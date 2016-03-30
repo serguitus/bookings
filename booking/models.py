@@ -115,8 +115,8 @@ class QuoteAllotment(QuoteService):
     Quote Service Allotment
     """
     class Meta:
-        verbose_name = 'Quote Allotment'
-        verbose_name_plural = 'Quotes Allotments'
+        verbose_name = 'Quote Accomodation'
+        verbose_name_plural = 'Quotes Accomodations'
     service = models.ForeignKey(Allotment)
     room_type = models.ForeignKey(RoomType)
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
@@ -342,7 +342,7 @@ class BookingAllotment(BookingService):
     """
     class Meta:
         verbose_name = 'Booking Accomodation'
-        verbose_name_plural = 'Booking Accomodation'
+        verbose_name_plural = 'Bookings Accomodations'
     service = models.ForeignKey(Allotment)
     room_type = models.ForeignKey(RoomType)
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
@@ -362,7 +362,7 @@ class BookingTransfer(BookingService):
     """
     class Meta:
         verbose_name = 'Booking Transfer'
-        verbose_name_plural = 'Booking Transfers'
+        verbose_name_plural = 'Bookings Transfers'
     service = models.ForeignKey(Transfer)
     location_from = models.ForeignKey(Location, related_name='location_from')
     pickup = models.ForeignKey(Allotment, related_name='transfer_pickup',
@@ -396,7 +396,7 @@ class BookingExtra(BookingService):
     """
     class Meta:
         verbose_name = 'Booking Extra'
-        verbose_name_plural = 'Booking Extras'
+        verbose_name_plural = 'Bookings Extras'
     service = models.ForeignKey(Extra)
     quantity = models.SmallIntegerField()
     parameter = models.SmallIntegerField()
