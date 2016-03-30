@@ -1,14 +1,14 @@
-{% load booking_tags %}{% if bs.service_type == 'T' %}
+{% load booking_tags %}{% if bs.service_type == 'T' %}{# This is a Transfer #}
     {{ bs.service}} {{ bs.location_from }} -> {{ bs.location_to }}
     Fecha: {{ bs.datetime_from }}
     Pick Up: {% if bs.pickup %}{{ bs.pickup.name }}({{ bs.pickup.address }}){% endif %}
     Drop Off: {% if bs.dropoff %}{{ bs.dropoff.name }}({{ bs.dropoff.address }}){% endif %}
-{% elif bs.service_type == 'A' %}
+{% elif bs.service_type == 'A' %}{# This is an Accomodation #}
     {{ bs.name }}
     {% get_distribution bs %}
     Check In: {{ bs.datetime_from }}
     Check Out {{ bs.datetime_to }}
-{% else %}
+{% else %}{# This is an Extra #}
     {{ bs.service }}
     Fecha: {{ bs.datetime_from }}
-{% endif %}
+{% endif %}----------------------------------

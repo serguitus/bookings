@@ -69,24 +69,26 @@ def get_distribution(booking_service):
                                       service=booking_service.service)
     dist = ''
     room_count = {
-        0: 0,
-        1: 0,
-        2: 0,
-        3: 0
+        '10': 0,  # SGL counter
+        '20': 0,  # DBL counter
+        '30': 0,  # TPL counter
+        '21': 0,  # DBL+1Child
+        '22': 0,  # DBL+2Child
+        '31': 0,  # TPL+1Child
+    }
+    room_types = {
+        '10': 'SGL',
+        '20': 'DBL',
+        '30': 'TPL',
+        '21': 'DBL+1Chld',
+        '22': 'DBL+2Chld',
+        '31': 'TPL+1Chld',
     }
     for room in rooms:
-        room_count[room[0]] += 1
-    if room_count[1]:
-        dist += '%d SGL' % room_count[1]
-    if room_count[2]:
-        if dist:
-            dist += ' + '
-        dist += '%d DBL' % room_count[2]
-    if room_count[3]:
-        if dist:
-            dist += ' + '
-        dist += '%d TPL' % room_count[3]
-    if dist:
-        dist += ' %s (%s)' % (booking_service.room_type,
-                              booking_service.board_type)
+        room_count['%d%d' % (room[0], room[1])] += 1
+    for k in room_count.keys():
+        if room_count[k]:
+            if dist:
+                dist += ' + '
+            dist += '%d %s' % (room_count[k], room_types[k])
     return dist

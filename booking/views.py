@@ -268,9 +268,11 @@ class EmailProviderView(View):
         provider_name = ''
         if bs.provider:
             provider_name = bs.provider.name
+        rooming = bs.rooming_list.all()
         initial = {
             'services': services,
             'provider': provider_name,
+            'rooming': rooming,
             'user': request.user,
         }
         t = get_template('booking/emails/provider_email.html')
@@ -288,9 +290,10 @@ class EmailProviderView(View):
         """ send the email to provider """
         pass
 
-def send_service_request(request, id):
+
+def _send_service_request(subject, e_from, e_to, e_cc, e_bcc, body):
     """
-    This sends emails to service providers
+    This helper sends emails
     """
     email = EmailMessage(
         'subject xx',

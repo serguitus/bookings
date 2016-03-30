@@ -2,6 +2,9 @@
 
 Por favor Confirmar:
 {{ services.0.booking.name }} {% if services.0.booking.reference %}({{ services.0.booking.reference }}){% endif %}
-{% for booking_service in services %}{% render_service booking_service %}{% endfor %}Gracias
-
+{% for booking_service in services %}{% render_service booking_service %}{% endfor %}
+Nombres:
+{% for pax in rooming %}{{ pax.booking_pax.pax_name }}
+{% endfor %}
+Gracias
 {{ user }}
