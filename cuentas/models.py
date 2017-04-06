@@ -13,7 +13,7 @@ class Caja(models.Model):
 
     def __str__(self):
         """ Representation of a Caja """
-        return "Caja %s" % self.currency
+        return "%s (%s)" % (self.description, self.currency)
 
 
 class Transaction(models.Model):
