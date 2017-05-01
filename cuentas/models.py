@@ -105,22 +105,23 @@ class Caja(models.Model):
         return account, transaction
 
     @classmethod
-    def withdraw(cls, cid, withdrawn_by, amount, asof, comment=None):
+    def withdraw(cls, cid, withdrawn_by, amount, asof, concept, detail=None):
         """Withdraw from account.
 
         uid (uuid.UUID): Account public identifier.
         withdrawn_by (User): The withdrawing user.
         amount (positive int): Amount to withdraw.
         asof (datetime.datetime): Time of withdraw.
-        comment (str or None): Optional comment.
+        concept (str or None): Payment Concept.
+        detail: Optional description of the transaction
 
         Raises:
-        Account.DoesNotExist
+        Caja.DoesNotExist
         InvalidAmount
 
         Returns (tuple):
-        [0] (Account) Updated account instance.
-        [0] (Action) Withdraw action.
+        [0] (Caja) Updated account instance.
+        [0] (Transaction) Withdraw action.
         """
         assert amount > 0
 

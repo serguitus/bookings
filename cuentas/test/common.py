@@ -32,23 +32,23 @@ class TestCajaBase:
         created_by = cls.default(created_by, cls.admin)
         asof = cls.default(asof, timezone.now())
 
-        account, action = Account.create(user, created_by, asof)
-        return cls.account, action
+        account, transaction = Caja.create(user, created_by, asof)
+        return cls.account, transaction
 
     def deposit(
         self,
         amount,
-        account=DEFAULT,
+        caja=DEFAULT,
         deposited_by=DEFAULT,
         asof=DEFAULT,
-        comment=DEFAULT,
+        concept=DEFAULT,
     ):
-        account = self.default(account, self.account)
+        caja = self.default(caja, self.caja)
         deposited_by = self.default(deposited_by, self.admin)
         asof = self.default(asof, timezone.now())
-        comment = self.default(comment, ‘deposit comment’)
+        concept = self.default(concept, ‘deposit comment’)
 
-        self.account, action = Account.deposit(
+        self.caja, transaction = Caja.deposit(
             uid=account.uid,
             deposited_by=deposited_by,
             amount=amount,
@@ -66,21 +66,22 @@ class TestCajaBase:
     def withdraw(
         self,
         amount,
-        account=DEFAULT,
+        caja=DEFAULT,
         withdrawn_by=DEFAULT,
         asof=DEFAULT,
-        comment=DEFAULT,
+        concept=DEFAULT,
     ):
-        account = self.default(account, self.account)
+        caja = self.default(caja, self.caja)
         withdrawn_by = self.default(withdrawn_by, self.admin)
         asof = self.default(asof, timezone.now())
-        comment = self.default(comment, ‘withdraw comment’)
+        concept = self.default(concept, ‘withdraw comment’)
 
-        self.account, action = Account.withdraw(
+        self.caja, transaction = Caja.withdraw(
             uid=account.uid,
             withdrawn_by=withdrawn_by,
             amount=amount,
             asof=asof,
+            concept=concept
         )
 
         self.assertEqual(action.type, Action.ACTION_TYPE_WITHDRAWN)
