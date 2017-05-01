@@ -7,3 +7,6 @@ from cuentas.models import Caja
 def index(request):
     c = Caja.objects.get(id=4)
     return HttpResponse('esto es lo de siempre... Hola Mundo. total %s' % c.ammount)
+
+def transfer(request):
+    return HttpResponse('aqui va la respuesta')

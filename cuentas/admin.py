@@ -9,7 +9,7 @@ from models import Caja, Transaction
 @admin.register(Caja)
 class CajaAdmin(admin.ModelAdmin):
     """ an admin interface for the Cajas """
-    list_display = ('__str__', 'ammount')
+    list_display = ('__str__', 'balance')
     actions = ['transfer']
 
     # Admin Action
@@ -19,8 +19,9 @@ class CajaAdmin(admin.ModelAdmin):
         if len(caja) > 1:
             return self.message_user(request, 'Para Transferir debe seleccionar solo 1 caja',
                                      level=messages.WARNING)
-        print caja
-        response = HttpResponseRedirect('/transfer/')
+        response = HttpResponseRedirect('/transfer/?from=%s' % caja[0].id)
+        print response
+
     transfer.short_description = "Transferir desde esta Caja"
 
 
