@@ -1,9 +1,11 @@
 from __future__ import unicode_literals
 
 from datetime import datetime
-from django.db import models
+from django.db import models, transaction as db_transaction
 from django.conf import settings
 from django.core.exceptions import ValidationError
+
+from cuentas.exceptions import Error
 
 # Create your models here.
 
@@ -38,7 +40,7 @@ class Caja(models.Model):
             [0] Account
             [1] Action
         """
-        with transaction.atomic():
+        with db_transaction.atomic():
             caja = cls.objects.create(created=asof, modified=asof, balance=0, currency=currency)
 
             transaction = Transaction.create(
@@ -71,7 +73,7 @@ class Caja(models.Model):
         """
         assert amount > 0
 
-        with transaction.atomic():
+        with db_transaction.atomic():
             account = cls.objects.select_for_update().get(id=cid)
 
             #if not (cls.MIN_DEPOSIT <= amount <= cls.MAX_DEPOSIT):
@@ -87,7 +89,7 @@ class Caja(models.Model):
             account.balance += amount
             account.modified = asof
 
-            caja.save(update_fields=[
+            account.save(update_fields=[
                 'balance',
                 'modified',
             ])
@@ -95,9 +97,9 @@ class Caja(models.Model):
             transaction = Transaction.create(
                 user=deposited_by,
                 caja=account,
-                transaction_type=Transaction.ACTION_TYPE_DEPOSITED,
-                ammount=amount,
-                date=asof,
+                t_type=Transaction.ACTION_TYPE_DEPOSITED,
+                delta=amount,
+                asof=asof,
                 concept=concept,
                 detail=detail
             )
@@ -125,7 +127,7 @@ class Caja(models.Model):
         """
         assert amount > 0
 
-        with transaction.atomic():
+        with db_transaction.atomic():
             account = cls.objects.select_for_update().get(uid=uid)
 
             #if not (cls.MIN_WITHDRAW <= amount <= cls.MAX_WITHDRAW):
@@ -232,7 +234,7 @@ class Transaction(models.Model):
 
         if (t_type == cls.ACTION_TYPE_DEPOSITED and 
             reference_type is None):
-            raise errors.ValidationError({
+            raise ValidationError({
                 'reference_type': 'required for deposit.',  
             })
 
@@ -261,3 +263,4 @@ class Transaction(models.Model):
             detail=detail,
             #debug_balance=account.balance,
         )
+

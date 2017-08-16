@@ -20,4 +20,5 @@ class InsufficientFunds(Error):
 
     def __str__(self):
         return ('amount: {}, current balance: {}'.format(
-                self.amount, self.balance)
+                self.amount, self.balance))
+
