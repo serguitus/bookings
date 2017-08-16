@@ -46,15 +46,16 @@ class Caja(models.Model):
             transaction = Transaction.create(
                 user=created_by,
                 caja=caja,
-                type=Transaction.ACTION_TYPE_CREATED,
-                balance=0,
+                t_type=Transaction.ACTION_TYPE_CREATED,
+                delta=0,
                 asof=asof,
             )
 
         return caja, transaction
 
     @classmethod
-    def deposit(cls, cid, deposited_by, amount, asof, concept='', detail=None):
+    def deposit(cls, cid, deposited_by, amount, asof,
+                concept='', reference_type='None', detail=None):
         """Deposit to account.
 
         cid: Caja ID.
@@ -101,6 +102,7 @@ class Caja(models.Model):
                 delta=amount,
                 asof=asof,
                 concept=concept,
+                reference_type=reference_type,
                 detail=detail
             )
 
@@ -128,7 +130,7 @@ class Caja(models.Model):
         assert amount > 0
 
         with db_transaction.atomic():
-            account = cls.objects.select_for_update().get(uid=uid)
+            account = cls.objects.select_for_update().get(id=cid)
 
             #if not (cls.MIN_WITHDRAW <= amount <= cls.MAX_WITHDRAW):
             #    raise InvalidAmount(amount)
@@ -147,9 +149,10 @@ class Caja(models.Model):
             action = Transaction.create(
                 user=withdrawn_by,
                 caja=account,
-                transaction_type=Transaction.ACTION_TYPE_WITHDRAWN,
-                ammount=-amount,
-                date=asof,
+                t_type=Transaction.ACTION_TYPE_WITHDRAWN,
+                delta=-amount,
+                asof=asof,
+                concept=concept
             )
 
         return account, action
@@ -253,7 +256,7 @@ class Transaction(models.Model):
 
         return cls.objects.create(
             #user_friendly_id=user_friendly_id,
-            created=asof,
+            date=asof,
             user=user,
             caja=caja,
             transaction_type=t_type,

@@ -70,7 +70,7 @@ class WithdrawForm(AccountActionForm):
 
     def form_action(self, caja, user):
         return Caja.withdraw(
-            id=caja.pk,
+            cid=caja.pk,
             #user=caja.user,
             amount=self.cleaned_data['amount'],
             withdrawn_by=user,
@@ -111,7 +111,7 @@ class DepositForm(AccountActionForm):
             amount=self.cleaned_data['amount'],
             deposited_by=user,
             #reference=self.cleaned_data['reference'],
-            #reference_type=self.cleaned_data['reference_type'],
+            reference_type=self.cleaned_data['reference_type'],
             concept=self.cleaned_data['concept'],
             asof=self.cleaned_data['date'],
         )
