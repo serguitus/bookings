@@ -158,7 +158,7 @@ class Caja(models.Model):
         return account, action
 
     @classmethod
-    def transfer(cls, cid, transfered_by, amount, asof, detail=None, rate):
+    def transfer(cls, cid, transfered_by, amount, asof, destination_id, concept=None, rate=1):
         """"Transfer from account
         cid: Account public identifier.
         transfered_by (User): The user who transfers.
@@ -167,6 +167,8 @@ class Caja(models.Model):
         detail (str or None): Details of operation.
         rate (positive float): rate to apply to Origin amount. Destination
              account will get [amount]*[rate] transfered
+        destination_id: Destination Account to make the deposit on
+
         Raises:
             Caja.DoesNotExist
             InvalidAmount
@@ -175,9 +177,52 @@ class Caja(models.Model):
         Returns (tuple)
         [0] (Caja) Updated account instance
         [1] (Transaction) Withdraw from Origin Account
-        [2] (Transaction) Deposit into Destination Account
-        """
 
+        """
+        assert amount > 0
+        assert rate > 0
+
+        with db_transaction.atomic():
+            account = cls.objects.select_for_update().get(id=cid)
+
+            account.balance -= amount
+            account.modified = asof
+
+            destination_account = cls.objects.select_for_update().get(id=destination_id)
+
+            destination_account.balance += amount*rate
+            destination_account.modified = asof
+
+            account.save(update_fields=[
+                'balance',
+                'modified'
+            ])
+
+            destination_account.save(update_fields=[
+                'balance',
+                'modified'
+            ])
+
+            origin_action = Transaction.create(
+                user=transfered_by,
+                caja=account,
+                t_type=Transaction.ACTION_TYPE_WITHDRAWN,
+                delta=-amount,
+                asof=asof,
+                concept='TRANSFERENCIA HACIA %s: %s' % (destination_account.__str__(), concept)
+            )
+
+            destination_action = Transaction.create(
+                user=transfered_by,
+                caja=destination_account,
+                t_type=Transaction.ACTION_TYPE_DEPOSITED,
+                delta=amount,
+                asof=asof,
+                reference_type=Transaction.REFERENCE_TYPE_CASH,
+                concept='TRANSFERENCIA DESDE %s: %s' % (account.__str__(), concept)
+            )
+
+            return account, origin_action
 
 class Transaction(models.Model):
     """ This deals with money operations. deposits, extractions, loans and transferences """

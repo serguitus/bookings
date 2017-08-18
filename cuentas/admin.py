@@ -6,7 +6,7 @@ from django.utils.html import format_html
 from django.core.urlresolvers import reverse
 
 from exceptions import Error
-from .forms import DepositForm, WithdrawForm
+from .forms import DepositForm, WithdrawForm, TransferForm
 
 # Register your models here.
 from models import Caja, Transaction
@@ -46,20 +46,23 @@ class CajaAdmin(admin.ModelAdmin):
                 name='account-withdraw',
             ),
             url(
-                r'^(?P<account_id>.+/transfer/$)',
+                r'^(?P<account_id>.+)/transfer/$',
                 self.admin_site.admin_view(self.process_transfer),
                 name='account-transfer',
             ),
         ]
         return custom_urls + urls
-    
+
+
     def account_actions(self, obj):
         # TODO: Render action buttons
         return format_html(
             '<a class="button" href="{}">Deposit</a>&nbsp;'
-            '<a class="button" href="{}">Withdraw</a>',
+            '<a class="button" href="{}">Withdraw</a>&nbsp'
+            '<a class="button" href="{}">Transfer</a>',
             reverse('admin:account-deposit', args=[obj.pk]),
             reverse('admin:account-withdraw', args=[obj.pk]),
+            reverse('admin:account-transfer', args=[obj.pk])
         )
     account_actions.short_description = 'Account Actions'
     account_actions.allow_tags = True
@@ -72,6 +75,7 @@ class CajaAdmin(admin.ModelAdmin):
             action_title='Deposit',
         )
 
+
     def process_withdraw(self, request, account_id, *args, **kwargs):
         return self.process_action(
             request=request,
@@ -79,7 +83,18 @@ class CajaAdmin(admin.ModelAdmin):
             action_form=WithdrawForm,
             action_title='Withdraw',
         )
-     
+
+
+    def process_transfer(self, request, account_id, *args, **kwargs):
+        name = Caja.objects.get(id=account_id).__str__()
+        return self.process_action(
+             request=request,
+             account_id=account_id,
+             action_form=TransferForm,
+             action_title='Transference from %s' % name,
+             )
+
+
     def process_action(self, request, account_id, action_form, action_title):
         caja = self.get_object(request, account_id)
 

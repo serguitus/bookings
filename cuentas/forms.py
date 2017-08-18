@@ -115,3 +115,28 @@ class DepositForm(AccountActionForm):
             concept=self.cleaned_data['concept'],
             asof=self.cleaned_data['date'],
         )
+
+class TransferForm(AccountActionForm):
+    amount = forms.IntegerField(
+        required=True,
+        help_text='Amount to be transfered from this Account'
+    )
+    rate = forms.FloatField(
+        required=True,
+        help_text='Exchange rate to apply on Destination Account'
+    )
+
+    destination = forms.ChoiceField(
+        choices=[(obj.pk, obj.__str__()) for obj in Caja.objects.all()],
+    )
+
+    def form_action(self, caja, user):
+        return Caja.transfer(
+            cid=caja.pk,
+            amount=self.cleaned_data['amount'],
+            transfered_by=user,
+            rate=self.cleaned_data['rate'],
+            destination_id=self.cleaned_data['destination'],
+            concept=self.cleaned_data['concept'],
+            asof=self.cleaned_data['date'],
+        )
