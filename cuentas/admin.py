@@ -45,6 +45,11 @@ class CajaAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.process_withdraw),
                 name='account-withdraw',
             ),
+            url(
+                r'^(?P<account_id>.+/transfer/$)',
+                self.admin_site.admin_view(self.process_transfer),
+                name='account-transfer',
+            ),
         ]
         return custom_urls + urls
     
@@ -131,5 +136,8 @@ class CajaAdmin(admin.ModelAdmin):
 class TransactionAdmin(admin.ModelAdmin):
     """ an admin interface for Transactions """
     list_display = ('concept', 'detail', 'caja', 'ammount', 'date')
+    readonly_fields = ('concept', 'detail', 'caja', 'ammount', 'date',
+                       'user', 'transaction_type', 'reference_type')
     list_filter = ('caja',)
     search_fields = ['concept', 'detail']
+

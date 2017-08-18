@@ -157,6 +157,27 @@ class Caja(models.Model):
 
         return account, action
 
+    @classmethod
+    def transfer(cls, cid, transfered_by, amount, asof, detail=None, rate):
+        """"Transfer from account
+        cid: Account public identifier.
+        transfered_by (User): The user who transfers.
+        amount (positive int): Origin Amount to transfer
+        asof (datetime.datetime): Time of transfer.
+        detail (str or None): Details of operation.
+        rate (positive float): rate to apply to Origin amount. Destination
+             account will get [amount]*[rate] transfered
+        Raises:
+            Caja.DoesNotExist
+            InvalidAmount
+            InvalidRate
+
+        Returns (tuple)
+        [0] (Caja) Updated account instance
+        [1] (Transaction) Withdraw from Origin Account
+        [2] (Transaction) Deposit into Destination Account
+        """
+
 
 class Transaction(models.Model):
     """ This deals with money operations. deposits, extractions, loans and transferences """
