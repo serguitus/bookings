@@ -9,6 +9,7 @@ from cuentas.exceptions import Error
 
 # Create your models here.
 
+
 class Caja(models.Model):
     """ Esto define una Caja en cierta moneda """
     class Meta:
@@ -158,7 +159,8 @@ class Caja(models.Model):
         return account, action
 
     @classmethod
-    def transfer(cls, cid, transfered_by, amount, asof, destination_id, concept=None, rate=1):
+    def transfer(cls, cid, transfered_by, amount, asof, destination_id,
+                 concept=None, rate=1, detail=None):
         """"Transfer from account
         cid: Account public identifier.
         transfered_by (User): The user who transfers.
@@ -209,7 +211,8 @@ class Caja(models.Model):
                 t_type=Transaction.ACTION_TYPE_WITHDRAWN,
                 delta=-amount,
                 asof=asof,
-                concept='TRANSFERENCIA HACIA %s: %s' % (destination_account.__str__(), concept)
+                concept='TRANSFERENCIA HACIA %s: %s' % (destination_account.__str__(), concept),
+                detail=detail
             )
 
             destination_action = Transaction.create(
@@ -219,7 +222,8 @@ class Caja(models.Model):
                 delta=amount,
                 asof=asof,
                 reference_type=Transaction.REFERENCE_TYPE_CASH,
-                concept='TRANSFERENCIA DESDE %s: %s' % (account.__str__(), concept)
+                concept='TRANSFERENCIA DESDE %s: %s' % (account.__str__(), concept),
+                detail=detail
             )
 
             return account, origin_action

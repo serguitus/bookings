@@ -1,21 +1,27 @@
 from __future__ import unicode_literals
 
 from django import forms
-from django.utils import timezone
+from django.contrib.admin.widgets import AdminDateWidget
+
 
 #from common.utils import send_email
 from exceptions import Error
 from .models import Caja, Transaction
 
+
 class AccountActionForm(forms.Form):
     concept = forms.CharField(
         required=False,
-        widget=forms.Textarea,
+        widget=forms.TextInput,
     )
+    detail = forms.CharField(
+        required=False,
+        widget=forms.Textarea)
+
     send_email = forms.BooleanField(
         required=False,
     )
-    date = forms.DateTimeField()
+    date = forms.fields.DateTimeField(widget=AdminDateWidget)
 
     @property
     def email_subject_template(self):
@@ -75,6 +81,7 @@ class WithdrawForm(AccountActionForm):
             amount=self.cleaned_data['amount'],
             withdrawn_by=user,
             concept=self.cleaned_data['concept'],
+            detail=self.cleaned_data['detail'],
             asof=self.cleaned_data['date'],
         )
 
@@ -107,14 +114,16 @@ class DepositForm(AccountActionForm):
     def form_action(self, caja, user):
         return Caja.deposit(
             cid=caja.pk,
-            #user=caja.user,
+            # user=caja.user,
             amount=self.cleaned_data['amount'],
             deposited_by=user,
-            #reference=self.cleaned_data['reference'],
+            # reference=self.cleaned_data['reference'],
             reference_type=self.cleaned_data['reference_type'],
             concept=self.cleaned_data['concept'],
+            detail=self.cleaned_data['detail'],
             asof=self.cleaned_data['date'],
         )
+
 
 class TransferForm(AccountActionForm):
     amount = forms.IntegerField(
@@ -123,7 +132,8 @@ class TransferForm(AccountActionForm):
     )
     rate = forms.FloatField(
         required=True,
-        help_text='Exchange rate to apply on Destination Account'
+        help_text='Exchange rate to apply on Destination Account',
+        initial=1
     )
 
     destination = forms.ChoiceField(
@@ -138,5 +148,6 @@ class TransferForm(AccountActionForm):
             rate=self.cleaned_data['rate'],
             destination_id=self.cleaned_data['destination'],
             concept=self.cleaned_data['concept'],
+            detail=self.cleaned_data['detail'],
             asof=self.cleaned_data['date'],
         )

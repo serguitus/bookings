@@ -106,6 +106,7 @@ class CajaAdmin(admin.ModelAdmin):
             if form.is_valid():
                 try:
                     form.save(caja, request.user)
+                    self.message_user(request, 'Operation Successful')
 
                 except Error as e:
                     # If save() raised, the form will a have a non
