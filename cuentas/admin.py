@@ -5,7 +5,7 @@ from django.template.response import TemplateResponse
 from django.utils.html import format_html
 from django.core.urlresolvers import reverse
 
-from exceptions import Error
+from .exceptions import Error
 from .forms import DepositForm, WithdrawForm, TransferForm
 
 # Register your models here.

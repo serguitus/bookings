@@ -74,15 +74,10 @@ WSGI_APPLICATION = 'reservas.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
+from .dbconfig import db_config
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'django',
-        'USER': 'sergio',
-        'PASSWORD': 'SergioAdmin1',
-        'HOST': '',
-        'PORT': '',
-    }
+    'default': db_config
 }
 
 

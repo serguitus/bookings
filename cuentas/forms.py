@@ -5,7 +5,7 @@ from django.contrib.admin.widgets import AdminDateWidget
 
 
 #from common.utils import send_email
-from exceptions import Error
+from .exceptions import Error
 from .models import Caja, Transaction
 
 
