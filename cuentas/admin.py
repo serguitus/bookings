@@ -9,7 +9,7 @@ from .exceptions import Error
 from .forms import DepositForm, WithdrawForm, TransferForm
 
 # Register your models here.
-from models import Caja, Transaction
+from .models import Caja, Transaction
 
 
 ##### ADMIN CLASSES ####
