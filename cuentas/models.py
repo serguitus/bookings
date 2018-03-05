@@ -190,7 +190,8 @@ class Caja(models.Model):
             account.balance -= amount
             account.modified = asof
 
-            destination_account = cls.objects.select_for_update().get(id=destination_id)
+            destination_account = cls.objects.select_for_update().get(
+                id=destination_id)
 
             destination_account.balance += amount*rate
             destination_account.modified = asof
