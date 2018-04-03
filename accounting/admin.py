@@ -9,7 +9,12 @@ from .exceptions import Error
 # from .forms import DepositForm, WithdrawForm, TransferForm
 
 # Register your models here.
-from .models import Account, Operation
-admin.site.register(Account)
-admin.site.register(Operation)
+
+
+
+#from accounting.models import *
+
+#admin.site.register(Account)
+#admin.site.register(Movement)
+#admin.site.register(Operation)
 
