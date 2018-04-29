@@ -1,6 +1,9 @@
 from django.db import models
-from accounting.models import Account
-from finance.models import Agency, Provider
+
+from accounting.models import *
+
+from finance.models import *
+
 from .constants import *
 
 

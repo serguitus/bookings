@@ -1,20 +1,22 @@
-from django.conf.urls import url
-from django.contrib import admin, messages
-from django.http import HttpResponseRedirect
-from django.template.response import TemplateResponse
-from django.utils.html import format_html
-from django.core.urlresolvers import reverse
+from django.contrib import admin
 
-from .exceptions import Error
-# from .forms import DepositForm, WithdrawForm, TransferForm
+from .models import *
 
-# Register your models here.
+@admin.register(Account)
+class AccountAdmin(admin.ModelAdmin):
+    list_editable = ('enabled',)
+    list_display = ('name','currency','enabled','balance',)
+    list_filter = ('name','currency','enabled','balance',)
+    search_fields = ('name',)
+    ordering = ('enabled','currency','name',)
+    readonly_fields = ('balance',)
 
+    def get_readonly_fields(self, request, obj=None):
+        """
+        Hook for specifying custom readonly fields.
+        """
+        if obj is None:
+            return ('balance',)
 
-
-#from accounting.models import *
-
-#admin.site.register(Account)
-#admin.site.register(Movement)
-#admin.site.register(Operation)
+        return ('currency', 'balance',)
 

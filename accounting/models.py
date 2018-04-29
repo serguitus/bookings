@@ -1,13 +1,7 @@
-from __future__ import unicode_literals
-
-from datetime import datetime
-
-from django.db import models, transaction
+from django.db import models
 from django.conf import settings
-from django.core.exceptions import ValidationError
 
-from accounting.constants import CURRENCIES, CURRENCY_CUC, MOVEMENT_TYPES
-from accounting.exceptions import Error
+from .constants import *
 
 
 class Account(models.Model):
@@ -23,7 +17,7 @@ class Account(models.Model):
     enabled = models.BooleanField(default=True)
 
     def __str__(self):
-        return '%s (%s)' % (self.name, self.currency)
+        return '%s (%s)' % (self.name, CURRENCY_DICT[self.currency])
 
 
 class Operation(models.Model):
@@ -51,3 +45,8 @@ class OperationMovement(models.Model):
     movement_type = models.CharField(max_length=2, choices=MOVEMENT_TYPES)
     account = models.ForeignKey(Account)
     amount = models.DecimalField(default=0.0, max_digits=9, decimal_places=2)
+
+    def __str__(self):
+        return  '%s : %s On %s For %s' % (self.operation, MOVEMENT_TYPE_DICT[self.movement_type], self.account, self.amount)
+
+
