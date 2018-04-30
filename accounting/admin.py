@@ -10,11 +10,8 @@ from .exceptions import Error
 
 # Register your models here.
 
+from accounting.models import (Account, OperationMovement, Operation)
 
-
-#from accounting.models import *
-
-#admin.site.register(Account)
-#admin.site.register(Movement)
-#admin.site.register(Operation)
-
+admin.site.register(Account)
+admin.site.register(OperationMovement)
+admin.site.register(Operation)

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'finance',
     'config',
     'booking',
+    'bootstrap_themes',
 ]
 
 MIDDLEWARE = [
