@@ -1,10 +1,20 @@
 from django.contrib import admin
 
-from finance.models import (Agency, Provider, Deposit,
-                            Withdraw)
-# Register your models here.
+from .models import *
 
-admin.site.register(Agency)
-admin.site.register(Provider)
-admin.site.register(Deposit)
-admin.site.register(Withdraw)
+@admin.register(Agency)
+class AccountAdmin(admin.ModelAdmin):
+    list_display = ('name','currency','enabled',)
+    list_filter = ('name','currency','enabled',)
+    search_fields = ('name',)
+    ordering = ('enabled','currency','name',)
+
+@admin.register(Provider)
+class AccountAdmin(admin.ModelAdmin):
+    list_display = ('name','currency','enabled',)
+    list_filter = ('name','currency','enabled',)
+    search_fields = ('name',)
+    ordering = ('enabled','currency','name',)
+
+admin.site.register(FinantialDocument)
+

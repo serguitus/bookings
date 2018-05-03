@@ -1,15 +1,10 @@
-from __future__ import unicode_literals
-
-from datetime import datetime
-
-from django.db import models, transaction
+from django.db import models
 from django.conf import settings
-from django.core.exceptions import ValidationError
 
-from accounting.constants import CURRENCIES, CURRENCY_USD, CURRENCY_CUC
-from accounting.models import Account, Operation
+from accounting.constants import *
+from accounting.models import *
 
-from finance.constants import *
+from .constants import *
 
 
 class Agency(models.Model):
@@ -22,6 +17,9 @@ class Agency(models.Model):
         max_length=5, choices=CURRENCIES, default=CURRENCY_USD)
     enabled = models.BooleanField(default=True)
 
+    def __str__(self):
+        return '%s (%s)' % (self.name, CURRENCY_DICT[self.currency])
+
 
 class Provider(models.Model):
     class Meta:
@@ -33,6 +31,9 @@ class Provider(models.Model):
         max_length=5, choices=CURRENCIES, default=CURRENCY_CUC)
     enabled = models.BooleanField(default=True)
 
+    def __str__(self):
+        return '%s (%s)' % (self.name, CURRENCY_DICT[self.currency])
+
 
 class FinantialDocument(models.Model):
     class Meta:
@@ -40,10 +41,14 @@ class FinantialDocument(models.Model):
         verbose_name_plural = 'Finantials Documents'
     name = models.CharField(max_length=50)
     date = models.DateTimeField()
-    currency = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(
+        max_length=5, choices=CURRENCIES)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(
         max_length=2, choices=STATUSES, default=STATUS_DRAFT)
+
+    def __str__(self):
+        return '%s (%s)' % (self.name, CURRENCY_DICT[self.currency])
 
 
 class FinantialDocumentHistory(models.Model):
@@ -66,7 +71,7 @@ class FinantialDocumentHistory(models.Model):
 class AccountingDocument(models.Model):
     class Meta:
         abstract = True
-    current_operation = models.ForeignKey(Operation)
+    current_operation = models.ForeignKey(Operation, blank=True, null=True)
 
 
 class AccountingDocumentHistory(models.Model):
@@ -109,6 +114,20 @@ class LoanDevolution(FinantialDocument, AccountingDocument):
         verbose_name = 'Loan Devolution'
         verbose_name_plural = 'Loans Devolutions'
     account = models.ForeignKey(Account)
+
+
+class LoanAccount(Loan):
+    class Meta:
+        verbose_name = 'Loan Account'
+        verbose_name_plural = 'Loans Accounts'
+    account_dst = models.ForeignKey(Account, related_name='account_dst')
+
+
+class LoanAccountDevolution(LoanDevolution):
+    class Meta:
+        verbose_name = 'Loan Account Devolution'
+        verbose_name_plural = 'Loans Accounts Devolutions'
+    account_src = models.ForeignKey(Account, related_name='account_src')
 
 
 class LoanMatch(models.Model):

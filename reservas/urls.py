@@ -18,8 +18,8 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    # url(r'^accounting/', include('accounting.urls')),
-    # url(r'^finance/', include('finance.urls')),
-    # url(r'^config/', include('config.urls')),
-    # url(r'^booking/', include('booking.urls')),
+    url(r'^accounting/', include('accounting.urls', namespace="accounting")),
+    url(r'^finance/', include('finance.urls', namespace="finance")),
+    url(r'^config/', include('config.urls', namespace="configuration")),
+    url(r'^booking/', include('booking.urls', namespace="booking")),
 ]
