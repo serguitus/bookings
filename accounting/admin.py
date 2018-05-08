@@ -2,14 +2,31 @@ from django.contrib import admin
 
 from .models import *
 
+class AccountMovementInline(admin.TabularInline):
+    model = OperationMovement
+    extra = 0
+    can_delete = False
+    
+    readonly_fields = ['operation','movement_type','amount',]
+
+    def has_add_permission(self, request):
+        return False
+    #def has_change_permission(self, request, obj=None):
+    #    return False
+    def has_delete_permission(self, request, obj=None):
+        return False
+        
+    
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):
+    actions_on_top = True
+    save_on_top = True
     list_editable = ('enabled',)
     list_display = ('name','currency','enabled','balance',)
     list_filter = ('name','currency','enabled','balance',)
     search_fields = ('name',)
     ordering = ('enabled','currency','name',)
-    readonly_fields = ('balance',)
+    inlines = [AccountMovementInline]
 
     def get_readonly_fields(self, request, obj=None):
         """
