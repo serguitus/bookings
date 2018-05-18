@@ -1,4 +1,4 @@
 from django.apps import AppConfig
 
-class ConfigConfig(AppConfig):
+class FinanceConfig(AppConfig):
     name = 'finance'

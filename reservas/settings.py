@@ -31,12 +31,17 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+#    'admin_tools',
+#    'admin_tools.theming',
+#    'admin_tools.menu',
+#    'admin_tools.dashboard',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'common',
     'accounting',
     'finance',
     'config',
@@ -67,6 +72,9 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+ #           'loaders': [
+ #               'admin_tools.template_loaders.Loader',
+ #           ],
         },
     },
 ]
@@ -121,6 +129,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
+
+#STATIC_ROOT = 'static_files'
+
+#ADMIN_TOOLS_INDEX_DASHBOARD = {
+#    'django.contrib.admin.site': 'reservas.django_admin_dashboard.CustomIndexDashboard',
+#    'reservas.admin.reservas_site': 'reservas.reservas_dashboard.CustomIndexDashboard',
+#}
+
 
 CURRENCIES = [
     ('CUC', 'cuc'),
