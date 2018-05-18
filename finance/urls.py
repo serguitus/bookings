@@ -8,5 +8,5 @@ urlpatterns = [
     url(r'^loan/$', views.loan, name='loan'),
     url(r'^loandevolution/$', views.loandevolution, name='loandevolution'),
     url(r'^loanmatch/$', views.loanmatch, name='loanmatch'),
+    url(r'^documents/$', views.documents, name='documents'),
 ]
-
