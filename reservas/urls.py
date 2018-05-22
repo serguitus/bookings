@@ -15,8 +15,10 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from common import sites
 
 urlpatterns = [
+    url(r'^reservas/', sites.app_site.urls),
     url(r'^admin/', admin.site.urls),
     url(r'^accounting/', include('accounting.urls', namespace="accounting")),
     url(r'^finance/', include('finance.urls', namespace="finance")),
