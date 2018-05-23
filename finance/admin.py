@@ -20,3 +20,4 @@ class ProviderAdmin(admin.ModelAdmin):
 
 
 admin.site.register(FinantialDocument)
+
