@@ -1,6 +1,8 @@
 from django.contrib import admin
+from reservas.admin import reservas_admin
 
-from finance.models import Agency, Provider, FinantialDocument
+from finance.models import (Agency, Provider, FinantialDocument,
+                            Deposit)
 
 
 @admin.register(Agency)
@@ -21,3 +23,9 @@ class ProviderAdmin(admin.ModelAdmin):
 
 admin.site.register(FinantialDocument)
 
+# ### Registering in custom adminSite reservas_admin ###
+
+reservas_admin.register(FinantialDocument)
+reservas_admin.register(Provider, ProviderAdmin)
+reservas_admin.register(Agency, AgencyAdmin)
+reservas_admin.register(Deposit)

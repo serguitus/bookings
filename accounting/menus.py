@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from common.sites import app_site
+from reservas.admin import reservas_admin
 
 from accounting.models import Account, OperationMovement
 
@@ -40,3 +41,8 @@ class AccountAdmin(admin.ModelAdmin):
             return ('balance',)
 
         return ('currency', 'balance',)
+
+
+# ### Registering in custom adminSite reservas_admin ###
+
+reservas_admin.register(Account, AccountAdmin)
