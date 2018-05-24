@@ -9,22 +9,22 @@ from accounting.models import *
 class AccountingService():
 
     @classmethod
-    def validateAmount(cls, amount):
+    def validate_amount(cls, amount):
         if not amount or amount < 0:
             raise ValidationError('Amount Required')
 
     @classmethod
-    def validateOperation(cls, operation):
+    def validate_operation(cls, operation):
         if not operation:
             raise ValidationError('Operation Required')
 
     @classmethod
-    def validateMovementType(cls, movement_type):
+    def validate_movement_type(cls, movement_type):
         if not movement_type or not movement_type in MOVEMENT_TYPES:
             raise ValidationError('Movement Type Required')
 
     @classmethod
-    def validateAccountEnabled(cls, account):
+    def validate_account_enabled(cls, account):
         if not account:
             raise ValidationError('Account Required')
         if not account.enabled:
@@ -32,14 +32,14 @@ class AccountingService():
                 'Account %s Not Enabled' % account.__str__())
 
     @classmethod
-    def validateAccountBalance(cls, account, balance):
-        cls.validateAccountEnabled(account=account)
+    def validate_account_balance(cls, account, balance):
+        cls.validate_account_enabled(account=account)
         if account.balance < balance:
             raise ValidationError('Account %s Balance (%s) Insufficient for (%s)' % (
                 account.__str__(), account.balance, balance))
 
     @classmethod
-    def findAccountById(cls, account_id):
+    def find_account_by_id(cls, account_id):
         with transaction.atomic():
             account = (
                 Account.objects.get(id=account_id)
@@ -49,7 +49,7 @@ class AccountingService():
             return account
 
     @classmethod
-    def findAndLockAccountById(cls, account_id):
+    def find_and_lock_account_by_id(cls, account_id):
         with transaction.atomic():
             account = (
                 Account.objects.select_for_update().get(id=account_id)
@@ -59,7 +59,7 @@ class AccountingService():
             return account
 
     @classmethod
-    def findOperationById(cls, operation_id):
+    def find_operation_by_id(cls, operation_id):
         with transaction.atomic():
             operation = (
                 Operation.objects.get(id=operation_id)
@@ -70,39 +70,42 @@ class AccountingService():
 
     @classmethod
     # account should be locked
-    def doAccountDeposit(cls, account, amount):
-        cls.validateAccountEnabled(account=account)
-        cls.validateAmount(amount=amount)
+    def do_account_deposit(cls, account, amount):
+        cls.validate_account_enabled(account=account)
+        cls.validate_amount(amount=amount)
         account.balance += amount
         account.save()
         return account
 
     @classmethod
     # account should be locked
-    def doAccountWithdraw(cls, account, amount):
-        cls.validateAccountBalance(account=account, balance=amount)
-        cls.validateAmount(amount=amount)
+    def do_account_withdraw(cls, account, amount):
+        cls.validate_account_balance(account=account, balance=amount)
+        cls.validate_amount(amount=amount)
         account.balance -= amount
         account.save()
         return account
 
     @classmethod
     # account should be locked
-    def addOperationMovement(cls, operation, account, movement_type, amount):
-        cls.validateOperation(operation=operation)
-        cls.validateMovementType(movement_type=movement_type)
+    def add_operation_movement(cls, operation, account, movement_type, amount):
+        cls.validate_operation(operation=operation)
+        cls.validate_movement_type(movement_type=movement_type)
         with transaction.atomic():
             if movement_type is MOVEMENT_TYPE_DEPOSIT:
-                cls.doAccountDeposit(
+                cls.do_account_deposit(
+                    account=account,
+                    amount=amount,
+                )
+            elif movement_type is MOVEMENT_TYPE_WITHDRAW:
+                cls.do_account_withdraw(
                     account=account,
                     amount=amount,
                 )
             else:
-                cls.doAccountWithdraw(
-                    account=account,
-                    amount=amount,
-                )
-            movement = Movement(
+                raise ValidationError('Invalid Movement Type: %s' % (movement_type))
+                
+            movement = OperationMovement(
                 operation=operation,
                 movement_type=movement_type,
                 account=account,
