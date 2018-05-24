@@ -1,34 +1,34 @@
 from django.contrib import admin
 
-from accounting.models import Account, OperationMovement
+from common.sites import app_site
 
+from .models import *
 
-class AccountMovementInline(admin.TabularInline):
+class AccountMovementMngInline(admin.TabularInline):
     model = OperationMovement
     extra = 0
     can_delete = False
-
-    readonly_fields = ['operation', 'movement_type', 'amount']
+    
+    readonly_fields = ['operation','movement_type','amount',]
 
     def has_add_permission(self, request):
         return False
-    # def has_change_permission(self, request, obj=None):
+    #def has_change_permission(self, request, obj=None):
     #    return False
-
     def has_delete_permission(self, request, obj=None):
         return False
-
-
-@admin.register(Account)
-class AccountAdmin(admin.ModelAdmin):
+        
+    
+@admin.register(Account, site=app_site)
+class AccountMng(admin.ModelAdmin):
     actions_on_top = True
     save_on_top = True
     list_editable = ('enabled',)
-    list_display = ('name', 'currency', 'enabled', 'balance')
-    list_filter = ('name', 'currency', 'enabled', 'balance')
+    list_display = ('name','currency','enabled','balance',)
+    list_filter = ('name','currency','enabled','balance',)
     search_fields = ('name',)
-    ordering = ('enabled', 'currency', 'name')
-    inlines = [AccountMovementInline]
+    ordering = ('enabled','currency','name',)
+    inlines = [AccountMovementMngInline]
 
     def get_readonly_fields(self, request, obj=None):
         """
@@ -38,3 +38,4 @@ class AccountAdmin(admin.ModelAdmin):
             return ('balance',)
 
         return ('currency', 'balance',)
+
