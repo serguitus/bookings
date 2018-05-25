@@ -6,6 +6,7 @@ from accounting.models import *
 from accounting.services import AccountingService
 from finance.models import *
 
+
 class FinanceService():
 
     @classmethod
@@ -17,7 +18,7 @@ class FinanceService():
     def validateDocumentNotCancelled(cls, document):
         if document.status == STATUS_CANCELLED:
             raise ValidationError('Document Cancelled')
-           
+
     @classmethod
     def findDocumentById(cls, document_id):
         with transaction.atomic():
@@ -25,7 +26,7 @@ class FinanceService():
                 FinantialDocument.objects.get(id=document_id)
             )
             if not document:
-                raise ValidationError('Document Not Fount : %s' % (document_id))
+                raise ValidationError('Document Not Found : %s' % document_id)
             return document
 
     @classmethod
@@ -35,7 +36,7 @@ class FinanceService():
                 FinantialDocument.objects.select_for_update().get(id=document_id)
             )
             if not document:
-                raise ValidationError('Document Not Fount : %s' % (document_id))
+                raise ValidationError('Document Not Found : %s' % document_id)
             return document
 
     @classmethod
@@ -76,37 +77,37 @@ class FinanceService():
             concept = 'Deposit on Account'
             detail = 'Date %s - Deposit on %s of %s %s ' % (date, account, deposit.amount, deposit.currency)
             # verify if new
-            if deposit.id == None:
+            if deposit.id is None:
                     if cls.document_needs_operation(deposit):
                         # create new operation
                         operation = Operation(
-                            user = user,
-                            date = date,
-                            concept = concept,
-                            detail = detail)
+                            user=user,
+                            date=date,
+                            concept=concept,
+                            detail=detail)
                         operation.save()
                         # create operation movement
                         AccountingService.add_operation_movement(
-                            operation = operation,
-                            account = account,
-                            movement_type = MOVEMENT_TYPE_DEPOSIT,
-                            amount = deposit.amount)
+                            operation=operation,
+                            account=account,
+                            movement_type=MOVEMENT_TYPE_DEPOSIT,
+                            amount=deposit.amount)
                         deposit.current_operation_id = operation.id
                     # save deposit
                     deposit.save()
                     # manage finantial history
                     finantial_history = FinantialDocumentHistory(
-                        document = deposit,
-                        user = user,
-                        date = date,
-                        old_status = None,
-                        new_status = deposit.status)
+                        document=deposit,
+                        user=user,
+                        date=date,
+                        old_status=None,
+                        new_status=deposit.status)
                     finantial_history.save()
                     if deposit.current_operation_id:
                         # manage accounting history
                         accounting_history = AccountingDocumentHistory(
-                            document = deposit,
-                            operation = operation)
+                            document=deposit,
+                            operation=operation)
                         accounting_history.save()
             else:
                 # verify need of new operation
@@ -120,11 +121,19 @@ class FinanceService():
 
                         if cls.document_needs_operation(deposit):
                             # create new operation
-                            operation = Operation(user = user, date = date,  concept = concept, detail = detail)
+                            operation = Operation(
+                                user=user,
+                                date=date,
+                                concept=concept
+                                detail=detail)
                             operation.save()
                             # create operation movement
                             account = AccountingService.find_and_lock_account_by_id(deposit.account.id)
-                            AccountingService.add_operation_movement(operation = operation, account = account, movement_type = MOVEMENT_TYPE_DEPOSIT, amount = deposit.amount)
+                            AccountingService.add_operation_movement(
+                                operation=operation,
+                                account=account,
+                                movement_type=MOVEMENT_TYPE_DEPOSIT,
+                                amount=deposit.amount)
 
     @classmethod
     def document_needs_operation(cls, document):
