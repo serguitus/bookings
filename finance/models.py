@@ -1,10 +1,10 @@
 from django.db import models
 from django.conf import settings
 
-from accounting.constants import *
-from accounting.models import *
+from accounting.constants import CURRENCIES, CURRENCY_DICT, CURRENCY_CUC, CURRENCY_USD
+from accounting.models import Account, Operation
 
-from .constants import *
+from finance.constants import STATUSES, STATUS_DRAFT
 
 
 class Agency(models.Model):
@@ -71,6 +71,7 @@ class FinantialDocumentHistory(models.Model):
 class AccountingDocument(models.Model):
     class Meta:
         abstract = True
+    account = models.ForeignKey(Account)
     current_operation = models.ForeignKey(Operation, blank=True, null=True)
 
 
@@ -92,52 +93,56 @@ class Deposit(FinantialDocument, AccountingDocument):
     class Meta:
         verbose_name = 'Deposit'
         verbose_name_plural = 'Deposits'
-    deposit_account = models.ForeignKey(Account)
 
 
 class Withdraw(FinantialDocument, AccountingDocument):
     class Meta:
         verbose_name = 'Withdraw'
         verbose_name_plural = 'Withdraws'
-    withdraw_account = models.ForeignKey(Account)
 
 
-class Loan(FinantialDocument, AccountingDocument):
+class LoanDeposit(FinantialDocument, AccountingDocument, MatchingDocument):
     class Meta:
-        verbose_name = 'Loan'
-        verbose_name_plural = 'Loans'
-    account = models.ForeignKey(Account)
+        verbose_name = 'Loan Deposit'
+        verbose_name_plural = 'Loans Deposits'
 
 
-class LoanDevolution(FinantialDocument, AccountingDocument):
+class LoanWithdraw(FinantialDocument, AccountingDocument, MatchingDocument):
     class Meta:
-        verbose_name = 'Loan Devolution'
-        verbose_name_plural = 'Loans Devolutions'
-    account = models.ForeignKey(Account)
-
-
-class LoanAccount(Loan):
-    class Meta:
-        verbose_name = 'Loan Account'
-        verbose_name_plural = 'Loans Accounts'
-    account_dst = models.ForeignKey(Account, related_name='account_dst')
-
-
-class LoanAccountDevolution(LoanDevolution):
-    class Meta:
-        verbose_name = 'Loan Account Devolution'
-        verbose_name_plural = 'Loans Accounts Devolutions'
-    account_src = models.ForeignKey(Account, related_name='account_src')
+        verbose_name = 'Loan Withdraw'
+        verbose_name_plural = 'Loans Withdraws'
 
 
 class LoanMatch(models.Model):
     class Meta:
         verbose_name = 'Loan Match'
         verbose_name_plural = 'Loans Matches'
-    currency = models.DecimalField(max_digits=10, decimal_places=2)
+    loan_deposit = models.ForeignKey(LoanDeposit)
+    loan_withdraw = models.ForeignKey(LoanWithdraw)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    loan = models.ForeignKey(Loan)
-    devolution = models.ForeignKey(LoanDevolution)
+
+
+class LoanAccountDeposit(LoanDeposit):
+    class Meta:
+        verbose_name = 'Loan Account Deposit'
+        verbose_name_plural = 'Loans Accounts Deposits'
+    withdraw_account = models.ForeignKey(Account, related_name='withdraw_account')
+
+
+class LoanAccountWithdraw(LoanWithdraw):
+    class Meta:
+        verbose_name = 'Loan Account Withdraw'
+        verbose_name_plural = 'Loans Accounts Withdraws'
+    deposit_account = models.ForeignKey(Account, related_name='deposit_account')
+
+
+class LoanAccountMatch(models.Model):
+    class Meta:
+        verbose_name = 'Loan Account Match'
+        verbose_name_plural = 'Loans Accounts Matches'
+    loan_account_deposit = models.ForeignKey(LoanAccountDeposit)
+    loan_account_withdraw = models.ForeignKey(LoanAccountWithdraw)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
 
 
 class AgencyInvoiceItem(models.Model):
@@ -150,7 +155,8 @@ class AgencyInvoiceItem(models.Model):
 
 class AgencyDocument(FinantialDocument):
     class Meta:
-        abstract = True
+        verbose_name = 'Agency Document'
+        verbose_name_plural = 'Agencies Documents'
     agency = models.ForeignKey(Agency)
 
 
@@ -166,11 +172,17 @@ class AgencyCreditDocument(AgencyDocument):
         verbose_name_plural = 'Agencies Credits Documents'
 
 
+class AgencyInvoice(AgencyDebitDocument):
+    class Meta:
+        verbose_name = 'Agency Invoice'
+        verbose_name_plural = 'Agencies Invoices'
+    item = models.ForeignKey(AgencyInvoiceItem)
+
+
 class AgencyPayment(AgencyCreditDocument, AccountingDocument):
     class Meta:
         verbose_name = 'Agency Payment'
         verbose_name_plural = 'Agencies Payments'
-    deposit_account = models.ForeignKey(Account)
 
 
 class AgencyDiscount(AgencyCreditDocument):
@@ -179,28 +191,19 @@ class AgencyDiscount(AgencyCreditDocument):
         verbose_name_plural = 'Agencies Discounts'
 
 
-class AgencyInvoice(AgencyDebitDocument):
-    class Meta:
-        verbose_name = 'Agency Invoice'
-        verbose_name_plural = 'Agencies Invoices'
-    item = models.ForeignKey(AgencyInvoiceItem)
-
-
 class AgencyDevolution(AgencyDebitDocument, AccountingDocument):
     class Meta:
         verbose_name = 'Agency Devolution'
         verbose_name_plural = 'Agencies Devolutions'
-    withdraw_account = models.ForeignKey(Account)
 
 
 class AgencyMatch(models.Model):
     class Meta:
         verbose_name = 'Agency Match'
         verbose_name_plural = 'Agencies Matches'
-    currency = models.DecimalField(max_digits=10, decimal_places=2)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
     debit_document = models.ForeignKey(AgencyDebitDocument)
     credit_document = models.ForeignKey(AgencyCreditDocument)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
 
 
 class ProviderInvoiceItem(models.Model):
@@ -212,7 +215,8 @@ class ProviderInvoiceItem(models.Model):
 
 class ProviderDocument(FinantialDocument):
     class Meta:
-        abstract = True
+        verbose_name = 'Provider Document'
+        verbose_name_plural = 'Providers Documents'
     provider = models.ForeignKey(Provider)
 
 
@@ -228,39 +232,35 @@ class ProviderCreditDocument(ProviderDocument):
         verbose_name_plural = 'Providers Credits Documents'
 
 
-class ProviderPayment(ProviderDebitDocument, AccountingDocument):
-    class Meta:
-        verbose_name = 'Provider Payment'
-        verbose_name_plural = 'Providers Payments'
-    withdraw_account = models.ForeignKey(Account)
-
-
-class ProviderDiscount(ProviderDebitDocument):
-    class Meta:
-        verbose_name = 'Provider Discount'
-        verbose_name_plural = 'Providers Discounts'
-
-
-class ProviderInvoice(ProviderCreditDocument):
+class ProviderInvoice(ProviderDebitDocument):
     class Meta:
         verbose_name = 'Provider Invoice'
         verbose_name_plural = 'Providers Invoices'
     item = models.ForeignKey(ProviderInvoiceItem)
 
 
-class ProviderDevolution(ProviderCreditDocument, AccountingDocument):
+class ProviderPayment(ProviderCreditDocument, AccountingDocument):
+    class Meta:
+        verbose_name = 'Provider Payment'
+        verbose_name_plural = 'Providers Payments'
+
+
+class ProviderDiscount(ProviderCreditDocument):
+    class Meta:
+        verbose_name = 'Provider Discount'
+        verbose_name_plural = 'Providers Discounts'
+
+
+class ProviderDevolution(ProviderDebitDocument, AccountingDocument):
     class Meta:
         verbose_name = 'Provider Devolution'
         verbose_name_plural = 'Providers Devolutions'
-    deposit_account = models.ForeignKey(Account)
 
 
 class ProviderMatch(models.Model):
     class Meta:
         verbose_name = 'Provider Match'
         verbose_name_plural = 'Providers Matches'
-    currency = models.DecimalField(max_digits=10, decimal_places=2)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
     debit_document = models.ForeignKey(ProviderDebitDocument)
     credit_document = models.ForeignKey(ProviderCreditDocument)
-
+    amount = models.DecimalField(max_digits=10, decimal_places=2)

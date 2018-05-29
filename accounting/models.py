@@ -1,7 +1,8 @@
 from django.db import models
 from django.conf import settings
 
-from .constants import *
+from accounting.constants import CURRENCIES, CURRENCY_DICT, CURRENCY_CUC, \
+    MOVEMENT_TYPES, MOVEMENT_TYPE_DICT
 
 
 class Account(models.Model):
@@ -47,6 +48,5 @@ class OperationMovement(models.Model):
     amount = models.DecimalField(default=0.0, max_digits=9, decimal_places=2)
 
     def __str__(self):
-        return  '%s : %s On %s For %s' % (self.operation, MOVEMENT_TYPE_DICT[self.movement_type], self.account, self.amount)
-
-
+        return  '%s : %s On %s For %s' % (
+            self.operation, MOVEMENT_TYPE_DICT[self.movement_type], self.account, self.amount)
