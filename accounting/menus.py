@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from common.sites import app_site
-from reservas.admin import reservas_admin
+from reservas.admin import reservas_admin, ExtendedModelAdmin
 
 from accounting.models import Account, OperationMovement
 
@@ -45,4 +45,8 @@ class AccountAdmin(admin.ModelAdmin):
 
 # ### Registering in custom adminSite reservas_admin ###
 
-reservas_admin.register(Account, AccountAdmin)
+class ExtendedAccountAdmin(ExtendedModelAdmin):
+    site_actions = ['deposit']
+
+
+reservas_admin.register(Account, ExtendedAccountAdmin)

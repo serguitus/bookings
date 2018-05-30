@@ -6,7 +6,8 @@ from accounting.models import *
 from accounting.services import AccountingService
 from finance.models import *
 
-class FinanceService():
+
+class FinanceService(object):
 
     @classmethod
     def validateDocumentCancelled(cls, document):
