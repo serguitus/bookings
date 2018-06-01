@@ -14,7 +14,8 @@ from finance.constants import STATUS_READY
 from finance.models import Deposit, Withdraw, LoanDeposit, LoanWithdraw, LoanMatch, \
     FinantialDocumentHistory, AccountingDocumentHistory
 
-class FinanceService():
+
+class FinanceService(object):
     """
     Finance Service
     """
@@ -194,7 +195,8 @@ class FinanceService():
 
     @classmethod
     def _load_locked_account(cls, account_id):
-        account = AccountingService.find_and_lock_account_by_id(account_id=account_id)
+        account = AccountingService.find_and_lock_account_by_id(
+            account_id=account_id)
         if not account:
             raise ValidationError('Invalid Document Account PK')
         return account

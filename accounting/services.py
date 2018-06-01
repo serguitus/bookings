@@ -5,7 +5,9 @@ Accounting Service
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from accounting.constants import MOVEMENT_TYPES, MOVEMENT_TYPE_DEPOSIT, MOVEMENT_TYPE_WITHDRAW
+from accounting.constants import (MOVEMENT_TYPES,
+                                  MOVEMENT_TYPE_DEPOSIT,
+                                  MOVEMENT_TYPE_WITHDRAW)
 from accounting.models import Account, Operation, OperationMovement
 
 
@@ -20,15 +22,15 @@ class AccountingService():
         Gets and lock account
         """
         with transaction.atomic():
-            account = Account.objects.select_for_update().get(pk=account_id)
-            if not account:
-                raise ValidationError('Account Not Fount : %s' % (account_id))
+            account = Account.objects.select_for_update().get(
+                    pk=account_id)
             return account
 
     @classmethod
     # account should be locked
     def simple_operation(
-            cls, user, current_datetime, concept, detail, account, movement_type, amount):
+            cls, user, current_datetime, concept,
+            detail, account, movement_type, amount):
         """
         Registers simple operation
         """

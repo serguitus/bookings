@@ -5,8 +5,10 @@ from django.contrib.admin.sites import AdminSite
 from django.utils.translation import ugettext as _, ugettext_lazy
 
 all_sites = WeakSet()
+
+
 class CommonSite(AdminSite):
-    
+
     index_template = 'index.html'
     # Text to put at the end of each page's <title>.
     site_title = ugettext_lazy('Application Site')
@@ -24,8 +26,6 @@ class CommonSite(AdminSite):
 
 class CommonModel(ModelAdmin):
     site_actions = []
-    
-    
 
 
-app_site = CommonSite('app_site')
+app_site = CommonSite(name='reservas')

@@ -15,11 +15,12 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-from common import sites
+from reservas.admin import reservas_admin
+
 
 urlpatterns = [
-    url(r'^reservas/', sites.app_site.urls),
     url(r'^admin/', admin.site.urls),
+    url(r'^reservas/', reservas_admin.urls),
     url(r'^accounting/', include('accounting.urls', namespace="accounting")),
     url(r'^finance/', include('finance.urls', namespace="finance")),
     url(r'^config/', include('config.urls', namespace="configuration")),
