@@ -86,7 +86,7 @@ class AccountingDocumentHistory(models.Model):
 class MatchingDocument(models.Model):
     class Meta:
         abstract = True
-    unmatched = models.DecimalField(max_digits=10, decimal_places=2)
+    amount_matched = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 
 class Deposit(FinantialDocument, AccountingDocument):

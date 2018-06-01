@@ -78,7 +78,7 @@ class AccountingService():
     @classmethod
     def revert_operation(cls, user, operation_id, current_datetime):
         """
-        Registers operation reberting another operation
+        Registers operation for reverting another operation
         """
         operation = Operation.objects.get(pk=operation_id)
         revertion = None
@@ -91,9 +91,9 @@ class AccountingService():
                     date=current_datetime,
                     concept=concept,
                     detail=detail)
-                operation.save()
+                revertion.save()
                 # barrer movimientos de operacion
-                movements = OperationMovement.objects.filter(operation__pk=operation.pk)
+                movements = operation.operation_movement_set.all()
                 for movement in movements:
                     reverted_movement_type = cls._revert_movement_type(movement.movement_type)
                     movement = OperationMovement(
