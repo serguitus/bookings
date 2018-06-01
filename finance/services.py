@@ -155,7 +155,8 @@ class FinanceService(object):
 
     @classmethod
     def _load_locked_account(cls, account_id):
-        account = AccountingService.find_and_lock_account_by_id(account_id=account_id)
+        account = AccountingService.find_and_lock_account_by_id(
+            account_id=account_id)
         if not account:
             raise ValidationError('Invalid Account for Accounting Document')
         return account
