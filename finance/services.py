@@ -11,10 +11,9 @@ from accounting.constants import MOVEMENT_TYPE_DEPOSIT, MOVEMENT_TYPE_WITHDRAW
 from accounting.services import AccountingService
 
 from finance.constants import STATUS_READY
-from finance.models import (Deposit, Withdraw, LoanDeposit,
-                            LoanWithdraw, FinantialDocumentHistory,
-                            AccountingDocumentHistory)
-
+from finance.models import Deposit, Withdraw, LoanDeposit, LoanWithdraw, LoanMatch, \
+    LoanAccountDeposit, LoanAccountWithdraw, LoanAccountMatch, \
+    FinantialDocumentHistory, AccountingDocumentHistory
 
 class FinanceService(object):
     """
@@ -40,6 +39,7 @@ class FinanceService(object):
                 document=deposit,
                 db_document=db_deposit,
                 account=account,
+                other_account=None,
                 concept=concept,
                 detail=detail,
                 movement_type=MOVEMENT_TYPE_DEPOSIT)
@@ -63,6 +63,7 @@ class FinanceService(object):
                 document=withdraw,
                 db_document=db_withdraw,
                 account=account,
+                other_account=None,
                 concept=concept,
                 detail=detail,
                 movement_type=MOVEMENT_TYPE_WITHDRAW)
@@ -80,11 +81,15 @@ class FinanceService(object):
             detail = '%s - Loan Deposit to %s of %s %s ' % (
                 today, account, loan_deposit.amount, account.currency)
             db_loan_deposit = cls._load_locked_loan_deposit(loan_deposit=loan_deposit)
+            # process matches on status or amount change
+            cls._process_loan_matches(document=loan_deposit, db_document=db_loan_deposit)
+            # manage saving
             cls._document_save(
                 user=user,
                 document=loan_deposit,
                 db_document=db_loan_deposit,
                 account=account,
+                other_account=None,
                 concept=concept,
                 detail=detail,
                 movement_type=MOVEMENT_TYPE_DEPOSIT)
@@ -102,23 +107,170 @@ class FinanceService(object):
             detail = '%s - Loan Withdraw from %s of %s %s ' % (
                 today, account, loan_withdraw.amount, account.currency)
             db_loan_withdraw = cls._load_locked_loan_withdraw(loan_withdraw=loan_withdraw)
+            # process matches on status or amount change
+            cls._process_loan_matches(document=loan_withdraw, db_document=db_loan_withdraw)
             # manage saving
             cls._document_save(
                 user=user,
                 document=loan_withdraw,
                 db_document=db_loan_withdraw,
                 account=account,
+                other_account=None,
                 concept=concept,
                 detail=detail,
                 movement_type=MOVEMENT_TYPE_WITHDRAW)
 
     @classmethod
-    def add_loan_matching(cls, user, loan_deposit, loan_withdraw, amount):
-        pass
+    def save_loan_match(cls, loan_match):
+        """
+        Save Loan Match
+        """
+        with transaction.atomic():
+            if not loan_match.pk:
+                # new match
+                # save match
+                cls._save_loan_match(loan_match=loan_match)
+            else:
+                # db match
+                # get db loan match
+                db_loan_match = LoanMatch.objects.get(pk=loan_match.pk)
+                if not db_loan_match:
+                    raise ValidationError('Invalid Loan Match PK')
+                # validate same documents
+                if db_loan_match.loan_deposit_id != loan_match.loan_deposit_id:
+                    raise ValidationError('Invalid Loan Deposit document')
+                if db_loan_match.loan_withdraw_id != loan_match.loan_withdraw_id:
+                    raise ValidationError('Invalid Loan Withdraw document')
+                # save match
+                cls._save_loan_match(loan_match=loan_match)
 
     @classmethod
-    def remove_loan_matching(cls, user, loan_deposit, loan_withdraw):
-        pass
+    def delete_loan_match(cls, loan_match_id):
+        """
+        Delete Loan Match
+        """
+        with transaction.atomic():
+            # get loan match
+            loan_match = LoanMatch.objects.get(pk=loan_match_id)
+            if not loan_match:
+                raise ValidationError('Invalid Loan Match PK')
+            # get loan match amount
+            amount = loan_match.amount
+            # obtain related documents and update matched_amount
+            loan_deposit = cls._load_locked_loan_deposit(loan_match.loan_deposit_id)
+            cls._update_matched(document=loan_deposit, amount=amount, direction=-1)
+            loan_withdraw = cls._load_locked_loan_withdraw(loan_match.loan_withdraw_id)
+            cls._update_matched(document=loan_withdraw, amount=amount, direction=-1)
+            # delete loan_match
+            loan_match.delete()
+
+    @classmethod
+    def save_loan_account_deposit(cls, user, loan_account_deposit):
+        """
+        Saves Loan Account Deposit
+        """
+        with transaction.atomic():
+            # load and lock accounts
+            account = cls._load_locked_account(account_id=loan_account_deposit.account_id)
+            withdraw_account = cls._load_locked_account(account_id=loan_account_deposit.withdraw_account_id)
+            # verify accounts
+            if account.currency != withdraw_account.currency:
+                raise ValidationError('Accounts must be on same currency')
+            today = date.today()
+            concept = 'Loan Account Deposit'
+            detail = '%s - Loan Account Deposit to %s of %s %s from %s' % (
+                today, account, loan_account_deposit.amount, account.currency, withdraw_account)
+            db_loan_account_deposit = cls._load_locked_loan_account_deposit(
+                loan_account_deposit=loan_account_deposit)
+            # process matches on status or amount change
+            cls._process_loan_matches(
+                document=loan_account_deposit, db_document=db_loan_account_deposit)
+            # manage saving
+            cls._document_save(
+                user=user,
+                document=loan_account_deposit,
+                db_document=db_loan_account_deposit,
+                account=account,
+                other_account=withdraw_account,
+                concept=concept,
+                detail=detail,
+                movement_type=MOVEMENT_TYPE_DEPOSIT)
+
+    @classmethod
+    def save_loan_account_withdraw(cls, user, loan_account_withdraw):
+        """
+        Saves Loan Account Withdraw
+        """
+        with transaction.atomic():
+            # load and lock accounts
+            account = cls._load_locked_account(account_id=loan_account_withdraw.account_id)
+            deposit_account = cls._load_locked_account(account_id=loan_account_withdraw.deposit_account_id)
+            # verify accounts
+            if account.currency != deposit_account.currency:
+                raise ValidationError('Accounts must be on same currency')
+            today = date.today()
+            concept = 'Loan Account Withdraw'
+            detail = '%s - Loan Account Withdraw from %s of %s %s to %s' % (
+                today, account, loan_account_withdraw.amount, account.currency, deposit_account)
+            db_loan_account_withdraw = cls._load_locked_loan_account_withdraw(
+                loan_account_withdraw=loan_account_withdraw)
+            # process matches on status or amount change
+            cls._process_loan_matches(
+                document=loan_account_withdraw, db_document=db_loan_account_withdraw)
+            # manage saving
+            cls._document_save(
+                user=user,
+                document=loan_account_withdraw,
+                db_document=db_loan_account_withdraw,
+                account=account,
+                other_account=deposit_account,
+                concept=concept,
+                detail=detail,
+                movement_type=MOVEMENT_TYPE_WITHDRAW)
+
+    @classmethod
+    def save_loan_account_match(cls, loan_account_match):
+        """
+        Save Loan Account Match
+        """
+        with transaction.atomic():
+            if not loan_account_match.pk:
+                # new match
+                # save match
+                cls._save_loan_account_match(loan_account_match=loan_account_match)
+            else:
+                # db match
+                # get db loan account match
+                db_loan_account_match = LoanAccountMatch.objects.get(pk=loan_account_match.pk)
+                if not db_loan_account_match:
+                    raise ValidationError('Invalid Loan Account Match PK')
+                # validate same documents
+                if db_loan_account_match.loan_deposit_account_id != loan_account_match.loan_deposit_account_id:
+                    raise ValidationError('Invalid Loan Account Deposit document')
+                if db_loan_account_match.loan_withdraw_account_id != loan_account_match.loan_withdraw_account_id:
+                    raise ValidationError('Invalid Loan Account Withdraw document')
+                # save match
+                cls._save_loan_account_match(loan_account_match=loan_account_match)
+
+    @classmethod
+    def delete_loan_account_match(cls, loan_account_match_id):
+        """
+        Delete Loan Account Match
+        """
+        with transaction.atomic():
+            # get loan account match
+            loan_account_match = LoanAccountMatch.objects.get(pk=loan_account_match_id)
+            if not loan_account_match:
+                raise ValidationError('Invalid Loan Account_Match PK')
+            # get loan account match amount
+            amount = loan_account_match.amount
+            # obtain related documents and update matched_amount
+            loan_account_deposit = cls._load_locked_loan_account_deposit(loan_account_match.loan_account_deposit_id)
+            cls._update_matched(document=loan_account_deposit, amount=amount, direction=-1)
+            loan_account_withdraw = cls._load_locked_loan_account_withdraw(loan_account_match.loan_account_withdraw_id)
+            cls._update_matched(document=loan_account_withdraw, amount=amount, direction=-1)
+            # delete loan account match
+            loan_account_match.delete()
 
     @classmethod
     def save_agency_invoice(cls, user, invoice):
@@ -155,10 +307,9 @@ class FinanceService(object):
 
     @classmethod
     def _load_locked_account(cls, account_id):
-        account = AccountingService.find_and_lock_account_by_id(
-            account_id=account_id)
+        account = AccountingService.find_and_lock_account_by_id(account_id=account_id)
         if not account:
-            raise ValidationError('Invalid Account for Accounting Document')
+            raise ValidationError('Invalid Document Account PK')
         return account
 
     @classmethod
@@ -206,7 +357,32 @@ class FinanceService(object):
         return db_loan_withdraw
 
     @classmethod
-    def _document_save(cls, user, document, db_document, account, concept, detail, movement_type):
+    def _load_locked_loan_account_deposit(cls, loan_account_deposit):
+        db_loan_account_deposit = None
+        # verify if not new
+        if loan_account_deposit and loan_account_deposit.pk:
+            # load loan account deposit from db
+            db_loan_account_deposit = LoanAccountDeposit.objects.select_for_update().get(
+                pk=loan_account_deposit.pk)
+            if not db_loan_account_deposit:
+                raise ValidationError('Invalid Loan Account Deposit PK')
+        return db_loan_account_deposit
+
+    @classmethod
+    def _load_locked_loan_account_withdraw(cls, loan_account_withdraw):
+        db_loan_account_withdraw = None
+        # verify if not new
+        if loan_account_withdraw and loan_account_withdraw.pk:
+            # load loan account withdraw from db
+            db_loan_account_withdraw = LoanAccountWithdraw.objects.select_for_update().get(
+                pk=loan_account_withdraw.pk)
+            if not db_loan_account_withdraw:
+                raise ValidationError('Invalid Loan Account Withdraw PK')
+        return db_loan_account_withdraw
+
+    @classmethod
+    def _document_save(
+        cls, user, document, db_document, account, other_account, concept, detail, movement_type):
         document.currency = account.currency
         now = datetime.now()
         # manage operations
@@ -218,6 +394,7 @@ class FinanceService(object):
             concept=concept,
             detail=detail,
             account=account,
+            other_account=other_account,
             movement_type=movement_type)
         # save documment
         document.name = detail
@@ -237,8 +414,8 @@ class FinanceService(object):
 
     @classmethod
     def _manage_operations(
-            cls, user, document, db_document, account, concept, detail, movement_type, \
-            current_datetime):
+            cls, user, document, db_document, account, other_account, concept, detail, \
+            movement_type, current_datetime):
         result = []
         revertion = None
         current = None
@@ -260,6 +437,7 @@ class FinanceService(object):
             concept=concept,
             detail=detail,
             account=account,
+            other_account=other_account,
             movement_type=movement_type)
         if current:
             document.current_operation_id = current.pk
@@ -285,7 +463,8 @@ class FinanceService(object):
 
     @classmethod
     def _current_operation(
-            cls, user, document, current_datetime, concept, detail, account, movement_type):
+            cls, user, document, current_datetime, concept, detail, \
+            account, other_account, movement_type):
         operation = None
         if document and document.status == STATUS_READY:
             # create new operation
@@ -295,6 +474,7 @@ class FinanceService(object):
                 concept=concept,
                 detail=detail,
                 account=account,
+                other_account=other_account,
                 movement_type=movement_type,
                 amount=document.amount)
         return operation
@@ -318,24 +498,81 @@ class FinanceService(object):
         return (not db_document) or (db_document.status != document.status)
 
     @classmethod
-    def _cancelDocumentMatching(cls, document):
-        # find matches and cancel them
-
-        for match in matches:
-            # cancel and update documents unmatched
-            pass
-        # verify if loan
-        # verify if loan devolution
-        # verify if agency debit
-        # verify if agency credit
-        return document
+    def _process_loan_matches(cls, document, db_document):
+        # verify not new
+        if db_document and (db_document.status == STATUS_READY):
+            # process status change
+            if document.status != STATUS_READY:
+                # verifies matches
+                if cls._loan_has_matches(document=document):
+                    raise ValidationError('Can not change status from Ready if Loan document has matches')
+            # process amount change
+            if db_document.amount > document.amount:
+                # verifies amonunt matched
+                if document.amount_matched > document.amount:
+                    raise ValidationError('Can not decrease amount below matched amount')
 
     @classmethod
-    def _restoreDocumentMatching(cls, document):
-        # find matches and try to restore them
-        for match in matches:
-            # try to restore and update documents unmatched
-            pass
-        return document
+    def _loan_has_matches(cls, document):
+        return document.loan_match_set.count() > 0
 
-           
+    @classmethod
+    def _save_loan_match(cls, loan_match):
+        # get loan match amount
+        amount = loan_match.amount
+        if amount <= 0:
+            raise ValidationError('Amount must be above 0')
+        # obtain related documents and update matched_amount
+        loan_deposit = cls._load_locked_loan_deposit(loan_match.loan_deposit_id)
+        # verify status
+        if loan_deposit.status != STATUS_READY:
+            raise ValidationError('Loan Deposit Status mus be Ready')
+        loan_withdraw = cls._load_locked_loan_withdraw(loan_match.loan_withdraw_id)
+        # verify status
+        if loan_withdraw.status != STATUS_READY:
+            raise ValidationError('Loan Withdraw Status must be Ready')
+        # verify accounts
+        if loan_deposit.account_id != loan_withdraw.account_id:
+            raise ValidationError('Documents Accounts must be the same')
+        cls._update_matched(document=loan_deposit, amount=loan_match.amount, direction=1)
+        cls._update_matched(document=loan_withdraw, amount=loan_match.amount, direction=1)
+        # save loan_match
+        loan_match.save()
+
+    @classmethod
+    def _save_loan_account_match(cls, loan_account_match):
+        # get loan account_match amount
+        amount = loan_account_match.amount
+        if amount <= 0:
+            raise ValidationError('Amount must be above 0')
+        # obtain related documents and update matched_amount
+        loan_account_deposit = cls._load_locked_loan_account_deposit(loan_account_match.loan_account_deposit_id)
+        # verify status
+        if loan_account_deposit.status != STATUS_READY:
+            raise ValidationError('Loan Account Deposit Status mus be Ready')
+        loan_account_withdraw = cls._load_locked_loan_account_withdraw(loan_account_match.loan_account_withdraw_id)
+        # verify status
+        if loan_account_withdraw.status != STATUS_READY:
+            raise ValidationError('Loan Account Withdraw Status must be Ready')
+        # verify accounts
+        if loan_account_deposit.account_id != loan_account_withdraw.account_id \
+            or loan_account_deposit.withdraw_account_id != loan_account_withdraw.deposit_account_id:
+            raise ValidationError('Documents Accounts must be the same')
+        cls._update_matched(document=loan_account_deposit, amount=loan_account_match.amount, direction=1)
+        cls._update_matched(document=loan_account_withdraw, amount=loan_account_match.amount, direction=1)
+        # save loan account match
+        loan_account_match.save()
+
+    @classmethod
+    def _update_matched(cls, document, amount, direction):
+        # find matches and cancel them
+        if direction > 0:
+            document.matched_amount = document.matched_amount + amount
+            if document.amount < document.matched_amount:
+                raise ValidationError('Invalid Match Amount')
+            document.save()
+        if direction < 0:
+            document.matched_amount = document.matched_amount - amount
+            if document.matched_amount < 0:
+                raise ValidationError('Invalid Match Amount')
+            document.save()

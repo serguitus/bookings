@@ -29,8 +29,8 @@ class AccountingService():
     @classmethod
     # account should be locked
     def simple_operation(
-            cls, user, current_datetime, concept,
-            detail, account, movement_type, amount):
+            cls, user, current_datetime, concept, detail,
+            account, other_account, movement_type, amount, other_amount=None):
         """
         Registers simple operation
         """
@@ -48,6 +48,15 @@ class AccountingService():
                 account=account,
                 movement_type=movement_type,
                 amount=amount)
+            if other_account:
+                movement_amount = amount
+                if other_amount:
+                    movement_amount = other_amount
+                cls.add_operation_movement(
+                    operation=operation,
+                    account=other_account,
+                    movement_type=cls._revert_movement_type(movement_type),
+                    amount=movement_amount)
             return operation
 
     @classmethod
@@ -80,7 +89,7 @@ class AccountingService():
     @classmethod
     def revert_operation(cls, user, operation_id, current_datetime):
         """
-        Registers operation reberting another operation
+        Registers operation for reverting another operation
         """
         operation = Operation.objects.get(pk=operation_id)
         revertion = None
@@ -93,9 +102,9 @@ class AccountingService():
                     date=current_datetime,
                     concept=concept,
                     detail=detail)
-                operation.save()
+                revertion.save()
                 # barrer movimientos de operacion
-                movements = OperationMovement.objects.filter(operation__pk=operation.pk)
+                movements = operation.operation_movement_set.all()
                 for movement in movements:
                     reverted_movement_type = cls._revert_movement_type(movement.movement_type)
                     movement = OperationMovement(
