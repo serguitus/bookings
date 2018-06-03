@@ -1,7 +1,8 @@
 from django.db import models
 from django.conf import settings
 
-from accounting.constants import CURRENCIES, CURRENCY_DICT, CURRENCY_CUC, CURRENCY_USD
+from accounting.constants import (CURRENCIES, CURRENCY_DICT,
+                                  CURRENCY_CUC, CURRENCY_USD)
 from accounting.models import Account, Operation
 
 from finance.constants import STATUSES, STATUS_DRAFT
