@@ -31,7 +31,7 @@ class FinanceService(object):
             today = date.today()
             concept = 'Deposit'
             detail = '%s - Deposit on %s of %s %s ' % (
-                today, account, deposit.amount, account.currency)
+                today, account, deposit.amount, account.get_currency_display())
             db_deposit = cls._load_locked_deposit(deposit=deposit)
             # manage saving
             cls._document_save(
@@ -39,7 +39,6 @@ class FinanceService(object):
                 document=deposit,
                 db_document=db_deposit,
                 account=account,
-                other_account=None,
                 concept=concept,
                 detail=detail,
                 movement_type=MOVEMENT_TYPE_DEPOSIT)
@@ -55,7 +54,7 @@ class FinanceService(object):
             today = date.today()
             concept = 'Withdraw'
             detail = '%s - Withdraw from %s of %s %s ' % (
-                today, account, withdraw.amount, account.currency)
+                today, account, withdraw.amount, account.get_currency_display())
             db_withdraw = cls._load_locked_withdraw(withdraw=withdraw)
             # manage saving
             cls._document_save(
@@ -63,7 +62,6 @@ class FinanceService(object):
                 document=withdraw,
                 db_document=db_withdraw,
                 account=account,
-                other_account=None,
                 concept=concept,
                 detail=detail,
                 movement_type=MOVEMENT_TYPE_WITHDRAW)
@@ -84,8 +82,8 @@ class FinanceService(object):
             today = date.today()
             concept = 'Exchange'
             detail = '%s - Exchange to %s for %s %s from %s of %s %s' % (
-                today, account, currency_exchange.amount, account.currency, \
-                exchange_account, currency_exchange.exchange_amount, exchange_account.currency)
+                today, account, currency_exchange.amount, account.get_currency_display(), \
+                exchange_account, currency_exchange.exchange_amount, exchange_account.get_currency_display())
             db_exchange = cls._load_locked_currency_exchange(currency_exchange=currency_exchange)
             # manage saving
             cls._document_save(
@@ -93,10 +91,10 @@ class FinanceService(object):
                 document=currency_exchange,
                 db_document=db_exchange,
                 account=account,
-                other_account=exchange_account,
                 concept=concept,
                 detail=detail,
                 movement_type=MOVEMENT_TYPE_WITHDRAW,
+                other_account=exchange_account,
                 other_amount=currency_exchange.exchange_amount)
 
     @classmethod
@@ -110,7 +108,7 @@ class FinanceService(object):
             today = date.today()
             concept = 'Loan Deposit'
             detail = '%s - Loan Deposit to %s of %s %s ' % (
-                today, account, loan_deposit.amount, account.currency)
+                today, account, loan_deposit.amount, account.get_currency_display())
             db_loan_deposit = cls._load_locked_loan_deposit(loan_deposit=loan_deposit)
             # process matches on status or amount change
             cls._process_loan_matches(document=loan_deposit, db_document=db_loan_deposit)
@@ -120,7 +118,6 @@ class FinanceService(object):
                 document=loan_deposit,
                 db_document=db_loan_deposit,
                 account=account,
-                other_account=None,
                 concept=concept,
                 detail=detail,
                 movement_type=MOVEMENT_TYPE_DEPOSIT)
@@ -146,7 +143,6 @@ class FinanceService(object):
                 document=loan_withdraw,
                 db_document=db_loan_withdraw,
                 account=account,
-                other_account=None,
                 concept=concept,
                 detail=detail,
                 movement_type=MOVEMENT_TYPE_WITHDRAW)
@@ -222,10 +218,10 @@ class FinanceService(object):
                 document=loan_account_deposit,
                 db_document=db_loan_account_deposit,
                 account=account,
-                other_account=withdraw_account,
                 concept=concept,
                 detail=detail,
-                movement_type=MOVEMENT_TYPE_DEPOSIT)
+                movement_type=MOVEMENT_TYPE_DEPOSIT,
+                other_account=withdraw_account)
 
     @classmethod
     def save_loan_account_withdraw(cls, user, loan_account_withdraw):
@@ -254,10 +250,10 @@ class FinanceService(object):
                 document=loan_account_withdraw,
                 db_document=db_loan_account_withdraw,
                 account=account,
-                other_account=deposit_account,
                 concept=concept,
                 detail=detail,
-                movement_type=MOVEMENT_TYPE_WITHDRAW)
+                movement_type=MOVEMENT_TYPE_WITHDRAW,
+                other_account=deposit_account)
 
     @classmethod
     def save_loan_account_match(cls, loan_account_match):
@@ -304,7 +300,7 @@ class FinanceService(object):
             loan_account_match.delete()
 
     @classmethod
-    def save_agency_invoice(cls, user, invoice):
+    def save_agency_invoice(cls, user, agency_invoice):
         pass
 
     @classmethod
@@ -425,8 +421,8 @@ class FinanceService(object):
 
     @classmethod
     def _document_save(
-        cls, user, document, db_document, account, other_account, concept, detail, \
-        movement_type, other_amount=None):
+        cls, user, document, db_document, account, concept, detail, \
+        movement_type, other_account=None, other_amount=None):
         document.currency = account.currency
         now = datetime.now()
         # manage operations
@@ -438,8 +434,8 @@ class FinanceService(object):
             concept=concept,
             detail=detail,
             account=account,
-            other_account=other_account,
             movement_type=movement_type,
+            other_account=other_account,
             other_amount=other_amount)
         # save documment
         document.name = detail
@@ -459,8 +455,8 @@ class FinanceService(object):
 
     @classmethod
     def _manage_operations(
-            cls, user, document, db_document, account, other_account, concept, detail, \
-            movement_type, current_datetime, other_amount=None):
+            cls, user, document, db_document, account, concept, detail, movement_type, \
+            current_datetime, other_account=None, other_amount=None):
         result = []
         revertion = None
         current = None
@@ -482,8 +478,8 @@ class FinanceService(object):
             concept=concept,
             detail=detail,
             account=account,
-            other_account=other_account,
             movement_type=movement_type,
+            other_account=other_account,
             other_amount=other_amount)
         if current:
             document.current_operation_id = current.pk
@@ -494,7 +490,7 @@ class FinanceService(object):
     def _needs_revertion(cls, document, db_document):
         return db_document and db_document.current_operation \
             and (document.status != STATUS_READY \
-                or document.account_id != db_document.accont_id \
+                or document.account_id != db_document.account_id \
                 or document.amount != db_document.amount)
 
     @classmethod
@@ -510,7 +506,7 @@ class FinanceService(object):
     @classmethod
     def _current_operation(
             cls, user, document, current_datetime, concept, detail, \
-            account, other_account, movement_type, other_amount=None):
+            account, movement_type, other_account=None, other_amount=None):
         operation = None
         if document and document.status == STATUS_READY:
             # create new operation
@@ -520,9 +516,9 @@ class FinanceService(object):
                 concept=concept,
                 detail=detail,
                 account=account,
-                other_account=other_account,
                 movement_type=movement_type,
                 amount=document.amount,
+                other_account=other_account,
                 other_amount=other_amount)
         return operation
 

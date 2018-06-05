@@ -30,7 +30,7 @@ class AccountingService():
     # account should be locked
     def simple_operation(
             cls, user, current_datetime, concept, detail,
-            account, other_account, movement_type, amount, other_amount=None):
+            account, movement_type, amount, other_account=None, other_amount=None):
         """
         Registers simple operation
         """
@@ -104,15 +104,14 @@ class AccountingService():
                     detail=detail)
                 revertion.save()
                 # barrer movimientos de operacion
-                movements = operation.operation_movement_set.all()
+                movements = operation.operationmovement_set.all()
                 for movement in movements:
                     reverted_movement_type = cls._revert_movement_type(movement.movement_type)
-                    movement = OperationMovement(
+                    cls.add_operation_movement(
                         operation=revertion,
-                        movement_type=reverted_movement_type,
                         account=movement.account,
+                        movement_type=reverted_movement_type,
                         amount=movement.amount)
-                    movement.save()
         return revertion
 
     @classmethod

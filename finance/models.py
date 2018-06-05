@@ -1,8 +1,7 @@
 from django.db import models
 from django.conf import settings
 
-from accounting.constants import (CURRENCIES, CURRENCY_DICT,
-                                  CURRENCY_CUC, CURRENCY_USD)
+from accounting.constants import CURRENCIES, CURRENCY_CUC, CURRENCY_USD
 from accounting.models import Account, Operation
 
 from finance.constants import STATUSES, STATUS_DRAFT
@@ -12,7 +11,7 @@ class FinantialDocument(models.Model):
     class Meta:
         verbose_name = 'Finantial Document'
         verbose_name_plural = 'Finantials Documents'
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=80)
     date = models.DateTimeField()
     currency = models.CharField(
         max_length=5, choices=CURRENCIES)
@@ -21,7 +20,7 @@ class FinantialDocument(models.Model):
         max_length=2, choices=STATUSES, default=STATUS_DRAFT)
 
     def __str__(self):
-        return '%s (%s)' % (self.name, CURRENCY_DICT[self.currency])
+        return '%s (%s)' % (self.name, self.get_currency_display())
 
 
 class FinantialDocumentHistory(models.Model):
@@ -138,7 +137,7 @@ class Agency(models.Model):
     enabled = models.BooleanField(default=True)
 
     def __str__(self):
-        return '%s (%s)' % (self.name, CURRENCY_DICT[self.currency])
+        return '%s (%s)' % (self.name, self.get_currency_display())
 
 
 class AgencyDocument(FinantialDocument):
@@ -204,7 +203,7 @@ class Provider(models.Model):
     enabled = models.BooleanField(default=True)
 
     def __str__(self):
-        return '%s (%s)' % (self.name, CURRENCY_DICT[self.currency])
+        return '%s (%s)' % (self.name, self.get_currency_display())
 
 
 class ProviderDocument(FinantialDocument):

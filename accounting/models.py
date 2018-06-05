@@ -1,8 +1,8 @@
 from django.db import models
 from django.conf import settings
+from django.db import connection
 
-from accounting.constants import (CURRENCIES, CURRENCY_DICT, CURRENCY_CUC,
-                                  MOVEMENT_TYPES)
+from accounting.constants import CURRENCIES, CURRENCY_CUC, MOVEMENT_TYPES
 
 
 class Account(models.Model):
@@ -18,7 +18,24 @@ class Account(models.Model):
     enabled = models.BooleanField(default=True)
 
     def __str__(self):
-        return '%s (%s)' % (self.name, CURRENCY_DICT[self.currency])
+        return '%s (%s)' % (self.name, self.get_currency_display())
+
+    def update_balance(self):
+        cursor = connection.cursor()
+        cursor.execute(
+            "UPDATE \
+                accounting_account a \
+            SET \
+                a.balance = (\
+                    SELECT \
+                        SUM(CASE WHEN movement_type = \'D\' THEN 1 ELSE -1 END * amount) \
+                    FROM \
+                        accounting_operationmovement \
+                    WHERE \
+                        account_id = a.id\
+                )\
+            WHERE \
+                id = $s", [self.pk])
 
 
 class Operation(models.Model):
