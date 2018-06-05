@@ -11,7 +11,7 @@ from accounting.constants import MOVEMENT_TYPE_DEPOSIT, MOVEMENT_TYPE_WITHDRAW
 from accounting.services import AccountingService
 
 from finance.constants import STATUS_READY
-from finance.models import Deposit, Withdraw, LoanDeposit, LoanWithdraw, LoanMatch, \
+from finance.models import Deposit, Withdraw, CurrencyExchange, LoanDeposit, LoanWithdraw, LoanMatch, \
     LoanAccountDeposit, LoanAccountWithdraw, LoanAccountMatch, \
     FinantialDocumentHistory, AccountingDocumentHistory
 
@@ -67,6 +67,37 @@ class FinanceService(object):
                 concept=concept,
                 detail=detail,
                 movement_type=MOVEMENT_TYPE_WITHDRAW)
+
+    @classmethod
+    def save_currency_exchange(cls, user, currency_exchange):
+        """
+        Saves Currency Exchange
+        """
+        with transaction.atomic():
+            # load and lock account
+            account = cls._load_locked_account(account_id=currency_exchange.account_id)
+            exchange_account = cls._load_locked_account(
+                account_id=currency_exchange.exchange_account_id)
+            # verify accounts
+            if account.currency == exchange_account.currency:
+                raise ValidationError('Accounts must not be on same currency')
+            today = date.today()
+            concept = 'Exchange'
+            detail = '%s - Exchange to %s for %s %s from %s of %s %s' % (
+                today, account, currency_exchange.amount, account.currency, \
+                exchange_account, currency_exchange.exchange_amount, exchange_account.currency)
+            db_exchange = cls._load_locked_currency_exchange(currency_exchange=currency_exchange)
+            # manage saving
+            cls._document_save(
+                user=user,
+                document=currency_exchange,
+                db_document=db_exchange,
+                account=account,
+                other_account=exchange_account,
+                concept=concept,
+                detail=detail,
+                movement_type=MOVEMENT_TYPE_WITHDRAW,
+                other_amount=currency_exchange.exchange_amount)
 
     @classmethod
     def save_loan_deposit(cls, user, loan_deposit):
@@ -335,6 +366,18 @@ class FinanceService(object):
         return db_withdraw
 
     @classmethod
+    def _load_locked_currency_exchange(cls, currency_exchange):
+        db_currency_exchange = None
+        # verify if not new
+        if currency_exchange and currency_exchange.pk:
+            # load currency_exchange from db
+            db_currency_exchange = CurrencyExchange.objects.select_for_update().get(
+                pk=currency_exchange.pk)
+            if not db_currency_exchange:
+                raise ValidationError('Invalid Currency Exchange PK')
+        return db_currency_exchange
+
+    @classmethod
     def _load_locked_loan_deposit(cls, loan_deposit):
         db_loan_deposit = None
         # verify if not new
@@ -382,7 +425,8 @@ class FinanceService(object):
 
     @classmethod
     def _document_save(
-        cls, user, document, db_document, account, other_account, concept, detail, movement_type):
+        cls, user, document, db_document, account, other_account, concept, detail, \
+        movement_type, other_amount=None):
         document.currency = account.currency
         now = datetime.now()
         # manage operations
@@ -395,7 +439,8 @@ class FinanceService(object):
             detail=detail,
             account=account,
             other_account=other_account,
-            movement_type=movement_type)
+            movement_type=movement_type,
+            other_amount=other_amount)
         # save documment
         document.name = detail
         document.save()
@@ -415,7 +460,7 @@ class FinanceService(object):
     @classmethod
     def _manage_operations(
             cls, user, document, db_document, account, other_account, concept, detail, \
-            movement_type, current_datetime):
+            movement_type, current_datetime, other_amount=None):
         result = []
         revertion = None
         current = None
@@ -438,7 +483,8 @@ class FinanceService(object):
             detail=detail,
             account=account,
             other_account=other_account,
-            movement_type=movement_type)
+            movement_type=movement_type,
+            other_amount=other_amount)
         if current:
             document.current_operation_id = current.pk
             result.append(current)
@@ -464,7 +510,7 @@ class FinanceService(object):
     @classmethod
     def _current_operation(
             cls, user, document, current_datetime, concept, detail, \
-            account, other_account, movement_type):
+            account, other_account, movement_type, other_amount=None):
         operation = None
         if document and document.status == STATUS_READY:
             # create new operation
@@ -476,7 +522,8 @@ class FinanceService(object):
                 account=account,
                 other_account=other_account,
                 movement_type=movement_type,
-                amount=document.amount)
+                amount=document.amount,
+                other_amount=other_amount)
         return operation
 
     @classmethod

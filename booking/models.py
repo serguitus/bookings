@@ -25,14 +25,14 @@ class Sale(models.Model):
     price = models.DecimalField(max_digits = 10, decimal_places = 2)
 
 
-class Booking(AgencyInvoiceItem, Sale, DateTimeRange):
+class Booking(Sale, DateTimeRange):
     class Meta:
         verbose_name = 'Booking'
         verbose_name_plural = 'Bookings'
     description = models.CharField(max_length = 1000)
     reference = models.CharField(max_length = 256)
     status = models.CharField(max_length=2, choices = BOOKING_STATUS_LIST, default = BOOKING_STATUS_REQUEST)
-    
+    agency_invoice = models.ForeignKey(AgencyInvoice)
 
 class BookingPax(models.Model):
     class Meta:
@@ -42,7 +42,7 @@ class BookingPax(models.Model):
     age = models.SmallIntegerField()
     
 
-class BookingService(ProviderInvoiceItem, Sale, DateTimeRange):
+class BookingService(Sale, DateTimeRange):
     class Meta:
         verbose_name = 'Booking Service'
         verbose_name_plural = 'Bookings Services'
@@ -50,6 +50,7 @@ class BookingService(ProviderInvoiceItem, Sale, DateTimeRange):
     service = models.ForeignKey(Service)
     description = models.CharField(max_length = 1000)
     status = models.CharField(max_length=2, choices = SERVICE_STATUS_LIST, default = SERVICE_STATUS_REQUEST)
+    provider_invoice = models.ForeignKey(ProviderInvoice)
 
 
 class BookingAllotment(BookingService):
@@ -66,7 +67,7 @@ class BookingTransfer(BookingService):
     transfer = models.ForeignKey(Transfer)
 
 
-class BookingServiceLine(ProviderInvoiceItem, Sale, DateTimeRange):
+class BookingServiceLine(Sale, DateTimeRange):
     class Meta:
         verbose_name = 'Booking Service Line'
         verbose_name_plural = 'Bookings Services Lines'
@@ -75,6 +76,7 @@ class BookingServiceLine(ProviderInvoiceItem, Sale, DateTimeRange):
     list_unit_cost = models.DecimalField(max_digits = 10, decimal_places = 2)
     list_unit_price = models.DecimalField(max_digits = 10, decimal_places = 2)
     status = models.CharField(max_length=2, choices = LINE_STATUS_LIST, default = LINE_STATUS_REQUEST)
+    provider_invoice = models.ForeignKey(ProviderInvoice)
 
 
 class BookingAllotmentLine(BookingServiceLine, AllotmentDefinition):
@@ -99,7 +101,7 @@ class BookingTransferLine(BookingServiceLine, TransferDefinition):
     transport_qtty = models.SmallIntegerField(default=1)
 
 
-class BookingServiceLineSupplement(ProviderInvoiceItem, Sale, DateTimeRange):
+class BookingServiceLineSupplement(Sale, DateTimeRange):
     class Meta:
         verbose_name = 'Booking Service Line Supplement'
         verbose_name_plural = 'Bookings Services Lines Supplements'

@@ -7,34 +7,6 @@ from accounting.models import Account, Operation
 from finance.constants import STATUSES, STATUS_DRAFT
 
 
-class Agency(models.Model):
-    class Meta:
-        verbose_name = 'Agency'
-        verbose_name_plural = 'Agencies'
-    name = models.CharField(max_length=50)
-    description = models.CharField(max_length=500, blank=True, null=True)
-    currency = models.CharField(
-        max_length=5, choices=CURRENCIES, default=CURRENCY_USD)
-    enabled = models.BooleanField(default=True)
-
-    def __str__(self):
-        return '%s (%s)' % (self.name, CURRENCY_DICT[self.currency])
-
-
-class Provider(models.Model):
-    class Meta:
-        verbose_name = 'Provider'
-        verbose_name_plural = 'Providers'
-    name = models.CharField(max_length=50)
-    description = models.CharField(max_length=500, blank=True, null=True)
-    currency = models.CharField(
-        max_length=5, choices=CURRENCIES, default=CURRENCY_CUC)
-    enabled = models.BooleanField(default=True)
-
-    def __str__(self):
-        return '%s (%s)' % (self.name, CURRENCY_DICT[self.currency])
-
-
 class FinantialDocument(models.Model):
     class Meta:
         verbose_name = 'Finantial Document'
@@ -86,7 +58,7 @@ class AccountingDocumentHistory(models.Model):
 class MatchingDocument(models.Model):
     class Meta:
         abstract = True
-    amount_matched = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    matched_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 
 class Deposit(FinantialDocument, AccountingDocument):
@@ -99,6 +71,14 @@ class Withdraw(FinantialDocument, AccountingDocument):
     class Meta:
         verbose_name = 'Withdraw'
         verbose_name_plural = 'Withdraws'
+
+
+class CurrencyExchange(FinantialDocument, AccountingDocument):
+    class Meta:
+        verbose_name = 'Currency Exchange'
+        verbose_name_plural = 'Currencies Exchanges'
+    exchange_account = models.ForeignKey(Account, related_name='exchange_account')
+    exchange_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 
 class LoanDeposit(FinantialDocument, AccountingDocument, MatchingDocument):
@@ -145,12 +125,18 @@ class LoanAccountMatch(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
 
 
-class AgencyInvoiceItem(models.Model):
+class Agency(models.Model):
     class Meta:
-        verbose_name = 'Agency Invoice Item'
-        verbose_name_plural = 'Agencies Invoices Items'
-    agency = models.ForeignKey(Agency)
-    file = models.FileField()
+        verbose_name = 'Agency'
+        verbose_name_plural = 'Agencies'
+    name = models.CharField(max_length=50)
+    description = models.CharField(max_length=500, blank=True, null=True)
+    currency = models.CharField(
+        max_length=5, choices=CURRENCIES, default=CURRENCY_USD)
+    enabled = models.BooleanField(default=True)
+
+    def __str__(self):
+        return '%s (%s)' % (self.name, CURRENCY_DICT[self.currency])
 
 
 class AgencyDocument(FinantialDocument):
@@ -176,7 +162,6 @@ class AgencyInvoice(AgencyDebitDocument):
     class Meta:
         verbose_name = 'Agency Invoice'
         verbose_name_plural = 'Agencies Invoices'
-    item = models.ForeignKey(AgencyInvoiceItem)
 
 
 class AgencyPayment(AgencyCreditDocument, AccountingDocument):
@@ -206,11 +191,18 @@ class AgencyMatch(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
 
 
-class ProviderInvoiceItem(models.Model):
+class Provider(models.Model):
     class Meta:
-        verbose_name = 'Provider Invoice Item'
-        verbose_name_plural = 'Providers Invoices Items'
-    provider = models.ForeignKey(Provider)
+        verbose_name = 'Provider'
+        verbose_name_plural = 'Providers'
+    name = models.CharField(max_length=50)
+    description = models.CharField(max_length=500, blank=True, null=True)
+    currency = models.CharField(
+        max_length=5, choices=CURRENCIES, default=CURRENCY_CUC)
+    enabled = models.BooleanField(default=True)
+
+    def __str__(self):
+        return '%s (%s)' % (self.name, CURRENCY_DICT[self.currency])
 
 
 class ProviderDocument(FinantialDocument):
@@ -236,7 +228,6 @@ class ProviderInvoice(ProviderDebitDocument):
     class Meta:
         verbose_name = 'Provider Invoice'
         verbose_name_plural = 'Providers Invoices'
-    item = models.ForeignKey(ProviderInvoiceItem)
 
 
 class ProviderPayment(ProviderCreditDocument, AccountingDocument):
