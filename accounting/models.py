@@ -1,8 +1,8 @@
 from django.db import models
 from django.conf import settings
 
-from accounting.constants import CURRENCIES, CURRENCY_DICT, CURRENCY_CUC, \
-    MOVEMENT_TYPES, MOVEMENT_TYPE_DICT
+from accounting.constants import (CURRENCIES, CURRENCY_DICT, CURRENCY_CUC,
+                                  MOVEMENT_TYPES)
 
 
 class Account(models.Model):
@@ -49,4 +49,4 @@ class OperationMovement(models.Model):
 
     def __str__(self):
         return  '%s : %s On %s For %s' % (
-            self.operation, MOVEMENT_TYPE_DICT[self.movement_type], self.account, self.amount)
+            self.operation, self.get_movement_type_display(), self.account, self.amount)

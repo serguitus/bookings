@@ -3,6 +3,7 @@ from reservas.admin import reservas_admin, ExtendedModelAdmin
 
 from finance.models import (Agency, Provider, FinantialDocument,
                             Deposit)
+from finance.services import FinanceService
 
 
 @admin.register(Agency)
@@ -29,6 +30,11 @@ admin.site.register(Deposit)
 class ExtendedDepositAdmin(ExtendedModelAdmin):
     list_display = ('account', 'amount', 'date', 'status')
 
+    def save_form(self, request, form, change):
+        # overrides base class method
+        obj = super(ExtendedDepositAdmin, self).save_form(request, form, change)
+        FinanceService.save_deposit(request.user, obj)
+        return obj
 
 reservas_admin.register(FinantialDocument)
 reservas_admin.register(Provider, ProviderAdmin)

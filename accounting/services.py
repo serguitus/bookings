@@ -135,8 +135,11 @@ class AccountingService():
     def _validate_movement_type(cls, movement_type):
         """
         Validates movement type
+        Maybe this is not needed
+        see site-packages/django/forms/models.py#1218
+        This validates the ChoiceField option
         """
-        if not movement_type or not movement_type in MOVEMENT_TYPES:
+        if not movement_type or not movement_type in [t[0] for t in MOVEMENT_TYPES]:
             raise ValidationError('Movement Type Required')
 
     @classmethod

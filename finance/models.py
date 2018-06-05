@@ -64,7 +64,8 @@ class FinantialDocumentHistory(models.Model):
     )
     date = models.DateTimeField()
     old_status = models.CharField(
-        max_length=2, choices=STATUSES)
+        max_length=2, choices=STATUSES,
+        blank=True, null=True)
     new_status = models.CharField(
         max_length=2, choices=STATUSES)
 
