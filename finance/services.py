@@ -7,13 +7,26 @@ from datetime import date, datetime
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from accounting.constants import MOVEMENT_TYPE_DEPOSIT, MOVEMENT_TYPE_WITHDRAW
+from accounting.constants import (
+    MOVEMENT_TYPE_DEPOSIT, MOVEMENT_TYPE_WITHDRAW,
+    CONCEPT_DEPOSIT, CONCEPT_WITHDRAW, CONCEPT_CURRENCY_EXCHANGE, CONCEPT_TRANSFER,
+    CONCEPT_LOAN_DEPOSIT, CONCEPT_LOAN_WITHDRAW,
+    CONCEPT_LOAN_ACCOUNT_DEPOSIT, CONCEPT_LOAN_ACCOUNT_WITHDRAW,
+    CONCEPT_AGENCY_INVOICE, CONCEPT_AGENCY_PAYMENT,
+    CONCEPT_AGENCY_DEVOLUTION, CONCEPT_AGENCY_DISCOUNT,
+    CONCEPT_PROVIDER_INVOICE, CONCEPT_PROVIDER_PAYMENT,
+    CONCEPT_PROVIDER_DEVOLUTION, CONCEPT_PROVIDER_DISCOUNT)
+from accounting.models import Account
 from accounting.services import AccountingService
 
 from finance.constants import STATUS_READY
-from finance.models import Deposit, Withdraw, CurrencyExchange, LoanDeposit, LoanWithdraw, LoanMatch, \
-    LoanAccountDeposit, LoanAccountWithdraw, LoanAccountMatch, \
-    FinantialDocumentHistory, AccountingDocumentHistory
+from finance.models import (
+    Deposit, Withdraw, CurrencyExchange, Transfer,
+    LoanDeposit, LoanWithdraw, LoanMatch,
+    LoanAccountDeposit, LoanAccountWithdraw, LoanAccountMatch,
+    AgencyInvoice, AgencyPayment, AgencyDevolution, AgencyDiscount, AgencyMatch,
+    ProviderInvoice, ProviderPayment, ProviderDevolution, ProviderDiscount, ProviderMatch,
+    FinantialDocumentHistory, AccountingDocumentHistory)
 
 class FinanceService(object):
     """
@@ -27,12 +40,14 @@ class FinanceService(object):
         """
         with transaction.atomic():
             # load and lock account
-            account = cls._load_locked_account(account_id=deposit.account_id)
+            account = cls._load_locked_model_object(
+                pk=deposit.account_id, manager=Account.objects, allow_empty_pk=False)
             today = date.today()
-            concept = 'Deposit'
+            concept = CONCEPT_DEPOSIT
             detail = '%s - Deposit on %s of %s %s ' % (
                 today, account, deposit.amount, account.get_currency_display())
-            db_deposit = cls._load_locked_deposit(deposit=deposit)
+            db_deposit = cls._load_locked_model_object(
+                pk=deposit.pk, manager=Deposit.objects)
             # manage saving
             cls._document_save(
                 user=user,
@@ -50,12 +65,14 @@ class FinanceService(object):
         """
         with transaction.atomic():
             # load and lock account
-            account = cls._load_locked_account(account_id=withdraw.account_id)
+            account = cls._load_locked_model_object(
+                pk=withdraw.account_id, manager=Account.objects, allow_empty_pk=False)
             today = date.today()
-            concept = 'Withdraw'
+            concept = CONCEPT_WITHDRAW
             detail = '%s - Withdraw from %s of %s %s ' % (
                 today, account, withdraw.amount, account.get_currency_display())
-            db_withdraw = cls._load_locked_withdraw(withdraw=withdraw)
+            db_withdraw = cls._load_locked_model_object(
+                pk=withdraw.pk, manager=Withdraw.objects)
             # manage saving
             cls._document_save(
                 user=user,
@@ -73,18 +90,22 @@ class FinanceService(object):
         """
         with transaction.atomic():
             # load and lock account
-            account = cls._load_locked_account(account_id=currency_exchange.account_id)
-            exchange_account = cls._load_locked_account(
-                account_id=currency_exchange.exchange_account_id)
+            account = cls._load_locked_model_object(
+                pk=currency_exchange.account_id, manager=Account.objects, allow_empty_pk=False)
+            exchange_account = cls._load_locked_model_object(
+                pk=currency_exchange.exchange_account_id, manager=Account.objects,
+                allow_empty_pk=False)
             # verify accounts
             if account.currency == exchange_account.currency:
                 raise ValidationError('Accounts must not be on same currency')
             today = date.today()
-            concept = 'Exchange'
+            concept = CONCEPT_CURRENCY_EXCHANGE
             detail = '%s - Exchange to %s for %s %s from %s of %s %s' % (
-                today, account, currency_exchange.amount, account.get_currency_display(), \
-                exchange_account, currency_exchange.exchange_amount, exchange_account.get_currency_display())
-            db_exchange = cls._load_locked_currency_exchange(currency_exchange=currency_exchange)
+                today, account, currency_exchange.amount, account.get_currency_display(),
+                exchange_account, currency_exchange.exchange_amount,
+                exchange_account.get_currency_display())
+            db_exchange = cls._load_locked_model_object(
+                pk=currency_exchange.pk, manager=CurrencyExchange.objects)
             # manage saving
             cls._document_save(
                 user=user,
@@ -98,18 +119,52 @@ class FinanceService(object):
                 other_amount=currency_exchange.exchange_amount)
 
     @classmethod
+    def save_transfer(cls, user, transfer):
+        """
+        Saves Transfer
+        """
+        with transaction.atomic():
+            # load and lock accounts
+            account = cls._load_locked_model_object(
+                pk=transfer.account_id, manager=Account.objects, allow_empty_pk=False)
+            transfer_account = cls._load_locked_model_object(
+                pk=transfer.transfer_account_id, manager=Account.objects,
+                allow_empty_pk=False)
+            # verify accounts
+            if account.currency != transfer_account.currency:
+                raise ValidationError('Accounts must be on same currency')
+            today = date.today()
+            concept = CONCEPT_TRANSFER
+            detail = '%s - Transfer to %s of %s %s from %s' % (
+                today, account, transfer.amount, account.currency, transfer_account)
+            db_transfer = cls._load_locked_model_object(
+                pk=transfer.pk, manager=Transfer.objects)
+            # manage saving
+            cls._document_save(
+                user=user,
+                document=transfer,
+                db_document=db_transfer,
+                account=account,
+                concept=concept,
+                detail=detail,
+                movement_type=MOVEMENT_TYPE_DEPOSIT,
+                other_account=transfer_account)
+
+    @classmethod
     def save_loan_deposit(cls, user, loan_deposit):
         """
         Saves Loan Deposit
         """
         with transaction.atomic():
             # load and lock account
-            account = cls._load_locked_account(account_id=loan_deposit.account_id)
+            account = cls._load_locked_model_object(
+                pk=loan_deposit.account_id, manager=Account.objects, allow_empty_pk=False)
             today = date.today()
-            concept = 'Loan Deposit'
+            concept = CONCEPT_LOAN_DEPOSIT
             detail = '%s - Loan Deposit to %s of %s %s ' % (
                 today, account, loan_deposit.amount, account.get_currency_display())
-            db_loan_deposit = cls._load_locked_loan_deposit(loan_deposit=loan_deposit)
+            db_loan_deposit = cls._load_locked_model_object(
+                pk=loan_deposit.pk, manager=LoanDeposit.objects)
             # process matches on status or amount change
             cls._process_loan_matches(document=loan_deposit, db_document=db_loan_deposit)
             # manage saving
@@ -129,12 +184,14 @@ class FinanceService(object):
         """
         with transaction.atomic():
             # load and lock account
-            account = cls._load_locked_account(account_id=loan_withdraw.account_id)
+            account = cls._load_locked_model_object(
+                pk=loan_withdraw.account_id, manager=Account.objects, allow_empty_pk=False)
             today = date.today()
-            concept = 'Loan Withdraw'
+            concept = CONCEPT_LOAN_WITHDRAW
             detail = '%s - Loan Withdraw from %s of %s %s ' % (
                 today, account, loan_withdraw.amount, account.currency)
-            db_loan_withdraw = cls._load_locked_loan_withdraw(loan_withdraw=loan_withdraw)
+            db_loan_withdraw = cls._load_locked_model_object(
+                pk=loan_withdraw.pk, manager=LoanWithdraw.objects)
             # process matches on status or amount change
             cls._process_loan_matches(document=loan_withdraw, db_document=db_loan_withdraw)
             # manage saving
@@ -168,8 +225,10 @@ class FinanceService(object):
                     raise ValidationError('Invalid Loan Deposit document')
                 if db_loan_match.loan_withdraw_id != loan_match.loan_withdraw_id:
                     raise ValidationError('Invalid Loan Withdraw document')
-                # save match
-                cls._save_loan_match(loan_match=loan_match)
+                # verify amount changed
+                if loan_match.amount != db_loan_match.amount:
+                    # save match
+                    cls._save_loan_match(loan_match=loan_match)
 
     @classmethod
     def delete_loan_match(cls, loan_match_id):
@@ -184,9 +243,11 @@ class FinanceService(object):
             # get loan match amount
             amount = loan_match.amount
             # obtain related documents and update matched_amount
-            loan_deposit = cls._load_locked_loan_deposit(loan_match.loan_deposit_id)
+            loan_deposit = cls._load_locked_model_object(
+                pk=loan_match.loan_deposit_id, manager=LoanDeposit.objects)
             cls._update_matched(document=loan_deposit, amount=amount, direction=-1)
-            loan_withdraw = cls._load_locked_loan_withdraw(loan_match.loan_withdraw_id)
+            loan_withdraw = cls._load_locked_model_object(
+                pk=loan_match.loan_withdraw_id, manager=LoanWithdraw.objects)
             cls._update_matched(document=loan_withdraw, amount=amount, direction=-1)
             # delete loan_match
             loan_match.delete()
@@ -198,17 +259,20 @@ class FinanceService(object):
         """
         with transaction.atomic():
             # load and lock accounts
-            account = cls._load_locked_account(account_id=loan_account_deposit.account_id)
-            withdraw_account = cls._load_locked_account(account_id=loan_account_deposit.withdraw_account_id)
+            account = cls._load_locked_model_object(
+                pk=loan_account_deposit.account_id, manager=Account.objects, allow_empty_pk=False)
+            withdraw_account = cls._load_locked_model_object(
+                pk=loan_account_deposit.withdraw_account_id, manager=Account.objects,
+                allow_empty_pk=False)
             # verify accounts
             if account.currency != withdraw_account.currency:
                 raise ValidationError('Accounts must be on same currency')
             today = date.today()
-            concept = 'Loan Account Deposit'
+            concept = CONCEPT_LOAN_ACCOUNT_DEPOSIT
             detail = '%s - Loan Account Deposit to %s of %s %s from %s' % (
                 today, account, loan_account_deposit.amount, account.currency, withdraw_account)
-            db_loan_account_deposit = cls._load_locked_loan_account_deposit(
-                loan_account_deposit=loan_account_deposit)
+            db_loan_account_deposit = cls._load_locked_model_object(
+                pk=loan_account_deposit.pk, manager=LoanAccountDeposit.objects)
             # process matches on status or amount change
             cls._process_loan_matches(
                 document=loan_account_deposit, db_document=db_loan_account_deposit)
@@ -230,17 +294,20 @@ class FinanceService(object):
         """
         with transaction.atomic():
             # load and lock accounts
-            account = cls._load_locked_account(account_id=loan_account_withdraw.account_id)
-            deposit_account = cls._load_locked_account(account_id=loan_account_withdraw.deposit_account_id)
+            account = cls._load_locked_model_object(
+                pk=loan_account_withdraw.account_id, manager=Account.objects, allow_empty_pk=False)
+            deposit_account = cls._load_locked_model_object(
+                pk=loan_account_withdraw.deposit_account_id, manager=Account.objects,
+                allow_empty_pk=False)
             # verify accounts
             if account.currency != deposit_account.currency:
                 raise ValidationError('Accounts must be on same currency')
             today = date.today()
-            concept = 'Loan Account Withdraw'
+            concept = CONCEPT_LOAN_ACCOUNT_WITHDRAW
             detail = '%s - Loan Account Withdraw from %s of %s %s to %s' % (
                 today, account, loan_account_withdraw.amount, account.currency, deposit_account)
-            db_loan_account_withdraw = cls._load_locked_loan_account_withdraw(
-                loan_account_withdraw=loan_account_withdraw)
+            db_loan_account_withdraw = cls._load_locked_model_object(
+                pk=loan_account_withdraw.pk, manager=LoanAccountWithdraw.objects)
             # process matches on status or amount change
             cls._process_loan_matches(
                 document=loan_account_withdraw, db_document=db_loan_account_withdraw)
@@ -272,12 +339,16 @@ class FinanceService(object):
                 if not db_loan_account_match:
                     raise ValidationError('Invalid Loan Account Match PK')
                 # validate same documents
-                if db_loan_account_match.loan_deposit_account_id != loan_account_match.loan_deposit_account_id:
+                if db_loan_account_match.loan_deposit_account_id != \
+                        loan_account_match.loan_deposit_account_id:
                     raise ValidationError('Invalid Loan Account Deposit document')
-                if db_loan_account_match.loan_withdraw_account_id != loan_account_match.loan_withdraw_account_id:
+                if db_loan_account_match.loan_withdraw_account_id != \
+                        loan_account_match.loan_withdraw_account_id:
                     raise ValidationError('Invalid Loan Account Withdraw document')
-                # save match
-                cls._save_loan_account_match(loan_account_match=loan_account_match)
+                # verify amount changed
+                if loan_account_match.amount != db_loan_account_match.amount:
+                    # save match
+                    cls._save_loan_account_match(loan_account_match=loan_account_match)
 
     @classmethod
     def delete_loan_account_match(cls, loan_account_match_id):
@@ -292,9 +363,11 @@ class FinanceService(object):
             # get loan account match amount
             amount = loan_account_match.amount
             # obtain related documents and update matched_amount
-            loan_account_deposit = cls._load_locked_loan_account_deposit(loan_account_match.loan_account_deposit_id)
+            loan_account_deposit = cls._load_locked_model_object(
+                pk=loan_account_match.loan_account_deposit_id, manager=LoanAccountDeposit.objects)
             cls._update_matched(document=loan_account_deposit, amount=amount, direction=-1)
-            loan_account_withdraw = cls._load_locked_loan_account_withdraw(loan_account_match.loan_account_withdraw_id)
+            loan_account_withdraw = cls._load_locked_model_object(
+                pk=loan_account_match.loan_account_withdraw_id, manager=LoanAccountWithdraw.objects)
             cls._update_matched(document=loan_account_withdraw, amount=amount, direction=-1)
             # delete loan account match
             loan_account_match.delete()
@@ -304,125 +377,147 @@ class FinanceService(object):
         pass
 
     @classmethod
-    def save_agency_payment(cls, user, payment):
+    def save_agency_payment(cls, user, agency_payment):
         pass
 
     @classmethod
-    def save_agency_devolution(cls, user, devolution):
+    def save_agency_devolution(cls, user, agency_devolution):
         pass
 
     @classmethod
-    def save_agency_discount(cls, user, discount):
+    def save_agency_discount(cls, user, agency_discount):
         pass
 
     @classmethod
-    def save_provider_invoice(cls, user, invoice):
+    def save_agency_match(cls, agency_match):
+        """
+        Save Agency Match
+        """
+        with transaction.atomic():
+            if not agency_match.pk:
+                # new match
+                # save match
+                cls._save_agency_match(agency_match=agency_match)
+            else:
+                # db match
+                # get db agency match
+                db_agency_match = AgencyMatch.objects.get(pk=agency_match.pk)
+                if not db_agency_match:
+                    raise ValidationError('Invalid Agency Match PK')
+                # validate same documents
+                if db_agency_match.credit_document_id != agency_match.credit_document_id:
+                    raise ValidationError('Invalid Agency Credit document')
+                if db_agency_match.debit_document_id != agency_match.debit_document_id:
+                    raise ValidationError('Invalid Agency Debit document')
+                # verify amount changed
+                if agency_match.amount != db_agency_match.amount:
+                    # save match
+                    cls._save_agency_match(agency_match=agency_match)
+
+    @classmethod
+    def delete_agency_match(cls, agency_match_id):
+        """
+        Delete Agency Match
+        """
+        with transaction.atomic():
+            # get agency match
+            agency_match = AgencyMatch.objects.get(pk=agency_match_id)
+            if not agency_match:
+                raise ValidationError('Invalid Agency Match PK')
+            # get agency match amount
+            amount = agency_match.amount
+            # obtain related documents and update matched_amount
+            credit_document = cls._load_locked_agency_credit_document(
+                pk=agency_match.credit_document_id)
+            cls._update_matched(document=credit_document, amount=amount, direction=-1)
+            debit_document = cls._load_locked_agency_debit_document(
+                pk=agency_match.debit_document_id)
+            cls._update_matched(document=debit_document, amount=amount, direction=-1)
+            # delete agency_match
+            agency_match.delete()
+
+    @classmethod
+    def save_provider_invoice(cls, user, provider_invoice):
         pass
 
 
     @classmethod
-    def save_provider_payment(cls, user, payment):
+    def save_provider_payment(cls, user, provider_payment):
         pass
 
     @classmethod
-    def save_provider_discount(cls, user, discount):
+    def save_provider_discount(cls, user, provider_discount):
         pass
 
     @classmethod
-    def save_provider_devolution(cls, user, devolution):
+    def save_provider_devolution(cls, user, provider_devolution):
         pass
 
     @classmethod
-    def _load_locked_account(cls, account_id):
-        account = AccountingService.find_and_lock_account_by_id(account_id=account_id)
-        if not account:
-            raise ValidationError('Invalid Document Account PK')
-        return account
+    def save_provider_match(cls, provider_match):
+        """
+        Save Provider Match
+        """
+        with transaction.atomic():
+            if not provider_match.pk:
+                # new match
+                # save match
+                cls._save_provider_match(provider_match=provider_match)
+            else:
+                # db match
+                # get db provider match
+                db_provider_match = ProviderMatch.objects.get(pk=provider_match.pk)
+                if not db_provider_match:
+                    raise ValidationError('Invalid Provider Match PK')
+                # validate same documents
+                if db_provider_match.credit_document_id != provider_match.credit_document_id:
+                    raise ValidationError('Invalid Provider Credit document')
+                if db_provider_match.debit_document_id != provider_match.debit_document_id:
+                    raise ValidationError('Invalid Provider Debit document')
+                # verify amount changed
+                if provider_match.amount != db_provider_match.amount:
+                    # save match
+                    cls._save_provider_match(provider_match=provider_match)
 
     @classmethod
-    def _load_locked_deposit(cls, deposit):
-        db_deposit = None
-        # verify if not new
-        if deposit and deposit.pk:
-            # load deposit from db
-            db_deposit = Deposit.objects.select_for_update().get(pk=deposit.pk)
-            if not db_deposit:
-                raise ValidationError('Invalid Deposit PK')
-        return db_deposit
+    def delete_provider_match(cls, provider_match_id):
+        """
+        Delete Provider Match
+        """
+        with transaction.atomic():
+            # get provider match
+            provider_match = ProviderMatch.objects.get(pk=provider_match_id)
+            if not provider_match:
+                raise ValidationError('Invalid Provider Match PK')
+            # get provider match amount
+            amount = provider_match.amount
+            # obtain related documents and update matched_amount
+            credit_document = cls._load_locked_provider_credit_document(
+                pk=provider_match.credit_document_id)
+            cls._update_matched(document=credit_document, amount=amount, direction=-1)
+            debit_document = cls._load_locked_provider_debit_document(
+                pk=provider_match.debit_document_id)
+            cls._update_matched(document=debit_document, amount=amount, direction=-1)
+            # delete provider_match
+            provider_match.delete()
 
     @classmethod
-    def _load_locked_withdraw(cls, withdraw):
-        db_withdraw = None
+    def _load_locked_model_object(cls, pk, manager, allow_empty_pk=True):
+        db_model_object = None
         # verify if not new
-        if withdraw and withdraw.pk:
-            # load withdraw from db
-            db_withdraw = Withdraw.objects.select_for_update().get(pk=withdraw.pk)
-            if not db_withdraw:
-                raise ValidationError('Invalid Withdraw PK')
-        return db_withdraw
-
-    @classmethod
-    def _load_locked_currency_exchange(cls, currency_exchange):
-        db_currency_exchange = None
-        # verify if not new
-        if currency_exchange and currency_exchange.pk:
-            # load currency_exchange from db
-            db_currency_exchange = CurrencyExchange.objects.select_for_update().get(
-                pk=currency_exchange.pk)
-            if not db_currency_exchange:
-                raise ValidationError('Invalid Currency Exchange PK')
-        return db_currency_exchange
-
-    @classmethod
-    def _load_locked_loan_deposit(cls, loan_deposit):
-        db_loan_deposit = None
-        # verify if not new
-        if loan_deposit and loan_deposit.pk:
-            # load loan deposit from db
-            db_loan_deposit = LoanDeposit.objects.select_for_update().get(pk=loan_deposit.pk)
-            if not db_loan_deposit:
-                raise ValidationError('Invalid Loan Deposit PK')
-        return db_loan_deposit
-
-    @classmethod
-    def _load_locked_loan_withdraw(cls, loan_withdraw):
-        db_loan_withdraw = None
-        # verify if not new
-        if loan_withdraw and loan_withdraw.pk:
-            # load loan withdraw from db
-            db_loan_withdraw = LoanWithdraw.objects.select_for_update().get(pk=loan_withdraw.pk)
-            if not db_loan_withdraw:
-                raise ValidationError('Invalid Loan Withdraw PK')
-        return db_loan_withdraw
-
-    @classmethod
-    def _load_locked_loan_account_deposit(cls, loan_account_deposit):
-        db_loan_account_deposit = None
-        # verify if not new
-        if loan_account_deposit and loan_account_deposit.pk:
-            # load loan account deposit from db
-            db_loan_account_deposit = LoanAccountDeposit.objects.select_for_update().get(
-                pk=loan_account_deposit.pk)
-            if not db_loan_account_deposit:
-                raise ValidationError('Invalid Loan Account Deposit PK')
-        return db_loan_account_deposit
-
-    @classmethod
-    def _load_locked_loan_account_withdraw(cls, loan_account_withdraw):
-        db_loan_account_withdraw = None
-        # verify if not new
-        if loan_account_withdraw and loan_account_withdraw.pk:
-            # load loan account withdraw from db
-            db_loan_account_withdraw = LoanAccountWithdraw.objects.select_for_update().get(
-                pk=loan_account_withdraw.pk)
-            if not db_loan_account_withdraw:
-                raise ValidationError('Invalid Loan Account Withdraw PK')
-        return db_loan_account_withdraw
+        if pk:
+            # load agency_invoice from db
+            db_model_object = manager.select_for_update().get(pk=pk)
+            if not db_model_object:
+                raise ValidationError('Invalid Model Object PK')
+        elif not allow_empty_pk:
+            raise ValidationError('Empty Model Object PK')
+        return db_model_object
 
     @classmethod
     def _document_save(
-        cls, user, document, db_document, account, concept, detail, \
-        movement_type, other_account=None, other_amount=None):
+            cls, user, document, db_document, account, concept, detail,
+            movement_type, other_account=None, other_amount=None):
         document.currency = account.currency
         now = datetime.now()
         # manage operations
@@ -438,6 +533,7 @@ class FinanceService(object):
             other_account=other_account,
             other_amount=other_amount)
         # save documment
+        document.concept = concept
         document.name = detail
         document.save()
         # manage accounting history
@@ -548,10 +644,11 @@ class FinanceService(object):
             if document.status != STATUS_READY:
                 # verifies matches
                 if cls._loan_has_matches(document=document):
-                    raise ValidationError('Can not change status from Ready if Loan document has matches')
+                    raise ValidationError(
+                        'Can not change status from Ready if Loan document has matches')
             # process amount change
             if db_document.amount > document.amount:
-                # verifies amonunt matched
+                # verifies amount matched
                 if document.amount_matched > document.amount:
                     raise ValidationError('Can not decrease amount below matched amount')
 
@@ -566,11 +663,13 @@ class FinanceService(object):
         if amount <= 0:
             raise ValidationError('Amount must be above 0')
         # obtain related documents and update matched_amount
-        loan_deposit = cls._load_locked_loan_deposit(loan_match.loan_deposit_id)
+        loan_deposit = cls._load_locked_model_object(
+            pk=loan_match.loan_deposit_id, manager=LoanDeposit.objects)
         # verify status
         if loan_deposit.status != STATUS_READY:
-            raise ValidationError('Loan Deposit Status mus be Ready')
-        loan_withdraw = cls._load_locked_loan_withdraw(loan_match.loan_withdraw_id)
+            raise ValidationError('Loan Deposit Status must be Ready')
+        loan_withdraw = cls._load_locked_model_object(
+            pk=loan_match.loan_withdraw_id, manager=LoanWithdraw.objects)
         # verify status
         if loan_withdraw.status != STATUS_READY:
             raise ValidationError('Loan Withdraw Status must be Ready')
@@ -589,11 +688,13 @@ class FinanceService(object):
         if amount <= 0:
             raise ValidationError('Amount must be above 0')
         # obtain related documents and update matched_amount
-        loan_account_deposit = cls._load_locked_loan_account_deposit(loan_account_match.loan_account_deposit_id)
+        loan_account_deposit = cls._load_locked_model_object(
+            pk=loan_account_match.loan_account_deposit_id, manager=LoanAccountDeposit.objects)
         # verify status
         if loan_account_deposit.status != STATUS_READY:
-            raise ValidationError('Loan Account Deposit Status mus be Ready')
-        loan_account_withdraw = cls._load_locked_loan_account_withdraw(loan_account_match.loan_account_withdraw_id)
+            raise ValidationError('Loan Account Deposit Status must be Ready')
+        loan_account_withdraw = cls._load_locked_model_object(
+            pk=loan_account_match.loan_account_withdraw_id, manager=LoanAccountWithdraw.objects)
         # verify status
         if loan_account_withdraw.status != STATUS_READY:
             raise ValidationError('Loan Account Withdraw Status must be Ready')
@@ -601,10 +702,60 @@ class FinanceService(object):
         if loan_account_deposit.account_id != loan_account_withdraw.account_id \
             or loan_account_deposit.withdraw_account_id != loan_account_withdraw.deposit_account_id:
             raise ValidationError('Documents Accounts must be the same')
-        cls._update_matched(document=loan_account_deposit, amount=loan_account_match.amount, direction=1)
-        cls._update_matched(document=loan_account_withdraw, amount=loan_account_match.amount, direction=1)
+        cls._update_matched(
+            document=loan_account_deposit, amount=loan_account_match.amount, direction=1)
+        cls._update_matched(
+            document=loan_account_withdraw, amount=loan_account_match.amount, direction=1)
         # save loan account match
         loan_account_match.save()
+
+    @classmethod
+    def _save_agency_match(cls, agency_match):
+        # get agency match amount
+        amount = agency_match.amount
+        if amount <= 0:
+            raise ValidationError('Amount must be above 0')
+        # obtain related documents and update matched_amount
+        credit_document = cls._load_locked_agency_credit_document(agency_match.credit_document_id)
+        # verify status
+        if credit_document.status != STATUS_READY:
+            raise ValidationError('Credit Document Status must be Ready')
+        debit_document = cls._load_locked_agency_debit_document(agency_match.debit_document_id)
+        # verify status
+        if debit_document.status != STATUS_READY:
+            raise ValidationError('Debit Document Status must be Ready')
+        # verify agencies
+        if credit_document.agency_id != debit_document.agency_id:
+            raise ValidationError('Documents Agencies must be the same')
+        cls._update_matched(document=credit_document, amount=agency_match.amount, direction=1)
+        cls._update_matched(document=debit_document, amount=agency_match.amount, direction=1)
+        # save agency_match
+        agency_match.save()
+
+    @classmethod
+    def _save_provider_match(cls, provider_match):
+        # get provider match amount
+        amount = provider_match.amount
+        if amount <= 0:
+            raise ValidationError('Amount must be above 0')
+        # obtain related documents and update matched_amount
+        credit_document = cls._load_locked_provider_credit_document(
+            pk=provider_match.credit_document_id)
+        # verify status
+        if credit_document.status != STATUS_READY:
+            raise ValidationError('Credit Document Status must be Ready')
+        debit_document = cls._load_locked_provider_debit_document(
+            pk=provider_match.debit_document_id)
+        # verify status
+        if debit_document.status != STATUS_READY:
+            raise ValidationError('Debit Document Status must be Ready')
+        # verify providers
+        if credit_document.provider_id != debit_document.provider_id:
+            raise ValidationError('Documents Providers must be the same')
+        cls._update_matched(document=credit_document, amount=provider_match.amount, direction=1)
+        cls._update_matched(document=debit_document, amount=provider_match.amount, direction=1)
+        # save provider_match
+        provider_match.save()
 
     @classmethod
     def _update_matched(cls, document, amount, direction):
@@ -619,3 +770,47 @@ class FinanceService(object):
             if document.matched_amount < 0:
                 raise ValidationError('Invalid Match Amount')
             document.save()
+
+    @classmethod
+    def _load_locked_agency_credit_document(cls, pk):
+        try:
+            payment = cls._load_locked_model_object(
+                pk=pk, manager=AgencyPayment.objects)
+            return payment
+        except:
+            discount = cls._load_locked_model_object(
+                pk=pk, manager=AgencyDiscount.objects)
+            return discount
+
+    @classmethod
+    def _load_locked_agency_debit_document(cls, pk):
+        try:
+            invoice = cls._load_locked_model_object(
+                pk=pk, manager=AgencyInvoice.objects)
+            return invoice
+        except:
+            devolution = cls._load_locked_model_object(
+                pk=pk, manager=AgencyDevolution.objects)
+            return devolution
+
+    @classmethod
+    def _load_locked_provider_credit_document(cls, pk):
+        try:
+            payment = cls._load_locked_model_object(
+                pk=pk, manager=ProviderPayment.objects)
+            return payment
+        except:
+            discount = cls._load_locked_model_object(
+                pk=pk, manager=ProviderDiscount.objects)
+            return discount
+
+    @classmethod
+    def _load_locked_provider_debit_document(cls, pk):
+        try:
+            invoice = cls._load_locked_model_object(
+                pk=pk, manager=ProviderInvoice.objects)
+            return invoice
+        except:
+            devolution = cls._load_locked_model_object(
+                pk=pk, manager=ProviderDevolution.objects)
+            return devolution
