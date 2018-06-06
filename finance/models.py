@@ -1,7 +1,8 @@
 from django.db import models
 from django.conf import settings
 
-from accounting.constants import CURRENCIES, CURRENCY_CUC, CURRENCY_USD, CONCEPTS
+from accounting.constants import (
+    CURRENCIES, CURRENCY_CUC, CURRENCY_USD, CONCEPTS, CONCEPT_EMPTY)
 from accounting.models import Account, Operation
 
 from finance.constants import STATUSES, STATUS_DRAFT
@@ -11,8 +12,8 @@ class FinantialDocument(models.Model):
     class Meta:
         verbose_name = 'Finantial Document'
         verbose_name_plural = 'Finantials Documents'
-    concept = models.CharField(max_length=50, choices=CONCEPTS)
-    name = models.CharField(max_length=200)
+    concept = models.CharField(max_length=50, choices=CONCEPTS, default=CONCEPT_EMPTY)
+    name = models.CharField(max_length=200, default='Finantial Document')
     date = models.DateTimeField()
     currency = models.CharField(
         max_length=5, choices=CURRENCIES)
