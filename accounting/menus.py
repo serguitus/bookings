@@ -45,8 +45,8 @@ class AccountAdmin(admin.ModelAdmin):
 
 # ### Registering in custom adminSite reservas_admin ###
 
-class ExtendedAccountAdmin(ExtendedModelAdmin):
-    site_actions = ['deposit']
+#class ExtendedAccountAdmin(ExtendedModelAdmin):
+#    site_actions = ['deposit']
 
 
-reservas_admin.register(Account, ExtendedAccountAdmin)
+#reservas_admin.register(Account, ExtendedAccountAdmin)

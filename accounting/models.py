@@ -3,7 +3,7 @@ from django.conf import settings
 from django.db import connection
 
 from accounting.constants import (
-    CURRENCIES, CURRENCY_CUC, MOVEMENT_TYPES, MOVEMENT_TYPE_DEPOSIT, CONCEPTS)
+    CURRENCIES, CURRENCY_CUC, MOVEMENT_TYPES, MOVEMENT_TYPE_INPUT, CONCEPTS)
 
 
 class Account(models.Model):
@@ -37,7 +37,7 @@ class Account(models.Model):
                             account_id = a.id\
                     )\
                 WHERE \
-                    id = %s", [MOVEMENT_TYPE_DEPOSIT, self.pk])
+                    id = %s", [MOVEMENT_TYPE_INPUT, self.pk])
         finally:
             cursor.close()
 

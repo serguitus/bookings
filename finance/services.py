@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from accounting.constants import (
-    MOVEMENT_TYPE_DEPOSIT, MOVEMENT_TYPE_WITHDRAW,
+    MOVEMENT_TYPE_INPUT, MOVEMENT_TYPE_OUTPUT,
     CONCEPT_DEPOSIT, CONCEPT_WITHDRAW, CONCEPT_CURRENCY_EXCHANGE, CONCEPT_TRANSFER,
     CONCEPT_LOAN_DEPOSIT, CONCEPT_LOAN_WITHDRAW,
     CONCEPT_LOAN_ACCOUNT_DEPOSIT, CONCEPT_LOAN_ACCOUNT_WITHDRAW,
@@ -38,7 +38,7 @@ class FinanceService(object):
         """
         Saves Deposit
         """
-        with transaction.atomic():
+        with transaction.atomic(savepoint=False):
             # load and lock account
             account = cls._load_locked_model_object(
                 pk=deposit.account_id, manager=Account.objects, allow_empty_pk=False)
@@ -49,21 +49,21 @@ class FinanceService(object):
             db_deposit = cls._load_locked_model_object(
                 pk=deposit.pk, manager=Deposit.objects)
             # manage saving
-            cls._document_save(
+            return cls._document_save(
                 user=user,
                 document=deposit,
                 db_document=db_deposit,
                 account=account,
                 concept=concept,
                 detail=detail,
-                movement_type=MOVEMENT_TYPE_DEPOSIT)
+                movement_type=MOVEMENT_TYPE_INPUT)
 
     @classmethod
     def save_withdraw(cls, user, withdraw):
         """
         Saves Withdraw
         """
-        with transaction.atomic():
+        with transaction.atomic(savepoint=False):
             # load and lock account
             account = cls._load_locked_model_object(
                 pk=withdraw.account_id, manager=Account.objects, allow_empty_pk=False)
@@ -74,21 +74,21 @@ class FinanceService(object):
             db_withdraw = cls._load_locked_model_object(
                 pk=withdraw.pk, manager=Withdraw.objects)
             # manage saving
-            cls._document_save(
+            return cls._document_save(
                 user=user,
                 document=withdraw,
                 db_document=db_withdraw,
                 account=account,
                 concept=concept,
                 detail=detail,
-                movement_type=MOVEMENT_TYPE_WITHDRAW)
+                movement_type=MOVEMENT_TYPE_OUTPUT)
 
     @classmethod
     def save_currency_exchange(cls, user, currency_exchange):
         """
         Saves Currency Exchange
         """
-        with transaction.atomic():
+        with transaction.atomic(savepoint=False):
             # load and lock account
             account = cls._load_locked_model_object(
                 pk=currency_exchange.account_id, manager=Account.objects, allow_empty_pk=False)
@@ -107,14 +107,14 @@ class FinanceService(object):
             db_exchange = cls._load_locked_model_object(
                 pk=currency_exchange.pk, manager=CurrencyExchange.objects)
             # manage saving
-            cls._document_save(
+            return cls._document_save(
                 user=user,
                 document=currency_exchange,
                 db_document=db_exchange,
                 account=account,
                 concept=concept,
                 detail=detail,
-                movement_type=MOVEMENT_TYPE_WITHDRAW,
+                movement_type=MOVEMENT_TYPE_OUTPUT,
                 other_account=exchange_account,
                 other_amount=currency_exchange.exchange_amount)
 
@@ -123,7 +123,7 @@ class FinanceService(object):
         """
         Saves Transfer
         """
-        with transaction.atomic():
+        with transaction.atomic(savepoint=False):
             # load and lock accounts
             account = cls._load_locked_model_object(
                 pk=transfer.account_id, manager=Account.objects, allow_empty_pk=False)
@@ -140,14 +140,14 @@ class FinanceService(object):
             db_transfer = cls._load_locked_model_object(
                 pk=transfer.pk, manager=Transfer.objects)
             # manage saving
-            cls._document_save(
+            return cls._document_save(
                 user=user,
                 document=transfer,
                 db_document=db_transfer,
                 account=account,
                 concept=concept,
                 detail=detail,
-                movement_type=MOVEMENT_TYPE_DEPOSIT,
+                movement_type=MOVEMENT_TYPE_INPUT,
                 other_account=transfer_account)
 
     @classmethod
@@ -155,7 +155,7 @@ class FinanceService(object):
         """
         Saves Loan Deposit
         """
-        with transaction.atomic():
+        with transaction.atomic(savepoint=False):
             # load and lock account
             account = cls._load_locked_model_object(
                 pk=loan_deposit.account_id, manager=Account.objects, allow_empty_pk=False)
@@ -168,21 +168,21 @@ class FinanceService(object):
             # process matches on status or amount change
             cls._process_loan_matches(document=loan_deposit, db_document=db_loan_deposit)
             # manage saving
-            cls._document_save(
+            return cls._document_save(
                 user=user,
                 document=loan_deposit,
                 db_document=db_loan_deposit,
                 account=account,
                 concept=concept,
                 detail=detail,
-                movement_type=MOVEMENT_TYPE_DEPOSIT)
+                movement_type=MOVEMENT_TYPE_INPUT)
 
     @classmethod
     def save_loan_withdraw(cls, user, loan_withdraw):
         """
         Saves Loan Withdraw
         """
-        with transaction.atomic():
+        with transaction.atomic(savepoint=False):
             # load and lock account
             account = cls._load_locked_model_object(
                 pk=loan_withdraw.account_id, manager=Account.objects, allow_empty_pk=False)
@@ -195,21 +195,21 @@ class FinanceService(object):
             # process matches on status or amount change
             cls._process_loan_matches(document=loan_withdraw, db_document=db_loan_withdraw)
             # manage saving
-            cls._document_save(
+            return cls._document_save(
                 user=user,
                 document=loan_withdraw,
                 db_document=db_loan_withdraw,
                 account=account,
                 concept=concept,
                 detail=detail,
-                movement_type=MOVEMENT_TYPE_WITHDRAW)
+                movement_type=MOVEMENT_TYPE_OUTPUT)
 
     @classmethod
     def save_loan_match(cls, loan_match):
         """
         Save Loan Match
         """
-        with transaction.atomic():
+        with transaction.atomic(savepoint=False):
             if not loan_match.pk:
                 # new match
                 # save match
@@ -235,7 +235,7 @@ class FinanceService(object):
         """
         Delete Loan Match
         """
-        with transaction.atomic():
+        with transaction.atomic(savepoint=False):
             # get loan match
             loan_match = LoanMatch.objects.get(pk=loan_match_id)
             if not loan_match:
@@ -257,7 +257,7 @@ class FinanceService(object):
         """
         Saves Loan Account Deposit
         """
-        with transaction.atomic():
+        with transaction.atomic(savepoint=False):
             # load and lock accounts
             account = cls._load_locked_model_object(
                 pk=loan_account_deposit.account_id, manager=Account.objects, allow_empty_pk=False)
@@ -277,14 +277,14 @@ class FinanceService(object):
             cls._process_loan_matches(
                 document=loan_account_deposit, db_document=db_loan_account_deposit)
             # manage saving
-            cls._document_save(
+            return cls._document_save(
                 user=user,
                 document=loan_account_deposit,
                 db_document=db_loan_account_deposit,
                 account=account,
                 concept=concept,
                 detail=detail,
-                movement_type=MOVEMENT_TYPE_DEPOSIT,
+                movement_type=MOVEMENT_TYPE_INPUT,
                 other_account=withdraw_account)
 
     @classmethod
@@ -292,7 +292,7 @@ class FinanceService(object):
         """
         Saves Loan Account Withdraw
         """
-        with transaction.atomic():
+        with transaction.atomic(savepoint=False):
             # load and lock accounts
             account = cls._load_locked_model_object(
                 pk=loan_account_withdraw.account_id, manager=Account.objects, allow_empty_pk=False)
@@ -312,14 +312,14 @@ class FinanceService(object):
             cls._process_loan_matches(
                 document=loan_account_withdraw, db_document=db_loan_account_withdraw)
             # manage saving
-            cls._document_save(
+            return cls._document_save(
                 user=user,
                 document=loan_account_withdraw,
                 db_document=db_loan_account_withdraw,
                 account=account,
                 concept=concept,
                 detail=detail,
-                movement_type=MOVEMENT_TYPE_WITHDRAW,
+                movement_type=MOVEMENT_TYPE_OUTPUT,
                 other_account=deposit_account)
 
     @classmethod
@@ -327,7 +327,7 @@ class FinanceService(object):
         """
         Save Loan Account Match
         """
-        with transaction.atomic():
+        with transaction.atomic(savepoint=False):
             if not loan_account_match.pk:
                 # new match
                 # save match
@@ -355,7 +355,7 @@ class FinanceService(object):
         """
         Delete Loan Account Match
         """
-        with transaction.atomic():
+        with transaction.atomic(savepoint=False):
             # get loan account match
             loan_account_match = LoanAccountMatch.objects.get(pk=loan_account_match_id)
             if not loan_account_match:
@@ -393,7 +393,7 @@ class FinanceService(object):
         """
         Save Agency Match
         """
-        with transaction.atomic():
+        with transaction.atomic(savepoint=False):
             if not agency_match.pk:
                 # new match
                 # save match
@@ -419,7 +419,7 @@ class FinanceService(object):
         """
         Delete Agency Match
         """
-        with transaction.atomic():
+        with transaction.atomic(savepoint=False):
             # get agency match
             agency_match = AgencyMatch.objects.get(pk=agency_match_id)
             if not agency_match:
@@ -458,7 +458,7 @@ class FinanceService(object):
         """
         Save Provider Match
         """
-        with transaction.atomic():
+        with transaction.atomic(savepoint=False):
             if not provider_match.pk:
                 # new match
                 # save match
@@ -484,7 +484,7 @@ class FinanceService(object):
         """
         Delete Provider Match
         """
-        with transaction.atomic():
+        with transaction.atomic(savepoint=False):
             # get provider match
             provider_match = ProviderMatch.objects.get(pk=provider_match_id)
             if not provider_match:
@@ -548,23 +548,30 @@ class FinanceService(object):
             document=document,
             db_document=db_document,
             current_datetime=now)
+        return document
 
     @classmethod
     def _manage_operations(
-            cls, user, document, db_document, account, concept, detail, movement_type, \
+            cls, user, document, db_document, account, concept, detail, movement_type,
             current_datetime, other_account=None, other_amount=None):
         result = []
         revertion = None
         current = None
         # verify previous operation revertion
-        if cls._needs_revertion(document=document, db_document=db_document):
-            # revert previous operation
+        reverted = False
+        needs_revertion = cls._needs_revertion(document=document, db_document=db_document)
+        # outputs revertion before current
+        if needs_revertion:
+            # revert outputs of previous operation
             revertion = cls._revert_operation(
                 user=user,
                 document=db_document,
-                current_datetime=current_datetime)
+                current_datetime=current_datetime,
+                movement_type=MOVEMENT_TYPE_OUTPUT,
+                account=account,
+                other_account=other_account)
             if revertion:
-                document.current_operation_id = None
+                reverted = True
                 result.append(revertion)
         # manage current_operation
         current = cls._current_operation(
@@ -578,8 +585,24 @@ class FinanceService(object):
             other_account=other_account,
             other_amount=other_amount)
         if current:
-            document.current_operation_id = current.pk
             result.append(current)
+        # inputs revertion after current
+        if needs_revertion:
+            # revert inputs of previous operation
+            revertion = cls._revert_operation(
+                user=user,
+                document=db_document,
+                current_datetime=current_datetime,
+                movement_type=MOVEMENT_TYPE_INPUT,
+                account=account,
+                other_account=other_account)
+            if revertion:
+                reverted = True
+                result.append(revertion)
+        if current:
+            document.current_operation_id = current.pk
+        elif reverted:
+            document.current_operation_id = None
         return result
 
     @classmethod
@@ -590,13 +613,17 @@ class FinanceService(object):
                 or document.amount != db_document.amount)
 
     @classmethod
-    def _revert_operation(cls, user, document, current_datetime):
+    def _revert_operation(
+            cls, user, document, current_datetime, movement_type, account=None, other_account=None):
         operation = None
         if document and document.current_operation:
             operation = AccountingService.revert_operation(
                 user=user,
                 operation_id=document.current_operation_id,
-                current_datetime=current_datetime)
+                current_datetime=current_datetime,
+                movement_type=movement_type,
+                account=account,
+                other_account=other_account)
         return operation
 
     @classmethod

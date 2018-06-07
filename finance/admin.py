@@ -1,8 +1,13 @@
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.contrib.admin.options import csrf_protect_m
+from django.core.exceptions import ValidationError
+from django.db import router, transaction
+
 from reservas.admin import reservas_admin, ExtendedModelAdmin
 
-from finance.models import (Agency, Provider, FinantialDocument,
-                            Deposit)
+from finance.models import (
+    Agency, Provider, FinantialDocument,
+    Deposit, Withdraw, CurrencyExchange, Transfer)
 from finance.services import FinanceService
 
 
@@ -30,13 +35,35 @@ admin.site.register(Deposit)
 class ExtendedDepositAdmin(ExtendedModelAdmin):
     list_display = ('account', 'amount', 'date', 'status')
 
-    def save_form(self, request, form, change):
+    def save_model(self, request, obj, form, change):
         # overrides base class method
-        obj = super(ExtendedDepositAdmin, self).save_form(request, form, change)
-        FinanceService.save_deposit(request.user, obj)
-        return obj
+        return FinanceService.save_deposit(request.user, obj)
+
+class ExtendedWithdrawAdmin(ExtendedModelAdmin):
+    list_display = ('account', 'amount', 'date', 'status')
+
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        return FinanceService.save_withdraw(request.user, obj)
+
+class ExtendedCurrencyExchangeAdmin(ExtendedModelAdmin):
+    list_display = ('account', 'amount', 'date', 'status')
+
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        return FinanceService.save_currency_exchange(request.user, obj)
+
+class ExtendedTransferAdmin(ExtendedModelAdmin):
+    list_display = ('account', 'amount', 'date', 'status')
+
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        return FinanceService.save_transfer(request.user, obj)
 
 reservas_admin.register(FinantialDocument)
 reservas_admin.register(Provider, ProviderAdmin)
 reservas_admin.register(Agency, AgencyAdmin)
 reservas_admin.register(Deposit, ExtendedDepositAdmin)
+reservas_admin.register(Withdraw, ExtendedWithdrawAdmin)
+reservas_admin.register(CurrencyExchange, ExtendedCurrencyExchangeAdmin)
+reservas_admin.register(Transfer, ExtendedTransferAdmin)

@@ -2,6 +2,8 @@ from django.contrib import admin
 
 from accounting.models import Account, OperationMovement
 
+from reservas.admin import reservas_admin, ExtendedModelAdmin
+
 
 class AccountMovementInline(admin.TabularInline):
     model = OperationMovement
@@ -38,3 +40,17 @@ class AccountAdmin(admin.ModelAdmin):
             return ('balance',)
 
         return ('currency', 'balance',)
+
+class ExtendedAccountAdmin(ExtendedModelAdmin):
+    actions_on_top = True
+    save_on_top = True
+    list_editable = ('enabled',)
+    list_display = ('name', 'currency', 'enabled', 'balance')
+    list_filter = ('name', 'currency', 'enabled', 'balance')
+    search_fields = ('name',)
+    ordering = ['enabled', 'currency', 'name']
+    inlines = [AccountMovementInline]
+    readonly_fields = ('balance',)
+    change_readonly_fields = ('currency',)
+
+reservas_admin.register(Account, ExtendedAccountAdmin)
