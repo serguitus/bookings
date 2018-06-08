@@ -34,6 +34,7 @@ reservas_admin = ReservasAdmin(name='reservas')
 
 
 class ExtendedModelAdmin(admin.ModelAdmin):
+    save_on_top = True
     site_actions = []
     add_readonly_fields = ()
     change_readonly_fields = ()

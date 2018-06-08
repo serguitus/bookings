@@ -49,7 +49,7 @@ class ExtendedAccountAdmin(ExtendedModelAdmin):
     list_filter = ('name', 'currency', 'enabled', 'balance')
     search_fields = ('name',)
     ordering = ['enabled', 'currency', 'name']
-    inlines = [AccountMovementInline]
+    # inlines = [AccountMovementInline]
     readonly_fields = ('balance',)
     change_readonly_fields = ('currency',)
 
