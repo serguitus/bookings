@@ -1,6 +1,6 @@
-from django.db import models
 from django.conf import settings
-from django.db import connection
+from django.db import connection, models
+from django.utils import timezone
 
 from accounting.constants import (
     CURRENCIES, CURRENCY_CUC, MOVEMENT_TYPES, MOVEMENT_TYPE_INPUT, CONCEPTS)
@@ -51,7 +51,7 @@ class Operation(models.Model):
         on_delete=models.PROTECT,
         help_text='User who did the operation.',
     )
-    date = models.DateTimeField()
+    datetime = models.DateTimeField(default=timezone.now())
     concept = models.CharField(max_length=50, choices=CONCEPTS)
     detail = models.CharField(max_length=200)
 

@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 
 from accounting.constants import (
     CURRENCIES, CURRENCY_CUC, CURRENCY_USD, CONCEPTS, CONCEPT_EMPTY)
@@ -14,7 +15,7 @@ class FinantialDocument(models.Model):
         verbose_name_plural = 'Finantials Documents'
     concept = models.CharField(max_length=50, choices=CONCEPTS, default=CONCEPT_EMPTY)
     name = models.CharField(max_length=200, default='Finantial Document')
-    date = models.DateTimeField()
+    date = models.DateField(default=timezone.now())
     currency = models.CharField(
         max_length=5, choices=CURRENCIES)
     amount = models.DecimalField(max_digits=10, decimal_places=2)

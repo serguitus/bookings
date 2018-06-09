@@ -2,10 +2,9 @@
 Finance Service
 """
 
-from datetime import date, datetime
-
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.utils import timezone
 
 from accounting.constants import (
     MOVEMENT_TYPE_INPUT, MOVEMENT_TYPE_OUTPUT,
@@ -42,10 +41,9 @@ class FinanceService(object):
             # load and lock account
             account = cls._load_locked_model_object(
                 pk=deposit.account_id, manager=Account.objects, allow_empty_pk=False)
-            today = date.today()
             concept = CONCEPT_DEPOSIT
             detail = '%s - Deposit on %s of %s %s ' % (
-                today, account, deposit.amount, account.get_currency_display())
+                deposit.date, account, deposit.amount, account.get_currency_display())
             db_deposit = cls._load_locked_model_object(
                 pk=deposit.pk, manager=Deposit.objects)
             # manage saving
@@ -67,10 +65,9 @@ class FinanceService(object):
             # load and lock account
             account = cls._load_locked_model_object(
                 pk=withdraw.account_id, manager=Account.objects, allow_empty_pk=False)
-            today = date.today()
             concept = CONCEPT_WITHDRAW
             detail = '%s - Withdraw from %s of %s %s ' % (
-                today, account, withdraw.amount, account.get_currency_display())
+                withdraw.date, account, withdraw.amount, account.get_currency_display())
             db_withdraw = cls._load_locked_model_object(
                 pk=withdraw.pk, manager=Withdraw.objects)
             # manage saving
@@ -92,20 +89,25 @@ class FinanceService(object):
             # load and lock account
             account = cls._load_locked_model_object(
                 pk=currency_exchange.account_id, manager=Account.objects, allow_empty_pk=False)
-            exchange_account = cls._load_locked_model_object(
+            other_account = cls._load_locked_model_object(
                 pk=currency_exchange.exchange_account_id, manager=Account.objects,
                 allow_empty_pk=False)
             # verify accounts
-            if account.currency == exchange_account.currency:
+            if account.currency == other_account.currency:
                 raise ValidationError('Accounts must not be on same currency')
-            today = date.today()
             concept = CONCEPT_CURRENCY_EXCHANGE
             detail = '%s - Exchange to %s for %s %s from %s of %s %s' % (
-                today, account, currency_exchange.amount, account.get_currency_display(),
-                exchange_account, currency_exchange.exchange_amount,
-                exchange_account.get_currency_display())
+                currency_exchange.date, account, currency_exchange.amount, account.get_currency_display(),
+                other_account, currency_exchange.exchange_amount,
+                other_account.get_currency_display())
             db_exchange = cls._load_locked_model_object(
                 pk=currency_exchange.pk, manager=CurrencyExchange.objects)
+            # define db others
+            db_other_account_id = None
+            db_other_amount = None
+            if db_exchange:
+                db_other_account_id = db_exchange.exchange_account_id
+                db_other_amount = db_exchange.exchange_amount
             # manage saving
             return cls._document_save(
                 user=user,
@@ -115,8 +117,10 @@ class FinanceService(object):
                 concept=concept,
                 detail=detail,
                 movement_type=MOVEMENT_TYPE_OUTPUT,
-                other_account=exchange_account,
-                other_amount=currency_exchange.exchange_amount)
+                other_account=other_account,
+                db_other_account_id=db_other_account_id,
+                other_amount=currency_exchange.exchange_amount,
+                db_other_amount=db_other_amount)
 
     @classmethod
     def save_transfer(cls, user, transfer):
@@ -127,18 +131,21 @@ class FinanceService(object):
             # load and lock accounts
             account = cls._load_locked_model_object(
                 pk=transfer.account_id, manager=Account.objects, allow_empty_pk=False)
-            transfer_account = cls._load_locked_model_object(
+            other_account = cls._load_locked_model_object(
                 pk=transfer.transfer_account_id, manager=Account.objects,
                 allow_empty_pk=False)
             # verify accounts
-            if account.currency != transfer_account.currency:
+            if account.currency != other_account.currency:
                 raise ValidationError('Accounts must be on same currency')
-            today = date.today()
             concept = CONCEPT_TRANSFER
             detail = '%s - Transfer to %s of %s %s from %s' % (
-                today, account, transfer.amount, account.currency, transfer_account)
+                transfer.date, account, transfer.amount, account.currency, other_account)
             db_transfer = cls._load_locked_model_object(
                 pk=transfer.pk, manager=Transfer.objects)
+            # define db others
+            db_other_account_id = None
+            if db_transfer:
+                db_other_account_id = db_transfer.transfer_account_id
             # manage saving
             return cls._document_save(
                 user=user,
@@ -148,7 +155,8 @@ class FinanceService(object):
                 concept=concept,
                 detail=detail,
                 movement_type=MOVEMENT_TYPE_INPUT,
-                other_account=transfer_account)
+                other_account=other_account,
+                db_other_account_id=db_other_account_id)
 
     @classmethod
     def save_loan_deposit(cls, user, loan_deposit):
@@ -159,10 +167,9 @@ class FinanceService(object):
             # load and lock account
             account = cls._load_locked_model_object(
                 pk=loan_deposit.account_id, manager=Account.objects, allow_empty_pk=False)
-            today = date.today()
             concept = CONCEPT_LOAN_DEPOSIT
             detail = '%s - Loan Deposit to %s of %s %s ' % (
-                today, account, loan_deposit.amount, account.get_currency_display())
+                loan_deposit.date, account, loan_deposit.amount, account.get_currency_display())
             db_loan_deposit = cls._load_locked_model_object(
                 pk=loan_deposit.pk, manager=LoanDeposit.objects)
             # process matches on status or amount change
@@ -186,10 +193,9 @@ class FinanceService(object):
             # load and lock account
             account = cls._load_locked_model_object(
                 pk=loan_withdraw.account_id, manager=Account.objects, allow_empty_pk=False)
-            today = date.today()
             concept = CONCEPT_LOAN_WITHDRAW
             detail = '%s - Loan Withdraw from %s of %s %s ' % (
-                today, account, loan_withdraw.amount, account.currency)
+                loan_withdraw.date, account, loan_withdraw.amount, account.currency)
             db_loan_withdraw = cls._load_locked_model_object(
                 pk=loan_withdraw.pk, manager=LoanWithdraw.objects)
             # process matches on status or amount change
@@ -261,18 +267,21 @@ class FinanceService(object):
             # load and lock accounts
             account = cls._load_locked_model_object(
                 pk=loan_account_deposit.account_id, manager=Account.objects, allow_empty_pk=False)
-            withdraw_account = cls._load_locked_model_object(
+            other_account = cls._load_locked_model_object(
                 pk=loan_account_deposit.withdraw_account_id, manager=Account.objects,
                 allow_empty_pk=False)
             # verify accounts
-            if account.currency != withdraw_account.currency:
+            if account.currency != other_account.currency:
                 raise ValidationError('Accounts must be on same currency')
-            today = date.today()
             concept = CONCEPT_LOAN_ACCOUNT_DEPOSIT
             detail = '%s - Loan Account Deposit to %s of %s %s from %s' % (
-                today, account, loan_account_deposit.amount, account.currency, withdraw_account)
+                loan_account_deposit.date, account, loan_account_deposit.amount, account.currency, other_account)
             db_loan_account_deposit = cls._load_locked_model_object(
                 pk=loan_account_deposit.pk, manager=LoanAccountDeposit.objects)
+            # define db others
+            db_other_account_id = None
+            if db_loan_account_deposit:
+                db_other_account_id = db_loan_account_deposit.withdraw_account_id
             # process matches on status or amount change
             cls._process_loan_matches(
                 document=loan_account_deposit, db_document=db_loan_account_deposit)
@@ -285,7 +294,8 @@ class FinanceService(object):
                 concept=concept,
                 detail=detail,
                 movement_type=MOVEMENT_TYPE_INPUT,
-                other_account=withdraw_account)
+                other_account=other_account,
+                db_other_account_id=db_other_account_id)
 
     @classmethod
     def save_loan_account_withdraw(cls, user, loan_account_withdraw):
@@ -296,18 +306,21 @@ class FinanceService(object):
             # load and lock accounts
             account = cls._load_locked_model_object(
                 pk=loan_account_withdraw.account_id, manager=Account.objects, allow_empty_pk=False)
-            deposit_account = cls._load_locked_model_object(
+            other_account = cls._load_locked_model_object(
                 pk=loan_account_withdraw.deposit_account_id, manager=Account.objects,
                 allow_empty_pk=False)
             # verify accounts
-            if account.currency != deposit_account.currency:
+            if account.currency != other_account.currency:
                 raise ValidationError('Accounts must be on same currency')
-            today = date.today()
             concept = CONCEPT_LOAN_ACCOUNT_WITHDRAW
             detail = '%s - Loan Account Withdraw from %s of %s %s to %s' % (
-                today, account, loan_account_withdraw.amount, account.currency, deposit_account)
+                loan_account_withdraw.date, account, loan_account_withdraw.amount, account.currency, other_account)
             db_loan_account_withdraw = cls._load_locked_model_object(
                 pk=loan_account_withdraw.pk, manager=LoanAccountWithdraw.objects)
+            # define db others
+            db_other_account_id = None
+            if db_loan_account_withdraw:
+                db_other_account_id = db_loan_account_withdraw.deposit_account_id
             # process matches on status or amount change
             cls._process_loan_matches(
                 document=loan_account_withdraw, db_document=db_loan_account_withdraw)
@@ -320,7 +333,8 @@ class FinanceService(object):
                 concept=concept,
                 detail=detail,
                 movement_type=MOVEMENT_TYPE_OUTPUT,
-                other_account=deposit_account)
+                other_account=other_account,
+                db_other_account_id=db_other_account_id)
 
     @classmethod
     def save_loan_account_match(cls, loan_account_match):
@@ -517,21 +531,23 @@ class FinanceService(object):
     @classmethod
     def _document_save(
             cls, user, document, db_document, account, concept, detail,
-            movement_type, other_account=None, other_amount=None):
+            movement_type, other_account=None, db_other_account_id=None,
+            other_amount=None, db_other_amount=None):
         document.currency = account.currency
-        now = datetime.now()
         # manage operations
         operations = cls._manage_operations(
             user=user,
             document=document,
             db_document=db_document,
-            current_datetime=now,
+            current_datetime=timezone.now(),
             concept=concept,
             detail=detail,
             account=account,
             movement_type=movement_type,
             other_account=other_account,
-            other_amount=other_amount)
+            db_other_account_id=db_other_account_id,
+            other_amount=other_amount,
+            db_other_amount=db_other_amount)
         # save documment
         document.concept = concept
         document.name = detail
@@ -553,49 +569,66 @@ class FinanceService(object):
     @classmethod
     def _manage_operations(
             cls, user, document, db_document, account, concept, detail, movement_type,
-            current_datetime, other_account=None, other_amount=None):
+            current_datetime,
+            other_account=None, db_other_account_id=None, other_amount=None, db_other_amount=None):
         result = []
-        revertion = None
-        current = None
         # verify previous operation revertion
         reverted = False
-        needs_revertion = cls._needs_revertion(document=document, db_document=db_document)
-        # outputs revertion before current
+        needs_revertion = cls._needs_revertion(
+            document=document,
+            db_document=db_document,
+            other_account=other_account,
+            db_other_account_id=db_other_account_id,
+            other_amount=other_amount,
+            db_other_amount=db_other_amount)
         if needs_revertion:
-            # revert outputs of previous operation
-            revertion = cls._revert_operation(
+            revertion = cls._manage_output_revertion(
                 user=user,
-                document=db_document,
+                document=document,
+                db_document=db_document,
+                movement_type=movement_type,
                 current_datetime=current_datetime,
-                movement_type=MOVEMENT_TYPE_OUTPUT,
                 account=account,
-                other_account=other_account)
+                other_account=other_account,
+                db_other_account_id=db_other_account_id,
+                db_other_amount=db_other_amount)
             if revertion:
                 reverted = True
                 result.append(revertion)
-        # manage current_operation
-        current = cls._current_operation(
-            user=user,
-            document=document,
-            current_datetime=current_datetime,
-            concept=concept,
-            detail=detail,
-            account=account,
-            movement_type=movement_type,
-            other_account=other_account,
-            other_amount=other_amount)
-        if current:
-            result.append(current)
-        # inputs revertion after current
-        if needs_revertion:
-            # revert inputs of previous operation
-            revertion = cls._revert_operation(
+            # manage current_operation
+        current = None
+        if cls._needs_current(
+                document=document,
+                db_document=db_document,
+                other_account=other_account,
+                db_other_account_id=db_other_account_id,
+                other_amount=other_amount,
+                db_other_amount=db_other_amount):
+            # create new operation
+            current = AccountingService.simple_operation(
                 user=user,
-                document=db_document,
                 current_datetime=current_datetime,
-                movement_type=MOVEMENT_TYPE_INPUT,
+                concept=concept,
+                detail=detail,
                 account=account,
-                other_account=other_account)
+                movement_type=movement_type,
+                amount=document.amount,
+                other_account=other_account,
+                other_amount=other_amount)
+            if current:
+                result.append(current)
+        if needs_revertion:
+            # inputs revertion after current
+            revertion = cls._manage_input_revertion(
+                user=user,
+                document=document,
+                db_document=db_document,
+                movement_type=movement_type,
+                current_datetime=current_datetime,
+                account=account,
+                other_account=other_account,
+                db_other_account_id=db_other_account_id,
+                db_other_amount=db_other_amount)
             if revertion:
                 reverted = True
                 result.append(revertion)
@@ -606,44 +639,103 @@ class FinanceService(object):
         return result
 
     @classmethod
-    def _needs_revertion(cls, document, db_document):
-        return db_document and db_document.current_operation \
-            and (document.status != STATUS_READY \
-                or document.account_id != db_document.account_id \
-                or document.amount != db_document.amount)
-
-    @classmethod
-    def _revert_operation(
-            cls, user, document, current_datetime, movement_type, account=None, other_account=None):
-        operation = None
-        if document and document.current_operation:
-            operation = AccountingService.revert_operation(
-                user=user,
-                operation_id=document.current_operation_id,
-                current_datetime=current_datetime,
-                movement_type=movement_type,
-                account=account,
-                other_account=other_account)
-        return operation
-
-    @classmethod
-    def _current_operation(
-            cls, user, document, current_datetime, concept, detail, \
-            account, movement_type, other_account=None, other_amount=None):
-        operation = None
-        if document and document.status == STATUS_READY:
-            # create new operation
-            operation = AccountingService.simple_operation(
+    def _manage_output_revertion(
+            cls, user, document, db_document, account, movement_type, current_datetime,
+            other_account, db_other_account_id, db_other_amount):
+        revertion = None
+        if movement_type is MOVEMENT_TYPE_OUTPUT:
+            # revert outputs of previous operation
+            revertion = AccountingService.simple_operation(
                 user=user,
                 current_datetime=current_datetime,
-                concept=concept,
-                detail=detail,
+                concept='Revertion of %s' % (db_document.concept),
+                detail='%s - Revertion of %s' % (document.date, db_document.detail),
                 account=account,
-                movement_type=movement_type,
-                amount=document.amount,
-                other_account=other_account,
-                other_amount=other_amount)
-        return operation
+                movement_type=MOVEMENT_TYPE_INPUT,
+                amount=db_document.amount)
+        if movement_type is MOVEMENT_TYPE_INPUT:
+            if db_other_account_id:
+                if account and (account.pk == db_other_account_id):
+                    reverted_account = account
+                elif other_account and (other_account.pk == db_other_account_id):
+                    reverted_account = other_account
+                else:
+                    reverted_account = cls._load_locked_model_object(
+                        pk=db_other_account_id, manager=Account.objects, allow_empty_pk=False)
+                # revert outputs of previous operation
+                reverted_amount = db_document.amount
+                if db_other_amount:
+                    reverted_amount = db_other_amount
+                revertion = AccountingService.simple_operation(
+                    user=user,
+                    current_datetime=current_datetime,
+                    concept='Revertion of %s' % (db_document.concept),
+                    detail='%s - Revertion of %s' % (document.date, db_document.detail),
+                    account=reverted_account,
+                    movement_type=MOVEMENT_TYPE_INPUT,
+                    amount=reverted_amount)
+        return revertion
+
+    @classmethod
+    def _manage_input_revertion(
+            cls, user, document, db_document, account, movement_type, current_datetime,
+            other_account, db_other_account_id, db_other_amount):
+        revertion = None
+        if movement_type is MOVEMENT_TYPE_INPUT:
+            # revert outputs of previous operation
+            revertion = AccountingService.simple_operation(
+                user=user,
+                current_datetime=current_datetime,
+                concept='Revertion of %s' % (db_document.concept),
+                detail='%s - Revertion of %s' % (document.date, db_document.name),
+                account=account,
+                movement_type=MOVEMENT_TYPE_OUTPUT,
+                amount=db_document.amount)
+        if movement_type is MOVEMENT_TYPE_OUTPUT:
+            if db_other_account_id:
+                if account and (account.pk == db_other_account_id):
+                    reverted_account = account
+                elif other_account and (other_account.pk == db_other_account_id):
+                    reverted_account = other_account
+                else:
+                    reverted_account = cls._load_locked_model_object(
+                        pk=db_other_account_id, manager=Account.objects, allow_empty_pk=False)
+                # revert outputs of previous operation
+                reverted_amount = db_document.amount
+                if db_other_amount:
+                    reverted_amount = db_other_amount
+                revertion = AccountingService.simple_operation(
+                    user=user,
+                    current_datetime=current_datetime,
+                    concept='Revertion of %s' % (db_document.concept),
+                    detail='%s - Revertion of %s' % (document.date, db_document.name),
+                    account=reverted_account,
+                    movement_type=MOVEMENT_TYPE_OUTPUT,
+                    amount=reverted_amount)
+        return revertion
+
+    @classmethod
+    def _needs_current(
+            cls, document, db_document,
+            other_account=None, db_other_account_id=None, other_amount=None, db_other_amount=None):
+        return document and (document.status is STATUS_READY) and (
+            (not db_document)
+            or (not (db_document.status is STATUS_READY))
+            or (document.account_id != db_document.account_id)
+            or (document.amount != db_document.amount)
+            or (other_account and (other_account.pk != db_other_account_id))
+            or (other_amount != db_other_amount))
+
+    @classmethod
+    def _needs_revertion(
+            cls, document, db_document,
+            other_account=None, db_other_account_id=None, other_amount=None, db_other_amount=None):
+        return db_document and (db_document.status is STATUS_READY) and (
+            (not (document.status is STATUS_READY))
+            or (document.account_id != db_document.account_id)
+            or (document.amount != db_document.amount)
+            or (other_account and (other_account.pk != db_other_account_id))
+            or (other_amount != db_other_amount))
 
     @classmethod
     def _finantial_history(cls, user, document, db_document, current_datetime):

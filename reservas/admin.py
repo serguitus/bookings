@@ -4,7 +4,7 @@ from django.contrib.admin import helpers
 from django.contrib.admin.exceptions import DisallowedModelAdminToField
 from django.contrib.admin.options import csrf_protect_m, TO_FIELD_VAR, IS_POPUP_VAR
 from django.contrib.admin.utils import unquote
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import router, transaction
 from django.forms.formsets import all_valid
 from django.utils.encoding import force_text
@@ -63,7 +63,7 @@ class ExtendedModelAdmin(admin.ModelAdmin):
                 else:
                     self.log_change(request, new_object, change_message)
                     return self.response_change(request, new_object)
-        except Exception as ex:
+        except ValidationError as ex:
             self.message_user(request, ex, messages.ERROR)
             return False
 

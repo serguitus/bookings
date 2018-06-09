@@ -43,7 +43,6 @@ class AccountAdmin(admin.ModelAdmin):
 
 class ExtendedAccountAdmin(ExtendedModelAdmin):
     actions_on_top = True
-    save_on_top = True
     list_editable = ('enabled',)
     list_display = ('name', 'currency', 'enabled', 'balance')
     list_filter = ('name', 'currency', 'enabled', 'balance')
@@ -53,4 +52,11 @@ class ExtendedAccountAdmin(ExtendedModelAdmin):
     readonly_fields = ('balance',)
     change_readonly_fields = ('currency',)
 
+class ExtendedOperationMovementAdmin(ExtendedModelAdmin):
+    actions_on_top = False
+    list_display = ('operation', 'account', 'movement_type', 'amount',)
+    list_filter = ('account', 'movement_type',)
+    ordering = ['operation',]
+
 reservas_admin.register(Account, ExtendedAccountAdmin)
+reservas_admin.register(OperationMovement, ExtendedOperationMovementAdmin)
