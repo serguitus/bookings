@@ -85,3 +85,11 @@ CONCEPTS = (
     (CONCEPT_PROVIDER_DEVOLUTION_REVERTION, 'Revertion of Provider Devolution'),
     (CONCEPT_PROVIDER_DISCOUNT_REVERTION, 'Revertion of Provider Discount'),
 )
+
+ERROR_ACCOUNT_REQUIRED = 'Account Required'
+ERROR_AMOUNT_REQUIRED = 'Positive Amount Required'
+ERROR_DISABLED = 'Account %s is Disabled'
+ERROR_NOT_BALANCE = 'Account %s Balance (%s) Insufficient for (%s)'
+ERROR_UNKNOWN_MOVEMENT_TYPE = 'Unknown Movement Type: %s'
+ERROR_SAME_CURRENCY = 'Account %s and %s must have different currencies'
+ERROR_DIFFERENT_CURRENCY = 'Account %s and %s must have same currency'

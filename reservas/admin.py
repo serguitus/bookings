@@ -64,7 +64,8 @@ class ExtendedModelAdmin(admin.ModelAdmin):
                     self.log_change(request, new_object, change_message)
                     return self.response_change(request, new_object)
         except ValidationError as ex:
-            self.message_user(request, ex, messages.ERROR)
+            for message in ex.messages:
+                self.message_user(request, message, messages.ERROR)
             return False
 
     def _changeform_view(self, request, object_id, form_url, extra_context):
