@@ -1,9 +1,9 @@
 from django.conf import settings
 from django.db import connection, models
-from django.utils import timezone
+from django.utils.timezone import now
 
 from accounting.constants import (
-    CURRENCIES, CURRENCY_CUC, MOVEMENT_TYPES, MOVEMENT_TYPE_INPUT, CONCEPTS)
+    CURRENCIES, CURRENCY_CUC, MOVEMENT_TYPES, MOVEMENT_TYPE_INPUT)
 
 
 class Account(models.Model):
@@ -51,8 +51,8 @@ class Operation(models.Model):
         on_delete=models.PROTECT,
         help_text='User who did the operation.',
     )
-    datetime = models.DateTimeField(default=timezone.now())
-    concept = models.CharField(max_length=50, choices=CONCEPTS)
+    datetime = models.DateTimeField(default=now)
+    concept = models.CharField(max_length=50)
     detail = models.CharField(max_length=200)
 
     def __str__(self):

@@ -5,14 +5,24 @@ from django.utils import timezone
 
 from accounting.constants import (
     MOVEMENT_TYPE_INPUT, MOVEMENT_TYPE_OUTPUT, CURRENCY_CUC, CURRENCY_USD,
-    CONCEPT_DEPOSIT, CONCEPT_WITHDRAW, CONCEPT_TRANSFER, CONCEPT_CURRENCY_EXCHANGE,
     ERROR_UNKNOWN_MOVEMENT_TYPE, ERROR_ACCOUNT_REQUIRED, ERROR_DISABLED,
     ERROR_AMOUNT_REQUIRED, ERROR_NOT_BALANCE, ERROR_DIFFERENT_CURRENCY, ERROR_SAME_CURRENCY)
-from accounting.models import Account, Operation
+from accounting.models import Account
 from accounting.services import AccountingService
 
 
-class AccountingServiceTestCase(TestCase):
+class AccountingBaseTestCase(TestCase):
+
+    def assertAccount(self, test_account, test_balance):
+        test_account.refresh_from_db()
+        self.assertEqual(test_account.balance, test_balance)
+
+    def assertMovement(self, test_movement, test_account, test_movement_type, test_amount):
+        self.assertEqual(test_movement.account_id, test_account.pk)
+        self.assertEqual(test_movement.movement_type, test_movement_type)
+        self.assertEqual(test_movement.amount, test_amount)
+
+class AccountingServiceTestCase(AccountingBaseTestCase):
 
     test_user = None
 
@@ -30,7 +40,7 @@ class AccountingServiceTestCase(TestCase):
         test_balance = test_account.balance
 
         test_current_datetime = timezone.now()
-        test_concept = CONCEPT_DEPOSIT
+        test_concept = 'Deposit'
         test_detail = 'Testing'
         test_movement_type = MOVEMENT_TYPE_INPUT
         test_amount = 100
@@ -44,13 +54,18 @@ class AccountingServiceTestCase(TestCase):
             movement_type=test_movement_type,
             amount=test_amount)
 
-        self.assertEqual(test_account.balance, test_balance + test_amount)
+        # account balance incremented
+        self.assertAccount(test_account=test_account, test_balance=test_balance + test_amount)
+
+        # one movement created
         movements = operation.operationmovement_set
         self.assertEqual(movements.count(), 1)
+
+        # movement info
         movement = movements.first()
-        self.assertEqual(movement.account_id, test_account.pk)
-        self.assertEqual(movement.movement_type, test_movement_type)
-        self.assertEqual(movement.amount, test_amount)
+        self.assertMovement(
+            test_movement=movement, test_account=test_account,
+            test_movement_type=test_movement_type, test_amount=test_amount)
 
     def test_simple_operation_with_invalid_movement_type(self):
         """
@@ -60,13 +75,13 @@ class AccountingServiceTestCase(TestCase):
         test_balance = test_account.balance
 
         test_current_datetime = timezone.now()
-        test_concept = CONCEPT_DEPOSIT
+        test_concept = 'Deposit'
         test_detail = "Testing"
         test_movement_type = 'unknown'
         test_amount = 100
 
         with self.assertRaisesMessage(
-                ValidationError, ERROR_UNKNOWN_MOVEMENT_TYPE % (test_movement_type)) as ex:
+            ValidationError, ERROR_UNKNOWN_MOVEMENT_TYPE % (test_movement_type)) as ex:
             operation = AccountingService.simple_operation(
                 user=self.test_user,
                 current_datetime=test_current_datetime,
@@ -76,14 +91,15 @@ class AccountingServiceTestCase(TestCase):
                 movement_type=test_movement_type,
                 amount=test_amount)
 
-        self.assertEqual(test_account.balance, test_balance)
+        # account balance unchanged
+        self.assertAccount(test_account=test_account, test_balance=test_balance)
 
     def test_simple_operation_without_account(self):
         """
         Does deposit without account
         """
         test_current_datetime = timezone.now()
-        test_concept = CONCEPT_DEPOSIT
+        test_concept = 'Deposit'
         test_detail = "Testing"
         test_movement_type = MOVEMENT_TYPE_INPUT
         test_amount = 100
@@ -109,7 +125,7 @@ class AccountingServiceTestCase(TestCase):
         test_balance = test_account.balance
 
         test_current_datetime = timezone.now()
-        test_concept = CONCEPT_DEPOSIT
+        test_concept = 'Deposit'
         test_detail = "Testing"
         test_movement_type = MOVEMENT_TYPE_INPUT
         test_amount = 100
@@ -124,7 +140,8 @@ class AccountingServiceTestCase(TestCase):
                 movement_type=test_movement_type,
                 amount=test_amount)
 
-        self.assertEqual(test_account.balance, test_balance)
+        # account balance unchanged
+        self.assertAccount(test_account=test_account, test_balance=test_balance)
 
     def test_simple_operation_with_no_amount(self):
         """
@@ -134,7 +151,7 @@ class AccountingServiceTestCase(TestCase):
         test_balance = test_account.balance
 
         test_current_datetime = timezone.now()
-        test_concept = CONCEPT_DEPOSIT
+        test_concept = 'Deposit'
         test_detail = "Testing"
         test_movement_type = MOVEMENT_TYPE_INPUT
         test_amount = 0
@@ -149,7 +166,8 @@ class AccountingServiceTestCase(TestCase):
                 movement_type=test_movement_type,
                 amount=test_amount)
 
-        self.assertEqual(test_account.balance, test_balance)
+        # account balance unchanged
+        self.assertAccount(test_account=test_account, test_balance=test_balance)
 
     def test_simple_operation_withdraw_on_low_balance(self):
         """
@@ -162,7 +180,7 @@ class AccountingServiceTestCase(TestCase):
         test_balance = test_account.balance
 
         test_current_datetime = timezone.now()
-        test_concept = CONCEPT_WITHDRAW
+        test_concept = 'Withdraw'
         test_detail = "Testing"
         test_movement_type = MOVEMENT_TYPE_OUTPUT
         test_amount = 100
@@ -179,7 +197,8 @@ class AccountingServiceTestCase(TestCase):
                 movement_type=test_movement_type,
                 amount=test_amount)
 
-        self.assertEqual(test_account.balance, test_balance)
+        # account balance unchanged
+        self.assertAccount(test_account=test_account, test_balance=test_balance)
 
     def test_simple_operation_transfer(self):
         """
@@ -195,7 +214,7 @@ class AccountingServiceTestCase(TestCase):
         test_balance2 = test_account2.balance
 
         test_current_datetime = timezone.now()
-        test_concept = CONCEPT_TRANSFER
+        test_concept = 'Transfer'
         test_detail = "Testing"
         test_movement_type = MOVEMENT_TYPE_INPUT
         test_amount = 50
@@ -210,29 +229,30 @@ class AccountingServiceTestCase(TestCase):
             amount=test_amount,
             other_account=test_account2)
 
-        self.assertEqual(test_account1.balance, test_balance1 + test_amount)
-        self.assertEqual(test_account2.balance, test_balance2 - test_amount)
+        # account balance incremented
+        self.assertAccount(test_account=test_account1, test_balance=test_balance1 + test_amount)
+        # account balance decremented
+        self.assertAccount(test_account=test_account2, test_balance=test_balance2 - test_amount)
+
+        # two movement created
         movements = operation.operationmovement_set
         self.assertEqual(movements.count(), 2)
+
+        # movement info
         movement = movements.first()
-        if movement.movement_type is MOVEMENT_TYPE_INPUT:
-            self.assertEqual(movement.account_id, test_account1.pk)
-            self.assertEqual(movement.amount, test_amount)
-            movement = movements.last()
-            self.assertEqual(movement.account_id, test_account2.pk)
-            self.assertEqual(movement.movement_type, MOVEMENT_TYPE_OUTPUT)
-            self.assertEqual(movement.amount, test_amount)
-        else:
-            self.assertEqual(movement.account_id, test_account2.pk)
-            self.assertEqual(movement.amount, test_amount)
-            movement = movements.last()
-            self.assertEqual(movement.account_id, test_account1.pk)
-            self.assertEqual(movement.movement_type, MOVEMENT_TYPE_INPUT)
-            self.assertEqual(movement.amount, test_amount)
+        self.assertMovement(
+            test_movement=movement, test_account=test_account1,
+            test_movement_type=MOVEMENT_TYPE_INPUT, test_amount=test_amount)
+
+        # movement info
+        movement = movements.last()
+        self.assertMovement(
+            test_movement=movement, test_account=test_account2,
+            test_movement_type=MOVEMENT_TYPE_OUTPUT, test_amount=test_amount)
 
     def test_simple_operation_transfer_on_different_currency(self):
         """
-        Does transfer with different accounts currency 
+        Does transfer with different accounts currency
         """
         test_account1 = Account.objects.create(name="Test Account 1", currency=CURRENCY_USD)
         test_balance1 = test_account1.balance
@@ -244,7 +264,7 @@ class AccountingServiceTestCase(TestCase):
         test_balance2 = test_account2.balance
 
         test_current_datetime = timezone.now()
-        test_concept = CONCEPT_TRANSFER
+        test_concept = 'Transfer'
         test_detail = "Testing"
         test_movement_type = MOVEMENT_TYPE_INPUT
         test_amount = 50
@@ -261,12 +281,13 @@ class AccountingServiceTestCase(TestCase):
                 amount=test_amount,
                 other_account=test_account2)
 
-        self.assertEqual(test_account1.balance, test_balance1)
-        self.assertEqual(test_account2.balance, test_balance2)
+        # account balance unchanged
+        self.assertAccount(test_account=test_account1, test_balance=test_balance1)
+        self.assertAccount(test_account=test_account2, test_balance=test_balance2)
 
     def test_simple_operation_transfer_with_low_balance(self):
         """
-        Does transfer with low balance 
+        Does transfer with low balance
         """
         test_account1 = Account.objects.create(name="Test Account 1", currency=CURRENCY_CUC)
         test_balance1 = test_account1.balance
@@ -278,7 +299,7 @@ class AccountingServiceTestCase(TestCase):
         test_balance2 = test_account2.balance
 
         test_current_datetime = timezone.now()
-        test_concept = CONCEPT_TRANSFER
+        test_concept = 'Transfer'
         test_detail = "Testing"
         test_movement_type = MOVEMENT_TYPE_INPUT
         test_amount = 100
@@ -296,8 +317,9 @@ class AccountingServiceTestCase(TestCase):
                 amount=test_amount,
                 other_account=test_account2)
 
-        self.assertEqual(test_account1.balance, test_balance1)
-        self.assertEqual(test_account2.balance, test_balance2)
+        # account balance unchanged
+        self.assertAccount(test_account=test_account1, test_balance=test_balance1)
+        self.assertAccount(test_account=test_account2, test_balance=test_balance2)
 
     def test_simple_operation_currency_exchange(self):
         """
@@ -313,7 +335,7 @@ class AccountingServiceTestCase(TestCase):
         test_balance2 = test_account2.balance
 
         test_current_datetime = timezone.now()
-        test_concept = CONCEPT_CURRENCY_EXCHANGE
+        test_concept = 'Currency Exchange'
         test_detail = "Testing"
         test_movement_type = MOVEMENT_TYPE_INPUT
         test_amount1 = 100
@@ -330,25 +352,26 @@ class AccountingServiceTestCase(TestCase):
             other_account=test_account2,
             other_amount=test_amount2)
 
-        self.assertEqual(test_account1.balance, test_balance1 + test_amount1)
-        self.assertEqual(test_account2.balance, test_balance2 - test_amount2)
+        # account balance incremented
+        self.assertAccount(test_account=test_account1, test_balance=test_balance1 + test_amount1)
+        # account balance decremented
+        self.assertAccount(test_account=test_account2, test_balance=test_balance2 - test_amount2)
+
+        # two movement created
         movements = operation.operationmovement_set
         self.assertEqual(movements.count(), 2)
+
+        # movement info
         movement = movements.first()
-        if movement.movement_type is MOVEMENT_TYPE_INPUT:
-            self.assertEqual(movement.account_id, test_account1.pk)
-            self.assertEqual(movement.amount, test_amount1)
-            movement = movements.last()
-            self.assertEqual(movement.account_id, test_account2.pk)
-            self.assertEqual(movement.movement_type, MOVEMENT_TYPE_OUTPUT)
-            self.assertEqual(movement.amount, test_amount2)
-        else:
-            self.assertEqual(movement.account_id, test_account2.pk)
-            self.assertEqual(movement.amount, test_amount2)
-            movement = movements.last()
-            self.assertEqual(movement.account_id, test_account1.pk)
-            self.assertEqual(movement.movement_type, MOVEMENT_TYPE_INPUT)
-            self.assertEqual(movement.amount, test_amount1)
+        self.assertMovement(
+            test_movement=movement, test_account=test_account1,
+            test_movement_type=MOVEMENT_TYPE_INPUT, test_amount=test_amount1)
+
+        # movement info
+        movement = movements.last()
+        self.assertMovement(
+            test_movement=movement, test_account=test_account2,
+            test_movement_type=MOVEMENT_TYPE_OUTPUT, test_amount=test_amount2)
 
     def test_simple_operation_currency_exchange_with_same_currency(self):
         """
@@ -364,7 +387,7 @@ class AccountingServiceTestCase(TestCase):
         test_balance2 = test_account2.balance
 
         test_current_datetime = timezone.now()
-        test_concept = CONCEPT_CURRENCY_EXCHANGE
+        test_concept = 'Currency Exchange'
         test_detail = "Testing"
         test_movement_type = MOVEMENT_TYPE_INPUT
         test_amount1 = 100
@@ -383,8 +406,9 @@ class AccountingServiceTestCase(TestCase):
                 other_account=test_account2,
                 other_amount=test_amount2)
 
-        self.assertEqual(test_account1.balance, test_balance1)
-        self.assertEqual(test_account2.balance, test_balance2)
+        # account balance unchanged
+        self.assertAccount(test_account=test_account1, test_balance=test_balance1)
+        self.assertAccount(test_account=test_account2, test_balance=test_balance2)
 
     def test_simple_operation_currency_exchange_with_low_balance(self):
         """
@@ -400,7 +424,7 @@ class AccountingServiceTestCase(TestCase):
         test_balance2 = test_account2.balance
 
         test_current_datetime = timezone.now()
-        test_concept = CONCEPT_CURRENCY_EXCHANGE
+        test_concept = 'Currency Exchange'
         test_detail = "Testing"
         test_movement_type = MOVEMENT_TYPE_INPUT
         test_amount1 = 200
@@ -420,5 +444,6 @@ class AccountingServiceTestCase(TestCase):
                 other_account=test_account2,
                 other_amount=test_amount2)
 
-        self.assertEqual(test_account1.balance, test_balance1)
-        self.assertEqual(test_account2.balance, test_balance2)
+        # account balance unchanged
+        self.assertAccount(test_account=test_account1, test_balance=test_balance1)
+        self.assertAccount(test_account=test_account2, test_balance=test_balance2)
