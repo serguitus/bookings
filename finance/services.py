@@ -6,7 +6,8 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
-from accounting.constants import MOVEMENT_TYPE_INPUT, MOVEMENT_TYPE_OUTPUT
+from accounting.constants import (
+    MOVEMENT_TYPE_INPUT, MOVEMENT_TYPE_OUTPUT, ERROR_DIFFERENT_CURRENCY, ERROR_SAME_CURRENCY)
 from accounting.models import Account
 from accounting.services import AccountingService
 
@@ -63,41 +64,6 @@ class FinanceService(object):
                 movement_type=MOVEMENT_TYPE_OUTPUT)
 
     @classmethod
-    def save_currency_exchange(cls, user, currency_exchange):
-        """
-        Saves Currency Exchange
-        """
-        with transaction.atomic(savepoint=False):
-            # load and lock account
-            account = cls._load_locked_model_object(
-                pk=currency_exchange.account_id, manager=Account.objects, allow_empty_pk=False)
-            other_account = cls._load_locked_model_object(
-                pk=currency_exchange.exchange_account_id, manager=Account.objects,
-                allow_empty_pk=False)
-            # verify accounts
-            if account.currency == other_account.currency:
-                raise ValidationError('Accounts must not be on same currency')
-            db_exchange = cls._load_locked_model_object(
-                pk=currency_exchange.pk, manager=CurrencyExchange.objects)
-            # define db others
-            db_other_account_id = None
-            db_other_amount = None
-            if db_exchange:
-                db_other_account_id = db_exchange.exchange_account_id
-                db_other_amount = db_exchange.exchange_amount
-            # manage saving
-            return cls._document_save(
-                user=user,
-                document=currency_exchange,
-                db_document=db_exchange,
-                account=account,
-                movement_type=MOVEMENT_TYPE_OUTPUT,
-                other_account=other_account,
-                db_other_account_id=db_other_account_id,
-                other_amount=currency_exchange.exchange_amount,
-                db_other_amount=db_other_amount)
-
-    @classmethod
     def save_transfer(cls, user, transfer):
         """
         Saves Transfer
@@ -111,7 +77,7 @@ class FinanceService(object):
                 allow_empty_pk=False)
             # verify accounts
             if account.currency != other_account.currency:
-                raise ValidationError('Accounts must be on same currency')
+                raise ValidationError(ERROR_DIFFERENT_CURRENCY % (account, other_account))
             db_transfer = cls._load_locked_model_object(
                 pk=transfer.pk, manager=Transfer.objects)
             # define db others
@@ -127,6 +93,41 @@ class FinanceService(object):
                 movement_type=MOVEMENT_TYPE_INPUT,
                 other_account=other_account,
                 db_other_account_id=db_other_account_id)
+
+    @classmethod
+    def save_currency_exchange(cls, user, currency_exchange):
+        """
+        Saves Currency Exchange
+        """
+        with transaction.atomic(savepoint=False):
+            # load and lock account
+            account = cls._load_locked_model_object(
+                pk=currency_exchange.account_id, manager=Account.objects, allow_empty_pk=False)
+            other_account = cls._load_locked_model_object(
+                pk=currency_exchange.exchange_account_id, manager=Account.objects,
+                allow_empty_pk=False)
+            # verify accounts
+            if account.currency == other_account.currency:
+                raise ValidationError(ERROR_SAME_CURRENCY % (account, other_account))
+            db_exchange = cls._load_locked_model_object(
+                pk=currency_exchange.pk, manager=CurrencyExchange.objects)
+            # define db others
+            db_other_account_id = None
+            db_other_amount = None
+            if db_exchange:
+                db_other_account_id = db_exchange.exchange_account_id
+                db_other_amount = db_exchange.exchange_amount
+            # manage saving
+            return cls._document_save(
+                user=user,
+                document=currency_exchange,
+                db_document=db_exchange,
+                account=account,
+                movement_type=MOVEMENT_TYPE_INPUT,
+                other_account=other_account,
+                db_other_account_id=db_other_account_id,
+                other_amount=currency_exchange.exchange_amount,
+                db_other_amount=db_other_amount)
 
     @classmethod
     def save_loan_entity_deposit(cls, user, loan_entity_deposit):
