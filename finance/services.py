@@ -25,6 +25,9 @@ class FinanceService(object):
     Finance Service
     """
 
+    LOAN_TYPE_ENTITY = 1
+    LOAN_TYPE_ACCOUNT = 2
+
     @classmethod
     def save_deposit(cls, user, deposit):
         """
@@ -141,7 +144,10 @@ class FinanceService(object):
             db_loan_entity_deposit = cls._load_locked_model_object(
                 pk=loan_entity_deposit.pk, manager=LoanEntityDeposit.objects)
             # process matches on status or amount change
-            cls._process_loan_matches(document=loan_entity_deposit, db_document=db_loan_entity_deposit)
+            cls._process_loan_matches(
+                document=loan_entity_deposit,
+                db_document=db_loan_entity_deposit,
+                loan_type=cls.LOAN_TYPE_ENTITY)
             # manage saving
             return cls._document_save(
                 user=user,
@@ -162,7 +168,10 @@ class FinanceService(object):
             db_loan_entity_withdraw = cls._load_locked_model_object(
                 pk=loan_entity_withdraw.pk, manager=LoanEntityWithdraw.objects)
             # process matches on status or amount change
-            cls._process_loan_matches(document=loan_entity_withdraw, db_document=db_loan_entity_withdraw)
+            cls._process_loan_matches(
+                document=loan_entity_withdraw,
+                db_document=db_loan_entity_withdraw,
+                loan_type=cls.LOAN_TYPE_ENTITY)
             # manage saving
             return cls._document_save(
                 user=user,
@@ -229,20 +238,22 @@ class FinanceService(object):
             account = cls._load_locked_model_object(
                 pk=loan_account_deposit.account_id, manager=Account.objects, allow_empty_pk=False)
             other_account = cls._load_locked_model_object(
-                pk=loan_account_deposit.withdraw_account_id, manager=Account.objects,
+                pk=loan_account_deposit.loan_account_id, manager=Account.objects,
                 allow_empty_pk=False)
             # verify accounts
             if account.currency != other_account.currency:
-                raise ValidationError('Accounts must be on same currency')
+                raise ValidationError(ERROR_DIFFERENT_CURRENCY % (account, other_account))
             db_loan_account_deposit = cls._load_locked_model_object(
                 pk=loan_account_deposit.pk, manager=LoanAccountDeposit.objects)
             # define db others
             db_other_account_id = None
             if db_loan_account_deposit:
-                db_other_account_id = db_loan_account_deposit.withdraw_account_id
+                db_other_account_id = db_loan_account_deposit.loan_account_id
             # process matches on status or amount change
             cls._process_loan_matches(
-                document=loan_account_deposit, db_document=db_loan_account_deposit)
+                document=loan_account_deposit,
+                db_document=db_loan_account_deposit,
+                loan_type=cls.LOAN_TYPE_ACCOUNT)
             # manage saving
             return cls._document_save(
                 user=user,
@@ -263,20 +274,22 @@ class FinanceService(object):
             account = cls._load_locked_model_object(
                 pk=loan_account_withdraw.account_id, manager=Account.objects, allow_empty_pk=False)
             other_account = cls._load_locked_model_object(
-                pk=loan_account_withdraw.deposit_account_id, manager=Account.objects,
+                pk=loan_account_withdraw.loan_account_id, manager=Account.objects,
                 allow_empty_pk=False)
             # verify accounts
             if account.currency != other_account.currency:
-                raise ValidationError('Accounts must be on same currency')
+                raise ValidationError(ERROR_DIFFERENT_CURRENCY % (account, other_account))
             db_loan_account_withdraw = cls._load_locked_model_object(
                 pk=loan_account_withdraw.pk, manager=LoanAccountWithdraw.objects)
             # define db others
             db_other_account_id = None
             if db_loan_account_withdraw:
-                db_other_account_id = db_loan_account_withdraw.deposit_account_id
+                db_other_account_id = db_loan_account_withdraw.loan_account_id
             # process matches on status or amount change
             cls._process_loan_matches(
-                document=loan_account_withdraw, db_document=db_loan_account_withdraw)
+                document=loan_account_withdraw,
+                db_document=db_loan_account_withdraw,
+                loan_type=cls.LOAN_TYPE_ACCOUNT)
             # manage saving
             return cls._document_save(
                 user=user,
@@ -724,24 +737,27 @@ class FinanceService(object):
         return (not db_document) or (db_document.status != document.status)
 
     @classmethod
-    def _process_loan_matches(cls, document, db_document):
+    def _process_loan_matches(cls, document, db_document, loan_type):
         # verify not new
         if db_document and (db_document.status == STATUS_READY):
             # process status change
             if document.status != STATUS_READY:
                 # verifies matches
-                if cls._loan_has_matches(document=document):
+                if cls._loan_has_matches(document=document, loan_type=loan_type):
                     raise ValidationError(
                         'Can not change status from Ready if Loan document has matches')
             # process amount change
             if db_document.amount > document.amount:
-                # verifies amount matched
-                if document.amount_matched > document.amount:
+                # verifies matched amount
+                if document.matched_amount > document.amount:
                     raise ValidationError('Can not decrease amount below matched amount')
 
     @classmethod
-    def _loan_has_matches(cls, document):
-        return document.loan_match_set.count() > 0
+    def _loan_has_matches(cls, document, loan_type):
+        if loan_type == cls.LOAN_TYPE_ENTITY:
+            return document.loanentitymatch_set.count() > 0
+        if loan_type == cls.LOAN_TYPE_ACCOUNT:
+            return document.loanaccountmatch_set.count() > 0
 
     @classmethod
     def _save_loan_entity_match(cls, loan_entity_match):

@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.utils.timezone import now
 
@@ -35,6 +36,10 @@ class FinantialDocument(models.Model):
 
     def __str__(self):
         return self.name
+
+    def delete(self, using=None, keep_parents=False):
+        raise ValidationError(
+            'Can not delete Finantials Documents')
 
 
 class FinantialDocumentHistory(models.Model):
@@ -172,7 +177,7 @@ class LoanEntity(models.Model):
         return self.name
 
 
-class LoanEntityCurrencyMatch(models.Model, ):
+class LoanEntityCurrency(models.Model):
     class Meta:
         verbose_name = 'Loan Entity Currency'
         verbose_name_plural = 'Loans Entities Currencies'
@@ -198,12 +203,8 @@ class LoanEntityDeposit(LoanEntityDocument):
         verbose_name = 'Loan Entity Deposit'
         verbose_name_plural = 'Loans Entities Deposits'
 
-    def __init__(self, *args, **kwargs):
-        super(LoanEntityDeposit, self).__init__()
-        self.document_type = TYPE_LOAN_ENTITY_DEPOSIT
-
     def fill_data(self):
-        self.document_type = TYPE_LOAN_ENTITY_DEPOSIT
+        self.document_type = DOC_TYPE_LOAN_ENTITY_DEPOSIT
         account = Account.objects.get(pk=self.account_id)
         loan_entity = LoanEntity.objects.get(pk=self.loan_entity_id)
         self.name = '%s - Loan Entity Deposit to %s of %s %s from %s' % (

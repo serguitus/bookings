@@ -1,5 +1,6 @@
-from django.conf import settings
 from django.db import connection, models
+from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 
 from accounting.constants import (
@@ -58,6 +59,10 @@ class Operation(models.Model):
     def __str__(self):
         return self.detail
 
+    def delete(self, using=None, keep_parents=False):
+        raise ValidationError(
+            'Can not delete Operations')
+
 
 class OperationMovement(models.Model):
     class Meta:
@@ -71,3 +76,8 @@ class OperationMovement(models.Model):
     def __str__(self):
         return  '%s on %s of %s' % (
             self.get_movement_type_display(), self.account, self.amount)
+
+    def delete(self, using=None, keep_parents=False):
+        raise ValidationError(
+            'Can not delete Movements')
+
