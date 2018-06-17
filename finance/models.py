@@ -131,7 +131,7 @@ class CurrencyExchange(FinantialDocument, AccountingDocument):
         self.document_type = DOC_TYPE_CURRENCY_EXCHANGE
         account = Account.objects.get(pk=self.account_id)
         exchange_account = Account.objects.get(pk=self.exchange_account_id)
-        self.name = '%s - Exchange to %s for %s %s from %s of %s %s' % (
+        self.name = '%s - Exchange to %s of %s %s from %s of %s %s' % (
             self.date, account, self.amount, account.get_currency_display(),
             exchange_account, self.exchange_amount, exchange_account.get_currency_display())
 

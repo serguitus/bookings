@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.db.utils import IntegrityError
 from django.test import TestCase
 from django.utils import timezone
 
@@ -447,3 +448,12 @@ class AccountingServiceTestCase(AccountingBaseTestCase):
         # account balance unchanged
         self.assertAccount(test_account=test_account1, test_balance=test_balance1)
         self.assertAccount(test_account=test_account2, test_balance=test_balance2)
+
+    def test_create_account_duplicate(self):
+        """
+        Does accounts qith same name and currency
+        """
+        test_account1 = Account.objects.create(name="Test Account 1", currency=CURRENCY_USD)
+
+        with self.assertRaises(IntegrityError) as ex:
+            test_account2 = Account.objects.create(name="Test Account 1", currency=CURRENCY_USD)

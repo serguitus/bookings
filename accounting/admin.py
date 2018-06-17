@@ -1,24 +1,8 @@
 from django.contrib import admin
 
-from accounting.models import Account, OperationMovement
+from accounting.models import Account, Operation, OperationMovement
 
 from reservas.admin import reservas_admin, ExtendedModelAdmin
-
-
-class AccountMovementInline(admin.TabularInline):
-    model = OperationMovement
-    extra = 0
-    can_delete = False
-
-    readonly_fields = ['operation', 'movement_type', 'amount']
-
-    def has_add_permission(self, request):
-        return False
-    # def has_change_permission(self, request, obj=None):
-    #     return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
 
 
 @admin.register(Account)
@@ -30,16 +14,7 @@ class AccountAdmin(admin.ModelAdmin):
     list_filter = ('name', 'currency', 'enabled', 'balance')
     search_fields = ('name',)
     ordering = ['enabled', 'currency', 'name']
-    inlines = [AccountMovementInline]
 
-    def get_readonly_fields(self, request, obj=None):
-        """
-        Hook for specifying custom readonly fields.
-        """
-        if obj is None:
-            return ('balance',)
-
-        return ('currency', 'balance',)
 
 class ExtendedAccountAdmin(ExtendedModelAdmin):
     actions_on_top = True
@@ -52,11 +27,23 @@ class ExtendedAccountAdmin(ExtendedModelAdmin):
     readonly_fields = ('balance',)
     change_readonly_fields = ('currency',)
 
+
+class ExtendedOperationAdmin(ExtendedModelAdmin):
+    readonly_model = True
+    actions_on_top = False
+    list_display = ('datetime', 'concept', 'detail',)
+    list_filter = ('concept', 'datetime',)
+    ordering = ['-datetime',]
+
+
 class ExtendedOperationMovementAdmin(ExtendedModelAdmin):
+    readonly_model = True
     actions_on_top = False
     list_display = ('operation', 'account', 'movement_type', 'amount',)
     list_filter = ('account', 'movement_type',)
     ordering = ['operation',]
 
+
 reservas_admin.register(Account, ExtendedAccountAdmin)
+reservas_admin.register(Operation, ExtendedOperationAdmin)
 reservas_admin.register(OperationMovement, ExtendedOperationMovementAdmin)
