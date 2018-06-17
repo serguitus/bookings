@@ -171,6 +171,8 @@ class LoanEntity(models.Model):
     class Meta:
         verbose_name = 'Loan Entity'
         verbose_name_plural = 'Loans Entities'
+        unique_together = (('name',),)
+
     name = models.CharField(max_length=100)
 
     def __str__(self):
@@ -181,6 +183,7 @@ class LoanEntityCurrency(models.Model):
     class Meta:
         verbose_name = 'Loan Entity Currency'
         verbose_name_plural = 'Loans Entities Currencies'
+        unique_together = (('loan_entity', 'currency',),)
     loan_entity = models.ForeignKey(LoanEntity)
     currency = models.CharField(max_length=5, choices=CURRENCIES)
     credit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -240,6 +243,7 @@ class LoanEntityMatch(models.Model):
     class Meta:
         verbose_name = 'Loan Entity Match'
         verbose_name_plural = 'Loans Entities Matches'
+        unique_together = (('loan_entity_deposit', 'loan_entity_withdraw',),)
     loan_entity_deposit = models.ForeignKey(LoanEntityDeposit)
     loan_entity_withdraw = models.ForeignKey(LoanEntityWithdraw)
     matched_amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -249,6 +253,7 @@ class LoanAccount(models.Model):
     class Meta:
         verbose_name = 'Finantial Account'
         verbose_name_plural = 'Finantials Accounts'
+        unique_together = (('loan_account',),)
     loan_account = models.ForeignKey(Account)
     credit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     debit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -303,6 +308,7 @@ class LoanAccountMatch(models.Model):
     class Meta:
         verbose_name = 'Loan Account Match'
         verbose_name_plural = 'Loans Accounts Matches'
+        unique_together = (('loan_account_deposit', 'loan_account_withdraw',),)
     loan_account_deposit = models.ForeignKey(LoanAccountDeposit)
     loan_account_withdraw = models.ForeignKey(LoanAccountWithdraw)
     matched_amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -312,6 +318,7 @@ class Agency(models.Model):
     class Meta:
         verbose_name = 'Agency'
         verbose_name_plural = 'Agencies'
+        unique_together = (('name',),)
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=500, blank=True, null=True)
     currency = models.CharField(
@@ -322,10 +329,11 @@ class Agency(models.Model):
         return self.name
 
 
-class AgencyCurrencyMatch(models.Model):
+class AgencyCurrency(models.Model):
     class Meta:
         verbose_name = 'Agency Currency Match'
         verbose_name_plural = 'Agencies Currencies Matches'
+        unique_together = (('agency', 'currency',),)
     agency = models.ForeignKey(Agency)
     currency = models.CharField(max_length=5, choices=CURRENCIES)
     credit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -428,8 +436,9 @@ class AgencyDocumentMatch(models.Model):
     class Meta:
         verbose_name = 'Agency Match'
         verbose_name_plural = 'Agencies Matches'
-    debit_document = models.ForeignKey(AgencyDebitDocument)
+        unique_together = (('credit_document', 'debit_document',),)
     credit_document = models.ForeignKey(AgencyCreditDocument)
+    debit_document = models.ForeignKey(AgencyDebitDocument)
     matched_amount = models.DecimalField(max_digits=10, decimal_places=2)
 
 
@@ -437,6 +446,7 @@ class Provider(models.Model):
     class Meta:
         verbose_name = 'Provider'
         verbose_name_plural = 'Providers'
+        unique_together = (('name',),)
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=500, blank=True, null=True)
     currency = models.CharField(
@@ -447,10 +457,11 @@ class Provider(models.Model):
         return self.name
 
 
-class ProviderCurrencyMatch(models.Model):
+class ProviderCurrency(models.Model):
     class Meta:
         verbose_name = 'Provider Currency Match'
         verbose_name_plural = 'Providers Currencies Matches'
+        unique_together = (('provider', 'currency',),)
     provider = models.ForeignKey(Provider)
     currency = models.CharField(max_length=5, choices=CURRENCIES)
     credit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -529,6 +540,7 @@ class ProviderDocumentMatch(models.Model):
     class Meta:
         verbose_name = 'Provider Match'
         verbose_name_plural = 'Providers Matches'
-    debit_document = models.ForeignKey(ProviderDebitDocument)
+        unique_together = (('credit_document', 'debit_document',),)
     credit_document = models.ForeignKey(ProviderCreditDocument)
+    debit_document = models.ForeignKey(ProviderDebitDocument)
     matched_amount = models.DecimalField(max_digits=10, decimal_places=2)

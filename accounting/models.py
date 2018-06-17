@@ -22,7 +22,7 @@ class Account(models.Model):
     def __str__(self):
         return '%s (%s)' % (self.name, self.get_currency_display())
 
-    def update_balance(self):
+    def fix_balance(self):
         cursor = connection.cursor()
         try:
             cursor.execute(
@@ -42,6 +42,24 @@ class Account(models.Model):
         finally:
             cursor.close()
 
+    @classmethod
+    def fix_balances(cls):
+        cursor = connection.cursor()
+        try:
+            cursor.execute(
+                "UPDATE \
+                    accounting_account a \
+                SET \
+                    a.balance = (\
+                        SELECT \
+                            SUM(CASE WHEN movement_type = %s THEN 1 ELSE -1 END * amount) \
+                        FROM \
+                            accounting_operationmovement \
+                        WHERE \
+                            account_id = a.id\
+                    )", MOVEMENT_TYPE_INPUT)
+        finally:
+            cursor.close()
 
 class Operation(models.Model):
     class Meta:
@@ -80,4 +98,3 @@ class OperationMovement(models.Model):
     def delete(self, using=None, keep_parents=False):
         raise ValidationError(
             'Can not delete Movements')
-
