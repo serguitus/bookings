@@ -378,11 +378,51 @@ class FinanceService(object):
 
     @classmethod
     def save_agency_payment(cls, user, agency_payment):
-        pass
+        """
+        Saves Agency Payment
+        """
+        with transaction.atomic(savepoint=False):
+            # load and lock account
+            account = cls._load_locked_model_object(
+                pk=agency_payment.account_id, model_class=Account, allow_empty_pk=False)
+            db_agency_payment = cls._load_locked_model_object(
+                pk=agency_payment.pk, model_class=AgencyPayment)
+            # validate matches on status, currency or amount change
+            cls._validate_matches(
+                document=agency_payment,
+                db_document=db_agency_payment,
+                match_type=cls.MATCH_TYPE_AGENCY)
+            # manage saving
+            return cls._document_save(
+                user=user,
+                document=agency_payment,
+                db_document=db_agency_payment,
+                account=account,
+                movement_type=MOVEMENT_TYPE_INPUT)
 
     @classmethod
     def save_agency_devolution(cls, user, agency_devolution):
-        pass
+        """
+        Saves Agency Devolution
+        """
+        with transaction.atomic(savepoint=False):
+            # load and lock account
+            account = cls._load_locked_model_object(
+                pk=agency_devolution.account_id, model_class=Account, allow_empty_pk=False)
+            db_agency_devolution = cls._load_locked_model_object(
+                pk=agency_devolution.pk, model_class=AgencyDevolution)
+            # validate matches on status, currency or amount change
+            cls._validate_matches(
+                document=agency_devolution,
+                db_document=db_agency_devolution,
+                match_type=cls.MATCH_TYPE_AGENCY)
+            # manage saving
+            return cls._document_save(
+                user=user,
+                document=agency_devolution,
+                db_document=db_agency_devolution,
+                account=account,
+                movement_type=MOVEMENT_TYPE_OUTPUT)
 
     @classmethod
     def save_agency_discount(cls, user, agency_discount):
@@ -473,7 +513,27 @@ class FinanceService(object):
 
     @classmethod
     def save_provider_payment(cls, user, provider_payment):
-        pass
+        """
+        Saves Provider Payment
+        """
+        with transaction.atomic(savepoint=False):
+            # load and lock account
+            account = cls._load_locked_model_object(
+                pk=provider_payment.account_id, model_class=Account, allow_empty_pk=False)
+            db_provider_payment = cls._load_locked_model_object(
+                pk=provider_payment.pk, model_class=ProviderPayment)
+            # validate matches on status, currency or amount change
+            cls._validate_matches(
+                document=provider_payment,
+                db_document=db_provider_payment,
+                match_type=cls.MATCH_TYPE_PROVIDER)
+            # manage saving
+            return cls._document_save(
+                user=user,
+                document=provider_payment,
+                db_document=db_provider_payment,
+                account=account,
+                movement_type=MOVEMENT_TYPE_OUTPUT)
 
     @classmethod
     def save_provider_discount(cls, user, provider_discount):
@@ -496,7 +556,27 @@ class FinanceService(object):
 
     @classmethod
     def save_provider_devolution(cls, user, provider_devolution):
-        pass
+        """
+        Saves Provider Devolution
+        """
+        with transaction.atomic(savepoint=False):
+            # load and lock account
+            account = cls._load_locked_model_object(
+                pk=provider_devolution.account_id, model_class=Account, allow_empty_pk=False)
+            db_provider_devolution = cls._load_locked_model_object(
+                pk=provider_devolution.pk, model_class=ProviderDevolution)
+            # validate matches on status, currency or amount change
+            cls._validate_matches(
+                document=provider_devolution,
+                db_document=db_provider_devolution,
+                match_type=cls.MATCH_TYPE_PROVIDER)
+            # manage saving
+            return cls._document_save(
+                user=user,
+                document=provider_devolution,
+                db_document=db_provider_devolution,
+                account=account,
+                movement_type=MOVEMENT_TYPE_INPUT)
 
     @classmethod
     def save_provider_match(cls, provider_match):

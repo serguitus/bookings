@@ -493,11 +493,35 @@ class ProviderInvoice(ProviderDebitDocument):
         verbose_name = 'Provider Invoice'
         verbose_name_plural = 'Providers Invoices'
 
+    def fill_data(self):
+        self.document_type = DOC_TYPE_PROVIDER_INVOICE
+        provider = Provider.objects.get(pk=self.provider_id)
+        self.name = '%s - Provider Invoice from %s for %s %s' % (
+            self.date, provider, self.amount, self.get_currency_display())
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        self.fill_data()
+        # Call the real save() method
+        super(ProviderInvoice, self).save(force_insert, force_update, using, update_fields)
+
 
 class ProviderPayment(ProviderCreditDocument, AccountingDocument):
     class Meta:
         verbose_name = 'Provider Payment'
         verbose_name_plural = 'Providers Payments'
+
+    def fill_data(self):
+        self.document_type = DOC_TYPE_PROVIDER_PAYMENT
+        provider = Provider.objects.get(pk=self.provider_id)
+        self.name = '%s - Provider Payment from %s for %s %s' % (
+            self.date, provider, self.amount, self.get_currency_display())
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        self.fill_data()
+        # Call the real save() method
+        super(ProviderPayment, self).save(force_insert, force_update, using, update_fields)
 
 
 class ProviderDiscount(ProviderCreditDocument):
