@@ -341,7 +341,7 @@ class AgencyCurrency(models.Model):
     matched_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 
-class AgencyDocument(FinantialDocument):
+class AgencyDocument(FinantialDocument, MatchingDocument):
     class Meta:
         verbose_name = 'Agency Document'
         verbose_name_plural = 'Agencies Documents'
@@ -469,7 +469,7 @@ class ProviderCurrency(models.Model):
     matched_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 
-class ProviderDocument(FinantialDocument):
+class ProviderDocument(FinantialDocument, MatchingDocument):
     class Meta:
         verbose_name = 'Provider Document'
         verbose_name_plural = 'Providers Documents'

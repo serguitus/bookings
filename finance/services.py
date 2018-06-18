@@ -14,7 +14,7 @@ from accounting.services import AccountingService
 
 from finance.constants import (
     STATUS_READY,
-    ERROR_HAS_MATCH, ERROR_MATCH_AMOUNT, ERROR_NOT_READY,
+    ERROR_HAS_MATCH, ERROR_NOT_READY, ERROR_MATCH_AMOUNT, ERROR_MATCH_CURRENCY,
     ERROR_INVALID_MATCH, ERROR_MATCH_WITHOUT_AMOUNT, ERROR_DIFFERENT_DOCUMENTS)
 from finance.models import (
     Deposit, Withdraw, CurrencyExchange, Transfer,
@@ -29,8 +29,10 @@ class FinanceService(object):
     Finance Service
     """
 
-    LOAN_TYPE_ENTITY = 1
-    LOAN_TYPE_ACCOUNT = 2
+    MATCH_TYPE_ENTITY = 1
+    MATCH_TYPE_ACCOUNT = 2
+    MATCH_TYPE_AGENCY = 3
+    MATCH_TYPE_PROVIDER = 4
 
     @classmethod
     def save_deposit(cls, user, deposit):
@@ -147,11 +149,11 @@ class FinanceService(object):
                 pk=loan_entity_deposit.account_id, model_class=Account, allow_empty_pk=False)
             db_loan_entity_deposit = cls._load_locked_model_object(
                 pk=loan_entity_deposit.pk, model_class=LoanEntityDeposit)
-            # process matches on status or amount change
-            cls._process_loan_matches(
+            # validate matches on status, currency or amount change
+            cls._validate_matches(
                 document=loan_entity_deposit,
                 db_document=db_loan_entity_deposit,
-                loan_type=cls.LOAN_TYPE_ENTITY)
+                match_type=cls.MATCH_TYPE_ENTITY)
             # manage saving
             return cls._document_save(
                 user=user,
@@ -171,11 +173,11 @@ class FinanceService(object):
                 pk=loan_entity_withdraw.account_id, model_class=Account, allow_empty_pk=False)
             db_loan_entity_withdraw = cls._load_locked_model_object(
                 pk=loan_entity_withdraw.pk, model_class=LoanEntityWithdraw)
-            # process matches on status or amount change
-            cls._process_loan_matches(
+            # validate matches on status, currency or amount change
+            cls._validate_matches(
                 document=loan_entity_withdraw,
                 db_document=db_loan_entity_withdraw,
-                loan_type=cls.LOAN_TYPE_ENTITY)
+                match_type=cls.MATCH_TYPE_ENTITY)
             # manage saving
             return cls._document_save(
                 user=user,
@@ -253,11 +255,11 @@ class FinanceService(object):
             db_other_account_id = None
             if db_loan_account_deposit:
                 db_other_account_id = db_loan_account_deposit.loan_account_id
-            # process matches on status or amount change
-            cls._process_loan_matches(
+            # validate matches on status, currency or amount change
+            cls._validate_matches(
                 document=loan_account_deposit,
                 db_document=db_loan_account_deposit,
-                loan_type=cls.LOAN_TYPE_ACCOUNT)
+                match_type=cls.MATCH_TYPE_ACCOUNT)
             # manage saving
             return cls._document_save(
                 user=user,
@@ -289,11 +291,11 @@ class FinanceService(object):
             db_other_account_id = None
             if db_loan_account_withdraw:
                 db_other_account_id = db_loan_account_withdraw.loan_account_id
-            # process matches on status or amount change
-            cls._process_loan_matches(
+            # validate matches on status, currency or amount change
+            cls._validate_matches(
                 document=loan_account_withdraw,
                 db_document=db_loan_account_withdraw,
-                loan_type=cls.LOAN_TYPE_ACCOUNT)
+                match_type=cls.MATCH_TYPE_ACCOUNT)
             # manage saving
             return cls._document_save(
                 user=user,
@@ -356,7 +358,23 @@ class FinanceService(object):
 
     @classmethod
     def save_agency_invoice(cls, user, agency_invoice):
-        pass
+        """
+        Saves Agency Invoice
+        """
+        with transaction.atomic(savepoint=False):
+            db_agency_invoice = cls._load_locked_model_object(
+                pk=agency_invoice.pk, model_class=AgencyInvoice)
+            # validate matches on status, currency or amount change
+            cls._validate_matches(
+                document=agency_invoice,
+                db_document=db_agency_invoice,
+                match_type=cls.MATCH_TYPE_AGENCY)
+            # manage saving
+            return cls._document_save(
+                user=user,
+                document=agency_invoice,
+                db_document=db_agency_invoice)
+
 
     @classmethod
     def save_agency_payment(cls, user, agency_payment):
@@ -368,7 +386,22 @@ class FinanceService(object):
 
     @classmethod
     def save_agency_discount(cls, user, agency_discount):
-        pass
+        """
+        Saves Agency Discount
+        """
+        with transaction.atomic(savepoint=False):
+            db_agency_discount = cls._load_locked_model_object(
+                pk=agency_discount.pk, model_class=AgencyDiscount)
+            # validate matches on status, currency or amount change
+            cls._validate_matches(
+                document=agency_discount,
+                db_document=db_agency_discount,
+                match_type=cls.MATCH_TYPE_AGENCY)
+            # manage saving
+            return cls._document_save(
+                user=user,
+                document=agency_discount,
+                db_document=db_agency_discount)
 
     @classmethod
     def save_agency_match(cls, agency_match):
@@ -420,7 +453,22 @@ class FinanceService(object):
 
     @classmethod
     def save_provider_invoice(cls, user, provider_invoice):
-        pass
+        """
+        Saves Provider Invoice
+        """
+        with transaction.atomic(savepoint=False):
+            db_provider_invoice = cls._load_locked_model_object(
+                pk=provider_invoice.pk, model_class=ProviderInvoice)
+            # validate matches on status, currency or amount change
+            cls._validate_matches(
+                document=provider_invoice,
+                db_document=db_provider_invoice,
+                match_type=cls.MATCH_TYPE_PROVIDER)
+            # manage saving
+            return cls._document_save(
+                user=user,
+                document=provider_invoice,
+                db_document=db_provider_invoice)
 
 
     @classmethod
@@ -429,7 +477,22 @@ class FinanceService(object):
 
     @classmethod
     def save_provider_discount(cls, user, provider_discount):
-        pass
+        """
+        Saves Provider Discount
+        """
+        with transaction.atomic(savepoint=False):
+            db_provider_discount = cls._load_locked_model_object(
+                pk=provider_discount.pk, model_class=ProviderDiscount)
+            # validate matches on status, currency or amount change
+            cls._validate_matches(
+                document=provider_discount,
+                db_document=db_provider_discount,
+                match_type=cls.MATCH_TYPE_PROVIDER)
+            # manage saving
+            return cls._document_save(
+                user=user,
+                document=provider_discount,
+                db_document=db_provider_discount)
 
     @classmethod
     def save_provider_devolution(cls, user, provider_devolution):
@@ -498,37 +561,37 @@ class FinanceService(object):
 
     @classmethod
     def _document_save(
-            cls, user, document, db_document, account, movement_type,
+            cls, user, document, db_document, account=None, movement_type=None,
             other_account=None, db_other_account_id=None, other_amount=None, db_other_amount=None):
-        document.currency = account.currency
         document.fill_data()
-        concept = document.document_type
-        detail = document.name
-        current_datetime=timezone.now()
+        current_datetime = timezone.now()
         # manage operations
-        operations = cls._manage_operations(
-            user=user,
-            document=document,
-            db_document=db_document,
-            current_datetime=current_datetime,
-            concept=concept,
-            detail=detail,
-            account=account,
-            movement_type=movement_type,
-            other_account=other_account,
-            db_other_account_id=db_other_account_id,
-            other_amount=other_amount,
-            db_other_amount=db_other_amount)
+        if account:
+            document.currency = account.currency
+            concept = document.document_type
+            detail = document.name
+            operations = cls._manage_operations(
+                user=user,
+                document=document,
+                db_document=db_document,
+                current_datetime=current_datetime,
+                concept=concept,
+                detail=detail,
+                account=account,
+                movement_type=movement_type,
+                other_account=other_account,
+                db_other_account_id=db_other_account_id,
+                other_amount=other_amount,
+                db_other_amount=db_other_amount)
         # save documment
-        document.concept = concept
-        document.name = detail
         document.save()
         # manage accounting history
-        for operation in operations:
-            accounting_history = AccountingDocumentHistory(
-                document=document,
-                operation=operation)
-            accounting_history.save()
+        if account:
+            for operation in operations:
+                accounting_history = AccountingDocumentHistory(
+                    document=document,
+                    operation=operation)
+                accounting_history.save()
         # manage finantial history
         cls._finantial_history(
             user=user,
@@ -741,26 +804,35 @@ class FinanceService(object):
         return (not db_document) or (db_document.status != document.status)
 
     @classmethod
-    def _process_loan_matches(cls, document, db_document, loan_type):
+    def _validate_matches(cls, document, db_document, match_type):
         # verify not new
         if db_document and (db_document.status == STATUS_READY):
-            # process status change
+            # validate status change
             if document.status != STATUS_READY:
                 # verifies matches
-                if cls._loan_has_matches(document=document, loan_type=loan_type):
+                if cls._document_has_matches(document=document, match_type=match_type):
                     raise ValidationError(ERROR_HAS_MATCH)
-            # process amount change
+            # validate currency changed
+            if db_document.currency != document.currency:
+                # verifies matches
+                if cls._document_has_matches(document=document, match_type=match_type):
+                    raise ValidationError(ERROR_MATCH_CURRENCY)
+            # validate amount change
             if db_document.amount > document.amount:
                 # verifies matched amount
                 if document.matched_amount > document.amount:
                     raise ValidationError(ERROR_MATCH_AMOUNT)
 
     @classmethod
-    def _loan_has_matches(cls, document, loan_type):
-        if loan_type == cls.LOAN_TYPE_ENTITY:
+    def _document_has_matches(cls, document, match_type):
+        if match_type == cls.MATCH_TYPE_ENTITY:
             return document.loanentitymatch_set.count() > 0
-        if loan_type == cls.LOAN_TYPE_ACCOUNT:
+        if match_type == cls.MATCH_TYPE_ACCOUNT:
             return document.loanaccountmatch_set.count() > 0
+        if match_type == cls.MATCH_TYPE_AGENCY:
+            return document.agencydocumentmatch_set.count() > 0
+        if match_type == cls.MATCH_TYPE_PROVIDER:
+            return document.providerdocumentmatch_set.count() > 0
 
     @classmethod
     def _save_loan_entity_match(cls, loan_entity_match):
@@ -869,7 +941,8 @@ class FinanceService(object):
         if direction > 0:
             document.matched_amount = document.matched_amount + amount
             if document.amount < document.matched_amount:
-                raise ValidationError(ERROR_MATCH_WITHOUT_AMOUNT % (document.amount, document.matched_amount))
+                raise ValidationError(
+                    ERROR_MATCH_WITHOUT_AMOUNT % (document.amount, document.matched_amount))
             document.save()
         if direction < 0:
             document.matched_amount = document.matched_amount - amount

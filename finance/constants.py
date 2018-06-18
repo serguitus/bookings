@@ -43,8 +43,9 @@ DOC_TYPES = (
     (DOC_TYPE_PROVIDER_DISCOUNT, 'Provider Discount'),
 )
 
-ERROR_HAS_MATCH = 'Can not change status from Ready if Loan document has matches'
+ERROR_HAS_MATCH = 'Can not change status from Ready if document has matches'
 ERROR_MATCH_AMOUNT = 'Can not decrease amount below matched amount'
+ERROR_MATCH_CURRENCY = 'Can not change currency if document has matches '
 ERROR_NOT_READY = '%s Status must be Ready'
 ERROR_MATCH_WITHOUT_AMOUNT = 'Amount (%s) Insufficient for total matching (%s)'
 ERROR_INVALID_MATCH = 'Invalid total matching (%s)'
