@@ -1,4 +1,4 @@
-from accounting.tests import AccountingBaseTestCase
+from accounting.tests.tests_services import AccountingBaseTestCase
 
 class FinanceBaseTestCase(AccountingBaseTestCase):
 

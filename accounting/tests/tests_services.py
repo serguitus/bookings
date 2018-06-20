@@ -23,7 +23,7 @@ class AccountingBaseTestCase(TestCase):
         self.assertEqual(test_movement.movement_type, test_movement_type)
         self.assertEqual(test_movement.amount, test_amount)
 
-class AccountingServiceTestCase(AccountingBaseTestCase):
+class AccountingServicesTestCase(AccountingBaseTestCase):
 
     test_user = None
 

@@ -25,20 +25,16 @@ class Account(models.Model):
     def fix_balance(self):
         cursor = connection.cursor()
         try:
-            cursor.execute(
-                "UPDATE \
-                    accounting_account a \
-                SET \
-                    a.balance = (\
-                        SELECT \
-                            SUM(CASE WHEN movement_type = %s THEN 1 ELSE -1 END * amount) \
-                        FROM \
-                            accounting_operationmovement \
-                        WHERE \
-                            account_id = a.id\
-                    )\
-                WHERE \
-                    id = %s", [MOVEMENT_TYPE_INPUT, self.pk])
+            cursor.execute("""
+                UPDATE accounting_account a SET a.balance = (
+                    SELECT COALESCE(
+                        SUM(CASE WHEN movement_type = %s THEN 1 ELSE -1 END * amount),
+                        0)
+                    FROM accounting_operationmovement
+                    WHERE account_id = a.id)
+                WHERE id = %s
+                """, [MOVEMENT_TYPE_INPUT, self.pk])
+            self.refresh_from_db()
         finally:
             cursor.close()
 
@@ -46,18 +42,14 @@ class Account(models.Model):
     def fix_balances(cls):
         cursor = connection.cursor()
         try:
-            cursor.execute(
-                "UPDATE \
-                    accounting_account a \
-                SET \
-                    a.balance = (\
-                        SELECT \
-                            SUM(CASE WHEN movement_type = %s THEN 1 ELSE -1 END * amount) \
-                        FROM \
-                            accounting_operationmovement \
-                        WHERE \
-                            account_id = a.id\
-                    )", MOVEMENT_TYPE_INPUT)
+            cursor.execute("""
+                UPDATE accounting_account a SET a.balance = (
+                    SELECT COALESCE(
+                        SUM(CASE WHEN movement_type = %s THEN 1 ELSE -1 END * amount),
+                        0)
+                    FROM accounting_operationmovement
+                    WHERE account_id = a.id)
+            """, MOVEMENT_TYPE_INPUT)
         finally:
             cursor.close()
 
@@ -86,6 +78,9 @@ class OperationMovement(models.Model):
     class Meta:
         verbose_name = 'Operation Movement'
         verbose_name_plural = 'Operations Movements'
+        indexes = [
+            models.Index(fields=['account']),
+        ]        
     operation = models.ForeignKey(Operation)
     movement_type = models.CharField(max_length=2, choices=MOVEMENT_TYPES)
     account = models.ForeignKey(Account)

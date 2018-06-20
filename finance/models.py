@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import connection, models
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.utils.timezone import now
@@ -193,6 +193,145 @@ class LoanEntityCurrency(models.Model):
     def __str__(self):
         return '%s (%s)' % (self.name, self.get_currency_display())
 
+    def fix_credit_amount(self):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_loanentitycurrency lec SET lec.credit_amount = (
+                    SELECT SUM(fd.amount)
+                    FROM finance_loanentitydeposit ledd
+                        INNER JOIN finance_loanentitydocument led
+                            ON led.finantialdocument_ptr_id = ledd.loanentitydocument_ptr_id
+                        INNER JOIN finance_finantialdocument fd
+                            ON fd.id = led.finantialdocument_ptr_id
+                    WHERE led.loan_entity_id = lec.loan_entity_id
+                        AND fd.currency = lec.currency
+                        AND fd.status = %s)
+                WHERE lec.id = %s
+                """, [STATUS_READY, self.pk])
+            self.refresh_from_db()
+        finally:
+            cursor.close()
+
+    @classmethod
+    def fix_credit_amounts(cls):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_loanentitycurrency lec SET lec.credit_amount = (
+                    SELECT SUM(fd.amount)
+                    FROM finance_loanentitydeposit ledd
+                        INNER JOIN finance_loanentitydocument led
+                            ON led.finantialdocument_ptr_id = ledd.loanentitydocument_ptr_id
+                        INNER JOIN finance_finantialdocument fd
+                            ON fd.id = led.finantialdocument_ptr_id
+                    WHERE led.loan_entity_id = lec.loan_entity_id
+                        AND fd.currency = lec.currency
+                        AND fd.status = %s)
+            """, [STATUS_READY])
+        finally:
+            cursor.close()
+
+    def fix_debit_amount(self):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_loanentitycurrency lec SET lec.credit_amount = (
+                    SELECT SUM(fd.amount)
+                    FROM finance_loanentitywithdraw lew
+                        INNER JOIN finance_loanentitydocument led
+                            ON led.finantialdocument_ptr_id = lew.loanentitydocument_ptr_id
+                        INNER JOIN finance_finantialdocument fd
+                            ON fd.id = led.finantialdocument_ptr_id
+                    WHERE led.loan_entity_id = lec.loan_entity_id
+                        AND fd.currency = lec.currency
+                        AND fd.status = %s)
+                WHERE lec.id = %s
+                """, [STATUS_READY, self.pk])
+            self.refresh_from_db()
+        finally:
+            cursor.close()
+
+    @classmethod
+    def fix_debit_amounts(cls):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_loanentitycurrency lec SET lec.credit_amount = (
+                    SELECT SUM(fd.amount)
+                    FROM finance_loanentitywithdraw lew
+                        INNER JOIN finance_loanentitydocument led
+                            ON led.finantialdocument_ptr_id = lew.loanentitydocument_ptr_id
+                        INNER JOIN finance_finantialdocument fd
+                            ON fd.id = led.finantialdocument_ptr_id
+                    WHERE led.loan_entity_id = lec.loan_entity_id
+                        AND fd.currency = lec.currency
+                        AND fd.status = %s)
+            """, [STATUS_READY])
+        finally:
+            cursor.close()
+
+    def fix_matched_amount(self):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_loanentitycurrency lec SET lec.matched_amount = (
+                    SELECT SUM(lem.matched_amount)
+                    FROM finance_loanentitymatch lem
+                        INNER JOIN finance_loanentitydeposit ledd
+                            ON ledd.loanentitydocument_ptr_id = lem.loan_entity_deposit_id
+                        INNER JOIN finance_loanentitydocument led1
+                            ON led1.finantialdocument_ptr_id = ledd.loanentitydocument_ptr_id
+                        INNER JOIN finance_finantialdocument fd1
+                            ON fd1.id = led1.finantialdocument_ptr_id
+                        INNER JOIN finance_loanentitywithdraw lew
+                            ON lew.loanentitydocument_ptr_id = lem.loan_entity_withdraw_id
+                        INNER JOIN finance_loanentitydocument led2
+                            ON led2.finantialdocument_ptr_id = lew.loanentitydocument_ptr_id
+                        INNER JOIN finance_finantialdocument fd2
+                            ON fd2.id = led2.finantialdocument_ptr_id
+                    WHERE led1.loan_entity_id = lec.loan_entity_id
+                        AND led2.loan_entity_id = lec.loan_entity_id
+                        AND fd1.currency = lec.currency
+                        AND fd2.currency = lec.currency
+                        AND fd1.status = %s
+                        AND fd2.status = fd1.status)
+                WHERE lec.id = %s
+                """, [STATUS_READY, self.pk])
+            self.refresh_from_db()
+        finally:
+            cursor.close()
+
+    @classmethod
+    def fix_matched_amounts(cls):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_loanentitycurrency lec SET lec.matched_amount = (
+                    SELECT SUM(lem.matched_amount)
+                    FROM finance_loanentitymatch lem
+                        INNER JOIN finance_loanentitydeposit ledd
+                            ON ledd.loanentitydocument_ptr_id = lem.loan_entity_deposit_id
+                        INNER JOIN finance_loanentitydocument led1
+                            ON led1.finantialdocument_ptr_id = ledd.loanentitydocument_ptr_id
+                        INNER JOIN finance_finantialdocument fd1
+                            ON fd1.id = led1.finantialdocument_ptr_id
+                        INNER JOIN finance_loanentitywithdraw lew
+                            ON lew.loanentitydocument_ptr_id = lem.loan_entity_withdraw_id
+                        INNER JOIN finance_loanentitydocument led2
+                            ON led2.finantialdocument_ptr_id = lew.loanentitydocument_ptr_id
+                        INNER JOIN finance_finantialdocument fd2
+                            ON fd2.id = led2.finantialdocument_ptr_id
+                    WHERE led1.loan_entity_id = lec.loan_entity_id
+                        AND led2.loan_entity_id = lec.loan_entity_id
+                        AND fd1.currency = lec.currency
+                        AND fd2.currency = lec.currency
+                        AND fd1.status = %s
+                        AND fd2.status = fd1.status)
+            """, [STATUS_READY])
+        finally:
+            cursor.close()
+
 
 class LoanEntityDocument(LoanDocument):
     class Meta:
@@ -219,6 +358,43 @@ class LoanEntityDeposit(LoanEntityDocument):
         # Call the real save() method
         super(LoanEntityDeposit, self).save(force_insert, force_update, using, update_fields)
 
+    def fix_matched_amount(self):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_loanentitydocument led SET led.matched_amount = (
+                    SELECT CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lem.matched_amount) END
+                    FROM finance_loanentitymatch lem
+                        INNER JOIN finance_finantialdocument fd1
+                            ON fd1.id = lem.loan_entity_deposit_id
+                        INNER JOIN finance_finantialdocument fd2
+                            ON fd2.id = lem.loan_entity_withdraw_id
+                    WHERE fd1.id = led.finantialdocument_ptr_id
+                        AND fd2.status = fd1.status)
+                WHERE led.finantialdocument_ptr_id = %s
+                """, [STATUS_READY, self.pk])
+            self.refresh_from_db()
+        finally:
+            cursor.close()
+
+    @classmethod
+    def fix_matched_amounts(cls):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_loanentitydocument led SET led.matched_amount = (
+                    SELECT CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lem.matched_amount) END
+                    FROM finance_loanentitymatch lem
+                        INNER JOIN finance_finantialdocument fd1
+                            ON fd1.id = lem.loan_entity_deposit_id
+                        INNER JOIN finance_finantialdocument fd2
+                            ON fd2.id = lem.loan_entity_withdraw_id
+                    WHERE fd1.id = led.finantialdocument_ptr_id
+                        AND fd2.status = fd1.status)
+            """, [STATUS_READY])
+        finally:
+            cursor.close()
+
 
 class LoanEntityWithdraw(LoanEntityDocument):
     class Meta:
@@ -237,6 +413,43 @@ class LoanEntityWithdraw(LoanEntityDocument):
         self.fill_data()
         # Call the real save() method
         super(LoanEntityWithdraw, self).save(force_insert, force_update, using, update_fields)
+
+    def fix_matched_amount(self):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_loanentitydocument led SET led.matched_amount = (
+                    SELECT CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lem.matched_amount) END
+                    FROM finance_loanentitymatch lem
+                        INNER JOIN finance_finantialdocument fd1
+                            ON fd1.id = lem.loan_entity_withdraw_id
+                        INNER JOIN finance_finantialdocument fd2
+                            ON fd2.id = lem.loan_entity_deposit_id
+                    WHERE fd1.id = led.finantialdocument_ptr_id
+                        AND fd2.status = fd1.status)
+                WHERE led.finantialdocument_ptr_id = %s
+                """, [STATUS_READY, self.pk])
+            self.refresh_from_db()
+        finally:
+            cursor.close()
+
+    @classmethod
+    def fix_matched_amounts(cls):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_loanentitydocument led SET led.matched_amount = (
+                    SELECT CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lem.matched_amount) END
+                    FROM finance_loanentitymatch lem
+                        INNER JOIN finance_finantialdocument fd1
+                            ON fd1.id = lem.loan_entity_withdraw_id
+                        INNER JOIN finance_finantialdocument fd2
+                            ON fd2.id = lem.loan_entity_deposit_id
+                    WHERE fd1.id = led.finantialdocument_ptr_id
+                        AND fd2.status = fd1.status)
+            """, [STATUS_READY])
+        finally:
+            cursor.close()
 
 
 class LoanEntityMatch(models.Model):
@@ -258,6 +471,137 @@ class LoanAccount(models.Model):
     credit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     debit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     matched_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    def fix_credit_amount(self):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_loanaccount la SET la.credit_amount = (
+                    SELECT SUM(fd.amount)
+                    FROM finance_loanaccountdeposit ladd
+                        INNER JOIN finance_loanaccountdocument lad
+                            ON lad.finantialdocument_ptr_id = ladd.loanaccountdocument_ptr_id
+                        INNER JOIN finance_finantialdocument fd
+                            ON fd.id = lad.finantialdocument_ptr_id
+                    WHERE lad.loan_account_id = la.loan_account_id
+                        AND fd.status = %s)
+                WHERE la.id = %s
+                """, [STATUS_READY, self.pk])
+            self.refresh_from_db()
+        finally:
+            cursor.close()
+
+    @classmethod
+    def fix_credit_amounts(cls):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_loanaccount la SET la.credit_amount = (
+                    SELECT SUM(fd.amount)
+                    FROM finance_loanaccountdeposit ladd
+                        INNER JOIN finance_loanaccountdocument lad
+                            ON lad.finantialdocument_ptr_id = ladd.loanaccountdocument_ptr_id
+                        INNER JOIN finance_finantialdocument fd
+                            ON fd.id = lad.finantialdocument_ptr_id
+                    WHERE lad.loan_account_id = la.loan_account_id
+                        AND fd.status = %s)
+            """, [STATUS_READY])
+        finally:
+            cursor.close()
+
+    def fix_debit_amount(self):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_loanaccount la SET la.debit_amount = (
+                    SELECT SUM(fd.amount)
+                    FROM finance_loanaccountwithdraw law
+                        INNER JOIN finance_loanaccountdocument lad
+                            ON lad.finantialdocument_ptr_id = law.loanaccountdocument_ptr_id
+                        INNER JOIN finance_finantialdocument fd
+                            ON fd.id = lad.finantialdocument_ptr_id
+                    WHERE lad.loan_account_id = la.loan_account_id
+                        AND fd.status = %s)
+                WHERE la.id = %s
+                """, [STATUS_READY, self.pk])
+            self.refresh_from_db()
+        finally:
+            cursor.close()
+
+    @classmethod
+    def fix_debit_amounts(cls):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_loanaccount la SET la.debit_amount = (
+                    SELECT SUM(fd.amount)
+                    FROM finance_loanaccountwithdraw law
+                        INNER JOIN finance_loanaccountdocument lad
+                            ON lad.finantialdocument_ptr_id = law.loanaccountdocument_ptr_id
+                        INNER JOIN finance_finantialdocument fd
+                            ON fd.id = lad.finantialdocument_ptr_id
+                    WHERE lad.loan_account_id = la.loan_account_id
+                        AND fd.status = %s)
+            """, [STATUS_READY])
+        finally:
+            cursor.close()
+
+    def fix_matched_amount(self):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_loanaccount la SET la.matched_amount = (
+                    SELECT SUM(lam.matched_amount)
+                    FROM finance_loanaccountmatch lam
+                        INNER JOIN finance_loanaccountdeposit ladd
+                            ON ladd.loanaccountdocument_ptr_id = lam.loan_account_deposit_id
+                        INNER JOIN finance_loanaccountdocument lad1
+                            ON lad1.finantialdocument_ptr_id = ladd.loanaccountdocument_ptr_id
+                        INNER JOIN finance_finantialdocument fd1
+                            ON fd1.id = lad1.finantialdocument_ptr_id
+                        INNER JOIN finance_loanaccountwithdraw law
+                            ON law.loanaccountdocument_ptr_id = lam.loan_account_withdraw_id
+                        INNER JOIN finance_loanaccountdocument lad2
+                            ON lad2.finantialdocument_ptr_id = law.loanaccountdocument_ptr_id
+                        INNER JOIN finance_finantialdocument fd2
+                            ON fd2.id = lad2.finantialdocument_ptr_id
+                    WHERE lad1.loan_account_id = la.loan_account_id
+                        AND lad2.loan_account_id = la.loan_account_id
+                        AND fd1.status = %s
+                        AND fd2.status = fd1.status)
+                WHERE la.id = %s
+                """, [STATUS_READY, self.pk])
+            self.refresh_from_db()
+        finally:
+            cursor.close()
+
+    @classmethod
+    def fix_matched_amounts(cls):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_loanaccount la SET la.matched_amount = (
+                    SELECT SUM(lam.matched_amount)
+                    FROM finance_loanaccountmatch lam
+                        INNER JOIN finance_loanaccountdeposit ladd
+                            ON ladd.loanaccountdocument_ptr_id = lam.loan_account_deposit_id
+                        INNER JOIN finance_loanaccountdocument lad1
+                            ON lad1.finantialdocument_ptr_id = ladd.loanaccountdocument_ptr_id
+                        INNER JOIN finance_finantialdocument fd1
+                            ON fd1.id = lad1.finantialdocument_ptr_id
+                        INNER JOIN finance_loanaccountwithdraw law
+                            ON law.loanaccountdocument_ptr_id = lam.loan_account_withdraw_id
+                        INNER JOIN finance_loanaccountdocument lad2
+                            ON lad2.finantialdocument_ptr_id = law.loanentitydocument_ptr_id
+                        INNER JOIN finance_finantialdocument fd2
+                            ON fd2.id = lad2.finantialdocument_ptr_id
+                    WHERE lad1.loan_account_id = la.loan_account_id
+                        AND lad2.loan_account_id = la.loan_account_id
+                        AND fd1.status = %s
+                        AND fd2.status = fd1.status)
+            """, [STATUS_READY])
+        finally:
+            cursor.close()
 
 
 class LoanAccountDocument(LoanDocument):
@@ -284,6 +628,43 @@ class LoanAccountDeposit(LoanAccountDocument):
         # Call the real save() method
         super(LoanAccountDeposit, self).save(force_insert, force_update, using, update_fields)
 
+    def fix_matched_amount(self):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_loanaccountdocument lad SET lad.matched_amount = (
+                    SELECT CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lam.matched_amount) END
+                    FROM finance_loanaccountmatch lam
+                        INNER JOIN finance_finantialdocument fd1
+                            ON fd1.id = lam.loan_account_deposit_id
+                        INNER JOIN finance_finantialdocument fd2
+                            ON fd2.id = lam.loan_account_withdraw_id
+                    WHERE fd1.id = lad.finantialdocument_ptr_id
+                        AND fd2.status = fd1.status)
+                WHERE lad.finantialdocument_ptr_id = %s
+                """, [STATUS_READY, self.pk])
+            self.refresh_from_db()
+        finally:
+            cursor.close()
+
+    @classmethod
+    def fix_matched_amounts(cls):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_loanaccountdocument lad SET lad.matched_amount = (
+                    SELECT CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lam.matched_amount) END
+                    FROM finance_loanaccountmatch lam
+                        INNER JOIN finance_finantialdocument fd1
+                            ON fd1.id = lam.loan_account_deposit_id
+                        INNER JOIN finance_finantialdocument fd2
+                            ON fd2.id = lam.loan_account_withdraw_id
+                    WHERE fd1.id = lad.finantialdocument_ptr_id
+                        AND fd2.status = fd1.status)
+            """, [STATUS_READY])
+        finally:
+            cursor.close()
+
 
 class LoanAccountWithdraw(LoanAccountDocument):
     class Meta:
@@ -302,6 +683,43 @@ class LoanAccountWithdraw(LoanAccountDocument):
         self.fill_data()
         # Call the real save() method
         super(LoanAccountWithdraw, self).save(force_insert, force_update, using, update_fields)
+
+    def fix_matched_amount(self):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_loanaccountdocument lad SET lad.matched_amount = (
+                    SELECT CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lam.matched_amount) END
+                    FROM finance_loanaccountmatch lam
+                        INNER JOIN finance_finantialdocument fd1
+                            ON fd1.id = lam.loan_account_withdraw_id
+                        INNER JOIN finance_finantialdocument fd2
+                            ON fd2.id = lam.loan_account_deposit_id
+                    WHERE fd1.id = lad.finantialdocument_ptr_id
+                        AND fd2.status = fd1.status)
+                WHERE lad.finantialdocument_ptr_id = %s
+                """, [STATUS_READY, self.pk])
+            self.refresh_from_db()
+        finally:
+            cursor.close()
+
+    @classmethod
+    def fix_matched_amounts(cls):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_loanaccountdocument lad SET lad.matched_amount = (
+                    SELECT CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lam.matched_amount) END
+                    FROM finance_loanaccountmatch lam
+                        INNER JOIN finance_finantialdocument fd1
+                            ON fd1.id = lam.loan_account_withdraw_id
+                        INNER JOIN finance_finantialdocument fd2
+                            ON fd2.id = lam.loan_account_deposit_id
+                    WHERE fd1.id = lad.finantialdocument_ptr_id
+                        AND fd2.status = fd1.status)
+            """, [STATUS_READY])
+        finally:
+            cursor.close()
 
 
 class LoanAccountMatch(models.Model):
