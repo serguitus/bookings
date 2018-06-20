@@ -787,11 +787,93 @@ class AgencyDebitDocument(AgencyDocument):
         verbose_name = 'Agency Debit Document'
         verbose_name_plural = 'Agencies Debits Documents'
 
+    def fix_matched_amount(self):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_agencydocument ad SET ad.matched_amount = (
+                    SELECT COALESCE(
+                        CASE WHEN fd1.status != %s THEN 0 ELSE SUM(adm.matched_amount) END,
+                        0)
+                    FROM finance_agencydocumentmatch adm
+                        INNER JOIN finance_finantialdocument fd1
+                            ON fd1.id = adm.debit_document_id
+                        INNER JOIN finance_finantialdocument fd2
+                            ON fd2.id = adm.credit_document_id
+                    WHERE fd1.id = ad.finantialdocument_ptr_id
+                        AND fd2.status = fd1.status)
+                WHERE ad.finantialdocument_ptr_id = %s
+                """, [STATUS_READY, self.pk])
+            self.refresh_from_db()
+        finally:
+            cursor.close()
+
+    @classmethod
+    def fix_matched_amounts(cls):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_agencydocument ad SET ad.matched_amount = (
+                    SELECT COALESCE(
+                        CASE WHEN fd1.status != %s THEN 0 ELSE SUM(adm.matched_amount) END,
+                        0)
+                    FROM finance_agencydocumentmatch adm
+                        INNER JOIN finance_finantialdocument fd1
+                            ON fd1.id = adm.debdit_document_id
+                        INNER JOIN finance_finantialdocument fd2
+                            ON fd2.id = adm.credit_document_id
+                    WHERE fd1.id = ad.finantialdocument_ptr_id
+                        AND fd2.status = fd1.status)
+                """, [STATUS_READY])
+        finally:
+            cursor.close()
+
 
 class AgencyCreditDocument(AgencyDocument):
     class Meta:
         verbose_name = 'Agency Credit Document'
         verbose_name_plural = 'Agencies Credits Documents'
+
+    def fix_matched_amount(self):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_agencydocument ad SET ad.matched_amount = (
+                    SELECT COALESCE(
+                        CASE WHEN fd1.status != %s THEN 0 ELSE SUM(adm.matched_amount) END,
+                        0)
+                    FROM finance_agencydocumentmatch adm
+                        INNER JOIN finance_finantialdocument fd1
+                            ON fd1.id = adm.credit_document_id
+                        INNER JOIN finance_finantialdocument fd2
+                            ON fd2.id = adm.debit_document_id
+                    WHERE fd1.id = ad.finantialdocument_ptr_id
+                        AND fd2.status = fd1.status)
+                WHERE ad.finantialdocument_ptr_id = %s
+                """, [STATUS_READY, self.pk])
+            self.refresh_from_db()
+        finally:
+            cursor.close()
+
+    @classmethod
+    def fix_matched_amounts(cls):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_agencydocument ad SET ad.matched_amount = (
+                    SELECT COALESCE(
+                        CASE WHEN fd1.status != %s THEN 0 ELSE SUM(adm.matched_amount) END,
+                        0)
+                    FROM finance_agencydocumentmatch adm
+                        INNER JOIN finance_finantialdocument fd1
+                            ON fd1.id = adm.credit_document_id
+                        INNER JOIN finance_finantialdocument fd2
+                            ON fd2.id = adm.debit_document_id
+                    WHERE fd1.id = ad.finantialdocument_ptr_id
+                        AND fd2.status = fd1.status)
+                """, [STATUS_READY])
+        finally:
+            cursor.close()
 
 
 class AgencyInvoice(AgencyDebitDocument):
@@ -811,9 +893,6 @@ class AgencyInvoice(AgencyDebitDocument):
         # Call the real save() method
         super(AgencyInvoice, self).save(force_insert, force_update, using, update_fields)
 
-    def fix_matched_amount(self):
-        pass
-
 
 class AgencyPayment(AgencyCreditDocument, AccountingDocument):
     class Meta:
@@ -831,9 +910,6 @@ class AgencyPayment(AgencyCreditDocument, AccountingDocument):
         self.fill_data()
         # Call the real save() method
         super(AgencyPayment, self).save(force_insert, force_update, using, update_fields)
-
-    def fix_matched_amount(self):
-        pass
 
 
 class AgencyDiscount(AgencyCreditDocument):
@@ -853,9 +929,6 @@ class AgencyDiscount(AgencyCreditDocument):
         # Call the real save() method
         super(AgencyDiscount, self).save(force_insert, force_update, using, update_fields)
 
-    def fix_matched_amount(self):
-        pass
-
 
 class AgencyDevolution(AgencyDebitDocument, AccountingDocument):
     class Meta:
@@ -873,9 +946,6 @@ class AgencyDevolution(AgencyDebitDocument, AccountingDocument):
         self.fill_data()
         # Call the real save() method
         super(AgencyDevolution, self).save(force_insert, force_update, using, update_fields)
-
-    def fix_matched_amount(self):
-        pass
 
 
 class AgencyDocumentMatch(models.Model):
@@ -927,11 +997,93 @@ class ProviderDebitDocument(ProviderDocument):
         verbose_name = 'Provider Debit Document'
         verbose_name_plural = 'Providers Debits Documents'
 
+    def fix_matched_amount(self):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_providerdocument pd SET pd.matched_amount = (
+                    SELECT COALESCE(
+                        CASE WHEN fd1.status != %s THEN 0 ELSE SUM(pdm.matched_amount) END,
+                        0)
+                    FROM finance_providerdocumentmatch pdm
+                        INNER JOIN finance_finantialdocument fd1
+                            ON fd1.id = pdm.debit_document_id
+                        INNER JOIN finance_finantialdocument fd2
+                            ON fd2.id = pdm.credit_document_id
+                    WHERE fd1.id = pd.finantialdocument_ptr_id
+                        AND fd2.status = fd1.status)
+                WHERE pd.finantialdocument_ptr_id = %s
+                """, [STATUS_READY, self.pk])
+            self.refresh_from_db()
+        finally:
+            cursor.close()
+
+    @classmethod
+    def fix_matched_amounts(cls):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_providerdocument pd SET pd.matched_amount = (
+                    SELECT COALESCE(
+                        CASE WHEN fd1.status != %s THEN 0 ELSE SUM(pdm.matched_amount) END,
+                        0)
+                    FROM finance_providerdocumentmatch pdm
+                        INNER JOIN finance_finantialdocument fd1
+                            ON fd1.id = pdm.debit_document_id
+                        INNER JOIN finance_finantialdocument fd2
+                            ON fd2.id = pdm.credit_document_id
+                    WHERE fd1.id = pd.finantialdocument_ptr_id
+                        AND fd2.status = fd1.status)
+                """, [STATUS_READY])
+        finally:
+            cursor.close()
+
 
 class ProviderCreditDocument(ProviderDocument):
     class Meta:
         verbose_name = 'Provider Credit Document'
         verbose_name_plural = 'Providers Credits Documents'
+
+    def fix_matched_amount(self):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_providerdocument pd SET pd.matched_amount = (
+                    SELECT COALESCE(
+                        CASE WHEN fd1.status != %s THEN 0 ELSE SUM(pdm.matched_amount) END,
+                        0)
+                    FROM finance_providerdocumentmatch pdm
+                        INNER JOIN finance_finantialdocument fd1
+                            ON fd1.id = pdm.credit_document_id
+                        INNER JOIN finance_finantialdocument fd2
+                            ON fd2.id = pdm.debit_document_id
+                    WHERE fd1.id = pd.finantialdocument_ptr_id
+                        AND fd2.status = fd1.status)
+                WHERE pd.finantialdocument_ptr_id = %s
+                """, [STATUS_READY, self.pk])
+            self.refresh_from_db()
+        finally:
+            cursor.close()
+
+    @classmethod
+    def fix_matched_amounts(cls):
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                UPDATE finance_providerdocument pd SET pd.matched_amount = (
+                    SELECT COALESCE(
+                        CASE WHEN fd1.status != %s THEN 0 ELSE SUM(pdm.matched_amount) END,
+                        0)
+                    FROM finance_providerdocumentmatch pdm
+                        INNER JOIN finance_finantialdocument fd1
+                            ON fd1.id = pdm.credit_document_id
+                        INNER JOIN finance_finantialdocument fd2
+                            ON fd2.id = pdm.debit_document_id
+                    WHERE fd1.id = pd.finantialdocument_ptr_id
+                        AND fd2.status = fd1.status)
+                """, [STATUS_READY])
+        finally:
+            cursor.close()
 
 
 class ProviderInvoice(ProviderDebitDocument):
@@ -951,9 +1103,6 @@ class ProviderInvoice(ProviderDebitDocument):
         # Call the real save() method
         super(ProviderInvoice, self).save(force_insert, force_update, using, update_fields)
 
-    def fix_matched_amount(self):
-        pass
-
 
 class ProviderPayment(ProviderCreditDocument, AccountingDocument):
     class Meta:
@@ -971,9 +1120,6 @@ class ProviderPayment(ProviderCreditDocument, AccountingDocument):
         self.fill_data()
         # Call the real save() method
         super(ProviderPayment, self).save(force_insert, force_update, using, update_fields)
-
-    def fix_matched_amount(self):
-        pass
 
 
 class ProviderDiscount(ProviderCreditDocument):
@@ -993,9 +1139,6 @@ class ProviderDiscount(ProviderCreditDocument):
         # Call the real save() method
         super(ProviderDiscount, self).save(force_insert, force_update, using, update_fields)
 
-    def fix_matched_amount(self):
-        pass
-
 
 class ProviderDevolution(ProviderDebitDocument, AccountingDocument):
     class Meta:
@@ -1013,9 +1156,6 @@ class ProviderDevolution(ProviderDebitDocument, AccountingDocument):
         self.fill_data()
         # Call the real save() method
         super(ProviderDevolution, self).save(force_insert, force_update, using, update_fields)
-
-    def fix_matched_amount(self):
-        pass
 
 
 class ProviderDocumentMatch(models.Model):

@@ -161,7 +161,8 @@ class FinanceService(object):
                 db_document=db_loan_entity_deposit,
                 account=account,
                 movement_type=MOVEMENT_TYPE_INPUT)
-            document.fix_matched_amount()
+            # loan_entity currency credit_amount
+            # TODO
             return document
 
     @classmethod
@@ -187,7 +188,8 @@ class FinanceService(object):
                 db_document=db_loan_entity_withdraw,
                 account=account,
                 movement_type=MOVEMENT_TYPE_OUTPUT)
-            document.fix_matched_amount()
+            # loan_entity currency debit_amount
+            # TODO
             return document
 
     @classmethod
@@ -237,6 +239,11 @@ class FinanceService(object):
             cls._update_matched(document=loan_entity_withdraw, amount=amount, direction=-1)
             # delete loan_match
             loan_entity_match.delete()
+            # documents matched_amount
+            loan_entity_deposit.fix_matched_amount()
+            loan_entity_withdraw.fix_matched_amount()
+            # loan_entity matched_amount
+            # TODO
 
     @classmethod
     def save_loan_account_deposit(cls, user, loan_account_deposit):
@@ -273,7 +280,8 @@ class FinanceService(object):
                 movement_type=MOVEMENT_TYPE_INPUT,
                 other_account=other_account,
                 db_other_account_id=db_other_account_id)
-            document.fix_matched_amount()
+            # loan_account credit_amount
+            # TODO
             return document
 
     @classmethod
@@ -311,7 +319,8 @@ class FinanceService(object):
                 movement_type=MOVEMENT_TYPE_OUTPUT,
                 other_account=other_account,
                 db_other_account_id=db_other_account_id)
-            document.fix_matched_amount()
+            # loan_account debit_amount
+            # TODO
             return document
 
     @classmethod
@@ -357,12 +366,15 @@ class FinanceService(object):
             # obtain related documents and update matched_amount
             loan_account_deposit = cls._load_locked_model_object(
                 pk=loan_account_match.loan_account_deposit_id, model_class=LoanAccountDeposit)
-            cls._update_matched(document=loan_account_deposit, amount=amount, direction=-1)
             loan_account_withdraw = cls._load_locked_model_object(
                 pk=loan_account_match.loan_account_withdraw_id, model_class=LoanAccountWithdraw)
-            cls._update_matched(document=loan_account_withdraw, amount=amount, direction=-1)
             # delete loan account match
             loan_account_match.delete()
+            # documents matched_amount
+            loan_account_deposit.fix_matched_amount()
+            loan_account_withdraw.fix_matched_amount()
+            # loan_account matched_amount
+            # TODO
 
     @classmethod
     def save_agency_invoice(cls, user, agency_invoice):
@@ -382,7 +394,8 @@ class FinanceService(object):
                 user=user,
                 document=agency_invoice,
                 db_document=db_agency_invoice)
-            document.fix_matched_amount()
+            # agency currency debit_amount
+            # TODO
             return document
 
 
@@ -409,7 +422,8 @@ class FinanceService(object):
                 db_document=db_agency_payment,
                 account=account,
                 movement_type=MOVEMENT_TYPE_INPUT)
-            document.fix_matched_amount()
+            # agency currency credit_amount
+            # TODO
             return document
 
     @classmethod
@@ -435,7 +449,8 @@ class FinanceService(object):
                 db_document=db_agency_devolution,
                 account=account,
                 movement_type=MOVEMENT_TYPE_OUTPUT)
-            document.fix_matched_amount()
+            # agency currency debit_amount
+            # TODO
             return document
 
     @classmethod
@@ -456,7 +471,8 @@ class FinanceService(object):
                 user=user,
                 document=agency_discount,
                 db_document=db_agency_discount)
-            document.fix_matched_amount()
+            # agency currency credit_amount
+            # TODO
             return document
 
     @classmethod
@@ -500,12 +516,15 @@ class FinanceService(object):
             # obtain related documents and update matched_amount
             credit_document = cls._load_locked_agency_credit_document(
                 pk=agency_match.credit_document_id)
-            cls._update_matched(document=credit_document, amount=amount, direction=-1)
             debit_document = cls._load_locked_agency_debit_document(
                 pk=agency_match.debit_document_id)
-            cls._update_matched(document=debit_document, amount=amount, direction=-1)
             # delete agency_match
             agency_match.delete()
+            # documents matched_amount
+            credit_document.fix_matched_amount()
+            debit_document.fix_matched_amount()
+            # agency currency matched_amount
+            # TODO
 
     @classmethod
     def save_provider_invoice(cls, user, provider_invoice):
@@ -525,7 +544,8 @@ class FinanceService(object):
                 user=user,
                 document=provider_invoice,
                 db_document=db_provider_invoice)
-            document.fix_matched_amount()
+            # provider currency credit_amount
+            # TODO
             return document
 
 
@@ -552,7 +572,8 @@ class FinanceService(object):
                 db_document=db_provider_payment,
                 account=account,
                 movement_type=MOVEMENT_TYPE_OUTPUT)
-            document.fix_matched_amount()
+            # provider currency debit_amount
+            # TODO
             return document
 
     @classmethod
@@ -573,7 +594,8 @@ class FinanceService(object):
                 user=user,
                 document=provider_discount,
                 db_document=db_provider_discount)
-            document.fix_matched_amount()
+            # provider currency debit_amount
+            # TODO
             return document
 
     @classmethod
@@ -599,7 +621,8 @@ class FinanceService(object):
                 db_document=db_provider_devolution,
                 account=account,
                 movement_type=MOVEMENT_TYPE_INPUT)
-            document.fix_matched_amount()
+            # provider currency credit_amount
+            # TODO
             return document
 
     @classmethod
@@ -643,12 +666,16 @@ class FinanceService(object):
             # obtain related documents and update matched_amount
             credit_document = cls._load_locked_provider_credit_document(
                 pk=provider_match.credit_document_id)
-            cls._update_matched(document=credit_document, amount=amount, direction=-1)
             debit_document = cls._load_locked_provider_debit_document(
                 pk=provider_match.debit_document_id)
-            cls._update_matched(document=debit_document, amount=amount, direction=-1)
             # delete provider_match
             provider_match.delete()
+            # documents matched_amount
+            credit_document.fix_matched_amount()
+            debit_document.fix_matched_amount()
+            # provider matched_amount
+            # TODO
+            
 
     @classmethod
     def _load_locked_model_object(cls, pk, model_class, allow_empty_pk=True):
@@ -958,10 +985,13 @@ class FinanceService(object):
         # verify accounts
         if loan_entity_deposit.account_id != loan_entity_withdraw.account_id:
             raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Accounts')
-        cls._update_matched(document=loan_entity_deposit, amount=loan_entity_match.amount, direction=1)
-        cls._update_matched(document=loan_entity_withdraw, amount=loan_entity_match.amount, direction=1)
         # save loan_match
         loan_entity_match.save()
+        # documents matched_amount
+        loan_entity_deposit.fix_matched_amount()
+        loan_entity_withdraw.fix_matched_amount()
+        # loan_emtity amounts
+        # TODO
 
     @classmethod
     def _save_loan_account_match(cls, loan_account_match):
@@ -984,12 +1014,13 @@ class FinanceService(object):
         if loan_account_deposit.account_id != loan_account_withdraw.account_id \
             or loan_account_deposit.withdraw_account_id != loan_account_withdraw.deposit_account_id:
             raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Accounts')
-        cls._update_matched(
-            document=loan_account_deposit, amount=loan_account_match.amount, direction=1)
-        cls._update_matched(
-            document=loan_account_withdraw, amount=loan_account_match.amount, direction=1)
         # save loan account match
         loan_account_match.save()
+        # documents matched_amount
+        loan_account_deposit.fix_matched_amount()
+        loan_account_withdraw.fix_matched_amount()
+        # loan_account amounts
+        # TODO
 
     @classmethod
     def _save_agency_match(cls, agency_match):
@@ -1009,10 +1040,13 @@ class FinanceService(object):
         # verify agencies
         if credit_document.agency_id != debit_document.agency_id:
             raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % "Agency's")
-        cls._update_matched(document=credit_document, amount=agency_match.amount, direction=1)
-        cls._update_matched(document=debit_document, amount=agency_match.amount, direction=1)
         # save agency_match
         agency_match.save()
+        # documents matched_amount
+        credit_document.fix_matched_amount()
+        debit_document.fix_matched_amount()
+        # agency amounts
+        # TODO
 
     @classmethod
     def _save_provider_match(cls, provider_match):
@@ -1034,10 +1068,13 @@ class FinanceService(object):
         # verify providers
         if credit_document.provider_id != debit_document.provider_id:
             raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % "Provider's")
-        cls._update_matched(document=credit_document, amount=provider_match.amount, direction=1)
-        cls._update_matched(document=debit_document, amount=provider_match.amount, direction=1)
         # save provider_match
         provider_match.save()
+        # documents matched_amount
+        credit_document.fix_matched_amount()
+        debit_document.fix_matched_amount()
+        # provider amounts
+        # TODO
 
     @classmethod
     def _update_matched(cls, document, amount, direction):
