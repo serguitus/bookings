@@ -198,7 +198,7 @@ class LoanEntityCurrency(models.Model):
         try:
             cursor.execute("""
                 UPDATE finance_loanentitycurrency lec SET lec.credit_amount = (
-                    SELECT SUM(fd.amount)
+                    SELECT COALESCE(SUM(fd.amount), 0)
                     FROM finance_loanentitydeposit ledd
                         INNER JOIN finance_loanentitydocument led
                             ON led.finantialdocument_ptr_id = ledd.loanentitydocument_ptr_id
@@ -219,7 +219,7 @@ class LoanEntityCurrency(models.Model):
         try:
             cursor.execute("""
                 UPDATE finance_loanentitycurrency lec SET lec.credit_amount = (
-                    SELECT SUM(fd.amount)
+                    SELECT COALESCE(SUM(fd.amount), 0)
                     FROM finance_loanentitydeposit ledd
                         INNER JOIN finance_loanentitydocument led
                             ON led.finantialdocument_ptr_id = ledd.loanentitydocument_ptr_id
@@ -237,7 +237,7 @@ class LoanEntityCurrency(models.Model):
         try:
             cursor.execute("""
                 UPDATE finance_loanentitycurrency lec SET lec.credit_amount = (
-                    SELECT SUM(fd.amount)
+                    SELECT COALESCE(SUM(fd.amount), 0)
                     FROM finance_loanentitywithdraw lew
                         INNER JOIN finance_loanentitydocument led
                             ON led.finantialdocument_ptr_id = lew.loanentitydocument_ptr_id
@@ -258,7 +258,7 @@ class LoanEntityCurrency(models.Model):
         try:
             cursor.execute("""
                 UPDATE finance_loanentitycurrency lec SET lec.credit_amount = (
-                    SELECT SUM(fd.amount)
+                    SELECT COALESCE(SUM(fd.amount), 0)
                     FROM finance_loanentitywithdraw lew
                         INNER JOIN finance_loanentitydocument led
                             ON led.finantialdocument_ptr_id = lew.loanentitydocument_ptr_id
@@ -276,7 +276,7 @@ class LoanEntityCurrency(models.Model):
         try:
             cursor.execute("""
                 UPDATE finance_loanentitycurrency lec SET lec.matched_amount = (
-                    SELECT SUM(lem.matched_amount)
+                    SELECT COALESCE(SUM(lem.matched_amount), 0)
                     FROM finance_loanentitymatch lem
                         INNER JOIN finance_loanentitydeposit ledd
                             ON ledd.loanentitydocument_ptr_id = lem.loan_entity_deposit_id
@@ -308,7 +308,7 @@ class LoanEntityCurrency(models.Model):
         try:
             cursor.execute("""
                 UPDATE finance_loanentitycurrency lec SET lec.matched_amount = (
-                    SELECT SUM(lem.matched_amount)
+                    SELECT COALESCE(SUM(lem.matched_amount), 0)
                     FROM finance_loanentitymatch lem
                         INNER JOIN finance_loanentitydeposit ledd
                             ON ledd.loanentitydocument_ptr_id = lem.loan_entity_deposit_id
@@ -363,7 +363,9 @@ class LoanEntityDeposit(LoanEntityDocument):
         try:
             cursor.execute("""
                 UPDATE finance_loanentitydocument led SET led.matched_amount = (
-                    SELECT CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lem.matched_amount) END
+                    SELECT COALESCE(
+                        CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lem.matched_amount) END,
+                        0)
                     FROM finance_loanentitymatch lem
                         INNER JOIN finance_finantialdocument fd1
                             ON fd1.id = lem.loan_entity_deposit_id
@@ -383,7 +385,9 @@ class LoanEntityDeposit(LoanEntityDocument):
         try:
             cursor.execute("""
                 UPDATE finance_loanentitydocument led SET led.matched_amount = (
-                    SELECT CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lem.matched_amount) END
+                    SELECT COALESCE(
+                        CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lem.matched_amount) END,
+                        0)
                     FROM finance_loanentitymatch lem
                         INNER JOIN finance_finantialdocument fd1
                             ON fd1.id = lem.loan_entity_deposit_id
@@ -419,7 +423,9 @@ class LoanEntityWithdraw(LoanEntityDocument):
         try:
             cursor.execute("""
                 UPDATE finance_loanentitydocument led SET led.matched_amount = (
-                    SELECT CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lem.matched_amount) END
+                    SELECT COALESCE(
+                        CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lem.matched_amount) END,
+                        0)
                     FROM finance_loanentitymatch lem
                         INNER JOIN finance_finantialdocument fd1
                             ON fd1.id = lem.loan_entity_withdraw_id
@@ -439,7 +445,9 @@ class LoanEntityWithdraw(LoanEntityDocument):
         try:
             cursor.execute("""
                 UPDATE finance_loanentitydocument led SET led.matched_amount = (
-                    SELECT CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lem.matched_amount) END
+                    SELECT COALESCE(
+                        CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lem.matched_amount) END,
+                        0)
                     FROM finance_loanentitymatch lem
                         INNER JOIN finance_finantialdocument fd1
                             ON fd1.id = lem.loan_entity_withdraw_id
@@ -477,7 +485,7 @@ class LoanAccount(models.Model):
         try:
             cursor.execute("""
                 UPDATE finance_loanaccount la SET la.credit_amount = (
-                    SELECT SUM(fd.amount)
+                    SELECT COALESCE(SUM(fd.amount), 0)
                     FROM finance_loanaccountdeposit ladd
                         INNER JOIN finance_loanaccountdocument lad
                             ON lad.finantialdocument_ptr_id = ladd.loanaccountdocument_ptr_id
@@ -497,7 +505,7 @@ class LoanAccount(models.Model):
         try:
             cursor.execute("""
                 UPDATE finance_loanaccount la SET la.credit_amount = (
-                    SELECT SUM(fd.amount)
+                    SELECT COALESCE(SUM(fd.amount), 0)
                     FROM finance_loanaccountdeposit ladd
                         INNER JOIN finance_loanaccountdocument lad
                             ON lad.finantialdocument_ptr_id = ladd.loanaccountdocument_ptr_id
@@ -514,7 +522,7 @@ class LoanAccount(models.Model):
         try:
             cursor.execute("""
                 UPDATE finance_loanaccount la SET la.debit_amount = (
-                    SELECT SUM(fd.amount)
+                    SELECT COALESCE(SUM(fd.amount), 0)
                     FROM finance_loanaccountwithdraw law
                         INNER JOIN finance_loanaccountdocument lad
                             ON lad.finantialdocument_ptr_id = law.loanaccountdocument_ptr_id
@@ -534,7 +542,7 @@ class LoanAccount(models.Model):
         try:
             cursor.execute("""
                 UPDATE finance_loanaccount la SET la.debit_amount = (
-                    SELECT SUM(fd.amount)
+                    SELECT COALESCE(SUM(fd.amount), 0)
                     FROM finance_loanaccountwithdraw law
                         INNER JOIN finance_loanaccountdocument lad
                             ON lad.finantialdocument_ptr_id = law.loanaccountdocument_ptr_id
@@ -551,7 +559,7 @@ class LoanAccount(models.Model):
         try:
             cursor.execute("""
                 UPDATE finance_loanaccount la SET la.matched_amount = (
-                    SELECT SUM(lam.matched_amount)
+                    SELECT COALESCE(SUM(lam.amount), 0)
                     FROM finance_loanaccountmatch lam
                         INNER JOIN finance_loanaccountdeposit ladd
                             ON ladd.loanaccountdocument_ptr_id = lam.loan_account_deposit_id
@@ -581,7 +589,7 @@ class LoanAccount(models.Model):
         try:
             cursor.execute("""
                 UPDATE finance_loanaccount la SET la.matched_amount = (
-                    SELECT SUM(lam.matched_amount)
+                    SELECT COALESCE(SUM(lam.amount), 0)
                     FROM finance_loanaccountmatch lam
                         INNER JOIN finance_loanaccountdeposit ladd
                             ON ladd.loanaccountdocument_ptr_id = lam.loan_account_deposit_id
@@ -633,7 +641,9 @@ class LoanAccountDeposit(LoanAccountDocument):
         try:
             cursor.execute("""
                 UPDATE finance_loanaccountdocument lad SET lad.matched_amount = (
-                    SELECT CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lam.matched_amount) END
+                    SELECT COALESCE(
+                        CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lam.matched_amount) END,
+                        0)
                     FROM finance_loanaccountmatch lam
                         INNER JOIN finance_finantialdocument fd1
                             ON fd1.id = lam.loan_account_deposit_id
@@ -653,7 +663,9 @@ class LoanAccountDeposit(LoanAccountDocument):
         try:
             cursor.execute("""
                 UPDATE finance_loanaccountdocument lad SET lad.matched_amount = (
-                    SELECT CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lam.matched_amount) END
+                    SELECT COALESCE(
+                        CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lam.matched_amount) END,
+                        0)
                     FROM finance_loanaccountmatch lam
                         INNER JOIN finance_finantialdocument fd1
                             ON fd1.id = lam.loan_account_deposit_id
@@ -689,7 +701,9 @@ class LoanAccountWithdraw(LoanAccountDocument):
         try:
             cursor.execute("""
                 UPDATE finance_loanaccountdocument lad SET lad.matched_amount = (
-                    SELECT CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lam.matched_amount) END
+                    SELECT COALESCE(
+                        CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lam.matched_amount) END,
+                        0)
                     FROM finance_loanaccountmatch lam
                         INNER JOIN finance_finantialdocument fd1
                             ON fd1.id = lam.loan_account_withdraw_id
@@ -709,7 +723,9 @@ class LoanAccountWithdraw(LoanAccountDocument):
         try:
             cursor.execute("""
                 UPDATE finance_loanaccountdocument lad SET lad.matched_amount = (
-                    SELECT CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lam.matched_amount) END
+                    SELECT COALESCE(
+                        CASE WHEN fd1.status != %s THEN 0 ELSE SUM(lam.matched_amount) END,
+                        0)
                     FROM finance_loanaccountmatch lam
                         INNER JOIN finance_finantialdocument fd1
                             ON fd1.id = lam.loan_account_withdraw_id
@@ -795,6 +811,9 @@ class AgencyInvoice(AgencyDebitDocument):
         # Call the real save() method
         super(AgencyInvoice, self).save(force_insert, force_update, using, update_fields)
 
+    def fix_matched_amount(self):
+        pass
+
 
 class AgencyPayment(AgencyCreditDocument, AccountingDocument):
     class Meta:
@@ -812,6 +831,9 @@ class AgencyPayment(AgencyCreditDocument, AccountingDocument):
         self.fill_data()
         # Call the real save() method
         super(AgencyPayment, self).save(force_insert, force_update, using, update_fields)
+
+    def fix_matched_amount(self):
+        pass
 
 
 class AgencyDiscount(AgencyCreditDocument):
@@ -831,6 +853,9 @@ class AgencyDiscount(AgencyCreditDocument):
         # Call the real save() method
         super(AgencyDiscount, self).save(force_insert, force_update, using, update_fields)
 
+    def fix_matched_amount(self):
+        pass
+
 
 class AgencyDevolution(AgencyDebitDocument, AccountingDocument):
     class Meta:
@@ -848,6 +873,9 @@ class AgencyDevolution(AgencyDebitDocument, AccountingDocument):
         self.fill_data()
         # Call the real save() method
         super(AgencyDevolution, self).save(force_insert, force_update, using, update_fields)
+
+    def fix_matched_amount(self):
+        pass
 
 
 class AgencyDocumentMatch(models.Model):
@@ -923,6 +951,9 @@ class ProviderInvoice(ProviderDebitDocument):
         # Call the real save() method
         super(ProviderInvoice, self).save(force_insert, force_update, using, update_fields)
 
+    def fix_matched_amount(self):
+        pass
+
 
 class ProviderPayment(ProviderCreditDocument, AccountingDocument):
     class Meta:
@@ -940,6 +971,9 @@ class ProviderPayment(ProviderCreditDocument, AccountingDocument):
         self.fill_data()
         # Call the real save() method
         super(ProviderPayment, self).save(force_insert, force_update, using, update_fields)
+
+    def fix_matched_amount(self):
+        pass
 
 
 class ProviderDiscount(ProviderCreditDocument):
@@ -959,6 +993,9 @@ class ProviderDiscount(ProviderCreditDocument):
         # Call the real save() method
         super(ProviderDiscount, self).save(force_insert, force_update, using, update_fields)
 
+    def fix_matched_amount(self):
+        pass
+
 
 class ProviderDevolution(ProviderDebitDocument, AccountingDocument):
     class Meta:
@@ -976,6 +1013,9 @@ class ProviderDevolution(ProviderDebitDocument, AccountingDocument):
         self.fill_data()
         # Call the real save() method
         super(ProviderDevolution, self).save(force_insert, force_update, using, update_fields)
+
+    def fix_matched_amount(self):
+        pass
 
 
 class ProviderDocumentMatch(models.Model):

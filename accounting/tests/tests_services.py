@@ -451,7 +451,7 @@ class AccountingServicesTestCase(AccountingBaseTestCase):
 
     def test_create_account_duplicate(self):
         """
-        Does accounts qith same name and currency
+        Does accounts with same name and currency
         """
         test_account1 = Account.objects.create(name="Test Account 1", currency=CURRENCY_USD)
 

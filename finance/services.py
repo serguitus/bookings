@@ -155,12 +155,14 @@ class FinanceService(object):
                 db_document=db_loan_entity_deposit,
                 match_type=cls.MATCH_TYPE_ENTITY)
             # manage saving
-            return cls._document_save(
+            document = cls._document_save(
                 user=user,
                 document=loan_entity_deposit,
                 db_document=db_loan_entity_deposit,
                 account=account,
                 movement_type=MOVEMENT_TYPE_INPUT)
+            document.fix_matched_amount()
+            return document
 
     @classmethod
     def save_loan_entity_withdraw(cls, user, loan_entity_withdraw):
@@ -179,12 +181,14 @@ class FinanceService(object):
                 db_document=db_loan_entity_withdraw,
                 match_type=cls.MATCH_TYPE_ENTITY)
             # manage saving
-            return cls._document_save(
+            document = cls._document_save(
                 user=user,
                 document=loan_entity_withdraw,
                 db_document=db_loan_entity_withdraw,
                 account=account,
                 movement_type=MOVEMENT_TYPE_OUTPUT)
+            document.fix_matched_amount()
+            return document
 
     @classmethod
     def save_loan_entity_match(cls, loan_entity_match):
@@ -261,7 +265,7 @@ class FinanceService(object):
                 db_document=db_loan_account_deposit,
                 match_type=cls.MATCH_TYPE_ACCOUNT)
             # manage saving
-            return cls._document_save(
+            document = cls._document_save(
                 user=user,
                 document=loan_account_deposit,
                 db_document=db_loan_account_deposit,
@@ -269,6 +273,8 @@ class FinanceService(object):
                 movement_type=MOVEMENT_TYPE_INPUT,
                 other_account=other_account,
                 db_other_account_id=db_other_account_id)
+            document.fix_matched_amount()
+            return document
 
     @classmethod
     def save_loan_account_withdraw(cls, user, loan_account_withdraw):
@@ -297,7 +303,7 @@ class FinanceService(object):
                 db_document=db_loan_account_withdraw,
                 match_type=cls.MATCH_TYPE_ACCOUNT)
             # manage saving
-            return cls._document_save(
+            document = cls._document_save(
                 user=user,
                 document=loan_account_withdraw,
                 db_document=db_loan_account_withdraw,
@@ -305,6 +311,8 @@ class FinanceService(object):
                 movement_type=MOVEMENT_TYPE_OUTPUT,
                 other_account=other_account,
                 db_other_account_id=db_other_account_id)
+            document.fix_matched_amount()
+            return document
 
     @classmethod
     def save_loan_account_match(cls, loan_account_match):
@@ -370,10 +378,12 @@ class FinanceService(object):
                 db_document=db_agency_invoice,
                 match_type=cls.MATCH_TYPE_AGENCY)
             # manage saving
-            return cls._document_save(
+            document = cls._document_save(
                 user=user,
                 document=agency_invoice,
                 db_document=db_agency_invoice)
+            document.fix_matched_amount()
+            return document
 
 
     @classmethod
@@ -393,12 +403,14 @@ class FinanceService(object):
                 db_document=db_agency_payment,
                 match_type=cls.MATCH_TYPE_AGENCY)
             # manage saving
-            return cls._document_save(
+            document = cls._document_save(
                 user=user,
                 document=agency_payment,
                 db_document=db_agency_payment,
                 account=account,
                 movement_type=MOVEMENT_TYPE_INPUT)
+            document.fix_matched_amount()
+            return document
 
     @classmethod
     def save_agency_devolution(cls, user, agency_devolution):
@@ -417,12 +429,14 @@ class FinanceService(object):
                 db_document=db_agency_devolution,
                 match_type=cls.MATCH_TYPE_AGENCY)
             # manage saving
-            return cls._document_save(
+            document = cls._document_save(
                 user=user,
                 document=agency_devolution,
                 db_document=db_agency_devolution,
                 account=account,
                 movement_type=MOVEMENT_TYPE_OUTPUT)
+            document.fix_matched_amount()
+            return document
 
     @classmethod
     def save_agency_discount(cls, user, agency_discount):
@@ -438,10 +452,12 @@ class FinanceService(object):
                 db_document=db_agency_discount,
                 match_type=cls.MATCH_TYPE_AGENCY)
             # manage saving
-            return cls._document_save(
+            document = cls._document_save(
                 user=user,
                 document=agency_discount,
                 db_document=db_agency_discount)
+            document.fix_matched_amount()
+            return document
 
     @classmethod
     def save_agency_match(cls, agency_match):
@@ -505,10 +521,12 @@ class FinanceService(object):
                 db_document=db_provider_invoice,
                 match_type=cls.MATCH_TYPE_PROVIDER)
             # manage saving
-            return cls._document_save(
+            document = cls._document_save(
                 user=user,
                 document=provider_invoice,
                 db_document=db_provider_invoice)
+            document.fix_matched_amount()
+            return document
 
 
     @classmethod
@@ -528,12 +546,14 @@ class FinanceService(object):
                 db_document=db_provider_payment,
                 match_type=cls.MATCH_TYPE_PROVIDER)
             # manage saving
-            return cls._document_save(
+            document = cls._document_save(
                 user=user,
                 document=provider_payment,
                 db_document=db_provider_payment,
                 account=account,
                 movement_type=MOVEMENT_TYPE_OUTPUT)
+            document.fix_matched_amount()
+            return document
 
     @classmethod
     def save_provider_discount(cls, user, provider_discount):
@@ -549,10 +569,12 @@ class FinanceService(object):
                 db_document=db_provider_discount,
                 match_type=cls.MATCH_TYPE_PROVIDER)
             # manage saving
-            return cls._document_save(
+            document = cls._document_save(
                 user=user,
                 document=provider_discount,
                 db_document=db_provider_discount)
+            document.fix_matched_amount()
+            return document
 
     @classmethod
     def save_provider_devolution(cls, user, provider_devolution):
@@ -571,12 +593,14 @@ class FinanceService(object):
                 db_document=db_provider_devolution,
                 match_type=cls.MATCH_TYPE_PROVIDER)
             # manage saving
-            return cls._document_save(
+            document = cls._document_save(
                 user=user,
                 document=provider_devolution,
                 db_document=db_provider_devolution,
                 account=account,
                 movement_type=MOVEMENT_TYPE_INPUT)
+            document.fix_matched_amount()
+            return document
 
     @classmethod
     def save_provider_match(cls, provider_match):
