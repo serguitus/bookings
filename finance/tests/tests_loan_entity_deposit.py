@@ -98,6 +98,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_entity_deposit=loan_entity_deposit)
 
+        # entity credit incremented
+        self.assertLoanEntityCurrencyCreditAmount(
+            loan_entity=test_loan_entity,
+            currency=CURRENCY_CUC,
+            amount=test_amount)
+
         # account balance incremented
         self.assertAccount(test_account=test_account, test_balance=test_balance + test_amount)
 
@@ -186,6 +192,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_entity_deposit=loan_entity_deposit)
 
+        # entity credit incremented
+        self.assertLoanEntityCurrencyCreditAmount(
+            loan_entity=test_loan_entity,
+            currency=CURRENCY_CUC,
+            amount=test_amount)
+
         # account balance incremented
         self.assertAccount(test_account=test_account, test_balance=test_balance + test_amount)
 
@@ -246,6 +258,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_entity_deposit=loan_entity_deposit)
 
+        # entity credit incremented
+        self.assertLoanEntityCurrencyCreditAmount(
+            loan_entity=test_loan_entity,
+            currency=CURRENCY_CUC,
+            amount=test_amount)
+
         # account balance incremented
         self.assertAccount(test_account=test_account, test_balance=test_balance + test_amount)
 
@@ -286,6 +304,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_entity_deposit = FinanceService.save_loan_entity_deposit(
             user=self.test_user,
             loan_entity_deposit=loan_entity_deposit)
+
+        # entity credit returned to 0
+        self.assertLoanEntityCurrencyCreditAmount(
+            loan_entity=test_loan_entity,
+            currency=CURRENCY_CUC,
+            amount=0)
 
         # account balance unchanged
         self.assertAccount(test_account=test_account, test_balance=test_balance)
@@ -347,6 +371,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_entity_deposit=loan_entity_deposit)
 
+        # entity credit incremented
+        self.assertLoanEntityCurrencyCreditAmount(
+            loan_entity=test_loan_entity,
+            currency=CURRENCY_CUC,
+            amount=test_amount)
+
         # account balance incremented
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 + test_amount)
 
@@ -393,6 +423,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_entity_deposit = FinanceService.save_loan_entity_deposit(
             user=self.test_user,
             loan_entity_deposit=loan_entity_deposit)
+
+        # entity credit returned to 0
+        self.assertLoanEntityCurrencyCreditAmount(
+            loan_entity=test_loan_entity,
+            currency=CURRENCY_CUC,
+            amount=0)
 
         # account balance unchanged
         self.assertAccount(test_account=test_account1, test_balance=test_balance1)
@@ -526,6 +562,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_entity_deposit=loan_entity_deposit)
 
+        # entity credit incremented
+        self.assertLoanEntityCurrencyCreditAmount(
+            loan_entity=test_loan_entity,
+            currency=CURRENCY_CUC,
+            amount=test_amount1)
+
         # account balance incremented
         self.assertAccount(test_account=test_account, test_balance=test_balance + test_amount1)
 
@@ -566,6 +608,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_entity_deposit = FinanceService.save_loan_entity_deposit(
             user=self.test_user,
             loan_entity_deposit=loan_entity_deposit)
+
+        # entity credit changed
+        self.assertLoanEntityCurrencyCreditAmount(
+            loan_entity=test_loan_entity,
+            currency=CURRENCY_CUC,
+            amount=test_amount2)
 
         # account balance updated
         self.assertAccount(test_account=test_account, test_balance=test_balance + test_amount2)
@@ -709,6 +757,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_entity_deposit=loan_entity_deposit)
 
+        # entity credit incremented
+        self.assertLoanEntityCurrencyCreditAmount(
+            loan_entity=test_loan_entity,
+            currency=CURRENCY_CUC,
+            amount=test_amount)
+
         # account balance incremented
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 + test_amount)
 
@@ -752,6 +806,17 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_entity_deposit = FinanceService.save_loan_entity_deposit(
             user=self.test_user,
             loan_entity_deposit=loan_entity_deposit)
+
+        # entity credit returned to 0
+        self.assertLoanEntityCurrencyCreditAmount(
+            loan_entity=test_loan_entity,
+            currency=CURRENCY_CUC,
+            amount=0)
+        # entity credit incremented
+        self.assertLoanEntityCurrencyCreditAmount(
+            loan_entity=test_loan_entity,
+            currency=CURRENCY_USD,
+            amount=test_amount)
 
         # account balance updated
         self.assertAccount(test_account=test_account1, test_balance=test_balance1)
@@ -822,6 +887,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_entity_deposit=loan_entity_deposit)
 
+        # entity credit incremented
+        self.assertLoanEntityCurrencyCreditAmount(
+            loan_entity=test_loan_entity,
+            currency=CURRENCY_CUC,
+            amount=test_amount1)
+
         # account balance incremented
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 + test_amount1)
 
@@ -868,6 +939,17 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_entity_deposit = FinanceService.save_loan_entity_deposit(
             user=self.test_user,
             loan_entity_deposit=loan_entity_deposit)
+
+        # entity credit returned to 0
+        self.assertLoanEntityCurrencyCreditAmount(
+            loan_entity=test_loan_entity,
+            currency=CURRENCY_CUC,
+            amount=0)
+        # entity credit incremented
+        self.assertLoanEntityCurrencyCreditAmount(
+            loan_entity=test_loan_entity,
+            currency=CURRENCY_USD,
+            amount=test_amount2)
 
         # account balance updated
         self.assertAccount(test_account=test_account1, test_balance=test_balance1)
@@ -1018,6 +1100,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         test_name1 = loan_entity_deposit.name
 
+        # entity credit incremented
+        self.assertLoanEntityCurrencyCreditAmount(
+            loan_entity=test_loan_entity,
+            currency=CURRENCY_CUC,
+            amount=test_amount)
+
         # account balance incremented
         self.assertAccount(test_account=test_account, test_balance=test_balance + test_amount)
 
@@ -1062,6 +1150,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         # name changed
         self.assertNotEqual(test_name1, test_name2)
+
+        # entity credit unchanged
+        self.assertLoanEntityCurrencyCreditAmount(
+            loan_entity=test_loan_entity,
+            currency=CURRENCY_CUC,
+            amount=test_amount)
 
         # account balance remains changed
         self.assertAccount(test_account=test_account, test_balance=test_balance + test_amount)

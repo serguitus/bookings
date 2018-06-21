@@ -765,8 +765,8 @@ class Agency(models.Model):
 
 class AgencyCurrency(models.Model):
     class Meta:
-        verbose_name = 'Agency Currency Match'
-        verbose_name_plural = 'Agencies Currencies Matches'
+        verbose_name = 'Agency Currency'
+        verbose_name_plural = 'Agencies Currencies'
         unique_together = (('agency', 'currency',),)
     agency = models.ForeignKey(Agency)
     currency = models.CharField(max_length=5, choices=CURRENCIES)
@@ -950,8 +950,8 @@ class AgencyDevolution(AgencyDebitDocument, AccountingDocument):
 
 class AgencyDocumentMatch(models.Model):
     class Meta:
-        verbose_name = 'Agency Match'
-        verbose_name_plural = 'Agencies Matches'
+        verbose_name = 'Agency Document Match'
+        verbose_name_plural = 'Agencies Documents Matches'
         unique_together = (('credit_document', 'debit_document',),)
     credit_document = models.ForeignKey(AgencyCreditDocument)
     debit_document = models.ForeignKey(AgencyDebitDocument)
@@ -975,8 +975,8 @@ class Provider(models.Model):
 
 class ProviderCurrency(models.Model):
     class Meta:
-        verbose_name = 'Provider Currency Match'
-        verbose_name_plural = 'Providers Currencies Matches'
+        verbose_name = 'Provider Currency'
+        verbose_name_plural = 'Providers Currencies'
         unique_together = (('provider', 'currency',),)
     provider = models.ForeignKey(Provider)
     currency = models.CharField(max_length=5, choices=CURRENCIES)
@@ -1160,8 +1160,8 @@ class ProviderDevolution(ProviderDebitDocument, AccountingDocument):
 
 class ProviderDocumentMatch(models.Model):
     class Meta:
-        verbose_name = 'Provider Match'
-        verbose_name_plural = 'Providers Matches'
+        verbose_name = 'Provider Document Match'
+        verbose_name_plural = 'Providers Documents Matches'
         unique_together = (('credit_document', 'debit_document',),)
     credit_document = models.ForeignKey(ProviderCreditDocument)
     debit_document = models.ForeignKey(ProviderDebitDocument)

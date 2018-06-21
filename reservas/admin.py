@@ -232,41 +232,39 @@ class ExtendedModelAdmin(admin.ModelAdmin):
             response = self.do_deleting(request, obj, obj_display, obj_id)
             if response:
                 return response
-            else:
-                model_form = self.get_form(request, obj)
 
-                form = model_form(instance=obj)
-                formsets, inline_instances = self._create_formsets(request, obj, change=True)
+            model_form = self.get_form(request, obj)
 
-                admin_form = helpers.AdminForm(
-                    form,
-                    list(self.get_fieldsets(request, obj)),
-                    self.get_prepopulated_fields(request, obj),
-                    self.get_readonly_fields(request, obj),
-                    model_admin=self)
-                media = self.media + admin_form.media
+            form = model_form(instance=obj)
+            formsets, inline_instances = self._create_formsets(request, obj, change=True)
 
-                inline_formsets = self.get_inline_formsets(request, formsets, inline_instances, obj)
-                for inline_formset in inline_formsets:
-                    media = media + inline_formset.media
+            admin_form = helpers.AdminForm(
+                form,
+                list(self.get_fieldsets(request, obj)),
+                self.get_prepopulated_fields(request, obj),
+                self.get_readonly_fields(request, obj),
+                model_admin=self)
+            media = self.media + admin_form.media
 
-                context = dict(
-                    self.admin_site.each_context(request),
-                    title=(_('Change %s')) % force_text(opts.verbose_name),
-                    adminform=admin_form,
-                    object_id=object_id,
-                    original=obj,
-                    is_popup=(IS_POPUP_VAR in request.POST or
-                            IS_POPUP_VAR in request.GET),
-                    to_field=to_field,
-                    media=media,
-                    inline_admin_formsets=inline_formsets,
-                    errors=helpers.AdminErrorList(form, formsets),
-                    preserved_filters=self.get_preserved_filters(request),
-                )
-                return self.render_change_form(
-                    request, context, add=False, change=True, obj=obj, form_url='')
-                
+            inline_formsets = self.get_inline_formsets(request, formsets, inline_instances, obj)
+            for inline_formset in inline_formsets:
+                media = media + inline_formset.media
+
+            context = dict(
+                self.admin_site.each_context(request),
+                title=(_('Change %s')) % force_text(opts.verbose_name),
+                adminform=admin_form,
+                object_id=object_id,
+                original=obj,
+                is_popup=(IS_POPUP_VAR in request.POST or IS_POPUP_VAR in request.GET),
+                to_field=to_field,
+                media=media,
+                inline_admin_formsets=inline_formsets,
+                errors=helpers.AdminErrorList(form, formsets),
+                preserved_filters=self.get_preserved_filters(request),
+            )
+            return self.render_change_form(
+                request, context, add=False, change=True, obj=obj, form_url='')
 
         object_name = force_text(opts.verbose_name)
 

@@ -103,6 +103,11 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
+        # loan_account credit incremented
+        self.assertLoanAccountCreditAmount(
+            loan_account=test_account2,
+            amount=test_amount)
+
         # account balance incremented
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 + test_amount)
         self.assertAccount(test_account=test_account2, test_balance=test_balance2 - test_amount)
@@ -201,6 +206,11 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
+        # loan_account credit incremented
+        self.assertLoanAccountCreditAmount(
+            loan_account=test_account2,
+            amount=test_amount)
+
         # account balance incremented
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 + test_amount)
         self.assertAccount(test_account=test_account2, test_balance=test_balance2 - test_amount)
@@ -270,6 +280,11 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
+        # loan_account credit incremented
+        self.assertLoanAccountCreditAmount(
+            loan_account=test_account2,
+            amount=test_amount)
+
         # account balance incremented
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 + test_amount)
         self.assertAccount(test_account=test_account2, test_balance=test_balance2 - test_amount)
@@ -316,6 +331,11 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_deposit = FinanceService.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
+
+        # loan_account credit returned 0
+        self.assertLoanAccountCreditAmount(
+            loan_account=test_account2,
+            amount=0)
 
         # account balance unchanged
         self.assertAccount(test_account=test_account1, test_balance=test_balance1)
@@ -393,6 +413,11 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
+        # loan_account credit incremented
+        self.assertLoanAccountCreditAmount(
+            loan_account=test_account2,
+            amount=test_amount)
+
         # account balance changed
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 + test_amount)
         self.assertAccount(test_account=test_account2, test_balance=test_balance2 - test_amount)
@@ -451,6 +476,11 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_deposit = FinanceService.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
+
+        # loan_account credit returned 0
+        self.assertLoanAccountCreditAmount(
+            loan_account=test_account2,
+            amount=0)
 
         # account balance unchanged
         self.assertAccount(test_account=test_account1, test_balance=test_balance1)
@@ -606,6 +636,11 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
+        # loan_account credit incremented
+        self.assertLoanAccountCreditAmount(
+            loan_account=test_account2,
+            amount=test_amount1)
+
         # account balance incremented
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 + test_amount1)
         self.assertAccount(test_account=test_account2, test_balance=test_balance2 - test_amount1)
@@ -652,6 +687,11 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_deposit = FinanceService.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
+
+        # loan_account credit changed
+        self.assertLoanAccountCreditAmount(
+            loan_account=test_account2,
+            amount=test_amount2)
 
         # account balance updated
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 + test_amount2)
@@ -827,6 +867,11 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
+        # loan_account credit incremented
+        self.assertLoanAccountCreditAmount(
+            loan_account=test_account2,
+            amount=test_amount)
+
         # account balance incremented
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 + test_amount)
         self.assertAccount(test_account=test_account2, test_balance=test_balance2 - test_amount)
@@ -882,6 +927,15 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_deposit = FinanceService.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
+
+        # loan_account credit returned 0
+        self.assertLoanAccountCreditAmount(
+            loan_account=test_account2,
+            amount=0)
+        # loan_account credit incremented
+        self.assertLoanAccountCreditAmount(
+            loan_account=test_account4,
+            amount=test_amount)
 
         # account balance updated
         self.assertAccount(test_account=test_account1, test_balance=test_balance1)
@@ -973,6 +1027,11 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
+        # loan_account credit incremented
+        self.assertLoanAccountCreditAmount(
+            loan_account=test_account2,
+            amount=test_amount1)
+
         # account balance incremented
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 + test_amount1)
         self.assertAccount(test_account=test_account2, test_balance=test_balance2 - test_amount1)
@@ -1031,6 +1090,15 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_deposit = FinanceService.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
+
+        # loan_account credit returned 0
+        self.assertLoanAccountCreditAmount(
+            loan_account=test_account2,
+            amount=0)
+        # loan_account credit incremented
+        self.assertLoanAccountCreditAmount(
+            loan_account=test_account4,
+            amount=test_amount2)
 
         # account balance updated
         self.assertAccount(test_account=test_account1, test_balance=test_balance1)
@@ -1206,6 +1274,11 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         test_name1 = loan_account_deposit.name
 
+        # loan_account credit incremented
+        self.assertLoanAccountCreditAmount(
+            loan_account=test_account2,
+            amount=test_amount)
+
         # account balance incremented
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 + test_amount)
         self.assertAccount(test_account=test_account2, test_balance=test_balance2 - test_amount)
@@ -1258,6 +1331,11 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         # name changed
         self.assertNotEqual(test_name1, test_name2)
 
+        # loan_account credit unchanged
+        self.assertLoanAccountCreditAmount(
+            loan_account=test_account2,
+            amount=test_amount)
+
         # account balance remains changed
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 + test_amount)
         self.assertAccount(test_account=test_account2, test_balance=test_balance2 - test_amount)
@@ -1304,7 +1382,3 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account_deposit = FinanceService.save_loan_account_deposit(
                 user=self.test_user,
                 loan_account_deposit=loan_account_deposit)
-
-        # account balance unchanged
-        #self.assertAccount(test_account=test_account1, test_balance=test_balance1)
-        #self.assertAccount(test_account=test_account2, test_balance=test_balance2)
