@@ -354,7 +354,7 @@ class FinanceService(object):
             if not loan_account_match.pk:
                 # new match
                 # process match
-                cls._process_match(
+                return cls._process_match(
                     document_match=loan_account_match,
                     db_document_match=None,
                     match_type=MATCH_TYPE_ACCOUNT)
@@ -365,7 +365,7 @@ class FinanceService(object):
                 if not db_loan_account_match:
                     raise ValidationError(ERROR_MODEL_NOT_FOUND % 'Loan Account Match')
                 # process match
-                cls._process_match(
+                return cls._process_match(
                     document_match=loan_account_match,
                     db_document_match=db_loan_account_match,
                     match_type=MATCH_TYPE_ACCOUNT)
@@ -523,7 +523,7 @@ class FinanceService(object):
             if not agency_match.pk:
                 # new match
                 # process match
-                cls._process_match(
+                return cls._process_match(
                     document_match=agency_match,
                     db_document_match=None,
                     match_type=MATCH_TYPE_AGENCY)
@@ -534,7 +534,7 @@ class FinanceService(object):
                 if not db_agency_match:
                     raise ValidationError(ERROR_MODEL_NOT_FOUND % 'Agency Document Match')
                 # process match
-                cls._process_match(
+                return cls._process_match(
                     document_match=agency_match,
                     db_document_match=db_agency_match,
                     match_type=MATCH_TYPE_AGENCY)
@@ -692,7 +692,7 @@ class FinanceService(object):
             if not provider_match.pk:
                 # new match
                 # process match
-                cls._process_match(
+                return cls._process_match(
                     document_match=provider_match,
                     db_document_match=None,
                     match_type=MATCH_TYPE_PROVIDER)
@@ -703,7 +703,7 @@ class FinanceService(object):
                 if not db_provider_match:
                     raise ValidationError(ERROR_MODEL_NOT_FOUND % 'Provider Document Match')
                 # process match
-                cls._process_match(
+                return cls._process_match(
                     document_match=provider_match,
                     db_document_match=db_provider_match,
                     match_type=MATCH_TYPE_PROVIDER)
@@ -1069,7 +1069,7 @@ class FinanceService(object):
             cls._validate_match_same_documents(
                 document_match=document_match,
                 db_document_match=db_document_match,
-                match_type=MATCH_TYPE_ENTITY)
+                match_type=match_type)
             # verify amount changed
             if document_match.matched_amount == db_document_match.matched_amount:
                 # do nothing
@@ -1134,7 +1134,7 @@ class FinanceService(object):
             credit_document=credit_document,
             debit_document=debit_document,
             delta_amount=delta_amount,
-            match_type=MATCH_TYPE_ENTITY)
+            match_type=match_type)
 
     @classmethod
     def _validate_match_same_relateds(cls, credit_document, debit_document, match_type):

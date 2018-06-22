@@ -324,7 +324,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         test_account2 = Account.objects.create(
             name='Test Account2',
-            currency=CURRENCY_USD,
+            currency=CURRENCY_CUC,
             balance=500)
 
         loan_entity_withdraw = LoanEntityWithdraw(
@@ -574,7 +574,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         test_account2 = Account.objects.create(
             name='Test Account2',
-            currency=CURRENCY_USD,
+            currency=CURRENCY_CUC,
             balance=500)
 
         loan_entity_withdraw.account = test_account2
