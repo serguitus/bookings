@@ -16,7 +16,7 @@ from finance.constants import (
     STATUS_READY,
     ERROR_MATCH_STATUS, ERROR_NOT_READY, ERROR_MATCH_AMOUNT, ERROR_MATCH_ACCOUNT,
     ERROR_MATCH_CURRENCY, ERROR_MATCH_LOAN_ENTITY, ERROR_MATCH_LOAN_ACCOUNT,
-    ERROR_MATCH_AGENCY, ERROR_MATCH_PROVIDER,
+    ERROR_MATCH_AGENCY, ERROR_MATCH_PROVIDER, ERROR_MATCH_OVERMATCHED,
     ERROR_INVALID_MATCH, ERROR_MATCH_WITHOUT_AMOUNT, ERROR_DIFFERENT_DOCUMENTS)
 from finance.models import (
     Deposit, Withdraw, CurrencyExchange, Transfer,
@@ -208,28 +208,27 @@ class FinanceService(object):
     @classmethod
     def save_loan_entity_match(cls, loan_entity_match):
         """
-        Save Loan Match
+        Save Loan Entity Match
         """
         with transaction.atomic(savepoint=False):
             if not loan_entity_match.pk:
                 # new match
-                # save match
-                cls._save_loan_entity_match(loan_entity_match=loan_entity_match)
+                # process match
+                cls._process_match(
+                    document_match=loan_entity_match,
+                    db_document_match=None,
+                    match_type=MATCH_TYPE_ENTITY)
             else:
                 # db match
                 # get db loan match
                 db_loan_entity_match = LoanEntityMatch.objects.get(pk=loan_entity_match.pk)
                 if not db_loan_entity_match:
                     raise ValidationError(ERROR_MODEL_NOT_FOUND % 'Loan Entity Match')
-                # validate same documents
-                if db_loan_entity_match.loan_entity_deposit_id != loan_entity_match.loan_entity_deposit_id:
-                    raise ValidationError(ERROR_MODEL_NOT_FOUND % 'Loan Entity Deposit')
-                if db_loan_entity_match.loan_entity_withdraw_id != loan_entity_match.loan_entity_withdraw_id:
-                    raise ValidationError(ERROR_MODEL_NOT_FOUND % 'Loan Entity Withdraw')
-                # verify amount changed
-                if loan_entity_match.matched_amount != db_loan_entity_match.matched_amount:
-                    # save match
-                    cls._save_loan_entity_match(loan_entity_match=loan_entity_match)
+                # process match
+                cls._process_match(
+                    document_match=loan_entity_match,
+                    db_document_match=db_loan_entity_match,
+                    match_type=MATCH_TYPE_ENTITY)
 
     @classmethod
     def delete_loan_entity_match(cls, loan_entity_match_id):
@@ -241,6 +240,7 @@ class FinanceService(object):
             loan_entity_match = LoanEntityMatch.objects.get(pk=loan_entity_match_id)
             if not loan_entity_match:
                 raise ValidationError(ERROR_MODEL_NOT_FOUND % 'Loan Entity Match')
+            matched_amount = loan_entity_match.matched_amount
             # obtain related documents and update matched_amount
             loan_entity_deposit = cls._load_locked_model_object(
                 pk=loan_entity_match.loan_entity_deposit_id, model_class=LoanEntityDeposit)
@@ -252,7 +252,12 @@ class FinanceService(object):
             loan_entity_deposit.fix_matched_amount()
             loan_entity_withdraw.fix_matched_amount()
             # loan_entity matched_amount
-            # TODO
+            if loan_entity_deposit.loan_entity_id == loan_entity_withdraw.loan_entity_id:
+                cls._process_matched_amount(
+                    related_id=loan_entity_deposit.loan_entity_id,
+                    currency=loan_entity_deposit.currency,
+                    delta_amount=-matched_amount,
+                    match_type=MATCH_TYPE_ENTITY)
 
     @classmethod
     def save_loan_account_deposit(cls, user, loan_account_deposit):
@@ -348,25 +353,22 @@ class FinanceService(object):
         with transaction.atomic(savepoint=False):
             if not loan_account_match.pk:
                 # new match
-                # save match
-                cls._save_loan_account_match(loan_account_match=loan_account_match)
+                # process match
+                cls._process_match(
+                    document_match=loan_account_match,
+                    db_document_match=None,
+                    match_type=MATCH_TYPE_ACCOUNT)
             else:
                 # db match
-                # get db loan account match
+                # get db loan match
                 db_loan_account_match = LoanAccountMatch.objects.get(pk=loan_account_match.pk)
                 if not db_loan_account_match:
                     raise ValidationError(ERROR_MODEL_NOT_FOUND % 'Loan Account Match')
-                # validate same documents
-                if db_loan_account_match.loan_deposit_account_id != \
-                        loan_account_match.loan_deposit_account_id:
-                    raise ValidationError(ERROR_MODEL % 'Loan Account Deposit')
-                if db_loan_account_match.loan_withdraw_account_id != \
-                        loan_account_match.loan_withdraw_account_id:
-                    raise ValidationError(ERROR_MODEL % 'Loan Account Withdraw')
-                # verify amount changed
-                if loan_account_match.amount != db_loan_account_match.amount:
-                    # save match
-                    cls._save_loan_account_match(loan_account_match=loan_account_match)
+                # process match
+                cls._process_match(
+                    document_match=loan_account_match,
+                    db_document_match=db_loan_account_match,
+                    match_type=MATCH_TYPE_ACCOUNT)
 
     @classmethod
     def delete_loan_account_match(cls, loan_account_match_id):
@@ -376,6 +378,7 @@ class FinanceService(object):
         with transaction.atomic(savepoint=False):
             # get loan account match
             loan_account_match = LoanAccountMatch.objects.get(pk=loan_account_match_id)
+            matched_amount = loan_account_match.matched_amount
             if not loan_account_match:
                 raise ValidationError(ERROR_MODEL_NOT_FOUND % 'Loan Account Match')
             # obtain related documents and update matched_amount
@@ -389,7 +392,12 @@ class FinanceService(object):
             loan_account_deposit.fix_matched_amount()
             loan_account_withdraw.fix_matched_amount()
             # loan_account matched_amount
-            # TODO
+            if loan_account_deposit.loan_account_id == loan_account_withdraw.loan_account_id:
+                cls._process_matched_amount(
+                    related_id=loan_account_deposit.loan_account_id,
+                    currency=loan_account_deposit.currency,
+                    delta_amount=-matched_amount,
+                    match_type=MATCH_TYPE_ACCOUNT)
 
     @classmethod
     def save_agency_invoice(cls, user, agency_invoice):
@@ -514,23 +522,22 @@ class FinanceService(object):
         with transaction.atomic(savepoint=False):
             if not agency_match.pk:
                 # new match
-                # save match
-                cls._save_agency_match(agency_match=agency_match)
+                # process match
+                cls._process_match(
+                    document_match=agency_match,
+                    db_document_match=None,
+                    match_type=MATCH_TYPE_AGENCY)
             else:
                 # db match
-                # get db agency match
+                # get db loan match
                 db_agency_match = AgencyDocumentMatch.objects.get(pk=agency_match.pk)
                 if not db_agency_match:
-                    raise ValidationError(ERROR_MODEL_NOT_FOUND % 'Agency Match')
-                # validate same documents
-                if db_agency_match.credit_document_id != agency_match.credit_document_id:
-                    raise ValidationError(ERROR_MODEL % 'Agency Credit document')
-                if db_agency_match.debit_document_id != agency_match.debit_document_id:
-                    raise ValidationError(ERROR_MODEL % 'Agency Debit document')
-                # verify amount changed
-                if agency_match.amount != db_agency_match.amount:
-                    # save match
-                    cls._save_agency_match(agency_match=agency_match)
+                    raise ValidationError(ERROR_MODEL_NOT_FOUND % 'Agency Document Match')
+                # process match
+                cls._process_match(
+                    document_match=agency_match,
+                    db_document_match=db_agency_match,
+                    match_type=MATCH_TYPE_AGENCY)
 
     @classmethod
     def delete_agency_match(cls, agency_match_id):
@@ -542,6 +549,7 @@ class FinanceService(object):
             agency_match = AgencyDocumentMatch.objects.get(pk=agency_match_id)
             if not agency_match:
                 raise ValidationError(ERROR_MODEL_NOT_FOUND % 'Agency Match')
+            matched_amount = agency_match.matched_amount
             # obtain related documents and update matched_amount
             credit_document = cls._load_locked_model_object(
                 pk=agency_match.credit_document_id, model_class=AgencyCreditDocument)
@@ -553,7 +561,12 @@ class FinanceService(object):
             credit_document.fix_matched_amount()
             debit_document.fix_matched_amount()
             # agency currency matched_amount
-            # TODO
+            if credit_document.agency_id == debit_document.agency_id:
+                cls._process_matched_amount(
+                    related_id=credit_document.agency_id,
+                    currency=credit_document.currency,
+                    delta_amount=-matched_amount,
+                    match_type=MATCH_TYPE_AGENCY)
 
     @classmethod
     def save_provider_invoice(cls, user, provider_invoice):
@@ -678,23 +691,22 @@ class FinanceService(object):
         with transaction.atomic(savepoint=False):
             if not provider_match.pk:
                 # new match
-                # save match
-                cls._save_provider_match(provider_match=provider_match)
+                # process match
+                cls._process_match(
+                    document_match=provider_match,
+                    db_document_match=None,
+                    match_type=MATCH_TYPE_PROVIDER)
             else:
                 # db match
-                # get db provider match
+                # get db document match
                 db_provider_match = ProviderDocumentMatch.objects.get(pk=provider_match.pk)
                 if not db_provider_match:
-                    raise ValidationError(ERROR_MODEL_NOT_FOUND % 'Provider Match')
-                # validate same documents
-                if db_provider_match.credit_document_id != provider_match.credit_document_id:
-                    raise ValidationError(ERROR_MODEL % 'Provider Credit document')
-                if db_provider_match.debit_document_id != provider_match.debit_document_id:
-                    raise ValidationError(ERROR_MODEL % 'Provider Debit document')
-                # verify amount changed
-                if provider_match.amount != db_provider_match.amount:
-                    # save match
-                    cls._save_provider_match(provider_match=provider_match)
+                    raise ValidationError(ERROR_MODEL_NOT_FOUND % 'Provider Document Match')
+                # process match
+                cls._process_match(
+                    document_match=provider_match,
+                    db_document_match=db_provider_match,
+                    match_type=MATCH_TYPE_PROVIDER)
 
     @classmethod
     def delete_provider_match(cls, provider_match_id):
@@ -706,6 +718,7 @@ class FinanceService(object):
             provider_match = ProviderDocumentMatch.objects.get(pk=provider_match_id)
             if not provider_match:
                 raise ValidationError(ERROR_MODEL_NOT_FOUND % 'Provider Match')
+            matched_amount = provider_match.matched_amount
             # obtain related documents and update matched_amount
             credit_document = cls._load_locked_model_object(
                 pk=provider_match.credit_document_id, model_class=ProviderCreditDocument)
@@ -717,7 +730,12 @@ class FinanceService(object):
             credit_document.fix_matched_amount()
             debit_document.fix_matched_amount()
             # provider matched_amount
-            # TODO
+            if credit_document.provider_id == debit_document.provider_id:
+                cls._process_matched_amount(
+                    related_id=credit_document.provider_id,
+                    currency=credit_document.currency,
+                    delta_amount=-matched_amount,
+                    match_type=MATCH_TYPE_PROVIDER)
 
     @classmethod
     def _load_locked_model_object(cls, pk, model_class, allow_empty_pk=True):
@@ -1045,247 +1063,132 @@ class FinanceService(object):
             return document.providerdocumentmatch_set.count() > 0
 
     @classmethod
-    def _save_loan_entity_match(cls, loan_entity_match):
+    def _process_match(cls, document_match, db_document_match, match_type):
+        if db_document_match:
+            # validate same documents
+            cls._validate_match_same_documents(
+                document_match=document_match,
+                db_document_match=db_document_match,
+                match_type=MATCH_TYPE_ENTITY)
+            # verify amount changed
+            if document_match.matched_amount == db_document_match.matched_amount:
+                # do nothing
+                return
+
         # get loan match amount
-        amount = loan_entity_match.matched_amount
-        if amount <= 0:
+        matched_amount = document_match.matched_amount
+        if matched_amount <= 0:
             raise ValidationError(ERROR_AMOUNT_REQUIRED)
-        # obtain related documents and update matched_amount
-        loan_entity_deposit = cls._load_locked_model_object(
-            pk=loan_entity_match.loan_entity_deposit_id, model_class=LoanEntityDeposit)
+        # obtain credit document
+        credit_document = cls._get_locked_match_related(
+            document_match=document_match,
+            match_type=match_type,
+            is_credit=True)
         # verify status
-        if loan_entity_deposit.status != STATUS_READY:
-            raise ValidationError(ERROR_NOT_READY % 'Loan Entity Deposit')
-        loan_entity_withdraw = cls._load_locked_model_object(
-            pk=loan_entity_match.loan_entity_withdraw_id, model_class=LoanEntityWithdraw)
-        # verify status
-        if loan_entity_withdraw.status != STATUS_READY:
-            raise ValidationError(ERROR_NOT_READY % 'Loan Entity Withdraw')
-        # verify same loan_entity
-        if loan_entity_deposit.loan_entity_id != loan_entity_withdraw.loan_entity_id:
-            raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Loan Entities')
-        # verify accounts
-        if loan_entity_deposit.account_id != loan_entity_withdraw.account_id:
-            raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Accounts')
-        # verify deposit amount and matched amount
-        if amount > loan_entity_deposit.amount - loan_entity_deposit.matched_amount:
-            raise ValidationError(ERROR_NOT_READY % 'Loan Entity Deposit')
-        # verify withdraw amount and matched amount
-        if amount > loan_entity_withdraw.amount - loan_entity_withdraw.matched_amount:
-            raise ValidationError(ERROR_NOT_READY % 'Loan Entity Withdraw')
-        # save loan_match
-        loan_entity_match.save()
-        # documents matched_amount
-        loan_entity_deposit.fix_matched_amount()
-        loan_entity_withdraw.fix_matched_amount()
-        # loan_emtity amounts
-        # TODO
-
-    @classmethod
-    def _save_loan_account_match(cls, loan_account_match):
-        # get loan account_match amount
-        amount = loan_account_match.matched_amount
-        if amount <= 0:
-            raise ValidationError(ERROR_AMOUNT_REQUIRED)
-        # obtain related documents and update matched_amount
-        loan_account_deposit = cls._load_locked_model_object(
-            pk=loan_account_match.loan_account_deposit_id, model_class=LoanAccountDeposit)
-        # verify status
-        if loan_account_deposit.status != STATUS_READY:
-            raise ValidationError(ERROR_NOT_READY % 'Loan Account Deposit')
-        loan_account_withdraw = cls._load_locked_model_object(
-            pk=loan_account_match.loan_account_withdraw_id, model_class=LoanAccountWithdraw)
-        # verify status
-        if loan_account_withdraw.status != STATUS_READY:
-            raise ValidationError(ERROR_NOT_READY % 'Loan Account Withdraw')
-        # verify loan_accounts
-        if loan_account_deposit.loan_account_id != loan_account_withdraw.loan_account_id:
-            raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Loan Accounts')
-        # verify accounts
-        if loan_account_deposit.account_id != loan_account_withdraw.account_id:
-            raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Accounts')
-        # verify deposit amount and matched amount
-        if amount > loan_account_deposit.amount - loan_account_deposit.matched_amount:
-            raise ValidationError(ERROR_NOT_READY % 'Loan Account Deposit')
-        # verify withdraw amount and matched amount
-        if amount > loan_account_withdraw.amount - loan_account_withdraw.matched_amount:
-            raise ValidationError(ERROR_NOT_READY % 'Loan Account Withdraw')
-        # save loan account match
-        loan_account_match.save()
-        # documents matched_amount
-        loan_account_deposit.fix_matched_amount()
-        loan_account_withdraw.fix_matched_amount()
-        # loan_account amounts
-        # TODO
-
-    @classmethod
-    def _save_agency_match(cls, agency_match):
-        # get agency match amount
-        amount = agency_match.matched_amount
-        if amount <= 0:
-            raise ValidationError(ERROR_AMOUNT_REQUIRED)
-        # obtain related documents and update matched_amount
-        credit_document = cls._load_locked_model_object(
-            agency_match.credit_document_id, AgencyCreditDocument)
-        # verify status
+        credit_msg = 'Loan Entity Deposit'
+        if match_type is MATCH_TYPE_ACCOUNT:
+            credit_msg = 'Loan Account Deposit'
+        if match_type is MATCH_TYPE_AGENCY:
+            credit_msg = 'Agency Credit Document'
+        if match_type is MATCH_TYPE_PROVIDER:
+            credit_msg = 'Provider Credit Document'
         if credit_document.status != STATUS_READY:
-            raise ValidationError(ERROR_NOT_READY % 'Credit Document')
-        debit_document = cls._load_locked_model_object(
-            agency_match.debit_document_id, AgencyDebitDocument)
+            raise ValidationError(ERROR_NOT_READY % credit_msg)
+        # obtain debit document
+        debit_document = cls._get_locked_match_related(
+            document_match=document_match,
+            match_type=match_type,
+            is_credit=False)
         # verify status
+        debit_msg = 'Loan Entity Withdraw'
+        if match_type is MATCH_TYPE_ACCOUNT:
+            debit_msg = 'Loan Account Withdraw'
+        if match_type is MATCH_TYPE_AGENCY:
+            debit_msg = 'Agency Debit Document'
+        if match_type is MATCH_TYPE_PROVIDER:
+            debit_msg = 'Provider Debit Document'
         if debit_document.status != STATUS_READY:
-            raise ValidationError(ERROR_NOT_READY % 'Debit Document')
-        # verify agencies
-        if credit_document.agency_id != debit_document.agency_id:
-            raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % "Agency's")
+            raise ValidationError(ERROR_NOT_READY % debit_msg)
+        # verify same match entity
+        cls._validate_match_same_relateds(
+            credit_document=credit_document,
+            debit_document=debit_document,
+            match_type=match_type)
+        if match_type is MATCH_TYPE_ENTITY or match_type is MATCH_TYPE_ACCOUNT:
+            # verify accounts
+            if credit_document.account_id != debit_document.account_id:
+                raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Accounts')
         # verify credit document amount and matched amount
-        if amount > credit_document.amount - credit_document.matched_amount:
-            raise ValidationError(ERROR_NOT_READY % 'Agency Credit')
-        # verify debit_document amount and matched amount
-        if amount > debit_document.amount - debit_document.matched_amount:
-            raise ValidationError(ERROR_NOT_READY % 'Agency Debit')
-        # save agency_match
-        agency_match.save()
+        if matched_amount > credit_document.amount - credit_document.matched_amount:
+            raise ValidationError(ERROR_MATCH_OVERMATCHED % credit_msg)
+        # verify debit document amount and matched amount
+        if matched_amount > debit_document.amount - debit_document.matched_amount:
+            raise ValidationError(ERROR_MATCH_OVERMATCHED % debit_msg)
+        # delta matched amount
+        delta_amount = matched_amount
+        if db_document_match:
+            delta_amount -= db_document_match.matched_amount
+        # save match
+        cls._save_match(
+            document_match=document_match,
+            credit_document=credit_document,
+            debit_document=debit_document,
+            delta_amount=delta_amount,
+            match_type=MATCH_TYPE_ENTITY)
+
+    @classmethod
+    def _validate_match_same_relateds(cls, credit_document, debit_document, match_type):
+        msg = 'Loan Entities'
+        if match_type is MATCH_TYPE_ACCOUNT:
+            msg = 'Loan Accounts'
+        if match_type is MATCH_TYPE_AGENCY:
+            msg = 'Agencies'
+        if match_type is MATCH_TYPE_PROVIDER:
+            msg = 'Providers'
+        if cls._get_related_id(credit_document, match_type) \
+                != cls._get_related_id(debit_document, match_type):
+            raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % msg)
+
+    @classmethod
+    def _validate_match_same_documents(
+            cls, document_match, db_document_match, match_type):
+        if match_type is MATCH_TYPE_ENTITY:
+            if db_document_match.loan_entity_deposit_id != document_match.loan_entity_deposit_id:
+                raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Loan Entity Deposit')
+            if db_document_match.loan_entity_withdraw_id != document_match.loan_entity_withdraw_id:
+                raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Loan Entity Withdraw')
+        if match_type is MATCH_TYPE_ACCOUNT:
+            if db_document_match.loan_account_deposit_id != document_match.loan_account_deposit_id:
+                raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Loan Account Deposit')
+            if db_document_match.loan_account_withdraw_id \
+                    != document_match.loan_account_withdraw_id:
+                raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Loan Account Withdraw')
+        if match_type is MATCH_TYPE_AGENCY:
+            if db_document_match.credit_document_id != document_match.credit_document_id:
+                raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Agency Credit document')
+            if db_document_match.debit_document_id != document_match.debit_document_id:
+                raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Agency Debit Document')
+        if match_type is MATCH_TYPE_PROVIDER:
+            if db_document_match.credit_document_id != document_match.credit_document_id:
+                raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Provider Credit document')
+            if db_document_match.debit_document_id != document_match.debit_document_id:
+                raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Provider Debit Document')
+
+    @classmethod
+    def _save_match(
+            cls, document_match, credit_document, debit_document, delta_amount, match_type):
+        # save match
+        document_match.save()
         # documents matched_amount
         credit_document.fix_matched_amount()
         debit_document.fix_matched_amount()
-        # agency amounts
-        # TODO
-
-    @classmethod
-    def _save_provider_match(cls, provider_match):
-        # get provider match amount
-        amount = provider_match.matched_amount
-        if amount <= 0:
-            raise ValidationError(ERROR_AMOUNT_REQUIRED)
-        # obtain related documents and update matched_amount
-        credit_document = cls._load_locked_model_object(
-            pk=provider_match.credit_document_id, model_class=ProviderCreditDocument)
-        # verify status
-        if credit_document.status != STATUS_READY:
-            raise ValidationError(ERROR_NOT_READY % 'Credit Document')
-        debit_document = cls._load_locked_model_object(
-            pk=provider_match.debit_document_id, model_class=ProviderDebitDocument)
-        # verify status
-        if debit_document.status != STATUS_READY:
-            raise ValidationError(ERROR_NOT_READY % 'Debit Document')
-        # verify providers
-        if credit_document.provider_id != debit_document.provider_id:
-            raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % "Provider's")
-        # verify credit document amount and matched amount
-        if amount > credit_document.amount - credit_document.matched_amount:
-            raise ValidationError(ERROR_NOT_READY % 'Provider Credit')
-        # verify debit_document amount and matched amount
-        if amount > debit_document.amount - debit_document.matched_amount:
-            raise ValidationError(ERROR_NOT_READY % 'Provider Debit')
-        # save provider_match
-        provider_match.save()
-        # documents matched_amount
-        credit_document.fix_matched_amount()
-        debit_document.fix_matched_amount()
-        # provider amounts
-        # TODO
-
-    @classmethod
-    def _update_matched(cls, document, amount, direction):
-        # find matches and cancel them
-        if direction > 0:
-            document.matched_amount = document.matched_amount + amount
-            if document.amount < document.matched_amount:
-                raise ValidationError(
-                    ERROR_MATCH_WITHOUT_AMOUNT % (document.amount, document.matched_amount))
-            document.save()
-        if direction < 0:
-            document.matched_amount = document.matched_amount - amount
-            if document.matched_amount < 0:
-                raise ValidationError(ERROR_INVALID_MATCH % document.matched_amount)
-            document.save()
-
-    @classmethod
-    def _process_entity_credit_amount(cls, document, db_document):
-        old_ready = False
-        old_entity_id = None
-        old_currency = None
-        old_amount = 0
-        new_ready = False
-        new_entity_id = None
-        new_currency = None
-        new_amount = 0
-
-        if db_document and db_document.status is STATUS_READY:
-            old_ready = True
-            old_entity_id = db_document.loan_entity_id
-            old_currency = db_document.currency
-            old_amount = db_document.amount
-        if document.status is STATUS_READY:
-            new_ready = True
-            new_entity_id = document.loan_entity_id
-            new_currency = document.currency
-            new_amount = document.amount
-        if old_ready:
-            if new_ready:
-                if (new_entity_id == old_entity_id) and (new_currency == old_currency):
-                    if new_amount != old_amount:
-                        # find or create new entity currency
-                        loan_entity_currency = LoanEntityCurrency.objects.get_or_create(
-                            loan_entity_id=new_entity_id,
-                            currency=new_currency
-                        )
-                        # load locked
-                        loan_entity_currency = cls._load_locked_model_object(
-                            pk=loan_entity_currency.pk, model_class=LoanEntityCurrency)
-                        # update credit amount
-                        loan_entity_currency.credit_amount += new_amount
-                        loan_entity_currency.credit_amount -= old_amount
-                        loan_entity_currency.save()
-                else:
-                    # find or create old entity currency
-                    loan_entity_currency = LoanEntityCurrency.objects.get_or_create(
-                        loan_entity_id=old_entity_id,
-                        currency=old_currency
-                    )
-                    # load locked
-                    loan_entity_currency = cls._load_locked_model_object(
-                        pk=loan_entity_currency.pk, model_class=LoanEntityCurrency)
-                    # update credit amount
-                    loan_entity_currency.credit_amount -= old_amount
-                    loan_entity_currency.save()
-
-                    # find or create new entity currency
-                    loan_entity_currency = LoanEntityCurrency.objects.get_or_create(
-                        loan_entity_id=new_entity_id,
-                        currency=new_currency
-                    )
-                    # load locked
-                    loan_entity_currency = cls._load_locked_model_object(
-                        pk=loan_entity_currency.pk, model_class=LoanEntityCurrency)
-                    # update credit amount
-                    loan_entity_currency.credit_amount += new_amount
-                    loan_entity_currency.save()
-            else:
-                # find or create old entity currency
-                loan_entity_currency = LoanEntityCurrency.objects.get_or_create(
-                    loan_entity_id=old_entity_id,
-                    currency=old_currency
-                )
-                # load locked
-                loan_entity_currency = cls._load_locked_model_object(
-                    pk=loan_entity_currency.pk, model_class=LoanEntityCurrency)
-                # update credit amount
-                loan_entity_currency.credit_amount -= old_amount
-                loan_entity_currency.save()
-        elif new_ready:
-            # find or create new entity currency
-            loan_entity_currency = LoanEntityCurrency.objects.get_or_create(
-                loan_entity_id=new_entity_id,
-                currency=new_currency
-            )
-            # load locked
-            loan_entity_currency = cls._load_locked_model_object(
-                pk=loan_entity_currency.pk, model_class=LoanEntityCurrency)
-            # update credit amount
-            loan_entity_currency.credit_amount += new_amount
-            loan_entity_currency.save()
+        # loan_emtity matched amount
+        cls._process_matched_amount(
+            related_id=credit_document.loan_entity_id,
+            currency=credit_document.currency,
+            delta_amount=delta_amount,
+            match_type=match_type
+        )
 
     @classmethod
     def _process_summary_amount(cls, document, db_document, match_type, is_credit=False):
@@ -1375,6 +1278,17 @@ class FinanceService(object):
             related_summary.save()
 
     @classmethod
+    def _process_matched_amount(cls, related_id, currency, delta_amount, match_type):
+        # get locked related
+        related_summary = cls._get_locked_related_summary(
+            related_id=related_id,
+            currency=currency,
+            match_type=match_type)
+        # update amount
+        related_summary.matched_amount += delta_amount
+        related_summary.save()
+
+    @classmethod
     def _get_related_id(cls, document, match_type):
         if match_type is MATCH_TYPE_ENTITY:
             return document.loan_entity_id
@@ -1384,6 +1298,37 @@ class FinanceService(object):
             return document.agency_id
         if match_type is MATCH_TYPE_PROVIDER:
             return document.provider_id
+
+    @classmethod
+    def _get_locked_match_related(cls, document_match, match_type, is_credit):
+        if match_type is MATCH_TYPE_ENTITY:
+            if is_credit:
+                return cls._load_locked_model_object(
+                    pk=document_match.loan_entity_deposit_id, model_class=LoanEntityDeposit)
+            else:
+                return cls._load_locked_model_object(
+                    pk=document_match.loan_entity_withdraw_id, model_class=LoanEntityWithdraw)
+        if match_type is MATCH_TYPE_ACCOUNT:
+            if is_credit:
+                return cls._load_locked_model_object(
+                    pk=document_match.loan_account_deposit_id, model_class=LoanAccountDeposit)
+            else:
+                return cls._load_locked_model_object(
+                    pk=document_match.loan_acount_withdraw_id, model_class=LoanAccountWithdraw)
+        if match_type is MATCH_TYPE_AGENCY:
+            if is_credit:
+                return cls._load_locked_model_object(
+                    pk=document_match.credit_document_id, model_class=AgencyCreditDocument)
+            else:
+                return cls._load_locked_model_object(
+                    pk=document_match.debit_document_id, model_class=AgencyDebitDocument)
+        if match_type is MATCH_TYPE_PROVIDER:
+            if is_credit:
+                return cls._load_locked_model_object(
+                    pk=document_match.credit_document_id, model_class=ProviderCreditDocument)
+            else:
+                return cls._load_locked_model_object(
+                    pk=document_match.debit_document_id, model_class=ProviderDebitDocument)
 
     @classmethod
     def _get_locked_related_summary(cls, related_id, currency, match_type):

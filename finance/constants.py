@@ -46,15 +46,16 @@ DOC_TYPES = (
     (DOC_TYPE_PROVIDER_DISCOUNT, 'Provider Discount'),
 )
 
-ERROR_MATCH_STATUS = 'Can not change Status from Ready if document has matches'
+ERROR_INVALID_MATCH = 'Invalid total matching (%s)'
+ERROR_DIFFERENT_DOCUMENTS = '%s documents must be the same'
 ERROR_MATCH_AMOUNT = 'Can not decrease Amount below matched amount'
 ERROR_MATCH_ACCOUNT = 'Can not change Account if document has matches'
 ERROR_MATCH_CURRENCY = 'Can not change Currency if document has matches'
+ERROR_MATCH_OVERMATCHED = 'Matched amount is too high for %s'
 ERROR_MATCH_LOAN_ENTITY = 'Can not change Loan Entity if document has matches'
 ERROR_MATCH_LOAN_ACCOUNT = 'Can not change Loan Account if document has matches'
 ERROR_MATCH_AGENCY = 'Can not change Agency if document has matches'
 ERROR_MATCH_PROVIDER = 'Can not change Provider if document has matches'
-ERROR_NOT_READY = '%s Status must be Ready'
+ERROR_MATCH_STATUS = 'Can not change Status from Ready if document has matches'
 ERROR_MATCH_WITHOUT_AMOUNT = 'Amount (%s) Insufficient for total matching (%s)'
-ERROR_INVALID_MATCH = 'Invalid total matching (%s)'
-ERROR_DIFFERENT_DOCUMENTS = '%s documents must be the same'
+ERROR_NOT_READY = '%s Status must be Ready'
