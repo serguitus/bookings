@@ -7,3 +7,6 @@ Filtros
 - Filtros de choices no exclusivos, que sean checkboxes que se marcan y desmarcan permitiendo filtrar por mas de un elemento.
 - Filtros de fechas personalizable a poder especificar anterior a y posterior a
 - Filtros replegables
+
+Vista de Edicion
+- Paneles con listados relacionados
