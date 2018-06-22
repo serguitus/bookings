@@ -214,7 +214,7 @@ class FinanceService(object):
             if not loan_entity_match.pk:
                 # new match
                 # process match
-                cls._process_match(
+                return cls._process_match(
                     document_match=loan_entity_match,
                     db_document_match=None,
                     match_type=MATCH_TYPE_ENTITY)
@@ -225,7 +225,7 @@ class FinanceService(object):
                 if not db_loan_entity_match:
                     raise ValidationError(ERROR_MODEL_NOT_FOUND % 'Loan Entity Match')
                 # process match
-                cls._process_match(
+                return cls._process_match(
                     document_match=loan_entity_match,
                     db_document_match=db_loan_entity_match,
                     match_type=MATCH_TYPE_ENTITY)
@@ -1073,7 +1073,7 @@ class FinanceService(object):
             # verify amount changed
             if document_match.matched_amount == db_document_match.matched_amount:
                 # do nothing
-                return
+                return document_match
 
         # get loan match amount
         matched_amount = document_match.matched_amount
@@ -1118,18 +1118,18 @@ class FinanceService(object):
             # verify accounts
             if credit_document.account_id != debit_document.account_id:
                 raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Accounts')
-        # verify credit document amount and matched amount
-        if matched_amount > credit_document.amount - credit_document.matched_amount:
-            raise ValidationError(ERROR_MATCH_OVERMATCHED % credit_msg)
-        # verify debit document amount and matched amount
-        if matched_amount > debit_document.amount - debit_document.matched_amount:
-            raise ValidationError(ERROR_MATCH_OVERMATCHED % debit_msg)
         # delta matched amount
         delta_amount = matched_amount
         if db_document_match:
             delta_amount -= db_document_match.matched_amount
+        # verify credit document amount and matched amount
+        if delta_amount > credit_document.amount - credit_document.matched_amount:
+            raise ValidationError(ERROR_MATCH_OVERMATCHED % credit_msg)
+        # verify debit document amount and matched amount
+        if delta_amount > debit_document.amount - debit_document.matched_amount:
+            raise ValidationError(ERROR_MATCH_OVERMATCHED % debit_msg)
         # save match
-        cls._save_match(
+        return cls._save_match(
             document_match=document_match,
             credit_document=credit_document,
             debit_document=debit_document,
@@ -1184,11 +1184,12 @@ class FinanceService(object):
         debit_document.fix_matched_amount()
         # loan_emtity matched amount
         cls._process_matched_amount(
-            related_id=credit_document.loan_entity_id,
+            related_id=cls._get_related_id(credit_document, match_type),
             currency=credit_document.currency,
             delta_amount=delta_amount,
             match_type=match_type
         )
+        return document_match
 
     @classmethod
     def _process_summary_amount(cls, document, db_document, match_type, is_credit=False):
@@ -1314,7 +1315,7 @@ class FinanceService(object):
                     pk=document_match.loan_account_deposit_id, model_class=LoanAccountDeposit)
             else:
                 return cls._load_locked_model_object(
-                    pk=document_match.loan_acount_withdraw_id, model_class=LoanAccountWithdraw)
+                    pk=document_match.loan_account_withdraw_id, model_class=LoanAccountWithdraw)
         if match_type is MATCH_TYPE_AGENCY:
             if is_credit:
                 return cls._load_locked_model_object(

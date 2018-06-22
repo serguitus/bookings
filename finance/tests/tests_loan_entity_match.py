@@ -79,9 +79,9 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         self.assertEqual(loan_entity_deposit.matched_amount, test_amount)
         self.assertEqual(loan_entity_withdraw.matched_amount, test_amount)
 
-    def test_loan_entity_match_then_decrease_amount(self):
+    def test_loan_entity_match_then_decrease_matched_amount(self):
         """
-        Does match between loan_entity_deposit and loan_entity_withdraw then decrease amount
+        Does match between loan_entity_deposit and loan_entity_withdraw then decrease matched amount
         """
         test_account = Account.objects.create(
             name='Test Account',
