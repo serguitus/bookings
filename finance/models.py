@@ -103,7 +103,7 @@ class Deposit(FinantialDocument, AccountingDocument):
         self.document_type = DOC_TYPE_DEPOSIT
         account = Account.objects.get(pk=self.account_id)
         status = ''
-        if not (self.status is STATUS_READY):
+        if not (self.status == STATUS_READY):
             status = ' - %s' % self.get_status_display()
         self.name = '%s%s - Deposit on %s of %s %s ' % (
             self.date, status.upper(), account, self.amount, account.get_currency_display())

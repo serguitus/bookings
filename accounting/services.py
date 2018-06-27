@@ -37,7 +37,7 @@ class AccountingService():
         cls._validate_movement_type(movement_type=movement_type)
         cls._validate_account(account=account)
         cls._validate_amount(amount=amount)
-        if movement_type is MOVEMENT_TYPE_OUTPUT:
+        if movement_type == MOVEMENT_TYPE_OUTPUT:
             cls._validate_account_balance(account=account, amount=amount)
         if other_account:
             cls._validate_account(account=other_account)
@@ -53,7 +53,7 @@ class AccountingService():
                 if account.currency != other_account.currency:
                     raise ValidationError(ERROR_DIFFERENT_CURRENCY % (account, other_account))
             # verify balance
-            if movement_type is MOVEMENT_TYPE_INPUT:
+            if movement_type == MOVEMENT_TYPE_INPUT:
                 cls._validate_account_balance(account=other_account, amount=movement_amount)
         with transaction.atomic(savepoint=False):
             # create new operation
@@ -107,9 +107,9 @@ class AccountingService():
     @classmethod
     # account should be locked
     def _do_account_movement(cls, account, amount, movement_type):
-        if movement_type is MOVEMENT_TYPE_INPUT:
+        if movement_type == MOVEMENT_TYPE_INPUT:
             account.balance = account.balance + amount
-        if movement_type is MOVEMENT_TYPE_OUTPUT:
+        if movement_type == MOVEMENT_TYPE_OUTPUT:
             account.balance = account.balance - amount
         account.save()
         return account
