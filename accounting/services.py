@@ -153,8 +153,8 @@ class AccountingService():
 
     @classmethod
     def _revert_movement_type(cls, movement_type):
-        if movement_type is MOVEMENT_TYPE_OUTPUT:
+        if movement_type == MOVEMENT_TYPE_OUTPUT:
             return MOVEMENT_TYPE_INPUT
-        if movement_type is MOVEMENT_TYPE_INPUT:
+        if movement_type == MOVEMENT_TYPE_INPUT:
             return MOVEMENT_TYPE_OUTPUT
         raise ValidationError(ERROR_UNKNOWN_MOVEMENT_TYPE % (movement_type))
