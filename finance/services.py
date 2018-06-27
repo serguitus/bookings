@@ -12,10 +12,6 @@ from accounting.constants import (
 from accounting.models import Account
 from accounting.services import AccountingService
 
-<<<<<<< HEAD
-
-class FinanceService():
-=======
 from finance.constants import (
     STATUS_READY,
     ERROR_MATCH_STATUS, ERROR_NOT_READY, ERROR_MATCH_AMOUNT, ERROR_MATCH_ACCOUNT,
@@ -42,7 +38,6 @@ class FinanceService(object):
     """
     Finance Service
     """
->>>>>>> origin/dev
 
     @classmethod
     def save_deposit(cls, user, deposit):
@@ -64,30 +59,6 @@ class FinanceService(object):
                 movement_type=MOVEMENT_TYPE_INPUT)
 
     @classmethod
-<<<<<<< HEAD
-    def validateDocumentNotCancelled(cls, document):
-        if document.status == STATUS_CANCELLED:
-            raise ValidationError('Document Cancelled')
-
-    @classmethod
-    def findDocumentById(cls, document_id):
-        with transaction.atomic():
-            document = (
-                FinantialDocument.objects.get(id=document_id)
-            )
-            if not document:
-                raise ValidationError('Document Not Found : %s' % document_id)
-            return document
-
-    @classmethod
-    def findAndLockDocumentById(cls, document_id):
-        with transaction.atomic():
-            document = (
-                FinantialDocument.objects.select_for_update().get(id=document_id)
-            )
-            if not document:
-                raise ValidationError('Document Not Found : %s' % document_id)
-=======
     def save_withdraw(cls, user, withdraw):
         """
         Saves Withdraw
@@ -201,7 +172,6 @@ class FinanceService(object):
                 db_document=db_loan_entity_deposit,
                 is_credit=True,
                 match_type=MATCH_TYPE_ENTITY)
->>>>>>> origin/dev
             return document
 
     @classmethod
@@ -236,52 +206,6 @@ class FinanceService(object):
             return document
 
     @classmethod
-<<<<<<< HEAD
-    def save_deposit(cls, user, deposit):
-        with transaction.atomic():
-            # validate currencies
-            account = AccountingService.find_and_lock_account_by_id(deposit.deposit_account_id)
-            if not account
-                raise ValidationError('Invalid Account for Deposit')
-            if account.currency != deposit.currency:
-                raise ValidationError('Deposit Currency (%s) and Account Currency (%s) must be equals' % (deposit.currency, account.currency))
-            date = now()
-            concept = 'Deposit on Account'
-            detail = 'Date %s - Deposit on %s of %s %s ' % (date, account, deposit.amount, deposit.currency)
-            # verify if new
-            if deposit.id is None:
-                    if cls.document_needs_operation(deposit):
-                        # create new operation
-                        operation = Operation(
-                            user=user,
-                            date=date,
-                            concept=concept,
-                            detail=detail)
-                        operation.save()
-                        # create operation movement
-                        AccountingService.add_operation_movement(
-                            operation=operation,
-                            account=account,
-                            movement_type=MOVEMENT_TYPE_DEPOSIT,
-                            amount=deposit.amount)
-                        deposit.current_operation_id = operation.id
-                    # save deposit
-                    deposit.save()
-                    # manage finantial history
-                    finantial_history = FinantialDocumentHistory(
-                        document=deposit,
-                        user=user,
-                        date=date,
-                        old_status=None,
-                        new_status=deposit.status)
-                    finantial_history.save()
-                    if deposit.current_operation_id:
-                        # manage accounting history
-                        accounting_history = AccountingDocumentHistory(
-                            document=deposit,
-                            operation=operation)
-                        accounting_history.save()
-=======
     def save_loan_entity_match(cls, loan_entity_match):
         """
         Save Loan Entity Match
@@ -294,7 +218,6 @@ class FinanceService(object):
                     document_match=loan_entity_match,
                     db_document_match=None,
                     match_type=MATCH_TYPE_ENTITY)
->>>>>>> origin/dev
             else:
                 # db match
                 # get db loan match
@@ -307,25 +230,6 @@ class FinanceService(object):
                     db_document_match=db_loan_entity_match,
                     match_type=MATCH_TYPE_ENTITY)
 
-<<<<<<< HEAD
-                        # add to 
-
-                        if cls.document_needs_operation(deposit):
-                            # create new operation
-                            operation = Operation(
-                                user=user,
-                                date=date,
-                                concept=concept
-                                detail=detail)
-                            operation.save()
-                            # create operation movement
-                            account = AccountingService.find_and_lock_account_by_id(deposit.account.id)
-                            AccountingService.add_operation_movement(
-                                operation=operation,
-                                account=account,
-                                movement_type=MOVEMENT_TYPE_DEPOSIT,
-                                amount=deposit.amount)
-=======
     @classmethod
     def delete_loan_entity_match(cls, loan_entity_match_id):
         """
@@ -354,7 +258,6 @@ class FinanceService(object):
                     currency=loan_entity_deposit.currency,
                     delta_amount=-matched_amount,
                     match_type=MATCH_TYPE_ENTITY)
->>>>>>> origin/dev
 
     @classmethod
     def save_loan_account_deposit(cls, user, loan_account_deposit):
