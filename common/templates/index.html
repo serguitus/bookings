@@ -24,7 +24,7 @@
 			{% if model.default_action %}
                 <th scope="row"><a href="{{ model.default_action.url }}">{{ model.name }}</a></th>
 			{% else %}
-                <th scope="row">{{ model.name }}</th>
+                <th scope="row"><a href="{{ model.admin_url }}">{{ model.name }}</a></th>
 			{% endif %}
 			{% if model.actions %}
 				<th scope="row">{{ model.name }}</th>

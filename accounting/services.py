@@ -1,115 +1,160 @@
+"""
+Accounting Service
+"""
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.utils import timezone
 
-from accounting.constants import MOVEMENT_TYPES, MOVEMENT_TYPE_DEPOSIT, MOVEMENT_TYPE_WITHDRAW
-from accounting.models import *
+from accounting.constants import (
+    MOVEMENT_TYPE_INPUT, MOVEMENT_TYPE_OUTPUT,
+    ERROR_UNKNOWN_MOVEMENT_TYPE, ERROR_ACCOUNT_REQUIRED, ERROR_DISABLED,
+    ERROR_AMOUNT_REQUIRED, ERROR_NOT_BALANCE, ERROR_SAME_CURRENCY, ERROR_DIFFERENT_CURRENCY)
+from accounting.models import Account, Operation, OperationMovement
 
 
 class AccountingService():
+    """
+    Accounting Service
+    """
 
     @classmethod
-    def validate_amount(cls, amount):
-        if not amount or amount < 0:
-            raise ValidationError('Amount Required')
-
-    @classmethod
-    def validate_operation(cls, operation):
-        if not operation:
-            raise ValidationError('Operation Required')
-
-    @classmethod
-    def validate_movement_type(cls, movement_type):
-        if not movement_type or not movement_type in MOVEMENT_TYPES:
-            raise ValidationError('Movement Type Required')
-
-    @classmethod
-    def validate_account_enabled(cls, account):
-        if not account:
-            raise ValidationError('Account Required')
-        if not account.enabled:
-            raise ValidationError(
-                'Account %s Not Enabled' % account.__str__())
-
-    @classmethod
-    def validate_account_balance(cls, account, balance):
-        cls.validate_account_enabled(account=account)
-        if account.balance < balance:
-            raise ValidationError('Account %s Balance (%s) Insufficient for (%s)' % (
-                account.__str__(), account.balance, balance))
-
-    @classmethod
-    def find_account_by_id(cls, account_id):
-        with transaction.atomic():
-            account = (
-                Account.objects.get(id=account_id)
-            )
-            if not account:
-                raise ValidationError('Account Not Fount : %s' % (account_id))
-            return account
-
-    @classmethod
-    def find_and_lock_account_by_id(cls, account_id):
-        with transaction.atomic():
-            account = (
-                Account.objects.select_for_update().get(id=account_id)
-            )
-            if not account:
-                raise ValidationError('Account Not Fount : %s' % (account_id))
-            return account
-
-    @classmethod
-    def find_operation_by_id(cls, operation_id):
-        with transaction.atomic():
-            operation = (
-                Operation.objects.get(id=operation_id)
-            )
-            if not operation:
-                raise ValidationError('Operation Not Fount : %s' % (operation_id))
+    # account should be locked
+    def simple_operation(
+            cls, user, concept, detail, account, movement_type, amount,
+            other_account=None, other_amount=None, current_datetime=timezone.now()):
+        """
+        Registers simple operation with 1 or 2 movements
+        for first movement parameters:
+            account, amount and movement_type are used
+        for second movement parameters:
+            other_account most be especified
+            if other_amount is especified, accounts most have different currency
+                else accounts most have same currency
+            reverted movement type
+        """
+        # verifications
+        cls._validate_movement_type(movement_type=movement_type)
+        cls._validate_account(account=account)
+        cls._validate_amount(amount=amount)
+        if movement_type is MOVEMENT_TYPE_OUTPUT:
+            cls._validate_account_balance(account=account, amount=amount)
+        if other_account:
+            cls._validate_account(account=other_account)
+            movement_amount = amount
+            if other_amount:
+                # must be accounts with different currencies
+                if account.currency == other_account.currency:
+                    raise ValidationError(ERROR_SAME_CURRENCY % (account, other_account))
+                cls._validate_amount(amount=other_amount)
+                movement_amount = other_amount
+            else:
+                # must be accounts with same currencies
+                if account.currency != other_account.currency:
+                    raise ValidationError(ERROR_DIFFERENT_CURRENCY % (account, other_account))
+            # verify balance
+            if movement_type is MOVEMENT_TYPE_INPUT:
+                cls._validate_account_balance(account=other_account, amount=movement_amount)
+        with transaction.atomic(savepoint=False):
+            # create new operation
+            operation = Operation(
+                user=user,
+                datetime=current_datetime,
+                concept=concept,
+                detail=detail)
+            operation.save()
+            # create operation movement
+            cls._add_operation_movement(
+                operation=operation,
+                account=account,
+                movement_type=movement_type,
+                amount=amount)
+            if other_account:
+                cls._add_operation_movement(
+                    operation=operation,
+                    account=other_account,
+                    movement_type=cls._revert_movement_type(movement_type),
+                    amount=movement_amount)
             return operation
 
     @classmethod
+    def _find_and_lock_account_by_id(cls, account_id):
+        """
+        Gets and lock account
+        """
+        with transaction.atomic(savepoint=False):
+            account = Account.objects.select_for_update().get(pk=account_id)
+            return account
+
+    @classmethod
     # account should be locked
-    def do_account_deposit(cls, account, amount):
-        cls.validate_account_enabled(account=account)
-        cls.validate_amount(amount=amount)
-        account.balance += amount
+    def _add_operation_movement(cls, operation, account, movement_type, amount):
+        """
+        Registers movement for operation
+        """
+        cls._do_account_movement(
+            account=account,
+            amount=amount,
+            movement_type=movement_type)
+        movement = OperationMovement(
+            operation=operation,
+            movement_type=movement_type,
+            account=account,
+            amount=amount)
+        movement.save()
+        return movement
+
+    @classmethod
+    # account should be locked
+    def _do_account_movement(cls, account, amount, movement_type):
+        if movement_type is MOVEMENT_TYPE_INPUT:
+            account.balance = account.balance + amount
+        if movement_type is MOVEMENT_TYPE_OUTPUT:
+            account.balance = account.balance - amount
         account.save()
         return account
 
     @classmethod
-    # account should be locked
-    def do_account_withdraw(cls, account, amount):
-        cls.validate_account_balance(account=account, balance=amount)
-        cls.validate_amount(amount=amount)
-        account.balance -= amount
-        account.save()
-        return account
+    def _validate_movement_type(cls, movement_type):
+        """
+        Validates movement type
+        """
+        if (movement_type != MOVEMENT_TYPE_INPUT) and (movement_type != MOVEMENT_TYPE_OUTPUT):
+            raise ValidationError(ERROR_UNKNOWN_MOVEMENT_TYPE % (movement_type))
 
     @classmethod
-    # account should be locked
-    def add_operation_movement(cls, operation, account, movement_type, amount):
-        cls.validate_operation(operation=operation)
-        cls.validate_movement_type(movement_type=movement_type)
-        with transaction.atomic():
-            if movement_type is MOVEMENT_TYPE_DEPOSIT:
-                cls.do_account_deposit(
-                    account=account,
-                    amount=amount,
-                )
-            elif movement_type is MOVEMENT_TYPE_WITHDRAW:
-                cls.do_account_withdraw(
-                    account=account,
-                    amount=amount,
-                )
-            else:
-                raise ValidationError('Invalid Movement Type: %s' % (movement_type))
-                
-            movement = OperationMovement(
-                operation=operation,
-                movement_type=movement_type,
-                account=account,
-                amount=amount,
-            )
-            movement.save()
-            return movement
+    def _validate_account(cls, account):
+        """
+        Validates account
+        """
+        if not account:
+            raise ValidationError(
+                ERROR_ACCOUNT_REQUIRED)
+        if not account.enabled:
+            raise ValidationError(
+                ERROR_DISABLED % account)
+
+    @classmethod
+    def _validate_amount(cls, amount):
+        """
+        Validates positive amount
+        """
+        if not amount or amount <= 0:
+            raise ValidationError(ERROR_AMOUNT_REQUIRED)
+
+    @classmethod
+    def _validate_account_balance(cls, account, amount):
+        """
+        Validates account balance
+        """
+        if account.balance < amount:
+            raise ValidationError(ERROR_NOT_BALANCE % (
+                account, account.balance, amount))
+
+    @classmethod
+    def _revert_movement_type(cls, movement_type):
+        if movement_type is MOVEMENT_TYPE_OUTPUT:
+            return MOVEMENT_TYPE_INPUT
+        if movement_type is MOVEMENT_TYPE_INPUT:
+            return MOVEMENT_TYPE_OUTPUT
+        raise ValidationError(ERROR_UNKNOWN_MOVEMENT_TYPE % (movement_type))

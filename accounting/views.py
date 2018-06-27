@@ -1,10 +1,11 @@
-from django.shortcuts import *
-from django.http import *
-from django.core.urlresolvers import *
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse, HttpResponseRedirect
+# from django.core.urlresolvers import
 from django.views import generic
 
-from .models import *
-from .services import *
+from .models import Account
+# from .services import *
+
 
 class IndexView(generic.ListView):
     template_name = 'account/index.html'
@@ -18,20 +19,21 @@ class IndexView(generic.ListView):
 class DetailView(generic.DetailView):
     model = Account
     template_name = 'account/detail.html'
-    
-def index(request):
-    account_list = Account.objects.order_by('+name')[:20]
-    context = { 'account_list': account_list }
-    return render(request, 'accounting/account/index.html', context)
 
-def detail(request, account_id):
-    return HttpResponse("You're looking at question %s." % account_id)
+    def index(request):
+        account_list = Account.objects.order_by('+name')[:20]
+        context = {'account_list': account_list}
+        return render(request, 'accounting/account/index.html', context)
+
+    def detail(request, account_id):
+        return HttpResponse("You're looking at question %s." % account_id)
+
 
 def report(request, account_id):
     p = get_object_or_404(Account, pk=account_id)
     try:
         selected_choice = p.choice_set.get(pk=request.POST['choice'])
-    except (KeyError, Choice.DoesNotExist):
+    except (KeyError, Account.DoesNotExist):
         # Redisplay the question voting form.
         return render(request, 'accounting/account/detail.html', {
             'account': p,
