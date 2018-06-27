@@ -80,9 +80,9 @@ class OperationMovement(models.Model):
         verbose_name_plural = 'Operations Movements'
         indexes = [
             models.Index(fields=['account']),
-        ]        
+        ]
     operation = models.ForeignKey(Operation)
-    movement_type = models.CharField(max_length=2, choices=MOVEMENT_TYPES)
+    movement_type = models.CharField(max_length=5, choices=MOVEMENT_TYPES)
     account = models.ForeignKey(Account)
     amount = models.DecimalField(default=0.0, max_digits=9, decimal_places=2)
 

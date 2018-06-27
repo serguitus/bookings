@@ -1,6 +1,6 @@
 from accounting.tests.tests_services import AccountingBaseTestCase
 
-from finance.models import LoanEntityCurrency, LoanAccount, AgencyCurrency, Provider
+from finance.models import LoanEntityCurrency, LoanAccount, AgencyCurrency, ProviderCurrency
 class FinanceBaseTestCase(AccountingBaseTestCase):
 
     def assertDocument(self, test_document, test_doc_type, test_currency):

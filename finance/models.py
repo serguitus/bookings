@@ -19,6 +19,14 @@ from finance.constants import (
     DOC_TYPE_PROVIDER_DEVOLUTION, DOC_TYPE_PROVIDER_DISCOUNT)
 
 
+class SummaryModel(models.Model):
+    class Meta:
+        abstract = True
+    credit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    debit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    matched_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+
 class FinantialDocument(models.Model):
     class Meta:
         verbose_name = 'Finantial Document'
@@ -29,13 +37,18 @@ class FinantialDocument(models.Model):
     currency = models.CharField(max_length=5, choices=CURRENCIES)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(
-        max_length=2, choices=STATUSES, default=STATUS_DRAFT)
+        max_length=5, choices=STATUSES, default=STATUS_DRAFT)
+
+    def __str__(self):
+        return self.name
 
     def fill_data(self):
         pass
 
-    def __str__(self):
-        return self.name
+    def save(self, *args, **kwargs):
+        self.fill_data()
+        # Call the "real" save() method.
+        super().save(*args, **kwargs)
 
     def delete(self, using=None, keep_parents=False):
         raise ValidationError(
@@ -54,10 +67,10 @@ class FinantialDocumentHistory(models.Model):
     )
     date = models.DateTimeField()
     old_status = models.CharField(
-        max_length=2, choices=STATUSES,
+        max_length=5, choices=STATUSES,
         blank=True, null=True)
     new_status = models.CharField(
-        max_length=2, choices=STATUSES)
+        max_length=5, choices=STATUSES)
 
 
 class AccountingDocument(models.Model):
@@ -95,11 +108,6 @@ class Deposit(FinantialDocument, AccountingDocument):
         self.name = '%s%s - Deposit on %s of %s %s ' % (
             self.date, status.upper(), account, self.amount, account.get_currency_display())
 
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        self.fill_data()
-        # Call the real save() method
-        super(Deposit, self).save(force_insert, force_update, using, update_fields)
 
 class Withdraw(FinantialDocument, AccountingDocument):
     class Meta:
@@ -112,12 +120,6 @@ class Withdraw(FinantialDocument, AccountingDocument):
         self.name = '%s - Withdraw from %s of %s %s ' % (
             self.date, account, self.amount, account.get_currency_display())
         return self.name
-
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        self.fill_data()
-        # Call the real save() method
-        super(Withdraw, self).save(force_insert, force_update, using, update_fields)
 
 
 class CurrencyExchange(FinantialDocument, AccountingDocument):
@@ -135,12 +137,6 @@ class CurrencyExchange(FinantialDocument, AccountingDocument):
             self.date, account, self.amount, account.get_currency_display(),
             exchange_account, self.exchange_amount, exchange_account.get_currency_display())
 
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        self.fill_data()
-        # Call the real save() method
-        super(CurrencyExchange, self).save(force_insert, force_update, using, update_fields)
-
 
 class Transfer(FinantialDocument, AccountingDocument):
     class Meta:
@@ -154,12 +150,6 @@ class Transfer(FinantialDocument, AccountingDocument):
         transfer_account = Account.objects.get(pk=self.transfer_account_id)
         self.name = '%s - Transfer to %s of %s %s from %s' % (
             self.date, account, self.amount, account.currency, transfer_account)
-
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        self.fill_data()
-        # Call the real save() method
-        super(Transfer, self).save(force_insert, force_update, using, update_fields)
 
 
 class LoanDocument(FinantialDocument, AccountingDocument, MatchingDocument):
@@ -179,16 +169,13 @@ class LoanEntity(models.Model):
         return self.name
 
 
-class LoanEntityCurrency(models.Model):
+class LoanEntityCurrency(SummaryModel):
     class Meta:
         verbose_name = 'Loan Entity Currency'
         verbose_name_plural = 'Loans Entities Currencies'
         unique_together = (('loan_entity', 'currency',),)
     loan_entity = models.ForeignKey(LoanEntity)
     currency = models.CharField(max_length=5, choices=CURRENCIES)
-    credit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    debit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    matched_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):
         return '%s (%s)' % (self.name, self.get_currency_display())
@@ -352,12 +339,6 @@ class LoanEntityDeposit(LoanEntityDocument):
         self.name = '%s - Loan Entity Deposit to %s of %s %s from %s' % (
             self.date, account, self.amount, account.get_currency_display(), loan_entity)
 
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        self.fill_data()
-        # Call the real save() method
-        super(LoanEntityDeposit, self).save(force_insert, force_update, using, update_fields)
-
     def fix_matched_amount(self):
         cursor = connection.cursor()
         try:
@@ -412,12 +393,6 @@ class LoanEntityWithdraw(LoanEntityDocument):
         self.name = '%s - Loan Entity Withdraw from %s of %s %s to %s' % (
             self.date, account, self.amount, account.get_currency_display(), loan_entity)
 
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        self.fill_data()
-        # Call the real save() method
-        super(LoanEntityWithdraw, self).save(force_insert, force_update, using, update_fields)
-
     def fix_matched_amount(self):
         cursor = connection.cursor()
         try:
@@ -470,15 +445,12 @@ class LoanEntityMatch(models.Model):
     matched_amount = models.DecimalField(max_digits=10, decimal_places=2)
 
 
-class LoanAccount(models.Model):
+class LoanAccount(SummaryModel):
     class Meta:
         verbose_name = 'Finantial Account'
         verbose_name_plural = 'Finantials Accounts'
         unique_together = (('loan_account',),)
     loan_account = models.ForeignKey(Account)
-    credit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    debit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    matched_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def fix_credit_amount(self):
         cursor = connection.cursor()
@@ -630,12 +602,6 @@ class LoanAccountDeposit(LoanAccountDocument):
         self.name = '%s - Loan Account Deposit to %s of %s %s from %s' % (
             self.date, account, self.amount, account.get_currency_display(), loan_account)
 
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        self.fill_data()
-        # Call the real save() method
-        super(LoanAccountDeposit, self).save(force_insert, force_update, using, update_fields)
-
     def fix_matched_amount(self):
         cursor = connection.cursor()
         try:
@@ -689,12 +655,6 @@ class LoanAccountWithdraw(LoanAccountDocument):
         loan_account = Account.objects.get(pk=self.loan_account_id)
         self.name = '%s - Loan Account Withdraw from %s of %s %s to %s' % (
             self.date, account, self.amount, account.get_currency_display(), loan_account)
-
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        self.fill_data()
-        # Call the real save() method
-        super(LoanAccountWithdraw, self).save(force_insert, force_update, using, update_fields)
 
     def fix_matched_amount(self):
         cursor = connection.cursor()
@@ -762,17 +722,13 @@ class Agency(models.Model):
     def __str__(self):
         return self.name
 
-
-class AgencyCurrency(models.Model):
+class AgencyCurrency(SummaryModel):
     class Meta:
         verbose_name = 'Agency Currency'
         verbose_name_plural = 'Agencies Currencies'
         unique_together = (('agency', 'currency',),)
     agency = models.ForeignKey(Agency)
     currency = models.CharField(max_length=5, choices=CURRENCIES)
-    credit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    debit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    matched_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 
 class AgencyDocument(FinantialDocument, MatchingDocument):
@@ -887,12 +843,6 @@ class AgencyInvoice(AgencyDebitDocument):
         self.name = '%s - Agency Invoice to %s for %s %s' % (
             self.date, agency, self.amount, self.get_currency_display())
 
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        self.fill_data()
-        # Call the real save() method
-        super(AgencyInvoice, self).save(force_insert, force_update, using, update_fields)
-
 
 class AgencyPayment(AgencyCreditDocument, AccountingDocument):
     class Meta:
@@ -904,12 +854,6 @@ class AgencyPayment(AgencyCreditDocument, AccountingDocument):
         agency = Agency.objects.get(pk=self.agency_id)
         self.name = '%s - Agency Payment from %s for %s %s' % (
             self.date, agency, self.amount, self.get_currency_display())
-
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        self.fill_data()
-        # Call the real save() method
-        super(AgencyPayment, self).save(force_insert, force_update, using, update_fields)
 
 
 class AgencyDiscount(AgencyCreditDocument):
@@ -923,12 +867,6 @@ class AgencyDiscount(AgencyCreditDocument):
         self.name = '%s - Agency Discount to %s for %s %s' % (
             self.date, agency, self.amount, self.get_currency_display())
 
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        self.fill_data()
-        # Call the real save() method
-        super(AgencyDiscount, self).save(force_insert, force_update, using, update_fields)
-
 
 class AgencyDevolution(AgencyDebitDocument, AccountingDocument):
     class Meta:
@@ -940,12 +878,6 @@ class AgencyDevolution(AgencyDebitDocument, AccountingDocument):
         agency = Agency.objects.get(pk=self.agency_id)
         self.name = '%s - Agency Devolution to %s for %s %s' % (
             self.date, agency, self.amount, self.get_currency_display())
-
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        self.fill_data()
-        # Call the real save() method
-        super(AgencyDevolution, self).save(force_insert, force_update, using, update_fields)
 
 
 class AgencyDocumentMatch(models.Model):
@@ -973,16 +905,13 @@ class Provider(models.Model):
         return self.name
 
 
-class ProviderCurrency(models.Model):
+class ProviderCurrency(SummaryModel):
     class Meta:
         verbose_name = 'Provider Currency'
         verbose_name_plural = 'Providers Currencies'
         unique_together = (('provider', 'currency',),)
     provider = models.ForeignKey(Provider)
     currency = models.CharField(max_length=5, choices=CURRENCIES)
-    credit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    debit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    matched_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 
 class ProviderDocument(FinantialDocument, MatchingDocument):
@@ -1115,12 +1044,6 @@ class ProviderPayment(ProviderCreditDocument, AccountingDocument):
         self.name = '%s - Provider Payment from %s for %s %s' % (
             self.date, provider, self.amount, self.get_currency_display())
 
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        self.fill_data()
-        # Call the real save() method
-        super(ProviderPayment, self).save(force_insert, force_update, using, update_fields)
-
 
 class ProviderDiscount(ProviderCreditDocument):
     class Meta:
@@ -1133,12 +1056,6 @@ class ProviderDiscount(ProviderCreditDocument):
         self.name = '%s - Provider Discount from %s for %s %s' % (
             self.date, provider, self.amount, self.get_currency_display())
 
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        self.fill_data()
-        # Call the real save() method
-        super(ProviderDiscount, self).save(force_insert, force_update, using, update_fields)
-
 
 class ProviderDevolution(ProviderDebitDocument, AccountingDocument):
     class Meta:
@@ -1150,12 +1067,6 @@ class ProviderDevolution(ProviderDebitDocument, AccountingDocument):
         provider = Provider.objects.get(pk=self.provider_id)
         self.name = '%s - Provider Devolution from %s for %s %s' % (
             self.date, provider, self.amount, self.get_currency_display())
-
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        self.fill_data()
-        # Call the real save() method
-        super(ProviderDevolution, self).save(force_insert, force_update, using, update_fields)
 
 
 class ProviderDocumentMatch(models.Model):
