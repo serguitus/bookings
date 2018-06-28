@@ -48,7 +48,7 @@ class FinantialDocument(models.Model):
     def save(self, *args, **kwargs):
         self.fill_data()
         # Call the "real" save() method.
-        super().save(*args, **kwargs)
+        super(FinantialDocument, self).save(*args, **kwargs)
 
     def delete(self, using=None, keep_parents=False):
         raise ValidationError(
