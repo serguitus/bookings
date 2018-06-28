@@ -1,6 +1,7 @@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# Must be especified when DEBUG is False
 ALLOWED_HOSTS = []
 
 
@@ -23,6 +24,7 @@ DATABASES = {
         # 'ATOMIC_REQUESTS': True,
     }
 }
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
