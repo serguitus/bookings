@@ -1,9 +1,10 @@
+"""
+Config Models
+"""
 from django.db import models
 
-from accounting.models import CURRENCIES, CURRENCY_CUC
-
 from config.constants import (
-    SERVICE_CATEGORIES, ROOM_TYPES, BOARD_TYPES, PAX_TYPES, PAX_COMBOS,
+    SERVICE_CATEGORIES, ROOM_TYPES, BOARD_TYPES,
     EXTRA_COST_TYPES,
     ALLOTMENT_SUPPLEMENT_COST_TYPES, TRANSFER_SUPPLEMENT_COST_TYPES,
     TRANSFER_COST_TYPES)
@@ -12,6 +13,9 @@ from finance.models import Agency, Provider
 
 
 class Location(models.Model):
+    """
+    Location
+    """
     class Meta:
         verbose_name = 'Location'
         verbose_name_plural = 'Locations'
@@ -20,6 +24,9 @@ class Location(models.Model):
 
 
 class Service(models.Model):
+    """
+    Service
+    """
     class Meta:
         verbose_name = 'Service'
         verbose_name_plural = 'Services'
@@ -29,6 +36,9 @@ class Service(models.Model):
 
 
 class ServiceSupplement(models.Model):
+    """
+    ServiceSupplement
+    """
     class Meta:
         verbose_name = 'Service Supplement'
         verbose_name_plural = 'Services Supplements'
@@ -41,6 +51,9 @@ class ServiceSupplement(models.Model):
 
 
 class ServiceProvider(models.Model):
+    """
+    ServiceProvider
+    """
     class Meta:
         verbose_name = 'Service Provider'
         verbose_name_plural = 'Services Providers'
@@ -52,6 +65,9 @@ class ServiceProvider(models.Model):
 
 
 class Cost(models.Model):
+    """
+    Cost
+    """
     class Meta:
         verbose_name = 'Cost'
         verbose_name_plural = 'Costs'
@@ -61,6 +77,9 @@ class Cost(models.Model):
 
 
 class CostDetail(models.Model):
+    """
+    CostDetail
+    """
     class Meta:
         verbose_name = 'Cost Detail'
         verbose_name_plural = 'Costs Details'
@@ -72,6 +91,9 @@ class CostDetail(models.Model):
 
 
 class SupplementCostDetail(models.Model):
+    """
+    SupplementCostDetail
+    """
     class Meta:
         verbose_name = 'Supplement Cost Detail'
         verbose_name_plural = 'Supplements Costs Details'
@@ -84,6 +106,9 @@ class SupplementCostDetail(models.Model):
 
 
 class PriceCatalogue(models.Model):
+    """
+    PriceCatalogue
+    """
     class Meta:
         verbose_name = 'Price Catalogue'
         verbose_name_plural = 'Prices Catalogues'
@@ -93,6 +118,9 @@ class PriceCatalogue(models.Model):
 
 
 class ServiceProviderPrice(models.Model):
+    """
+    ServiceProviderPrice
+    """
     class Meta:
         verbose_name = 'Price Catalogue'
         verbose_name_plural = 'Prices Catalogues'
@@ -103,6 +131,9 @@ class ServiceProviderPrice(models.Model):
 
 
 class CostDetailPrice(models.Model):
+    """
+    CostDetailPrice
+    """
     class Meta:
         verbose_name = 'Cost Detail Price'
         verbose_name_plural = 'Costs Details Prices'
@@ -115,6 +146,9 @@ class CostDetailPrice(models.Model):
 
 
 class SupplementCostDetailPrice(models.Model):
+    """
+    SupplementCostDetailPrice
+    """
     class Meta:
         verbose_name = 'Supplement Cost Detail Price'
         verbose_name_plural = 'Supplements Costs Details Prices'
@@ -127,6 +161,9 @@ class SupplementCostDetailPrice(models.Model):
 
 
 class AgencyPriceCatalogue(models.Model):
+    """
+    AgencyPriceCatalogue
+    """
     class Meta:
         verbose_name = 'Agency Price Catalogue'
         verbose_name_plural = 'Agencies Prices Catalogues'
@@ -139,12 +176,18 @@ class AgencyPriceCatalogue(models.Model):
 # Extra
 #===============================================================================
 class Extra(Service):
+    """
+    Extra
+    """
     class Meta:
         verbose_name = 'Extra'
         verbose_name_plural = 'Extras'
 
 
 class ExtraServiceProvider(ServiceProvider):
+    """
+    ExtraServiceProvider
+    """
     class Meta:
         verbose_name = 'Extra Service Provider'
         verbose_name_plural = 'Extras Services Providers'
@@ -156,6 +199,9 @@ class ExtraServiceProvider(ServiceProvider):
 # Allotment
 #===============================================================================
 class Allotment(Service):
+    """
+    Allotment
+    """
     class Meta:
         verbose_name = 'Allotment'
         verbose_name_plural = 'Allotments'
@@ -165,6 +211,9 @@ class Allotment(Service):
 
 
 class AllotmentRoomType(models.Model):
+    """
+    AllotmentRoomType
+    """
     class Meta:
         verbose_name = 'Allotment Room Type'
         verbose_name_plural = 'Allotments Rooms Types'
@@ -175,6 +224,9 @@ class AllotmentRoomType(models.Model):
 
 
 class AllotmentBoardType(models.Model):
+    """
+    AllotmentBoardType
+    """
     class Meta:
         verbose_name = 'Allotment Board Type'
         verbose_name_plural = 'Alloments Boards Types'
@@ -183,6 +235,9 @@ class AllotmentBoardType(models.Model):
 
 
 class AllotmentCostDetail(CostDetail):
+    """
+    AllotmentCostDetail
+    """
     class Meta:
         verbose_name = 'Allotment Cost Detail'
         verbose_name_plural = 'Allotments Costs Details'
@@ -191,6 +246,9 @@ class AllotmentCostDetail(CostDetail):
 
 
 class AllotmentSupplementCostDetail(SupplementCostDetail):
+    """
+    AllotmentSupplementCostDetail
+    """
     class Meta:
         verbose_name = 'Allotment Supplement Cost Detail'
         verbose_name_plural = 'Allotments Supplements Costs Details'
@@ -200,6 +258,9 @@ class AllotmentSupplementCostDetail(SupplementCostDetail):
 
 
 class AllotmentRoomAvailability(models.Model):
+    """
+    AllotmentRoomAvailability
+    """
     class Meta:
         verbose_name = 'Allotment Availability'
         verbose_name_plural = 'Allotments Availabilities'
@@ -213,11 +274,17 @@ class AllotmentRoomAvailability(models.Model):
 # TRANFER
 #===============================================================================
 class Transfer(Service):
+    """
+    Transfer
+    """
     location_from = models.ForeignKey(Location, related_name='location_from')
     location_to = models.ForeignKey(Location, related_name='location_to')
 
 
 class TransferServiceProvider(ServiceProvider):
+    """
+    TransferServiceProvider
+    """
     class Meta:
         verbose_name = 'Transfer Service Provider'
         verbose_name_plural = 'Transfers Services Providers'
@@ -225,6 +292,9 @@ class TransferServiceProvider(ServiceProvider):
 
 
 class TransferSupplementCostDetail(SupplementCostDetail):
+    """
+    TransferSupplementCostDetail
+    """
     class Meta:
         verbose_name = 'Transfer Supplement'
         verbose_name_plural = 'Transfers Supplements'
