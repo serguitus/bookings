@@ -47,3 +47,4 @@ class ExtendedOperationMovementAdmin(ExtendedModelAdmin):
 reservas_admin.register(Account, ExtendedAccountAdmin)
 reservas_admin.register(Operation, ExtendedOperationAdmin)
 reservas_admin.register(OperationMovement, ExtendedOperationMovementAdmin)
+
