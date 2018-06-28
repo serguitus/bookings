@@ -1,127 +1,165 @@
+"""
+Booking models
+"""
 from django.db import models
-from django.db.models import Sum
 
-from accounting.models import *
+from accounting.constants import CURRENCIES, CURRENCY_CUC
 
-from booking.constants import *
+from booking.constants import (
+    BOOKING_STATUS_LIST, BOOKING_STATUS_PENDING,
+    SERVICE_STATUS_LIST, SERVICE_STATUS_PENDING)
 
-from config.models import *
+from config.constants import BOARD_TYPES
+from config.models import Service, ServiceSupplement, AllotmentRoomType
 
-from finance.models import *
+from finance.models import Agency, AgencyInvoice, Provider, ProviderInvoice
 
-class DateTimeRange(models.Model):
-    class Meta:
-        abstract = True
-    date_from = models.DateTimeField()
-    date_to = models.DateTimeField()
-
-
-class Sale(models.Model):
-    class Meta:
-        abstract = True
-    list_cost = models.DecimalField(max_digits = 10, decimal_places = 2)
-    list_price = models.DecimalField(max_digits = 10, decimal_places = 2)
-    cost = models.DecimalField(max_digits = 10, decimal_places = 2)
-    price = models.DecimalField(max_digits = 10, decimal_places = 2)
-
-
-class Booking(Sale, DateTimeRange):
+class Booking(models.Model):
+    """
+    Booking
+    """
     class Meta:
         verbose_name = 'Booking'
         verbose_name_plural = 'Bookings'
-    description = models.CharField(max_length = 1000)
-    reference = models.CharField(max_length = 256)
-    status = models.CharField(max_length=2, choices = BOOKING_STATUS_LIST, default = BOOKING_STATUS_REQUEST)
+        default_permissions = ('add', 'change',)
+    description = models.CharField(max_length=1000)
+    agency = models.ForeignKey(Agency)
+    reference = models.CharField(max_length=250)
+    date_from = models.DateField()
+    date_to = models.DateField()
+    status = models.CharField(
+        max_length=5, choices=BOOKING_STATUS_LIST, default=BOOKING_STATUS_PENDING)
+    currency = models.CharField(
+        max_length=5, choices=CURRENCIES, default=CURRENCY_CUC)
+    currency_factor = models.DecimalField(max_digits=12, decimal_places=6)
+    cost_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    cost_comments = models.CharField(max_length=1000)
+    price_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    price_comments = models.CharField(max_length=1000)
     agency_invoice = models.ForeignKey(AgencyInvoice)
 
+    def fill_data(self):
+        pass
+
+    def save(self, *args, **kwargs):
+        self.fill_data()
+        # Call the "real" save() method.
+        super().save(*args, **kwargs)
+
+
 class BookingPax(models.Model):
+    """
+    Booking Pax
+    """
     class Meta:
         verbose_name = 'Booking Pax'
         verbose_name_plural = 'Bookings Paxes'
-    name = models.CharField(max_length = 50)
-    age = models.SmallIntegerField()
-    
+    booking = models.ForeignKey(Booking)
+    pax_name = models.CharField(max_length=50)
+    pax_age = models.SmallIntegerField()
 
-class BookingService(Sale, DateTimeRange):
+
+class BookingService(models.Model):
+    """
+    Booking Service
+    """
     class Meta:
         verbose_name = 'Booking Service'
         verbose_name_plural = 'Bookings Services'
+        default_permissions = ('add', 'change',)
     booking = models.ForeignKey(Booking)
     service = models.ForeignKey(Service)
-    description = models.CharField(max_length = 1000)
-    status = models.CharField(max_length=2, choices = SERVICE_STATUS_LIST, default = SERVICE_STATUS_REQUEST)
+    description = models.CharField(max_length=1000)
+    datetime_from = models.DateTimeField()
+    datetime_to = models.DateTimeField()
+    status = models.CharField(
+        max_length=5, choices=SERVICE_STATUS_LIST, default=SERVICE_STATUS_PENDING)
+    cost_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    cost_comments = models.CharField(max_length=1000)
+    price_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    price_comments = models.CharField(max_length=1000)
+    service_qtty = models.SmallIntegerField(default=1)
+    adult_qtty = models.SmallIntegerField()
+    senior_qtty = models.SmallIntegerField()
+    child_qtty = models.SmallIntegerField()
+    baby_qtty = models.SmallIntegerField()
+    provider = models.ForeignKey(Provider)
     provider_invoice = models.ForeignKey(ProviderInvoice)
+
+    def fill_data(self):
+        pass
+
+    def save(self, *args, **kwargs):
+        self.fill_data()
+        # Call the "real" save() method.
+        super().save(*args, **kwargs)
+
+
+class BookingServiceSupplement(models.Model):
+    """
+    Booking Service Supplement
+    """
+    class Meta:
+        verbose_name = 'Booking Service Supplement'
+        verbose_name_plural = 'Bookings Services Supplements'
+    booking_service = models.ForeignKey(BookingService)
+    supplement = models.ForeignKey(ServiceSupplement)
+    description = models.CharField(max_length=1000)
+    datetime_from = models.DateTimeField()
+    datetime_to = models.DateTimeField()
+    supplement_qtty = models.SmallIntegerField(default=1)
+    cost_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    cost_comments = models.CharField(max_length=1000)
+    price_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    price_comments = models.CharField(max_length=1000)
+
+
+class BookingExtra(BookingService):
+    """
+    Booking Service Extra
+    """
+    class Meta:
+        verbose_name = 'Booking Extra'
+        verbose_name_plural = 'Bookings Extras'
+    extra_qtty = models.SmallIntegerField()
 
 
 class BookingAllotment(BookingService):
+    """
+    Booking Service Allotment
+    """
     class Meta:
         verbose_name = 'Booking Allotment'
         verbose_name_plural = 'Bookings Allotments'
-    allotment = models.ForeignKey(Allotment)
+    room_type = models.ForeignKey(AllotmentRoomType)
+    board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
 
 
-class BookingTransfer(BookingService):
-    class Meta:
-        verbose_name = 'Booking Transfer'
-        verbose_name_plural = 'Bookings Transfers'
-    transfer = models.ForeignKey(Transfer)
-
-
-class BookingServiceLine(Sale, DateTimeRange):
-    class Meta:
-        verbose_name = 'Booking Service Line'
-        verbose_name_plural = 'Bookings Services Lines'
-    booking_service = models.ForeignKey(BookingService)
-    description = models.CharField(max_length = 1000)
-    list_unit_cost = models.DecimalField(max_digits = 10, decimal_places = 2)
-    list_unit_price = models.DecimalField(max_digits = 10, decimal_places = 2)
-    status = models.CharField(max_length=2, choices = LINE_STATUS_LIST, default = LINE_STATUS_REQUEST)
-    provider_invoice = models.ForeignKey(ProviderInvoice)
-
-
-class BookingAllotmentLine(BookingServiceLine, AllotmentDefinition):
-    class Meta:
-        verbose_name = 'Booking Allotment Line'
-        verbose_name_plural = 'Bookings Allotments Lines'
-
-
-class BookingAllotmentLinePax(models.Model):
+class BookingAllotmentPax(models.Model):
+    """
+    Allotment Pax
+    """
     class Meta:
         verbose_name = 'Booking Allotment Line Pax'
         verbose_name_plural = 'Bookings Allotments Lines Paxes'
-    booking_allotment_line = models.ForeignKey(BookingAllotmentLine)
+    booking_allotment = models.ForeignKey(BookingAllotment)
     booking_pax = models.ForeignKey(BookingPax)
 
 
-class BookingTransferLine(BookingServiceLine, TransferDefinition):
+class BookingTransfer(BookingService):
+    """
+    Booking Service Transfer
+    """
     class Meta:
-        verbose_name = 'Booking Transfer Line'
-        verbose_name_plural = 'Bookings Transfers Lines'
-    pax_qtty = models.SmallIntegerField()
-    transport_qtty = models.SmallIntegerField(default=1)
+        verbose_name = 'Booking Transfer'
+        verbose_name_plural = 'Bookings Transfers'
 
 
-class BookingServiceLineSupplement(Sale, DateTimeRange):
-    class Meta:
-        verbose_name = 'Booking Service Line Supplement'
-        verbose_name_plural = 'Bookings Services Lines Supplements'
-    booking_service_line = models.ForeignKey(BookingServiceLine)
-    description = models.CharField(max_length = 1000)
-
-
-class BookingAllotmentLineSupplement(BookingServiceLineSupplement):
-    class Meta:
-        verbose_name = 'Booking Allotment Line Supplement'
-        verbose_name_plural = 'Bookings Allotments Lines Supplements'
-    supplement = models.ForeignKey(AllotmentSupplement)
-
-
-class BookingTransferLineSupplement(BookingServiceLineSupplement):
+class BookingTransferSupplement(BookingServiceSupplement):
+    """
+    Transfer Supplement
+    """
     class Meta:
         verbose_name = 'Booking Transfer Line Supplement'
         verbose_name_plural = 'Bookings Transfers Lines Supplements'
-    supplement = models.ForeignKey(TransferSupplement)
-    hours = models.SmallIntegerField(default=1)
-
-
-
+    hours = models.SmallIntegerField()

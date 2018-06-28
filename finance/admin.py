@@ -43,7 +43,7 @@ class ExtendedFinantialDocumentAdmin(ExtendedModelAdmin):
 
 
 class ExtendedDepositAdmin(ExtendedFinantialDocumentAdmin):
-    readonly_model = False;
+    readonly_model = False
     readonly_fields = ('name',)
     fields = ('name', 'account', 'amount', 'date', 'status')
     list_display = ('name', 'account', 'amount', 'date', 'status')
@@ -61,7 +61,8 @@ class ExtendedWithdrawAdmin(ExtendedDepositAdmin):
 
 class ExtendedCurrencyExchangeAdmin(ExtendedModelAdmin):
     fields = ('name', 'account', 'amount', 'date', 'status', 'exchange_account', 'exchange_amount')
-    list_display = ('name', 'account', 'amount', 'date', 'status', 'exchange_account', 'exchange_amount')
+    list_display = (
+        'name', 'account', 'amount', 'date', 'status', 'exchange_account', 'exchange_amount')
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
