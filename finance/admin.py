@@ -7,7 +7,8 @@ from reservas.admin import reservas_admin, ExtendedModelAdmin
 
 from finance.models import (
     Agency, Provider, FinantialDocument,
-    Deposit, Withdraw, CurrencyExchange, Transfer)
+    Deposit, Withdraw, CurrencyExchange, Transfer,
+    LoanAccountWithdraw, LoanAccountDeposit)
 from finance.services import FinanceService
 
 
@@ -75,6 +76,12 @@ class ExtendedTransferAdmin(ExtendedModelAdmin):
         # overrides base class method
         return FinanceService.save_transfer(request.user, obj)
 
+class ExtendedLoanAccountWithdrawAdmin(ExtendedModelAdmin):
+   """ a class to add new widthdraws from an account
+   as loans to other account"""
+   list_display = ['account', 'loan_account', 'amount', 'date']
+
+
 reservas_admin.register(FinantialDocument, ExtendedFinantialDocumentAdmin)
 reservas_admin.register(Provider, ProviderAdmin)
 reservas_admin.register(Agency, AgencyAdmin)
@@ -82,3 +89,4 @@ reservas_admin.register(Deposit, ExtendedDepositAdmin)
 reservas_admin.register(Withdraw, ExtendedWithdrawAdmin)
 reservas_admin.register(CurrencyExchange, ExtendedCurrencyExchangeAdmin)
 reservas_admin.register(Transfer, ExtendedTransferAdmin)
+reservas_admin.register(LoanAccountWithdraw, ExtendedLoanAccountWithdrawAdmin)
