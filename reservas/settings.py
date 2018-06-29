@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
+from .custom_settings import ALLOWED_HOSTS, DATABASES, DEBUG, STATIC_URL, STATIC_ROOT
+
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -21,11 +23,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '0wp56g2aw)9r2094mh0w+t5$wk213$jz#tc@_m&euj95+-w0rt'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -83,16 +80,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'reservas.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/1.10/ref/settings/#databases
-
-from .dbconfig import db_config
-
-DATABASES = {
-    'default': db_config
-}
-
-
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
 
@@ -124,24 +111,3 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.10/howto/static-files/
-
-STATIC_URL = '/static/'
-STATIC_ROOT = '../static'
-
-#STATIC_ROOT = 'static_files'
-
-#ADMIN_TOOLS_INDEX_DASHBOARD = {
-#    'django.contrib.admin.site': 'reservas.django_admin_dashboard.CustomIndexDashboard',
-#    'reservas.admin.reservas_site': 'reservas.reservas_dashboard.CustomIndexDashboard',
-#}
-
-
-CURRENCIES = [
-    ('CUC', 'cuc'),
-    ('USD', 'usd'),
-    ('EUR', 'eur'),
-]
