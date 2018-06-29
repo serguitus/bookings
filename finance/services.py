@@ -869,7 +869,7 @@ class FinanceService(object):
             other_account, db_other_account_id, db_other_amount):
         revertion = None
         reverted_account = account
-        if movement_type is MOVEMENT_TYPE_OUTPUT:
+        if movement_type == MOVEMENT_TYPE_OUTPUT:
             # revert outputs of previous operation
             if db_document.account_id != account.pk:
                 if other_account and other_account.pk == db_document.account_id:
@@ -885,7 +885,7 @@ class FinanceService(object):
                 account=reverted_account,
                 movement_type=MOVEMENT_TYPE_INPUT,
                 amount=db_document.amount)
-        if movement_type is MOVEMENT_TYPE_INPUT:
+        if movement_type == MOVEMENT_TYPE_INPUT:
             if db_other_account_id:
                 if account and (account.pk == db_other_account_id):
                     reverted_account = account
@@ -914,7 +914,7 @@ class FinanceService(object):
             other_account, db_other_account_id, db_other_amount):
         revertion = None
         reverted_account = account
-        if movement_type is MOVEMENT_TYPE_INPUT:
+        if movement_type == MOVEMENT_TYPE_INPUT:
             # revert outputs of previous operation
             if db_document.account_id != account.pk:
                 if other_account and other_account.pk == db_document.account_id:
@@ -930,7 +930,7 @@ class FinanceService(object):
                 account=reverted_account,
                 movement_type=MOVEMENT_TYPE_OUTPUT,
                 amount=db_document.amount)
-        if movement_type is MOVEMENT_TYPE_OUTPUT:
+        if movement_type == MOVEMENT_TYPE_OUTPUT:
             if db_other_account_id:
                 if account and (account.pk == db_other_account_id):
                     reverted_account = account
@@ -957,9 +957,9 @@ class FinanceService(object):
     def _needs_current(
             cls, document, db_document,
             other_account=None, db_other_account_id=None, other_amount=None, db_other_amount=None):
-        return document and (document.status is STATUS_READY) and (
+        return document and (document.status == STATUS_READY) and (
             (not db_document)
-            or (not (db_document.status is STATUS_READY))
+            or (not (db_document.status == STATUS_READY))
             or (document.account_id != db_document.account_id)
             or (document.amount != db_document.amount)
             or (other_account and (other_account.pk != db_other_account_id))
@@ -969,8 +969,8 @@ class FinanceService(object):
     def _needs_revertion(
             cls, document, db_document,
             other_account=None, db_other_account_id=None, other_amount=None, db_other_amount=None):
-        return db_document and (db_document.status is STATUS_READY) and (
-            (not (document.status is STATUS_READY))
+        return db_document and (db_document.status == STATUS_READY) and (
+            (not (document.status == STATUS_READY))
             or (document.account_id != db_document.account_id)
             or (document.amount != db_document.amount)
             or (other_account and (other_account.pk != db_other_account_id))
@@ -1010,42 +1010,42 @@ class FinanceService(object):
                     raise ValidationError(ERROR_MATCH_AMOUNT)
 
             # validate account changed for loans
-            if match_type is MATCH_TYPE_ENTITY or match_type is MATCH_TYPE_ACCOUNT:
+            if match_type == MATCH_TYPE_ENTITY or match_type == MATCH_TYPE_ACCOUNT:
                 if db_document.account_id != document.account_id:
                     # verifies matches
                     if cls._document_has_matches(document=document, match_type=match_type):
                         raise ValidationError(ERROR_MATCH_ACCOUNT)
 
                 # validate loan_entity changed for loan entities
-                if match_type is MATCH_TYPE_ENTITY:
+                if match_type == MATCH_TYPE_ENTITY:
                     if db_document.loan_entity_id != document.loan_entity_id:
                         # verifies matches
                         if cls._document_has_matches(document=document, match_type=match_type):
                             raise ValidationError(ERROR_MATCH_LOAN_ENTITY)
 
                 # validate loan_account changed for loan accounts
-                if match_type is MATCH_TYPE_ACCOUNT:
+                if match_type == MATCH_TYPE_ACCOUNT:
                     if db_document.loan_account_id != document.loan_account_id:
                         # verifies matches
                         if cls._document_has_matches(document=document, match_type=match_type):
                             raise ValidationError(ERROR_MATCH_LOAN_ACCOUNT)
 
             # validate currency changed for agency and provider
-            if match_type is MATCH_TYPE_AGENCY or match_type is MATCH_TYPE_PROVIDER:
+            if match_type == MATCH_TYPE_AGENCY or match_type == MATCH_TYPE_PROVIDER:
                 if db_document.currency != document.currency:
                     # verifies matches
                     if cls._document_has_matches(document=document, match_type=match_type):
                         raise ValidationError(ERROR_MATCH_CURRENCY)
 
                 # validate agency changed for agency docs
-                if match_type is MATCH_TYPE_AGENCY:
+                if match_type == MATCH_TYPE_AGENCY:
                     if db_document.agency_id != document.agency_id:
                         # verifies matches
                         if cls._document_has_matches(document=document, match_type=match_type):
                             raise ValidationError(ERROR_MATCH_AGENCY)
 
                 # validate provider changed for provider docs
-                if match_type is MATCH_TYPE_PROVIDER:
+                if match_type == MATCH_TYPE_PROVIDER:
                     if db_document.provider_id != document.provider_id:
                         # verifies matches
                         if cls._document_has_matches(document=document, match_type=match_type):
@@ -1086,11 +1086,11 @@ class FinanceService(object):
             is_credit=True)
         # verify status
         credit_msg = 'Loan Entity Deposit'
-        if match_type is MATCH_TYPE_ACCOUNT:
+        if match_type == MATCH_TYPE_ACCOUNT:
             credit_msg = 'Loan Account Deposit'
-        if match_type is MATCH_TYPE_AGENCY:
+        if match_type == MATCH_TYPE_AGENCY:
             credit_msg = 'Agency Credit Document'
-        if match_type is MATCH_TYPE_PROVIDER:
+        if match_type == MATCH_TYPE_PROVIDER:
             credit_msg = 'Provider Credit Document'
         if credit_document.status != STATUS_READY:
             raise ValidationError(ERROR_NOT_READY % credit_msg)
@@ -1101,11 +1101,11 @@ class FinanceService(object):
             is_credit=False)
         # verify status
         debit_msg = 'Loan Entity Withdraw'
-        if match_type is MATCH_TYPE_ACCOUNT:
+        if match_type == MATCH_TYPE_ACCOUNT:
             debit_msg = 'Loan Account Withdraw'
-        if match_type is MATCH_TYPE_AGENCY:
+        if match_type == MATCH_TYPE_AGENCY:
             debit_msg = 'Agency Debit Document'
-        if match_type is MATCH_TYPE_PROVIDER:
+        if match_type == MATCH_TYPE_PROVIDER:
             debit_msg = 'Provider Debit Document'
         if debit_document.status != STATUS_READY:
             raise ValidationError(ERROR_NOT_READY % debit_msg)
@@ -1114,7 +1114,7 @@ class FinanceService(object):
             credit_document=credit_document,
             debit_document=debit_document,
             match_type=match_type)
-        if match_type is MATCH_TYPE_ENTITY or match_type is MATCH_TYPE_ACCOUNT:
+        if match_type == MATCH_TYPE_ENTITY or match_type == MATCH_TYPE_ACCOUNT:
             # verify accounts
             if credit_document.account_id != debit_document.account_id:
                 raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Accounts')
@@ -1139,11 +1139,11 @@ class FinanceService(object):
     @classmethod
     def _validate_match_same_relateds(cls, credit_document, debit_document, match_type):
         msg = 'Loan Entities'
-        if match_type is MATCH_TYPE_ACCOUNT:
+        if match_type == MATCH_TYPE_ACCOUNT:
             msg = 'Loan Accounts'
-        if match_type is MATCH_TYPE_AGENCY:
+        if match_type == MATCH_TYPE_AGENCY:
             msg = 'Agencies'
-        if match_type is MATCH_TYPE_PROVIDER:
+        if match_type == MATCH_TYPE_PROVIDER:
             msg = 'Providers'
         if cls._get_related_id(credit_document, match_type) \
                 != cls._get_related_id(debit_document, match_type):
@@ -1152,23 +1152,23 @@ class FinanceService(object):
     @classmethod
     def _validate_match_same_documents(
             cls, document_match, db_document_match, match_type):
-        if match_type is MATCH_TYPE_ENTITY:
+        if match_type == MATCH_TYPE_ENTITY:
             if db_document_match.loan_entity_deposit_id != document_match.loan_entity_deposit_id:
                 raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Loan Entity Deposit')
             if db_document_match.loan_entity_withdraw_id != document_match.loan_entity_withdraw_id:
                 raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Loan Entity Withdraw')
-        if match_type is MATCH_TYPE_ACCOUNT:
+        if match_type == MATCH_TYPE_ACCOUNT:
             if db_document_match.loan_account_deposit_id != document_match.loan_account_deposit_id:
                 raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Loan Account Deposit')
             if db_document_match.loan_account_withdraw_id \
                     != document_match.loan_account_withdraw_id:
                 raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Loan Account Withdraw')
-        if match_type is MATCH_TYPE_AGENCY:
+        if match_type == MATCH_TYPE_AGENCY:
             if db_document_match.credit_document_id != document_match.credit_document_id:
                 raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Agency Credit document')
             if db_document_match.debit_document_id != document_match.debit_document_id:
                 raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Agency Debit Document')
-        if match_type is MATCH_TYPE_PROVIDER:
+        if match_type == MATCH_TYPE_PROVIDER:
             if db_document_match.credit_document_id != document_match.credit_document_id:
                 raise ValidationError(ERROR_DIFFERENT_DOCUMENTS % 'Provider Credit document')
             if db_document_match.debit_document_id != document_match.debit_document_id:
@@ -1202,12 +1202,12 @@ class FinanceService(object):
         new_currency = None
         new_amount = 0
 
-        if db_document and db_document.status is STATUS_READY:
+        if db_document and db_document.status == STATUS_READY:
             old_ready = True
             old_related_id = cls._get_related_id(db_document, match_type)
             old_currency = db_document.currency
             old_amount = db_document.amount
-        if document.status is STATUS_READY:
+        if document.status == STATUS_READY:
             new_ready = True
             new_related_id = cls._get_related_id(document, match_type)
             new_currency = document.currency
@@ -1291,39 +1291,39 @@ class FinanceService(object):
 
     @classmethod
     def _get_related_id(cls, document, match_type):
-        if match_type is MATCH_TYPE_ENTITY:
+        if match_type == MATCH_TYPE_ENTITY:
             return document.loan_entity_id
-        if match_type is MATCH_TYPE_ACCOUNT:
+        if match_type == MATCH_TYPE_ACCOUNT:
             return document.loan_account_id
-        if match_type is MATCH_TYPE_AGENCY:
+        if match_type == MATCH_TYPE_AGENCY:
             return document.agency_id
-        if match_type is MATCH_TYPE_PROVIDER:
+        if match_type == MATCH_TYPE_PROVIDER:
             return document.provider_id
 
     @classmethod
     def _get_locked_match_related(cls, document_match, match_type, is_credit):
-        if match_type is MATCH_TYPE_ENTITY:
+        if match_type == MATCH_TYPE_ENTITY:
             if is_credit:
                 return cls._load_locked_model_object(
                     pk=document_match.loan_entity_deposit_id, model_class=LoanEntityDeposit)
             else:
                 return cls._load_locked_model_object(
                     pk=document_match.loan_entity_withdraw_id, model_class=LoanEntityWithdraw)
-        if match_type is MATCH_TYPE_ACCOUNT:
+        if match_type == MATCH_TYPE_ACCOUNT:
             if is_credit:
                 return cls._load_locked_model_object(
                     pk=document_match.loan_account_deposit_id, model_class=LoanAccountDeposit)
             else:
                 return cls._load_locked_model_object(
                     pk=document_match.loan_account_withdraw_id, model_class=LoanAccountWithdraw)
-        if match_type is MATCH_TYPE_AGENCY:
+        if match_type == MATCH_TYPE_AGENCY:
             if is_credit:
                 return cls._load_locked_model_object(
                     pk=document_match.credit_document_id, model_class=AgencyCreditDocument)
             else:
                 return cls._load_locked_model_object(
                     pk=document_match.debit_document_id, model_class=AgencyDebitDocument)
-        if match_type is MATCH_TYPE_PROVIDER:
+        if match_type == MATCH_TYPE_PROVIDER:
             if is_credit:
                 return cls._load_locked_model_object(
                     pk=document_match.credit_document_id, model_class=ProviderCreditDocument)
@@ -1333,7 +1333,7 @@ class FinanceService(object):
 
     @classmethod
     def _get_locked_related_summary(cls, related_id, currency, match_type):
-        if match_type is MATCH_TYPE_ENTITY:
+        if match_type == MATCH_TYPE_ENTITY:
             # find or create related
             related_summary = LoanEntityCurrency.objects.get_or_create(
                 loan_entity_id=related_id,
@@ -1341,14 +1341,14 @@ class FinanceService(object):
             # load locked
             return cls._load_locked_model_object(
                 pk=related_summary[0].pk, model_class=LoanEntityCurrency)
-        if match_type is MATCH_TYPE_ACCOUNT:
+        if match_type == MATCH_TYPE_ACCOUNT:
             # find or create related
             related_summary = LoanAccount.objects.get_or_create(
                 loan_account_id=related_id)
             # load locked
             return cls._load_locked_model_object(
                 pk=related_summary[0].pk, model_class=LoanAccount)
-        if match_type is MATCH_TYPE_AGENCY:
+        if match_type == MATCH_TYPE_AGENCY:
             # find or create related
             related_summary = AgencyCurrency.objects.get_or_create(
                 agency_id=related_id,
@@ -1356,7 +1356,7 @@ class FinanceService(object):
             # load locked
             return cls._load_locked_model_object(
                 pk=related_summary[0].pk, model_class=AgencyCurrency)
-        if match_type is MATCH_TYPE_PROVIDER:
+        if match_type == MATCH_TYPE_PROVIDER:
             # find or create related
             related_summary = ProviderCurrency.objects.get_or_create(
                 provider_id=related_id,
