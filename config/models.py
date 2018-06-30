@@ -4,9 +4,11 @@ Config Models
 from django.db import models
 
 from config.constants import (
-    SERVICE_CATEGORIES, ROOM_TYPES, BOARD_TYPES,
+    SERVICE_CATEGORIES,
+    SERVICE_CATEGORY_EXTRA, SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER,
+    ROOM_TYPES, BOARD_TYPES,
     EXTRA_COST_TYPES,
-    ALLOTMENT_SUPPLEMENT_COST_TYPES, TRANSFER_SUPPLEMENT_COST_TYPES,
+    ALLOTMENT_COST_TYPES, ALLOTMENT_SUPPLEMENT_COST_TYPES, TRANSFER_SUPPLEMENT_COST_TYPES,
     TRANSFER_COST_TYPES)
 
 from finance.models import Agency, Provider
@@ -19,8 +21,12 @@ class Location(models.Model):
     class Meta:
         verbose_name = 'Location'
         verbose_name_plural = 'Locations'
+        unique_together = (('name',),)
     name = models.CharField(max_length=50)
     enabled = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Service(models.Model):
@@ -30,9 +36,26 @@ class Service(models.Model):
     class Meta:
         verbose_name = 'Service'
         verbose_name_plural = 'Services'
+        unique_together = (('category', 'name'),)
     name = models.CharField(max_length=50)
     category = models.CharField(max_length=5, choices=SERVICE_CATEGORIES)
     enabled = models.BooleanField(default=True)
+
+    def __init__(self, *args, **kwargs):
+        # Call the "real" __init__ method.
+        super(Service, self).__init__(*args, **kwargs)
+        self.fill_data()
+
+    def fill_data(self):
+        pass
+
+    def save(self, *args, **kwargs):
+        self.fill_data()
+        # Call the "real" save method.
+        super(Service, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
 
 
 class ServiceSupplement(models.Model):
@@ -42,6 +65,7 @@ class ServiceSupplement(models.Model):
     class Meta:
         verbose_name = 'Service Supplement'
         verbose_name_plural = 'Services Supplements'
+        unique_together = (('service', 'name'),)
     name = models.CharField(max_length=50)
     service = models.ForeignKey(Service)
     datetime_from = models.DateTimeField()
@@ -57,11 +81,12 @@ class ServiceProvider(models.Model):
     class Meta:
         verbose_name = 'Service Provider'
         verbose_name_plural = 'Services Providers'
+        unique_together = (('service', 'provider'),)
     service = models.ForeignKey(Service)
     provider = models.ForeignKey(Provider)
-    senior_age_from = models.IntegerField(null=True)
-    child_age_to = models.IntegerField(null=True)
-    baby_age_to = models.IntegerField(null=True)
+    senior_age_from = models.IntegerField(blank=True, null=True)
+    child_age_to = models.IntegerField(blank=True, null=True)
+    baby_age_to = models.IntegerField(blank=True, null=True)
 
 
 class Cost(models.Model):
@@ -97,6 +122,7 @@ class SupplementCostDetail(models.Model):
     class Meta:
         verbose_name = 'Supplement Cost Detail'
         verbose_name_plural = 'Supplements Costs Details'
+        unique_together = (('cost', 'supplement'),)
     cost = models.ForeignKey(Cost)
     supplement = models.ForeignKey(ServiceSupplement)
     adult_unit_cost = models.DecimalField(max_digits=8, decimal_places=2)
@@ -112,9 +138,10 @@ class PriceCatalogue(models.Model):
     class Meta:
         verbose_name = 'Price Catalogue'
         verbose_name_plural = 'Prices Catalogues'
+        unique_together = (('name',),)
     name = models.CharField(max_length=50)
-    price_percent = models.DecimalField(max_digits=4, decimal_places=1)
-    price_amount = models.DecimalField(max_digits=8, decimal_places=2)
+    price_percent = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
+    price_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
 
 
 class ServiceProviderPrice(models.Model):
@@ -124,10 +151,11 @@ class ServiceProviderPrice(models.Model):
     class Meta:
         verbose_name = 'Price Catalogue'
         verbose_name_plural = 'Prices Catalogues'
+        unique_together = (('catalogue', 'service_provider'),)
     catalogue = models.ForeignKey(PriceCatalogue)
     service_provider = models.ForeignKey(ServiceProvider)
-    price_percent = models.DecimalField(max_digits=4, decimal_places=1)
-    price_amount = models.DecimalField(max_digits=8, decimal_places=2)
+    price_percent = models.DecimalField(max_digits=4, decimal_places=1, null=True)
+    price_amount = models.DecimalField(max_digits=8, decimal_places=2, null=True)
 
 
 class CostDetailPrice(models.Model):
@@ -137,6 +165,7 @@ class CostDetailPrice(models.Model):
     class Meta:
         verbose_name = 'Cost Detail Price'
         verbose_name_plural = 'Costs Details Prices'
+        unique_together = (('catalogue', 'cost_detail'),)
     catalogue = models.ForeignKey(PriceCatalogue)
     cost_detail = models.ForeignKey(CostDetail)
     adult_unit_price = models.DecimalField(max_digits=8, decimal_places=2)
@@ -183,6 +212,9 @@ class Extra(Service):
         verbose_name = 'Extra'
         verbose_name_plural = 'Extras'
 
+    def fill_data(self):
+        category = SERVICE_CATEGORY_EXTRA
+
 
 class ExtraServiceProvider(ServiceProvider):
     """
@@ -193,6 +225,15 @@ class ExtraServiceProvider(ServiceProvider):
         verbose_name_plural = 'Extras Services Providers'
     cost_type = models.CharField(
         max_length=5, choices=EXTRA_COST_TYPES)
+
+
+class ExtraCostDetail(CostDetail):
+    """
+    ExtraCostDetail
+    """
+    class Meta:
+        verbose_name = 'Extra Cost Detail'
+        verbose_name_plural = 'Extras Costs Details'
 
 
 #===============================================================================
@@ -209,6 +250,9 @@ class Allotment(Service):
     time_from = models.TimeField(default='16:00')
     time_to = models.TimeField(default='12:00')
 
+    def fill_data(self):
+        self.category = SERVICE_CATEGORY_ALLOTMENT
+
 
 class AllotmentRoomType(models.Model):
     """
@@ -222,6 +266,9 @@ class AllotmentRoomType(models.Model):
     room_type = models.CharField(max_length=5, choices=ROOM_TYPES)
     enabled = models.BooleanField(default=True)
 
+    def __str__(self):
+        return '%s (%s)' % (self.name, self.get_room_type_display())
+
 
 class AllotmentBoardType(models.Model):
     """
@@ -233,6 +280,9 @@ class AllotmentBoardType(models.Model):
     allotment = models.ForeignKey(Allotment)
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
 
+    def __str__(self):
+        return self.get_board_type_display()
+
 
 class AllotmentCostDetail(CostDetail):
     """
@@ -242,7 +292,7 @@ class AllotmentCostDetail(CostDetail):
         verbose_name = 'Allotment Cost Detail'
         verbose_name_plural = 'Allotments Costs Details'
     room_type = models.ForeignKey(AllotmentRoomType)
-    board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
+    board_type = models.ForeignKey(AllotmentBoardType)
 
 
 class AllotmentSupplementCostDetail(SupplementCostDetail):
@@ -270,6 +320,16 @@ class AllotmentRoomAvailability(models.Model):
     date_to = models.DateField()
 
 
+class AllotmentServiceProvider(ServiceProvider):
+    """
+    AllotmentServiceProvider
+    """
+    class Meta:
+        verbose_name = 'Allotment Service Provider'
+        verbose_name_plural = 'Allotments Services Providers'
+    cost_type = models.CharField(max_length=5, choices=ALLOTMENT_COST_TYPES)
+
+
 #===============================================================================
 # TRANFER
 #===============================================================================
@@ -280,6 +340,9 @@ class Transfer(Service):
     location_from = models.ForeignKey(Location, related_name='location_from')
     location_to = models.ForeignKey(Location, related_name='location_to')
 
+    def fill_data(self):
+        category = SERVICE_CATEGORY_TRANSFER
+
 
 class TransferServiceProvider(ServiceProvider):
     """
@@ -289,6 +352,15 @@ class TransferServiceProvider(ServiceProvider):
         verbose_name = 'Transfer Service Provider'
         verbose_name_plural = 'Transfers Services Providers'
     cost_type = models.CharField(max_length=5, choices=TRANSFER_COST_TYPES)
+
+
+class TransferCostDetail(CostDetail):
+    """
+    TransferCostDetail
+    """
+    class Meta:
+        verbose_name = 'Transfer Cost Detail'
+        verbose_name_plural = 'Transfers Costs Details'
 
 
 class TransferSupplementCostDetail(SupplementCostDetail):
