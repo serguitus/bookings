@@ -154,6 +154,71 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         self.assertEqual(loan_entity_deposit.matched_amount, test_amount + delta)
         self.assertEqual(loan_entity_withdraw.matched_amount, test_amount + delta)
 
+    def test_loan_entity_match_then_delete(self):
+        """
+        Does match between loan_entity_deposit and loan_entity_withdraw then delete
+        """
+        test_account = Account.objects.create(
+            name='Test Account',
+            currency=CURRENCY_CUC,
+            balance=1000)
+
+        test_loan_entity = LoanEntity.objects.create(
+            name='Test Loan Entity')
+
+        test_date = timezone.now()
+        test_amount = 100
+        test_status = STATUS_READY
+
+        loan_entity_deposit = LoanEntityDeposit(
+            date=test_date,
+            account=test_account,
+            amount=test_amount,
+            loan_entity=test_loan_entity,
+            status=test_status)
+
+        loan_entity_deposit = FinanceService.save_loan_entity_deposit(
+            user=self.test_user,
+            loan_entity_deposit=loan_entity_deposit)
+
+        loan_entity_withdraw = LoanEntityWithdraw(
+            date=test_date,
+            account=test_account,
+            amount=test_amount,
+            loan_entity=test_loan_entity,
+            status=test_status)
+
+        loan_entity_withdraw = FinanceService.save_loan_entity_withdraw(
+            user=self.test_user,
+            loan_entity_withdraw=loan_entity_withdraw)
+
+        loan_entity_match = LoanEntityMatch(
+            loan_entity_deposit=loan_entity_deposit,
+            loan_entity_withdraw=loan_entity_withdraw,
+            matched_amount=test_amount)
+
+        loan_entity_match = FinanceService.save_loan_entity_match(loan_entity_match)
+
+        # entity matched incremented
+        self.assertLoanEntityCurrencyMatchedAmount(
+            loan_entity=test_loan_entity,
+            currency=CURRENCY_CUC,
+            amount=test_amount)
+
+        loan_entity_deposit.refresh_from_db()
+        loan_entity_withdraw.refresh_from_db()
+
+        self.assertEqual(loan_entity_deposit.matched_amount, test_amount)
+        self.assertEqual(loan_entity_withdraw.matched_amount, test_amount)
+
+        FinanceService.delete_loan_entity_match(loan_entity_match.pk)
+
+        loan_entity_deposit.refresh_from_db()
+        loan_entity_withdraw.refresh_from_db()
+
+        self.assertEqual(loan_entity_deposit.matched_amount, 0)
+        self.assertEqual(loan_entity_withdraw.matched_amount, 0)
+
     def test_loan_entity_match_document_draft(self):
         """
         Does match between loan_entity_deposit and loan_entity_withdraw with draft status
