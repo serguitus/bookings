@@ -213,7 +213,7 @@ class Extra(Service):
         verbose_name_plural = 'Extras'
 
     def fill_data(self):
-        category = SERVICE_CATEGORY_EXTRA
+        self.category = SERVICE_CATEGORY_EXTRA
 
 
 class ExtraServiceProvider(ServiceProvider):
@@ -341,7 +341,8 @@ class Transfer(Service):
     location_to = models.ForeignKey(Location, related_name='location_to')
 
     def fill_data(self):
-        category = SERVICE_CATEGORY_TRANSFER
+        self.category = SERVICE_CATEGORY_TRANSFER
+        self.name = 'Transfer %s - %s' % (self.location_from, self.location_to)
 
 
 class TransferServiceProvider(ServiceProvider):
