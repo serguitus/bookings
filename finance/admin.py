@@ -95,12 +95,21 @@ class ExtendedLoanAccountDepositAdmin(ExtendedModelAdmin):
     as loans from other account"""
     list_display = ['account', 'loan_account', 'amount']  # , 'date']
 
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        return FinanceService.save_loan_account_deposit(request.user, obj)
+
+
 
 class ExtendedLoanAccountWithdrawAdmin(ExtendedModelAdmin):
     """ a class to add new widthdraws from an account
     as loans to other account"""
     list_display = ['account', 'loan_account', 'amount', 'date']
     match_model = ExtendedLoanAccountDepositAdmin
+
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        return FinanceService.save_loan_account_withdraw(request.user, obj)
 
     def get_urls(self):
         def wrap(view):
