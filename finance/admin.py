@@ -105,7 +105,7 @@ class ExtendedLoanAccountWithdrawAdmin(ExtendedModelAdmin):
     """ a class to add new widthdraws from an account
     as loans to other account"""
     list_display = ['account', 'loan_account', 'amount', 'date']
-    match_model = ExtendedLoanAccountDepositAdmin
+    match_model = LoanAccountDeposit
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
@@ -128,8 +128,8 @@ class ExtendedLoanAccountWithdrawAdmin(ExtendedModelAdmin):
         The 'match list' admin view for this model.
         """
         from django.contrib.admin.views.main import ERROR_FLAG
-        match_obj = reservas_admin._registry[LoanAccountDeposit]
-        opts = reservas_admin._registry[LoanAccountDeposit].model._meta
+        match_obj = reservas_admin._registry[self.match_model]
+        opts = reservas_admin._registry[self.match_model].model._meta
         # opts = self.model._meta
         app_label = opts.app_label
         if not self.has_change_permission(request, None):
