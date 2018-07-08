@@ -1,13 +1,17 @@
 from django.shortcuts import render
+from django.http import HttpResponse
 
+# from .models import FinantialDocument
 # Create your views here.
-def documents(request):
-    cocument_list = FinantialDocument.objects.order_by('-date')[:20]
-    template = loader.get_template('finance/documents.html')
-    context = {
-        'document_list': document_list,
-    }
-    return HttpResponse(template.render(context, request))
+
+
+# def documents(request):
+#     document_list = FinantialDocument.objects.order_by('-date')[:20]
+#     template = loader.get_template('finance/documents.html')
+#     context = {
+#         'document_list': document_list,
+#     }
+#     return HttpResponse(template.render(context, request))
 
 
 def deposit(request):

@@ -106,6 +106,7 @@ class ExtendedLoanAccountWithdrawAdmin(ExtendedModelAdmin):
     as loans to other account"""
     list_display = ['account', 'loan_account', 'amount', 'date']
     match_model = LoanAccountDeposit
+    match_fields = ['account', 'loan_account']
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
@@ -129,7 +130,7 @@ class ExtendedLoanAccountWithdrawAdmin(ExtendedModelAdmin):
         """
         from django.contrib.admin.views.main import ERROR_FLAG
         match_obj = reservas_admin._registry[self.match_model]
-        opts = reservas_admin._registry[self.match_model].model._meta
+        opts = match_obj.model._meta
         # opts = self.model._meta
         app_label = opts.app_label
         if not self.has_change_permission(request, None):
@@ -140,6 +141,7 @@ class ExtendedLoanAccountWithdrawAdmin(ExtendedModelAdmin):
         list_filter = match_obj.get_list_filter(request)
         search_fields = match_obj.get_search_fields(request)
         list_select_related = match_obj.get_list_select_related(request)
+        obj_id = pk
 
         # Check actions to see if any are available on this changelist
         actions = match_obj.get_actions(request)
@@ -147,13 +149,14 @@ class ExtendedLoanAccountWithdrawAdmin(ExtendedModelAdmin):
             # Add the action checkboxes if there are any actions available.
             list_display = ['action_checkbox'] + list(list_display)
 
-        ChangeList = match_obj.get_changelist(request)
+        MatchList = match_obj.get_matchlist(request)
         try:
-            cl = ChangeList(
+            cl = MatchList(
                 request, match_obj.model, list_display,
                 list_display_links, list_filter, match_obj.date_hierarchy,
                 search_fields, list_select_related, match_obj.list_per_page,
                 match_obj.list_max_show_all, match_obj.list_editable, match_obj,
+                self.match_fields, self.model, obj_id
             )
         except IncorrectLookupParameters:
             # Wacky lookup parameters were given, so redirect to the main
