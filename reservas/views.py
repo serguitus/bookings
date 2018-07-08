@@ -1,6 +1,10 @@
 from django.contrib.admin.views.main import ChangeList
 
 
+class IncorrectLookupParameters(Exception):
+    pass
+
+
 class MatchList(ChangeList):
     """
     A custom admin.ChangeList class to build
@@ -26,7 +30,12 @@ class MatchList(ChangeList):
 
     def get_queryset(self, request):
         """ customizing queryset to matched objects"""
-        base_obj = self.base_class.objects.get(id=self.obj_id)
+        try:
+            base_obj = self.base_class.objects.get(id=self.obj_id)
+        except self.base_class.DoesNotExist:
+            # some basic handling
+            # TODO: instead show some message and an empty MatchList
+            raise IncorrectLookupParameters("Base object does not exist")
         if self.match_fields:
             filters = {}
             for field in self.match_fields:
