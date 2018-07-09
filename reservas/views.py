@@ -1,4 +1,6 @@
 from django.contrib.admin.views.main import ChangeList
+from django.utils.encoding import force_text
+from django.utils.translation import ugettext
 
 
 class IncorrectLookupParameters(Exception):
@@ -27,6 +29,8 @@ class MatchList(ChangeList):
             request, model, list_display, list_display_links,
             list_filter, date_hierarchy, search_fields, list_select_related,
             list_per_page, list_max_show_all, list_editable, model_admin)
+        self.title = ugettext(
+            'Select %s to match') % force_text(self.opts.verbose_name)
 
     def get_queryset(self, request):
         """ customizing queryset to matched objects"""

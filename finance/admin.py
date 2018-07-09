@@ -1,4 +1,4 @@
-from functools import update_wrapper
+from functools import update_wrapper, partial
 
 from django.conf.urls import url
 from django.contrib import admin, messages
@@ -6,6 +6,7 @@ from django.contrib.admin.options import csrf_protect_m
 from django.contrib.admin import helpers
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import router, transaction
+from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
 from django.template.response import SimpleTemplateResponse, TemplateResponse
 from django.utils.encoding import force_text
@@ -66,6 +67,7 @@ class ExtendedDepositAdmin(ExtendedFinantialDocumentAdmin):
         # overrides base class method
         return FinanceService.save_deposit(request.user, obj)
 
+
 class ExtendedWithdrawAdmin(ExtendedDepositAdmin):
 
     def save_model(self, request, obj, form, change):
@@ -93,13 +95,33 @@ class ExtendedTransferAdmin(ExtendedModelAdmin):
 class ExtendedLoanAccountDepositAdmin(ExtendedModelAdmin):
     """ a class to add new deposits from an account
     as loans from other account"""
-    list_display = ['account', 'loan_account', 'amount']  # , 'date']
+    list_display = ['account', 'loan_account', 'amount', 'date']
+    list_editable = ['amount']
+    # This defines which fields are editable when instances of
+    # this class are shown in a MatchList
+    match_list_editable = ['amount']
+
+    def pending_amount(self, obj):
+        return obj.amount - obj.matched_amount
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
         return FinanceService.save_loan_account_deposit(request.user, obj)
 
-
+    def get_matchlist_formset(self, request, **kwargs):
+        """
+        Returns a FormSet class for use on the changelist page if list_editable
+        is used.
+        """
+        defaults = {
+            "formfield_callback": partial(
+                self.formfield_for_dbfield, request=request),
+        }
+        defaults.update(kwargs)
+        return modelformset_factory(
+            self.model, self.get_changelist_form(request), extra=0,
+            fields=self.match_list_editable, **defaults
+        )
 
 class ExtendedLoanAccountWithdrawAdmin(ExtendedModelAdmin):
     """ a class to add new widthdraws from an account
@@ -107,10 +129,31 @@ class ExtendedLoanAccountWithdrawAdmin(ExtendedModelAdmin):
     list_display = ['account', 'loan_account', 'amount', 'date']
     match_model = LoanAccountDeposit
     match_fields = ['account', 'loan_account']
+    match_list_display = ['account', 'loan_account', 'amount', 'pending_amount', 'date']
+    # This defines which fields are editable when instances of
+    # this class are shown in a MatchList
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
         return FinanceService.save_loan_account_withdraw(request.user, obj)
+
+    def pending_amount(self, obj):
+        return obj.amount - obj.matched_amount
+
+    def get_matchlist_formset(self, request, **kwargs):
+        """
+        Returns a FormSet class for use on the changelist page if list_editable
+        is used.
+        """
+        defaults = {
+            "formfield_callback": partial(
+                self.formfield_for_dbfield, request=request),
+        }
+        defaults.update(kwargs)
+        return modelformset_factory(
+            self.model, self.get_changelist_form(request), extra=0,
+            fields=self.match_list_editable, **defaults
+        )
 
     def get_urls(self):
         def wrap(view):
@@ -136,7 +179,7 @@ class ExtendedLoanAccountWithdrawAdmin(ExtendedModelAdmin):
         if not self.has_change_permission(request, None):
             raise PermissionDenied
 
-        list_display = match_obj.get_list_display(request)
+        list_display = self.match_list_display
         list_display_links = match_obj.get_list_display_links(request, list_display)
         list_filter = match_obj.get_list_filter(request)
         search_fields = match_obj.get_search_fields(request)
@@ -155,7 +198,7 @@ class ExtendedLoanAccountWithdrawAdmin(ExtendedModelAdmin):
                 request, match_obj.model, list_display,
                 list_display_links, list_filter, match_obj.date_hierarchy,
                 search_fields, list_select_related, match_obj.list_per_page,
-                match_obj.list_max_show_all, match_obj.list_editable, match_obj,
+                match_obj.list_max_show_all, match_obj.match_list_editable, match_obj,
                 self.match_fields, self.model, obj_id
             )
         except IncorrectLookupParameters:
@@ -217,7 +260,7 @@ class ExtendedLoanAccountWithdrawAdmin(ExtendedModelAdmin):
 
         # Handle POSTed bulk-edit data.
         if request.method == 'POST' and cl.list_editable and '_save' in request.POST:
-            FormSet = match_obj.get_changelist_formset(request)
+            FormSet = match_obj.get_matchlist_formset(request)
             formset = cl.formset = FormSet(request.POST, request.FILES, queryset=match_obj.get_queryset(request))
             if formset.is_valid():
                 changecount = 0
@@ -250,7 +293,7 @@ class ExtendedLoanAccountWithdrawAdmin(ExtendedModelAdmin):
 
         # Handle GET -- construct a formset for display.
         elif cl.list_editable:
-            FormSet = match_obj.get_changelist_formset(request)
+            FormSet = match_obj.get_matchlist_formset(request)
             formset = cl.formset = FormSet(queryset=cl.result_list)
 
         # Build the list of media to be used by the formset.
