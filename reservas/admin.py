@@ -292,3 +292,7 @@ class ExtendedModelAdmin(admin.ModelAdmin):
         context.update(extra_context or {})
 
         return self.render_delete_form(request, context)
+
+    def get_matchlist(self, request, **kwargs):
+        from .views import MatchList
+        return MatchList
