@@ -52,15 +52,6 @@ TRANSFER_SUPPLEMENT_COST_TYPES = (
     (TRANSFER_SUPPLEMENT_COST_TYPE_BYHOURS, 'By Hours'),
 )
 
-ROOM_TYPE_SINGLE = 'S'
-ROOM_TYPE_DOUBLE = 'D'
-ROOM_TYPE_TRIPLE = 'T'
-ROOM_TYPES = (
-    (ROOM_TYPE_SINGLE, 'Single'),
-    (ROOM_TYPE_DOUBLE, 'Double'),
-    (ROOM_TYPE_TRIPLE, 'Triple'),
-)
-
 BOARD_TYPE_NB = 'NB'
 BOARD_TYPE_BB = 'BB'
 BOARD_TYPE_HB = 'HB'
@@ -74,13 +65,12 @@ BOARD_TYPES = (
     (BOARD_TYPE_AI, 'All Included'),
 )
 
-PAX_TYPE_BABY = 'B'
 PAX_TYPE_CHILD = 'C'
 PAX_TYPE_ADULT = 'A'
-PAX_TYPE_SENIOR = 'S'
 PAX_TYPES = (
-    (PAX_TYPE_BABY, 'Baby'),
     (PAX_TYPE_CHILD, 'Child'),
     (PAX_TYPE_ADULT, 'Adult'),
-    (PAX_TYPE_SENIOR, 'Senior'),
 )
+
+ERROR_INVALID_SERVICE_CATEGORY = 'Invalid Service Category %s'
+ERROR_NO_EXTRA_COST_FOUND = 'Cost Not Found for Service %s - Provider %s - Date %s'

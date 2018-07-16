@@ -54,9 +54,15 @@ class BookingPax(models.Model):
     class Meta:
         verbose_name = 'Booking Pax'
         verbose_name_plural = 'Bookings Paxes'
+        unique_together = (('booking', 'pax_name'),)
     booking = models.ForeignKey(Booking)
     pax_name = models.CharField(max_length=50)
-    pax_age = models.SmallIntegerField()
+    pax_age = models.SmallIntegerField(blank=True, null=True)
+    pax_group = models.SmallIntegerField()
+    cost_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    cost_comments = models.CharField(max_length=1000)
+    price_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    price_comments = models.CharField(max_length=1000)
 
 
 class BookingService(models.Model):
@@ -78,13 +84,54 @@ class BookingService(models.Model):
     cost_comments = models.CharField(max_length=1000)
     price_amount = models.DecimalField(max_digits=10, decimal_places=2)
     price_comments = models.CharField(max_length=1000)
-    service_qtty = models.SmallIntegerField(default=1)
-    adult_qtty = models.SmallIntegerField()
-    senior_qtty = models.SmallIntegerField()
-    child_qtty = models.SmallIntegerField()
-    baby_qtty = models.SmallIntegerField()
     provider = models.ForeignKey(Provider)
     provider_invoice = models.ForeignKey(ProviderInvoice)
+
+    def fill_data(self):
+        pass
+
+    def save(self, *args, **kwargs):
+        self.fill_data()
+        # Call the "real" save() method.
+        super().save(*args, **kwargs)
+
+
+class BookingServiceGroup(models.Model):
+    """
+    Booking Service Group
+    """
+    class Meta:
+        verbose_name = 'Booking Service Group'
+        verbose_name_plural = 'Bookings Services Group'
+    booking_service = models.ForeignKey(BookingService)
+    group = models.SmallIntegerField()
+    cost_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    cost_comments = models.CharField(max_length=1000)
+    price_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    price_comments = models.CharField(max_length=1000)
+
+    def fill_data(self):
+        pass
+
+    def save(self, *args, **kwargs):
+        self.fill_data()
+        # Call the "real" save() method.
+        super().save(*args, **kwargs)
+
+
+class BookingPaxServiceGroup(models.Model):
+    """
+    Booking Pax Service Group
+    """
+    class Meta:
+        verbose_name = 'Booking Pax Service Group'
+        verbose_name_plural = 'Bookings Paxes Services Groups'
+    booking_pax = models.ForeignKey(BookingPax)
+    service_group = models.ForeignKey(BookingServiceGroup)
+    cost_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    cost_comments = models.CharField(max_length=1000)
+    price_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    price_comments = models.CharField(max_length=1000)
 
     def fill_data(self):
         pass
@@ -103,6 +150,52 @@ class BookingServiceSupplement(models.Model):
         verbose_name = 'Booking Service Supplement'
         verbose_name_plural = 'Bookings Services Supplements'
     booking_service = models.ForeignKey(BookingService)
+    supplement = models.ForeignKey(ServiceSupplement)
+    cost_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    cost_comments = models.CharField(max_length=1000)
+    price_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    price_comments = models.CharField(max_length=1000)
+
+    def fill_data(self):
+        pass
+
+    def save(self, *args, **kwargs):
+        self.fill_data()
+        # Call the "real" save() method.
+        super().save(*args, **kwargs)
+
+
+class ServiceSupplementBookingPax(models.Model):
+    """
+    Service Supplement Booking Pax
+    """
+    class Meta:
+        verbose_name = 'Service Supplement Booking Pax'
+        verbose_name_plural = 'Services Supplements Bookings Paxes'
+    service_group = models.ForeignKey(BookingServiceSupplement)
+    booking_pax = models.ForeignKey(BookingPax)
+    cost_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    cost_comments = models.CharField(max_length=1000)
+    price_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    price_comments = models.CharField(max_length=1000)
+
+    def fill_data(self):
+        pass
+
+    def save(self, *args, **kwargs):
+        self.fill_data()
+        # Call the "real" save() method.
+        super().save(*args, **kwargs)
+
+
+class BookingPaxServiceSupplement(models.Model):
+    """
+    Booking Pax Service Supplement
+    """
+    class Meta:
+        verbose_name = 'Booking Service Supplement'
+        verbose_name_plural = 'Bookings Services Supplements'
+    booking_pax = models.ForeignKey(BookingPax)
     supplement = models.ForeignKey(ServiceSupplement)
     description = models.CharField(max_length=1000)
     datetime_from = models.DateTimeField()
@@ -133,17 +226,6 @@ class BookingAllotment(BookingService):
         verbose_name_plural = 'Bookings Allotments'
     room_type = models.ForeignKey(AllotmentRoomType)
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
-
-
-class BookingAllotmentPax(models.Model):
-    """
-    Allotment Pax
-    """
-    class Meta:
-        verbose_name = 'Booking Allotment Line Pax'
-        verbose_name_plural = 'Bookings Allotments Lines Paxes'
-    booking_allotment = models.ForeignKey(BookingAllotment)
-    booking_pax = models.ForeignKey(BookingPax)
 
 
 class BookingTransfer(BookingService):

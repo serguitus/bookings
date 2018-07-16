@@ -131,6 +131,7 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Loan Entity',
                 'verbose_name_plural': 'Loans Entities',
+                'ordering': ['name'],
             },
         ),
         migrations.CreateModel(
