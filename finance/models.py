@@ -162,6 +162,7 @@ class LoanEntity(models.Model):
         verbose_name = 'Loan Entity'
         verbose_name_plural = 'Loans Entities'
         unique_together = (('name',),)
+        ordering = ['name']
 
     name = models.CharField(max_length=100)
 
