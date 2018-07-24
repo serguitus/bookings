@@ -448,8 +448,8 @@ class LoanEntityMatch(models.Model):
 
 class LoanAccount(SummaryModel):
     class Meta:
-        verbose_name = 'Finantial Account'
-        verbose_name_plural = 'Finantials Accounts'
+        verbose_name = 'Loan Account'
+        verbose_name_plural = 'Loans Accounts'
         unique_together = (('loan_account',),)
     loan_account = models.ForeignKey(Account)
 

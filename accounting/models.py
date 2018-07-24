@@ -1,7 +1,7 @@
 from django.db import connection, models
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.utils.timezone import now
+from django.utils import timezone
 
 from accounting.constants import (
     CURRENCIES, CURRENCY_CUC, MOVEMENT_TYPES, MOVEMENT_TYPE_INPUT)
@@ -62,7 +62,7 @@ class Operation(models.Model):
         on_delete=models.PROTECT,
         help_text='User who did the operation.',
     )
-    datetime = models.DateTimeField(default=now)
+    datetime = models.DateTimeField(default=timezone.now)
     concept = models.CharField(max_length=50)
     detail = models.CharField(max_length=200)
 

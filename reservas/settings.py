@@ -32,18 +32,20 @@ INSTALLED_APPS = [
 #    'admin_tools.theming',
 #    'admin_tools.menu',
 #    'admin_tools.dashboard',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'common',
     'accounting',
     'finance',
     'config',
     'booking',
-    'bootstrap_themes',
+
 ]
 
 MIDDLEWARE = [
@@ -61,7 +63,7 @@ ROOT_URLCONF = 'reservas.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['reservas/templates'],
+        'DIRS': ['reservas/templates', 'common/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

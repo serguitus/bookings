@@ -15,14 +15,14 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+
 from reservas.admin import reservas_admin
+from reservas.admin import bookings_site
 
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^reservas/', reservas_admin.urls),
-    url(r'^accounting/', include('accounting.urls', namespace="accounting")),
-    url(r'^finance/', include('finance.urls', namespace="finance")),
-    url(r'^config/', include('config.urls', namespace="configuration")),
-    url(r'^booking/', include('booking.urls', namespace="booking")),
+
+    url(r'^%s/' % (bookings_site.name), bookings_site.urls),
 ]

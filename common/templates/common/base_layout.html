@@ -1,0 +1,120 @@
+{% extends "common/base_blocks.html" %}
+
+{% load i18n static %}
+
+{% block head_title %}
+    {{ site_title|default:_('Application Site') }} | {{ title }}
+{% endblock head_title %}
+
+{% block head_extra %}
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/base.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'common/css/base.css' %}" />
+{% endblock head_extra %}
+
+{% block navbar %}
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                {% block header_logo %}
+                {% endblock header_logo %}
+            </div>
+            {% block header_app_menu %}
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="{% url 'common:index' %}">
+                            <span class="glyphicon glyphicon-home" />
+                        </a>
+                    </li>
+                    {% if app_list %}
+                        {% for menu in app_list %}
+                            {% if menu.model_list %}
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                        {{ menu.label }}<span class="caret"></span>
+                                        </a>
+                                    <ul class="dropdown-menu" role="menu">
+                                        {% for model in menu.model_list %}
+                                            <li role="presentation">
+                                                <a role="menuitem" href="{{ model.index_url }}">{{ model.label }}</a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </ul>
+            {% endblock header_app_menu %}
+            {% block header_user_menu %}
+                <ul class="nav navbar-nav navbar-right">
+                    {% block welcome-msg %}
+                        <span class="navbar-brand">
+                            <strong>{% firstof user.get_short_name user.get_username %}</strong>
+                        </span>
+                    {% endblock welcome-msg %}
+                    {% block userlinks %}
+                        {% if user.has_usable_password %}
+                            <li>
+                                <a href="{% url 'common:password_change' %}">{% trans 'Change password' %}</a>
+                            </li>
+                        {% endif %}
+                        <li>
+                            <a href="{% url 'common:logout' %}">{% trans 'Log out' %}</a>
+                        </li>
+                    {% endblock userlinks %}
+                </ul>
+            {% endblock header_user_menu %}
+        </div>
+    </nav>
+{% endblock navbar %}
+
+{% block leftbar %}
+    <div id="leftbar_container" class="left-bg-color">
+        {% if module_name and current_model_actions %}
+            {% block model_actions %}
+                <div class="module">
+                    <h2>{% trans "Actions for" %} {{ module_name }}</h2>
+                    <ul class="left-nav left-bg-color">
+                        {% for model_action in current_model_actions %}
+                            <li style="background-image: url({% static 'common/img/action-icon-{{ model_action.name }}.svg' %})">
+                                <a href="{% url model_action.url %}">{{ model_action.label }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endblock model_actions %}
+        {% endif %}
+        {% block recent_links %}
+            <div class="module">
+                <h2>{% trans "Recent" %}</h2>
+                {% if recent_links %}
+                    <ul class="left-nav left-bg-color">
+                        {% for recent_link in recent_links %}
+                            <li style="background-image: url({% static 'common/img/model-icon-{{ recent_link.link_icon }}.svg' %})"><a href="{{ recent_link.link_url }}">{{ recent_link.link_label }}</a></li>
+                        {% endfor %}
+                        <li style="background-image: url({% static 'admin/img/icon-yes.svg' %})"><a href="#">Recent 1</a></li>
+                        <li style="background-image: url({% static 'admin/img/icon-no.svg' %})"><a href="#">Recent 2</a></li>
+                        <li style="background-image: url({% static 'admin/img/icon-yes.svg' %})"><a href="#">Recent 3</a></li>
+                    </ul>
+                {% endif %}
+            </div>
+        {% endblock recent_links %}
+    </div>
+{% endblock leftbar %}
+
+{% block messages %}
+    {% if messages %}
+        <div id="messages_container">
+            <ul class="messagelist">
+                {% for message in messages %}
+                    <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>
+                        {{ message }}
+                    </li>
+                {% endfor %}
+                <li>Message 1</li>
+                <li>Message 2</li>
+                <li>Message 3</li>
+            </ul>
+        </div>
+    {% endif %}
+{% endblock messages %}

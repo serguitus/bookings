@@ -172,8 +172,12 @@ class ServiceSupplementBookingPax(models.Model):
     class Meta:
         verbose_name = 'Service Supplement Booking Pax'
         verbose_name_plural = 'Services Supplements Bookings Paxes'
-    service_group = models.ForeignKey(BookingServiceSupplement)
+    service_supplment = models.ForeignKey(BookingServiceSupplement)
     booking_pax = models.ForeignKey(BookingPax)
+    supplement_qtty = models.SmallIntegerField(default=1)
+    description = models.CharField(max_length=1000)
+    datetime_from = models.DateTimeField()
+    datetime_to = models.DateTimeField()
     cost_amount = models.DecimalField(max_digits=10, decimal_places=2)
     cost_comments = models.CharField(max_length=1000)
     price_amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -186,25 +190,6 @@ class ServiceSupplementBookingPax(models.Model):
         self.fill_data()
         # Call the "real" save() method.
         super().save(*args, **kwargs)
-
-
-class BookingPaxServiceSupplement(models.Model):
-    """
-    Booking Pax Service Supplement
-    """
-    class Meta:
-        verbose_name = 'Booking Service Supplement'
-        verbose_name_plural = 'Bookings Services Supplements'
-    booking_pax = models.ForeignKey(BookingPax)
-    supplement = models.ForeignKey(ServiceSupplement)
-    description = models.CharField(max_length=1000)
-    datetime_from = models.DateTimeField()
-    datetime_to = models.DateTimeField()
-    supplement_qtty = models.SmallIntegerField(default=1)
-    cost_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    cost_comments = models.CharField(max_length=1000)
-    price_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    price_comments = models.CharField(max_length=1000)
 
 
 class BookingExtra(BookingService):
