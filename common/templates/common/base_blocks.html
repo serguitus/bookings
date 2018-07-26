@@ -8,12 +8,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" type="text/css" href="{% static 'common/css/bootstrap.min.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'common/css/font-awesome.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/base.css' %}" />
     <title>
         {% block head_title %}
         {% endblock head_title %}
     </title>
     {% block head_extra %}
     {% endblock head_extra %}
+    <link rel="stylesheet" type="text/css" href="{% static 'common/css/base.css' %}" />
 </head>
 <body data-common-utc-offset="{% now "Z" %}">
     {% if not is_popup %}

@@ -1,24 +1,30 @@
-from common.models import RecentLink
+import json
 
-from django.contrib import admin, messages
+from functools import update_wrapper
+
+from django.contrib import messages
 from django.contrib.admin import helpers
 from django.contrib.admin.exceptions import DisallowedModelAdminToField
 from django.contrib.admin.options import csrf_protect_m, TO_FIELD_VAR, IS_POPUP_VAR, ModelAdmin
 from django.contrib.admin.sites import AdminSite
-from django.contrib.admin.utils import flatten_fieldsets, unquote, get_deleted_objects
-from django.contrib.auth import REDIRECT_FIELD_NAME, logout as auth_logout
+from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
+from django.contrib.admin.utils import quote, unquote, get_deleted_objects
+from django.contrib.auth import logout as auth_logout
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import router, transaction
 from django.forms.formsets import all_valid
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.template.response import TemplateResponse
+from django.utils.html import format_html
+from django.utils.http import urlquote
 from django.utils.encoding import force_text
+from django.utils import six
 from django.utils.translation import ugettext as _, ugettext_lazy
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 
-from functools import update_wrapper
+from common.models import RecentLink
 
 
 class CommonSite(AdminSite):
@@ -121,7 +127,7 @@ class CommonSite(AdminSite):
             if True not in perms.values():
                 continue
 
-            label = site_model.submenu_label
+            label = site_model.menu_option
             if not label:
                 label = model._meta.verbose_name_plural
 
@@ -134,7 +140,9 @@ class CommonSite(AdminSite):
 
             model_dict = {
                 'order': site_model.model_order,
+                'name': model._meta.model_name,
                 'label': label,
+                'group': site_model.menu_group,
                 'index_url': index_url,
                 'perms': perms,
                 'actions': site_model.get_model_actions(request),
@@ -228,80 +236,292 @@ class SiteModel(ModelAdmin):
     readonly_model = False
     delete_allowed = True
     self_inlines = []
-    change_form_template = 'change_form.html'
 
     model_actions = []
     model_order = -1
     menu_label = None
     menu_group = None
-    submenu_label = None
+    menu_option = None
     index_url = None
-    change_list_template = 'common/change_list.html'
+    add_form_template = 'common/change_form.html'
     change_form_template = 'common/change_form.html'
+    change_list_template = 'common/change_list.html'
+
+    def add_url_format(self):
+        return 'common:%s_%s_add'
+
+    def change_url_format(self):
+        return 'common:%s_%s_change'
+
+    def changelist_url_format(self):
+        return 'common:%s_%s_changelist'
 
     def get_model_actions(self, request):
         actions = []
         perms = self.get_model_perms(request)
         if perms.get('change'):
-            """
             actions.append(
                 {
                     'name': 'change',
-                    'label': 'Change',
-                    'url': reverse(
-                        'common:%s_%s_changelist' % (
-                            self.model._meta.app_label, self.model._meta.model_name),
-                        current_app=self.admin_site.name),
+                    'label': 'List %s' % (self.model._meta.verbose_name_plural),
+                    'url': self.changelist_url_format() % (
+                        self.model._meta.app_label, self.model._meta.model_name),
                 }
             )
-            """
-            pass
         if perms.get('add'):
             actions.append(
                 {
                     'name': 'add',
-                    'label': 'Add',
-                    'url': reverse(
-                        '%s_%s_add' % (
-                            self.model._meta.app_label, self.model._meta.model_name),
-                        current_app=self.admin_site.name),
+                    'label': 'Add %s' % (self.model._meta.verbose_name),
+                    'url': self.add_url_format() % (
+                        self.model._meta.app_label, self.model._meta.model_name),
                 }
             )
         return actions
 
     def get_model_extra_context(self, request, extra_context=None):
         context = dict(
-            current_model_actions = self.get_model_actions(request) 
+            module_name=force_text(self.model._meta.verbose_name_plural),
+            current_model_actions=self.get_model_actions(request)
         )
         context.update(self.admin_site.get_site_extra_context(request))
         return context
 
-    @csrf_protect_m
-    def changelist_view(self, request, extra_context=None):
-        site_context = self.get_model_extra_context(request, extra_context)
-        return super(SiteModel, self).changelist_view(request, site_context)
-
-    def change_view(self, request, object_id, form_url='', extra_context=None):
-        site_context = self.get_model_extra_context(request, extra_context)
-        return super(SiteModel, self).change_view(request, object_id, form_url, site_context)
-
-    def recent_link(self, request, model_object):
+    def recent_link(self, request, model_object, url=None, label=None, icon=None):
         """
         for adding recent link for user and url
         """
+        if not url:
+            url = request.get_full_path()
+        if not label:
+            label = model_object.__str__()
+        if not icon:
+            icon = model_object._meta.model_name
         return RecentLink.register_link(
             user=request.user,
-            url=request.get_full_path(),
-            label=model_object.__str__(),
-            icon=model_object._meta.model_name,)
+            url=url,
+            label=label,
+            icon=icon,
+        )
 
-    def delete_recent(self, request, url):
+    def delete_recent(self, request, model_object):
         """
         for removing registered recent links for user and url
         """
-        RecentLink.objects.filter(user=request.user, link_url=url).delete()
+        qs = RecentLink.objects.filter(user=request.user)
+        qs.filter(link_url__iendswith='/%s/%s/%s' % (
+            model_object.meta.app_name,
+            model_object.meta.model_name,
+            model_object.pk)).delete()
+        qs.filter(link_url__icontains='/%s/%s/%s/' % (
+            model_object.meta.app_name,
+            model_object.meta.model_name,
+            model_object.pk)).delete()
+        qs.filter(link_url__icontains='/%s/%s/%s?' % (
+            model_object.meta.app_name,
+            model_object.meta.model_name,
+            model_object.pk)).delete()
 
-    def do_saving(self, request, new_object, form, formsets, add):
+    def changeform_context(
+            self, request, form, obj, formsets, inline_instances,
+            add, opts, object_id, to_field, form_validated=None):
+
+        adminForm = helpers.AdminForm(
+            form,
+            list(self.get_fieldsets(request, obj)),
+            self.get_prepopulated_fields(request, obj),
+            self.get_readonly_fields(request, obj),
+            model_admin=self)
+        media = self.media + adminForm.media
+
+        inline_formsets = self.get_inline_formsets(request, formsets, inline_instances, obj)
+        for inline_formset in inline_formsets:
+            media = media + inline_formset.media
+
+        context = dict(
+            self.admin_site.each_context(request),
+            title=(_('Add %s') if add else _('Change %s')) % force_text(opts.verbose_name),
+            adminform=adminForm,
+            object_id=object_id,
+            original=obj,
+            is_popup=(IS_POPUP_VAR in request.POST or IS_POPUP_VAR in request.GET),
+            to_field=to_field,
+            media=media,
+            inline_admin_formsets=inline_formsets,
+            errors=helpers.AdminErrorList(form, formsets),
+            preserved_filters=self.get_preserved_filters(request),
+        )
+
+        context.update(self.get_model_extra_context(request))
+
+        # Hide the "Save" and "Save and continue" buttons if "Save as New" was
+        # previously chosen to prevent the interface from getting confusing.
+        if (self.readonly_model or (
+                request.method == 'POST' and not form_validated and "_saveasnew" in request.POST)):
+            context['show_save'] = False
+            context['show_save_and_continue'] = False
+            # Use the change template instead of the add template.
+            add = False
+
+        return context
+
+    def response_add(self, request, obj, post_url_continue=None):
+        """
+        Determines the HttpResponse for the add_view stage.
+        """
+        opts = obj._meta
+        pk_value = obj._get_pk_val()
+        preserved_filters = self.get_preserved_filters(request)
+        obj_url = reverse(
+            self.change_url_format() % (opts.app_label, opts.model_name),
+            args=(quote(pk_value),),
+            current_app=self.admin_site.name,
+        )
+        # Add a link to the object's change form if the user can edit the obj.
+        if self.has_change_permission(request, obj):
+            obj_repr = format_html('<a href="{}">{}</a>', urlquote(obj_url), obj)
+        else:
+            obj_repr = force_text(obj)
+        msg_dict = {
+            'name': force_text(opts.verbose_name),
+            'obj': obj_repr,
+        }
+        # Here, we distinguish between different save types by checking for
+        # the presence of keys in request.POST.
+
+        if IS_POPUP_VAR in request.POST:
+            to_field = request.POST.get(TO_FIELD_VAR)
+            if to_field:
+                attr = str(to_field)
+            else:
+                attr = obj._meta.pk.attname
+            value = obj.serializable_value(attr)
+            popup_response_data = json.dumps({
+                'value': six.text_type(value),
+                'obj': six.text_type(obj),
+            })
+            return TemplateResponse(request, self.popup_response_template or [
+                'admin/%s/%s/popup_response.html' % (opts.app_label, opts.model_name),
+                'admin/%s/popup_response.html' % opts.app_label,
+                'admin/popup_response.html',
+            ], {
+                'popup_response_data': popup_response_data,
+            })
+
+        elif "_continue" in request.POST or (
+                # Redirecting after "Save as new".
+                "_saveasnew" in request.POST and self.save_as_continue and
+                self.has_change_permission(request, obj)
+        ):
+            msg = format_html(
+                _('The {name} "{obj}" was added successfully. You may edit it again below.'),
+                **msg_dict
+            )
+            self.message_user(request, msg, messages.SUCCESS)
+            if post_url_continue is None:
+                post_url_continue = obj_url
+            post_url_continue = add_preserved_filters(
+                {'preserved_filters': preserved_filters, 'opts': opts},
+                post_url_continue
+            )
+            return HttpResponseRedirect(post_url_continue)
+
+        elif "_addanother" in request.POST:
+            msg = format_html(
+                _('The {name} "{obj}" was added successfully. You may add another {name} below.'),
+                **msg_dict
+            )
+            self.message_user(request, msg, messages.SUCCESS)
+            redirect_url = request.path
+            redirect_url = add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
+            return HttpResponseRedirect(redirect_url)
+
+        else:
+            msg = format_html(
+                _('The {name} "{obj}" was added successfully.'),
+                **msg_dict
+            )
+            self.message_user(request, msg, messages.SUCCESS)
+            return self.response_post_save_add(request, obj)
+
+    def response_change(self, request, obj):
+        """
+        Determines the HttpResponse for the change_view stage.
+        """
+
+        if IS_POPUP_VAR in request.POST:
+            opts = obj._meta
+            to_field = request.POST.get(TO_FIELD_VAR)
+            attr = str(to_field) if to_field else opts.pk.attname
+            # Retrieve the `object_id` from the resolved pattern arguments.
+            value = request.resolver_match.args[0]
+            new_value = obj.serializable_value(attr)
+            popup_response_data = json.dumps({
+                'action': 'change',
+                'value': six.text_type(value),
+                'obj': six.text_type(obj),
+                'new_value': six.text_type(new_value),
+            })
+            return TemplateResponse(request, self.popup_response_template or [
+                'admin/%s/%s/popup_response.html' % (opts.app_label, opts.model_name),
+                'admin/%s/popup_response.html' % opts.app_label,
+                'admin/popup_response.html',
+            ], {
+                'popup_response_data': popup_response_data,
+            })
+
+        opts = self.model._meta
+        pk_value = obj._get_pk_val()
+        preserved_filters = self.get_preserved_filters(request)
+
+        msg_dict = {
+            'name': force_text(opts.verbose_name),
+            'obj': format_html('<a href="{}">{}</a>', urlquote(request.path), obj),
+        }
+        if "_continue" in request.POST:
+            msg = format_html(
+                _('The {name} "{obj}" was changed successfully. You may edit it again below.'),
+                **msg_dict
+            )
+            self.message_user(request, msg, messages.SUCCESS)
+            redirect_url = request.path
+            redirect_url = add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
+            return HttpResponseRedirect(redirect_url)
+
+        elif "_saveasnew" in request.POST:
+            msg = format_html(
+                _('The {name} "{obj}" was added successfully. You may edit it again below.'),
+                **msg_dict
+            )
+            self.message_user(request, msg, messages.SUCCESS)
+            redirect_url = reverse(self.change_url_format() %
+                                   (opts.app_label, opts.model_name),
+                                   args=(pk_value,),
+                                   current_app=self.admin_site.name)
+            redirect_url = add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
+            return HttpResponseRedirect(redirect_url)
+
+        elif "_addanother" in request.POST:
+            msg = format_html(
+                _('The {name} "{obj}" was changed successfully. You may add another {name} below.'),
+                **msg_dict
+            )
+            self.message_user(request, msg, messages.SUCCESS)
+            redirect_url = reverse(self.add_url_format() %
+                                   (opts.app_label, opts.model_name),
+                                   current_app=self.admin_site.name)
+            redirect_url = add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
+            return HttpResponseRedirect(redirect_url)
+
+        else:
+            msg = format_html(
+                _('The {name} "{obj}" was changed successfully.'),
+                **msg_dict
+            )
+            self.message_user(request, msg, messages.SUCCESS)
+            return self.response_post_save_change(request, obj)
+
+    def changeform_do_saving(self, request, new_object, form, formsets, add):
         """
         Hook for custom saving actions.
         """
@@ -367,10 +587,12 @@ class SiteModel(ModelAdmin):
                 else:
                     form_validated = False
                     new_object = form.instance
-                formsets, inline_instances = self._create_formsets(request, new_object, change=not add)
+                formsets, inline_instances = self._create_formsets(
+                    request, new_object, change=not add)
                 if all_valid(formsets) and form_validated:
-                    response = self.do_saving(
-                        request=request, new_object=new_object, form=form, formsets=formsets, add=add)
+                    response = self.changeform_do_saving(
+                        request=request, new_object=new_object, form=form, formsets=formsets,
+                        add=add)
                     if response:
                         return response
                     else:
@@ -391,42 +613,16 @@ class SiteModel(ModelAdmin):
                     #self_formsets, self_inline_instances = self._create_self_formsets(
                     #    request, obj, change=True)
 
-            adminForm = helpers.AdminForm(
-                form,
-                list(self.get_fieldsets(request, obj)),
-                self.get_prepopulated_fields(request, obj),
-                self.get_readonly_fields(request, obj),
-                model_admin=self)
-            media = self.media + adminForm.media
+            print('FORM URL : ')
+            print(form_url)
 
-            inline_formsets = self.get_inline_formsets(request, formsets, inline_instances, obj)
-            for inline_formset in inline_formsets:
-                media = media + inline_formset.media
-
-            context = dict(
-                self.admin_site.each_context(request),
-                title=(_('Add %s') if add else _('Change %s')) % force_text(opts.verbose_name),
-                adminform=adminForm,
-                object_id=object_id,
-                original=obj,
-                is_popup=(IS_POPUP_VAR in request.POST or
-                        IS_POPUP_VAR in request.GET),
-                to_field=to_field,
-                media=media,
-                inline_admin_formsets=inline_formsets,
-                errors=helpers.AdminErrorList(form, formsets),
-                preserved_filters=self.get_preserved_filters(request),
-            )
-
-            # Hide the "Save" and "Save and continue" buttons if "Save as New" was
-            # previously chosen to prevent the interface from getting confusing.
-            if (self.readonly_model or (
-                    request.method == 'POST' and not form_validated and "_saveasnew" in request.POST)):
-                context['show_save'] = False
-                context['show_save_and_continue'] = False
-                # Use the change template instead of the add template.
-                add = False
-
+            if request.method == 'POST':
+                context = self.changeform_context(
+                    request, form, obj, formsets, inline_instances, add, opts, object_id, to_field,
+                    form_validated)
+            else:
+                context = self.changeform_context(
+                    request, form, obj, formsets, inline_instances, add, opts, object_id, to_field)
             context.update(extra_context or {})
 
             return self.render_change_form(
@@ -440,7 +636,7 @@ class SiteModel(ModelAdmin):
             with transaction.atomic(savepoint=False):
                 self.log_deletion(request, obj, obj_display)
                 self.delete_model(request, obj)
-                self.delete_recent(request)
+                self.delete_recent(request, obj)
 
                 return self.response_delete(request, obj_display, obj_id)
         except ValidationError as ex:
@@ -539,11 +735,14 @@ class SiteModel(ModelAdmin):
                 opts=opts,
                 app_label=app_label,
                 preserved_filters=self.get_preserved_filters(request),
-                is_popup=(IS_POPUP_VAR in request.POST or
-                        IS_POPUP_VAR in request.GET),
+                is_popup=(IS_POPUP_VAR in request.POST or IS_POPUP_VAR in request.GET),
                 to_field=to_field,
             )
             context.update(extra_context or {})
 
             return self.render_delete_form(request, context)
 
+    @csrf_protect_m
+    def changelist_view(self, request, extra_context=None):
+        site_context = self.get_model_extra_context(request, extra_context)
+        return super(SiteModel, self).changelist_view(request, site_context)

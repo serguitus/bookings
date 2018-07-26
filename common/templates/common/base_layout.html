@@ -1,15 +1,10 @@
 {% extends "common/base_blocks.html" %}
 
-{% load i18n static %}
+{% load i18n static common_utils %}
 
 {% block head_title %}
     {{ site_title|default:_('Application Site') }} | {{ title }}
 {% endblock head_title %}
-
-{% block head_extra %}
-    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/base.css' %}" />
-    <link rel="stylesheet" type="text/css" href="{% static 'common/css/base.css' %}" />
-{% endblock head_extra %}
 
 {% block navbar %}
     <nav class="navbar navbar-default navbar-fixed-top">
@@ -33,8 +28,17 @@
                                         {{ menu.label }}<span class="caret"></span>
                                         </a>
                                     <ul class="dropdown-menu" role="menu">
+                                        {% setvar '' as prev_group %}
                                         {% for model in menu.model_list %}
-                                            <li role="presentation">
+                                            {% if model.group and model.group != prev_group %}
+                                                {% if prev_group != '' %}
+                                                    <li  class='divider'></li>
+                                                {% endif %}
+                                                <li  class="dropdown-header">{{ model.group }}</li>
+                                                {% setvar model.group as prev_group %}
+                                            {% endif %}
+                                            {% setvar 'common/img/icon-model-'|add:model.name|add:'.svg' as static_icon_url %}
+                                            <li  style='background-image: url("{% static static_icon_url %}")'>
                                                 <a role="menuitem" href="{{ model.index_url }}">{{ model.label }}</a>
                                             </li>
                                         {% endfor %}
@@ -76,7 +80,8 @@
                     <h2>{% trans "Actions for" %} {{ module_name }}</h2>
                     <ul class="left-nav left-bg-color">
                         {% for model_action in current_model_actions %}
-                            <li style="background-image: url({% static 'common/img/action-icon-{{ model_action.name }}.svg' %})">
+                            {% setvar 'common/img/icon-action-'|add:model_action.name|add:'.svg' as static_icon_url %}
+                            <li style='background-image: url("{% static static_icon_url  %}")'>
                                 <a href="{% url model_action.url %}">{{ model_action.label }}</a>
                             </li>
                         {% endfor %}
@@ -90,11 +95,9 @@
                 {% if recent_links %}
                     <ul class="left-nav left-bg-color">
                         {% for recent_link in recent_links %}
-                            <li style="background-image: url({% static 'common/img/model-icon-{{ recent_link.link_icon }}.svg' %})"><a href="{{ recent_link.link_url }}">{{ recent_link.link_label }}</a></li>
+                            {% setvar 'common/img/icon-model-'|add:recent_link.link_icon|add:'.svg' as static_icon_url %}
+                            <li style='background-image: url("{% static static_icon_url %}")'><a href="{{ recent_link.link_url }}">{{ recent_link.link_label }}</a></li>
                         {% endfor %}
-                        <li style="background-image: url({% static 'admin/img/icon-yes.svg' %})"><a href="#">Recent 1</a></li>
-                        <li style="background-image: url({% static 'admin/img/icon-no.svg' %})"><a href="#">Recent 2</a></li>
-                        <li style="background-image: url({% static 'admin/img/icon-yes.svg' %})"><a href="#">Recent 3</a></li>
                     </ul>
                 {% endif %}
             </div>
@@ -111,9 +114,6 @@
                         {{ message }}
                     </li>
                 {% endfor %}
-                <li>Message 1</li>
-                <li>Message 2</li>
-                <li>Message 3</li>
             </ul>
         </div>
     {% endif %}

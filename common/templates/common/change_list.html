@@ -1,9 +1,9 @@
 {% extends "common/base_site.html" %}
-{% load i18n admin_urls static admin_list %}
+{% load i18n admin_urls static admin_list common_utils %}
 
 {% block head_extra %}
   {{ block.super }}
-  <link rel="stylesheet" type="text/css" href="{% static "admin/css/changelists.css" %}" />
+  <link rel="stylesheet" type="text/css" href="{% static "common/css/changelists.css" %}" />
   {% if cl.formset %}
     <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
   {% endif %}
@@ -13,7 +13,7 @@
   {{ media.css }}
   {% if not actions_on_top and not actions_on_bottom %}
     <style>
-      #changelist table thead th:first-child {width: inherit}
+      .div-changelist table thead th:first-child {width: inherit}
     </style>
   {% endif %}
   {{ media.js }}
@@ -34,7 +34,7 @@
         {% block object-tools-items %}
           {% if has_add_permission %}
           <li>
-            {% url 'common:{{ cl.opts.app_label }}_{{ cl.opts.model_name }}_add' as add_url %}
+            {% url 'common:'|add:cl.opts.app_label|add:'_'|add:cl.opts.model_name|add:'_add' as add_url %}
             <a href="{% add_preserved_filters add_url is_popup to_field %}" class="addlink">
               {% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}
             </a>
@@ -49,20 +49,24 @@
       </p>
       {{ cl.formset.non_form_errors }}
   {% endif %}
-  <div class="module{% if cl.has_filters %} filtered{% endif %}" id="changelist">
-    {% block search %}{% search_form cl %}{% endblock %}
-    {% block date_hierarchy %}{% date_hierarchy cl %}{% endblock %}
+  <div class="div-changelist module{% if cl.has_filters %} filtered{% endif %}">
+    {% block search %}
+      {% include 'common/include_search_form.html' %}
+    {% endblock search %}
+    {% block date_hierarchy %}
+      {% include 'common/include_date_hierarchy.html' %}
+    {% endblock date_hierarchy %}
 
     {% block filters %}
       {% if cl.has_filters %}
-        <div id="changelist-filter">
+        <div class="changelist-filter">
           <h2>{% trans 'Filter' %}</h2>
           {% for spec in cl.filter_specs %}{% admin_list_filter cl spec %}{% endfor %}
         </div>
       {% endif %}
     {% endblock %}
 
-    <form id="changelist-form" method="post"{% if cl.formset.is_multipart %} enctype="multipart/form-data"{% endif %} novalidate>{% csrf_token %}
+    <form class="changelist-form" method="post"{% if cl.formset.is_multipart %} enctype="multipart/form-data"{% endif %} novalidate>{% csrf_token %}
     {% if cl.formset %}
       <div>{{ cl.formset.management_form }}</div>
     {% endif %}
@@ -79,4 +83,5 @@
     {% block pagination %}{% pagination cl %}{% endblock %}
     </form>
   </div>
+
 {% endblock content %}

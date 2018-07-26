@@ -28,8 +28,7 @@ from reservas.admin import bookings_site
 
 MENU_LABEL_FINANCE_BASIC = 'Finance Basic'
 MENU_LABEL_FINANCE_LOAN = 'Finance Loan'
-MENU_LABEL_FINANCE_AGENCY = 'Finance Agency'
-MENU_LABEL_FINANCE_PROVIDER = 'Finance Provider'
+MENU_LABEL_FINANCE_ADVANCED = 'Finance Advanced'
 
 
 class IncorrectLookupParameters(Exception):
@@ -330,6 +329,7 @@ class LoanEntityDocumentSiteModel(MatchableSiteModel):
 class LoanEntitySiteModel(SiteModel):
     model_order = 3010
     menu_label = MENU_LABEL_FINANCE_LOAN
+    menu_group = 'Entity Loan'
     list_display = ('name',)
     list_filter = ('name',)
     search_fields = ['name',]
@@ -365,6 +365,7 @@ class LoanEntityWithdrawSiteModel(LoanEntityDocumentSiteModel):
 class LoanAccountSiteModel(SiteModel):
     model_order = 3040
     menu_label = MENU_LABEL_FINANCE_LOAN
+    menu_group = 'Account Loan'
     actions_on_top = True
     list_display = ('loan_account',)
     list_filter = ('loan_account__name', 'loan_account__currency',)
@@ -411,7 +412,8 @@ class LoanAccountWithdrawSiteModel(LoanAccountDocumentSiteModel):
 
 class ProviderSiteModel(SiteModel):
     model_order = 4010
-    menu_label = MENU_LABEL_FINANCE_PROVIDER
+    menu_label = MENU_LABEL_FINANCE_ADVANCED
+    menu_group = 'Finace Provider'
     list_display = ('name', 'currency', 'enabled')
     list_filter = ('name', 'currency', 'enabled')
     search_fields = ['name']
@@ -420,7 +422,8 @@ class ProviderSiteModel(SiteModel):
 
 class AgencySiteModel(SiteModel):
     model_order = 5010
-    menu_label = MENU_LABEL_FINANCE_AGENCY
+    menu_label = MENU_LABEL_FINANCE_ADVANCED
+    menu_group = 'Finace Agency'
     list_display = ('name', 'currency', 'enabled')
     list_filter = ('name', 'currency', 'enabled')
     search_fields = ['name']
