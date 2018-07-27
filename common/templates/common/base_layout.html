@@ -16,7 +16,8 @@
             {% block header_app_menu %}
                 <ul class="nav navbar-nav">
                     <li>
-                        <a href="{% url 'common:index' %}">
+                        {% url site_namespace|add:':index' as index_url %}
+                        <a href="{{ index_url }}">
                             <span class="glyphicon glyphicon-home" />
                         </a>
                     </li>
@@ -59,11 +60,13 @@
                     {% block userlinks %}
                         {% if user.has_usable_password %}
                             <li>
-                                <a href="{% url 'common:password_change' %}">{% trans 'Change password' %}</a>
+                                {% url site_namespace|add:':password_change' as password_change_url %}
+                                <a href="{{ password_change_url }}">{% trans 'Change password' %}</a>
                             </li>
                         {% endif %}
                         <li>
-                            <a href="{% url 'common:logout' %}">{% trans 'Log out' %}</a>
+                            {% url site_namespace|add:':logout' as logout_url %}
+                            <a href="{{ logout_url }}">{% trans 'Log out' %}</a>
                         </li>
                     {% endblock userlinks %}
                 </ul>

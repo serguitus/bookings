@@ -127,7 +127,7 @@ ul > li {
     background-repeat: no-repeat;
 }
 
-ul.messagelist li {
+ul.messagelist li, ul.messagelist li.warning, ul.messagelist li.error {
     padding: 5px 5px 5px 60px;
     margin: 0 0 5px 0;
     background-position-y: 8px;

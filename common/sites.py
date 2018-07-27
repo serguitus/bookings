@@ -1,4 +1,5 @@
 import json
+import string
 
 from functools import update_wrapper
 
@@ -7,8 +8,8 @@ from django.contrib.admin import helpers
 from django.contrib.admin.exceptions import DisallowedModelAdminToField
 from django.contrib.admin.options import csrf_protect_m, TO_FIELD_VAR, IS_POPUP_VAR, ModelAdmin
 from django.contrib.admin.sites import AdminSite
-from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.contrib.admin.utils import quote, unquote, get_deleted_objects
+from django.contrib.admin.views.main import ChangeList
 from django.contrib.auth import logout as auth_logout
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import router, transaction
@@ -17,27 +18,27 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.template.response import TemplateResponse
 from django.utils.html import format_html
-from django.utils.http import urlquote
+from django.utils.http import urlencode, urlquote
 from django.utils.encoding import force_text
-from django.utils import six
+from django.utils import six, timezone
 from django.utils.translation import ugettext as _, ugettext_lazy
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 
 from common.models import RecentLink
+from common.templatetags.common_utils import common_add_preserved_filters
 
 
 class CommonSite(AdminSite):
+    
+    site_namespace = 'common'
 
-    index_template = 'common/index.html'
-    password_change_template = 'common/password_change.html'
-    logout_template = 'common/logout.html'
-    title = ugettext_lazy('Common Site')
     site_title = ugettext_lazy('Common Site')
     current_model = None
-    password_change_url = None
-    logout_url = None
 
+    index_template = 'common/index.html'
+    password_change_template = 'registration/password_change.html'
+    password_change_done_template = 'registration/password_change_done.html'
 
     def get_urls(self):
         from django.conf.urls import url, include
@@ -81,20 +82,32 @@ class CommonSite(AdminSite):
 
     @property
     def urls(self):
-        return self.get_urls(), 'common', self.name
+        return self.get_urls(), self.site_namespace, self.name
+
+    def index_url(self):
+        return '%s:index' % self.site_namespace
+
+    def login_url(self):
+        return '%s:login' % self.site_namespace
+
+    def logout_url(self):
+        return '%s:logout' % self.site_namespace
+
+    def model_url_format(self):
+        return '%s:%%s_%%s_changelist' % self.site_namespace
 
     def admin_view(self, view, cacheable=False):
         def inner(request, *args, **kwargs):
             if not self.has_permission(request):
-                if request.path == reverse('common:logout', current_app=self.name):
-                    index_path = reverse('common:index', current_app=self.name)
+                if request.path == reverse(self.logout_url(), current_app=self.name):
+                    index_path = reverse(self.index_url(), current_app=self.name)
                     return HttpResponseRedirect(index_path)
                 # Inner import to prevent django.contrib.admin (app) from
                 # importing django.contrib.auth.models.User (unrelated model).
                 from django.contrib.auth.views import redirect_to_login
                 return redirect_to_login(
-                    request.get_full_path(),
-                    reverse('common:login', current_app=self.name)
+                    request.get_path(),
+                    reverse(self.login_url(), current_app=self.name)
                 )
             return view(request, *args, **kwargs)
         if not cacheable:
@@ -135,7 +148,7 @@ class CommonSite(AdminSite):
 
             if not index_url:
                 index_url = reverse(
-                    'common:%s_%s_changelist' % (model._meta.app_label, model._meta.model_name),
+                    self.model_url_format() % (model._meta.app_label, model._meta.model_name),
                     current_app=self.name)
 
             model_dict = {
@@ -185,8 +198,8 @@ class CommonSite(AdminSite):
     def get_site_extra_context(self, request):
         app_list = self.get_app_list(request)
         context = dict(
-            title=self.index_title,
             app_list=app_list,
+            site_namespace=self.site_namespace,
             recent_links=self.find_recents(request),
         )
         return context
@@ -206,9 +219,25 @@ class CommonSite(AdminSite):
         return TemplateResponse(request, self.index_template, context)
 
     def password_change(self, request, extra_context=None):
+        """
+        Handles the "change password" task -- both form display and validation.
+        """
+        from django.contrib.admin.forms import AdminPasswordChangeForm
+        from django.contrib.auth.views import PasswordChangeView
+
         site_context = self.get_site_extra_context(request)
         site_context.update(extra_context or {})
-        return super(CommonSite, self).password_change(request, site_context)
+
+        url = reverse('%s:password_change_done' % self.site_namespace, current_app=self.name)
+        defaults = {
+            'form_class': AdminPasswordChangeForm,
+            'success_url': url,
+            'extra_context': dict(self.each_context(request), **(site_context)),
+        }
+        if self.password_change_template is not None:
+            defaults['template_name'] = self.password_change_template
+        request.current_app = self.name
+        return PasswordChangeView.as_view(**defaults)(request)
 
     @never_cache
     def logout(self, request, extra_context=None):
@@ -218,13 +247,13 @@ class CommonSite(AdminSite):
         This should *not* assume the user is already logged in.
         """
         auth_logout(request)
-        index_path = reverse('common:index', current_app=self.name)
+        index_path = reverse('%s:index' % self.site_namespace, current_app=self.name)
 
         from django.contrib.auth.views import redirect_to_login
 
         return redirect_to_login(
             index_path,
-            reverse('common:login', current_app=self.name)
+            reverse('%s:login' % self.site_namespace, current_app=self.name)
         )
 
 
@@ -243,18 +272,29 @@ class SiteModel(ModelAdmin):
     menu_group = None
     menu_option = None
     index_url = None
+
     add_form_template = 'common/change_form.html'
     change_form_template = 'common/change_form.html'
     change_list_template = 'common/change_list.html'
+    delete_confirmation_template = 'common/delete_confirmation.html'
+    delete_selected_confirmation_template = 'common/delete_selected_confirmation.html'
+    object_history_template = 'common/object_history.html'
+    popup_response_template = None
+
+
+    recent_allowed = True
+
+    def index_url_format(self):
+        return '%s:%%s_%%s' % self.admin_site.site_namespace
 
     def add_url_format(self):
-        return 'common:%s_%s_add'
+        return '%s:%%s_%%s_add' % self.admin_site.site_namespace
 
     def change_url_format(self):
-        return 'common:%s_%s_change'
+        return '%s:%%s_%%s_change' % self.admin_site.site_namespace
 
     def changelist_url_format(self):
-        return 'common:%s_%s_changelist'
+        return '%s:%%s_%%s_changelist' % self.admin_site.site_namespace
 
     def get_model_actions(self, request):
         actions = []
@@ -291,36 +331,51 @@ class SiteModel(ModelAdmin):
         """
         for adding recent link for user and url
         """
-        if not url:
-            url = request.get_full_path()
-        if not label:
-            label = model_object.__str__()
-        if not icon:
-            icon = model_object._meta.model_name
-        return RecentLink.register_link(
-            user=request.user,
-            url=url,
-            label=label,
-            icon=icon,
-        )
+        if self.recent_allowed and model_object and model_object.pk:
+            if not url:
+                url = request.get_full_path()
+            if not label:
+                label = model_object.__str__()
+            if not icon:
+                icon = self.model._meta.model_name
+            # TODO add url from request is useless
+            #if self.is_add_url(url):
+            #    url = reverse(self.change_url_format() % (
+            #        self.model._meta.app_label, self.model._meta.model_name),
+            #    kwargs={'object_id': model_object.pk})
 
-    def delete_recent(self, request, model_object):
+        return RecentLink.objects.update_or_create(
+            user_id=request.user.pk,
+            link_url=url,
+            defaults={
+                'user_id': request.user.pk,
+                'link_time': timezone.now,
+                'link_label': label,
+                'link_url': url,
+                'link_icon': icon,},)
+
+    def is_add_url(self, url):
+        if url.find('/add') < 0:
+            return False
+        return True
+
+    def delete_recent(self, request, object_id):
         """
         for removing registered recent links for user and url
         """
         qs = RecentLink.objects.filter(user=request.user)
         qs.filter(link_url__iendswith='/%s/%s/%s' % (
-            model_object.meta.app_name,
-            model_object.meta.model_name,
-            model_object.pk)).delete()
+            self.model._meta.app_label,
+            self.model._meta.model_name,
+            object_id)).delete()
         qs.filter(link_url__icontains='/%s/%s/%s/' % (
-            model_object.meta.app_name,
-            model_object.meta.model_name,
-            model_object.pk)).delete()
+            self.model._meta.app_label,
+            self.model._meta.model_name,
+            object_id)).delete()
         qs.filter(link_url__icontains='/%s/%s/%s?' % (
-            model_object.meta.app_name,
-            model_object.meta.model_name,
-            model_object.pk)).delete()
+            self.model._meta.app_label,
+            self.model._meta.model_name,
+            object_id)).delete()
 
     def changeform_context(
             self, request, form, obj, formsets, inline_instances,
@@ -364,6 +419,38 @@ class SiteModel(ModelAdmin):
             add = False
 
         return context
+
+    def get_obj_does_not_exist_redirect(self, request, opts, object_id):
+        """
+        Create a message informing the user that the object doesn't exist
+        and return a redirect to the admin index page.
+        """
+        msg = _("""%(name)s with ID "%(key)s" doesn't exist. Perhaps it was deleted?""") % {
+            'name': force_text(opts.verbose_name),
+            'key': unquote(object_id),
+        }
+        self.message_user(request, msg, messages.WARNING)
+        url = reverse(self.changelist_url_format() % (opts.app_label, opts.model_name), current_app=self.admin_site.name)
+        self.delete_recent(request, object_id)
+        return HttpResponseRedirect(url)
+
+    def get_preserved_filters(self, request):
+        """
+        Returns the preserved filters querystring.
+        """
+        match = request.resolver_match
+        if self.preserve_filters and match:
+            opts = self.model._meta
+            current_url = '%s:%s' % (match.app_name, match.url_name)
+            changelist_url = self.changelist_url_format() % (opts.app_label, opts.model_name)
+            if current_url == changelist_url:
+                preserved_filters = request.GET.urlencode()
+            else:
+                preserved_filters = request.GET.get('_changelist_filters')
+
+            if preserved_filters:
+                return urlencode({'_changelist_filters': preserved_filters})
+        return ''
 
     def response_add(self, request, obj, post_url_continue=None):
         """
@@ -420,7 +507,7 @@ class SiteModel(ModelAdmin):
             self.message_user(request, msg, messages.SUCCESS)
             if post_url_continue is None:
                 post_url_continue = obj_url
-            post_url_continue = add_preserved_filters(
+            post_url_continue = common_add_preserved_filters(
                 {'preserved_filters': preserved_filters, 'opts': opts},
                 post_url_continue
             )
@@ -433,7 +520,7 @@ class SiteModel(ModelAdmin):
             )
             self.message_user(request, msg, messages.SUCCESS)
             redirect_url = request.path
-            redirect_url = add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
+            redirect_url = common_add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
             return HttpResponseRedirect(redirect_url)
 
         else:
@@ -485,7 +572,7 @@ class SiteModel(ModelAdmin):
             )
             self.message_user(request, msg, messages.SUCCESS)
             redirect_url = request.path
-            redirect_url = add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
+            redirect_url = common_add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
             return HttpResponseRedirect(redirect_url)
 
         elif "_saveasnew" in request.POST:
@@ -498,7 +585,7 @@ class SiteModel(ModelAdmin):
                                    (opts.app_label, opts.model_name),
                                    args=(pk_value,),
                                    current_app=self.admin_site.name)
-            redirect_url = add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
+            redirect_url = common_add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
             return HttpResponseRedirect(redirect_url)
 
         elif "_addanother" in request.POST:
@@ -510,7 +597,7 @@ class SiteModel(ModelAdmin):
             redirect_url = reverse(self.add_url_format() %
                                    (opts.app_label, opts.model_name),
                                    current_app=self.admin_site.name)
-            redirect_url = add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
+            redirect_url = common_add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
             return HttpResponseRedirect(redirect_url)
 
         else:
@@ -520,6 +607,83 @@ class SiteModel(ModelAdmin):
             )
             self.message_user(request, msg, messages.SUCCESS)
             return self.response_post_save_change(request, obj)
+
+    def response_post_save_add(self, request, obj):
+        """
+        Figure out where to redirect after the 'Save' button has been pressed
+        when adding a new object.
+        """
+        opts = self.model._meta
+        if self.has_change_permission(request, None):
+            post_url = reverse(self.changelist_url_format() %
+                               (opts.app_label, opts.model_name),
+                               current_app=self.admin_site.name)
+            preserved_filters = self.get_preserved_filters(request)
+            post_url = common_add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, post_url)
+        else:
+            post_url = reverse(self.admin_site.index_url(),
+                               current_app=self.admin_site.name)
+        return HttpResponseRedirect(post_url)
+
+    def response_post_save_change(self, request, obj):
+        """
+        Figure out where to redirect after the 'Save' button has been pressed
+        when editing an existing object.
+        """
+        opts = self.model._meta
+
+        if self.has_change_permission(request, None):
+            post_url = reverse(self.changelist_url_format() %
+                               (opts.app_label, opts.model_name),
+                               current_app=self.admin_site.name)
+            preserved_filters = self.get_preserved_filters(request)
+            post_url = common_add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, post_url)
+        else:
+            post_url = reverse(self.admin_site.index_url(),
+                               current_app=self.admin_site.name)
+        return HttpResponseRedirect(post_url)
+
+    def response_delete(self, request, obj_display, obj_id):
+        """
+        Determines the HttpResponse for the delete_view stage.
+        """
+
+        opts = self.model._meta
+
+        if IS_POPUP_VAR in request.POST:
+            popup_response_data = json.dumps({
+                'action': 'delete',
+                'value': str(obj_id),
+            })
+            return TemplateResponse(request, self.popup_response_template or [
+                'admin/%s/%s/popup_response.html' % (opts.app_label, opts.model_name),
+                'admin/%s/popup_response.html' % opts.app_label,
+                'admin/popup_response.html',
+            ], {
+                'popup_response_data': popup_response_data,
+            })
+
+        self.message_user(
+            request,
+            _('The %(name)s "%(obj)s" was deleted successfully.') % {
+                'name': force_text(opts.verbose_name),
+                'obj': force_text(obj_display),
+            },
+            messages.SUCCESS,
+        )
+
+        if self.has_change_permission(request, None):
+            post_url = reverse(
+                self.changelist_url_format() % (opts.app_label, opts.model_name),
+                current_app=self.admin_site.name,
+            )
+            preserved_filters = self.get_preserved_filters(request)
+            post_url = common_add_preserved_filters(
+                {'preserved_filters': preserved_filters, 'opts': opts}, post_url
+            )
+        else:
+            post_url = reverse(self.admin_site.index_url(), current_app=self.admin_site.name)
+        return HttpResponseRedirect(post_url)
 
     def changeform_do_saving(self, request, new_object, form, formsets, add):
         """
@@ -574,7 +738,7 @@ class SiteModel(ModelAdmin):
                     raise PermissionDenied
 
                 if obj is None:
-                    return self._get_obj_does_not_exist_redirect(request, opts, object_id)
+                    return self.get_obj_does_not_exist_redirect(request, opts, object_id)
 
             if obj:
                 self.recent_link(request, model_object=obj)
@@ -613,9 +777,6 @@ class SiteModel(ModelAdmin):
                     #self_formsets, self_inline_instances = self._create_self_formsets(
                     #    request, obj, change=True)
 
-            print('FORM URL : ')
-            print(form_url)
-
             if request.method == 'POST':
                 context = self.changeform_context(
                     request, form, obj, formsets, inline_instances, add, opts, object_id, to_field,
@@ -636,7 +797,7 @@ class SiteModel(ModelAdmin):
             with transaction.atomic(savepoint=False):
                 self.log_deletion(request, obj, obj_display)
                 self.delete_model(request, obj)
-                self.delete_recent(request, obj)
+                self.delete_recent(request, obj_id)
 
                 return self.response_delete(request, obj_display, obj_id)
         except ValidationError as ex:
@@ -663,7 +824,7 @@ class SiteModel(ModelAdmin):
                 raise PermissionDenied
 
             if obj is None:
-                return self._get_obj_does_not_exist_redirect(request, opts, object_id)
+                return self.get_obj_does_not_exist_redirect(request, opts, object_id)
 
             using = router.db_for_write(self.model)
 
@@ -742,7 +903,24 @@ class SiteModel(ModelAdmin):
 
             return self.render_delete_form(request, context)
 
+    def get_changelist(self, request, **kwargs):
+        """
+        Returns the ChangeList class for use on the changelist page.
+        """
+        return CommonChangeList
+
     @csrf_protect_m
     def changelist_view(self, request, extra_context=None):
         site_context = self.get_model_extra_context(request, extra_context)
         return super(SiteModel, self).changelist_view(request, site_context)
+
+class CommonChangeList(ChangeList):
+    def url_for_result(self, result):
+        pk = getattr(result, self.pk_attname)
+        return reverse(
+            '%s:%s_%s_change' % (
+                self.model_admin.admin_site.site_namespace,
+                self.opts.app_label,
+                self.opts.model_name),
+            args=(quote(pk),),
+            current_app=self.model_admin.admin_site.name)

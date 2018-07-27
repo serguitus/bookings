@@ -1,27 +1,5 @@
-{% extends "common/base_site.html" %}
 {% load i18n static common_utils admin_list %}
 
-{% block head_extra %}
-  {{ block.super }}
-  <link rel="stylesheet" type="text/css" href="{% static "common/css/changelists.css" %}" />
-  {% if cl.formset %}
-    <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
-  {% endif %}
-  {% if cl.formset or action_form %}
-    <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
-  {% endif %}
-  {{ media.css }}
-  {% if not actions_on_top and not actions_on_bottom %}
-    <style>
-      .div-changelist table thead th:first-child {width: inherit}
-    </style>
-  {% endif %}
-  {{ media.js }}
-{% endblock head_extra %}
-
-{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} change-list{% endblock %}
-
-{% block content %}
   {% block pretitle %}
   {% endblock pretitle %}
   {% block content_title %}
@@ -83,5 +61,3 @@
     {% block pagination %}{% pagination cl %}{% endblock %}
     </form>
   </div>
-
-{% endblock content %}
