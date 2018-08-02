@@ -19,7 +19,7 @@ class RecentLink(models.Model):
         default=timezone.now,
         editable=False,
     )
-    link_label = models.CharField(max_length=50)
+    link_label = models.CharField(max_length=250)
     link_url = models.CharField(max_length=250)
     link_icon = models.CharField(max_length=50)
     

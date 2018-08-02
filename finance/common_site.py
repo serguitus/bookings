@@ -2,21 +2,26 @@ from common.sites import SiteModel
 
 from django.conf.urls import url
 from django.contrib import admin, messages
-from django.contrib.admin.options import csrf_protect_m
+from django.contrib.admin.options import csrf_protect_m, IS_POPUP_VAR, TO_FIELD_VAR
 from django.contrib.admin import helpers
-from django.core.exceptions import ValidationError, PermissionDenied
+from django.contrib.admin.checks import ModelAdminChecks
+from django.contrib.admin.utils import unquote
+from django.core import checks
+from django.core.exceptions import FieldDoesNotExist, ValidationError, PermissionDenied
 from django.db import router, transaction
+from django import forms
 from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
 from django.template.response import SimpleTemplateResponse, TemplateResponse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext as _, ungettext
 
+from finance.forms import DepositForm
 from finance.models import (
     FinantialDocument,
     Deposit, Withdraw, CurrencyExchange, Transfer,
     LoanAccount, LoanAccountDeposit, LoanAccountWithdraw,
-    LoanEntity, LoanEntityDeposit, LoanEntityWithdraw,
+    LoanEntity, LoanEntityDeposit, LoanEntityWithdraw, LoanEntityMatch,
     Agency, Provider)
 from finance.services import FinanceService
 
@@ -48,14 +53,65 @@ class FinantialDocumentSiteModel(SiteModel):
 
 class BaseFinantialDocumentSiteModel(FinantialDocumentSiteModel):
     readonly_model = False
+    save_as = True
     readonly_fields = ('name',)
 
 
+class MatchableChangeListForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        instance = kwargs.get('instance')
+        if instance:
+            initial = kwargs.get('initial', {})
+            if instance.match_id is None:
+                initial['included'] = False
+                unmatched = instance.amount - instance.matched_amount
+                if unmatched < instance.parent_unmatched:
+                    initial['match_amount'] = unmatched
+                else:
+                    initial['match_amount'] = instance.parent_unmatched
+            else:
+                initial['included'] = True
+                initial['match_amount'] = instance.match_matched_amount
+            kwargs['initial'] = initial
+        super(MatchableChangeListForm, self).__init__(*args, **kwargs)
+
+
 class MatchableSiteModel(BaseFinantialDocumentSiteModel):
-    match_model = None
+
+    change_actions = [dict(name='match', label='Match')]
+
+    match_fieldsets = None
     match_fields = []
+    match_child_model = None
+    match_child_base_model = None
+    match_related_fields = []
+    match_model = None
+    match_model_parent_field = None
+    match_model_child_field = None
+
+    match_date_hierarchy = None
     match_list_display = []
-    match_list_editable = []
+    match_list_per_page = 100
+    match_list_max_show_all = True
+    match_list_select_related = []
+    match_list_editable = [
+        'included', 'match_amount'
+    ]
+    match_list_search_fields = []
+
+    def get_changelist_form(self, request, **kwargs):
+        return MatchableChangeListForm
+        
+    def do_match_saving(self):
+        pass
+
+    def get_change_tools(self):
+        return [dict(name='match', label='Match', view_def=self.match_view)]
+
+    #@csrf_protect_m
+    def match_view(self, request, object_id, extra_context=None):
+        return self._match_view(request, object_id, extra_context)
 
     def pending_amount(self, obj):
         return obj.amount - obj.matched_amount
@@ -75,55 +131,85 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
             fields=self.match_list_editable, **defaults
         )
 
-    def get_urls(self):
+    def get_match_parent_fields(self, request, obj=None):
+        if self.match_fields:
+            return self.match_fields
+        form = self.get_form(request, obj, fields=None)
+        return list(form.base_fields) + list(self.get_readonly_fields(request, obj))
 
-        def wrap(view):
-
-            def wrapper(*args, **kwargs):
-                return self.admin_site.admin_view(view)(*args, **kwargs)
-
-            wrapper.model_admin = self
-            return update_wrapper(wrapper, view)
-
-        new_urls = [
-            url(r'^(?P<pk>[-\w]+)/match/$', wrap(self.matchlist_view), name='matchlist-view')
-        ]
-        return new_urls + super(MatchableSiteModel, self).get_urls()
-
-    @csrf_protect_m
-    def matchlist_view(self, request, pk, extra_context=None):
+    def get_match_parent_fieldsets(self, request, obj=None):
         """
-        The 'match list' admin view for this model.
+        Hook for specifying match parent fieldsets.
+        """
+        if self.match_fieldsets:
+            return self.match_fieldsets
+        return [(None, {'fields': self.get_match_parent_fields(request, obj)})]
+
+    def build_matches(self, forms):
+        result = list()
+        for form in forms:
+            if form.is_valid():
+                included = form.cleaned_data['included']
+                if included:
+                    match_id = None
+                    if hasattr(form.cleaned_data,'match_id'):
+                        match_id = form.cleaned_data['match_id']
+                    child = form.cleaned_data[self.match_child_base_model]
+                    match_amount = form.cleaned_data['match_amount']
+                    result.append(
+                        dict(
+                            match_id=match_id,
+                            child=child,
+                            match_amount=match_amount,
+                        )
+                    )
+        return result
+
+    def save_matches(self, parent, matches):
+        pass
+        
+    def _match_view(self, request, object_id, extra_context=None):
+        """
+        The 'match list' view for this model.
         """
         from django.contrib.admin.views.main import ERROR_FLAG
-        match_obj = reservas_admin._registry[self.match_model]
-        opts = match_obj.model._meta
+
+        match_child_sitemodel = self.admin_site._registry[self.match_child_model]
+
+        opts = match_child_sitemodel.model._meta
+
         # opts = self.model._meta
         app_label = opts.app_label
-        if not self.has_change_permission(request, None):
+        if not self.has_permission(request, 'match'):
             raise PermissionDenied
 
-        list_display = self.match_list_display
-        list_display_links = match_obj.get_list_display_links(request, list_display)
-        list_filter = match_obj.get_list_filter(request)
-        search_fields = match_obj.get_search_fields(request)
-        list_select_related = match_obj.get_list_select_related(request)
-        obj_id = pk
+        match_list_display = self.match_list_display
+        match_list_display_links = match_child_sitemodel.get_list_display_links(request, match_list_display)
+        match_list_filter = match_child_sitemodel.get_list_filter(request)
+        match_date_hierarchy = self.match_date_hierarchy
+        match_list_search_fields = self.match_list_search_fields
+        match_list_select_related = self.match_list_select_related
+        match_list_per_page = self.match_list_per_page
+        match_list_max_show_all = self.match_list_max_show_all
+        match_list_editable = self.match_list_editable
 
-        # Check actions to see if any are available on this changelist
-        actions = match_obj.get_actions(request)
-        if actions:
-            # Add the action checkboxes if there are any actions available.
-            list_display = ['action_checkbox'] + list(list_display)
+        to_field = request.POST.get(TO_FIELD_VAR, request.GET.get(TO_FIELD_VAR))
 
-        MatchList = match_obj.get_matchlist(request)
+        obj = self.get_object(request, unquote(object_id), to_field)
+
+        if not self.has_permission(request, 'match', obj):
+            raise PermissionDenied
+
+        if obj is None:
+            return self._get_obj_does_not_exist_redirect(request, opts, object_id)
+
+        MatchList = self.get_matchlist(request)
         try:
             cl = MatchList(
-                request, match_obj.model, list_display,
-                list_display_links, list_filter, match_obj.date_hierarchy,
-                search_fields, list_select_related, match_obj.list_per_page,
-                match_obj.list_max_show_all, match_obj.match_list_editable, match_obj,
-                self.match_fields, self.model, obj_id
+                request, match_list_display,
+                match_list_display_links, match_list_filter, match_date_hierarchy,
+                match_list_search_fields, match_list_select_related, match_list_per_page,
+                match_list_max_show_all, match_list_editable, self, object_id, match_child_sitemodel
             )
         except IncorrectLookupParameters:
             # Wacky lookup parameters were given, so redirect to the main
@@ -138,101 +224,52 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
                 })
             return HttpResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
 
-        # If the request was POSTed, this might be a bulk action or a bulk
-        # edit. Try to look up an action or confirmation first, but if this
-        # isn't an action the POST will fall through to the bulk edit check,
-        # below.
-        action_failed = False
-        selected = request.POST.getlist(helpers.ACTION_CHECKBOX_NAME)
-
-        # Actions with no confirmation
-        if (actions and request.method == 'POST' and
-                'index' in request.POST and '_save' not in request.POST):
-            if selected:
-                response = self.response_action(request, queryset=cl.get_queryset(request))
-                if response:
-                    return response
-                else:
-                    action_failed = True
-            else:
-                msg = _("Items must be selected in order to perform "
-                        "actions on them. No items have been changed.")
-                match_obj.message_user(request, msg, messages.WARNING)
-                action_failed = True
-
-        # Actions with confirmation
-        if (actions and request.method == 'POST' and
-                helpers.ACTION_CHECKBOX_NAME in request.POST and
-                'index' not in request.POST and '_save' not in request.POST):
-            if selected:
-                response = match_obj.response_action(request, queryset=cl.get_queryset(request))
-                if response:
-                    return response
-                else:
-                    action_failed = True
-
-        if action_failed:
-            # Redirect back to the changelist page to avoid resubmitting the
-            # form if the user refreshes the browser or uses the "No, take
-            # me back" button on the action confirmation page.
-            return HttpResponseRedirect(request.get_full_path())
-
         # If we're allowing changelist editing, we need to construct a formset
         # for the changelist given all the fields to be edited. Then we'll
         # use the formset to validate/process POSTed data.
         formset = cl.formset = None
 
         # Handle POSTed bulk-edit data.
-        if request.method == 'POST' and cl.list_editable and '_save' in request.POST:
-            FormSet = match_obj.get_matchlist_formset(request)
-            formset = cl.formset = FormSet(request.POST, request.FILES, queryset=match_obj.get_queryset(request))
+        if request.method == 'POST' and '_save' in request.POST:
+            FormSet = self.get_matchlist_formset(request)
+            formset = cl.formset = FormSet(request.POST, request.FILES, queryset=self.get_queryset(request))
             if formset.is_valid():
-                changecount = 0
-                for form in formset.forms:
-                    if form.has_changed():
-                        obj = match_obj.save_form(request, form, change=True)
-                        match_obj.save_model(request, obj, form, change=True)
-                        match_obj.save_related(request, form, formsets=[], change=True)
-                        change_msg = match_obj.construct_change_message(request, form, None)
-                        match_obj.log_change(request, obj, change_msg)
-                        changecount += 1
+                matches = self.build_matches(formset.forms)
+                try:
+                    self.save_matches(obj, matches)
+                    msg = "Matched successfully."
+                    self.message_user(request, msg, messages.SUCCESS)
+                except ValidationError as ex:
+                    for message in ex.messages:
+                        self.message_user(request, message, messages.ERROR)
 
-                if changecount:
-                    if changecount == 1:
-                        name = force_text(opts.verbose_name)
-                    else:
-                        name = force_text(opts.verbose_name_plural)
-                    msg = ungettext(
-                        "%(count)s %(name)s was changed successfully.",
-                        "%(count)s %(name)s were changed successfully.",
-                        changecount
-                    ) % {
-                        'count': changecount,
-                        'name': name,
-                        'obj': force_text(obj),
-                    }
-                    match_obj.message_user(request, msg, messages.SUCCESS)
-
-                return HttpResponseRedirect(request.get_full_path())
+            return HttpResponseRedirect(request.get_full_path())
 
         # Handle GET -- construct a formset for display.
         elif cl.list_editable:
-            FormSet = match_obj.get_matchlist_formset(request)
+            FormSet = self.get_matchlist_formset(request)
             formset = cl.formset = FormSet(queryset=cl.result_list)
+
+        ModelForm = self.get_form(request, obj)
+
+        form = ModelForm(instance=obj)
+        formsets, inline_instances = self._create_formsets(request, obj, change=True)
+
+        adminForm = helpers.AdminForm(
+            form,
+            list(self.get_match_parent_fieldsets(request, obj)),
+            self.get_prepopulated_fields(request, obj),
+            self.get_match_parent_fields(request, obj),
+            model_admin=self)
+        media = self.media + adminForm.media
 
         # Build the list of media to be used by the formset.
         if formset:
-            media = match_obj.media + formset.media
+            media += self.media + formset.media
         else:
-            media = match_obj.media
+            media += self.media
 
-        # Build the action form and populate it with available actions.
-        if actions:
-            action_form = match_obj.action_form(auto_id=None)
-            action_form.fields['action'].choices = match_obj.get_action_choices(request)
-            media += action_form.media
-        else:
-            action_form = None
+        action_form = None
 
         selection_note_all = ungettext(
             '%(total_count)s selected',
@@ -240,34 +277,53 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
             cl.result_count
         )
 
+        ModelForm = self.get_form(request, obj)
+        form = ModelForm(instance=obj)
+        formsets, inline_instances = self._create_formsets(request, obj, change=True)
+
         context = dict(
-            match_obj.admin_site.each_context(request),
+            self.admin_site.each_context(request),
+            title=_('Change %s') % force_text(opts.verbose_name),
+            adminform=adminForm,
+            change=True,
+            object_id=object_id,
+            original=obj,
+            save_as=False,
+            change_actions=False,
+            show_save = False,
+            show_save_and_continue = False,
+            has_add_permission=False,
+            has_change_permission=True,
+            has_delete_permission=False,
+            is_popup=(IS_POPUP_VAR in request.POST or
+                      IS_POPUP_VAR in request.GET),
+            to_field=to_field,
+            media=media,
+            inline_admin_formsets=[],
+            errors=helpers.AdminErrorList(form, formsets),
+            preserved_filters=self.get_preserved_filters(request),
+
             module_name=force_text(opts.verbose_name_plural),
             selection_note=_('0 of %(cnt)s selected') % {'cnt': len(cl.result_list)},
             selection_note_all=selection_note_all % {'total_count': cl.result_count},
-            title=cl.title,
-            is_popup=cl.is_popup,
-            to_field=cl.to_field,
             cl=cl,
-            media=media,
-            has_add_permission=match_obj.has_add_permission(request),
             opts=cl.opts,
             action_form=action_form,
-            actions_on_top=match_obj.actions_on_top,
-            actions_on_bottom=match_obj.actions_on_bottom,
-            actions_selection_counter=match_obj.actions_selection_counter,
-            preserved_filters=match_obj.get_preserved_filters(request),
+            actions_on_top=self.actions_on_top,
+            actions_on_bottom=self.actions_on_bottom,
+            actions_selection_counter=self.actions_selection_counter,
         )
+        context.update(self.get_model_extra_context(request))
         context.update(extra_context or {})
 
-        request.current_app = match_obj.admin_site.name
+        request.current_app = self.admin_site.name
 
-        return TemplateResponse(request, match_obj.change_list_template or [
-            'admin/%s/%s/change_list.html' % (app_label, opts.model_name),
-            'admin/%s/change_list.html' % app_label,
-            'admin/change_list.html'
-        ], context)
+        return TemplateResponse(request, 'finance/match.html', context)
 
+    def get_matchlist(self, request, **kwargs):
+        from finance.views import MatchList
+
+        return MatchList
 
 class DepositSiteModel(BaseFinantialDocumentSiteModel):
     model_order = 2010
@@ -275,6 +331,7 @@ class DepositSiteModel(BaseFinantialDocumentSiteModel):
     fields = ('name', 'account', 'amount', 'date', 'status')
     list_display = ('name', 'account', 'amount', 'date', 'status')
     list_filter = ('currency', 'account', 'status', 'date')
+    form = DepositForm
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
@@ -314,18 +371,6 @@ class TransferSiteModel(BaseFinantialDocumentSiteModel):
         return FinanceService.save_transfer(request.user, obj)
 
 
-class LoanEntityDocumentSiteModel(MatchableSiteModel):
-    """
-    base class for loan entities deposits and withdraws
-    """
-    fields = ('name', 'account', 'loan_entity', 'amount', 'date', 'status')
-    list_display = ['name', 'account', 'loan_entity', 'amount', 'date', 'status']
-    list_filter = ('currency', 'account', 'status', 'date')
-    match_fields = ['account', 'loan_entity']
-    match_list_display = ['account', 'loan_entity', 'amount', 'pending_amount', 'date']
-    match_list_editable = ['amount']
-
-
 class LoanEntitySiteModel(SiteModel):
     model_order = 3010
     menu_label = MENU_LABEL_FINANCE_LOAN
@@ -336,17 +381,43 @@ class LoanEntitySiteModel(SiteModel):
     ordering = ('name',)
 
 
+class LoanEntityDocumentSiteModel(MatchableSiteModel):
+    """
+    base class for loan entities deposits and withdraws
+    """
+    fields = ('name', 'account', 'loan_entity', 'amount', 'date', 'status', 'matched_amount')
+    list_display = ['name', 'account', 'loan_entity', 'amount', 'date', 'status']
+    list_filter = ('currency', 'account', 'status', 'date')
+
+    readonly_fields = ('name', 'matched_amount',)
+
+    match_child_base_model = 'loanentitydocument_ptr'
+    match_model = LoanEntityMatch
+    match_fields = ('name', 'account', 'loan_entity', 'amount')
+    match_related_fields = ['account', 'loan_entity']
+    match_list_display = [
+        'name', 'included', 'match_amount'
+    ]
+
+
 class LoanEntityDepositSiteModel(LoanEntityDocumentSiteModel):
     """
     class for loan entity deposits
     """
     model_order = 3020
     menu_label = MENU_LABEL_FINANCE_LOAN
-    match_model = LoanEntityWithdraw
+
+    match_model_parent_field = 'loan_entity_deposit'
+    match_model_child_field = 'loan_entity_withdraw'
+    match_child_model = LoanEntityWithdraw
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
         return FinanceService.save_loan_entity_deposit(request.user, obj)
+
+    def save_matches(self, parent, matches):
+        # overrides base class method
+        return FinanceService.match_loan_entity_document(parent, matches, True)
 
 
 class LoanEntityWithdrawSiteModel(LoanEntityDocumentSiteModel):
@@ -355,11 +426,18 @@ class LoanEntityWithdrawSiteModel(LoanEntityDocumentSiteModel):
     """
     model_order = 3030
     menu_label = MENU_LABEL_FINANCE_LOAN
-    match_model = LoanEntityDeposit
+
+    match_model_parent_field = 'loan_entity_withdraw'
+    match_model_child_field = 'loan_entity_deposit'
+    match_child_model = LoanEntityDeposit
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
         return FinanceService.save_loan_entity_withdraw(request.user, obj)
+
+    def save_matches(self, parent, matches):
+        # overrides base class method
+        return FinanceService.match_loan_entity_document(parent, matches, False)
 
 
 class LoanAccountSiteModel(SiteModel):
@@ -379,6 +457,7 @@ class LoanAccountDocumentSiteModel(MatchableSiteModel):
     fields = ('name', 'account', 'loan_account', 'amount', 'date', 'status')
     list_display = ['name', 'account', 'loan_account', 'amount', 'date', 'status']
     list_filter = ('currency', 'account', 'status', 'date')
+
     match_fields = ['account', 'loan_account']
     match_list_display = ['account', 'loan_account', 'amount', 'pending_amount', 'date']
     match_list_editable = ['amount']

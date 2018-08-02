@@ -12,17 +12,24 @@
 {% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} change-form{% endblock %}
 
 {% block content %}
-  <div id="content-main">
+  <div class="change-main">
     {% block object-tools %}
       {% if change %}
         {% if not is_popup %}
           <ul class="object-tools">
               {% block object-tools-items %}
+                {% if change_tools %}
+                  {% for tool in change_tools %}
+                    <li>
+                      {% url site_namespace|add:':'|add:opts.app_label|add:'_'|add:opts.model_name|add:'_'|add:tool.name original.pk|admin_urlquote as tool_url %}
+                      <a href="{{ tool_url }}" class="change-tool change-tool-{{ tool.name }}">{% trans tool.label %}</a>
+                    </li>
+                  {% endfor %}
+                {% endif %}
                 <li>
                   {% url site_namespace|add:':'|add:opts.app_label|add:'_'|add:opts.model_name|add:'_history' original.pk|admin_urlquote as history_url %}
                   <a href="{% common_add_preserved_filters history_url %}" class="historylink">{% trans "History" %}</a>
                 </li>
-                {% if has_absolute_url %}<li><a href="{{ absolute_url }}" class="viewsitelink">{% trans "View on site" %}</a></li>{% endif %}
               {% endblock %}
           </ul>
         {% endif %}

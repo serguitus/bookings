@@ -140,8 +140,12 @@ ul.messagelist li, ul.messagelist li.warning, ul.messagelist li.error {
 nav ul li {
     list-style: none;
 }
+.change-main {
+    float: left;
+    width: 100%;
+}
 .object-tools {
-    margin-top: -35px;
+    margin-top: -30px;
 }
 h1 {
     margin-top: 10px;
@@ -156,4 +160,34 @@ h1 {
 }
 .dropdown-menu > li > a {
     padding: 3px 10px 3px 25px;
+}
+
+.submit-row {
+    text-align: center;
+}
+
+.submit-row input.btn-save {
+    float: right;
+}
+
+.change-tool {
+    background-color: green;
+}
+
+.submit-row input.change-action {
+    background-color: green;
+}
+
+.form-row {
+    padding: 3px 10px;
+}
+
+td, th {
+    padding: 3px;
+    line-height: 12px;
+    vertical-align: middle;
+}
+
+input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="number"], textarea, select, .vTextField {
+    padding: 5px 3px;
 }

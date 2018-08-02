@@ -10,9 +10,10 @@ from django.contrib.admin.options import csrf_protect_m, TO_FIELD_VAR, IS_POPUP_
 from django.contrib.admin.sites import AdminSite
 from django.contrib.admin.utils import quote, unquote, get_deleted_objects
 from django.contrib.admin.views.main import ChangeList
-from django.contrib.auth import logout as auth_logout
+from django.contrib.auth import get_permission_codename, logout as auth_logout
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import router, transaction
+from django.forms import fields_for_model
 from django.forms.formsets import all_valid
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -24,6 +25,7 @@ from django.utils import six, timezone
 from django.utils.translation import ugettext as _, ugettext_lazy
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
+from django.views.generic import RedirectView
 
 from common.models import RecentLink
 from common.templatetags.common_utils import common_add_preserved_filters
@@ -93,8 +95,8 @@ class CommonSite(AdminSite):
     def logout_url(self):
         return '%s:logout' % self.site_namespace
 
-    def model_url_format(self):
-        return '%s:%%s_%%s_changelist' % self.site_namespace
+    def model_action_url_format(self, action):
+        return '%s:%%s_%%s_%s' % (self.site_namespace, action)
 
     def admin_view(self, view, cacheable=False):
         def inner(request, *args, **kwargs):
@@ -106,7 +108,7 @@ class CommonSite(AdminSite):
                 # importing django.contrib.auth.models.User (unrelated model).
                 from django.contrib.auth.views import redirect_to_login
                 return redirect_to_login(
-                    request.get_path(),
+                    request.get_full_path(),
                     reverse(self.login_url(), current_app=self.name)
                 )
             return view(request, *args, **kwargs)
@@ -144,12 +146,25 @@ class CommonSite(AdminSite):
             if not label:
                 label = model._meta.verbose_name_plural
 
-            index_url = site_model.index_url
+            model_index_action = site_model.model_index_action
 
+            index_url = None
+            if model_index_action:
+                try:
+                    index_url = reverse(
+                        self.model_action_url_format(model_index_action) % (model._meta.app_label, model._meta.model_name),
+                        current_app=self.name)
+                except Exception as ex:
+                    print(ex)
+                    index_url = None
             if not index_url:
-                index_url = reverse(
-                    self.model_url_format() % (model._meta.app_label, model._meta.model_name),
-                    current_app=self.name)
+                try:
+                    index_url = reverse(
+                        self.model_action_url_format('changelist') % (model._meta.app_label, model._meta.model_name),
+                        current_app=self.name)
+                except Exception as ex:
+                    print(ex)
+                    index_url = None
 
             model_dict = {
                 'order': site_model.model_order,
@@ -271,7 +286,12 @@ class SiteModel(ModelAdmin):
     menu_label = None
     menu_group = None
     menu_option = None
-    index_url = None
+    model_index_action = 'changelist'
+
+    """
+    actions are dict with name, label
+    """
+    change_actions = []
 
     add_form_template = 'common/change_form.html'
     change_form_template = 'common/change_form.html'
@@ -281,8 +301,96 @@ class SiteModel(ModelAdmin):
     object_history_template = 'common/object_history.html'
     popup_response_template = None
 
-
     recent_allowed = True
+
+    def has_add_permission(self, request):
+        return (not self.readonly_model) \
+            and super(SiteModel, self).has_add_permission(request)
+
+    def has_delete_permission(self, request, obj=None):
+        return self.delete_allowed \
+            and (not self.readonly_model) \
+            and super(SiteModel, self).has_delete_permission(request, obj)
+
+    def get_readonly_fields(self, request, obj=None):
+        """
+        Hook for specifying custom readonly fields.
+        """
+        if self.readonly_model:
+            return fields_for_model(model=self.model)
+        if obj is None:
+            return list(self.add_readonly_fields) + list(self.readonly_fields)
+        else:
+            return list(self.change_readonly_fields) + list(self.readonly_fields)
+
+    @property
+    def change_tools(self):
+        """
+        tools are iterable of dicts with name, label and view_def
+        """
+        return self.get_change_tools()
+
+    def get_change_tools(self):
+        """
+        tools are dict with name, label and view_def
+        """
+        return []
+
+    def has_permission(self, request, action, obj=None):
+        """
+        Returns True if the given request has permission to change the given
+        Django model instance, the default implementation doesn't examine the
+        `obj` parameter.
+
+        Can be overridden by the user in subclasses. In such case it should
+        return True if the given request has permission to change the `obj`
+        model instance. If `obj` is None, this should return True if the given
+        request has permission to change *any* object of the given type.
+        """
+        opts = self.opts
+        codename = get_permission_codename(action, opts)
+        return request.user.has_perm("%s.%s" % (opts.app_label, codename))
+
+    def view_wrapper(self, view):
+        def wrapper(*args, **kwargs):
+            return self.admin_site.admin_view(view)(*args, **kwargs)
+        wrapper.model_admin = self
+        return update_wrapper(wrapper, view)
+
+    def build_url(self, url_pattern, view_def, view_name=None):
+        from django.conf.urls import url
+
+        return url(url_pattern, self.view_wrapper(view_def), name=view_name)
+
+    def get_urls(self):
+        from django.conf.urls import url
+
+        info = self.model._meta.app_label, self.model._meta.model_name
+
+        urlpatterns = [
+            self.build_url(r'^$', self.changelist_view, '%s_%s_changelist' % info),
+            self.build_url(r'^add/$', self.add_view, '%s_%s_add' % info),
+            self.build_url(r'^(.+)/history/$', self.history_view, '%s_%s_history' % info),
+            self.build_url(r'^(.+)/delete/$', self.delete_view, '%s_%s_delete' % info),
+            self.build_url(r'^(.+)/change/$', self.change_view, '%s_%s_change' % info),
+        ]
+        if self.change_tools:
+            for tool in self.change_tools:
+                if tool:
+                    urlpatterns += [
+                        self.build_url(r'^(.+)/%s/$' % tool['name'], tool['view_def'], '%s_%s_%s' % (
+                            self.model._meta.app_label,
+                            self.model._meta.model_name,
+                            tool['name'],
+                        )),
+                    ]
+        urlpatterns += [
+            # For backwards compatibility (was the change url before 1.9)
+            self.build_url(r'^(.+)/$', RedirectView.as_view(
+                pattern_name='%s:%s_%s_change' % ((self.admin_site.name,) + info))),
+        ]
+        
+        return urlpatterns
 
     def index_url_format(self):
         return '%s:%%s_%%s' % self.admin_site.site_namespace
@@ -322,7 +430,7 @@ class SiteModel(ModelAdmin):
     def get_model_extra_context(self, request, extra_context=None):
         context = dict(
             module_name=force_text(self.model._meta.verbose_name_plural),
-            current_model_actions=self.get_model_actions(request)
+            current_model_actions=self.get_model_actions(request),
         )
         context.update(self.admin_site.get_site_extra_context(request))
         return context
@@ -331,28 +439,31 @@ class SiteModel(ModelAdmin):
         """
         for adding recent link for user and url
         """
-        if self.recent_allowed and model_object and model_object.pk:
-            if not url:
-                url = request.get_full_path()
-            if not label:
-                label = model_object.__str__()
-            if not icon:
-                icon = self.model._meta.model_name
-            # TODO add url from request is useless
-            #if self.is_add_url(url):
-            #    url = reverse(self.change_url_format() % (
-            #        self.model._meta.app_label, self.model._meta.model_name),
-            #    kwargs={'object_id': model_object.pk})
+        try:
+            if self.recent_allowed and model_object and model_object.pk:
+                if not url:
+                    url = request.get_full_path()
+                if not label:
+                    label = model_object.__str__()
+                if not icon:
+                    icon = self.model._meta.model_name
+                # TODO add url from request is useless
+                #if self.is_add_url(url):
+                #    url = reverse(self.change_url_format() % (
+                #        self.model._meta.app_label, self.model._meta.model_name),
+                #    kwargs={'object_id': model_object.pk})
 
-        return RecentLink.objects.update_or_create(
-            user_id=request.user.pk,
-            link_url=url,
-            defaults={
-                'user_id': request.user.pk,
-                'link_time': timezone.now,
-                'link_label': label,
-                'link_url': url,
-                'link_icon': icon,},)
+                RecentLink.objects.update_or_create(
+                    user_id=request.user.pk,
+                    link_url=url,
+                    defaults={
+                        'user_id': request.user.pk,
+                        'link_time': timezone.now,
+                        'link_label': label,
+                        'link_url': url,
+                        'link_icon': icon,},)
+        except Exception as ex:
+            print(ex)
 
     def is_add_url(self, url):
         if url.find('/add') < 0:
@@ -405,8 +516,9 @@ class SiteModel(ModelAdmin):
             inline_admin_formsets=inline_formsets,
             errors=helpers.AdminErrorList(form, formsets),
             preserved_filters=self.get_preserved_filters(request),
+            change_actions=self.change_actions,
+            change_tools=self.change_tools,
         )
-
         context.update(self.get_model_extra_context(request))
 
         # Hide the "Save" and "Save and continue" buttons if "Save as New" was

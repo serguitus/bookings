@@ -1,5 +1,4 @@
 /* CHANGELISTS */
-
 .div-changelist {
     position: relative;
     width: 100%;
@@ -9,19 +8,19 @@
     width: 100%;
 }
 
-.change-list .hiddenfields { display:none; }
+.div-changelist .hiddenfields { display:none; }
 
-.change-list .filtered table {
+.div-changelist .filtered table {
     border-right: none;
 }
 
-.change-list .filtered {
+.div-changelist .filtered {
     min-height: 400px;
 }
 
-.change-list .filtered .results, .change-list .filtered .paginator,
-.filtered .search-toolbar, .filtered div.xfull {
-    margin-right: 280px;
+.div-changelist.filtered .results, .div-changelist.filtered .paginator, .filtered .search-toolbar,
+ .filtered div.xfull {
+    margin-right: 260px;
     width: auto;
 }
 
@@ -29,7 +28,7 @@
     padding-right: 1em;
 }
 
-#changelist-form .results {
+.changelist-form .results {
   overflow-x: auto;
 }
 

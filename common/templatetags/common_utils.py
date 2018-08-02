@@ -7,6 +7,7 @@ from django.contrib.admin.templatetags.admin_list import (
 from django.contrib.admin.utils import (
     display_for_field, display_for_value, get_fields_from_path,
     label_for_field, lookup_field)
+from django.contrib.admin.views.main import SEARCH_VAR
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.template.context import Context
@@ -200,17 +201,27 @@ def common_submit_row(context):
     show_save_and_continue = context.get('show_save_and_continue', True)
     ctx = Context(context)
     ctx.update({
+        'change_actions': context['change_actions'],
         'show_delete_link': (
             not is_popup and context['has_delete_permission'] and
             change and context.get('show_delete', True)
         ),
         'show_save_as_new': not is_popup and change and save_as,
         'show_save_and_add_another': (
-            context['has_add_permission'] and not is_popup and
-            (not save_as or context['add'])
+            context['has_add_permission'] and not is_popup and context['add']
         ),
         'show_save_and_continue': not is_popup and context['has_change_permission'] and show_save_and_continue,
         'show_save': show_save,
     })
     return ctx
 
+@register.inclusion_tag('common/search_form.html')
+def common_search_form(cl):
+    """
+    Displays a search form for searching the list.
+    """
+    return {
+        'cl': cl,
+        'show_result_count': cl.result_count != cl.full_result_count,
+        'search_var': SEARCH_VAR
+    }

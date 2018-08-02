@@ -92,7 +92,9 @@ class MatchingDocument(models.Model):
     class Meta:
         abstract = True
     matched_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-
+    # next two fields are only for matching list view edit purposse
+    match_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    included = models.BooleanField(default=False)
 
 class Deposit(FinantialDocument, AccountingDocument):
     class Meta:
@@ -325,6 +327,7 @@ class LoanEntityDocument(LoanDocument):
     class Meta:
         verbose_name = 'Loan Entity Document'
         verbose_name_plural = 'Loans Entities Documents'
+        permissions = (('match', 'Match Document'),)
     loan_entity = models.ForeignKey(LoanEntity)
 
 
@@ -589,6 +592,7 @@ class LoanAccountDocument(LoanDocument):
     class Meta:
         verbose_name = 'Loan Account document'
         verbose_name_plural = 'Loans Accounts Documents'
+        permissions = (('match', 'Match Document'),)
     loan_account = models.ForeignKey(Account, related_name='loan_account')
 
 class LoanAccountDeposit(LoanAccountDocument):
@@ -736,6 +740,7 @@ class AgencyDocument(FinantialDocument, MatchingDocument):
     class Meta:
         verbose_name = 'Agency Document'
         verbose_name_plural = 'Agencies Documents'
+        permissions = (('match', 'Match Document'),)
     agency = models.ForeignKey(Agency)
 
 
@@ -919,6 +924,7 @@ class ProviderDocument(FinantialDocument, MatchingDocument):
     class Meta:
         verbose_name = 'Provider Document'
         verbose_name_plural = 'Providers Documents'
+        permissions = (('match', 'Match Document'),)
     provider = models.ForeignKey(Provider)
 
 

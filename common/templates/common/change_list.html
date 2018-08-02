@@ -1,4 +1,5 @@
 {% extends "common/base_site.html" %}
+
 {% load i18n static common_utils admin_list %}
 
 {% block head_extra %}
@@ -51,10 +52,10 @@
   {% endif %}
   <div class="div-changelist module{% if cl.has_filters %} filtered{% endif %}">
     {% block search %}
-      {% include 'common/include_search_form.html' %}
+      {% common_search_form cl %}
     {% endblock search %}
     {% block date_hierarchy %}
-      {% include 'common/include_date_hierarchy.html' %}
+      {% date_hierarchy cl %}
     {% endblock date_hierarchy %}
 
     {% block filters %}

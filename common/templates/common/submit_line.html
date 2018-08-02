@@ -9,12 +9,17 @@
         <p class="deletelink-box"><a href="{% common_add_preserved_filters delete_url %}" class="deletelink">{% trans "Delete" %}</a></p>
     {% endif %}
     {% if show_save_as_new %}
-        <input type="submit" value="{% trans 'Save as new' %}" name="_saveasnew" />
+        <input class="btn-save" type="submit" value="{% trans 'Save as new' %}" name="_saveasnew" />
     {% endif %}
     {% if show_save_and_add_another %}
-        <input type="submit" value="{% trans 'Save and add another' %}" name="_addanother" />
+        <input class="btn-save" type="submit" value="{% trans 'Save and add another' %}" name="_addanother" />
     {% endif %}
     {% if show_save_and_continue %}
-        <input type="submit" value="{% trans 'Save and continue editing' %}" name="_continue" />
+        <input class="btn-save" type="submit" value="{% trans 'Save and continue editing' %}" name="_continue" />
+    {% endif %}
+    {% if change_actions %}
+        {% for action in change_actions %}
+            <input class="change-action change-action-{{action.name}}" type="submit" value="{% trans action.label %}" name="_{{ action.name }}" />
+        {% endfor %}
     {% endif %}
 </div>
