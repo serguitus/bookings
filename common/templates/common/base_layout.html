@@ -83,7 +83,7 @@
                     <h2>{% trans "Actions for" %} {{ module_name }}</h2>
                     <ul class="left-nav left-bg-color">
                         {% for model_action in current_model_actions %}
-                            {% setvar 'common/img/icon-action-'|add:model_action.name|add:'.png' as static_icon_url %}
+                            {% setvar 'common/img/icon-action-'|add:model_action.name|add:'.svg' as static_icon_url %}
                             <li style='background-image: url("{% static static_icon_url  %}")'>
                                 <a href="{% url model_action.url %}">{{ model_action.label }}</a>
                             </li>
