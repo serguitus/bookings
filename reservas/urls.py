@@ -19,10 +19,16 @@ from django.contrib import admin
 from reservas.admin import reservas_admin
 from reservas.admin import bookings_site
 
+from finance.views import AccountAutocompleteView
+
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^reservas/', reservas_admin.urls),
 
     url(r'^%s/' % (bookings_site.name), bookings_site.urls),
+    url(r'^account-autocomplete/$',
+        AccountAutocompleteView.as_view(),
+        name='account-autocomplete',
+    ),
 ]

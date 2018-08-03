@@ -33,6 +33,9 @@ INSTALLED_APPS = [
 #    'admin_tools.menu',
 #    'admin_tools.dashboard',
 
+    'dal',
+    'dal_select2',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,6 +48,7 @@ INSTALLED_APPS = [
     'finance',
     'config',
     'booking',
+    'hello',
 
 ]
 
