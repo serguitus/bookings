@@ -38,7 +38,7 @@
                                                 <li  class="dropdown-header">{{ model.group }}</li>
                                                 {% setvar model.group as prev_group %}
                                             {% endif %}
-                                            {% setvar 'common/img/icon-model-'|add:model.name|add:'.svg' as static_icon_url %}
+                                            {% setvar 'common/img/icon-model-'|add:model.name|add:'.png' as static_icon_url %}
                                             <li  style='background-image: url("{% static static_icon_url %}")'>
                                                 <a role="menuitem" href="{{ model.index_url }}">{{ model.label }}</a>
                                             </li>
@@ -83,7 +83,7 @@
                     <h2>{% trans "Actions for" %} {{ module_name }}</h2>
                     <ul class="left-nav left-bg-color">
                         {% for model_action in current_model_actions %}
-                            {% setvar 'common/img/icon-action-'|add:model_action.name|add:'.svg' as static_icon_url %}
+                            {% setvar 'common/img/icon-action-'|add:model_action.name|add:'.png' as static_icon_url %}
                             <li style='background-image: url("{% static static_icon_url  %}")'>
                                 <a href="{% url model_action.url %}">{{ model_action.label }}</a>
                             </li>
@@ -98,7 +98,7 @@
                 {% if recent_links %}
                     <ul class="left-nav left-bg-color">
                         {% for recent_link in recent_links %}
-                            {% setvar 'common/img/icon-model-'|add:recent_link.link_icon|add:'.svg' as static_icon_url %}
+                            {% setvar 'common/img/icon-model-'|add:recent_link.link_icon|add:'.png' as static_icon_url %}
                             <li style='background-image: url("{% static static_icon_url %}")'><a href="{{ recent_link.link_url }}">{{ recent_link.link_label }}</a></li>
                         {% endfor %}
                     </ul>
