@@ -457,7 +457,7 @@ class LoanAccount(SummaryModel):
     account = models.ForeignKey(Account)
 
     def __str__(self):
-        return self.account.name
+        return self.account.__str__()
 
     def fix_credit_amount(self):
         cursor = connection.cursor()

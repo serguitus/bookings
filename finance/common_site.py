@@ -379,11 +379,12 @@ class LoanEntitySiteModel(SiteModel):
     model_order = 3010
     menu_label = MENU_LABEL_FINANCE_LOAN
     menu_group = 'Entity Loan'
+
+    fields = ('name',)
     list_display = ('name',)
     list_filter = ('name',)
     search_fields = ['name',]
     ordering = ('name',)
-    form = AccountingForm
 
 
 class LoanEntityDocumentSiteModel(MatchableSiteModel):
@@ -392,7 +393,7 @@ class LoanEntityDocumentSiteModel(MatchableSiteModel):
     """
     fields = ('name', 'account', 'loan_entity', 'amount', 'date', 'status', 'matched_amount')
     list_display = ['name', 'account', 'loan_entity', 'amount', 'date', 'status']
-    list_filter = ('currency', 'account', 'status', 'date')
+    list_filter = ('currency', 'account', 'status', 'date', 'loan_entity')
 
     readonly_fields = ('name', 'matched_amount',)
     form = LoanEntityDocumentForm
@@ -450,11 +451,14 @@ class LoanAccountSiteModel(SiteModel):
     model_order = 3040
     menu_label = MENU_LABEL_FINANCE_LOAN
     menu_group = 'Account Loan'
-    actions_on_top = True
-    list_display = ('account',)
+
+    fields = ('account', 'credit_amount', 'debit_amount', 'matched_amount')
+    list_display = ('account', 'credit_amount', 'debit_amount', 'matched_amount')
     list_filter = ('account__name', 'account__currency',)
     ordering = ['account__name',]
+    readonly_fields = ('credit_amount', 'debit_amount', 'matched_amount')
 
+    form = AccountingForm
 
 class LoanAccountDocumentSiteModel(MatchableSiteModel):
     """
