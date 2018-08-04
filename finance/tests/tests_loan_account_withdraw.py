@@ -10,7 +10,7 @@ from accounting.constants import (
 from accounting.models import Account, Operation
 
 from finance.constants import STATUS_DRAFT, STATUS_READY, DOC_TYPE_LOAN_ACCOUNT_WITHDRAW
-from finance.models import LoanAccountWithdraw
+from finance.models import LoanAccount, LoanAccountWithdraw
 from finance.services import FinanceService
 from finance.tests.utils import FinanceBaseTestCase
 
@@ -35,6 +35,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         test_account2 = Account.objects.create(
             name='Test Account2',
             currency=CURRENCY_CUC)
+        test_loan_account = LoanAccount.objects.create(account=test_account2)
         test_balance2 = test_account2.balance
 
         test_date = timezone.now()
@@ -44,7 +45,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_withdraw = LoanAccountWithdraw(
             date=test_date,
             account=test_account1,
-            loan_account=test_account2,
+            loan_account=test_loan_account,
             amount=test_amount,
             status=test_status)
 
@@ -86,6 +87,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         test_account2 = Account.objects.create(
             name='Test Account2',
             currency=CURRENCY_CUC)
+        test_loan_account = LoanAccount.objects.create(account=test_account2)
         test_balance2 = test_account2.balance
 
         test_date = timezone.now()
@@ -95,7 +97,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_withdraw = LoanAccountWithdraw(
             date=test_date,
             account=test_account1,
-            loan_account=test_account2,
+            loan_account=test_loan_account,
             amount=test_amount,
             status=test_status)
 
@@ -103,10 +105,9 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
+        test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
         # loan_account debit incremented
-        self.assertLoanAccountDebitAmount(
-            loan_account=test_account2,
-            amount=test_amount)
+        self.assertEqual(test_loan_account.debit_amount, test_amount)
 
         # account balance incremented
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 - test_amount)
@@ -159,6 +160,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         test_account2 = Account.objects.create(
             name='Test Account2',
             currency=CURRENCY_CUC)
+        test_loan_account = LoanAccount.objects.create(account=test_account2)
         test_balance2 = test_account2.balance
 
         test_date = timezone.now()
@@ -168,7 +170,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_withdraw = LoanAccountWithdraw(
             date=test_date,
             account=test_account1,
-            loan_account=test_account2,
+            loan_account=test_loan_account,
             amount=test_amount,
             status=test_status1)
 
@@ -206,10 +208,9 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
+        test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
         # loan_account debit incremented
-        self.assertLoanAccountDebitAmount(
-            loan_account=test_account2,
-            amount=test_amount)
+        self.assertEqual(test_loan_account.debit_amount, test_amount)
 
         # account balance incremented
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 - test_amount)
@@ -263,6 +264,8 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         test_account2 = Account.objects.create(
             name='Test Account2',
             currency=CURRENCY_CUC)
+        test_loan_account = LoanAccount.objects.create(
+            account=test_account2)
         test_balance2 = test_account2.balance
 
         test_date = timezone.now()
@@ -272,7 +275,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_withdraw = LoanAccountWithdraw(
             date=test_date,
             account=test_account1,
-            loan_account=test_account2,
+            loan_account=test_loan_account,
             amount=test_amount,
             status=test_status1)
 
@@ -280,10 +283,9 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
+        test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
         # loan_account debit incremented
-        self.assertLoanAccountDebitAmount(
-            loan_account=test_account2,
-            amount=test_amount)
+        self.assertEqual(test_loan_account.debit_amount, test_amount)
 
         # account balance incremented
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 - test_amount)
@@ -332,10 +334,9 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
+        test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
         # loan_account debit returned 0
-        self.assertLoanAccountDebitAmount(
-            loan_account=test_account2,
-            amount=0)
+        self.assertEqual(test_loan_account.debit_amount, 0)
 
         # account balance unchanged
         self.assertAccount(test_account=test_account1, test_balance=test_balance1)
@@ -396,6 +397,8 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         test_account2 = Account.objects.create(
             name='Test Account2',
             currency=CURRENCY_CUC)
+        test_loan_account = LoanAccount.objects.create(
+            account=test_account2)
         test_balance2 = test_account2.balance
 
         test_date = timezone.now()
@@ -405,7 +408,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_withdraw = LoanAccountWithdraw(
             date=test_date,
             account=test_account1,
-            loan_account=test_account2,
+            loan_account=test_loan_account,
             amount=test_amount,
             status=test_status1)
 
@@ -413,10 +416,9 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
+        test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
         # loan_account debit incremented
-        self.assertLoanAccountDebitAmount(
-            loan_account=test_account2,
-            amount=test_amount)
+        self.assertEqual(test_loan_account.debit_amount, test_amount)
 
         # account balance changed
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 - test_amount)
@@ -467,20 +469,20 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         test_account4 = Account.objects.create(
             name='Test Account4',
             currency=CURRENCY_USD)
+        test_loan_account2 = LoanAccount.objects.create(account=test_account4)
         test_balance4 = test_account4.balance
 
         loan_account_withdraw.status = test_status2
         loan_account_withdraw.account = test_account3
-        loan_account_withdraw.loan_account = test_account4
+        loan_account_withdraw.loan_account = test_loan_account2
 
         loan_account_withdraw = FinanceService.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
+        test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
         # loan_account debit returned 0
-        self.assertLoanAccountDebitAmount(
-            loan_account=test_account2,
-            amount=0)
+        self.assertEqual(test_loan_account.debit_amount, 0)
 
         # account balance unchanged
         self.assertAccount(test_account=test_account1, test_balance=test_balance1)
@@ -544,6 +546,8 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         test_account2 = Account.objects.create(
             name='Test Account2',
             currency=CURRENCY_CUC)
+        test_loan_account = LoanAccount.objects.create(
+            account=test_account2)
         test_balance2 = test_account2.balance
 
         test_date = timezone.now()
@@ -553,7 +557,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_withdraw = LoanAccountWithdraw(
             date=test_date,
             account=test_account1,
-            loan_account=test_account2,
+            loan_account=test_loan_account,
             amount=test_amount1,
             status=test_status)
 
@@ -619,6 +623,8 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         test_account2 = Account.objects.create(
             name='Test Account2',
             currency=CURRENCY_CUC)
+        test_loan_account = LoanAccount.objects.create(
+            account=test_account2)
         test_balance2 = test_account2.balance
 
         test_date = timezone.now()
@@ -628,7 +634,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_withdraw = LoanAccountWithdraw(
             date=test_date,
             account=test_account1,
-            loan_account=test_account2,
+            loan_account=test_loan_account,
             amount=test_amount1,
             status=test_status)
 
@@ -636,10 +642,9 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
+        test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
         # loan_account debit incremented
-        self.assertLoanAccountDebitAmount(
-            loan_account=test_account2,
-            amount=test_amount1)
+        self.assertEqual(test_loan_account.debit_amount, test_amount1)
 
         # account balance incremented
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 - test_amount1)
@@ -688,10 +693,9 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
+        test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
         # loan_account debit changed
-        self.assertLoanAccountDebitAmount(
-            loan_account=test_account2,
-            amount=test_amount2)
+        self.assertEqual(test_loan_account.debit_amount, test_amount2)
 
         # account balance updated
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 - test_amount2)
@@ -764,6 +768,8 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         test_account2 = Account.objects.create(
             name='Test Account2',
             currency=CURRENCY_CUC)
+        test_loan_account1 = LoanAccount.objects.create(
+            account=test_account2)
         test_balance2 = test_account2.balance
 
         test_date = timezone.now()
@@ -773,7 +779,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_withdraw = LoanAccountWithdraw(
             date=test_date,
             account=test_account1,
-            loan_account=test_account2,
+            loan_account=test_loan_account1,
             amount=test_amount,
             status=test_status)
 
@@ -811,10 +817,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         test_account4 = Account.objects.create(
             name='Test Account4',
             currency=CURRENCY_USD)
+        test_loan_account2 = LoanAccount.objects.create(
+            account=test_account4)
         test_balance4 = test_account4.balance
 
         loan_account_withdraw.account = test_account3
-        loan_account_withdraw.loan_account = test_account4
+        loan_account_withdraw.loan_account = test_loan_account2
 
         loan_account_withdraw = FinanceService.save_loan_account_withdraw(
             user=self.test_user,
@@ -850,6 +858,8 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         test_account2 = Account.objects.create(
             name='Test Account2',
             currency=CURRENCY_CUC)
+        test_loan_account = LoanAccount.objects.create(
+            account=test_account2)
         test_balance2 = test_account2.balance
 
         test_date = timezone.now()
@@ -859,7 +869,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_withdraw = LoanAccountWithdraw(
             date=test_date,
             account=test_account1,
-            loan_account=test_account2,
+            loan_account=test_loan_account,
             amount=test_amount,
             status=test_status)
 
@@ -867,10 +877,9 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
+        test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
         # loan_account debit incremented
-        self.assertLoanAccountDebitAmount(
-            loan_account=test_account2,
-            amount=test_amount)
+        self.assertEqual(test_loan_account.debit_amount, test_amount)
 
         # account balance incremented
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 - test_amount)
@@ -919,23 +928,22 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         test_account4 = Account.objects.create(
             name='Test Account4',
             currency=CURRENCY_USD)
+        test_loan_account2 = LoanAccount.objects.create(account=test_account4)
         test_balance4 = test_account4.balance
 
         loan_account_withdraw.account = test_account3
-        loan_account_withdraw.loan_account = test_account4
+        loan_account_withdraw.loan_account = test_loan_account2
 
         loan_account_withdraw = FinanceService.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
+        test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
+        test_loan_account2 = LoanAccount.objects.get(pk=test_loan_account2.pk)
         # loan_account debit returned 0
-        self.assertLoanAccountDebitAmount(
-            loan_account=test_account2,
-            amount=0)
+        self.assertEqual(test_loan_account.debit_amount, 0)
         # loan_account debit incremented
-        self.assertLoanAccountDebitAmount(
-            loan_account=test_account4,
-            amount=test_amount)
+        self.assertEqual(test_loan_account2.debit_amount, test_amount)
 
         # account balance updated
         self.assertAccount(test_account=test_account1, test_balance=test_balance1)
@@ -1010,6 +1018,8 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         test_account2 = Account.objects.create(
             name='Test Account2',
             currency=CURRENCY_CUC)
+        test_loan_account = LoanAccount.objects.create(
+            account=test_account2)
         test_balance2 = test_account2.balance
 
         test_date = timezone.now()
@@ -1019,7 +1029,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_withdraw = LoanAccountWithdraw(
             date=test_date,
             account=test_account1,
-            loan_account=test_account2,
+            loan_account=test_loan_account,
             amount=test_amount1,
             status=test_status)
 
@@ -1027,10 +1037,9 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
+        test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
         # loan_account debit incremented
-        self.assertLoanAccountDebitAmount(
-            loan_account=test_account2,
-            amount=test_amount1)
+        self.assertEqual(test_loan_account.debit_amount, test_amount1)
 
         # account balance incremented
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 - test_amount1)
@@ -1079,26 +1088,25 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         test_account4 = Account.objects.create(
             name='Test Account4',
             currency=CURRENCY_USD)
+        test_loan_account2 = LoanAccount.objects.create(account=test_account4)
         test_balance4 = test_account4.balance
 
         test_amount2 = 50
 
         loan_account_withdraw.account = test_account3
-        loan_account_withdraw.loan_account = test_account4
+        loan_account_withdraw.loan_account = test_loan_account2
         loan_account_withdraw.amount = test_amount2
 
         loan_account_withdraw = FinanceService.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
+        test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
+        test_loan_account2 = LoanAccount.objects.get(pk=test_loan_account2.pk)
         # loan_account debit returned 0
-        self.assertLoanAccountDebitAmount(
-            loan_account=test_account2,
-            amount=0)
+        self.assertEqual(test_loan_account.debit_amount, 0)
         # loan_account debit incremented
-        self.assertLoanAccountDebitAmount(
-            loan_account=test_account4,
-            amount=test_amount2)
+        self.assertEqual(test_loan_account2.debit_amount, test_amount2)
 
 
         # account balance updated
@@ -1174,6 +1182,8 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         test_account2 = Account.objects.create(
             name='Test Account2',
             currency=CURRENCY_CUC)
+        test_loan_account = LoanAccount.objects.create(
+            account=test_account2)
         test_balance2 = test_account2.balance
 
         test_date1 = timezone.now()
@@ -1183,7 +1193,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_withdraw = LoanAccountWithdraw(
             date=test_date1,
             account=test_account1,
-            loan_account=test_account2,
+            loan_account=test_loan_account,
             amount=test_amount,
             status=test_status)
 
@@ -1256,6 +1266,8 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         test_account2 = Account.objects.create(
             name='Test Account2',
             currency=CURRENCY_CUC)
+        test_loan_account = LoanAccount.objects.create(
+            account=test_account2)
         test_balance2 = test_account2.balance
 
         test_date1 = timezone.now()
@@ -1265,7 +1277,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_withdraw = LoanAccountWithdraw(
             date=test_date1,
             account=test_account1,
-            loan_account=test_account2,
+            loan_account=test_loan_account,
             amount=test_amount,
             status=test_status)
 
@@ -1275,10 +1287,9 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         test_name1 = loan_account_withdraw.name
 
+        test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
         # loan_account debit incremented
-        self.assertLoanAccountDebitAmount(
-            loan_account=test_account2,
-            amount=test_amount)
+        self.assertEqual(test_loan_account.debit_amount, test_amount)
 
         # account balance incremented
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 - test_amount)
@@ -1332,10 +1343,9 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         # name changed
         self.assertNotEqual(test_name1, test_name2)
 
+        test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
         # loan_account debit unchanged
-        self.assertLoanAccountDebitAmount(
-            loan_account=test_account2,
-            amount=test_amount)
+        self.assertEqual(test_loan_account.debit_amount, test_amount)
 
         # account balance remains changed
         self.assertAccount(test_account=test_account1, test_balance=test_balance1 - test_amount)
@@ -1365,6 +1375,8 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         test_account2 = Account.objects.create(
             name='Test Account2',
             currency=CURRENCY_USD)
+        test_loan_account = LoanAccount.objects.create(
+            account=test_account2)
         test_balance2 = test_account2.balance
 
         test_date = timezone.now()
@@ -1374,7 +1386,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_withdraw = LoanAccountWithdraw(
             date=test_date,
             account=test_account1,
-            loan_account=test_account2,
+            loan_account=test_loan_account,
             amount=test_amount,
             status=test_status)
 

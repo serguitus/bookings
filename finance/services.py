@@ -339,7 +339,7 @@ class FinanceService(object):
             account = cls._load_locked_model_object(
                 pk=loan_account_deposit.account_id, model_class=Account, allow_empty_pk=False)
             other_account = cls._load_locked_model_object(
-                pk=loan_account_deposit.loan_account_id, model_class=Account,
+                pk=loan_account_deposit.loan_account.account_id, model_class=Account,
                 allow_empty_pk=False)
             # verify accounts
             if account.currency != other_account.currency:
@@ -349,7 +349,7 @@ class FinanceService(object):
             # define db others
             db_other_account_id = None
             if db_loan_account_deposit:
-                db_other_account_id = db_loan_account_deposit.loan_account_id
+                db_other_account_id = db_loan_account_deposit.loan_account.account_id
             # validate matches on status, currency or amount change
             cls._validate_matches(
                 document=loan_account_deposit,
@@ -382,7 +382,7 @@ class FinanceService(object):
             account = cls._load_locked_model_object(
                 pk=loan_account_withdraw.account_id, model_class=Account, allow_empty_pk=False)
             other_account = cls._load_locked_model_object(
-                pk=loan_account_withdraw.loan_account_id, model_class=Account,
+                pk=loan_account_withdraw.loan_account.account_id, model_class=Account,
                 allow_empty_pk=False)
             # verify accounts
             if account.currency != other_account.currency:
@@ -392,7 +392,7 @@ class FinanceService(object):
             # define db others
             db_other_account_id = None
             if db_loan_account_withdraw:
-                db_other_account_id = db_loan_account_withdraw.loan_account_id
+                db_other_account_id = db_loan_account_withdraw.loan_account.account_id
             # validate matches on status, currency or amount change
             cls._validate_matches(
                 document=loan_account_withdraw,
@@ -1412,12 +1412,9 @@ class FinanceService(object):
             return cls._load_locked_model_object(
                 pk=related_summary[0].pk, model_class=LoanEntityCurrency)
         if match_type == MATCH_TYPE_ACCOUNT:
-            # find or create related
-            related_summary = LoanAccount.objects.get_or_create(
-                loan_account_id=related_id)
             # load locked
             return cls._load_locked_model_object(
-                pk=related_summary[0].pk, model_class=LoanAccount)
+                pk=related_id, model_class=LoanAccount)
         if match_type == MATCH_TYPE_AGENCY:
             # find or create related
             related_summary = AgencyCurrency.objects.get_or_create(

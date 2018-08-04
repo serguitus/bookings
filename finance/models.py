@@ -181,7 +181,7 @@ class LoanEntityCurrency(SummaryModel):
     currency = models.CharField(max_length=5, choices=CURRENCIES)
 
     def __str__(self):
-        return '%s (%s)' % (self.name, self.get_currency_display())
+        return '%s (%s)' % (self.loan_entity.name, self.get_currency_display())
 
     def fix_credit_amount(self):
         cursor = connection.cursor()
@@ -453,8 +453,11 @@ class LoanAccount(SummaryModel):
     class Meta:
         verbose_name = 'Loan Account'
         verbose_name_plural = 'Loans Accounts'
-        unique_together = (('loan_account',),)
-    loan_account = models.ForeignKey(Account)
+        unique_together = (('account',),)
+    account = models.ForeignKey(Account)
+
+    def __str__(self):
+        return self.account.name
 
     def fix_credit_amount(self):
         cursor = connection.cursor()
@@ -467,7 +470,7 @@ class LoanAccount(SummaryModel):
                             ON lad.finantialdocument_ptr_id = ladd.loanaccountdocument_ptr_id
                         INNER JOIN finance_finantialdocument fd
                             ON fd.id = lad.finantialdocument_ptr_id
-                    WHERE lad.loan_account_id = la.loan_account_id
+                    WHERE lad.loan_account_id = la.account_id
                         AND fd.status = %s)
                 WHERE la.id = %s
                 """, [STATUS_READY, self.pk])
@@ -487,7 +490,7 @@ class LoanAccount(SummaryModel):
                             ON lad.finantialdocument_ptr_id = ladd.loanaccountdocument_ptr_id
                         INNER JOIN finance_finantialdocument fd
                             ON fd.id = lad.finantialdocument_ptr_id
-                    WHERE lad.loan_account_id = la.loan_account_id
+                    WHERE lad.loan_account_id = la.account_id
                         AND fd.status = %s)
             """, [STATUS_READY])
         finally:
@@ -504,7 +507,7 @@ class LoanAccount(SummaryModel):
                             ON lad.finantialdocument_ptr_id = law.loanaccountdocument_ptr_id
                         INNER JOIN finance_finantialdocument fd
                             ON fd.id = lad.finantialdocument_ptr_id
-                    WHERE lad.loan_account_id = la.loan_account_id
+                    WHERE lad.loan_account_id = la.account_id
                         AND fd.status = %s)
                 WHERE la.id = %s
                 """, [STATUS_READY, self.pk])
@@ -524,7 +527,7 @@ class LoanAccount(SummaryModel):
                             ON lad.finantialdocument_ptr_id = law.loanaccountdocument_ptr_id
                         INNER JOIN finance_finantialdocument fd
                             ON fd.id = lad.finantialdocument_ptr_id
-                    WHERE lad.loan_account_id = la.loan_account_id
+                    WHERE lad.loan_account_id = la.account_id
                         AND fd.status = %s)
             """, [STATUS_READY])
         finally:
@@ -549,8 +552,8 @@ class LoanAccount(SummaryModel):
                             ON lad2.finantialdocument_ptr_id = law.loanaccountdocument_ptr_id
                         INNER JOIN finance_finantialdocument fd2
                             ON fd2.id = lad2.finantialdocument_ptr_id
-                    WHERE lad1.loan_account_id = la.loan_account_id
-                        AND lad2.loan_account_id = la.loan_account_id
+                    WHERE lad1.loan_account_id = la.account_id
+                        AND lad2.loan_account_id = la.account_id
                         AND fd1.status = %s
                         AND fd2.status = fd1.status)
                 WHERE la.id = %s
@@ -579,8 +582,8 @@ class LoanAccount(SummaryModel):
                             ON lad2.finantialdocument_ptr_id = law.loanentitydocument_ptr_id
                         INNER JOIN finance_finantialdocument fd2
                             ON fd2.id = lad2.finantialdocument_ptr_id
-                    WHERE lad1.loan_account_id = la.loan_account_id
-                        AND lad2.loan_account_id = la.loan_account_id
+                    WHERE lad1.loan_account_id = la.account_id
+                        AND lad2.loan_account_id = la.account_id
                         AND fd1.status = %s
                         AND fd2.status = fd1.status)
             """, [STATUS_READY])
@@ -593,7 +596,7 @@ class LoanAccountDocument(LoanDocument):
         verbose_name = 'Loan Account document'
         verbose_name_plural = 'Loans Accounts Documents'
         permissions = (('match', 'Match Document'),)
-    loan_account = models.ForeignKey(Account, related_name='loan_account')
+    loan_account = models.ForeignKey(LoanAccount)
 
 class LoanAccountDeposit(LoanAccountDocument):
     class Meta:
@@ -603,7 +606,7 @@ class LoanAccountDeposit(LoanAccountDocument):
     def fill_data(self):
         self.document_type = DOC_TYPE_LOAN_ACCOUNT_DEPOSIT
         account = Account.objects.get(pk=self.account_id)
-        loan_account = Account.objects.get(pk=self.loan_account_id)
+        loan_account = LoanAccount.objects.get(pk=self.loan_account_id)
         self.name = '%s - Loan Account Deposit to %s of %s %s from %s' % (
             self.date, account, self.amount, account.get_currency_display(), loan_account)
 
@@ -657,7 +660,7 @@ class LoanAccountWithdraw(LoanAccountDocument):
     def fill_data(self):
         self.document_type = DOC_TYPE_LOAN_ACCOUNT_WITHDRAW
         account = Account.objects.get(pk=self.account_id)
-        loan_account = Account.objects.get(pk=self.loan_account_id)
+        loan_account = LoanAccount.objects.get(pk=self.loan_account_id)
         self.name = '%s - Loan Account Withdraw from %s of %s %s to %s' % (
             self.date, account, self.amount, account.get_currency_display(), loan_account)
 

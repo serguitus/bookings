@@ -30,10 +30,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             name='Test Account',
             currency=CURRENCY_CUC,
             balance=1000)
-        test_loan_account = Account.objects.create(
+        test_account2 = Account.objects.create(
             name='Test Loan Account',
             currency=CURRENCY_CUC,
             balance=1000)
+        test_loan_account = LoanAccount.objects.create(
+            account=test_account2)
 
         test_date = timezone.now()
         test_amount = 100
@@ -68,10 +70,9 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         loan_account_match = FinanceService.save_loan_account_match(loan_account_match)
 
+        test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
         # entity matched incremented
-        self.assertLoanAccountMatchedAmount(
-            loan_account=test_loan_account,
-            amount=test_amount)
+        self.assertEqual(test_loan_account.matched_amount, test_amount)
 
         loan_account_deposit.refresh_from_db()
         loan_account_withdraw.refresh_from_db()
@@ -87,11 +88,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             name='Test Account',
             currency=CURRENCY_CUC,
             balance=1000)
-        test_loan_account = Account.objects.create(
+        test_account2 = Account.objects.create(
             name='Test Loan Account',
             currency=CURRENCY_CUC,
             balance=1000)
-
+        test_loan_account = LoanAccount.objects.create(
+            account=test_account2)
 
         test_date = timezone.now()
         test_amount = 100
@@ -126,10 +128,9 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         loan_account_match = FinanceService.save_loan_account_match(loan_account_match)
 
+        test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
         # entity matched incremented
-        self.assertLoanAccountMatchedAmount(
-            loan_account=test_loan_account,
-            amount=test_amount)
+        self.assertEqual(test_loan_account.matched_amount, test_amount)
 
         loan_account_deposit.refresh_from_db()
         loan_account_withdraw.refresh_from_db()
@@ -143,10 +144,9 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         loan_account_match = FinanceService.save_loan_account_match(loan_account_match)
 
+        test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
         # entity matched changed
-        self.assertLoanAccountMatchedAmount(
-            loan_account=test_loan_account,
-            amount=test_amount + delta)
+        self.assertEqual(test_loan_account.matched_amount, test_amount + delta)
 
         loan_account_deposit.refresh_from_db()
         loan_account_withdraw.refresh_from_db()
@@ -162,11 +162,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             name='Test Account',
             currency=CURRENCY_CUC,
             balance=1000)
-        test_loan_account = Account.objects.create(
+        test_account2 = Account.objects.create(
             name='Test Loan Account',
             currency=CURRENCY_CUC,
             balance=1000)
-
+        test_loan_account = LoanAccount.objects.create(
+            account=test_account2)
 
         test_date = timezone.now()
         test_amount = 100
@@ -201,10 +202,9 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         loan_account_match = FinanceService.save_loan_account_match(loan_account_match)
 
+        test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
         # entity matched incremented
-        self.assertLoanAccountMatchedAmount(
-            loan_account=test_loan_account,
-            amount=test_amount)
+        self.assertEqual(test_loan_account.matched_amount, test_amount)
 
         loan_account_deposit.refresh_from_db()
         loan_account_withdraw.refresh_from_db()
@@ -230,11 +230,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             name='Test Account',
             currency=CURRENCY_CUC,
             balance=1000)
-        test_loan_account = Account.objects.create(
+        test_account2 = Account.objects.create(
             name='Test Loan Account',
             currency=CURRENCY_CUC,
             balance=1000)
-
+        test_loan_account = LoanAccount.objects.create(
+            account=test_account2)
 
         test_date = timezone.now()
         test_amount = 100
@@ -278,10 +279,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             name='Test Account',
             currency=CURRENCY_CUC,
             balance=1000)
-        test_loan_account = Account.objects.create(
+        test_account2 = Account.objects.create(
             name='Test Loan Account',
             currency=CURRENCY_CUC,
             balance=1000)
+        test_loan_account = LoanAccount.objects.create(
+            account=test_account2)
 
         test_date = timezone.now()
         test_amount = 100
@@ -325,10 +328,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             name='Test Account',
             currency=CURRENCY_CUC,
             balance=1000)
-        test_loan_account1 = Account.objects.create(
+        test_account2 = Account.objects.create(
             name='Test Loan Account1',
             currency=CURRENCY_CUC,
             balance=1000)
+        test_loan_account1 = LoanAccount.objects.create(
+            account=test_account2)
 
         test_date = timezone.now()
         test_amount = 100
@@ -345,10 +350,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
-        test_loan_account2 = Account.objects.create(
+        test_account4 = Account.objects.create(
             name='Test Loan Account2',
             currency=CURRENCY_CUC,
             balance=1000)
+        test_loan_account2 = LoanAccount.objects.create(
+            account=test_account4)
 
         loan_account_withdraw = LoanAccountWithdraw(
             date=test_date,
@@ -377,10 +384,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             name='Test Account1',
             currency=CURRENCY_CUC,
             balance=1000)
-        test_loan_account = Account.objects.create(
+        test_account2 = Account.objects.create(
             name='Test Loan Account',
             currency=CURRENCY_CUC,
             balance=1000)
+        test_loan_account = LoanAccount.objects.create(
+            account=test_account2)
 
         test_date = timezone.now()
         test_amount = 100
@@ -429,10 +438,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             name='Test Account',
             currency=CURRENCY_CUC,
             balance=1000)
-        test_loan_account = Account.objects.create(
+        test_account2 = Account.objects.create(
             name='Test Loan Account',
             currency=CURRENCY_CUC,
             balance=1000)
+        test_loan_account = LoanAccount.objects.create(
+            account=test_account2)
 
         test_date = timezone.now()
         test_amount = 100
@@ -489,10 +500,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             name='Test Account',
             currency=CURRENCY_CUC,
             balance=1000)
-        test_loan_account = Account.objects.create(
+        test_account2 = Account.objects.create(
             name='Test Loan Account',
             currency=CURRENCY_CUC,
             balance=1000)
+        test_loan_account = LoanAccount.objects.create(
+            account=test_account2)
 
         test_date = timezone.now()
         test_amount = 100
@@ -548,10 +561,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             name='Test Account',
             currency=CURRENCY_CUC,
             balance=1000)
-        test_loan_account = Account.objects.create(
+        test_account2 = Account.objects.create(
             name='Test Loan Account',
             currency=CURRENCY_CUC,
             balance=1000)
+        test_loan_account = LoanAccount.objects.create(
+            account=test_account2)
 
         test_date = timezone.now()
         test_amount = 100
@@ -607,10 +622,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             name='Test Account1',
             currency=CURRENCY_CUC,
             balance=1000)
-        test_loan_account = Account.objects.create(
+        test_account2 = Account.objects.create(
             name='Test Loan Account',
             currency=CURRENCY_CUC,
             balance=1000)
+        test_loan_account = LoanAccount.objects.create(
+            account=test_account2)
 
         test_date = timezone.now()
         test_amount = 100
@@ -671,10 +688,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             name='Test Account',
             currency=CURRENCY_CUC,
             balance=1000)
-        test_loan_account1 = Account.objects.create(
+        test_account2 = Account.objects.create(
             name='Test Loan Account1',
             currency=CURRENCY_CUC,
             balance=1000)
+        test_loan_account1 = LoanAccount.objects.create(
+            account=test_account2)
 
         test_date = timezone.now()
         test_amount = 100
@@ -715,10 +734,12 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         self.assertEqual(loan_account_deposit.matched_amount, test_amount)
         self.assertEqual(loan_account_withdraw.matched_amount, test_amount)
 
-        test_loan_account2 = Account.objects.create(
+        test_account4 = Account.objects.create(
             name='Test Loan Account2',
             currency=CURRENCY_CUC,
             balance=1000)
+        test_loan_account2 = LoanAccount.objects.create(
+            account=test_account4)
 
         loan_account_withdraw.loan_account = test_loan_account2
 
