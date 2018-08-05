@@ -36,7 +36,7 @@ class LoanAccountAutocompleteView(autocomplete.Select2QuerySetView):
         # Don't forget to filter out results depending on the visitor !
         if not self.request.user.is_authenticated():
             return LoanAccount.objects.none()
-        qs = LoanAccount.objects.filter(enabled=True).all()
+        qs = LoanAccount.objects.filter(account__enabled=True).all()
         if self.q:
             qs = qs.filter(name__istartswith=self.q)
         return qs
