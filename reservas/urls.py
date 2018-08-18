@@ -19,10 +19,25 @@ from django.contrib import admin
 from reservas.admin import reservas_admin
 from reservas.admin import bookings_site
 
+from finance.views import (
+    AccountAutocompleteView, LoanEntityAutocompleteView, LoanAccountAutocompleteView)
+
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^reservas/', reservas_admin.urls),
 
     url(r'^%s/' % (bookings_site.name), bookings_site.urls),
+    url(r'^account-autocomplete/$',
+        AccountAutocompleteView.as_view(),
+        name='account-autocomplete',
+    ),
+    url(r'^loanentity-autocomplete/$',
+        LoanEntityAutocompleteView.as_view(),
+        name='loanentity-autocomplete',
+    ),
+    url(r'^loanaccount-autocomplete/$',
+        LoanAccountAutocompleteView.as_view(),
+        name='loanaccount-autocomplete',
+    ),
 ]

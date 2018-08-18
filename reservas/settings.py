@@ -33,6 +33,9 @@ INSTALLED_APPS = [
 #    'admin_tools.menu',
 #    'admin_tools.dashboard',
 
+    'dal',
+    'dal_select2',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,8 +48,7 @@ INSTALLED_APPS = [
     'finance',
     'config',
     'booking',
-    'dal',
-    'dal_select2',
+    'hello',
 
 ]
 
@@ -65,7 +67,7 @@ ROOT_URLCONF = 'reservas.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['reservas/templates', 'common/templates'],
+        'DIRS': ['reservas/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

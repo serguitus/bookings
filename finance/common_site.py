@@ -16,11 +16,13 @@ from django.template.response import SimpleTemplateResponse, TemplateResponse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext as _, ungettext
 
-from finance.forms import DepositForm
+from finance.forms import (
+    AccountingForm, CurrencyExchangeForm, TransferForm,
+    LoanEntityDocumentForm, LoanAccountDocumentForm)
 from finance.models import (
     FinantialDocument,
     Deposit, Withdraw, CurrencyExchange, Transfer,
-    LoanAccount, LoanAccountDeposit, LoanAccountWithdraw,
+    LoanAccount, LoanAccountDeposit, LoanAccountWithdraw, LoanAccountMatch,
     LoanEntity, LoanEntityDeposit, LoanEntityWithdraw, LoanEntityMatch,
     Agency, Provider)
 from finance.services import FinanceService
@@ -331,7 +333,7 @@ class DepositSiteModel(BaseFinantialDocumentSiteModel):
     fields = ('name', 'account', 'amount', 'date', 'status')
     list_display = ('name', 'account', 'amount', 'date', 'status')
     list_filter = ('currency', 'account', 'status', 'date')
-    form = DepositForm
+    form = AccountingForm
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
@@ -353,6 +355,7 @@ class CurrencyExchangeSiteModel(BaseFinantialDocumentSiteModel):
     list_display = (
         'name', 'account', 'amount', 'date', 'status', 'exchange_account', 'exchange_amount')
     list_filter = ('currency', 'account', 'status', 'date')
+    form = CurrencyExchangeForm
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
@@ -365,6 +368,7 @@ class TransferSiteModel(BaseFinantialDocumentSiteModel):
     fields = ('name', 'account', 'transfer_account', 'amount', 'date', 'status')
     list_display = ('name', 'account', 'transfer_account', 'amount', 'date', 'status')
     list_filter = ('currency', 'account', 'status', 'date')
+    form = TransferForm
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
@@ -375,6 +379,8 @@ class LoanEntitySiteModel(SiteModel):
     model_order = 3010
     menu_label = MENU_LABEL_FINANCE_LOAN
     menu_group = 'Entity Loan'
+
+    fields = ('name',)
     list_display = ('name',)
     list_filter = ('name',)
     search_fields = ['name',]
@@ -387,9 +393,10 @@ class LoanEntityDocumentSiteModel(MatchableSiteModel):
     """
     fields = ('name', 'account', 'loan_entity', 'amount', 'date', 'status', 'matched_amount')
     list_display = ['name', 'account', 'loan_entity', 'amount', 'date', 'status']
-    list_filter = ('currency', 'account', 'status', 'date')
+    list_filter = ('currency', 'account', 'status', 'date', 'loan_entity')
 
     readonly_fields = ('name', 'matched_amount',)
+    form = LoanEntityDocumentForm
 
     match_child_base_model = 'loanentitydocument_ptr'
     match_model = LoanEntityMatch
@@ -444,10 +451,14 @@ class LoanAccountSiteModel(SiteModel):
     model_order = 3040
     menu_label = MENU_LABEL_FINANCE_LOAN
     menu_group = 'Account Loan'
-    actions_on_top = True
-    list_display = ('loan_account',)
-    list_filter = ('loan_account__name', 'loan_account__currency',)
-    ordering = ['loan_account__name',]
+
+    fields = ('account', 'credit_amount', 'debit_amount', 'matched_amount')
+    list_display = ('account', 'credit_amount', 'debit_amount', 'matched_amount')
+    list_filter = ('account__name', 'account__currency',)
+    ordering = ['account__name',]
+    readonly_fields = ('credit_amount', 'debit_amount', 'matched_amount')
+
+    form = AccountingForm
 
 
 class LoanAccountDocumentSiteModel(MatchableSiteModel):
@@ -456,11 +467,18 @@ class LoanAccountDocumentSiteModel(MatchableSiteModel):
     """
     fields = ('name', 'account', 'loan_account', 'amount', 'date', 'status')
     list_display = ['name', 'account', 'loan_account', 'amount', 'date', 'status']
-    list_filter = ('currency', 'account', 'status', 'date')
+    list_filter = ('currency', 'account', 'status', 'date', 'loan_account')
 
-    match_fields = ['account', 'loan_account']
-    match_list_display = ['account', 'loan_account', 'amount', 'pending_amount', 'date']
-    match_list_editable = ['amount']
+    readonly_fields = ('name', 'matched_amount',)
+    form = LoanAccountDocumentForm
+
+    match_child_base_model = 'loanaccountdocument_ptr'
+    match_model = LoanAccountMatch
+    match_fields = ('name', 'account', 'loan_account', 'amount')
+    match_related_fields = ['account', 'loan_account']
+    match_list_display = [
+        'name', 'included', 'match_amount'
+    ]
 
 
 class LoanAccountDepositSiteModel(LoanAccountDocumentSiteModel):
@@ -469,11 +487,18 @@ class LoanAccountDepositSiteModel(LoanAccountDocumentSiteModel):
     """
     model_order = 3050
     menu_label = MENU_LABEL_FINANCE_LOAN
-    match_model = LoanAccountWithdraw
+
+    match_model_parent_field = 'loan_account_deposit'
+    match_model_child_field = 'loan_account_withdraw'
+    match_child_model = LoanAccountWithdraw
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
         return FinanceService.save_loan_account_deposit(request.user, obj)
+
+    def save_matches(self, parent, matches):
+        # overrides base class method
+        return FinanceService.match_loan_account_document(parent, matches, True)
 
 
 class LoanAccountWithdrawSiteModel(LoanAccountDocumentSiteModel):
@@ -482,11 +507,18 @@ class LoanAccountWithdrawSiteModel(LoanAccountDocumentSiteModel):
     """
     model_order = 3060
     menu_label = MENU_LABEL_FINANCE_LOAN
-    match_model = LoanAccountDeposit
+
+    match_model_parent_field = 'loan_account_withdraw'
+    match_model_child_field = 'loan_account_deposit'
+    match_child_model = LoanAccountDeposit
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
         return FinanceService.save_loan_account_withdraw(request.user, obj)
+
+    def save_matches(self, parent, matches):
+        # overrides base class method
+        return FinanceService.match_loan_account_document(parent, matches, False)
 
 
 class ProviderSiteModel(SiteModel):
