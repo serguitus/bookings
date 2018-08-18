@@ -33,6 +33,7 @@ class OperationSiteModel(SiteModel):
     list_display = ('datetime', 'concept', 'detail',)
     list_filter = ('concept', 'datetime',)
     ordering = ['-datetime',]
+    search_fields = ['concept', 'detail']
 
 
 class OperationMovementSiteModel(SiteModel):
@@ -43,6 +44,7 @@ class OperationMovementSiteModel(SiteModel):
     list_display = ('operation', 'account', 'movement_type', 'amount',)
     list_filter = ('account', 'movement_type',)
     ordering = ['operation',]
+    search_fields = ['account', 'amount']
 
 
 bookings_site.register(Account, AccountSiteModel)

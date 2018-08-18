@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'finance',
     'config',
     'booking',
-    'hello',
+    # 'hello',
 
 ]
 
