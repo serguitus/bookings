@@ -1,0 +1,12 @@
+{% extends "common/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "common/css/dashboard.css" %}" />
+{% endblock extrastyle %}
+
+{% block content %}
+    <div id="content_container">
+    </div>
+{% endblock content %}

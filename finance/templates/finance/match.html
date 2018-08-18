@@ -1,0 +1,8 @@
+{% extends "common/change_list.html" %}
+
+{% load i18n static common_utils admin_modify %}
+
+{% block content %}
+  {% include 'common/include_model_detail.html' %}
+  {{ block.super }}
+{% endblock content %}

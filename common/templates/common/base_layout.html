@@ -1,0 +1,123 @@
+{% extends "common/base_blocks.html" %}
+
+{% load i18n static common_utils %}
+
+{% block head_title %}
+    {{ site_title|default:_('Application Site') }} | {{ title }}
+{% endblock head_title %}
+
+{% block navbar %}
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                {% block header_logo %}
+                {% endblock header_logo %}
+            </div>
+            {% block header_app_menu %}
+                <ul class="nav navbar-nav">
+                    <li>
+                        {% url site_namespace|add:':index' as index_url %}
+                        <a href="{{ index_url }}">
+                            <span class="glyphicon glyphicon-home" />
+                        </a>
+                    </li>
+                    {% if app_list %}
+                        {% for menu in app_list %}
+                            {% if menu.model_list %}
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                        {{ menu.label }}<span class="caret"></span>
+                                        </a>
+                                    <ul class="dropdown-menu" role="menu">
+                                        {% setvar '' as prev_group %}
+                                        {% for model in menu.model_list %}
+                                            {% if model.group and model.group != prev_group %}
+                                                {% if prev_group != '' %}
+                                                    <li  class='divider'></li>
+                                                {% endif %}
+                                                <li  class="dropdown-header">{{ model.group }}</li>
+                                                {% setvar model.group as prev_group %}
+                                            {% endif %}
+                                            {% setvar 'common/img/icon-model-'|add:model.name|add:'.png' as static_icon_url %}
+                                            <li  style='background-image: url("{% static static_icon_url %}")'>
+                                                <a role="menuitem" href="{{ model.index_url }}">{{ model.label }}</a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </ul>
+            {% endblock header_app_menu %}
+            {% block header_user_menu %}
+                <ul class="nav navbar-nav navbar-right">
+                    {% block welcome-msg %}
+                        <span class="navbar-brand">
+                            <strong>{% firstof user.get_short_name user.get_username %}</strong>
+                        </span>
+                    {% endblock welcome-msg %}
+                    {% block userlinks %}
+                        {% if user.has_usable_password %}
+                            <li>
+                                {% url site_namespace|add:':password_change' as password_change_url %}
+                                <a href="{{ password_change_url }}">{% trans 'Change password' %}</a>
+                            </li>
+                        {% endif %}
+                        <li>
+                            {% url site_namespace|add:':logout' as logout_url %}
+                            <a href="{{ logout_url }}">{% trans 'Log out' %}</a>
+                        </li>
+                    {% endblock userlinks %}
+                </ul>
+            {% endblock header_user_menu %}
+        </div>
+    </nav>
+{% endblock navbar %}
+
+{% block leftbar %}
+    <div id="leftbar_container" class="left-bg-color">
+        {% if module_name and current_model_actions %}
+            {% block model_actions %}
+                <div class="module">
+                    <h2>{% trans "Actions for" %} {{ module_name }}</h2>
+                    <ul class="left-nav left-bg-color">
+                        {% for model_action in current_model_actions %}
+                            {% setvar 'common/img/icon-action-'|add:model_action.name|add:'.svg' as static_icon_url %}
+                            <li style='background-image: url("{% static static_icon_url  %}")'>
+                                <a href="{% url model_action.url %}">{{ model_action.label }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endblock model_actions %}
+        {% endif %}
+        {% block recent_links %}
+            <div class="module">
+                <h2>{% trans "Recent" %}</h2>
+                {% if recent_links %}
+                    <ul class="left-nav left-bg-color">
+                        {% for recent_link in recent_links %}
+                            {% setvar 'common/img/icon-model-'|add:recent_link.link_icon|add:'.png' as static_icon_url %}
+                            <li style='background-image: url("{% static static_icon_url %}")'><a href="{{ recent_link.link_url }}">{{ recent_link.link_label }}</a></li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endblock recent_links %}
+    </div>
+{% endblock leftbar %}
+
+{% block messages %}
+    {% if messages %}
+        <div id="messages_container">
+            <ul class="messagelist">
+                {% for message in messages %}
+                    <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>
+                        {{ message }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+{% endblock messages %}

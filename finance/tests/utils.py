@@ -30,21 +30,6 @@ class FinanceBaseTestCase(AccountingBaseTestCase):
             loan_entity_id=loan_entity.pk, currency=currency)
         self.assertEqual(loan_entity_currency.matched_amount, amount)
 
-    def assertLoanAccountCreditAmount(self, loan_account, amount):
-        loan_account = LoanAccount.objects.get(
-            loan_account_id=loan_account.pk)
-        self.assertEqual(loan_account.credit_amount, amount)
-
-    def assertLoanAccountDebitAmount(self, loan_account, amount):
-        loan_account = LoanAccount.objects.get(
-            loan_account_id=loan_account.pk)
-        self.assertEqual(loan_account.debit_amount, amount)
-
-    def assertLoanAccountMatchedAmount(self, loan_account, amount):
-        loan_account = LoanAccount.objects.get(
-            loan_account_id=loan_account.pk)
-        self.assertEqual(loan_account.matched_amount, amount)
-
     def assertAgencyCurrencyCreditAmount(self, agency, currency, amount):
         agency_currency = AgencyCurrency.objects.get(
             agency_id=agency.pk, currency=currency)

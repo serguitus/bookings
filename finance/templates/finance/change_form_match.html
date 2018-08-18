@@ -1,0 +1,13 @@
+{% extends 'common/change_form.html' %}
+
+{% load common_utils %}
+
+{% block content %}
+    {{ block.super }}
+    <div>
+        {% setvar '' as match_url %}
+        <a href="{{ match_url }}">
+            Match View
+        </a>
+    </div>
+{% endblock content %}

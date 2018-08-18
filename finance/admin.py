@@ -17,7 +17,8 @@ from reservas.admin import reservas_admin, ExtendedModelAdmin
 from finance.models import (
     Agency, Provider, FinantialDocument,
     Deposit, Withdraw, CurrencyExchange, Transfer,
-    LoanAccountWithdraw, LoanAccountDeposit)
+    LoanAccountWithdraw, LoanAccountDeposit,
+    LoanEntity, LoanEntityWithdraw, LoanEntityDeposit)
 from finance.services import FinanceService
 
 
@@ -41,11 +42,19 @@ class ProviderAdmin(admin.ModelAdmin):
     ordering = ('enabled', 'currency', 'name')
 
 
+@admin.register(LoanEntity)
+class LoanEntityAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    list_filter = ('name',)
+    search_fields = ['name',]
+    ordering = ('name',)
+
+
 admin.site.register(Deposit)
 
 # ### Registering in custom adminSite reservas_admin ###
 
-class ExtendedFinantialDocumentAdmin(ExtendedModelAdmin):
+class FinantialDocumentAdmin(ExtendedModelAdmin):
     readonly_model = True
     delete_allowed = False
     actions_on_top = False
@@ -56,86 +65,16 @@ class ExtendedFinantialDocumentAdmin(ExtendedModelAdmin):
     ordering = ['-date', 'currency', 'status']
 
 
-class ExtendedDepositAdmin(ExtendedFinantialDocumentAdmin):
+class BaseFinantialDocumentAdmin(FinantialDocumentAdmin):
     readonly_model = False
     readonly_fields = ('name',)
-    fields = ('name', 'account', 'amount', 'date', 'status')
-    list_display = ('name', 'account', 'amount', 'date', 'status')
-    list_filter = ('currency', 'account', 'status', 'date')
-
-    def save_model(self, request, obj, form, change):
-        # overrides base class method
-        return FinanceService.save_deposit(request.user, obj)
 
 
-class ExtendedWithdrawAdmin(ExtendedDepositAdmin):
-
-    def save_model(self, request, obj, form, change):
-        # overrides base class method
-        return FinanceService.save_withdraw(request.user, obj)
-
-class ExtendedCurrencyExchangeAdmin(ExtendedModelAdmin):
-    fields = ('name', 'account', 'amount', 'date', 'status', 'exchange_account', 'exchange_amount')
-    list_display = (
-        'name', 'account', 'amount', 'date', 'status', 'exchange_account', 'exchange_amount')
-
-    def save_model(self, request, obj, form, change):
-        # overrides base class method
-        return FinanceService.save_currency_exchange(request.user, obj)
-
-class ExtendedTransferAdmin(ExtendedModelAdmin):
-    fields = ('name', 'account', 'amount', 'date', 'status', 'transfer_account')
-    list_display = ('name', 'account', 'amount', 'date', 'status', 'transfer_account')
-
-    def save_model(self, request, obj, form, change):
-        # overrides base class method
-        return FinanceService.save_transfer(request.user, obj)
-
-
-class ExtendedLoanAccountDepositAdmin(ExtendedModelAdmin):
-    """ a class to add new deposits from an account
-    as loans from other account"""
-    list_display = ['account', 'loan_account', 'amount', 'date']
-    list_editable = ['amount']
-    # This defines which fields are editable when instances of
-    # this class are shown in a MatchList
-    match_list_editable = ['amount']
-
-    def pending_amount(self, obj):
-        return obj.amount - obj.matched_amount
-
-    def save_model(self, request, obj, form, change):
-        # overrides base class method
-        return FinanceService.save_loan_account_deposit(request.user, obj)
-
-    def get_matchlist_formset(self, request, **kwargs):
-        """
-        Returns a FormSet class for use on the changelist page if list_editable
-        is used.
-        """
-        defaults = {
-            "formfield_callback": partial(
-                self.formfield_for_dbfield, request=request),
-        }
-        defaults.update(kwargs)
-        return modelformset_factory(
-            self.model, self.get_changelist_form(request), extra=0,
-            fields=self.match_list_editable, **defaults
-        )
-
-class ExtendedLoanAccountWithdrawAdmin(ExtendedModelAdmin):
-    """ a class to add new widthdraws from an account
-    as loans to other account"""
-    list_display = ['account', 'loan_account', 'amount', 'date']
-    match_model = LoanAccountDeposit
-    match_fields = ['account', 'loan_account']
-    match_list_display = ['account', 'loan_account', 'amount', 'pending_amount', 'date']
-    # This defines which fields are editable when instances of
-    # this class are shown in a MatchList
-
-    def save_model(self, request, obj, form, change):
-        # overrides base class method
-        return FinanceService.save_loan_account_withdraw(request.user, obj)
+class MatchableModelAdmin(BaseFinantialDocumentAdmin):
+    match_model = None
+    match_fields = []
+    match_list_display = []
+    match_list_editable = []
 
     def pending_amount(self, obj):
         return obj.amount - obj.matched_amount
@@ -156,15 +95,19 @@ class ExtendedLoanAccountWithdrawAdmin(ExtendedModelAdmin):
         )
 
     def get_urls(self):
+
         def wrap(view):
+
             def wrapper(*args, **kwargs):
                 return self.admin_site.admin_view(view)(*args, **kwargs)
+
             wrapper.model_admin = self
             return update_wrapper(wrapper, view)
+
         new_urls = [
             url(r'^(?P<pk>[-\w]+)/match/$', wrap(self.matchlist_view), name='matchlist-view')
         ]
-        return new_urls + super(ExtendedLoanAccountWithdrawAdmin, self).get_urls()
+        return new_urls + super(MatchableModelAdmin, self).get_urls()
 
     @csrf_protect_m
     def matchlist_view(self, request, pk, extra_context=None):
@@ -345,12 +288,121 @@ class ExtendedLoanAccountWithdrawAdmin(ExtendedModelAdmin):
         ], context)
 
 
-reservas_admin.register(FinantialDocument, ExtendedFinantialDocumentAdmin)
+class DepositAdmin(BaseFinantialDocumentAdmin):
+    fields = ('name', 'account', 'amount', 'date', 'status')
+    list_display = ('name', 'account', 'amount', 'date', 'status')
+    list_filter = ('currency', 'account', 'status', 'date')
+
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        return FinanceService.save_deposit(request.user, obj)
+
+
+class WithdrawAdmin(DepositAdmin):
+
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        return FinanceService.save_withdraw(request.user, obj)
+
+
+class CurrencyExchangeAdmin(BaseFinantialDocumentAdmin):
+    fields = ('name', 'account', 'amount', 'date', 'status', 'exchange_account', 'exchange_amount')
+    list_display = (
+        'name', 'account', 'amount', 'date', 'status', 'exchange_account', 'exchange_amount')
+    list_filter = ('currency', 'account', 'status', 'date')
+
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        return FinanceService.save_currency_exchange(request.user, obj)
+
+
+class TransferAdmin(BaseFinantialDocumentAdmin):
+    fields = ('name', 'account', 'transfer_account', 'amount', 'date', 'status')
+    list_display = ('name', 'account', 'transfer_account', 'amount', 'date', 'status')
+    list_filter = ('currency', 'account', 'status', 'date')
+
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        return FinanceService.save_transfer(request.user, obj)
+
+
+class LoanAccountDocumentAdmin(MatchableModelAdmin):
+    """
+    base class for loan accounts deposits and withdraws
+    """
+    fields = ('name', 'account', 'loan_account', 'amount', 'date', 'status')
+    list_display = ['name', 'account', 'loan_account', 'amount', 'date', 'status']
+    list_filter = ('currency', 'account', 'status', 'date')
+    match_fields = ['account', 'loan_account']
+    match_list_display = ['account', 'loan_account', 'amount', 'pending_amount', 'date']
+    match_list_editable = ['amount']
+
+
+class LoanAccountDepositAdmin(LoanAccountDocumentAdmin):
+    """
+    class for loan account deposits
+    """
+    match_model = LoanAccountWithdraw
+
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        return FinanceService.save_loan_account_deposit(request.user, obj)
+
+
+class LoanAccountWithdrawAdmin(LoanAccountDocumentAdmin):
+    """
+    class for loan account withdraws
+    """
+    match_model = LoanAccountDeposit
+
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        return FinanceService.save_loan_account_withdraw(request.user, obj)
+
+
+class LoanEntityDocumentAdmin(MatchableModelAdmin):
+    """
+    base class for loan entities deposits and withdraws
+    """
+    fields = ('name', 'account', 'loan_entity', 'amount', 'date', 'status')
+    list_display = ['name', 'account', 'loan_entity', 'amount', 'date', 'status']
+    list_filter = ('currency', 'account', 'status', 'date')
+    match_fields = ['account', 'loan_entity']
+    match_list_display = ['account', 'loan_entity', 'amount', 'pending_amount', 'date']
+    match_list_editable = ['amount']
+
+
+class LoanEntityDepositAdmin(LoanEntityDocumentAdmin):
+    """
+    class for loan entity deposits
+    """
+    match_model = LoanEntityWithdraw
+
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        return FinanceService.save_loan_entity_deposit(request.user, obj)
+
+
+class LoanEntityWithdrawAdmin(LoanEntityDocumentAdmin):
+    """
+    class for loan entity withdraws
+    """
+    match_model = LoanEntityDeposit
+
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        return FinanceService.save_loan_entity_withdraw(request.user, obj)
+
+
 reservas_admin.register(Provider, ProviderAdmin)
 reservas_admin.register(Agency, AgencyAdmin)
-reservas_admin.register(Deposit, ExtendedDepositAdmin)
-reservas_admin.register(Withdraw, ExtendedWithdrawAdmin)
-reservas_admin.register(CurrencyExchange, ExtendedCurrencyExchangeAdmin)
-reservas_admin.register(Transfer, ExtendedTransferAdmin)
-reservas_admin.register(LoanAccountWithdraw, ExtendedLoanAccountWithdrawAdmin)
-reservas_admin.register(LoanAccountDeposit, ExtendedLoanAccountDepositAdmin)
+reservas_admin.register(LoanEntity, LoanEntityAdmin)
+reservas_admin.register(FinantialDocument, FinantialDocumentAdmin)
+reservas_admin.register(Deposit, DepositAdmin)
+reservas_admin.register(Withdraw, WithdrawAdmin)
+reservas_admin.register(CurrencyExchange, CurrencyExchangeAdmin)
+reservas_admin.register(Transfer, TransferAdmin)
+reservas_admin.register(LoanAccountWithdraw, LoanAccountWithdrawAdmin)
+reservas_admin.register(LoanAccountDeposit, LoanAccountDepositAdmin)
+reservas_admin.register(LoanEntityWithdraw, LoanEntityWithdrawAdmin)
+reservas_admin.register(LoanEntityDeposit, LoanEntityDepositAdmin)

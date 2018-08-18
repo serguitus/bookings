@@ -1,0 +1,13 @@
+<form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}" method="post" id="{{ opts.model_name }}_form" novalidate>{% csrf_token %}{% block form_top %}{% endblock %}
+  <div>
+    {% block field_sets %}
+      {% for fieldset in adminform %}
+        {% include "admin/includes/fieldset.html" %}
+      {% endfor %}
+    {% endblock field_sets %}
+
+    {% block after_field_sets %}
+    {% endblock after_field_sets %}
+
+  </div>
+</form>

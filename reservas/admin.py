@@ -1,4 +1,3 @@
-# from django.contrib import admin
 from django.contrib import admin, messages
 from django.contrib.admin import helpers
 from django.contrib.admin.exceptions import DisallowedModelAdminToField
@@ -10,6 +9,11 @@ from django.forms.formsets import all_valid
 from django.forms.models import fields_for_model
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext as _
+
+from common.sites import CommonSite
+
+
+bookings_site = CommonSite(name='bookings')
 
 
 class ReservasAdmin(admin.sites.AdminSite):
@@ -27,11 +31,24 @@ class ReservasAdmin(admin.sites.AdminSite):
 
 
 reservas_admin = ReservasAdmin(name='reservas')
+
 # Run user_admin_site.register() for each model we wish to register
 # for our admin interface for users
 
 # Run admin.site.register() for each model we wish to register
 # with the REAL django admin!
+
+
+class SelfInlineModelAdmin(admin.options.InlineModelAdmin):
+    can_change = True
+
+
+class SelfStackedInline(SelfInlineModelAdmin):
+    template = 'self_stacked.html'
+
+
+class SelfTabularInline(SelfInlineModelAdmin):
+    template = 'self_tabular.html'
 
 
 class ExtendedModelAdmin(admin.ModelAdmin):
@@ -41,6 +58,8 @@ class ExtendedModelAdmin(admin.ModelAdmin):
     change_readonly_fields = ()
     readonly_model = False
     delete_allowed = True
+    self_inlines = []
+    change_form_template = 'change_form.html'
 
     def has_add_permission(self, request):
         return (not self.readonly_model) \
@@ -152,10 +171,15 @@ class ExtendedModelAdmin(admin.ModelAdmin):
             if add:
                 initial = self.get_changeform_initial_data(request)
                 form = ModelForm(initial=initial)
-                formsets, inline_instances = self._create_formsets(request, form.instance, change=False)
+                formsets, inline_instances = self._create_formsets(
+                    request, form.instance, change=False)
+                self_formsets, self_inline_instances = self._create_self_formsets(
+                    request, form.instance, change=False)
             else:
                 form = ModelForm(instance=obj)
                 formsets, inline_instances = self._create_formsets(request, obj, change=True)
+                self_formsets, self_inline_instances = self._create_self_formsets(
+                    request, obj, change=True)
 
         adminForm = helpers.AdminForm(
             form,
@@ -292,6 +316,56 @@ class ExtendedModelAdmin(admin.ModelAdmin):
         context.update(extra_context or {})
 
         return self.render_delete_form(request, context)
+
+    def get_self_inline_instances(self, request, obj=None):
+        inline_instances = []
+        for inline_class in self.self_inlines:
+            inline = inline_class(self.model, self.admin_site)
+            if request:
+                if not (inline.has_add_permission(request) or
+                        inline.has_change_permission(request, obj) or
+                        inline.has_delete_permission(request, obj)):
+                    continue
+                if not inline.has_add_permission(request):
+                    inline.max_num = 0
+            inline_instances.append(inline)
+
+        return inline_instances
+
+    def get_self_formsets_with_inlines(self, request, obj=None):
+        """
+        Yields formsets and the corresponding self_inlines.
+        """
+        for inline in self.get_self_inline_instances(request, obj):
+            yield inline.get_formset(request, obj), inline
+
+    def _create_self_formsets(self, request, obj, change):
+        "Helper function to generate formsets for add/change_view."
+        formsets = []
+        inline_instances = []
+        prefixes = {}
+        get_formsets_args = [request]
+        if change:
+            get_formsets_args.append(obj)
+        for FormSet, inline in self.get_self_formsets_with_inlines(*get_formsets_args):
+            prefix = FormSet.get_default_prefix()
+            prefixes[prefix] = prefixes.get(prefix, 0) + 1
+            if prefixes[prefix] != 1 or not prefix:
+                prefix = "%s-%s" % (prefix, prefixes[prefix])
+            formset_params = {
+                'instance': obj,
+                'prefix': prefix,
+                'queryset': inline.get_queryset(request),
+            }
+            if request.method == 'POST':
+                formset_params.update({
+                    'data': request.POST.copy(),
+                    'files': request.FILES,
+                    'save_as_new': '_saveasnew' in request.POST
+                })
+            formsets.append(FormSet(**formset_params))
+            inline_instances.append(inline)
+        return formsets, inline_instances
 
     def get_matchlist(self, request, **kwargs):
         from .views import MatchList
