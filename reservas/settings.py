@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'finance',
     'config',
     'booking',
+    'dal',
+    'dal_select2',
 
 ]
 

@@ -9,6 +9,6 @@ class DepositForm(forms.ModelForm):
     class Meta:
         model = Deposit
         fields = ('__all__')
-        widgets = {
-            'account': autocomplete.ModelSelect2(url='account-autocomplete')
-        }
+        # widgets = {
+        #     'account': autocomplete.ModelSelect2(url='account-autocomplete')
+        # }
