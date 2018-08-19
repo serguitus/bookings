@@ -498,6 +498,13 @@ class SiteModel(ModelAdmin):
             )
         return actions
 
+    def get_model_permissions(self, request):
+        perms = self.get_model_perms(request)
+        for action in self.model._meta.permissions:
+            if self.has_permission(request, action[0]):
+                perms.update({action[0]: True})
+        return perms
+
     def get_model_extra_context(self, request, extra_context=None):
         context = dict(
             module_name=force_text(self.model._meta.verbose_name_plural),
