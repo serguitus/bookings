@@ -31,7 +31,7 @@ class BookingSiteModel(SiteModel):
         context.update(self.get_model_extra_context(request))
         bookings = Booking.objects.all()
         context.update({
-            "bookings": bookings,
+            'bookings': bookings,
         })
         return render(request, 'booking/booking_list.html', context)
 
