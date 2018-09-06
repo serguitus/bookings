@@ -1,11 +1,14 @@
 """
 bookings site models
 """
+from django_tables2 import RequestConfig
+
 from django.conf.urls import url
 from django.shortcuts import render
 
 from common.sites import SiteModel
 from booking.models import Booking
+from booking.tables import BookingTable
 from reservas.admin import bookings_site
 
 MENU_LABEL_BOOKINGS = 'Reservas'
@@ -29,7 +32,8 @@ class BookingSiteModel(SiteModel):
         """ a list of bookings with their services """
         context = {}
         context.update(self.get_model_extra_context(request))
-        bookings = Booking.objects.all()
+        bookings = BookingTable(Booking.objects.all())
+        RequestConfig(request).configure(bookings)
         context.update({
             'bookings': bookings,
         })
