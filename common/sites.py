@@ -170,6 +170,7 @@ class CommonSite(AdminSite):
 
             model_dict = {
                 'order': site_model.model_order,
+                'app_label': model._meta.app_label,
                 'name': model._meta.model_name,
                 'label': label,
                 'group': site_model.menu_group,
@@ -525,7 +526,7 @@ class SiteModel(ModelAdmin):
                     args=(quote(model_object.pk),),
                     current_app=self.admin_site.name)
                 label = model_object.__str__()
-                icon = self.model._meta.model_name
+                icon = '%s%s' % (self.model._meta.app_label, self.model._meta.model_name)
                 # TODO add url from request is useless
                 #if self.is_add_url(url):
                 #    url = reverse(self.change_url_format() % (
@@ -1115,3 +1116,14 @@ class CommonChangeList(ChangeList):
                 self.opts.model_name),
             args=(quote(pk),),
             current_app=self.model_admin.admin_site.name)
+
+class CommonModelSiteTemplateResponse(TemplateResponse):
+    
+    def __init__(self, request, site_model, template, context=None, content_type=None,
+                 status=None, charset=None, using=None):
+        new_context = {}
+        new_context.update(site_model.get_model_extra_context(request))
+        new_context.update(context or {})
+
+        super(CommonModelSiteTemplateResponse, self).__init__(
+            template, new_context, content_type, status, charset, using)

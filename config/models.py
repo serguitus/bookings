@@ -6,6 +6,7 @@ from django.db import models
 from config.constants import (
     SERVICE_CATEGORIES,
     SERVICE_CATEGORY_EXTRA, SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER,
+    ROOM_TYPES,
     BOARD_TYPES,
     EXTRA_COST_TYPES,
     ALLOTMENT_COST_TYPES, ALLOTMENT_SUPPLEMENT_COST_TYPES, TRANSFER_SUPPLEMENT_COST_TYPES,
@@ -37,7 +38,7 @@ class Service(models.Model):
         verbose_name = 'Service'
         verbose_name_plural = 'Services'
         unique_together = (('category', 'name'),)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=150)
     category = models.CharField(max_length=5, choices=SERVICE_CATEGORIES)
     grouping = models.BooleanField(default=False)
     enabled = models.BooleanField(default=True)
@@ -213,6 +214,15 @@ class Extra(Service):
         self.category = SERVICE_CATEGORY_EXTRA
 
 
+class ExtraSupplement(ServiceSupplement):
+    """
+    ExtraSupplement
+    """
+    class Meta:
+        verbose_name = 'Extra Supplement'
+        verbose_name_plural = 'Extras Supplements'
+
+
 class ExtraServiceProvider(ServiceProvider):
     """
     ExtraServiceProvider
@@ -302,8 +312,9 @@ class AllotmentRoomType(models.Model):
     class Meta:
         verbose_name = 'Allotment Room Type'
         verbose_name_plural = 'Allotments Rooms Types'
-        unique_together = (('allotment', 'name'),)
+        unique_together = (('allotment', 'name', 'room_type',),)
     name = models.CharField(max_length=50)
+    room_type = models.CharField(max_length=5, choices=ROOM_TYPES)
     allotment = models.ForeignKey(Allotment)
     enabled = models.BooleanField(default=True)
 
@@ -324,6 +335,15 @@ class AllotmentBoardType(models.Model):
 
     def __str__(self):
         return self.get_board_type_display()
+
+
+class AllotmentSupplement(ServiceSupplement):
+    """
+    AllotmentSupplement
+    """
+    class Meta:
+        verbose_name = 'Allotment Supplement'
+        verbose_name_plural = 'Allotments Supplements'
 
 
 class AllotmentServiceProvider(ServiceProvider):
@@ -413,12 +433,30 @@ class Transfer(Service):
     """
     Transfer
     """
-    location_from = models.ForeignKey(Location, related_name='location_from')
-    location_to = models.ForeignKey(Location, related_name='location_to')
+    class Meta:
+        verbose_name = 'Transfer'
+        verbose_name_plural = 'Transfers'
+    location_from = models.ForeignKey(Location, blank=False, null=False, related_name='location_from')
+    location_to = models.ForeignKey(Location, blank=False, null=False, related_name='location_to')
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_TRANSFER
-        self.name = 'Transfer %s - %s' % (self.location_from, self.location_to)
+        var_from = '?'
+        if self.location_from:
+            var_from = self.location_from.name
+        var_to = '?'
+        if self.location_to:
+            var_to = self.location_to.name
+        self.name = 'Transfer FROM: %s - TO: %s' % (var_from, var_to)
+
+
+class TransferSupplement(ServiceSupplement):
+    """
+    TransferSupplement
+    """
+    class Meta:
+        verbose_name = 'Transfer Supplement'
+        verbose_name_plural = 'Transfers Supplements'
 
 
 class TransferServiceProvider(ServiceProvider):
