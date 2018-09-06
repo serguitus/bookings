@@ -75,6 +75,9 @@ class ServiceSupplement(models.Model):
     automatic = models.BooleanField(default=True)
     enabled = models.BooleanField(default=True)
 
+    def __str__(self):
+        return self.name
+
 
 class ServiceProvider(models.Model):
     """

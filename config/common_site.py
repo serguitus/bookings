@@ -46,13 +46,16 @@ class AllotmentRoomTypeInline(admin.TabularInline):
     model = AllotmentRoomType
     extra = 0
 
+
 class AllotmentBoardTypeInline(admin.TabularInline):
     model = AllotmentBoardType
     extra = 0
 
+
 class AllotmentSupplementInline(admin.TabularInline):
     model = AllotmentSupplement
     extra = 0
+
 
 class AllotmentSiteModel(SiteModel):
     model_order = 6110
@@ -65,9 +68,11 @@ class AllotmentSiteModel(SiteModel):
     ordering = ('enabled', 'name',)
     inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline, AllotmentSupplementInline]
 
+
 class TransferSupplementInline(admin.TabularInline):
     model = TransferSupplement
     extra = 0
+
 
 class TransferSiteModel(SiteModel):
     model_order = 6120
@@ -86,8 +91,9 @@ class ExtraSupplementInline(admin.TabularInline):
     model = ExtraSupplement
     extra = 0
 
+
 class ExtraSiteModel(SiteModel):
-    model_order = 6150
+    model_order = 6130
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
     fields = ('name', 'enabled',)

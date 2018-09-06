@@ -133,6 +133,9 @@ class CommonSite(AdminSite):
         for model, site_model in models.items():
             menu_label = site_model.menu_label
 
+            if menu_label is None:
+                continue
+
             has_module_perms = site_model.has_module_permission(request)
             if not has_module_perms:
                 continue
