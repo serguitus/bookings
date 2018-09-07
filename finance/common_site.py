@@ -448,7 +448,7 @@ class LoanEntityWithdrawSiteModel(LoanEntityDocumentSiteModel):
 
 
 class LoanAccountSiteModel(SiteModel):
-    model_order = 3040
+    model_order = 3110
     menu_label = MENU_LABEL_FINANCE_LOAN
     menu_group = 'Account Loan'
 
@@ -485,7 +485,7 @@ class LoanAccountDepositSiteModel(LoanAccountDocumentSiteModel):
     """
     class for loan account deposits
     """
-    model_order = 3050
+    model_order = 3120
     menu_label = MENU_LABEL_FINANCE_LOAN
 
     match_model_parent_field = 'loan_account_deposit'
@@ -505,7 +505,7 @@ class LoanAccountWithdrawSiteModel(LoanAccountDocumentSiteModel):
     """
     class for loan account withdraws
     """
-    model_order = 3060
+    model_order = 3130
     menu_label = MENU_LABEL_FINANCE_LOAN
 
     match_model_parent_field = 'loan_account_withdraw'
@@ -532,7 +532,7 @@ class ProviderSiteModel(SiteModel):
 
 
 class AgencySiteModel(SiteModel):
-    model_order = 5010
+    model_order = 4110
     menu_label = MENU_LABEL_FINANCE_ADVANCED
     menu_group = 'Finace Agency'
     list_display = ('name', 'currency', 'enabled')
