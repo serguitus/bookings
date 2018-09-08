@@ -44,7 +44,7 @@ class MatchList(ChangeList):
             filters = {}
             for field in self.match_fields:
                 nk = "{0}__exact".format(field)
-                nv = getattr(base_obj, field)
+                nv = getattr(base_obj, '%s_id' % field)
                 filters.update({nk: nv})
 
         self.root_queryset = self.model.objects.filter(**filters)

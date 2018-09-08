@@ -35,6 +35,7 @@ INSTALLED_APPS = [
 
     'dal',
     'dal_select2',
+    'django_tables2',
 
     'django.contrib.admin',
     'django.contrib.auth',

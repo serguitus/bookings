@@ -36,7 +36,7 @@ class Booking(models.Model):
     cost_comments = models.CharField(max_length=1000)
     price_amount = models.DecimalField(max_digits=10, decimal_places=2)
     price_comments = models.CharField(max_length=1000)
-    agency_invoice = models.ForeignKey(AgencyInvoice)
+    agency_invoice = models.ForeignKey(AgencyInvoice, blank=True, null=True)
 
     def fill_data(self):
         pass
@@ -44,7 +44,7 @@ class Booking(models.Model):
     def save(self, *args, **kwargs):
         self.fill_data()
         # Call the "real" save() method.
-        super().save(*args, **kwargs)
+        super(Booking, self).save(*args, **kwargs)
 
 
 class BookingPax(models.Model):
