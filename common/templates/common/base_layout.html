@@ -38,7 +38,7 @@
                                                 <li  class="dropdown-header">{{ model.group }}</li>
                                                 {% setvar model.group as prev_group %}
                                             {% endif %}
-                                            {% setvar 'common/img/icon-model-'|add:model.name|add:'.png' as static_icon_url %}
+                                            {% setvar 'common/img/icon-model-'|add:model.app_label|add:model.name|add:'.png' as static_icon_url %}
                                             <li  style='background-image: url("{% static static_icon_url %}")'>
                                                 <a role="menuitem" href="{{ model.index_url }}">{{ model.label }}</a>
                                             </li>

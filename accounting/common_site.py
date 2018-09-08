@@ -12,7 +12,7 @@ MENU_LABEL_ACCOUNTING = 'Accounting'
 
 
 class AccountSiteModel(SiteModel):
-    model_order = 1010
+    model_order = 5010
     menu_label = MENU_LABEL_ACCOUNTING
     actions_on_top = True
     list_editable = ('enabled',)
@@ -26,7 +26,7 @@ class AccountSiteModel(SiteModel):
 
 
 class OperationSiteModel(SiteModel):
-    model_order = 1020
+    model_order = 5020
     menu_label = MENU_LABEL_ACCOUNTING
     readonly_model = True
     actions_on_top = False
@@ -36,7 +36,7 @@ class OperationSiteModel(SiteModel):
 
 
 class OperationMovementSiteModel(SiteModel):
-    model_order = 1030
+    model_order = 5030
     menu_label = MENU_LABEL_ACCOUNTING
     readonly_model = True
     actions_on_top = False
