@@ -10,7 +10,12 @@ from booking.constants import (
     SERVICE_STATUS_LIST, SERVICE_STATUS_PENDING)
 
 from config.constants import BOARD_TYPES
-from config.models import Service, ServiceSupplement, AllotmentRoomType
+from config.models import (
+    Service, ServiceSupplement,
+    RoomType, Allotment, AllotmentRoomType, AllotmentBoardType,
+    Transfer,
+    Extra,
+)
 
 from finance.models import Agency, AgencyInvoice, Provider, ProviderInvoice
 
@@ -31,12 +36,21 @@ class Booking(models.Model):
         max_length=5, choices=BOOKING_STATUS_LIST, default=BOOKING_STATUS_PENDING)
     currency = models.CharField(
         max_length=5, choices=CURRENCIES, default=CURRENCY_CUC)
+<<<<<<< HEAD
     currency_factor = models.DecimalField(max_digits=12, decimal_places=6)
     cost_amount = models.DecimalField(max_digits=10, decimal_places=2)
     cost_comments = models.CharField(max_length=1000)
     price_amount = models.DecimalField(max_digits=10, decimal_places=2)
     price_comments = models.CharField(max_length=1000)
     agency_invoice = models.ForeignKey(AgencyInvoice, blank=True, null=True)
+=======
+    currency_factor = models.DecimalField(max_digits=12, decimal_places=6, default=1.0)
+    cost_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    cost_comments = models.CharField(max_length=1000, blank=True, null=True)
+    price_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    price_comments = models.CharField(max_length=1000, blank=True, null=True)
+    agency_invoice = models.ForeignKey(AgencyInvoice,blank=True, null=True)
+>>>>>>> origin/dev
 
     def fill_data(self):
         pass
@@ -46,6 +60,10 @@ class Booking(models.Model):
         # Call the "real" save() method.
         super(Booking, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return '%s - %s %s-%s (%s)' % (
+            self.agency.name, self.reference, self.date_from, self.date_to, self.get_status_display())
+        
 
 class BookingPax(models.Model):
     """
@@ -74,18 +92,18 @@ class BookingService(models.Model):
         verbose_name_plural = 'Bookings Services'
         default_permissions = ('add', 'change',)
     booking = models.ForeignKey(Booking)
-    service = models.ForeignKey(Service)
-    description = models.CharField(max_length=1000)
+    name = models.CharField(max_length=250, default='Booking Service')
+    description = models.CharField(max_length=1000, default='')
     datetime_from = models.DateTimeField()
     datetime_to = models.DateTimeField()
     status = models.CharField(
         max_length=5, choices=SERVICE_STATUS_LIST, default=SERVICE_STATUS_PENDING)
-    cost_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    cost_comments = models.CharField(max_length=1000)
-    price_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    price_comments = models.CharField(max_length=1000)
-    provider = models.ForeignKey(Provider)
-    provider_invoice = models.ForeignKey(ProviderInvoice)
+    cost_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    cost_comments = models.CharField(max_length=1000, blank=True, null=True)
+    price_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    price_comments = models.CharField(max_length=1000, blank=True, null=True)
+    provider = models.ForeignKey(Provider, blank=True, null=True)
+    provider_invoice = models.ForeignKey(ProviderInvoice, blank=True, null=True)
 
     def fill_data(self):
         pass
@@ -199,6 +217,7 @@ class BookingExtra(BookingService):
     class Meta:
         verbose_name = 'Booking Extra'
         verbose_name_plural = 'Bookings Extras'
+    service = models.ForeignKey(Extra)
     extra_qtty = models.SmallIntegerField()
 
 
@@ -209,7 +228,8 @@ class BookingAllotment(BookingService):
     class Meta:
         verbose_name = 'Booking Allotment'
         verbose_name_plural = 'Bookings Allotments'
-    room_type = models.ForeignKey(AllotmentRoomType)
+    service = models.ForeignKey(Allotment)
+    room_type = models.ForeignKey(RoomType)
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
 
 
@@ -220,6 +240,7 @@ class BookingTransfer(BookingService):
     class Meta:
         verbose_name = 'Booking Transfer'
         verbose_name_plural = 'Bookings Transfers'
+    service = models.ForeignKey(Transfer)
 
 
 class BookingTransferSupplement(BookingServiceSupplement):
