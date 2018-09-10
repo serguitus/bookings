@@ -44,8 +44,10 @@ class BookingSiteModel(SiteModel):
     model_order = 1010
     menu_label = MENU_LABEL_BOOKING
 
-    fields = ('reference',)
-    list_display = ('reference',)
+    fields = ('reference', 'agency', 'status', 'currency', 'cost_amount',
+              'price_amount',)
+    list_display = ('reference', 'agency', 'status', 'currency', 'cost_amount',
+                    'price_amount',)
     list_filter = ('reference',)
     search_fields = ['reference', ]
     ordering = ('reference',)
@@ -61,7 +63,10 @@ class BookingSiteModel(SiteModel):
         """ a list of bookings with their services """
         context = {}
         context.update(self.get_model_extra_context(request))
-        bookings = BookingTable(Booking.objects.all())
+        # first get the filtered list of bookings to show
+        # according to page filters
+        bookings = BookingTable(Booking.objects.all().prefetch_related(
+            'services'))
         RequestConfig(request).configure(bookings)
         context.update({
             'bookings': bookings,
