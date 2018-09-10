@@ -6,7 +6,7 @@ from django.db import models
 from config.constants import (
     SERVICE_CATEGORIES,
     SERVICE_CATEGORY_EXTRA, SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER,
-    ROOM_TYPES,
+    ROOM_CAPACITIES,
     BOARD_TYPES,
     EXTRA_COST_TYPES,
     ALLOTMENT_COST_TYPES, ALLOTMENT_SUPPLEMENT_COST_TYPES, TRANSFER_SUPPLEMENT_COST_TYPES,
@@ -22,6 +22,21 @@ class Location(models.Model):
     class Meta:
         verbose_name = 'Location'
         verbose_name_plural = 'Locations'
+        unique_together = (('name',),)
+    name = models.CharField(max_length=50)
+    enabled = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+
+class RoomType(models.Model):
+    """
+    RoomType
+    """
+    class Meta:
+        verbose_name = 'Room Type'
+        verbose_name_plural = 'Rooms Types'
         unique_together = (('name',),)
     name = models.CharField(max_length=50)
     enabled = models.BooleanField(default=True)
@@ -315,14 +330,13 @@ class AllotmentRoomType(models.Model):
     class Meta:
         verbose_name = 'Allotment Room Type'
         verbose_name_plural = 'Allotments Rooms Types'
-        unique_together = (('allotment', 'name', 'room_type',),)
-    name = models.CharField(max_length=50)
-    room_type = models.CharField(max_length=5, choices=ROOM_TYPES)
+        unique_together = (('allotment', 'room_type', 'room_capacity'),)
     allotment = models.ForeignKey(Allotment)
-    enabled = models.BooleanField(default=True)
+    room_type = models.ForeignKey(RoomType)
+    room_capacity = models.CharField(max_length=5, choices=ROOM_CAPACITIES)
 
     def __str__(self):
-        return '%s (%s)' % (self.name, self.get_room_type_display())
+        return '%s (%s)' % (self.room_type, self.get_room_capacity_display())
 
 
 class AllotmentBoardType(models.Model):
@@ -439,16 +453,16 @@ class Transfer(Service):
     class Meta:
         verbose_name = 'Transfer'
         verbose_name_plural = 'Transfers'
-    location_from = models.ForeignKey(Location, blank=False, null=False, related_name='location_from')
-    location_to = models.ForeignKey(Location, blank=False, null=False, related_name='location_to')
+    location_from = models.ForeignKey(Location, related_name='location_from')
+    location_to = models.ForeignKey(Location, related_name='location_to')
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_TRANSFER
         var_from = '?'
-        if self.location_from:
+        if hasattr(self, 'location_from'):
             var_from = self.location_from.name
         var_to = '?'
-        if self.location_to:
+        if hasattr(self, 'location_to'):
             var_to = self.location_to.name
         self.name = 'Transfer FROM: %s - TO: %s' % (var_from, var_to)
 

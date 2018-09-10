@@ -35,11 +35,11 @@ class BookingSiteModel(SiteModel):
     model_order = 1010
     menu_label = MENU_LABEL_BOOKING
 
-    fields = ('reference',)
-    list_display = ('reference',)
-    list_filter = ('reference',)
-    search_fields = ['reference',]
-    ordering = ('reference',)
+    fields = ('reference', 'agency', 'date_from', 'date_to', 'status', 'currency', 'currency_factor',)
+    list_display = ('reference', 'agency', 'date_from', 'date_to', 'status',)
+    list_filter = ('agency__name', 'date_from', 'status',)
+    search_fields = ('reference',)
+    readonly_fields = ('status',)
 
 
 class BookingAllotmentSiteModel(SiteModel):
@@ -47,10 +47,11 @@ class BookingAllotmentSiteModel(SiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_LABEL_BOOKING_SERVICES
 
-    fields = ('booking',)
-    list_display = ('booking',)
-    list_filter = ('booking',)
-    search_fields = ['booking__reference',]
+    fields = ('booking', 'service', 'datetime_from', 'datetime_to', 'status',
+        'cost_amount', 'price_amount', 'room_type', 'board_type')
+    list_display = ('booking', 'service', 'datetime_from', 'datetime_to', 'status')
+    list_filter = ('booking', 'service', 'datetime_from', 'datetime_to',)
+    search_fields = ('booking__reference',)
     ordering = ('booking__reference', 'service__name',)
 
 
@@ -62,7 +63,7 @@ class BookingTransferSiteModel(SiteModel):
     fields = ('booking',)
     list_display = ('booking',)
     list_filter = ('booking',)
-    search_fields = ['booking__reference',]
+    search_fields = ('booking__reference',)
     ordering = ('booking__reference', 'service__name',)
 
 
@@ -74,7 +75,7 @@ class BookingExtraSiteModel(SiteModel):
     fields = ('booking',)
     list_display = ('booking',)
     list_filter = ('booking',)
-    search_fields = ['booking__reference',]
+    search_fields = ('booking__reference',)
     ordering = ('booking__reference', 'service__name',)
 
 
