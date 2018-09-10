@@ -77,8 +77,9 @@ class BookingAllotmentSiteModel(SiteModel):
     menu_group = MENU_LABEL_BOOKING_SERVICES
 
     fields = ('booking', 'service', 'datetime_from', 'datetime_to', 'status',
-        'cost_amount', 'price_amount', 'room_type', 'board_type')
-    list_display = ('booking', 'service', 'datetime_from', 'datetime_to', 'status')
+              'cost_amount', 'price_amount', 'room_type', 'board_type')
+    list_display = ('booking', 'service', 'datetime_from',
+                    'datetime_to', 'status')
     list_filter = ('booking', 'service', 'datetime_from', 'datetime_to',)
     search_fields = ('booking__reference',)
     ordering = ('booking__reference', 'service__name',)
