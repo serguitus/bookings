@@ -21,6 +21,8 @@ from reservas.admin import bookings_site
 
 from finance.views import (
     AccountAutocompleteView, LoanEntityAutocompleteView, LoanAccountAutocompleteView)
+from config.views import (
+    LocationAutocompleteView, RoomTypeAutocompleteView)
 
 
 urlpatterns = [
@@ -39,5 +41,13 @@ urlpatterns = [
     url(r'^loanaccount-autocomplete/$',
         LoanAccountAutocompleteView.as_view(),
         name='loanaccount-autocomplete',
+    ),
+    url(r'^location-autocomplete/$',
+        LocationAutocompleteView.as_view(),
+        name='location-autocomplete',
+    ),
+    url(r'^roomtype-autocomplete/$',
+        RoomTypeAutocompleteView.as_view(),
+        name='roomtype-autocomplete',
     ),
 ]

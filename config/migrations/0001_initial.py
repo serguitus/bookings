@@ -110,7 +110,7 @@ class Migration(migrations.Migration):
             name='AllotmentRoomType',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50)),
+                ('room_capacity', models.CharField(choices=[('1', 'SGL'), ('2', 'DBL'), ('3', 'TPL'), ('4', 'QPL'), ('5', 'MPL')], max_length=5)),
                 ('enabled', models.BooleanField(default=True)),
             ],
             options={
@@ -248,11 +248,23 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='Service',
+            name='RoomType',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=50)),
-                ('category', models.CharField(choices=[(b'E', b'Extra'), (b'A', b'Allotment'), (b'T', b'Transfer')], max_length=5)),
+                ('enabled', models.BooleanField(default=True)),
+            ],
+            options={
+                'verbose_name': 'Room Type',
+                'verbose_name_plural': 'Rooms Types',
+            },
+        ),
+        migrations.CreateModel(
+            name='Service',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=150)),
+                ('category', models.CharField(choices=[('E', 'Extra'), ('A', 'Allotment'), ('T', 'Transfer')], max_length=5)),
                 ('grouping', models.BooleanField(default=False)),
                 ('enabled', models.BooleanField(default=True)),
             ],
@@ -365,7 +377,6 @@ class Migration(migrations.Migration):
                 ('ch_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=8, null=True)),
                 ('cost_type', models.CharField(choices=[(b'F', b'Fixed'), (b'H', b'By Hours')], max_length=10)),
                 ('cost', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='config.TransferCost')),
-                ('supplement', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='config.ServiceSupplement')),
             ],
             options={
                 'verbose_name': 'Transfer Supplement',
@@ -411,6 +422,17 @@ class Migration(migrations.Migration):
             bases=('config.serviceprovider',),
         ),
         migrations.CreateModel(
+            name='AllotmentSupplement',
+            fields=[
+                ('servicesupplement_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='config.ServiceSupplement')),
+            ],
+            options={
+                'verbose_name': 'Allotment Supplement',
+                'verbose_name_plural': 'Allotments Supplements',
+            },
+            bases=('config.servicesupplement',),
+        ),
+        migrations.CreateModel(
             name='Extra',
             fields=[
                 ('service_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='config.Service')),
@@ -434,10 +456,25 @@ class Migration(migrations.Migration):
             bases=('config.serviceprovider',),
         ),
         migrations.CreateModel(
+            name='ExtraSupplement',
+            fields=[
+                ('servicesupplement_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='config.ServiceSupplement')),
+            ],
+            options={
+                'verbose_name': 'Extra Supplement',
+                'verbose_name_plural': 'Extras Supplements',
+            },
+            bases=('config.servicesupplement',),
+        ),
+        migrations.CreateModel(
             name='Transfer',
             fields=[
                 ('service_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='config.Service')),
             ],
+            options={
+                'verbose_name': 'Transfer',
+                'verbose_name_plural': 'Transfers',
+            },
             bases=('config.service',),
         ),
         migrations.CreateModel(
@@ -451,6 +488,22 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Transfers Services Providers',
             },
             bases=('config.serviceprovider',),
+        ),
+        migrations.CreateModel(
+            name='TransferSupplement',
+            fields=[
+                ('servicesupplement_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='config.ServiceSupplement')),
+            ],
+            options={
+                'verbose_name': 'Transfer Supplement',
+                'verbose_name_plural': 'Transfers Supplements',
+            },
+            bases=('config.servicesupplement',),
+        ),
+        migrations.AddField(
+            model_name='transfersupplementcostdetail',
+            name='supplement',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='config.ServiceSupplement'),
         ),
         migrations.AddField(
             model_name='transfercost',
@@ -480,6 +533,10 @@ class Migration(migrations.Migration):
         migrations.AlterUniqueTogether(
             name='service',
             unique_together=set([('category', 'name')]),
+        ),
+        migrations.AlterUniqueTogether(
+            name='roomtype',
+            unique_together=set([('name',)]),
         ),
         migrations.AlterUniqueTogether(
             name='pricecatalogue',
@@ -533,6 +590,11 @@ class Migration(migrations.Migration):
             model_name='allotmentsupplementcostdetail',
             name='supplement',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='config.ServiceSupplement'),
+        ),
+        migrations.AddField(
+            model_name='allotmentroomtype',
+            name='room_type',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='config.RoomType'),
         ),
         migrations.AddField(
             model_name='allotmentroomavailability',
@@ -643,7 +705,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='allotmentroomtype',
-            unique_together=set([('allotment', 'name')]),
+            unique_together=set([('allotment', 'room_type', 'room_capacity')]),
         ),
         migrations.AlterUniqueTogether(
             name='allotmentboardtype',
