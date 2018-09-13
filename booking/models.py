@@ -82,7 +82,7 @@ class BookingService(models.Model):
         verbose_name = 'Booking Service'
         verbose_name_plural = 'Bookings Services'
         default_permissions = ('add', 'change',)
-    booking = models.ForeignKey(Booking)
+    booking = models.ForeignKey(Booking, related_name='booking_services')
     name = models.CharField(max_length=250, default='Booking Service')
     description = models.CharField(max_length=1000, default='')
     datetime_from = models.DateTimeField(blank=True, null=True)
@@ -102,7 +102,7 @@ class BookingService(models.Model):
     def save(self, *args, **kwargs):
         self.fill_data()
         # Call the "real" save() method.
-        super().save(*args, **kwargs)
+        super(BookingService, self).save(*args, **kwargs)
 
 
 class BookingServiceGroup(models.Model):
