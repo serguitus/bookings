@@ -83,7 +83,6 @@ class BookingService(models.Model):
         verbose_name_plural = 'Bookings Services'
         default_permissions = ('add', 'change',)
     booking = models.ForeignKey(Booking, related_name='services')
-    service = models.ForeignKey(Service)
     name = models.CharField(max_length=250, default='Booking Service')
     description = models.CharField(max_length=1000, default='')
     datetime_from = models.DateTimeField()

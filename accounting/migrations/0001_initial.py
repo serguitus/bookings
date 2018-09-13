@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=50)),
                 ('description', models.CharField(blank=True, max_length=200, null=True)),
-                ('currency', models.CharField(choices=[(b'CUC', b'CUC'), (b'USD', b'USD'), (b'EUR', b'EUR')], default=b'CUC', max_length=5)),
+                ('currency', models.CharField(choices=[('CUC', 'CUC'), ('USD', 'USD'), ('EUR', 'EUR')], default='CUC', max_length=5)),
                 ('balance', models.DecimalField(decimal_places=2, default=0.0, max_digits=12)),
                 ('enabled', models.BooleanField(default=True)),
             ],
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
                 ('datetime', models.DateTimeField(default=django.utils.timezone.now)),
                 ('concept', models.CharField(max_length=50)),
                 ('detail', models.CharField(max_length=200)),
-                ('user', models.ForeignKey(help_text=b'User who did the operation.', on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(help_text='User who did the operation.', on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'verbose_name': 'Operation',
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
             name='OperationMovement',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('movement_type', models.CharField(choices=[(b'I', b'Input'), (b'O', b'Output')], max_length=5)),
+                ('movement_type', models.CharField(choices=[('I', 'Input'), ('O', 'Output')], max_length=5)),
                 ('amount', models.DecimalField(decimal_places=2, default=0.0, max_digits=9)),
                 ('account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='accounting.Account')),
                 ('operation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='accounting.Operation')),
@@ -66,6 +66,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name='operationmovement',
-            index=models.Index(fields=[b'account'], name='accounting__account_7c1d5b_idx'),
+            index=models.Index(fields=['account'], name='accounting__account_7c1d5b_idx'),
         ),
     ]

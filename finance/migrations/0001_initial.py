@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=50)),
                 ('description', models.CharField(blank=True, max_length=500, null=True)),
-                ('currency', models.CharField(choices=[(b'CUC', b'CUC'), (b'USD', b'USD'), (b'EUR', b'EUR')], default=b'USD', max_length=5)),
+                ('currency', models.CharField(choices=[('CUC', 'CUC'), ('USD', 'USD'), ('EUR', 'EUR')], default='USD', max_length=5)),
                 ('enabled', models.BooleanField(default=True)),
             ],
             options={
@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
                 ('credit_amount', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
                 ('debit_amount', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
                 ('matched_amount', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('currency', models.CharField(choices=[(b'CUC', b'CUC'), (b'USD', b'USD'), (b'EUR', b'EUR')], max_length=5)),
+                ('currency', models.CharField(choices=[('CUC', 'CUC'), ('USD', 'USD'), ('EUR', 'EUR')], max_length=5)),
                 ('agency', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='finance.Agency')),
             ],
             options={
@@ -72,12 +72,12 @@ class Migration(migrations.Migration):
             name='FinantialDocument',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('document_type', models.CharField(choices=[(b'DEPOSIT', b'Deposit'), (b'WITHDRAW', b'Withdraw'), (b'TRANSFER', b'Transfer'), (b'CURRENCY_EXCHANGE', b'Currency Exchange'), (b'LOAN_ENTITY_DEPOSIT', b'Loan Entity Deposit'), (b'LOAN_ENTITY_WITHDRAW', b'Loan Entity Withdraw'), (b'LOAN_ACCOUNT_DEPOSIT', b'Loan Account Deposit'), (b'LOAN_ACCOUNT_WITHDRAW', b'Loan Account Withdraw'), (b'AGENCY_INVOICE', b'Agency Invoice'), (b'AGENCY_PAYMENT', b'Agency Payment'), (b'AGENCY_DEVOLUTION', b'Agency Devolution'), (b'AGENCY_DISCOUNT', b'Agency Discount'), (b'PROVIDER_INVOICE', b'Provider Invoice'), (b'PROVIDER_PAYMENT', b'Provider Payment'), (b'PROVIDER_DEVOLUTION', b'Provider Devolution'), (b'PROVIDER_DISCOUNT', b'Provider Discount')], max_length=50)),
-                ('name', models.CharField(default=b'Finantial Document', max_length=200)),
+                ('document_type', models.CharField(choices=[('DEPOSIT', 'Deposit'), ('WITHDRAW', 'Withdraw'), ('TRANSFER', 'Transfer'), ('CURRENCY_EXCHANGE', 'Currency Exchange'), ('LOAN_ENTITY_DEPOSIT', 'Loan Entity Deposit'), ('LOAN_ENTITY_WITHDRAW', 'Loan Entity Withdraw'), ('LOAN_ACCOUNT_DEPOSIT', 'Loan Account Deposit'), ('LOAN_ACCOUNT_WITHDRAW', 'Loan Account Withdraw'), ('AGENCY_INVOICE', 'Agency Invoice'), ('AGENCY_PAYMENT', 'Agency Payment'), ('AGENCY_DEVOLUTION', 'Agency Devolution'), ('AGENCY_DISCOUNT', 'Agency Discount'), ('PROVIDER_INVOICE', 'Provider Invoice'), ('PROVIDER_PAYMENT', 'Provider Payment'), ('PROVIDER_DEVOLUTION', 'Provider Devolution'), ('PROVIDER_DISCOUNT', 'Provider Discount')], max_length=50)),
+                ('name', models.CharField(default='Finantial Document', max_length=200)),
                 ('date', models.DateField(default=django.utils.timezone.now)),
-                ('currency', models.CharField(choices=[(b'CUC', b'CUC'), (b'USD', b'USD'), (b'EUR', b'EUR')], max_length=5)),
+                ('currency', models.CharField(choices=[('CUC', 'CUC'), ('USD', 'USD'), ('EUR', 'EUR')], max_length=5)),
                 ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('status', models.CharField(choices=[(b'D', b'Draft'), (b'R', b'Ready'), (b'C', b'Cancelled')], default=b'D', max_length=5)),
+                ('status', models.CharField(choices=[('D', 'Draft'), ('R', 'Ready'), ('C', 'Cancelled')], default='D', max_length=5)),
             ],
             options={
                 'verbose_name': 'Finantial Document',
@@ -89,8 +89,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('date', models.DateTimeField()),
-                ('old_status', models.CharField(blank=True, choices=[(b'D', b'Draft'), (b'R', b'Ready'), (b'C', b'Cancelled')], max_length=5, null=True)),
-                ('new_status', models.CharField(choices=[(b'D', b'Draft'), (b'R', b'Ready'), (b'C', b'Cancelled')], max_length=5)),
+                ('old_status', models.CharField(blank=True, choices=[('D', 'Draft'), ('R', 'Ready'), ('C', 'Cancelled')], max_length=5, null=True)),
+                ('new_status', models.CharField(choices=[('D', 'Draft'), ('R', 'Ready'), ('C', 'Cancelled')], max_length=5)),
             ],
             options={
                 'verbose_name': 'Finantial Document History',
@@ -129,9 +129,9 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=100)),
             ],
             options={
-                'ordering': ['name'],
                 'verbose_name': 'Loan Entity',
                 'verbose_name_plural': 'Loans Entities',
+                'ordering': ['name'],
             },
         ),
         migrations.CreateModel(
@@ -141,7 +141,7 @@ class Migration(migrations.Migration):
                 ('credit_amount', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
                 ('debit_amount', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
                 ('matched_amount', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('currency', models.CharField(choices=[(b'CUC', b'CUC'), (b'USD', b'USD'), (b'EUR', b'EUR')], max_length=5)),
+                ('currency', models.CharField(choices=[('CUC', 'CUC'), ('USD', 'USD'), ('EUR', 'EUR')], max_length=5)),
                 ('loan_entity', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='finance.LoanEntity')),
             ],
             options={
@@ -166,7 +166,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=50)),
                 ('description', models.CharField(blank=True, max_length=500, null=True)),
-                ('currency', models.CharField(choices=[(b'CUC', b'CUC'), (b'USD', b'USD'), (b'EUR', b'EUR')], default=b'CUC', max_length=5)),
+                ('currency', models.CharField(choices=[('CUC', 'CUC'), ('USD', 'USD'), ('EUR', 'EUR')], default='CUC', max_length=5)),
                 ('enabled', models.BooleanField(default=True)),
             ],
             options={
@@ -181,7 +181,7 @@ class Migration(migrations.Migration):
                 ('credit_amount', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
                 ('debit_amount', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
                 ('matched_amount', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('currency', models.CharField(choices=[(b'CUC', b'CUC'), (b'USD', b'USD'), (b'EUR', b'EUR')], max_length=5)),
+                ('currency', models.CharField(choices=[('CUC', 'CUC'), ('USD', 'USD'), ('EUR', 'EUR')], max_length=5)),
                 ('provider', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='finance.Provider')),
             ],
             options={
@@ -331,7 +331,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='finantialdocumenthistory',
             name='user',
-            field=models.ForeignKey(help_text=b'User who did the operation.', on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(help_text='User who did the operation.', on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AlterUniqueTogether(
             name='agency',

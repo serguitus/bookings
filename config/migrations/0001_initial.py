@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
             name='AllotmentBoardType',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('board_type', models.CharField(choices=[(b'NB', b'None Board'), (b'BB', b'Breakfast Board'), (b'HB', b'Half Board'), (b'FB', b'Full Board'), (b'AI', b'All Included')], max_length=5)),
+                ('board_type', models.CharField(choices=[('NB', 'None Board'), ('BB', 'Breakfast Board'), ('HB', 'Half Board'), ('FB', 'Full Board'), ('AI', 'All Included')], max_length=5)),
             ],
             options={
                 'verbose_name': 'Allotment Board Type',
@@ -111,7 +111,6 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('room_capacity', models.CharField(choices=[('1', 'SGL'), ('2', 'DBL'), ('3', 'TPL'), ('4', 'QPL'), ('5', 'MPL')], max_length=5)),
-                ('enabled', models.BooleanField(default=True)),
             ],
             options={
                 'verbose_name': 'Allotment Room Type',
@@ -124,7 +123,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('ad_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=8, null=True)),
                 ('ch_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=8, null=True)),
-                ('cost_type', models.CharField(choices=[(b'F', b'Fixed'), (b'P', b'By Pax'), (b'D', b'By Day'), (b'PD', b'By Pax Day')], max_length=10)),
+                ('cost_type', models.CharField(choices=[('F', 'Fixed'), ('P', 'By Pax'), ('D', 'By Day'), ('PD', 'By Pax Day')], max_length=10)),
                 ('cost', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='config.AllotmentCost')),
             ],
             options={
@@ -375,7 +374,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('ad_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=8, null=True)),
                 ('ch_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=8, null=True)),
-                ('cost_type', models.CharField(choices=[(b'F', b'Fixed'), (b'H', b'By Hours')], max_length=10)),
+                ('cost_type', models.CharField(choices=[('F', 'Fixed'), ('H', 'By Hours')], max_length=10)),
                 ('cost', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='config.TransferCost')),
             ],
             options={
@@ -400,8 +399,8 @@ class Migration(migrations.Migration):
             name='Allotment',
             fields=[
                 ('service_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='config.Service')),
-                ('time_from', models.TimeField(default=b'16:00')),
-                ('time_to', models.TimeField(default=b'12:00')),
+                ('time_from', models.TimeField(default='16:00')),
+                ('time_to', models.TimeField(default='12:00')),
             ],
             options={
                 'verbose_name': 'Allotment',
@@ -413,7 +412,7 @@ class Migration(migrations.Migration):
             name='AllotmentServiceProvider',
             fields=[
                 ('serviceprovider_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='config.ServiceProvider')),
-                ('cost_type', models.CharField(choices=[(b'F', b'Fixed'), (b'P', b'By Pax')], max_length=5)),
+                ('cost_type', models.CharField(choices=[('F', 'Fixed'), ('P', 'By Pax')], max_length=5)),
             ],
             options={
                 'verbose_name': 'Allotment Service Provider',
@@ -447,7 +446,7 @@ class Migration(migrations.Migration):
             name='ExtraServiceProvider',
             fields=[
                 ('serviceprovider_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='config.ServiceProvider')),
-                ('cost_type', models.CharField(choices=[(b'P', b'By Pax'), (b'E', b'By Extra'), (b'PE', b'By Pax Extra')], max_length=5)),
+                ('cost_type', models.CharField(choices=[('P', 'By Pax'), ('E', 'By Extra'), ('PE', 'By Pax Extra')], max_length=5)),
             ],
             options={
                 'verbose_name': 'Extra Service Provider',
@@ -481,7 +480,7 @@ class Migration(migrations.Migration):
             name='TransferServiceProvider',
             fields=[
                 ('serviceprovider_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='config.ServiceProvider')),
-                ('cost_type', models.CharField(choices=[(b'F', b'Fixed'), (b'P', b'By Pax')], max_length=5)),
+                ('cost_type', models.CharField(choices=[('F', 'Fixed'), ('P', 'By Pax')], max_length=5)),
             ],
             options={
                 'verbose_name': 'Transfer Service Provider',
