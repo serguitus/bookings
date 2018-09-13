@@ -1,0 +1,22 @@
+[
+{
+    "model": "finance.agency",
+    "pk": 1,
+    "fields": {
+        "name": "CCT",
+        "description": "C&C Travel",
+        "currency": "USD",
+        "enabled": true
+    }
+},
+{
+    "model": "finance.agency",
+    "pk": 2,
+    "fields": {
+        "name": "InsightCuba",
+        "description": "InsightCuba",
+        "currency": "USD",
+        "enabled": true
+    }
+}
+]

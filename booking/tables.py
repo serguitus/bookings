@@ -1,10 +1,26 @@
 import django_tables2 as tables
-from booking.models import Booking
+
+from django.utils.html import format_html
+from booking.models import Booking, BookingService
 
 
 class BookingTable(tables.Table):
     class Meta:
         model = Booking
         template_name = 'django_tables2/bootstrap.html'
-        fields = ['reference', 'agency', 'date_from',
+        fields = ['id', 'reference', 'agency', 'date_from',
                   'date_to', 'cost_amount', 'price_amount']
+
+    def render_reference(self, value, record):
+        return format_html('<a href="#services-list-%s" data-toggle="collapse">%s</a>' % (record.id, value))
+
+    def before_render(self, request):
+        self.columns.hide('id')
+
+
+class BookingServiceTable(tables.Table):
+    class Meta:
+        model = BookingService
+        template_name = 'django_tables2/bootstrap.html'
+        fields = ['name', 'datetime_from', 'datetime_to', 'cost_amount',
+                  'price_amount']

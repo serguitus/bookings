@@ -29,7 +29,7 @@ from booking.models import (
     BookingTransfer,
     BookingExtra,
 )
-from booking.tables import BookingTable
+from booking.tables import BookingTable, BookingServiceTable
 
 from functools import update_wrapper, partial
 
@@ -65,11 +65,15 @@ class BookingSiteModel(SiteModel):
         context.update(self.get_model_extra_context(request))
         # first get the filtered list of bookings to show
         # according to page filters
-        bookings = BookingTable(Booking.objects.all().prefetch_related(
-            'booking_services'))
+        qs = Booking.objects.all().prefetch_related('booking_services')
+        bookings = BookingTable(qs)
+        booking_services = {}
+        for booking in qs:
+            booking_services['%s' % booking.pk] = BookingServiceTable(booking.booking_services.all())
         RequestConfig(request).configure(bookings)
         context.update({
             'bookings': bookings,
+            'booking_services': booking_services,
         })
         return render(request, 'booking/booking_list.html', context)
 
