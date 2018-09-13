@@ -67,7 +67,7 @@ class BookingSiteModel(SiteModel):
         # first get the filtered list of bookings to show
         # according to page filters
         bookings = BookingTable(Booking.objects.all().prefetch_related(
-            'services'))
+            'booking_services'))
         RequestConfig(request).configure(bookings)
         context.update({
             'bookings': bookings,

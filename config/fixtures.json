@@ -1,0 +1,54 @@
+[
+{
+    "model": "config.location",
+    "pk": 1,
+    "fields": {
+        "name": "La Habana",
+        "enabled": true
+    }
+},
+{
+    "model": "config.roomtype",
+    "pk": 1,
+    "fields": {
+        "name": "Standard",
+        "enabled": true
+    }
+},
+{
+    "model": "config.service",
+    "pk": 1,
+    "fields": {
+        "name": "Hotel Melia Cohiba",
+        "category": "A",
+        "grouping": true,
+        "enabled": true
+    }
+},
+{
+    "model": "config.allotment",
+    "pk": 1,
+    "fields": {
+        "location": 1,
+        "time_from": "16:00:00",
+        "time_to": "12:00:00"
+    }
+},
+{
+    "model": "config.allotmentroomtype",
+    "pk": 1,
+    "fields": {
+        "allotment": 1,
+        "room_type": 1,
+        "room_capacity": "2"
+    }
+},
+{
+    "model": "config.allotmentboardtype",
+    "pk": 1,
+    "fields": {
+        "allotment": 1,
+        "board_type": "BB"
+    }
+}
+]
