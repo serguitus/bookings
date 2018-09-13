@@ -30,27 +30,18 @@ class Booking(models.Model):
     description = models.CharField(max_length=1000)
     agency = models.ForeignKey(Agency)
     reference = models.CharField(max_length=250)
-    date_from = models.DateField()
-    date_to = models.DateField()
+    date_from = models.DateField(blank=True, null=True)
+    date_to = models.DateField(blank=True, null=True)
     status = models.CharField(
         max_length=5, choices=BOOKING_STATUS_LIST, default=BOOKING_STATUS_PENDING)
     currency = models.CharField(
         max_length=5, choices=CURRENCIES, default=CURRENCY_CUC)
-<<<<<<< HEAD
-    currency_factor = models.DecimalField(max_digits=12, decimal_places=6)
-    cost_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    cost_comments = models.CharField(max_length=1000)
-    price_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    price_comments = models.CharField(max_length=1000)
-    agency_invoice = models.ForeignKey(AgencyInvoice, blank=True, null=True)
-=======
     currency_factor = models.DecimalField(max_digits=12, decimal_places=6, default=1.0)
     cost_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     cost_comments = models.CharField(max_length=1000, blank=True, null=True)
     price_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
     agency_invoice = models.ForeignKey(AgencyInvoice,blank=True, null=True)
->>>>>>> origin/dev
 
     def fill_data(self):
         pass
@@ -91,11 +82,11 @@ class BookingService(models.Model):
         verbose_name = 'Booking Service'
         verbose_name_plural = 'Bookings Services'
         default_permissions = ('add', 'change',)
-    booking = models.ForeignKey(Booking)
+    booking = models.ForeignKey(Booking, related_name='booking_services')
     name = models.CharField(max_length=250, default='Booking Service')
     description = models.CharField(max_length=1000, default='')
-    datetime_from = models.DateTimeField()
-    datetime_to = models.DateTimeField()
+    datetime_from = models.DateTimeField(blank=True, null=True)
+    datetime_to = models.DateTimeField(blank=True, null=True)
     status = models.CharField(
         max_length=5, choices=SERVICE_STATUS_LIST, default=SERVICE_STATUS_PENDING)
     cost_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
@@ -111,7 +102,7 @@ class BookingService(models.Model):
     def save(self, *args, **kwargs):
         self.fill_data()
         # Call the "real" save() method.
-        super().save(*args, **kwargs)
+        super(BookingService, self).save(*args, **kwargs)
 
 
 class BookingServiceGroup(models.Model):

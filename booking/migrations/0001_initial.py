@@ -35,9 +35,9 @@ class Migration(migrations.Migration):
                 ('agency_invoice', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='finance.AgencyInvoice')),
             ],
             options={
+                'default_permissions': ('add', 'change'),
                 'verbose_name': 'Booking',
                 'verbose_name_plural': 'Bookings',
-                'default_permissions': ('add', 'change'),
             },
         ),
         migrations.CreateModel(
@@ -88,9 +88,9 @@ class Migration(migrations.Migration):
                 ('price_comments', models.CharField(blank=True, max_length=1000, null=True)),
             ],
             options={
+                'default_permissions': ('add', 'change'),
                 'verbose_name': 'Booking Service',
                 'verbose_name_plural': 'Bookings Services',
-                'default_permissions': ('add', 'change'),
             },
         ),
         migrations.CreateModel(
