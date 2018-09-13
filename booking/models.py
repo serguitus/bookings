@@ -30,8 +30,8 @@ class Booking(models.Model):
     description = models.CharField(max_length=1000)
     agency = models.ForeignKey(Agency)
     reference = models.CharField(max_length=250)
-    date_from = models.DateField(blank=True, null=True)
-    date_to = models.DateField(blank=True, null=True)
+    date_from = models.DateField()
+    date_to = models.DateField()
     status = models.CharField(
         max_length=5, choices=BOOKING_STATUS_LIST, default=BOOKING_STATUS_PENDING)
     currency = models.CharField(
@@ -82,8 +82,7 @@ class BookingService(models.Model):
         verbose_name = 'Booking Service'
         verbose_name_plural = 'Bookings Services'
         default_permissions = ('add', 'change',)
-    booking = models.ForeignKey(Booking, related_name='services')
-    service = models.ForeignKey(Service)
+    booking = models.ForeignKey(Booking)
     name = models.CharField(max_length=250, default='Booking Service')
     description = models.CharField(max_length=1000, default='')
     datetime_from = models.DateTimeField()

@@ -44,21 +44,11 @@ class BookingSiteModel(SiteModel):
     model_order = 1010
     menu_label = MENU_LABEL_BOOKING
 
-<<<<<<< HEAD
-    fields = ('reference', 'agency', 'status', 'currency', 'cost_amount',
-              'price_amount',)
-    list_display = ('reference', 'agency', 'status', 'currency', 'cost_amount',
-                    'price_amount',)
-    list_filter = ('reference',)
-    search_fields = ['reference', ]
-    ordering = ('reference',)
-=======
     fields = ('reference', 'agency', 'date_from', 'date_to', 'status', 'currency', 'currency_factor',)
     list_display = ('reference', 'agency', 'date_from', 'date_to', 'status',)
     list_filter = ('agency__name', 'date_from', 'status',)
     search_fields = ('reference',)
     readonly_fields = ('status',)
->>>>>>> origin/dev
 
     def get_urls(self):
         urls = super(BookingSiteModel, self).get_urls()
