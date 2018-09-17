@@ -1,6 +1,5 @@
 from dal import autocomplete
 
-from django.contrib.admin.views.main import ChangeList
 from django.db.models import Exists, OuterRef, Subquery, Q, F, Value, DecimalField
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext
