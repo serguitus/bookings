@@ -1146,7 +1146,7 @@ class SiteModel(ModelAdmin):
         list_select_related = self.get_list_select_related(request)
 
         # Check details to see if any are available on this changelist
-        if True or self.details_template:
+        if self.details_template:
             # Add the details expand/collapse button.
             list_display = ['details_button'] + list(list_display)
 
@@ -1303,19 +1303,6 @@ class SiteModel(ModelAdmin):
         site_context = self.get_model_extra_context(request, extra_context)
         context.update(site_context)
 
-        headers = list(result_headers(cl))
-        num_sorted_fields = 0
-        for h in headers:
-            if h['sortable'] and h['sorted']:
-                num_sorted_fields += 1
-        results_context = {
-            'result_hidden_fields': list(result_hidden_fields(cl)),
-            'result_headers': headers,
-            'num_sorted_fields': num_sorted_fields,
-            'results': list(_results(cl, self.admin_site.site_namespace))
-        }
-
-        context.update(results_context)
         context.update(extra_context or {})
 
         request.current_app = self.admin_site.name
