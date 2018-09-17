@@ -31,6 +31,8 @@ from booking.models import (
 )
 from booking.tables import BookingTable
 
+from common.filters import TextFilter
+
 from functools import update_wrapper, partial
 
 from reservas.admin import bookings_site
@@ -48,20 +50,16 @@ class BookingSiteModel(SiteModel):
               'price_amount',)
     list_display = ('reference', 'agency', 'date_from', 'date_to', 'status', 'currency', 'cost_amount',
                     'price_amount',)
-    list_filter = ('agency', 'date_from', 'status',)
-    search_fields = ['reference', ]
+    top_filters = ('reference', 'agency', 'date_from', 'status',)
+    search_fields = []
     ordering = ('reference',)
     readonly_fields = ('status',)
+    details_template = 'booking/booking_details.html'
 
-    def get_urls(self):
-        urls = super(BookingSiteModel, self).get_urls()
-        other_urls = [
-            url(r'^bookinglist/$', self.booking_list),
-        ]
-        return other_urls + urls
-
-    def booking_list(self, request):
-        """ a list of bookings with their services """
+    """
+    @csrf_protect_m
+    def changelist_view(self, request, extra_context=None):
+        # a list of bookings with their services
         context = {}
         context.update(self.get_model_extra_context(request))
         # first get the filtered list of bookings to show
@@ -73,7 +71,7 @@ class BookingSiteModel(SiteModel):
             'bookings': bookings,
         })
         return render(request, 'booking/booking_list.html', context)
-
+    """
 
 class BookingAllotmentSiteModel(SiteModel):
     model_order = 1110
@@ -110,7 +108,7 @@ class BookingExtraSiteModel(SiteModel):
         'cost_amount', 'price_amount',)
     list_display = ('booking', 'service', 'extra_qtty', 'datetime_from', 'datetime_to', 'status',)
     list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
-    search_fields = ['booking__reference',]
+    search_fields = ('booking__reference',)
     ordering = ('booking__reference', 'service__name',)
 
 

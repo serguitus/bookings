@@ -191,3 +191,28 @@ td, th {
 input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="number"], textarea, select, .vTextField {
     padding: 5px 3px;
 }
+
+tr.details td {
+    padding: 0px;
+}
+
+tr.details td div {
+    padding: 3px;
+}
+
+th.column-details_button div.text span {
+    display: none;
+}
+
+th.column-details_button {
+    width: 25px;
+}
+
+/* button to collase details */
+td.details-button button span.glyphicon:before {
+    content: "\e082";
+}
+td.details-button button.collapsed span.glyphicon:before {
+    content: "\e081";
+}
+

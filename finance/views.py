@@ -1,6 +1,6 @@
 from dal import autocomplete
 
-from django.contrib.admin.views.main import ChangeList
+from common.sites import CommonChangeList
 from django.db.models import Exists, OuterRef, Subquery, Q, F, Value, DecimalField
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext
@@ -46,7 +46,7 @@ class IncorrectLookupParameters(Exception):
     pass
 
 
-class MatchList(ChangeList):
+class MatchList(CommonChangeList):
     """
     A custom class to build
     Match lists

@@ -1,36 +1,47 @@
 import copy
+import datetime
 import json
 import string
+import sys
 
 from functools import update_wrapper
 
 from django.contrib import messages
 from django.contrib.admin import helpers
-from django.contrib.admin.exceptions import DisallowedModelAdminToField
-from django.contrib.admin.options import InlineModelAdmin, csrf_protect_m, TO_FIELD_VAR, IS_POPUP_VAR, ModelAdmin
+from django.contrib.admin.exceptions import DisallowedModelAdminLookup, DisallowedModelAdminToField
+from django.contrib.admin.options import (
+    InlineModelAdmin, csrf_protect_m, TO_FIELD_VAR, IS_POPUP_VAR, ModelAdmin,
+    IncorrectLookupParameters,)
 from django.contrib.admin.sites import AdminSite
-from django.contrib.admin.utils import quote, unquote, get_deleted_objects
-from django.contrib.admin.views.main import ChangeList
+from django.contrib.admin.templatetags.admin_list import _coerce_field_name, ResultList, result_headers
+from django.contrib.admin.utils import (
+    quote, unquote, get_deleted_objects, get_fields_from_path,
+    lookup_field, lookup_needs_distinct,
+    prepare_lookup_value, display_for_field, display_for_value)
+from django.contrib.admin.views.main import IGNORED_PARAMS, ChangeList
 from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
 from django.contrib.auth import get_permission_codename, logout as auth_logout
-from django.core.exceptions import ValidationError, PermissionDenied
+from django.core.exceptions import ValidationError, PermissionDenied, ObjectDoesNotExist
 from django.db import router, transaction, models
+from django.core.exceptions import SuspiciousOperation, ImproperlyConfigured, FieldDoesNotExist
 from django.forms import fields_for_model
 from django.forms.formsets import all_valid
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from django.template.response import TemplateResponse
+from django.template.response import TemplateResponse, SimpleTemplateResponse
 from django.utils.html import format_html
 from django.utils.http import urlencode, urlquote
 from django.utils.encoding import force_text
 from django.utils import six, timezone
-from django.utils.translation import ugettext as _, ugettext_lazy
+from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext as _, ungettext, ugettext_lazy
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
-from django.views.generic import RedirectView
+from django.views.generic import RedirectView, View
 
+from common.filters import TopFilter
 from common.models import RecentLink
-from common.templatetags.common_utils import common_add_preserved_filters
+from common.templatetags.common_utils import common_add_preserved_filters, result_hidden_fields
 
 
 class CommonSite(AdminSite):
@@ -291,9 +302,12 @@ class SiteModel(ModelAdmin):
     site_actions = []
     add_readonly_fields = ()
     change_readonly_fields = ()
+    top_filters = ()
+    details_template = None
     readonly_model = False
     delete_allowed = True
     self_inlines = []
+    list_view = None
 
     model_actions = []
     model_order = -1
@@ -441,8 +455,13 @@ class SiteModel(ModelAdmin):
 
         info = self.model._meta.app_label, self.model._meta.model_name
 
-        urlpatterns = [
-            self.build_url(r'^$', self.changelist_view, '%s_%s_changelist' % info),
+        urlpatterns = []
+        if self.list_view is None or not issubclass(self.list_view, View):
+            urlpatterns += [self.build_url(r'^$', self.changelist_view, '%s_%s_changelist' % info),]
+        else:
+            urlpatterns += [self.build_url(r'^$', self.list_view.as_view(), '%s_%s_changelist' % info),]
+
+        urlpatterns += [
             self.build_url(r'^add/$', self.add_view, '%s_%s_add' % info),
             self.build_url(r'^(.+)/history/$', self.history_view, '%s_%s_history' % info),
             self.build_url(r'^(.+)/delete/$', self.delete_view, '%s_%s_delete' % info),
@@ -1103,12 +1122,215 @@ class SiteModel(ModelAdmin):
         """
         return CommonChangeList
 
+    def details_button(self, obj):
+        """
+        A list_display column containing a button widget.
+        """
+        return mark_safe('<button type="button" class="btn btn-default btn-xs" data-toggle="collapse" data-target="#div_' + str(obj.pk) +  '" aria-expanded="true"><span class="glyphicon"></span></button>')
+
     @csrf_protect_m
     def changelist_view(self, request, extra_context=None):
+        """
+        The 'change list' admin view for this model.
+        """
+        from django.contrib.admin.views.main import ERROR_FLAG
+        opts = self.model._meta
+        app_label = opts.app_label
+        if not self.has_change_permission(request, None):
+            raise PermissionDenied
+
+        list_display = self.get_list_display(request)
+        list_display_links = self.get_list_display_links(request, list_display)
+        list_filter = self.get_list_filter(request)
+        search_fields = self.get_search_fields(request)
+        list_select_related = self.get_list_select_related(request)
+
+        # Check details to see if any are available on this changelist
+        if True or self.details_template:
+            # Add the details expand/collapse button.
+            list_display = ['details_button'] + list(list_display)
+
+        # Check actions to see if any are available on this changelist
+        actions = self.get_actions(request)
+        if actions:
+            # Add the action checkboxes if there are any actions available.
+            list_display = ['action_checkbox'] + list(list_display)
+
+        ChangeListClass = self.get_changelist(request)
+        try:
+            cl = ChangeListClass(
+                request, self.model, list_display,
+                list_display_links, list_filter, self.date_hierarchy,
+                search_fields, list_select_related, self.list_per_page,
+                self.list_max_show_all, self.list_editable, self
+            )
+            cl.top_filters = self.top_filters
+            cl.details_template = self.details_template
+        except IncorrectLookupParameters:
+            # Wacky lookup parameters were given, so redirect to the main
+            # changelist page, without parameters, and pass an 'invalid=1'
+            # parameter via the query string. If wacky parameters were given
+            # and the 'invalid=1' parameter was already in the query string,
+            # something is screwed up with the database, so display an error
+            # page.
+            if ERROR_FLAG in request.GET.keys():
+                return SimpleTemplateResponse('admin/invalid_setup.html', {
+                    'title': _('Database error'),
+                })
+            return HttpResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
+
+        # If the request was POSTed, this might be a bulk action or a bulk
+        # edit. Try to look up an action or confirmation first, but if this
+        # isn't an action the POST will fall through to the bulk edit check,
+        # below.
+        action_failed = False
+        selected = request.POST.getlist(helpers.ACTION_CHECKBOX_NAME)
+
+        # Actions with no confirmation
+        if (actions and request.method == 'POST' and
+                'index' in request.POST and '_save' not in request.POST):
+            if selected:
+                response = self.response_action(request, queryset=cl.get_queryset(request))
+                if response:
+                    return response
+                else:
+                    action_failed = True
+            else:
+                msg = _("Items must be selected in order to perform "
+                        "actions on them. No items have been changed.")
+                self.message_user(request, msg, messages.WARNING)
+                action_failed = True
+
+        # Actions with confirmation
+        if (actions and request.method == 'POST' and
+                helpers.ACTION_CHECKBOX_NAME in request.POST and
+                'index' not in request.POST and '_save' not in request.POST):
+            if selected:
+                response = self.response_action(request, queryset=cl.get_queryset(request))
+                if response:
+                    return response
+                else:
+                    action_failed = True
+
+        if action_failed:
+            # Redirect back to the changelist page to avoid resubmitting the
+            # form if the user refreshes the browser or uses the "No, take
+            # me back" button on the action confirmation page.
+            return HttpResponseRedirect(request.get_full_path())
+
+        # If we're allowing changelist editing, we need to construct a formset
+        # for the changelist given all the fields to be edited. Then we'll
+        # use the formset to validate/process POSTed data.
+        formset = cl.formset = None
+
+        # Handle POSTed bulk-edit data.
+        if request.method == 'POST' and cl.list_editable and '_save' in request.POST:
+            FormSet = self.get_changelist_formset(request)
+            formset = cl.formset = FormSet(request.POST, request.FILES, queryset=self.get_queryset(request))
+            if formset.is_valid():
+                changecount = 0
+                for form in formset.forms:
+                    if form.has_changed():
+                        obj = self.save_form(request, form, change=True)
+                        self.save_model(request, obj, form, change=True)
+                        self.save_related(request, form, formsets=[], change=True)
+                        change_msg = self.construct_change_message(request, form, None)
+                        self.log_change(request, obj, change_msg)
+                        changecount += 1
+
+                if changecount:
+                    if changecount == 1:
+                        name = force_text(opts.verbose_name)
+                    else:
+                        name = force_text(opts.verbose_name_plural)
+                    msg = ungettext(
+                        "%(count)s %(name)s was changed successfully.",
+                        "%(count)s %(name)s were changed successfully.",
+                        changecount
+                    ) % {
+                        'count': changecount,
+                        'name': name,
+                        'obj': force_text(obj),
+                    }
+                    self.message_user(request, msg, messages.SUCCESS)
+
+                return HttpResponseRedirect(request.get_full_path())
+
+        # Handle GET -- construct a formset for display.
+        elif cl.list_editable:
+            FormSet = self.get_changelist_formset(request)
+            formset = cl.formset = FormSet(queryset=cl.result_list)
+
+        # Build the list of media to be used by the formset.
+        if formset:
+            media = self.media + formset.media
+        else:
+            media = self.media
+
+        # Build the action form and populate it with available actions.
+        if actions:
+            action_form = self.action_form(auto_id=None)
+            action_form.fields['action'].choices = self.get_action_choices(request)
+            media += action_form.media
+        else:
+            action_form = None
+
+        selection_note_all = ungettext(
+            '%(total_count)s selected',
+            'All %(total_count)s selected',
+            cl.result_count
+        )
+
+        context = dict(
+            self.admin_site.each_context(request),
+            module_name=force_text(opts.verbose_name_plural),
+            selection_note=_('0 of %(cnt)s selected') % {'cnt': len(cl.result_list)},
+            selection_note_all=selection_note_all % {'total_count': cl.result_count},
+            title=cl.title,
+            is_popup=cl.is_popup,
+            to_field=cl.to_field,
+            cl=cl,
+            media=media,
+            has_add_permission=self.has_add_permission(request),
+            opts=cl.opts,
+            action_form=action_form,
+            actions_on_top=self.actions_on_top,
+            actions_on_bottom=self.actions_on_bottom,
+            actions_selection_counter=self.actions_selection_counter,
+            preserved_filters=self.get_preserved_filters(request),
+        )
+
         site_context = self.get_model_extra_context(request, extra_context)
-        return super(SiteModel, self).changelist_view(request, site_context)
+        context.update(site_context)
+
+        headers = list(result_headers(cl))
+        num_sorted_fields = 0
+        for h in headers:
+            if h['sortable'] and h['sorted']:
+                num_sorted_fields += 1
+        results_context = {
+            'result_hidden_fields': list(result_hidden_fields(cl)),
+            'result_headers': headers,
+            'num_sorted_fields': num_sorted_fields,
+            'results': list(_results(cl, self.admin_site.site_namespace))
+        }
+
+        context.update(results_context)
+        context.update(extra_context or {})
+
+        request.current_app = self.admin_site.name
+
+        return TemplateResponse(request, self.change_list_template or [
+            'common/%s/%s/change_list.html' % (app_label, opts.model_name),
+            'common/%s/change_list.html' % app_label,
+            'common/change_list.html'
+        ], context)
+
 
 class CommonChangeList(ChangeList):
+    top_filters = ()
+    details_template = None
+
     def url_for_result(self, result):
         pk = getattr(result, self.pk_attname)
         return reverse(
@@ -1119,6 +1341,117 @@ class CommonChangeList(ChangeList):
             args=(quote(pk),),
             current_app=self.model_admin.admin_site.name)
 
+    def get_filtering_params(self, params=None):
+        """
+        Returns all params except IGNORED_PARAMS
+        """
+        if not params:
+            params = self.params
+        lookup_params = params.copy()  # a dictionary of the query string
+        # Remove all the parameters that are globally and systematically
+        # ignored.
+        for ignored in IGNORED_PARAMS:
+            if ignored in lookup_params:
+                del lookup_params[ignored]
+        return lookup_params
+
+    def get_top_filters(self, request):
+        lookup_params = self.get_filtering_params()
+        use_distinct = False
+
+        for key, value in lookup_params.items():
+            if not self.model_admin.lookup_allowed(key, value):
+                raise DisallowedModelAdminLookup("Filtering by %s not allowed" % key)
+
+        filter_specs = []
+        if self.top_filters:
+            for top_filter in self.top_filters:
+                if callable(top_filter):
+                    # This is simply a custom top filter class.
+                    spec = top_filter(request, lookup_params, self.model, self.model_admin)
+                else:
+                    field_path = None
+                    if isinstance(top_filter, (tuple, list)):
+                        # This is a custom Filter class for a given field.
+                        field, top_filter_class = top_filter
+                    else:
+                        # This is simply a field name, so use the default
+                        # TopFilter class that has been registered for
+                        # the type of the given field.
+                        field, top_filter_class = top_filter, TopFilter.create
+                    if not isinstance(field, models.Field):
+                        field_path = field
+                        field = get_fields_from_path(self.model, field_path)[-1]
+
+                    lookup_params_count = len(lookup_params)
+                    spec = top_filter_class(
+                        field, request, lookup_params,
+                        self.model, self.model_admin, field_path=field_path
+                    )
+                    # field_list_filter_class removes any lookup_params it
+                    # processes. If that happened, check if distinct() is
+                    # needed to remove duplicate results.
+                    if lookup_params_count > len(lookup_params):
+                        use_distinct = use_distinct or lookup_needs_distinct(self.lookup_opts, field_path)
+                if spec and spec.has_output():
+                    filter_specs.append(spec)
+
+        # At this point, all the parameters used by the various ListFilters
+        # have been removed from lookup_params, which now only contains other
+        # parameters passed via the query string. We now loop through the
+        # remaining parameters both to ensure that all the parameters are valid
+        # fields and to determine if at least one of them needs distinct(). If
+        # the lookup parameters aren't real fields, then bail out.
+        try:
+            for key, value in lookup_params.items():
+                lookup_params[key] = prepare_lookup_value(key, value)
+                use_distinct = use_distinct or lookup_needs_distinct(self.lookup_opts, key)
+            return filter_specs, bool(filter_specs), lookup_params, use_distinct
+        except FieldDoesNotExist as e:
+            six.reraise(IncorrectLookupParameters, IncorrectLookupParameters(e), sys.exc_info()[2])
+
+    def get_queryset(self, request):
+        qs = super(CommonChangeList, self).get_queryset(request);
+
+        # First, we collect all the declared top filters.
+        (self.top_filter_specs, self.has_top_filters, remaining_lookup_params,
+         filters_use_distinct) = self.get_top_filters(request)
+
+        # Then, we let every top filter modify the queryset to its liking.
+        for filter_spec in self.top_filter_specs:
+            new_qs = filter_spec.queryset(request, qs)
+            if new_qs is not None:
+                qs = new_qs
+
+        try:
+            # Finally, we apply the remaining lookup parameters from the query
+            # string (i.e. those that haven't already been processed by the
+            # filters).
+            qs = qs.filter(**remaining_lookup_params)
+        except (SuspiciousOperation, ImproperlyConfigured):
+            # Allow certain types of errors to be re-raised as-is so that the
+            # caller can treat them in a special way.
+            raise
+        except Exception as e:
+            # Every other error is caught with a naked except, because we don't
+            # have any other way of validating lookup parameters. They might be
+            # invalid if the keyword arguments are incorrect, or if the values
+            # are not in the correct type, so we might get FieldError,
+            # ValueError, ValidationError, or ?.
+            raise IncorrectLookupParameters(e)
+
+        if not qs.query.select_related:
+            qs = self.apply_select_related(qs)
+
+        # Remove duplicates from results, if necessary
+        if filters_use_distinct:
+            return qs.distinct()
+        else:
+            return qs
+
+        
+
+    
 class CommonModelSiteTemplateResponse(TemplateResponse):
     
     def __init__(self, request, site_model, template, context=None, content_type=None,

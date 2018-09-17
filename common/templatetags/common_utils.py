@@ -92,6 +92,8 @@ def _items_for_result(cl, result, form, namespace='common'):
             if f is None or f.auto_created:
                 if field_name == 'action_checkbox':
                     row_classes = ['action-checkbox']
+                if field_name == 'details_button':
+                    row_classes = ['details-button']
                 allow_tags = getattr(attr, 'allow_tags', False)
                 boolean = getattr(attr, 'boolean', False)
                 result_repr = display_for_value(value, empty_value_display, boolean)
@@ -168,10 +170,10 @@ def _items_for_result(cl, result, form, namespace='common'):
 def _results(cl, namespace='common'):
     if cl.formset:
         for res, form in zip(cl.result_list, cl.formset.forms):
-            yield ResultList(form, _items_for_result(cl, res, form, namespace))
+            yield ResultList(form, res, _items_for_result(cl, res, form, namespace))
     else:
         for res in cl.result_list:
-            yield ResultList(None, _items_for_result(cl, res, None, namespace))
+            yield ResultList(None, res, _items_for_result(cl, res, None, namespace))
 
 @register.inclusion_tag("common/change_list_results.html")
 def common_result_list(cl, namespace='common'):

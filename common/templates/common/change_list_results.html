@@ -1,4 +1,4 @@
-{% load i18n static %}
+{% load i18n static common_utils %}
 
 {% if result_hidden_fields %}
 	<div class="hiddenfields">{# DIV for HTML validation #}
@@ -51,6 +51,18 @@
 							{{ item }}
 						{% endfor %}
 					</tr>
+					{% if cl.details_template %}
+						<tr class="details">
+							<td></td>
+							<td colspan="{{ result|length }}">
+								<div id="div_{{ result.result.pk }}" class="collapse in">
+									<div>
+										{% include cl.details_template with current=result.result %}
+									</div>
+								</div>
+							</td>
+						</tr>
+					{% endif %}
 				{% endfor %}
 			</tbody>
 		</table>
