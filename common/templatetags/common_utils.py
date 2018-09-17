@@ -3,7 +3,7 @@ import warnings
 
 from django import template
 from django.contrib.admin.templatetags.admin_list import (
-    ResultList, _coerce_field_name, result_headers, result_hidden_fields)
+    _coerce_field_name, result_headers, result_hidden_fields)
 from django.contrib.admin.utils import (
     display_for_field, display_for_value, get_fields_from_path,
     label_for_field, lookup_field)
@@ -18,6 +18,8 @@ from django.utils.html import format_html
 from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
 from django.utils.six.moves.urllib.parse import parse_qsl, urlparse, urlunparse
+
+from common import sites
 
 
 register = template.Library()
@@ -170,10 +172,10 @@ def _items_for_result(cl, result, form, namespace='common'):
 def _results(cl, namespace='common'):
     if cl.formset:
         for res, form in zip(cl.result_list, cl.formset.forms):
-            yield ResultList(form, res, _items_for_result(cl, res, form, namespace))
+            yield sites.ResultList(form, res, _items_for_result(cl, res, form, namespace))
     else:
         for res in cl.result_list:
-            yield ResultList(None, res, _items_for_result(cl, res, None, namespace))
+            yield sites.ResultList(None, res, _items_for_result(cl, res, None, namespace))
 
 @register.inclusion_tag("common/change_list_results.html")
 def common_result_list(cl, namespace='common'):
