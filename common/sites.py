@@ -13,7 +13,7 @@ from django.contrib.admin.options import (
     InlineModelAdmin, csrf_protect_m, TO_FIELD_VAR, IS_POPUP_VAR, ModelAdmin,
     IncorrectLookupParameters,)
 from django.contrib.admin.sites import AdminSite
-from django.contrib.admin.templatetags.admin_list import _coerce_field_name, ResultList, result_headers
+from django.contrib.admin.templatetags.admin_list import _coerce_field_name, result_headers
 from django.contrib.admin.utils import (
     quote, unquote, get_deleted_objects, get_fields_from_path,
     lookup_field, lookup_needs_distinct,
@@ -1436,9 +1436,15 @@ class CommonChangeList(ChangeList):
         else:
             return qs
 
-        
 
-    
+class ResultList(list):
+
+    def __init__(self, form, result, *items):
+        self.form = form
+        self.result = result
+        super(ResultList, self).__init__(*items)
+
+
 class CommonModelSiteTemplateResponse(TemplateResponse):
     
     def __init__(self, request, site_model, template, context=None, content_type=None,
@@ -1519,3 +1525,5 @@ class CommonStackedInline(CommonInlineModelAdmin):
 
 class CommonTabularInline(CommonInlineModelAdmin):
     template = 'common/edit_inline/tabular.html'
+
+
