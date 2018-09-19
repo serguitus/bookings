@@ -1,18 +1,18 @@
 {% load i18n static %}
-{% if cl.search_fields or cl.top_filters %}
+{% if cl.search_fields or cl.top_filter_specs %}
   <div class="search-toolbar">
     <form class="changelist-search" method="get">
-      <div><!-- DIV needed for valid HTML -->
+      <div>
         <label for="searchbar">
           <img src="{% static "admin/img/search.svg" %}" alt="Search" />
         </label>
         {% if cl.search_fields %}
             <input type="text" size="30" name="{{ search_var }}" value="{{ cl.query }}" class="searchbar" autofocus />
         {% endif %}
-        {% if cl.top_filters %}
-          {% for top_filter in cl.top_filters %}
+        {% if cl.top_filter_specs %}
+          {% for top_filter in cl.top_filter_specs %}
             {% if top_filter.template %}
-              {% include top_filter.template %}
+              {% include top_filter.template with filter=top_filter %}
             {% endif %}
           {% endfor %}
         {% endif %}
@@ -22,10 +22,8 @@
             {% blocktrans count counter=cl.result_count %}{{ counter }} result{% plural %}{{ counter }} results{% endblocktrans %} (<a href="?{% if cl.is_popup %}_popup=1{% endif %}">{% if cl.show_full_result_count %}{% blocktrans with full_result_count=cl.full_result_count %}{{ full_result_count }} total{% endblocktrans %}{% else %}{% trans "Show all" %}{% endif %}</a>)
           </span>
         {% endif %}
-        {% for pair in cl.params.items %}
-          {% if pair.0 != search_var %}
-		    <input type="hidden" name="{{ pair.0 }}" value="{{ pair.1 }}"/>
-		  {% endif %}
+        {% for pair in cl.hidden_params.items %}
+          <input type="hidden" name="{{ pair.0 }}" value="{{ pair.1 }}"/>
         {% endfor %}
       </div>
     </form>

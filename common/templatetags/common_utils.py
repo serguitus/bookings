@@ -19,8 +19,6 @@ from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
 from django.utils.six.moves.urllib.parse import parse_qsl, urlparse, urlunparse
 
-from common import sites
-
 
 register = template.Library()
 
@@ -170,12 +168,14 @@ def _items_for_result(cl, result, form, namespace='common'):
         yield format_html('<td>{}</td>', force_text(form[cl.model._meta.pk.name]))
 
 def _results(cl, namespace='common'):
+    from common.sites import ResultList
+
     if cl.formset:
         for res, form in zip(cl.result_list, cl.formset.forms):
-            yield sites.ResultList(form, res, _items_for_result(cl, res, form, namespace))
+            yield ResultList(form, res, _items_for_result(cl, res, form, namespace))
     else:
         for res in cl.result_list:
-            yield sites.ResultList(None, res, _items_for_result(cl, res, None, namespace))
+            yield ResultList(None, res, _items_for_result(cl, res, None, namespace))
 
 @register.inclusion_tag("common/change_list_results.html")
 def common_result_list(cl, namespace='common'):
