@@ -1,8 +1,4 @@
 {% load booking_tags %}
 {% load render_table from django_tables2 %}
-{# {{ current }} #}
-{% show_bookingservices_table current %}
-{% for service in current.booking_services.all %}
-    {{ service.name }}
-{% endfor %}
-{{ current.booking_services.all.count }}
+{% bookingservices_table current as table %}
+    {% render_table table %}

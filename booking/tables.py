@@ -21,6 +21,6 @@ class BookingTable(tables.Table):
 class BookingServiceTable(tables.Table):
     class Meta:
         model = BookingService
-        template_name = 'django_tables2/bootstrap.html'
+        template_name = 'booking/booking_list.html'
         fields = ['name', 'datetime_from', 'datetime_to', 'cost_amount',
                   'price_amount']

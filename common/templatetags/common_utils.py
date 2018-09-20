@@ -167,6 +167,7 @@ def _items_for_result(cl, result, form, namespace='common'):
     if form and not form[cl.model._meta.pk.name].is_hidden:
         yield format_html('<td>{}</td>', force_text(form[cl.model._meta.pk.name]))
 
+
 def _results(cl, namespace='common'):
     from common.sites import ResultList
 
@@ -176,6 +177,7 @@ def _results(cl, namespace='common'):
     else:
         for res in cl.result_list:
             yield ResultList(None, res, _items_for_result(cl, res, None, namespace))
+
 
 @register.inclusion_tag("common/change_list_results.html")
 def common_result_list(cl, namespace='common'):
@@ -192,6 +194,7 @@ def common_result_list(cl, namespace='common'):
             'result_headers': headers,
             'num_sorted_fields': num_sorted_fields,
             'results': list(_results(cl, namespace))}
+
 
 @register.inclusion_tag('common/submit_line.html', takes_context=True)
 def common_submit_row(context):

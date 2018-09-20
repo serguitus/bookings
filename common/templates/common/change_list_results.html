@@ -52,10 +52,10 @@
 						{% endfor %}
 					</tr>
 					{% if cl.details_template %}
-						<tr class="details">
+						<tr class="details collapse" id="div_{{ result.result.pk }}">
 							<td></td>
 							<td colspan="{{ result|length }}">
-								<div id="div_{{ result.result.pk }}" class="collapse in">
+								<div >
 									<div>
 										{% include cl.details_template with current=result.result %}
 									</div>
