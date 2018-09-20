@@ -68,8 +68,8 @@ class BookingSiteModel(SiteModel):
         qs = Booking.objects.all().prefetch_related('booking_services')
         bookings = BookingTable(qs)
         booking_services = {}
-        for booking in qs:
-            booking_services['%s' % booking.pk] = BookingServiceTable(booking.booking_services.all())
+        for booking in bookings.rows:
+            booking.services = BookingServiceTable(booking.booking_services.all())
         RequestConfig(request).configure(bookings)
         context.update({
             'bookings': bookings,
