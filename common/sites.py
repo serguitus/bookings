@@ -18,7 +18,7 @@ from django.contrib.admin.utils import (
     quote, unquote, get_deleted_objects, get_fields_from_path,
     lookup_field, lookup_needs_distinct,
     prepare_lookup_value, display_for_field, display_for_value)
-from django.contrib.admin.views.main import IGNORED_PARAMS, ChangeList
+from django.contrib.admin.views.main import SEARCH_VAR, IGNORED_PARAMS, ChangeList
 from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
 from django.contrib.auth import get_permission_codename, logout as auth_logout
 from django.core.exceptions import ValidationError, PermissionDenied, ObjectDoesNotExist
@@ -39,7 +39,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from django.views.generic import RedirectView, View
 
-from common.filters import TopFilter
+from common.filters import PARAM_PREFIX, TopFilter
 from common.models import RecentLink
 from common.templatetags.common_utils import common_add_preserved_filters, result_hidden_fields
 
@@ -1160,12 +1160,12 @@ class SiteModel(ModelAdmin):
         try:
             cl = ChangeListClass(
                 request, self.model, list_display,
-                list_display_links, list_filter, self.date_hierarchy,
+                list_display_links, list_filter, self.top_filters, self.date_hierarchy,
                 search_fields, list_select_related, self.list_per_page,
                 self.list_max_show_all, self.list_editable, self
             )
-            cl.top_filters = self.top_filters
             cl.details_template = self.details_template
+
         except IncorrectLookupParameters:
             # Wacky lookup parameters were given, so redirect to the main
             # changelist page, without parameters, and pass an 'invalid=1'
@@ -1315,8 +1315,20 @@ class SiteModel(ModelAdmin):
 
 
 class CommonChangeList(ChangeList):
-    top_filters = ()
     details_template = None
+
+    def __init__(self, request, model, list_display, list_display_links,
+                 list_filter, top_filters, date_hierarchy, search_fields, list_select_related,
+                 list_per_page, list_max_show_all, list_editable, model_admin):
+        self.top_filters = top_filters
+        self.hidden_params = dict(request.GET.items())
+        if SEARCH_VAR in self.hidden_params:
+            self.hidden_params.pop(SEARCH_VAR)
+
+        super(CommonChangeList, self).__init__(request, model, list_display, list_display_links,
+                 list_filter, date_hierarchy, search_fields, list_select_related,
+                 list_per_page, list_max_show_all, list_editable, model_admin)
+
 
     def url_for_result(self, result):
         pk = getattr(result, self.pk_attname)
@@ -1328,10 +1340,7 @@ class CommonChangeList(ChangeList):
             args=(quote(pk),),
             current_app=self.model_admin.admin_site.name)
 
-    def get_filtering_params(self, params=None):
-        """
-        Returns all params except IGNORED_PARAMS
-        """
+    def get_filters_params(self, params=None):
         if not params:
             params = self.params
         lookup_params = params.copy()  # a dictionary of the query string
@@ -1340,10 +1349,22 @@ class CommonChangeList(ChangeList):
         for ignored in IGNORED_PARAMS:
             if ignored in lookup_params:
                 del lookup_params[ignored]
-        return lookup_params
+        result = lookup_params.copy()
+        for param in lookup_params:
+            if param.startswith(PARAM_PREFIX):
+                del result[param]
+        return result
 
-    def get_top_filters(self, request):
-        lookup_params = self.get_filtering_params()
+    def get_top_filters_params(self, params):
+        result = params.copy()
+        for param, value in self.params.items():
+            if param.startswith(PARAM_PREFIX):
+                result.update({param: value})
+        return result
+
+    def get_top_filters(self, request, params):
+        lookup_params = self.get_top_filters_params(params)
+        hidden_params = self.hidden_params
         use_distinct = False
 
         for key, value in lookup_params.items():
@@ -1355,7 +1376,7 @@ class CommonChangeList(ChangeList):
             for top_filter in self.top_filters:
                 if callable(top_filter):
                     # This is simply a custom top filter class.
-                    spec = top_filter(request, lookup_params, self.model, self.model_admin)
+                    spec = top_filter(request, lookup_params, hidden_params, self.model, self.model_admin)
                 else:
                     field_path = None
                     if isinstance(top_filter, (tuple, list)):
@@ -1372,7 +1393,7 @@ class CommonChangeList(ChangeList):
 
                     lookup_params_count = len(lookup_params)
                     spec = top_filter_class(
-                        field, request, lookup_params,
+                        field, request, lookup_params, hidden_params,
                         self.model, self.model_admin, field_path=field_path
                     )
                     # field_list_filter_class removes any lookup_params it
@@ -1380,7 +1401,7 @@ class CommonChangeList(ChangeList):
                     # needed to remove duplicate results.
                     if lookup_params_count > len(lookup_params):
                         use_distinct = use_distinct or lookup_needs_distinct(self.lookup_opts, field_path)
-                if spec and spec.has_output():
+                if spec:
                     filter_specs.append(spec)
 
         # At this point, all the parameters used by the various ListFilters
@@ -1398,11 +1419,21 @@ class CommonChangeList(ChangeList):
             six.reraise(IncorrectLookupParameters, IncorrectLookupParameters(e), sys.exc_info()[2])
 
     def get_queryset(self, request):
-        qs = super(CommonChangeList, self).get_queryset(request);
+        qs = self.root_queryset
 
-        # First, we collect all the declared top filters.
+        # First, we collect all the declared list filters.
+        (self.filter_specs, self.has_filters, remaining_lookup_params,
+         filters_use_distinct) = self.get_filters(request)
+
+        # Then, we let every list filter modify the queryset to its liking.
+        for filter_spec in self.filter_specs:
+            new_qs = filter_spec.queryset(request, qs)
+            if new_qs is not None:
+                qs = new_qs
+
+        # Second, we collect all the declared top filters.
         (self.top_filter_specs, self.has_top_filters, remaining_lookup_params,
-         filters_use_distinct) = self.get_top_filters(request)
+         filters_use_distinct) = self.get_top_filters(request, remaining_lookup_params)
 
         # Then, we let every top filter modify the queryset to its liking.
         for filter_spec in self.top_filter_specs:
@@ -1525,5 +1556,4 @@ class CommonStackedInline(CommonInlineModelAdmin):
 
 class CommonTabularInline(CommonInlineModelAdmin):
     template = 'common/edit_inline/tabular.html'
-
 
