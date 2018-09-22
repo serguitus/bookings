@@ -5,7 +5,7 @@ from django.contrib import admin, messages
 from django.contrib.admin.options import (csrf_protect_m,
                                           IS_POPUP_VAR,
                                           TO_FIELD_VAR)
-from django.contrib.admin import helpers
+from django.contrib.admin import TabularInline
 from django.contrib.admin.checks import ModelAdminChecks
 from django.contrib.admin.utils import unquote
 from django.core import checks
@@ -25,12 +25,11 @@ from django_tables2 import RequestConfig
 
 from booking.models import (
     Booking,
+    BookingPax,
     BookingAllotment,
     BookingTransfer,
     BookingExtra,
 )
-from booking.tables import BookingTable, BookingServiceTable
-
 from common.filters import TextFilter
 
 from functools import update_wrapper, partial
@@ -40,6 +39,10 @@ from reservas.admin import bookings_site
 
 MENU_LABEL_BOOKING = 'Booking'
 MENU_LABEL_BOOKING_SERVICES = 'Services By Type'
+
+
+class BookingPaxInline(TabularInline):
+    model = BookingPax
 
 
 class BookingSiteModel(SiteModel):
@@ -56,6 +59,7 @@ class BookingSiteModel(SiteModel):
     ordering = ('reference',)
     readonly_fields = ('status',)
     details_template = 'booking/booking_details.html'
+    inlines = [BookingPaxInline]
 
     """
     @csrf_protect_m

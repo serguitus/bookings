@@ -1,4 +1,9 @@
 {% load booking_tags %}
 {% load render_table from django_tables2 %}
 {% bookingservices_table current as table %}
+<div class="bookingservices-container">
     {% render_table table %}
+</div>
+<div class="bookingpax-container">
+    {% booking_pax_table current as pax-table %}
+</div>

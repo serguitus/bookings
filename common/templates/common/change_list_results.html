@@ -53,13 +53,8 @@
 					</tr>
 					{% if cl.details_template %}
 						<tr class="details collapse" id="div_{{ result.result.pk }}">
-							<td></td>
 							<td colspan="{{ result|length }}">
-								<div >
-									<div>
-										{% include cl.details_template with current=result.result %}
-									</div>
-								</div>
+								    {% include cl.details_template with current=result.result %}
 							</td>
 						</tr>
 					{% endif %}
