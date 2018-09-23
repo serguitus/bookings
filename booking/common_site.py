@@ -43,6 +43,8 @@ MENU_LABEL_BOOKING_SERVICES = 'Services By Type'
 
 class BookingPaxInline(TabularInline):
     model = BookingPax
+    fields = ['pax_name', 'pax_group', 'pax_age']
+    verbose_name_plural = 'Rooming List'
 
 
 class BookingSiteModel(SiteModel):

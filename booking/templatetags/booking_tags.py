@@ -1,6 +1,6 @@
 from django import template
 
-from booking.tables import BookingServiceTable
+from booking.tables import BookingServiceTable, BookingPaxTable
 
 register = template.Library()
 
@@ -15,4 +15,4 @@ def bookingservices_table(booking):
 @register.simple_tag
 def booking_pax_table(booking):
     """ Gives a table object with rooming list"""
-    return BookingServiceTable(booking.booking_services.all())
+    return BookingPaxTable(booking.rooming_list.all())

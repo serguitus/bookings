@@ -64,14 +64,16 @@ class BookingPax(models.Model):
         verbose_name = 'Booking Pax'
         verbose_name_plural = 'Bookings Paxes'
         unique_together = (('booking', 'pax_name'),)
-    booking = models.ForeignKey(Booking)
+    booking = models.ForeignKey(Booking, related_name='rooming_list')
     pax_name = models.CharField(max_length=50)
     pax_age = models.SmallIntegerField(blank=True, null=True)
     pax_group = models.SmallIntegerField()
-    cost_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    cost_comments = models.CharField(max_length=1000)
-    price_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    price_comments = models.CharField(max_length=1000)
+    cost_amount = models.DecimalField(max_digits=10, decimal_places=2,
+                                      blank=True, null=True)
+    cost_comments = models.CharField(max_length=1000, blank=True, null=True)
+    price_amount = models.DecimalField(max_digits=10, decimal_places=2,
+                                       blank=True, null=True)
+    price_comments = models.CharField(max_length=1000, blank=True, null=True)
 
 
 class BookingService(models.Model):

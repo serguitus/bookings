@@ -1,7 +1,7 @@
 import django_tables2 as tables
 
 from django.utils.html import format_html
-from booking.models import Booking, BookingService
+from booking.models import Booking, BookingService, BookingPax
 
 
 class BookingTable(tables.Table):
@@ -24,3 +24,10 @@ class BookingServiceTable(tables.Table):
         template_name = 'booking/bookingservices_list.html'
         fields = ['name', 'datetime_from', 'datetime_to', 'cost_amount',
                   'price_amount']
+
+
+class BookingPaxTable(tables.Table):
+    class Meta:
+        model = BookingPax
+        template_name = 'booking/bookingservices_list.html'
+        fields = ['pax_name', 'pax_age']
