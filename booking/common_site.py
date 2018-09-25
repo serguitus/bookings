@@ -116,9 +116,9 @@ class BookingExtraSiteModel(SiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_LABEL_BOOKING_SERVICES
 
-    fields = ('booking', 'service', 'extra_qtty', 'datetime_from', 'datetime_to', 'status',
+    fields = ('booking', 'service', 'quantity', 'datetime_from', 'datetime_to', 'status',
         'cost_amount', 'price_amount',)
-    list_display = ('booking', 'service', 'extra_qtty', 'datetime_from', 'datetime_to', 'status',)
+    list_display = ('booking', 'service', 'quantity', 'datetime_from', 'datetime_to', 'status',)
     list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
     search_fields = ('booking__reference',)
     ordering = ('booking__reference', 'service__name',)

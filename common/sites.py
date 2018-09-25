@@ -45,7 +45,7 @@ from common.templatetags.common_utils import common_add_preserved_filters, resul
 
 
 class CommonSite(AdminSite):
-    
+
     site_namespace = 'common'
 
     site_title = ugettext_lazy('Common Site')

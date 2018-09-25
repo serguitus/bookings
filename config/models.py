@@ -453,18 +453,11 @@ class Transfer(Service):
     class Meta:
         verbose_name = 'Transfer'
         verbose_name_plural = 'Transfers'
-    location_from = models.ForeignKey(Location, related_name='location_from')
-    location_to = models.ForeignKey(Location, related_name='location_to')
+    # location_from = models.ForeignKey(Location, related_name='location_from')
+    # location_to = models.ForeignKey(Location, related_name='location_to')
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_TRANSFER
-        var_from = '?'
-        if hasattr(self, 'location_from'):
-            var_from = self.location_from.name
-        var_to = '?'
-        if hasattr(self, 'location_to'):
-            var_to = self.location_to.name
-        self.name = 'Transfer FROM: %s - TO: %s' % (var_from, var_to)
 
 
 class TransferSupplement(ServiceSupplement):

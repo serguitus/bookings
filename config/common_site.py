@@ -17,7 +17,7 @@ from django.utils.encoding import force_text
 from django.utils.translation import ugettext as _, ungettext
 
 from config.forms import (
-    AllotmentRoomTypeInlineForm, TransferForm,
+    AllotmentRoomTypeInlineForm
 )
 from config.models import (
     Location, RoomType,
@@ -101,15 +101,13 @@ class TransferSiteModel(SiteModel):
     model_order = 6120
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
-    fields = ('name', 'location_from', 'location_to', 'enabled',)
-    list_display = ('name', 'location_from', 'location_to', 'enabled',)
-    list_filter = ('location_from', 'location_to', 'enabled',)
-    search_fields = ('name', 'location_from__name, location_to__name',)
+    fields = ('name', 'enabled',)
+    list_display = ('name', 'enabled',)
+    list_filter = ('enabled',)
+    search_fields = ('name',)
     ordering = ('enabled', 'name',)
     readonly_fields = ('name',)
     inlines = [TransferSupplementInline]
-
-    form = TransferForm
 
 
 class ExtraSupplementInline(admin.TabularInline):

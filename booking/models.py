@@ -13,7 +13,7 @@ from config.constants import BOARD_TYPES
 from config.models import (
     Service, ServiceSupplement,
     RoomType, Allotment, AllotmentRoomType, AllotmentBoardType,
-    Transfer,
+    Transfer, Location,
     Extra,
 )
 
@@ -107,30 +107,7 @@ class BookingService(models.Model):
         super(BookingService, self).save(*args, **kwargs)
 
 
-class BookingServiceGroup(models.Model):
-    """
-    Booking Service Group
-    """
-    class Meta:
-        verbose_name = 'Booking Service Group'
-        verbose_name_plural = 'Bookings Services Group'
-    booking_service = models.ForeignKey(BookingService)
-    group = models.SmallIntegerField()
-    cost_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    cost_comments = models.CharField(max_length=1000)
-    price_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    price_comments = models.CharField(max_length=1000)
-
-    def fill_data(self):
-        pass
-
-    def save(self, *args, **kwargs):
-        self.fill_data()
-        # Call the "real" save() method.
-        super().save(*args, **kwargs)
-
-
-class BookingPaxServiceGroup(models.Model):
+class BookingServicePax(models.Model):
     """
     Booking Pax Service Group
     """
@@ -138,7 +115,8 @@ class BookingPaxServiceGroup(models.Model):
         verbose_name = 'Booking Pax Service Group'
         verbose_name_plural = 'Bookings Paxes Services Groups'
     booking_pax = models.ForeignKey(BookingPax)
-    service_group = models.ForeignKey(BookingServiceGroup)
+    booking_service = models.ForeignKey(BookingService)
+    group = models.SmallIntegerField()
     cost_amount = models.DecimalField(max_digits=10, decimal_places=2)
     cost_comments = models.CharField(max_length=1000)
     price_amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -211,7 +189,7 @@ class BookingExtra(BookingService):
         verbose_name = 'Booking Extra'
         verbose_name_plural = 'Bookings Extras'
     service = models.ForeignKey(Extra)
-    extra_qtty = models.SmallIntegerField()
+    quantity = models.SmallIntegerField()
 
 
 class BookingAllotment(BookingService):
@@ -234,6 +212,9 @@ class BookingTransfer(BookingService):
         verbose_name = 'Booking Transfer'
         verbose_name_plural = 'Bookings Transfers'
     service = models.ForeignKey(Transfer)
+    location_from = models.ForeignKey(Location, related_name='location_from')
+    location_to = models.ForeignKey(Location, related_name='location_to')
+    quantity = models.SmallIntegerField(default=1)
 
 
 class BookingTransferSupplement(BookingServiceSupplement):
@@ -243,4 +224,4 @@ class BookingTransferSupplement(BookingServiceSupplement):
     class Meta:
         verbose_name = 'Booking Transfer Line Supplement'
         verbose_name_plural = 'Bookings Transfers Lines Supplements'
-    hours = models.SmallIntegerField()
+    quantity = models.SmallIntegerField(default=1)
