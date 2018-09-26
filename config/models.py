@@ -377,10 +377,10 @@ class ProviderTransferDetail(AmountDetail):
     class Meta:
         verbose_name = 'Provider Transfer Detail'
         verbose_name_plural = 'Providers Transfers Details'
-        unique_together = (('provider_service', 'location_from', 'location_to',),)
+        unique_together = (('provider_service', 'p_location_from', 'p_location_to',),)
     provider_service = models.ForeignKey(ProviderTransferService)
-    location_from = models.ForeignKey(Location, related_name='location_from')
-    location_to = models.ForeignKey(Location, related_name='location_to')
+    p_location_from = models.ForeignKey(Location, related_name='p_location_from')
+    p_location_to = models.ForeignKey(Location, related_name='p_location_to')
 
 
 class AgencyTransferService(AgencyServiceCatalogue):
@@ -400,9 +400,9 @@ class AgencyTransferDetail(AmountDetail):
     class Meta:
         verbose_name = 'Agency Transfer Detail'
         verbose_name_plural = 'Agencies Transfers Details'
-        unique_together = (('agency_service', 'location_from', 'location_to',),)
+        unique_together = (('agency_service', 'a_location_from', 'a_location_to',),)
     agency_service = models.ForeignKey(AgencyTransferService)
-    location_from = models.ForeignKey(Location, related_name='location_from')
-    location_to = models.ForeignKey(Location, related_name='location_to')
+    a_location_from = models.ForeignKey(Location, related_name='a_location_from')
+    a_location_to = models.ForeignKey(Location, related_name='a_location_to')
 
 

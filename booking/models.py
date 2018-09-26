@@ -109,18 +109,18 @@ class BookingService(models.Model):
 
 class BookingServicePax(models.Model):
     """
-    Booking Pax Service Group
+    Booking Service Pax
     """
     class Meta:
-        verbose_name = 'Booking Pax Service Group'
-        verbose_name_plural = 'Bookings Paxes Services Groups'
+        verbose_name = 'Booking Service Pax'
+        verbose_name_plural = 'Bookings Services Paxes'
     booking_pax = models.ForeignKey(BookingPax)
     booking_service = models.ForeignKey(BookingService)
     group = models.SmallIntegerField()
-    cost_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    cost_comments = models.CharField(max_length=1000)
-    price_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    price_comments = models.CharField(max_length=1000)
+    cost_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    cost_comments = models.CharField(max_length=1000, blank=True, null=True)
+    price_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    price_comments = models.CharField(max_length=1000, blank=True, null=True)
 
     def fill_data(self):
         pass
