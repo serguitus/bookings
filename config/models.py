@@ -56,6 +56,7 @@ class Service(models.Model):
     name = models.CharField(max_length=150)
     category = models.CharField(max_length=5, choices=SERVICE_CATEGORIES)
     grouping = models.BooleanField(default=False)
+    child_age = models.IntegerField(blank=True, null=True)
     enabled = models.BooleanField(default=True)
 
     def __init__(self, *args, **kwargs):
@@ -94,33 +95,35 @@ class ServiceSupplement(models.Model):
         return self.name
 
 
-class ServiceProvider(models.Model):
+class ProviderServiceCatalogue(models.Model):
     """
-    ServiceProvider
+    ProviderServiceCatalogue
     """
     class Meta:
-        verbose_name = 'Service Provider'
-        verbose_name_plural = 'Services Providers'
-        unique_together = (('service', 'provider'),)
+        verbose_name = 'Provider Service Catalogue'
+        verbose_name_plural = 'Providers Services Catalogues'
     service = models.ForeignKey(Service)
     provider = models.ForeignKey(Provider)
-    child_age = models.IntegerField(blank=True, null=True)
-
-
-class Cost(models.Model):
-    """
-    Cost
-    """
-    class Meta:
-        abstract = True
-    service_provider = models.ForeignKey(ServiceProvider)
     date_from = models.DateField()
     date_to = models.DateField()
 
 
-class CostDetail(models.Model):
+class AgencyServiceCatalogue(models.Model):
     """
-    CostDetail
+    AgencyServiceCatalogue
+    """
+    class Meta:
+        verbose_name = 'Agency Service Catalogue'
+        verbose_name_plural = 'Agencies Services Catalogues'
+    agency = models.ForeignKey(Agency)
+    service = models.ForeignKey(Service)
+    date_from = models.DateField()
+    date_to = models.DateField()
+
+
+class AmountDetail(models.Model):
+    """
+    AmountDetail
     """
     class Meta:
         abstract = True
@@ -143,78 +146,6 @@ class CostDetail(models.Model):
     ch_3_ad_2_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
     ch_3_ad_3_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
     ch_3_ad_4_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-
-
-class SupplementCostDetail(models.Model):
-    """
-    SupplementCostDetail
-    """
-    class Meta:
-        abstract = True
-    supplement = models.ForeignKey(ServiceSupplement)
-    ad_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    ch_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-
-
-class PriceCatalogue(models.Model):
-    """
-    PriceCatalogue
-    """
-    class Meta:
-        verbose_name = 'Price Catalogue'
-        verbose_name_plural = 'Prices Catalogues'
-        unique_together = (('name',),)
-    name = models.CharField(max_length=50)
-    price_percent = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
-    price_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-
-
-class ServiceProviderPrice(models.Model):
-    """
-    ServiceProviderPrice
-    """
-    class Meta:
-        verbose_name = 'Price Catalogue'
-        verbose_name_plural = 'Prices Catalogues'
-        unique_together = (('catalogue', 'service_provider'),)
-    catalogue = models.ForeignKey(PriceCatalogue)
-    service_provider = models.ForeignKey(ServiceProvider)
-    price_percent = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
-    price_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-
-
-class CostDetailPrice(models.Model):
-    """
-    CostDetailPrice
-    """
-    class Meta:
-        abstract = True
-    catalogue = models.ForeignKey(PriceCatalogue)
-    pax_1_price = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    pax_2_price = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    pax_3_price = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-
-
-class SupplementCostDetailPrice(models.Model):
-    """
-    SupplementCostDetailPrice
-    """
-    class Meta:
-        abstract = True
-    catalogue = models.ForeignKey(PriceCatalogue)
-    pax_1_price = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-
-
-class AgencyPriceCatalogue(models.Model):
-    """
-    AgencyPriceCatalogue
-    """
-    class Meta:
-        verbose_name = 'Agency Price Catalogue'
-        verbose_name_plural = 'Agencies Prices Catalogues'
-        unique_together = (('agency',),)
-    agency = models.ForeignKey(Agency)
-    price_catalogue = models.ForeignKey(PriceCatalogue)
 
 
 #===============================================================================
@@ -241,67 +172,48 @@ class ExtraSupplement(ServiceSupplement):
         verbose_name_plural = 'Extras Supplements'
 
 
-class ExtraServiceProvider(ServiceProvider):
+class ProviderExtraService(ProviderServiceCatalogue):
     """
-    ExtraServiceProvider
+    ProviderExtraService
     """
     class Meta:
-        verbose_name = 'Extra Service Provider'
-        verbose_name_plural = 'Extras Services Providers'
+        verbose_name = 'Provider Extra Service'
+        verbose_name_plural = 'Providers Extras Services'
     cost_type = models.CharField(
         max_length=5, choices=EXTRA_COST_TYPES)
 
 
-class ExtraCost(Cost):
+class ProviderExtraDetail(AmountDetail):
     """
-    ExtraCost
-    """
-    class Meta:
-        verbose_name = 'Extra Cost'
-        verbose_name_plural = 'Extras Costs'
-
-
-class ExtraCostDetail(CostDetail):
-    """
-    ExtraCostDetail
+    ProviderExtraDetail
     """
     class Meta:
-        verbose_name = 'Extra Cost Detail'
-        verbose_name_plural = 'Extras Costs Details'
-        unique_together = (('cost',),)
-    cost = models.ForeignKey(ExtraCost)
+        verbose_name = 'Provider Extra Detail'
+        verbose_name_plural = 'Providers Extras Details'
+        unique_together = (('provider_service',),)
+    provider_service = models.ForeignKey(ProviderExtraService)
 
 
-class ExtraSupplementCostDetail(SupplementCostDetail):
+class AgencyExtraService(AgencyServiceCatalogue):
     """
-    ExtraSupplementCostDetail
-    """
-    class Meta:
-        verbose_name = 'Extra Supplement Cost Detail'
-        verbose_name_plural = 'Extras Supplement Costs Details'
-        unique_together = (('cost', 'supplement'),)
-    cost = models.ForeignKey(ExtraCost)
-
-
-class ExtraCostDetailPrice(CostDetailPrice):
-    """
-    ExtraCostDetailPrice
+    AgencyExtraService
     """
     class Meta:
-        verbose_name = 'Extra Cost Detail Price'
-        verbose_name_plural = 'Extras Costs Details Prices'
-        unique_together = (('catalogue', 'cost_detail'),)
-    cost_detail = models.ForeignKey(ExtraCostDetail)
+        verbose_name = 'Provider Extra Service'
+        verbose_name_plural = 'Providers Extras Services'
+    cost_type = models.CharField(
+        max_length=5, choices=EXTRA_COST_TYPES)
 
 
-class ExtraSupplementCostDetailPrice(SupplementCostDetailPrice):
+class AgencyExtraDetail(AmountDetail):
     """
-    ExtraSupplementCostDetailPrice
+    AgencyExtraDetail
     """
     class Meta:
-        verbose_name = 'Extra Supplement Cost Detail Price'
-        verbose_name_plural = 'Extras Supplements Costs Details Prices'
-    supplement_cost_detail = models.ForeignKey(ExtraSupplementCostDetail)
+        verbose_name = 'Agency Extra Detail'
+        verbose_name_plural = 'Agencies Extras Details'
+        unique_together = (('agency_service',),)
+    agency_service = models.ForeignKey(AgencyExtraService)
 
 
 #===============================================================================
@@ -363,71 +275,50 @@ class AllotmentSupplement(ServiceSupplement):
         verbose_name_plural = 'Allotments Supplements'
 
 
-class AllotmentServiceProvider(ServiceProvider):
+class ProviderAllotmentService(ProviderServiceCatalogue):
     """
-    AllotmentServiceProvider
+    ProviderAllotmentService
     """
     class Meta:
-        verbose_name = 'Allotment Service Provider'
-        verbose_name_plural = 'Allotments Services Providers'
+        verbose_name = 'Provider Allotment Service'
+        verbose_name_plural = 'Providers Allotments Services'
     cost_type = models.CharField(max_length=5, choices=ALLOTMENT_COST_TYPES)
 
 
-class AllotmentCost(Cost):
+class ProviderAllotmentDetail(AmountDetail):
     """
-    AllotmentCost
-    """
-    class Meta:
-        verbose_name = 'Allotment Cost'
-        verbose_name_plural = 'Allotments Costs'
-
-
-class AllotmentCostDetail(CostDetail):
-    """
-    AllotmentCostDetail
+    ProviderAllotmentDetail
     """
     class Meta:
-        verbose_name = 'Allotment Cost Detail'
-        verbose_name_plural = 'Allotments Costs Details'
-        unique_together = (('cost', 'room_type', 'board_type'),)
-    cost = models.ForeignKey(AllotmentCost)
-    room_type = models.ForeignKey(AllotmentRoomType)
-    board_type = models.ForeignKey(AllotmentBoardType)
+        verbose_name = 'Provider Allotment Detail'
+        verbose_name_plural = 'Providers Allotments Details'
+        unique_together = (('provider_service', 'room_type', 'board_type'),)
+    provider_service = models.ForeignKey(ProviderAllotmentService)
+    room_type = models.ForeignKey(RoomType)
+    board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
 
 
-class AllotmentSupplementCostDetail(SupplementCostDetail):
+class AgencyAllotmentService(AgencyServiceCatalogue):
     """
-    AllotmentSupplementCostDetail
-    """
-    class Meta:
-        verbose_name = 'Allotment Supplement Cost Detail'
-        verbose_name_plural = 'Allotments Supplements Costs Details'
-        unique_together = (('cost', 'supplement'),)
-    cost = models.ForeignKey(AllotmentCost)
-    cost_type = models.CharField(
-        max_length=10,
-        choices=ALLOTMENT_SUPPLEMENT_COST_TYPES)
-
-
-class AllotmentCostDetailPrice(CostDetailPrice):
-    """
-    AllotmentCostDetailPrice
+    AgencyAllotmentService
     """
     class Meta:
-        verbose_name = 'Allotment Cost Detail Price'
-        verbose_name_plural = 'Allotments Costs Details Prices'
-        unique_together = (('catalogue', 'cost_detail'),)
-    cost_detail = models.ForeignKey(AllotmentCostDetail)
+        verbose_name = 'Agency Allotment Service'
+        verbose_name_plural = 'Agencies Allotments Services'
+    cost_type = models.CharField(max_length=5, choices=ALLOTMENT_COST_TYPES)
 
 
-class AllotmentSupplementCostDetailPrice(SupplementCostDetailPrice):
+class AgencyAllotmentDetail(AmountDetail):
     """
-    AllotmentSupplementCostDetailPrice
+    AgencyAllotmentDetail
     """
     class Meta:
-        verbose_name = 'Allotment Supplement Cost Detail Price'
-        verbose_name_plural = 'Allotments Supplements Costs Details Prices'
-    supplement_cost_detail = models.ForeignKey(AllotmentSupplementCostDetail)
+        verbose_name = 'Agency Allotment Detail'
+        verbose_name_plural = 'Agencies Allotments Details'
+        unique_together = (('agency_service', 'room_type', 'board_type'),)
+    agency_service = models.ForeignKey(AgencyAllotmentService)
+    room_type = models.ForeignKey(RoomType)
+    board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
 
 
 class AllotmentRoomAvailability(models.Model):
@@ -453,18 +344,9 @@ class Transfer(Service):
     class Meta:
         verbose_name = 'Transfer'
         verbose_name_plural = 'Transfers'
-    location_from = models.ForeignKey(Location, related_name='location_from')
-    location_to = models.ForeignKey(Location, related_name='location_to')
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_TRANSFER
-        var_from = '?'
-        if hasattr(self, 'location_from'):
-            var_from = self.location_from.name
-        var_to = '?'
-        if hasattr(self, 'location_to'):
-            var_to = self.location_to.name
-        self.name = 'Transfer FROM: %s - TO: %s' % (var_from, var_to)
 
 
 class TransferSupplement(ServiceSupplement):
@@ -476,64 +358,49 @@ class TransferSupplement(ServiceSupplement):
         verbose_name_plural = 'Transfers Supplements'
 
 
-class TransferServiceProvider(ServiceProvider):
+class ProviderTransferService(ProviderServiceCatalogue):
     """
-    TransferServiceProvider
+    ProviderTransferService
     """
     class Meta:
-        verbose_name = 'Transfer Service Provider'
-        verbose_name_plural = 'Transfers Services Providers'
+        verbose_name = 'Provider Transfer Service'
+        verbose_name_plural = 'Providers Transfers Services'
     cost_type = models.CharField(max_length=5, choices=TRANSFER_COST_TYPES)
 
 
-class TransferCost(Cost):
+class ProviderTransferDetail(AmountDetail):
     """
-    TransferCost
-    """
-    class Meta:
-        verbose_name = 'Transfer Cost'
-        verbose_name_plural = 'Transfers Costs'
-
-
-class TransferCostDetail(CostDetail):
-    """
-    TransferCostDetail
+    ProviderTransferDetail
     """
     class Meta:
-        verbose_name = 'Transfer Cost Detail'
-        verbose_name_plural = 'Transfers Costs Details'
-        unique_together = (('cost',),)
-    cost = models.ForeignKey(TransferCost)
+        verbose_name = 'Provider Transfer Detail'
+        verbose_name_plural = 'Providers Transfers Details'
+        unique_together = (('provider_service', 'location_from', 'location_to',),)
+    provider_service = models.ForeignKey(ProviderTransferService)
+    location_from = models.ForeignKey(Location, related_name='location_from')
+    location_to = models.ForeignKey(Location, related_name='location_to')
 
 
-class TransferSupplementCostDetail(SupplementCostDetail):
+class AgencyTransferService(AgencyServiceCatalogue):
     """
-    TransferSupplementCostDetail
+    AgencyTransferService
     """
     class Meta:
-        verbose_name = 'Transfer Supplement'
-        verbose_name_plural = 'Transfers Supplements'
-        unique_together = (('cost', 'supplement'),)
-    cost = models.ForeignKey(TransferCost)
-    cost_type = models.CharField(
-        max_length=10,
-        choices=TRANSFER_SUPPLEMENT_COST_TYPES)
+        verbose_name = 'Agency Transfer Service'
+        verbose_name_plural = 'Agencies Transfers Services'
+    cost_type = models.CharField(max_length=5, choices=TRANSFER_COST_TYPES)
 
-class TransferCostDetailPrice(CostDetailPrice):
+
+class AgencyTransferDetail(AmountDetail):
     """
-    TransferCostDetailPrice
+    AgencyTransferDetail
     """
     class Meta:
-        verbose_name = 'Transfer Cost Detail Price'
-        verbose_name_plural = 'Transfer Costs Details Prices'
-        unique_together = (('catalogue', 'cost_detail'),)
-    cost_detail = models.ForeignKey(TransferCostDetail)
+        verbose_name = 'Agency Transfer Detail'
+        verbose_name_plural = 'Agencies Transfers Details'
+        unique_together = (('agency_service', 'location_from', 'location_to',),)
+    agency_service = models.ForeignKey(AgencyTransferService)
+    location_from = models.ForeignKey(Location, related_name='location_from')
+    location_to = models.ForeignKey(Location, related_name='location_to')
 
-class TransferSupplementCostDetailPrice(SupplementCostDetailPrice):
-    """
-    TransferSupplementCostDetailPrice
-    """
-    class Meta:
-        verbose_name = 'Transfer Supplement Cost Detail Price'
-        verbose_name_plural = 'Transfers Supplements Costs Details Prices'
-    supplement_cost_detail = models.ForeignKey(TransferSupplementCostDetail)
+
