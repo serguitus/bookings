@@ -344,6 +344,8 @@ class Transfer(Service):
     class Meta:
         verbose_name = 'Transfer'
         verbose_name_plural = 'Transfers'
+    # location_from = models.ForeignKey(Location, related_name='location_from')
+    # location_to = models.ForeignKey(Location, related_name='location_to')
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_TRANSFER
