@@ -108,15 +108,13 @@ class ProviderServiceCatalogue(models.Model):
     date_to = models.DateField()
 
 
-class AgencyServiceCatalogue(models.Model):
+class AgencyCatalogue(models.Model):
     """
-    AgencyServiceCatalogue
+    AgencyCatalogue
     """
     class Meta:
-        verbose_name = 'Agency Service Catalogue'
-        verbose_name_plural = 'Agencies Services Catalogues'
+        abstract = True
     agency = models.ForeignKey(Agency)
-    service = models.ForeignKey(Service)
     date_from = models.DateField()
     date_to = models.DateField()
 
@@ -194,13 +192,14 @@ class ProviderExtraDetail(AmountDetail):
     provider_service = models.ForeignKey(ProviderExtraService)
 
 
-class AgencyExtraService(AgencyServiceCatalogue):
+class AgencyExtraService(AgencyCatalogue):
     """
     AgencyExtraService
     """
     class Meta:
-        verbose_name = 'Provider Extra Service'
-        verbose_name_plural = 'Providers Extras Services'
+        verbose_name = 'Agency Extra Service'
+        verbose_name_plural = 'Agency Extras Services'
+    service = models.ForeignKey(Extra)
     cost_type = models.CharField(
         max_length=5, choices=EXTRA_COST_TYPES)
 
@@ -298,13 +297,14 @@ class ProviderAllotmentDetail(AmountDetail):
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
 
 
-class AgencyAllotmentService(AgencyServiceCatalogue):
+class AgencyAllotmentService(AgencyCatalogue):
     """
     AgencyAllotmentService
     """
     class Meta:
         verbose_name = 'Agency Allotment Service'
         verbose_name_plural = 'Agencies Allotments Services'
+    service = models.ForeignKey(Allotment)
     cost_type = models.CharField(max_length=5, choices=ALLOTMENT_COST_TYPES)
 
 
@@ -383,13 +383,14 @@ class ProviderTransferDetail(AmountDetail):
     p_location_to = models.ForeignKey(Location, related_name='p_location_to')
 
 
-class AgencyTransferService(AgencyServiceCatalogue):
+class AgencyTransferService(AgencyCatalogue):
     """
     AgencyTransferService
     """
     class Meta:
         verbose_name = 'Agency Transfer Service'
         verbose_name_plural = 'Agencies Transfers Services'
+    service = models.ForeignKey(Transfer)
     cost_type = models.CharField(max_length=5, choices=TRANSFER_COST_TYPES)
 
 
