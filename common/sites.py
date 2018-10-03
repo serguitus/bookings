@@ -1126,7 +1126,7 @@ class SiteModel(ModelAdmin):
         """
         A list_display column containing a button widget.
         """
-        return mark_safe('<button type="button" class="btn btn-default btn-xs" data-toggle="collapse" data-target="#div_' + str(obj.pk) +  '" aria-expanded="true"><span class="glyphicon"></span></button>')
+        return mark_safe('<button type="button" class="btn btn-default btn-xs collapsed" data-toggle="collapse" data-target="#div_' + str(obj.pk) +  '" aria-expanded="false"><span class="glyphicon"></span></button>')
 
     @csrf_protect_m
     def changelist_view(self, request, extra_context=None):
