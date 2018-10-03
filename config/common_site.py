@@ -24,6 +24,9 @@ from config.models import (
     Allotment, AllotmentRoomType, AllotmentBoardType, AllotmentSupplement,
     Transfer, TransferSupplement,
     Extra, ExtraSupplement,
+    AgencyAllotmentService,
+    AgencyTransferService,
+    AgencyExtraService,
 )
 
 from functools import update_wrapper, partial
@@ -67,11 +70,6 @@ class AllotmentBoardTypeInline(CommonTabularInline):
     extra = 0
 
 
-class AllotmentSupplementInline(CommonTabularInline):
-    model = AllotmentSupplement
-    extra = 0
-
-
 class AllotmentRoomTypeSiteModel(SiteModel):
     fields = ('allotment', 'room_type', 'room_capacity',)
     list_display = ('allotment', 'room_type', 'room_capacity',)
@@ -89,12 +87,7 @@ class AllotmentSiteModel(SiteModel):
     list_filter = ('location', 'enabled',)
     search_fields = ('name', 'location__name',)
     ordering = ('enabled', 'name',)
-    inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline, AllotmentSupplementInline]
-
-
-class TransferSupplementInline(admin.TabularInline):
-    model = TransferSupplement
-    extra = 0
+    inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline]
 
 
 class TransferSiteModel(SiteModel):
@@ -107,12 +100,6 @@ class TransferSiteModel(SiteModel):
     search_fields = ('name',)
     ordering = ('enabled', 'name',)
     readonly_fields = ('name',)
-    inlines = [TransferSupplementInline]
-
-
-class ExtraSupplementInline(admin.TabularInline):
-    model = ExtraSupplement
-    extra = 0
 
 
 class ExtraSiteModel(SiteModel):
@@ -124,7 +111,33 @@ class ExtraSiteModel(SiteModel):
     list_filter = ('enabled',)
     search_fields = ('name',)
     ordering = ('enabled', 'name',)
-    inlines = [ExtraSupplementInline]
+
+
+class AgencyAllotmentServiceSiteModel(SiteModel):
+    model_order = 4120
+    menu_label = MENU_LABEL_CONFIG_BASIC
+    menu_group = 'Agency Catalogue'
+    fields = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
+    fields = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
+    search_fields = ('agency.name','service.name',)
+
+
+class AgencyTransferServiceSiteModel(SiteModel):
+    model_order = 4130
+    menu_label = MENU_LABEL_CONFIG_BASIC
+    menu_group = 'Agency Catalogue'
+    fields = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
+    fields = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
+    search_fields = ('agency.name','service.name',)
+
+
+class AgencyExtraServiceSiteModel(SiteModel):
+    model_order = 4140
+    menu_label = MENU_LABEL_CONFIG_BASIC
+    menu_group = 'Agency Catalogue'
+    fields = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
+    fields = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
+    search_fields = ('agency.name','service.name',)
 
 
 bookings_site.register(Location, LocationSiteModel)
@@ -135,3 +148,7 @@ bookings_site.register(AllotmentRoomType, AllotmentRoomTypeSiteModel)
 bookings_site.register(Allotment, AllotmentSiteModel)
 bookings_site.register(Transfer, TransferSiteModel)
 bookings_site.register(Extra, ExtraSiteModel)
+
+bookings_site.register(AgencyAllotmentService, AgencyAllotmentServiceSiteModel)
+bookings_site.register(AgencyTransferService, AgencyTransferServiceSiteModel)
+bookings_site.register(AgencyExtraService, AgencyExtraServiceSiteModel)
