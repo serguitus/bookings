@@ -140,7 +140,7 @@ class AgencyAllotmentServiceSiteModel(SiteModel):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
     fields = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
-    fields = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
+    list_display = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
     search_fields = ('agency.name','service.name',)
     inlines = [AgencyAllotmentDetailInline]
 
@@ -155,14 +155,22 @@ class AgencyTransferServiceSiteModel(SiteModel):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
     fields = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
-    fields = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
+    list_display = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
     search_fields = ('agency.name','service.name',)
     inlines = [AgencyTransferDetailInline]
 
 
 class AgencyExtraDetailInline(CommonStackedInline):
     model = AgencyExtraDetail
-    extra = 0
+    extra = 1
+    def emptyField(self):
+        pass
+    fields = (
+        ('ch_1_ad_0_amount','ch_2_ad_0_amount','ch_3_ad_0_amount',),
+        ('ad_1_amount','ch_1_ad_1_amount','ch_2_ad_1_amount','ch_3_ad_1_amount',),
+        ('ad_2_amount','ch_1_ad_2_amount','ch_2_ad_2_amount','ch_3_ad_2_amount',),
+        ('ad_3_amount','ch_1_ad_3_amount','ch_2_ad_3_amount','ch_3_ad_3_amount',),
+    )
 
 
 class AgencyExtraServiceSiteModel(SiteModel):
@@ -170,7 +178,7 @@ class AgencyExtraServiceSiteModel(SiteModel):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
     fields = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
-    fields = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
+    list_display = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
     search_fields = ('agency.name','service.name',)
     inlines = [AgencyExtraDetailInline]
 
