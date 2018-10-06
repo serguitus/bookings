@@ -365,8 +365,8 @@ class ProviderTransferService(ProviderServiceCatalogue):
     ProviderTransferService
     """
     class Meta:
-        verbose_name = 'Provider Transfer Service'
-        verbose_name_plural = 'Providers Transfers Services'
+        verbose_name = 'Transfer Service Provider'
+        verbose_name_plural = 'Transfer Service Providers'
     cost_type = models.CharField(max_length=5, choices=TRANSFER_COST_TYPES)
 
 

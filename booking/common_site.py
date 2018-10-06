@@ -30,6 +30,7 @@ from booking.models import (
     BookingTransfer,
     BookingExtra,
 )
+from booking.forms import BookingServiceForm
 from common.filters import TextFilter
 
 from functools import update_wrapper, partial
@@ -104,11 +105,12 @@ class BookingTransferSiteModel(SiteModel):
     menu_group = MENU_LABEL_BOOKING_SERVICES
 
     fields = ('booking', 'service', 'datetime_from', 'datetime_to', 'status',
-        'cost_amount', 'price_amount',)
+              'cost_amount', 'price_amount', 'provider')
     list_display = ('booking', 'service', 'datetime_from', 'datetime_to', 'status',)
     list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
     search_fields = ['booking__reference',]
     ordering = ('booking__reference', 'service__name',)
+    form = BookingServiceForm
 
 
 class BookingExtraSiteModel(SiteModel):
