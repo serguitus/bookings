@@ -95,14 +95,12 @@ class ServiceSupplement(models.Model):
         return self.name
 
 
-class ProviderServiceCatalogue(models.Model):
+class ProviderCatalogue(models.Model):
     """
-    ProviderServiceCatalogue
+    ProviderCatalogue
     """
     class Meta:
-        verbose_name = 'Provider Service Catalogue'
-        verbose_name_plural = 'Providers Services Catalogues'
-    service = models.ForeignKey(Service)
+        abstract = True
     provider = models.ForeignKey(Provider)
     date_from = models.DateField()
     date_to = models.DateField()
@@ -170,13 +168,14 @@ class ExtraSupplement(ServiceSupplement):
         verbose_name_plural = 'Extras Supplements'
 
 
-class ProviderExtraService(ProviderServiceCatalogue):
+class ProviderExtraService(ProviderCatalogue):
     """
     ProviderExtraService
     """
     class Meta:
         verbose_name = 'Provider Extra Service'
         verbose_name_plural = 'Providers Extras Services'
+    service = models.ForeignKey(Extra)
     cost_type = models.CharField(
         max_length=5, choices=EXTRA_COST_TYPES)
 
@@ -274,13 +273,14 @@ class AllotmentSupplement(ServiceSupplement):
         verbose_name_plural = 'Allotments Supplements'
 
 
-class ProviderAllotmentService(ProviderServiceCatalogue):
+class ProviderAllotmentService(ProviderCatalogue):
     """
     ProviderAllotmentService
     """
     class Meta:
         verbose_name = 'Provider Allotment Service'
         verbose_name_plural = 'Providers Allotments Services'
+    service = models.ForeignKey(Allotment)
     cost_type = models.CharField(max_length=5, choices=ALLOTMENT_COST_TYPES)
 
 
@@ -360,13 +360,14 @@ class TransferSupplement(ServiceSupplement):
         verbose_name_plural = 'Transfers Supplements'
 
 
-class ProviderTransferService(ProviderServiceCatalogue):
+class ProviderTransferService(ProviderCatalogue):
     """
     ProviderTransferService
     """
     class Meta:
         verbose_name = 'Provider Transfer Service'
         verbose_name_plural = 'Providers Transfers Services'
+    service = models.ForeignKey(Transfer)
     cost_type = models.CharField(max_length=5, choices=TRANSFER_COST_TYPES)
 
 
