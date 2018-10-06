@@ -24,9 +24,9 @@ from config.models import (
     Allotment, AllotmentRoomType, AllotmentBoardType, AllotmentSupplement,
     Transfer, TransferSupplement,
     Extra, ExtraSupplement,
-    AgencyAllotmentService,
-    AgencyTransferService,
-    AgencyExtraService,
+    AgencyAllotmentService, AgencyAllotmentDetail,
+    AgencyTransferService, AgencyTransferDetail,
+    AgencyExtraService, AgencyExtraDetail,
 )
 
 from functools import update_wrapper, partial
@@ -65,17 +65,22 @@ class AllotmentRoomTypeInline(CommonTabularInline):
     form = AllotmentRoomTypeInlineForm
 
 
-class AllotmentBoardTypeInline(CommonTabularInline):
-    model = AllotmentBoardType
-    extra = 0
-
-
 class AllotmentRoomTypeSiteModel(SiteModel):
     fields = ('allotment', 'room_type', 'room_capacity',)
     list_display = ('allotment', 'room_type', 'room_capacity',)
     list_filter = ('room_type', 'room_capacity',)
     search_fields = ('allotment__name',)
     ordering = ('allotment__name',)
+
+
+class AllotmentBoardTypeInline(CommonTabularInline):
+    model = AllotmentBoardType
+    extra = 0
+
+
+class AllotmentSupplementInline(CommonTabularInline):
+    model = AllotmentSupplement
+    extra = 0
 
 
 class AllotmentSiteModel(SiteModel):
@@ -87,7 +92,12 @@ class AllotmentSiteModel(SiteModel):
     list_filter = ('location', 'enabled',)
     search_fields = ('name', 'location__name',)
     ordering = ('enabled', 'name',)
-    inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline]
+    inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline, AllotmentSupplementInline]
+
+
+class TransferSupplementInline(CommonTabularInline):
+    model = TransferSupplement
+    extra = 0
 
 
 class TransferSiteModel(SiteModel):
@@ -99,6 +109,13 @@ class TransferSiteModel(SiteModel):
     list_filter = ('enabled',)
     search_fields = ('name',)
     ordering = ('enabled', 'name',)
+    readonly_fields = ('name',)
+    inlines = [TransferSupplementInline]
+
+
+class ExtraSupplementInline(CommonTabularInline):
+    model = ExtraSupplement
+    extra = 0
 
 
 class ExtraSiteModel(SiteModel):
@@ -110,6 +127,12 @@ class ExtraSiteModel(SiteModel):
     list_filter = ('enabled',)
     search_fields = ('name',)
     ordering = ('enabled', 'name',)
+    inlines = [ExtraSupplementInline]
+
+
+class AgencyAllotmentDetailInline(CommonStackedInline):
+    model = AgencyAllotmentDetail
+    extra = 0
 
 
 class AgencyAllotmentServiceSiteModel(SiteModel):
@@ -117,8 +140,14 @@ class AgencyAllotmentServiceSiteModel(SiteModel):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
     fields = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
-    fields = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
+    list_display = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
     search_fields = ('agency.name','service.name',)
+    inlines = [AgencyAllotmentDetailInline]
+
+
+class AgencyTransferDetailInline(CommonStackedInline):
+    model = AgencyTransferDetail
+    extra = 0
 
 
 class AgencyTransferServiceSiteModel(SiteModel):
@@ -126,8 +155,22 @@ class AgencyTransferServiceSiteModel(SiteModel):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
     fields = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
-    fields = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
+    list_display = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
     search_fields = ('agency.name','service.name',)
+    inlines = [AgencyTransferDetailInline]
+
+
+class AgencyExtraDetailInline(CommonStackedInline):
+    model = AgencyExtraDetail
+    extra = 1
+    def emptyField(self):
+        pass
+    fields = (
+        ('ch_1_ad_0_amount','ch_2_ad_0_amount','ch_3_ad_0_amount',),
+        ('ad_1_amount','ch_1_ad_1_amount','ch_2_ad_1_amount','ch_3_ad_1_amount',),
+        ('ad_2_amount','ch_1_ad_2_amount','ch_2_ad_2_amount','ch_3_ad_2_amount',),
+        ('ad_3_amount','ch_1_ad_3_amount','ch_2_ad_3_amount','ch_3_ad_3_amount',),
+    )
 
 
 class AgencyExtraServiceSiteModel(SiteModel):
@@ -135,8 +178,9 @@ class AgencyExtraServiceSiteModel(SiteModel):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
     fields = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
-    fields = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
+    list_display = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
     search_fields = ('agency.name','service.name',)
+    inlines = [AgencyExtraDetailInline]
 
 
 bookings_site.register(Location, LocationSiteModel)
