@@ -71,11 +71,18 @@ class AllotmentRoomTypeInline(CommonTabularInline):
 
 
 class AllotmentRoomTypeSiteModel(SiteModel):
+    model_order = 8110
+    menu_label = MENU_LABEL_CONFIG_BASIC
+    menu_group = 'Configuration Testing'
     fields = ('allotment', 'room_type', 'room_capacity',)
     list_display = ('allotment', 'room_type', 'room_capacity',)
     list_filter = ('room_type', 'room_capacity',)
     search_fields = ('allotment__name',)
+    top_filters = ('room_type',)
     ordering = ('allotment__name',)
+
+    class Media:
+        pass
 
 
 class AllotmentBoardTypeInline(CommonTabularInline):
@@ -84,7 +91,7 @@ class AllotmentBoardTypeInline(CommonTabularInline):
 
 
 class AllotmentBoardTypeSiteModel(SiteModel):
-    model_order = 8110
+    model_order = 8120
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Testing'
     fields = ('allotment', 'board_type',)

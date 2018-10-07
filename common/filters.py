@@ -1,6 +1,11 @@
-from django.db import models
+from dal import autocomplete
+
+from django import forms
 from django.contrib.admin.filters import FieldListFilter, DateFieldListFilter
 from django.contrib.admin.utils import lookup_needs_distinct
+from django.core.exceptions import ImproperlyConfigured
+from django.db import models
+from django.forms.widgets import Media, MEDIA_TYPES
 from django.utils.text import capfirst
 
 PARAM_PREFIX = 'srch_'
@@ -92,7 +97,7 @@ class BooleanFilter(TopFilter):
 
     def queryset(self, request, queryset):
         search_option = self._values[0]
-        if search_option:
+        if search_option and search_option != "":
             lookup = '%s__exact' % self.field_path
             if lookup_needs_distinct(self.model._meta, lookup):
                 queryset = queryset.distinct()
@@ -107,11 +112,92 @@ TopFilter.register(lambda f: isinstance(f, (models.BooleanField,)), BooleanFilte
 
 class ChoicesFilter(TopFilter):
     template = 'common/filters/choices_top_filter.html'
+    choices = None
 
     def queryset(self, request, queryset):
         search_option = self._values[0]
-        if search_option:
+        if search_option and search_option != "":
             lookup = '%s__exact' % self.field_path
+            if lookup_needs_distinct(self.model._meta, lookup):
+                queryset = queryset.distinct()
+            queryset = queryset.filter(**{lookup: search_option})
+        return queryset
+
+
+    def get_context(self):
+        if self.choices is None:
+            self.choices = self.field.choices
+        ctx = {'choices': self.choices }
+        ctx.update(super(ChoicesFilter, self).get_context())
+        return ctx
+
+
+TopFilter.register(lambda f: isinstance(f, (models.CharField,)) and bool(f.choices), ChoicesFilter)
+
+class ForeignKeyFilter(TopFilter):
+    template = 'common/filters/foreignkey_top_filter.html'
+    widget_attrs = {}
+    autocomplete_url = None
+
+    class Media:
+        css = {
+            'all': (
+                'autocomplete_light/vendor/select2/dist/css/select2.css',
+                'autocomplete_light/select2.css',
+                'dal_admin_filters/css/autocomplete-fix.css'
+            )
+        }
+        js = (
+            'autocomplete_light/jquery.init.js',
+            'autocomplete_light/autocomplete.init.js',
+            'autocomplete_light/vendor/select2/dist/js/select2.full.js',
+            'autocomplete_light/select2.js',
+            'dal_admin_filters/js/querystring.js',
+        )
+
+    def __init__(self, field, request, params, hidden_params, model, model_admin, field_path):
+
+        super(ForeignKeyFilter, self).__init__(
+            field, request, params, hidden_params, model, model_admin, field_path)
+
+        self._add_media(model_admin)
+
+        field = forms.ModelChoiceField(
+            queryset=getattr(model, self.field_path).get_queryset(),
+            widget=autocomplete.ModelSelect2(
+                url=self.autocomplete_url,
+            )
+        )
+
+        attrs = self.widget_attrs.copy()
+        attrs['id'] = 'id-%s-dal-filter' % self.field_path
+        attrs['data-placeholder'] = self.title
+
+        rendered_widget = field.widget.render(
+            name=self._parameters[0],
+            value=self._values[0],
+            attrs=attrs
+        )
+
+        self.context.update({'rendered_widget': rendered_widget})
+
+    def _add_media(self, model_admin):
+
+        if not hasattr(model_admin, 'Media'):
+            raise ImproperlyConfigured('Add empty Media class to %s. Sorry about this bug.' % model_admin)
+
+        def _get_media(obj):
+            return Media(media=getattr(obj, 'Media', None))
+
+        media = _get_media(model_admin) + _get_media(ForeignKeyFilter) + _get_media(self)
+
+        for name in MEDIA_TYPES:
+            setattr(model_admin.Media, name, getattr(media, "_" + name))
+
+    def queryset(self, request, queryset):
+        search_option = self._values[0]
+        if search_option and search_option != "" and search_option != "''":
+            lookup = '%s%s__exact' % (self.field_path, '_id')
             if lookup_needs_distinct(self.model._meta, lookup):
                 queryset = queryset.distinct()
             if search_option != "":
@@ -119,10 +205,4 @@ class ChoicesFilter(TopFilter):
         return queryset
 
 
-    def get_context(self):
-        ctx = {'choices': self.field.choices }
-        ctx.update(super(ChoicesFilter, self).get_context())
-        return ctx
-
-
-TopFilter.register(lambda f: isinstance(f, (models.CharField,)) and bool(f.choices), ChoicesFilter)
+TopFilter.register(lambda f: isinstance(f, (models.ForeignKey,)), ForeignKeyFilter)
