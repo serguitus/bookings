@@ -1,0 +1,10 @@
+{% load i18n %}
+
+<span>{{ filter.context.title }}</span>
+<select class="searchbar"
+    name="{{ filter.context.parameters.0 }}">
+    <option value="" {% if filter.context.values.0 == "" %}selected="selected"{% endif %}>All</option>
+    {% for choice in filter.context.choices %}
+        <option value="{{ choice.0 }}" {% if filter.context.values.0 == choice.0 %}selected="selected"{% endif %}>{{ choice.1 }}</option>
+    {% endfor %}
+</select>

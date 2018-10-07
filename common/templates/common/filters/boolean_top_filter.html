@@ -1,0 +1,9 @@
+{% load i18n %}
+
+<span>{{ filter.context.title }}</span>
+<select class="searchbar"
+    name="{{ filter.context.parameters.0 }}">
+    <option value="" {% if filter.context.values.0 == "" %}selected="selected"{% endif %}>All</option>
+    <option value="True" {% if filter.context.values.0 == "True" %}selected="selected"{% endif %}>Yes</option>
+    <option value="False"  {% if filter.context.values.0 == "False" %}selected="selected"{% endif %}>No</option>
+</select>

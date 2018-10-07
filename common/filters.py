@@ -84,4 +84,45 @@ class TextFilter(TopFilter):
         return queryset
 
 
-TopFilter.register(lambda f: isinstance(f, (models.CharField,)), TextFilter)
+TopFilter.register(lambda f: isinstance(f, (models.CharField,)) and not bool(f.choices), TextFilter)
+
+
+class BooleanFilter(TopFilter):
+    template = 'common/filters/boolean_top_filter.html'
+
+    def queryset(self, request, queryset):
+        search_option = self._values[0]
+        if search_option:
+            lookup = '%s__exact' % self.field_path
+            if lookup_needs_distinct(self.model._meta, lookup):
+                queryset = queryset.distinct()
+            if search_option == "True":
+                queryset = queryset.filter(**{lookup: True})
+            if search_option == "False":
+                queryset = queryset.filter(**{lookup: False})
+        return queryset
+
+
+TopFilter.register(lambda f: isinstance(f, (models.BooleanField,)), BooleanFilter)
+
+class ChoicesFilter(TopFilter):
+    template = 'common/filters/choices_top_filter.html'
+
+    def queryset(self, request, queryset):
+        search_option = self._values[0]
+        if search_option:
+            lookup = '%s__exact' % self.field_path
+            if lookup_needs_distinct(self.model._meta, lookup):
+                queryset = queryset.distinct()
+            if search_option != "":
+                queryset = queryset.filter(**{lookup: search_option})
+        return queryset
+
+
+    def get_context(self):
+        ctx = {'choices': self.field.choices }
+        ctx.update(super(ChoicesFilter, self).get_context())
+        return ctx
+
+
+TopFilter.register(lambda f: isinstance(f, (models.CharField,)) and bool(f.choices), ChoicesFilter)

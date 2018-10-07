@@ -56,7 +56,9 @@ class RoomTypeSiteModel(SiteModel):
     menu_label = MENU_LABEL_CONFIG_BASIC
     fields = ('name', 'enabled',)
     list_display = ('name', 'enabled',)
+    list_editable = ('enabled',)
     list_filter = ('enabled',)
+    top_filters = ('enabled',)
     search_fields = ('name',)
 
 
@@ -79,6 +81,18 @@ class AllotmentRoomTypeSiteModel(SiteModel):
 class AllotmentBoardTypeInline(CommonTabularInline):
     model = AllotmentBoardType
     extra = 0
+
+
+class AllotmentBoardTypeSiteModel(SiteModel):
+    model_order = 8110
+    menu_label = MENU_LABEL_CONFIG_BASIC
+    menu_group = 'Configuration Testing'
+    fields = ('allotment', 'board_type',)
+    list_display = ('allotment', 'board_type',)
+    list_filter = ('board_type',)
+    top_filters = ('board_type',)
+    search_fields = ('allotment__name',)
+    ordering = ('allotment__name',)
 
 
 class AllotmentSupplementInline(CommonTabularInline):
@@ -267,6 +281,7 @@ bookings_site.register(Location, LocationSiteModel)
 bookings_site.register(RoomType, RoomTypeSiteModel)
 
 bookings_site.register(AllotmentRoomType, AllotmentRoomTypeSiteModel)
+bookings_site.register(AllotmentBoardType, AllotmentBoardTypeSiteModel)
 
 bookings_site.register(Allotment, AllotmentSiteModel)
 bookings_site.register(Transfer, TransferSiteModel)
