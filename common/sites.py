@@ -331,6 +331,10 @@ class SiteModel(ModelAdmin):
 
     recent_allowed = True
 
+
+    class Media:
+        pass
+
     def related_field_widget_wrapper_class(self):
         return CommonRelatedFieldWidgetWrapper
 

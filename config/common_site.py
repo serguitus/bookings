@@ -81,9 +81,6 @@ class AllotmentRoomTypeSiteModel(SiteModel):
     top_filters = ('room_type',)
     ordering = ('allotment__name',)
 
-    class Media:
-        pass
-
 
 class AllotmentBoardTypeInline(CommonTabularInline):
     model = AllotmentBoardType
@@ -180,7 +177,7 @@ class ProviderTransferDetailInline(CommonStackedInline):
     model = ProviderTransferDetail
     extra = 1
     fields = (
-        ('a_location_from','a_location_to',),
+        ('p_location_from','p_location_to',),
         ('ad_1_amount','ch_1_ad_1_amount','ch_2_ad_1_amount','ch_3_ad_1_amount',),
         ('ad_2_amount','ch_1_ad_2_amount','ch_2_ad_2_amount','ch_3_ad_2_amount',),
         ('ad_3_amount','ch_1_ad_3_amount','ch_2_ad_3_amount','ch_3_ad_3_amount',),
