@@ -23,6 +23,7 @@ from django.utils.translation import ugettext as _, ungettext
 
 from django_tables2 import RequestConfig
 
+from booking.forms import BookingForm, BookingAllotmentForm, BookingTransferForm, BookingExtraForm
 from booking.models import (
     Booking,
     BookingPax,
@@ -30,7 +31,7 @@ from booking.models import (
     BookingTransfer,
     BookingExtra,
 )
-from booking.forms import BookingServiceForm
+
 from common.filters import TextFilter
 
 from functools import update_wrapper, partial
@@ -63,6 +64,7 @@ class BookingSiteModel(SiteModel):
     readonly_fields = ('status',)
     details_template = 'booking/booking_details.html'
     inlines = [BookingPaxInline]
+    form = BookingForm
 
     """
     @csrf_protect_m
@@ -97,6 +99,7 @@ class BookingAllotmentSiteModel(SiteModel):
     list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
     search_fields = ['booking__reference', ]
     ordering = ('booking__reference', 'service__name',)
+    form = BookingAllotmentForm
 
 
 class BookingTransferSiteModel(SiteModel):
@@ -110,7 +113,7 @@ class BookingTransferSiteModel(SiteModel):
     list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
     search_fields = ['booking__reference',]
     ordering = ('booking__reference', 'service__name',)
-    form = BookingServiceForm
+    form = BookingTransferForm
 
 
 class BookingExtraSiteModel(SiteModel):
@@ -124,6 +127,7 @@ class BookingExtraSiteModel(SiteModel):
     list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
     search_fields = ('booking__reference',)
     ordering = ('booking__reference', 'service__name',)
+    form = BookingExtraForm
 
 
 bookings_site.register(Booking, BookingSiteModel)

@@ -5,7 +5,7 @@ from django.db.models import Exists, OuterRef, Subquery, Q, F, Value, DecimalFie
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext
 
-from finance.models import Account, LoanEntity, LoanAccount, Provider
+from finance.models import Account, LoanEntity, LoanAccount, Agency, Provider
 from finance.constants import STATUS_READY
 
 
@@ -17,7 +17,7 @@ class AccountAutocompleteView(autocomplete.Select2QuerySetView):
         qs = Account.objects.filter(enabled=True).all()
         if self.q:
             qs = qs.filter(name__icontains=self.q)
-        return qs
+        return qs[:20]
 
 
 class LoanEntityAutocompleteView(autocomplete.Select2QuerySetView):
@@ -28,7 +28,7 @@ class LoanEntityAutocompleteView(autocomplete.Select2QuerySetView):
         qs = LoanEntity.objects.filter(enabled=True).all()
         if self.q:
             qs = qs.filter(name__istartswith=self.q)
-        return qs
+        return qs[:20]
 
 
 class LoanAccountAutocompleteView(autocomplete.Select2QuerySetView):
@@ -39,7 +39,18 @@ class LoanAccountAutocompleteView(autocomplete.Select2QuerySetView):
         qs = LoanAccount.objects.filter(account__enabled=True).all()
         if self.q:
             qs = qs.filter(name__istartswith=self.q)
-        return qs
+        return qs[:20]
+
+
+class AgencyAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return Agency.objects.none()
+        qs = Agency.objects.all()
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs[:20]
 
 
 class ProviderAutocompleteView(autocomplete.Select2QuerySetView):
@@ -50,7 +61,7 @@ class ProviderAutocompleteView(autocomplete.Select2QuerySetView):
         qs = Provider.objects.all()
         if self.q:
             qs = qs.filter(name__icontains=self.q)
-        return qs
+        return qs[:20]
 
 
 class IncorrectLookupParameters(Exception):
