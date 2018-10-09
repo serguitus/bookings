@@ -12,10 +12,10 @@ class LocationAutocompleteView(autocomplete.Select2QuerySetView):
         # Don't forget to filter out results depending on the visitor !
         if not self.request.user.is_authenticated():
             return Location.objects.none()
-        qs = Location.objects.filter(enabled=True).all()[:20]
+        qs = Location.objects.filter(enabled=True).all()
         if self.q:
             qs = qs.filter(name__icontains=self.q)
-        return qs
+        return qs[:20]
 
 
 class RoomTypeAutocompleteView(autocomplete.Select2QuerySetView):
@@ -23,10 +23,10 @@ class RoomTypeAutocompleteView(autocomplete.Select2QuerySetView):
         # Don't forget to filter out results depending on the visitor !
         if not self.request.user.is_authenticated():
             return RoomType.objects.none()
-        qs = RoomType.objects.filter(enabled=True).all()[:20]
+        qs = RoomType.objects.filter(enabled=True).all()
         if self.q:
             qs = qs.filter(name__icontains=self.q)
-        return qs
+        return qs[:20]
 
 
 class AllotmentAutocompleteView(autocomplete.Select2QuerySetView):
