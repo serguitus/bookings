@@ -53,21 +53,22 @@ class BookingAllotmentInLine(CommonTabularInline):
     model = BookingAllotment
     extra = 1
     fields = ['service', 'datetime_from', 'datetime_to',
-              'room_type', 'board_type', 'status']
+              'provider', 'room_type', 'board_type', 'status']
 
 
 class BookingTransferInLine(CommonTabularInline):
     model = BookingTransfer
     extra = 1
     fields = ['service', 'datetime_from', 'datetime_to',
-              'location_from', 'location_to', 'quantity', 'status']
+              'location_from', 'location_to', 'quantity',
+              'provider', 'status']
 
 
 class BookingExtraInLine(CommonTabularInline):
     model = BookingExtra
     extra = 1
     fields = ['service', 'datetime_from', 'datetime_to',
-              'quantity', 'status']
+              'provider', 'quantity', 'status']
 
 
 class BookingSiteModel(SiteModel):
