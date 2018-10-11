@@ -31,6 +31,7 @@ from config.models import (
     ProviderTransferService, ProviderTransferDetail,
     ProviderExtraService, ProviderExtraDetail,
 )
+from config.top_filters import RoomTypeTopFilter
 
 from functools import update_wrapper, partial
 
@@ -78,7 +79,7 @@ class AllotmentRoomTypeSiteModel(SiteModel):
     list_display = ('allotment', 'room_type', 'room_capacity',)
     list_filter = ('room_type', 'room_capacity',)
     search_fields = ('allotment__name',)
-    top_filters = ('room_type',)
+    top_filters = (('room_type', RoomTypeTopFilter),),
     ordering = ('allotment__name',)
 
 
