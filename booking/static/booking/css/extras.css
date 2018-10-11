@@ -1,0 +1,9 @@
+.bookingservices-container {
+    width: 75%;
+    float: left;
+}
+
+.bookingpax-container {
+    width: 20%;
+    float: right;
+}

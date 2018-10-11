@@ -131,7 +131,6 @@ class TransferSiteModel(SiteModel):
     list_filter = ('enabled',)
     search_fields = ('name',)
     ordering = ('enabled', 'name',)
-    readonly_fields = ('name',)
     inlines = [TransferSupplementInline]
 
 

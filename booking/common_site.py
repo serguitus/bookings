@@ -33,7 +33,7 @@ from booking.models import (
 )
 
 from common.filters import TextFilter
-
+from common.sites import CommonTabularInline
 from functools import update_wrapper, partial
 
 from reservas.admin import bookings_site
@@ -47,6 +47,28 @@ class BookingPaxInline(TabularInline):
     model = BookingPax
     fields = ['pax_name', 'pax_group', 'pax_age']
     verbose_name_plural = 'Rooming List'
+
+
+class BookingAllotmentInLine(CommonTabularInline):
+    model = BookingAllotment
+    extra = 1
+    fields = ['service', 'datetime_from', 'datetime_to',
+              'provider', 'room_type', 'board_type', 'status']
+
+
+class BookingTransferInLine(CommonTabularInline):
+    model = BookingTransfer
+    extra = 1
+    fields = ['service', 'datetime_from', 'datetime_to',
+              'location_from', 'location_to', 'quantity',
+              'provider', 'status']
+
+
+class BookingExtraInLine(CommonTabularInline):
+    model = BookingExtra
+    extra = 1
+    fields = ['service', 'datetime_from', 'datetime_to',
+              'provider', 'quantity', 'status']
 
 
 class BookingSiteModel(SiteModel):
@@ -63,7 +85,8 @@ class BookingSiteModel(SiteModel):
     ordering = ('reference',)
     readonly_fields = ('status',)
     details_template = 'booking/booking_details.html'
-    inlines = [BookingPaxInline]
+    inlines = [BookingPaxInline, BookingAllotmentInLine,
+               BookingTransferInLine, BookingExtraInLine]
     form = BookingForm
 
     """
