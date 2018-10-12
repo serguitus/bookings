@@ -1,16 +1,3 @@
 {% load i18n %}
 
 {{ filter.context.rendered_widget }}
-
-<script>
-    (function($) {
-        $(document).ready(function () {
-            $('#changelist-filter select[name={{ filter.context.parameters.0 }}]').on(
-                'change',
-                function (e, choice) {
-                    var val = $(e.target).val() || '';
-                    window.location.search = search_replace('{{ filter.context.parameters.0 }}', val);
-                });
-        });
-    })(yl.jQuery);
-</script>

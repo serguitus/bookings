@@ -120,25 +120,61 @@ class BooleanFilter(TopFilter):
 TopFilter.register(lambda f: isinstance(f, (models.BooleanField,)), BooleanFilter)
 
 class ChoicesFilter(TopFilter):
+    _support_array = True
     template = 'common/filters/choices_top_filter.html'
+    widget_attrs = {}
     choices = None
+
+    def __init__(self, field, request, params, hidden_params, model, model_admin, field_path):
+    
+        super(ChoicesFilter, self).__init__(
+            field, request, params, hidden_params, model, model_admin, field_path)
+
+        choices = self.choices
+        if choices is None:
+            choices = self.field.choices
+
+        field = forms.MultipleChoiceField(
+            choices=choices,
+            required=False,
+            widget=autocomplete.Select2Multiple()
+        )
+
+        self._add_media(model_admin)
+
+        attrs = self.widget_attrs.copy()
+        attrs['id'] = 'id-%s-dal-filter' % self.field_path
+        attrs['data-placeholder'] = self.title
+
+        rendered_widget = field.widget.render(
+            name=self._parameters[0],
+            value=self._values[0],
+            attrs=attrs
+        )
+
+        self.context.update({'rendered_widget': rendered_widget})
+
+    def _add_media(self, model_admin):
+
+        if not hasattr(model_admin, 'Media'):
+            raise ImproperlyConfigured('Add empty Media class to %s. Sorry about this bug.' % model_admin)
+
+        def _get_media(obj):
+            return Media(media=getattr(obj, 'Media', None))
+
+        media = _get_media(model_admin) + _get_media(autocomplete.Select2Multiple) + _get_media(self)
+
+        for name in MEDIA_TYPES:
+            setattr(model_admin.Media, name, getattr(media, "_" + name))
 
     def queryset(self, request, queryset):
         search_option = self._values[0]
-        if search_option and search_option != "":
-            lookup = '%s__exact' % self.field_path
+        if search_option and search_option != []:
+            lookup = '%s__in' % self.field_path
             if lookup_needs_distinct(self.model._meta, lookup):
                 queryset = queryset.distinct()
             queryset = queryset.filter(**{lookup: search_option})
         return queryset
-
-
-    def get_context(self):
-        if self.choices is None:
-            self.choices = self.field.choices
-        ctx = {'choices': self.choices }
-        ctx.update(super(ChoicesFilter, self).get_context())
-        return ctx
 
 
 TopFilter.register(lambda f: isinstance(f, (models.CharField,)) and bool(f.choices), ChoicesFilter)
