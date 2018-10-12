@@ -1,3 +1,7 @@
+from config.constants import (SERVICE_CATEGORY_EXTRA,
+                              SERVICE_CATEGORY_ALLOTMENT,
+                              SERVICE_CATEGORY_TRANSFER)
+
 BOOKING_STATUS_PENDING = 'PD'
 BOOKING_STATUS_REQUEST = 'RQ'
 BOOKING_STATUS_CONFIRMED = 'OK'
@@ -19,3 +23,9 @@ SERVICE_STATUS_LIST = (
     (SERVICE_STATUS_CONFIRMED, 'Confirmed'),
     (SERVICE_STATUS_CANCELLED, 'Cancelled'),
 )
+
+BOOKINGSERVICE_TYPES = {
+    SERVICE_CATEGORY_ALLOTMENT: 'bookingallotment',
+    SERVICE_CATEGORY_TRANSFER: 'bookingtransfer',
+    SERVICE_CATEGORY_EXTRA: 'bookingextra',
+}

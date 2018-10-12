@@ -9,7 +9,10 @@ from booking.constants import (
     BOOKING_STATUS_LIST, BOOKING_STATUS_PENDING,
     SERVICE_STATUS_LIST, SERVICE_STATUS_PENDING)
 
-from config.constants import BOARD_TYPES
+from config.constants import (BOARD_TYPES, SERVICE_CATEGORIES,
+                              SERVICE_CATEGORY_TRANSFER,
+                              SERVICE_CATEGORY_ALLOTMENT,
+                              SERVICE_CATEGORY_EXTRA)
 from config.models import (
     Service, ServiceSupplement,
     RoomType, Allotment, AllotmentRoomType, AllotmentBoardType,
@@ -82,10 +85,13 @@ class BookingService(models.Model):
     """
     class Meta:
         verbose_name = 'Booking Service'
-        verbose_name_plural = 'Bookings Services'
+        verbose_name_plural = 'Booking Services'
         default_permissions = ('add', 'change',)
     booking = models.ForeignKey(Booking, related_name='booking_services')
     name = models.CharField(max_length=250, default='Booking Service')
+    # this will store the child object type
+    service_type = models.CharField(max_length=5, choices=SERVICE_CATEGORIES,
+                                    blank=True, null=True)
     description = models.CharField(max_length=1000, default='')
     datetime_from = models.DateTimeField(blank=True, null=True)
     datetime_to = models.DateTimeField(blank=True, null=True)
@@ -203,6 +209,9 @@ class BookingAllotment(BookingService):
     room_type = models.ForeignKey(RoomType)
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
 
+    def fill_data(self):
+        self.service_type = SERVICE_CATEGORY_ALLOTMENT
+
 
 class BookingTransfer(BookingService):
     """
@@ -215,6 +224,12 @@ class BookingTransfer(BookingService):
     location_from = models.ForeignKey(Location, related_name='location_from')
     location_to = models.ForeignKey(Location, related_name='location_to')
     quantity = models.SmallIntegerField(default=1)
+
+    def fill_data(self):
+        # setting name for this booking_service
+        self.name = '%s (%s -> %s)' % (self.service, self.location_from,
+                                       self.location_to)
+        self.service_type = SERVICE_CATEGORY_TRANSFER
 
 
 class BookingTransferSupplement(BookingServiceSupplement):
