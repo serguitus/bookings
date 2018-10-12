@@ -1424,7 +1424,10 @@ class CommonChangeList(ChangeList):
             six.reraise(IncorrectLookupParameters, IncorrectLookupParameters(e), sys.exc_info()[2])
 
     def get_queryset(self, request):
-        qs = self.root_queryset
+        qs = self.model._default_manager.get_queryset()
+        ordering = self.get_ordering(request, qs)
+        if ordering:
+            qs = qs.order_by(*ordering)
 
         # First, we collect all the declared list filters.
         (self.filter_specs, self.has_filters, remaining_lookup_params,
