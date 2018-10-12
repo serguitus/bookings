@@ -81,7 +81,7 @@ class BookingSiteModel(SiteModel):
     list_display = ('reference', 'agency', 'date_from',
                     'date_to', 'status', 'currency', 'cost_amount',
                     'price_amount',)
-    top_filters = ('reference',)
+    top_filters = ('reference','date_from',)
     ordering = ('reference',)
     readonly_fields = ('status',)
     details_template = 'booking/booking_details.html'

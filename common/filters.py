@@ -3,6 +3,7 @@ from dal import autocomplete
 from django import forms
 from django.contrib.admin.filters import FieldListFilter, DateFieldListFilter
 from django.contrib.admin.utils import lookup_needs_distinct
+from django.contrib.admin.widgets import AdminDateWidget
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.forms.widgets import Media, MEDIA_TYPES
@@ -55,7 +56,10 @@ class TopFilter(object):
                 hidden_params.pop(parameter)
             if parameter in params:
                 value = params.pop(parameter)
-                if not self._support_array:
+                if self._support_array:
+                    if '' in value:
+                        value.remove('')
+                else:
                     value = value[0]
             else:
                 value = []
@@ -146,38 +150,21 @@ class ForeignKeyFilter(TopFilter):
     widget_attrs = {}
     autocomplete_url = None
 
-    class Media:
-        css = {
-            'all': (
-                'autocomplete_light/vendor/select2/dist/css/select2.css',
-                'autocomplete_light/select2.css',
-                'dal_admin_filters/css/autocomplete-fix.css'
-            )
-        }
-        js = (
-            'autocomplete_light/jquery.init.js',
-            'autocomplete_light/autocomplete.init.js',
-            'autocomplete_light/vendor/select2/dist/js/select2.full.js',
-            'autocomplete_light/select2.js',
-            'dal_admin_filters/js/querystring.js',
-        )
-
     def __init__(self, field, request, params, hidden_params, model, model_admin, field_path):
 
         super(ForeignKeyFilter, self).__init__(
             field, request, params, hidden_params, model, model_admin, field_path)
 
-        #if self._values[0] == '':
-        #    self._values[0] = []
-
-        self._add_media(model_admin)
-
         field = forms.ModelChoiceField(
             queryset=getattr(model, self.field_path).get_queryset(),
+            required=False,
+            empty_label='',
             widget=autocomplete.ModelSelect2Multiple(
                 url=self.autocomplete_url,
             )
         )
+
+        self._add_media(model_admin)
 
         attrs = self.widget_attrs.copy()
         attrs['id'] = 'id-%s-dal-filter' % self.field_path
@@ -199,7 +186,7 @@ class ForeignKeyFilter(TopFilter):
         def _get_media(obj):
             return Media(media=getattr(obj, 'Media', None))
 
-        media = _get_media(model_admin) + _get_media(ForeignKeyFilter) + _get_media(self)
+        media = _get_media(model_admin) + _get_media(autocomplete.ModelSelect2Multiple) + _get_media(self)
 
         for name in MEDIA_TYPES:
             setattr(model_admin.Media, name, getattr(media, "_" + name))
@@ -217,3 +204,73 @@ class ForeignKeyFilter(TopFilter):
 TopFilter.register(lambda f: isinstance(f, (models.ForeignKey,)), ForeignKeyFilter)
 
 
+class DateFilter(TopFilter):
+    template = 'common/filters/date_top_filter.html'
+    widget_attrs = {}
+
+    def get_parameters(self, field, model, model_admin, field_path):
+        return ('%s%s_from' % (PARAM_PREFIX, field_path),'%s%s_to' % (PARAM_PREFIX, field_path),)
+
+    class Media:
+        css = {
+            'all': (
+                'common/css/widgets.css',
+            )
+        }
+
+    def __init__(self, field, request, params, hidden_params, model, model_admin, field_path):
+
+        super(DateFilter, self).__init__(
+            field, request, params, hidden_params, model, model_admin, field_path)
+
+        widget = AdminDateWidget()
+
+        self._add_media(model_admin, widget)
+
+        from_widget = widget.render(
+            name=self._parameters[0],
+            value=self._values[0],
+        )
+
+        to_widget = widget.render(
+            name=self._parameters[1],
+            value=self._values[1],
+        )
+
+        self.context.update({
+            'from_widget': from_widget,
+            'to_widget': to_widget,
+        })
+
+    def _add_media(self, model_admin, widget):
+    
+        if not hasattr(model_admin, 'Media'):
+            raise ImproperlyConfigured('Add empty Media class to %s. Sorry about this bug.' % model_admin)
+
+        def _get_media(obj):
+            return Media(media=getattr(obj, 'Media', None))
+
+        media = _get_media(model_admin) + widget.media + _get_media(DateFilter) + _get_media(self)
+
+        for name in MEDIA_TYPES:
+            setattr(model_admin.Media, name, getattr(media, "_" + name))
+
+    def queryset(self, request, queryset):
+        from_option = self._values[0]
+        if from_option and from_option != "" and from_option != "''":
+            lookup = '%s__gte' % self.field_path
+            if lookup_needs_distinct(self.model._meta, lookup):
+                queryset = queryset.distinct()
+            queryset = queryset.filter(**{lookup: from_option})
+
+        to_option = self._values[1]
+        if to_option and to_option != "" and to_option != "''":
+            lookup = '%s__lte' % self.field_path
+            if lookup_needs_distinct(self.model._meta, lookup):
+                queryset = queryset.distinct()
+            queryset = queryset.filter(**{lookup: to_option})
+
+        return queryset
+
+
+TopFilter.register(lambda f: isinstance(f, (models.DateField,)), DateFilter)
