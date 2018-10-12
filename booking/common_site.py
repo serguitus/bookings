@@ -130,9 +130,12 @@ class BookingTransferSiteModel(SiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_LABEL_BOOKING_SERVICES
 
-    fields = ('booking', 'service', 'datetime_from', 'datetime_to', 'status',
+    fields = ('booking', 'service',
+              'location_from', 'location_to',
+              'datetime_from', 'datetime_to', 'status',
               'cost_amount', 'price_amount', 'provider')
-    list_display = ('booking', 'service', 'datetime_from', 'datetime_to', 'status',)
+    list_display = ('booking', 'name',
+                    'datetime_from', 'datetime_to', 'status',)
     list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
     search_fields = ['booking__reference',]
     ordering = ('booking__reference', 'service__name',)

@@ -25,6 +25,7 @@ class Location(models.Model):
         unique_together = (('name',),)
     name = models.CharField(max_length=50)
     enabled = models.BooleanField(default=True)
+    short_name = models.CharField(max_length=10, blank=True, null=True)
 
     def __str__(self):
         return self.name

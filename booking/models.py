@@ -227,8 +227,9 @@ class BookingTransfer(BookingService):
 
     def fill_data(self):
         # setting name for this booking_service
-        self.name = '%s (%s -> %s)' % (self.service, self.location_from,
-                                       self.location_to)
+        self.name = '%s (%s -> %s)' % (self.service,
+                                       self.location_from.short_name or self.location_from,
+                                       self.location_to.short_name or self.location_to)
         self.service_type = SERVICE_CATEGORY_TRANSFER
 
 

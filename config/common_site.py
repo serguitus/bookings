@@ -45,7 +45,7 @@ class IncorrectLookupParameters(Exception):
 class LocationSiteModel(SiteModel):
     model_order = 6010
     menu_label = MENU_LABEL_CONFIG_BASIC
-    fields = ('name', 'enabled',)
+    fields = ('name', 'enabled', 'short_name')
     list_display = ('name', 'enabled',)
     list_filter = ('enabled',)
     search_fields = ('name',)
