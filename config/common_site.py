@@ -58,9 +58,7 @@ class RoomTypeSiteModel(SiteModel):
     fields = ('name', 'enabled',)
     list_display = ('name', 'enabled',)
     list_editable = ('enabled',)
-    list_filter = ('enabled',)
-    top_filters = ('enabled',)
-    search_fields = ('name',)
+    top_filters = ('name', 'enabled',)
 
 
 class AllotmentRoomTypeInline(CommonTabularInline):
@@ -78,8 +76,7 @@ class AllotmentRoomTypeSiteModel(SiteModel):
     fields = ('allotment', 'room_type', 'room_capacity',)
     list_display = ('allotment', 'room_type', 'room_capacity',)
     list_filter = ('room_type', 'room_capacity',)
-    search_fields = ('allotment__name',)
-    top_filters = (('room_type', RoomTypeTopFilter),),
+    top_filters = ('allotment__name', ('room_type', RoomTypeTopFilter),)
     ordering = ('allotment__name',)
 
 

@@ -1359,15 +1359,16 @@ class CommonChangeList(ChangeList):
                 del result[param]
         return result
 
-    def get_top_filters_params(self, params):
-        result = params.copy()
-        for param, value in self.params.items():
+    def get_top_filters_params(self, request):
+        result = {}
+        params = request.GET.items()
+        for param, value in params:
             if param.startswith(PARAM_PREFIX):
-                result.update({param: value})
+                result.update({param: request.GET.getlist(param)})
         return result
 
     def get_top_filters(self, request, params):
-        lookup_params = self.get_top_filters_params(params)
+        lookup_params = self.get_top_filters_params(request)
         hidden_params = self.hidden_params
         use_distinct = False
 
@@ -1385,7 +1386,7 @@ class CommonChangeList(ChangeList):
                     field_path = None
                     if isinstance(top_filter, (tuple, list)):
                         # This is a custom Filter class for a given field.
-                        field, top_filter_class = top_filter[0][0], top_filter[0][1]
+                        field, top_filter_class = top_filter[0], top_filter[1]
                     else:
                         # This is simply a field name, so use the default
                         # TopFilter class that has been registered for

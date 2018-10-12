@@ -13,6 +13,7 @@ PARAM_PREFIX = 'srch_'
 class TopFilter(object):
     _top_filters = []
     _take_priority_index = 0
+    _support_array = False
     template = 'common/filters/top_filter.html'
 
     def __init__(self, field, request, params, hidden_params, model, model_admin, field_path):
@@ -54,8 +55,12 @@ class TopFilter(object):
                 hidden_params.pop(parameter)
             if parameter in params:
                 value = params.pop(parameter)
+                if not self._support_array:
+                    value = value[0]
             else:
-                value = ''
+                value = []
+                if not self._support_array:
+                    value = ''
             result.append(value)
         return result
 
@@ -77,7 +82,7 @@ class TextFilter(TopFilter):
 
     def queryset(self, request, queryset):
         search_terms = self._values[0]
-        if search_terms:
+        if search_terms and search_terms != '':
             lookup = '%s__icontains' % self.field_path
             if lookup_needs_distinct(self.model._meta, lookup):
                 queryset = queryset.distinct()
@@ -97,7 +102,7 @@ class BooleanFilter(TopFilter):
 
     def queryset(self, request, queryset):
         search_option = self._values[0]
-        if search_option and search_option != "":
+        if search_option and search_option != '':
             lookup = '%s__exact' % self.field_path
             if lookup_needs_distinct(self.model._meta, lookup):
                 queryset = queryset.distinct()
@@ -134,7 +139,9 @@ class ChoicesFilter(TopFilter):
 
 TopFilter.register(lambda f: isinstance(f, (models.CharField,)) and bool(f.choices), ChoicesFilter)
 
+
 class ForeignKeyFilter(TopFilter):
+    _support_array = True
     template = 'common/filters/foreignkey_top_filter.html'
     widget_attrs = {}
     autocomplete_url = None
@@ -160,11 +167,14 @@ class ForeignKeyFilter(TopFilter):
         super(ForeignKeyFilter, self).__init__(
             field, request, params, hidden_params, model, model_admin, field_path)
 
+        #if self._values[0] == '':
+        #    self._values[0] = []
+
         self._add_media(model_admin)
 
         field = forms.ModelChoiceField(
             queryset=getattr(model, self.field_path).get_queryset(),
-            widget=autocomplete.ModelSelect2(
+            widget=autocomplete.ModelSelect2Multiple(
                 url=self.autocomplete_url,
             )
         )
@@ -196,13 +206,14 @@ class ForeignKeyFilter(TopFilter):
 
     def queryset(self, request, queryset):
         search_option = self._values[0]
-        if search_option and search_option != "" and search_option != "''":
-            lookup = '%s%s__exact' % (self.field_path, '_id')
+        if search_option and search_option != []:
+            lookup = '%s%s__in' % (self.field_path, '_id')
             if lookup_needs_distinct(self.model._meta, lookup):
                 queryset = queryset.distinct()
-            if search_option != "":
-                queryset = queryset.filter(**{lookup: search_option})
+            queryset = queryset.filter(**{lookup: search_option})
         return queryset
 
 
 TopFilter.register(lambda f: isinstance(f, (models.ForeignKey,)), ForeignKeyFilter)
+
+
