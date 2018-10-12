@@ -1385,7 +1385,7 @@ class CommonChangeList(ChangeList):
                     field_path = None
                     if isinstance(top_filter, (tuple, list)):
                         # This is a custom Filter class for a given field.
-                        field, top_filter_class = top_filter
+                        field, top_filter_class = top_filter[0][0], top_filter[0][1]
                     else:
                         # This is simply a field name, so use the default
                         # TopFilter class that has been registered for

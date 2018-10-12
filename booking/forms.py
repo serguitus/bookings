@@ -23,6 +23,7 @@ class BookingAllotmentForm(forms.ModelForm):
             'room_type': autocomplete.ModelSelect2(url='roomtype-autocomplete'),
         }
 
+
 class BookingTransferForm(forms.ModelForm):
     class Meta:
         model = BookingTransfer
@@ -33,6 +34,7 @@ class BookingTransferForm(forms.ModelForm):
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
         }
+
 
 class BookingExtraForm(forms.ModelForm):
     class Meta:
