@@ -7,7 +7,9 @@ register = template.Library()
 
 @register.simple_tag
 def bookingservices_table(booking):
-    return BookingServiceTable(booking.booking_services.all())
+    table = BookingServiceTable(booking.booking_services.all(),
+                                order_by=('datetime_from', 'datetime_to'))
+    return table
     # table = BookingServiceTable(bs)
     # return {'table': bs}
 
