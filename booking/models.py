@@ -196,6 +196,7 @@ class BookingExtra(BookingService):
         verbose_name_plural = 'Bookings Extras'
     service = models.ForeignKey(Extra)
     quantity = models.SmallIntegerField()
+    parameter = models.SmallIntegerField()
 
 
 class BookingAllotment(BookingService):
