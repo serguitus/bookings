@@ -68,7 +68,7 @@ class BookingExtraInLine(CommonTabularInline):
     model = BookingExtra
     extra = 1
     fields = ['service', 'datetime_from', 'datetime_to',
-              'provider', 'quantity', 'status']
+              'provider', 'quantity', 'parameter', 'status']
 
 
 class BookingSiteModel(SiteModel):
@@ -147,10 +147,10 @@ class BookingExtraSiteModel(SiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_LABEL_BOOKING_SERVICES
 
-    fields = ('booking', 'service', 'quantity', 'datetime_from', 'datetime_to', 'status',
+    fields = ('booking', 'service', 'quantity', 'parameter', 'datetime_from', 'datetime_to', 'status',
         'cost_amount', 'price_amount',)
-    list_display = ('booking', 'service', 'quantity', 'datetime_from', 'datetime_to', 'status',)
-    list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
+    list_display = ('booking', 'service', 'quantity', 'parameter', 'datetime_from', 'datetime_to', 'status',)
+    list_filter = ('service', 'datetime_from', 'status',)
     search_fields = ('booking__reference',)
     ordering = ('booking__reference', 'service__name',)
     form = BookingExtraForm
