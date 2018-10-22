@@ -123,9 +123,9 @@ class TransferSiteModel(SiteModel):
     model_order = 6120
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
-    fields = ('name', 'enabled',)
-    list_display = ('name', 'enabled',)
-    list_filter = ('enabled',)
+    fields = ('name', 'cost_type', 'enabled',)
+    list_display = ('name', 'cost_type', 'enabled',)
+    top_filter = ('enabled',)
     search_fields = ('name',)
     ordering = ('enabled', 'name',)
     inlines = [TransferSupplementInline]
@@ -140,9 +140,9 @@ class ExtraSiteModel(SiteModel):
     model_order = 6130
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
-    fields = ('name', 'enabled',)
-    list_display = ('name', 'enabled',)
-    list_filter = ('enabled',)
+    fields = ('name', 'cost_type', 'parameter_type', 'enabled',)
+    list_display = ('name', 'cost_type', 'parameter_type', 'enabled',)
+    top_filter = ('enabled',)
     search_fields = ('name',)
     ordering = ('enabled', 'name',)
     inlines = [ExtraSupplementInline]
@@ -164,8 +164,8 @@ class ProviderAllotmentServiceSiteModel(SiteModel):
     model_order = 7220
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Provider Catalogue'
-    fields = ('provider', 'service', 'date_from', 'date_to', 'cost_type',)
-    list_display = ('provider', 'service', 'date_from', 'date_to', 'cost_type',)
+    fields = ('provider', 'service', 'date_from', 'date_to',)
+    list_display = ('provider', 'service', 'date_from', 'date_to',)
     search_fields = ('provider.name','service.name',)
     inlines = [ProviderAllotmentDetailInline]
 
@@ -186,8 +186,8 @@ class ProviderTransferServiceSiteModel(SiteModel):
     model_order = 7230
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Provider Catalogue'
-    fields = ('provider', 'service', 'date_from', 'date_to', 'cost_type',)
-    list_display = ('provider', 'service', 'date_from', 'date_to', 'cost_type',)
+    fields = ('provider', 'service', 'date_from', 'date_to',)
+    list_display = ('provider', 'service', 'date_from', 'date_to',)
     search_fields = ('provider.name','service.name',)
     inlines = [ProviderTransferDetailInline]
 
@@ -207,8 +207,8 @@ class ProviderExtraServiceSiteModel(SiteModel):
     model_order = 7240
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Provider Catalogue'
-    fields = ('provider', 'service', 'date_from', 'date_to', 'cost_type',)
-    list_display = ('provider', 'service', 'date_from', 'date_to', 'cost_type',)
+    fields = ('provider', 'service', 'date_from', 'date_to',)
+    list_display = ('provider', 'service', 'date_from', 'date_to',)
     search_fields = ('provider.name','service.name',)
     inlines = [ProviderExtraDetailInline]
 
@@ -229,8 +229,8 @@ class AgencyAllotmentServiceSiteModel(SiteModel):
     model_order = 7120
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
-    fields = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
-    list_display = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
+    fields = ('agency', 'service', 'date_from', 'date_to',)
+    list_display = ('agency', 'service', 'date_from', 'date_to',)
     search_fields = ('agency.name','service.name',)
     inlines = [AgencyAllotmentDetailInline]
 
@@ -251,8 +251,8 @@ class AgencyTransferServiceSiteModel(SiteModel):
     model_order = 7130
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
-    fields = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
-    list_display = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
+    fields = ('agency', 'service', 'date_from', 'date_to',)
+    list_display = ('agency', 'service', 'date_from', 'date_to',)
     search_fields = ('agency.name','service.name',)
     inlines = [AgencyTransferDetailInline]
 
@@ -272,8 +272,8 @@ class AgencyExtraServiceSiteModel(SiteModel):
     model_order = 7140
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
-    fields = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
-    list_display = ('agency', 'service', 'date_from', 'date_to', 'cost_type',)
+    fields = ('agency', 'service', 'date_from', 'date_to',)
+    list_display = ('agency', 'service', 'date_from', 'date_to',)
     search_fields = ('agency.name','service.name',)
     inlines = [AgencyExtraDetailInline]
 

@@ -8,8 +8,8 @@ from config.constants import (
     SERVICE_CATEGORY_EXTRA, SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER,
     ROOM_CAPACITIES,
     BOARD_TYPES,
-    EXTRA_COST_TYPES,
-    ALLOTMENT_COST_TYPES, ALLOTMENT_SUPPLEMENT_COST_TYPES, TRANSFER_SUPPLEMENT_COST_TYPES,
+    EXTRA_COST_TYPES, EXTRA_PARAMETER_TYPES,
+    ALLOTMENT_SUPPLEMENT_COST_TYPES, TRANSFER_SUPPLEMENT_COST_TYPES,
     TRANSFER_COST_TYPES)
 
 from finance.models import Agency, Provider
@@ -155,6 +155,10 @@ class Extra(Service):
     class Meta:
         verbose_name = 'Extra'
         verbose_name_plural = 'Extras'
+    cost_type = models.CharField(
+        max_length=5, choices=EXTRA_COST_TYPES)
+    parameter_type = models.CharField(
+        max_length=5, choices=EXTRA_PARAMETER_TYPES)
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_EXTRA
@@ -177,8 +181,6 @@ class ProviderExtraService(ProviderCatalogue):
         verbose_name = 'Provider Extra Service'
         verbose_name_plural = 'Providers Extras Services'
     service = models.ForeignKey(Extra)
-    cost_type = models.CharField(
-        max_length=5, choices=EXTRA_COST_TYPES)
 
 
 class ProviderExtraDetail(AmountDetail):
@@ -200,8 +202,6 @@ class AgencyExtraService(AgencyCatalogue):
         verbose_name = 'Agency Extra Service'
         verbose_name_plural = 'Agency Extras Services'
     service = models.ForeignKey(Extra)
-    cost_type = models.CharField(
-        max_length=5, choices=EXTRA_COST_TYPES)
 
 
 class AgencyExtraDetail(AmountDetail):
@@ -282,7 +282,6 @@ class ProviderAllotmentService(ProviderCatalogue):
         verbose_name = 'Provider Allotment Service'
         verbose_name_plural = 'Providers Allotments Services'
     service = models.ForeignKey(Allotment)
-    cost_type = models.CharField(max_length=5, choices=ALLOTMENT_COST_TYPES)
 
 
 class ProviderAllotmentDetail(AmountDetail):
@@ -306,7 +305,6 @@ class AgencyAllotmentService(AgencyCatalogue):
         verbose_name = 'Agency Allotment Service'
         verbose_name_plural = 'Agencies Allotments Services'
     service = models.ForeignKey(Allotment)
-    cost_type = models.CharField(max_length=5, choices=ALLOTMENT_COST_TYPES)
 
 
 class AgencyAllotmentDetail(AmountDetail):
@@ -345,8 +343,7 @@ class Transfer(Service):
     class Meta:
         verbose_name = 'Transfer'
         verbose_name_plural = 'Transfers'
-    # location_from = models.ForeignKey(Location, related_name='location_from')
-    # location_to = models.ForeignKey(Location, related_name='location_to')
+    cost_type = models.CharField(max_length=5, choices=TRANSFER_COST_TYPES)
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_TRANSFER
@@ -369,7 +366,6 @@ class ProviderTransferService(ProviderCatalogue):
         verbose_name = 'Provider Transfer Service'
         verbose_name_plural = 'Providers Transfers Services'
     service = models.ForeignKey(Transfer)
-    cost_type = models.CharField(max_length=5, choices=TRANSFER_COST_TYPES)
 
 
 class ProviderTransferDetail(AmountDetail):
@@ -393,7 +389,6 @@ class AgencyTransferService(AgencyCatalogue):
         verbose_name = 'Agency Transfer Service'
         verbose_name_plural = 'Agencies Transfers Services'
     service = models.ForeignKey(Transfer)
-    cost_type = models.CharField(max_length=5, choices=TRANSFER_COST_TYPES)
 
 
 class AgencyTransferDetail(AmountDetail):
