@@ -198,6 +198,9 @@ class BookingExtra(BookingService):
     quantity = models.SmallIntegerField()
     parameter = models.SmallIntegerField()
 
+    def fill_data(self):
+        self.service_type = SERVICE_CATEGORY_EXTRA
+
 
 class BookingAllotment(BookingService):
     """
@@ -211,6 +214,7 @@ class BookingAllotment(BookingService):
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
 
     def fill_data(self):
+        self.name = '%s' % (self.service,)
         self.service_type = SERVICE_CATEGORY_ALLOTMENT
 
 
