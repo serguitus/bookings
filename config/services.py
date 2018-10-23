@@ -67,12 +67,16 @@ class ConfigService(object):
                     if detail.agency_servide.date_to >= date_to:
                         # full date range
                         price += cls._get_extra_price(
-                            service, detail, current_date, date_to, quantity, parameter)
+                            service, detail, current_date, date_to,
+                            adults, children,
+                            quantity, parameter)
                         solved = True
                         stop = True
                     else:
                         price += cls._get_extra_price(
-                            service, detail, current_date, detail.agency_servide.date_to, quantity, parameter)
+                            service, detail, current_date, detail.agency_servide.date_to,
+                            adults, children,
+                            quantity, parameter)
                         current_date = detail.agency_servide.date_to + 1
                 # remove detail from list
                 agency_detail_list.remove(detail)
@@ -89,11 +93,51 @@ class ConfigService(object):
 
     @classmethod
     def _get_extra_price(
-        cls, service, detail, current_date, date_to, quantity, parameter):
+        cls, service, detail, current_date, date_to, adults, children, quantity, parameter):
         if service.cost_type == EXTRA_COST_TYPE_FIXED:
             return detail.ad_1_amount * quantity * parameter
         if service.cost_type == EXTRA_COST_TYPE_BY_PAX:
-            adults, children = cls._findPaxex()
-            return detail.ad_1_amount * quantity * parameter
-            
-        return 0
+            if adults == 0:
+                if children == 1 and detail.ch_1_ad_0_amount:
+                    return 1 * detail.ch_1_ad_0_amount * quantity * parameter
+                if children == 2 and detail.ch_2_ad_0_amount:
+                    return 2 * detail.ch_2_ad_0_amount * quantity * parameter
+                if children == 3 and detail.ch_3_ad_0_amount:
+                    return 3 * detail.ch_3_ad_0_amount * quantity * parameter
+            if adults == 1 and detail.ad_1_amount:
+                if children == 0:
+                    return 1 * detail.ad_1_amount * quantity * parameter
+                if children == 1 and detail.ch_1_ad_1_amount:
+                    return (1 * detail.ad_1_amount + 1 * detail.ch_1_ad_1_amount) * quantity * parameter
+                if children == 2 and detail.ch_2_ad_1_amount:
+                    return (1 * detail.ad_1_amount + 2 * detail.ch_2_ad_1_amount) * quantity * parameter
+                if children == 3 and detail.ch_3_ad_1_amount:
+                    return (1 * detail.ad_1_amount + 3 * detail.ch_3_ad_1_amount) * quantity * parameter
+            if adults == 2 and detail.ad_2_amount:
+                if children == 0:
+                    return 2 * detail.ad_2_amount * quantity * parameter
+                if children == 1 and detail.ch_1_ad_2_amount:
+                    return (2 * detail.ad_2_amount + 1 * detail.ch_1_ad_2_amount) * quantity * parameter
+                if children == 2 and detail.ch_2_ad_2_amount:
+                    return (2 * detail.ad_2_amount + 2 * detail.ch_2_ad_2_amount) * quantity * parameter
+                if children == 3 and detail.ch_3_ad_2_amount:
+                    return (2 * detail.ad_2_amount + 3 * detail.ch_3_ad_2_amount) * quantity * parameter
+            if adults == 3 and detail.ad_3_amount:
+                if children == 0:
+                    return 3 * detail.ad_3_amount * quantity * parameter
+                if children == 1 and detail.ch_1_ad_3_amount:
+                    return (3 * detail.ad_3_amount + 1 * detail.ch_1_ad_3_amount) * quantity * parameter
+                if children == 2 and detail.ch_2_ad_3_amount:
+                    return (3 * detail.ad_3_amount + 2 * detail.ch_2_ad_3_amount) * quantity * parameter
+                if children == 3 and detail.ch_3_ad_3_amount:
+                    return (3 * detail.ad_3_amount + 3 * detail.ch_3_ad_3_amount) * quantity * parameter
+            if adults == 4 and detail.ad_4_amount:
+                if children == 0:
+                    return 4 * detail.ad_4_amount * quantity * parameter
+                if children == 1 and detail.ch_1_ad_4_amount:
+                    return (4 * detail.ad_4_amount + 1 * detail.ch_1_ad_4_amount) * quantity * parameter
+                if children == 2 and detail.ch_2_ad_4_amount:
+                    return (4 * detail.ad_4_amount + 2 * detail.ch_2_ad_4_amount) * quantity * parameter
+                if children == 3 and detail.ch_3_ad_4_amount:
+                    return (4 * detail.ad_4_amount + 3 * detail.ch_3_ad_4_amount) * quantity * parameter
+        return -1
