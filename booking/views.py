@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
 
-from booking.models import BookingService
+from booking.models import BookingService, BookingServicePax
 
 from config.constants import (
     SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER, SERVICE_CATEGORY_EXTRA
@@ -65,8 +65,18 @@ class BookingServiceAmountsView(View):
         })
 
         def findPaxes(self, booking_service, service):
-            # TODO
-            return 2, 0
+            pax_list = list(
+                BookingServicePax.objects.filter(booking_service=booking_service.id))
+            if service.child_age is None:
+                return len(pax_list), 0
+            adults = 0
+            children = 0
+            for pax in pax_list:
+                if pax.pax_age > service.child_age:
+                    adults += 1
+                else:
+                    children +=1
+            return adults, children
 
 
 def booking_list(request, instance):
