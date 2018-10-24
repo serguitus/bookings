@@ -17,7 +17,7 @@ class BookingServiceAmountsView(View):
         return self.post(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        service_id = request.post.get('service_id')
+        service_id = request.POST.get('service_id')
         if service_id is None or service_id = ''
             return JsonResponse({
                 'code': 3,
@@ -25,7 +25,7 @@ class BookingServiceAmountsView(View):
                 'cost': None,
                 'price': None,
             })
-        date_from = request.post.get('date_from')
+        date_from = request.POST.get('date_from')
         if date_from is None or date_from = ''
             return JsonResponse({
                 'code': 3,
@@ -33,7 +33,7 @@ class BookingServiceAmountsView(View):
                 'cost': None,
                 'price': None,
             })
-        date_to = request.post.get('date_to')
+        date_to = request.POST.get('date_to')
         if date_to is None or date_to = ''
             return JsonResponse({
                 'code': 3,
@@ -41,21 +41,21 @@ class BookingServiceAmountsView(View):
                 'cost': None,
                 'price': None,
             })
-        provider_id = request.post.get('provider_id')
+        provider_id = request.POST.get('provider_id')
 
         service = Service.objects.get(pk=service_id)
         service_type = service.service_type
 
         provider = Provider.objects.get(pk=provider_id)
 
-        booking_service_id = request.post.get('booking_service_id')
+        booking_service_id = request.POST.get('booking_service_id')
         booking_service = BookingService.objects.get(pk=booking_service_id)
         agency = booking_service.booking.agency
 
         adults, children = self.findPaxes(booking_service, service)
 
         if service_type == SERVICE_CATEGORY_ALLOTMENT:
-            board_type = request.post.get('board_type')
+            board_type = request.POST.get('board_type')
             if board_type is None or board_type = ''
                 return JsonResponse({
                     'code': 3,
@@ -63,7 +63,7 @@ class BookingServiceAmountsView(View):
                     'cost': None,
                     'price': None,
                 })
-            room_type_id = request.post.get('room_type_id')
+            room_type_id = request.POST.get('room_type_id')
             if room_type_id is None or room_type_id = ''
                 return JsonResponse({
                     'code': 3,
@@ -77,7 +77,7 @@ class BookingServiceAmountsView(View):
                 board_type, room_type_id,
             )
         if service_type == SERVICE_CATEGORY_TRANSFER:
-            location_from_id = request.post.get('location_from_id')
+            location_from_id = request.POST.get('location_from_id')
             if location_from_id is None or location_from_id = ''
                 return JsonResponse({
                     'code': 3,
@@ -85,7 +85,7 @@ class BookingServiceAmountsView(View):
                     'cost': None,
                     'price': None,
                 })
-            location_to_id = request.post.get('location_to_id')
+            location_to_id = request.POST.get('location_to_id')
             if location_to_id is None or location_to_id = ''
                 return JsonResponse({
                     'code': 3,
@@ -99,8 +99,8 @@ class BookingServiceAmountsView(View):
                 location_from_id, location_to_id,
             )
         if service_type == SERVICE_CATEGORY_EXTRA:
-            quantity = request.post.get('quantity')
-            parameter = request.post.get('parameter')
+            quantity = request.POST.get('quantity')
+            parameter = request.POST.get('parameter')
 
             code, message, cost, price = ConfigService.extra_amounts(
                 service_id, date_from, date_to, adults, children, provider, agency,
