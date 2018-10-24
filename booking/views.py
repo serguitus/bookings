@@ -17,10 +17,30 @@ class BookingServiceAmountsView(View):
         return self.post(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        booking_service_id = request.post.get('booking_service_id')
         service_id = request.post.get('service_id')
+        if service_id is None or service_id = ''
+            return JsonResponse({
+                'code': 3,
+                'message': 'Service Id Missing',
+                'cost': None,
+                'price': None,
+            })
         date_from = request.post.get('date_from')
+        if date_from is None or date_from = ''
+            return JsonResponse({
+                'code': 3,
+                'message': 'Date From Missing',
+                'cost': None,
+                'price': None,
+            })
         date_to = request.post.get('date_to')
+        if date_to is None or date_to = ''
+            return JsonResponse({
+                'code': 3,
+                'message': 'Date To Missing',
+                'cost': None,
+                'price': None,
+            })
         provider_id = request.post.get('provider_id')
 
         service = Service.objects.get(pk=service_id)
@@ -28,6 +48,7 @@ class BookingServiceAmountsView(View):
 
         provider = Provider.objects.get(pk=provider_id)
 
+        booking_service_id = request.post.get('booking_service_id')
         booking_service = BookingService.objects.get(pk=booking_service_id)
         agency = booking_service.booking.agency
 
@@ -35,7 +56,21 @@ class BookingServiceAmountsView(View):
 
         if service_type == SERVICE_CATEGORY_ALLOTMENT:
             board_type = request.post.get('board_type')
+            if board_type is None or board_type = ''
+                return JsonResponse({
+                    'code': 3,
+                    'message': 'Board Missing',
+                    'cost': None,
+                    'price': None,
+                })
             room_type_id = request.post.get('room_type_id')
+            if room_type_id is None or room_type_id = ''
+                return JsonResponse({
+                    'code': 3,
+                    'message': 'Room Missing',
+                    'cost': None,
+                    'price': None,
+                })
 
             code, message, cost, price = ConfigService.allotment_amounts(
                 service_id, date_from, date_to, adults, children, provider, agency,
@@ -43,7 +78,21 @@ class BookingServiceAmountsView(View):
             )
         if service_type == SERVICE_CATEGORY_TRANSFER:
             location_from_id = request.post.get('location_from_id')
+            if location_from_id is None or location_from_id = ''
+                return JsonResponse({
+                    'code': 3,
+                    'message': 'Location From Missing',
+                    'cost': None,
+                    'price': None,
+                })
             location_to_id = request.post.get('location_to_id')
+            if location_to_id is None or location_to_id = ''
+                return JsonResponse({
+                    'code': 3,
+                    'message': 'Location To Missing',
+                    'cost': None,
+                    'price': None,
+                })
 
             code, message, cost, price = ConfigService.transfer_amounts(
                 service_id, date_from, date_to, adults, children, provider, agency,
@@ -75,7 +124,7 @@ class BookingServiceAmountsView(View):
                 if pax.pax_age > service.child_age:
                     adults += 1
                 else:
-                    children +=1
+                    children += 1
             return adults, children
 
 
