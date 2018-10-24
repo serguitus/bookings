@@ -10,7 +10,10 @@ from config.constants import (
 from config.models import Service
 from config.services import ConfigService
 
+from dateutil.parser import parse
+
 from finance.models import Provider
+
 
 class BookingServiceAmountsView(View):
     def get(self, request, *args, **kwargs):
@@ -25,7 +28,7 @@ class BookingServiceAmountsView(View):
                 'cost': None,
                 'price': None,
             })
-        date_from = request.POST.get('date_from')
+        date_from = request.POST.get('date_from', None)
         if date_from is None or date_from = ''
             return JsonResponse({
                 'code': 3,
@@ -33,7 +36,8 @@ class BookingServiceAmountsView(View):
                 'cost': None,
                 'price': None,
             })
-        date_to = request.POST.get('date_to')
+        date_from = parse(date_from)
+        date_to = request.POST.get('date_to', None)
         if date_to is None or date_to = ''
             return JsonResponse({
                 'code': 3,
@@ -41,6 +45,7 @@ class BookingServiceAmountsView(View):
                 'cost': None,
                 'price': None,
             })
+        date_to = parse(date_to)
         provider_id = request.POST.get('provider_id')
 
         service = Service.objects.get(pk=service_id)
