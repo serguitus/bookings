@@ -21,7 +21,7 @@ class BookingServiceAmountsView(View):
 
     def post(self, request, *args, **kwargs):
         service_id = request.POST.get('service_id')
-        if service_id is None or service_id = ''
+        if service_id is None or service_id == '':
             return JsonResponse({
                 'code': 3,
                 'message': 'Service Id Missing',
@@ -29,7 +29,7 @@ class BookingServiceAmountsView(View):
                 'price': None,
             })
         date_from = request.POST.get('date_from', None)
-        if date_from is None or date_from = ''
+        if date_from is None or date_from == '':
             return JsonResponse({
                 'code': 3,
                 'message': 'Date From Missing',
@@ -38,7 +38,7 @@ class BookingServiceAmountsView(View):
             })
         date_from = parse(date_from)
         date_to = request.POST.get('date_to', None)
-        if date_to is None or date_to = ''
+        if date_to is None or date_to == '':
             return JsonResponse({
                 'code': 3,
                 'message': 'Date To Missing',
@@ -61,7 +61,7 @@ class BookingServiceAmountsView(View):
 
         if service_type == SERVICE_CATEGORY_ALLOTMENT:
             board_type = request.POST.get('board_type')
-            if board_type is None or board_type = ''
+            if board_type is None or board_type == '':
                 return JsonResponse({
                     'code': 3,
                     'message': 'Board Missing',
@@ -69,7 +69,7 @@ class BookingServiceAmountsView(View):
                     'price': None,
                 })
             room_type_id = request.POST.get('room_type_id')
-            if room_type_id is None or room_type_id = ''
+            if room_type_id is None or room_type_id == '':
                 return JsonResponse({
                     'code': 3,
                     'message': 'Room Missing',
@@ -83,7 +83,7 @@ class BookingServiceAmountsView(View):
             )
         if service_type == SERVICE_CATEGORY_TRANSFER:
             location_from_id = request.POST.get('location_from_id')
-            if location_from_id is None or location_from_id = ''
+            if location_from_id is None or location_from_id == '':
                 return JsonResponse({
                     'code': 3,
                     'message': 'Location From Missing',
@@ -91,7 +91,7 @@ class BookingServiceAmountsView(View):
                     'price': None,
                 })
             location_to_id = request.POST.get('location_to_id')
-            if location_to_id is None or location_to_id = ''
+            if location_to_id is None or location_to_id == '':
                 return JsonResponse({
                     'code': 3,
                     'message': 'Location To Missing',
