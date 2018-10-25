@@ -1,6 +1,7 @@
 """
 Config Service
 """
+from datetime import timedelta
 
 from config.constants import (
     SERVICE_CATEGORY_EXTRA, SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER,
@@ -27,6 +28,9 @@ class ConfigService(object):
     @classmethod
     def allotment_amounts(cls, service_id, date_from, date_to, adults, children, provider, agency,
         board_type, room_type_id):
+
+        if adults is None or children is None:
+            return 3, 'Paxes Missing', None, None
 
         service = Allotment.objects.get(pk=service_id)
 
@@ -81,6 +85,9 @@ class ConfigService(object):
 
         service = Transfer.objects.get(pk=service_id)
 
+        if service.cost_type == TRANSFER_COST_TYPE_BY_PAX and (adults is None or children is None):
+            return 3, 'Paxes Missing', None, None
+
         # provider cost
         # obtain details order by date_from asc, date_to desc
         if provider is None:
@@ -130,6 +137,9 @@ class ConfigService(object):
         quantity, parameter):
         
         service = Extra.objects.get(pk=service_id)
+
+        if service.cost_type == EXTRA_COST_TYPE_BY_PAX and (adults is None or children is None):
+            return 3, 'Paxes Missing', None, None
 
         # provider cost
         # obtain details order by date_from asc, date_to desc
@@ -213,9 +223,9 @@ class ConfigService(object):
                     detail_date_from = detail.agency_service.date_from
                     detail_date_to = detail.agency_service.date_to
                     
-                if current_date >= detail_date_from:
+                if current_date.date() >= detail_date_from:
                     # verify final date included
-                    if detail_date_to >= date_to:
+                    if detail_date_to >= date_to.date():
                         # full date range
                         result = cls._get_service_amount(
                             service, detail, current_date, date_to,
@@ -266,7 +276,7 @@ class ConfigService(object):
         days = date_to - date_from
         amount = cls._find_detail_amount(detail, adults, children)
         if amount and amount >= 0:
-           return amount * days
+           return amount * days.days
         return None
 
     @classmethod

@@ -89,27 +89,37 @@ class BookingServiceAmountsView(View):
         adults, children = self.find_paxes(booking_service, service)
 
         if service_type == SERVICE_CATEGORY_ALLOTMENT:
-            board_type = request.POST.get('board_type')
-            if board_type is None or board_type == '':
+            if adults is None or children is None:
                 return JsonResponse({
                     'code': 3,
-                    'message': 'Board Missing',
+                    'message': 'Paxes Missing',
                     'cost': None,
                     'price': None,
                 })
-            room_type_id = request.POST.get('room_type')
-            if room_type_id is None or room_type_id == '':
-                return JsonResponse({
-                    'code': 3,
-                    'message': 'Room Missing',
-                    'cost': None,
-                    'price': None,
-                })
+                
+            else:
+                board_type = request.POST.get('board_type')
+                if board_type is None or board_type == '':
+                    return JsonResponse({
+                        'code': 3,
+                        'message': 'Board Missing',
+                        'cost': None,
+                        'price': None,
+                    })
+                room_type_id = request.POST.get('room_type')
+                if room_type_id is None or room_type_id == '':
+                    return JsonResponse({
+                        'code': 3,
+                        'message': 'Room Missing',
+                        'cost': None,
+                        'price': None,
+                    })
 
-            code, message, cost, price = ConfigService.allotment_amounts(
-                service_id, date_from, date_to, adults, children, provider, agency,
-                board_type, room_type_id,
-            )
+                code, message, cost, price = ConfigService.allotment_amounts(
+                    service_id, date_from, date_to, adults, children, provider, agency,
+                    board_type, room_type_id,
+                )
+                
         if service_type == SERVICE_CATEGORY_TRANSFER:
             location_from_id = request.POST.get('location_from_id')
             if location_from_id is None or location_from_id == '':
