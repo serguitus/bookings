@@ -28,7 +28,7 @@ class ConfigService(object):
     def allotment_amounts(cls, service_id, date_from, date_to, adults, children, provider, agency,
         board_type, room_type_id):
         pass
- 
+
     @classmethod
     def transfer_amounts(cls, service_id, date_from, date_to, adults, children, provider, agency,
         location_from, location_to):
