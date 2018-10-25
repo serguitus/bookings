@@ -1,6 +1,7 @@
 from django.conf.urls import url
 
-from . import views
+from booking import views
 
 urlpatterns = [
+    url(r'^amounts/?', views.BookingServiceAmountsView.as_view(), name='booking_amounts'),
 ]

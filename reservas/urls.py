@@ -26,6 +26,7 @@ from config.views import (
     LocationAutocompleteView, RoomTypeAutocompleteView,
     AllotmentAutocompleteView, TransferAutocompleteView, ExtraAutocompleteView,
     )
+from booking import urls as booking_urls
 
 
 urlpatterns = [
@@ -74,4 +75,5 @@ urlpatterns = [
         ExtraAutocompleteView.as_view(),
         name='extra-autocomplete',
     ),
+    url(r'^bookings/booking/', include(booking_urls.urlpatterns)),
 ]
