@@ -215,6 +215,7 @@ class ConfigService(object):
             if len(detail_list) > 0:
                 # working with first detail
                 detail = detail_list[0]
+
                 # verify current dat included
                 if amount_for_provider:
                     detail_date_from = detail.provider_servide.date_from
@@ -222,7 +223,7 @@ class ConfigService(object):
                 else:
                     detail_date_from = detail.agency_service.date_from
                     detail_date_to = detail.agency_service.date_to
-                    
+
                 if current_date.date() >= detail_date_from:
                     # verify final date included
                     if detail_date_to >= date_to.date():
@@ -242,8 +243,8 @@ class ConfigService(object):
                             quantity, parameter)
                         if result and result >= 0:
                             amount += result
-                            # TODO add 1 day
-                            current_date = detail_date_to + 1
+                            one_day = timedelta(days=1)
+                            current_date = detail_date_to + one_day
                 # remove detail from list
                 detail_list.remove(detail)
             else:
@@ -272,7 +273,6 @@ class ConfigService(object):
     @classmethod
     def _get_allotment_amount(
         cls, service, detail, date_from, date_to, adults, children, quantity, parameter):
-        # TODO
         days = date_to - date_from
         amount = cls._find_detail_amount(detail, adults, children)
         if amount and amount >= 0:
@@ -293,9 +293,8 @@ class ConfigService(object):
     @classmethod
     def _get_extra_amount(cls, service, detail, date_from, date_to, adults, children, quantity, parameter):
         if service.parameter_type == EXTRA_PARAMETER_TYPE_DAYS:
-            # TODO
             days = date_to - date_from
-            parameter = days
+            parameter = days.days
         if service.cost_type == EXTRA_COST_TYPE_FIXED and detail.ad_1_amount:
             return detail.ad_1_amount * quantity * parameter
         if service.cost_type == EXTRA_COST_TYPE_BY_PAX:
