@@ -6,13 +6,17 @@ var bookingextra_url = '/';
 $(document).ready(function(){
   $('#bookingallotment_form #id_cost_amount').after("<span class='computed-value'>Calculated: <b data-computed=cost>N/A</b></span>");
   $('#bookingallotment_form #id_price_amount').after("<span class='computed-value'>Calculated: <b data-computed=price>N/A</b></span>");
+  $('#bookingtransfer_form #id_cost_amount').after("<span class='computed-value'>Calculated: <b data-computed=cost>N/A</b></span>");
+  $('#bookingtransfer_form #id_price_amount').after("<span class='computed-value'>Calculated: <b data-computed=price>N/A</b></span>");
+    $('#bookingextra_form #id_cost_amount').after("<span class='computed-value'>Calculated: <b data-computed=cost>N/A</b></span>");
+  $('#bookingextra_form #id_price_amount').after("<span class='computed-value'>Calculated: <b data-computed=price>N/A</b></span>");
+
 
   var computedCost = $('b[data-computed=cost]');
   var computedPrice = $('b[data-computed=price]');
   var costInputContainer = $('div.field-cost_amount');
 
   function get_computed_amounts(url, form_dict){
-    console.log('cambió!!');
     computedCost.html('Loading...');
     computedPrice.html('Loading...');
     // sending a request to get computed numbers
@@ -21,11 +25,20 @@ $(document).ready(function(){
       'async': true,
       'datatype': 'json',
       'type': 'POST',
-      'data': $('#bookingallotment_form').serialize()
+      'data': form_dict,
     }).done(function(data){
-      computedCost.html(data['cost']);
-      computedPrice.html(data['price']);
-      console.log('llego dato valido');
+      if(data['cost']){
+        computedCost.html(data['cost']);
+      }
+      else{
+        computedCost.html('N/A');
+      }
+      if(data['price']){
+        computedPrice.html(data['price']);
+      }
+      else{
+        computedPrice.html('N/A');
+      }
     }).fail(function(){
       computedCost.html('N/A');
       computedPrice.html('N/A');
