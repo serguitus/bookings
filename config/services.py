@@ -32,57 +32,49 @@ class ConfigService(object):
 
         # provider cost
         # obtain details order by date_from asc, date_to desc
-        detail_list = list(
-            ProviderAllotmentDetail.objects.select_related(
-                'provider_service__service'
-            ).filter(
-                provider_service__provider__eq=provider.id
-            ).filter(
-                provider_service__provider_service__eq=service.id
-            ).filter(
-                provider_service__date_to__gte=date_from,
-                provider_service__date_from__lte=date_to
-            ).filter(
-                board_type__eq=board_type
-            ).filter(
-                room_type__eq=room_type_id
-            ).filter(
-                provider_service__provider_service__eq=service.id
-            ).order_by(
-                ['provider_service__date_from', '-provider_service__date_to']
+        if provider is None:
+            cost = None
+            cost_message = 'Provider Not Found'
+        else:
+            queryset = cls._get_provider_queryset(
+                ProviderAllotmentDetail.objects,
+                provider.id, service_id, date_from, date_to)
+            detail_list = list(
+                queryset.filter(
+                    board_type=board_type
+                ).filter(
+                    room_type_id=room_type_id
+                )
             )
-        )
-        cost, cost_message = cls.find_amount(
-            True, service, date_from, date_to, adults, children,
-            1, 1, detail_list
-        )
+            cost, cost_message = cls.find_amount(
+                True, service, date_from, date_to, adults, children,
+                1, 1, detail_list
+            )
 
         # agency price
         # obtain details order by date_from asc, date_to desc
-        detail_list = list(
-            AgencyAllotmentDetail.objects.select_related(
-                'agency_service__service'
-            ).filter(
-                agency_service__agency__eq=agency.id
-            ).filter(
-                agency_service__agency_service__eq=service.id
-            ).filter(
-                agency_service__date_to__gte=date_from,
-                agency_service__date_from__lte=date_to
-            ).filter(
-                board_type__eq=board_type
-            ).filter(
-                room_type__eq=room_type_id
-            ).order_by(
-                ['agency_service__date_from', '-agency_service__date_to']
+        if agency is None:
+            price = None
+            price_message = 'Agency Not Found'
+        else:
+            queryset = cls._get_agency_queryset(
+                AgencyAllotmentDetail.objects,
+                agency.id, service_id, date_from, date_to)
+            detail_list = list(
+                queryset.filter(
+                    board_type=board_type
+                ).filter(
+                    room_type_id=room_type_id
+                )
             )
-        )
-        price, price_message = cls.find_amount(
-            False, service, date_from, date_to, adults, children,
-            1, 1, detail_list
-        )
+            price, price_message = cls.find_amount(
+                False, service, date_from, date_to, adults, children,
+                1, 1, detail_list
+            )
+
         return cls._get_result(cost, cost_message, price, price_message)
  
+
     @classmethod
     def transfer_amounts(cls, service_id, date_from, date_to, adults, children, provider, agency,
         location_from_id, location_to_id):
@@ -91,55 +83,46 @@ class ConfigService(object):
 
         # provider cost
         # obtain details order by date_from asc, date_to desc
-        detail_list = list(
-            ProviderTransferDetail.objects.select_related(
-                'provider_service__service'
-            ).filter(
-                provider_service__provider__eq=provider.id
-            ).filter(
-                provider_service__provider_service__eq=service.id
-            ).filter(
-                provider_service__date_to__gte=date_from,
-                provider_service__date_from__lte=date_to
-            ).filter(
-                p_location_from__eq=location_from_id
-            ).filter(
-                p_location_to__eq=location_to_id
-            ).filter(
-                provider_service__provider_service__eq=service.id
-            ).order_by(
-                ['provider_service__date_from', '-provider_service__date_to']
+        if provider is None:
+            cost = None
+            cost_message = 'Provider Not Found'
+        else:
+            queryset = cls._get_provider_queryset(
+                ProviderAllotmentDetail.objects,
+                provider.id, service_id, date_from, date_to)
+            detail_list = list(
+                queryset.filter(
+                    p_location_from_id=location_from_id
+                ).filter(
+                    p_location_to_id=location_to_id
+                )
             )
-        )
-        cost, cost_message = cls.find_amount(
-            True, service, date_from, date_to, adults, children,
-            1, 1, detail_list
-        )
+            cost, cost_message = cls.find_amount(
+                True, service, date_from, date_to, adults, children,
+                1, 1, detail_list
+            )
 
         # agency price
         # obtain details order by date_from asc, date_to desc
-        detail_list = list(
-            AgencyTransferDetail.objects.select_related(
-                'agency_service__service'
-            ).filter(
-                agency_service__agency__eq=agency.id
-            ).filter(
-                agency_service__agency_service__eq=service.id
-            ).filter(
-                agency_service__date_to__gte=date_from,
-                agency_service__date_from__lte=date_to
-            ).filter(
-                a_location_from__eq=location_from_id
-            ).filter(
-                a_location_to__eq=location_to_id
-            ).order_by(
-                ['agency_service__date_from', '-agency_service__date_to']
+        if agency is None:
+            price = None
+            price_message = 'Agency Not Found'
+        else:
+            queryset = cls._get_agency_queryset(
+                AgencyAllotmentDetail.objects,
+                agency.id, service_id, date_from, date_to)
+            detail_list = list(
+                queryset.filter(
+                    a_location_from_id=location_from_id
+                ).filter(
+                    a_location_to_id=location_to_id
+                )
             )
-        )
-        price, price_message = cls.find_amount(
-            False, service, date_from, date_to, adults, children,
-            1, 1, detail_list
-        )
+            price, price_message = cls.find_amount(
+                False, service, date_from, date_to, adults, children,
+                1, 1, detail_list
+            )
+
         return cls._get_result(cost, cost_message, price, price_message)
 
     @classmethod
@@ -150,51 +133,40 @@ class ConfigService(object):
 
         # provider cost
         # obtain details order by date_from asc, date_to desc
-        detail_list = list(
-            ProviderExtraDetail.objects.select_related(
-                'provider_service__service'
-            ).filter(
-                provider_service__provider__eq=provider.id
-            ).filter(
-                provider_service__provider_service__eq=service.id
-            ).filter(
-                provider_service__date_to__gte=date_from,
-                provider_service__date_from__lte=date_to
-            ).order_by(
-                ['provider_service__date_from', '-provider_service__date_to']
+        if provider is None:
+            cost = None
+            cost_message = 'Provider Not Found'
+        else:
+            queryset = cls._get_provider_queryset(
+                ProviderAllotmentDetail.objects,
+                provider.id, service_id, date_from, date_to)
+            detail_list = list(queryset)
+            cost, cost_message = cls.find_amount(
+                True, service, date_from, date_to, adults, children,
+                1, 1, detail_list
             )
-        )
-        cost, cost_message = cls.find_amount(
-            True, service, date_from, date_to, adults, children,
-            quantity, parameter, detail_list
-        )
 
         # agency price
         # obtain details order by date_from asc, date_to desc
-        detail_list = list(
-            AgencyExtraDetail.objects.select_related(
-                'agency_service__service'
-            ).filter(
-                agency_service__agency__eq=agency.id
-            ).filter(
-                agency_service__agency_service__eq=service.id
-            ).filter(
-                agency_service__date_to__gte=date_from,
-                agency_service__date_from__lte=date_to
-            ).order_by(
-                ['agency_service__date_from', '-agency_service__date_to']
+        if agency is None:
+            price = None
+            price_message = 'Agency Not Found'
+        else:
+            queryset = cls._get_agency_queryset(
+                AgencyAllotmentDetail.objects,
+                agency.id, service_id, date_from, date_to)
+            detail_list = list(queryset)
+            price, price_message = cls.find_amount(
+                False, service, date_from, date_to, adults, children,
+                1, 1, detail_list
             )
-        )
-        price, price_message = cls.find_amount(
-            False, service, date_from, date_to, adults, children,
-            quantity, parameter, detail_list
-        )
+
         return cls._get_result(cost, cost_message, price, price_message)
 
     @classmethod
     def _get_result(cls, cost, cost_message, price, price_message):
-        if cost >= 0:
-            if price >= 0:
+        if cost and cost >= 0:
+            if price and price >= 0:
                 code = "0"
                 message = "Provider Cost and Agency Price Found: %s - %s" % (
                     cost_message, price_message
@@ -205,7 +177,7 @@ class ConfigService(object):
                     cost_message, price_message
                 )
         else:
-            if price >= 0:
+            if price and price >= 0:
                 code = "2"
                 message = "Only Agency Price Found: %s - %s" % (
                     cost_message, price_message
@@ -238,8 +210,8 @@ class ConfigService(object):
                     detail_date_from = detail.provider_servide.date_from
                     detail_date_to = detail.provider_servide.date_to
                 else:
-                    detail_date_from = detail.agency_servide.date_from
-                    detail_date_to = detail.agency_servide.date_to
+                    detail_date_from = detail.agency_service.date_from
+                    detail_date_to = detail.agency_service.date_to
                     
                 if current_date >= detail_date_from:
                     # verify final date included
@@ -249,7 +221,7 @@ class ConfigService(object):
                             service, detail, current_date, date_to,
                             adults, children,
                             quantity, parameter)
-                        if result >= 0:
+                        if result and result >= 0:
                             amount += result
                             solved = True
                             stop = True
@@ -258,7 +230,7 @@ class ConfigService(object):
                             service, detail, current_date, detail_date_to,
                             adults, children,
                             quantity, parameter)
-                        if result >= 0:
+                        if result and result >= 0:
                             amount += result
                             # TODO add 1 day
                             current_date = detail_date_to + 1
@@ -269,7 +241,7 @@ class ConfigService(object):
                 stop = True
                 message = 'Price Not Found for date %s' % current_date
         if not solved:
-            amount = -1
+            amount = None
 
         return amount, message
 
@@ -285,7 +257,7 @@ class ConfigService(object):
         if isinstance(service, Extra):
             return cls._get_extra_amount(
                 service, detail, date_from, date_to, adults, children, quantity, parameter)
-        return -1
+        return None
 
     @classmethod
     def _get_allotment_amount(
@@ -293,9 +265,9 @@ class ConfigService(object):
         # TODO
         days = date_to - date_from
         amount = cls._find_detail_amount(detail, adults, children)
-        if amount >= 0:
+        if amount and amount >= 0:
            return amount * days
-        return -1
+        return None
 
     @classmethod
     def _get_transfer_amount(
@@ -304,9 +276,9 @@ class ConfigService(object):
             return detail.ad_1_amount
         if service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
             amount = cls._find_detail_amount(detail, adults, children)
-            if amount >= 0:
+            if amount and amount >= 0:
                 return amount
-        return -1
+        return None
 
     @classmethod
     def _get_extra_amount(cls, service, detail, date_from, date_to, adults, children, quantity, parameter):
@@ -317,10 +289,10 @@ class ConfigService(object):
         if service.cost_type == EXTRA_COST_TYPE_FIXED and detail.ad_1_amount:
             return detail.ad_1_amount * quantity * parameter
         if service.cost_type == EXTRA_COST_TYPE_BY_PAX:
-            price = cls._find_detail_amount(detail, adults, children)
-            if price >= 0:
-                return price * quantity * parameter
-        return -1
+            amount = cls._find_detail_amount(detail, adults, children)
+            if amount and amount >= 0:
+                return amount * quantity * parameter
+        return None
 
     @classmethod
     def _find_detail_amount(cls, detail, adults, children):
@@ -367,5 +339,38 @@ class ConfigService(object):
                 return 4 * detail.ad_4_amount + 2 * detail.ch_2_ad_4_amount
             if children == 3 and detail.ch_3_ad_4_amount:
                 return 4 * detail.ad_4_amount + 3 * detail.ch_3_ad_4_amount
-        return -1
+        return None
     
+    @classmethod
+    def _get_provider_queryset(
+        cls, manager, provider_id, service_id, date_from, date_to):
+        
+        return manager.select_related(
+               'provider_service__service'
+            ).filter(
+                provider_service__provider_id=provider_id
+            ).filter(
+                provider_service__service_id=service_id
+            ).filter(
+                provider_service__date_to__gte=date_from,
+                provider_service__date_from__lte=date_to
+            ).order_by(
+                'provider_service__date_from', '-provider_service__date_to'
+            )
+
+    @classmethod
+    def _get_agency_queryset(
+        cls, manager, agency_id, service_id, date_from, date_to):
+        
+        return manager.select_related(
+               'agency_service__service'
+            ).filter(
+                agency_service__agency_id=agency_id
+            ).filter(
+                agency_service__service_id=service_id
+            ).filter(
+                agency_service__date_to__gte=date_from,
+                agency_service__date_from__lte=date_to
+            ).order_by(
+                'agency_service__date_from', '-agency_service__date_to'
+            )
