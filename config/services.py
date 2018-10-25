@@ -27,12 +27,120 @@ class ConfigService(object):
     @classmethod
     def allotment_amounts(cls, service_id, date_from, date_to, adults, children, provider, agency,
         board_type, room_type_id):
-        pass
+
+        service = Allotment.objects.get(pk=service_id)
+
+        # provider cost
+        # obtain details order by date_from asc, date_to desc
+        detail_list = list(
+            ProviderAllotmentDetail.objects.select_related(
+                'provider_service__service'
+            ).filter(
+                provider_service__provider__eq=provider.id
+            ).filter(
+                provider_service__provider_service__eq=service.id
+            ).filter(
+                provider_service__date_to__gte=date_from,
+                provider_service__date_from__lte=date_to
+            ).filter(
+                board_type__eq=board_type
+            ).filter(
+                room_type__eq=room_type_id
+            ).filter(
+                provider_service__provider_service__eq=service.id
+            ).order_by(
+                ['provider_service__date_from', '-provider_service__date_to']
+            )
+        )
+        cost, cost_message = cls.find_amount(
+            True, service, date_from, date_to, adults, children,
+            1, 1, detail_list
+        )
+
+        # agency price
+        # obtain details order by date_from asc, date_to desc
+        detail_list = list(
+            AgencyAllotmentDetail.objects.select_related(
+                'agency_service__service'
+            ).filter(
+                agency_service__agency__eq=agency.id
+            ).filter(
+                agency_service__agency_service__eq=service.id
+            ).filter(
+                agency_service__date_to__gte=date_from,
+                agency_service__date_from__lte=date_to
+            ).filter(
+                board_type__eq=board_type
+            ).filter(
+                room_type__eq=room_type_id
+            ).order_by(
+                ['agency_service__date_from', '-agency_service__date_to']
+            )
+        )
+        price, price_message = cls.find_amount(
+            False, service, date_from, date_to, adults, children,
+            1, 1, detail_list
+        )
+        return cls._get_result(cost, cost_message, price, price_message)
  
     @classmethod
     def transfer_amounts(cls, service_id, date_from, date_to, adults, children, provider, agency,
-        location_from, location_to):
-        pass
+        location_from_id, location_to_id):
+
+        service = Transfer.objects.get(pk=service_id)
+
+        # provider cost
+        # obtain details order by date_from asc, date_to desc
+        detail_list = list(
+            ProviderTransferDetail.objects.select_related(
+                'provider_service__service'
+            ).filter(
+                provider_service__provider__eq=provider.id
+            ).filter(
+                provider_service__provider_service__eq=service.id
+            ).filter(
+                provider_service__date_to__gte=date_from,
+                provider_service__date_from__lte=date_to
+            ).filter(
+                p_location_from__eq=location_from_id
+            ).filter(
+                p_location_to__eq=location_to_id
+            ).filter(
+                provider_service__provider_service__eq=service.id
+            ).order_by(
+                ['provider_service__date_from', '-provider_service__date_to']
+            )
+        )
+        cost, cost_message = cls.find_amount(
+            True, service, date_from, date_to, adults, children,
+            1, 1, detail_list
+        )
+
+        # agency price
+        # obtain details order by date_from asc, date_to desc
+        detail_list = list(
+            AgencyTransferDetail.objects.select_related(
+                'agency_service__service'
+            ).filter(
+                agency_service__agency__eq=agency.id
+            ).filter(
+                agency_service__agency_service__eq=service.id
+            ).filter(
+                agency_service__date_to__gte=date_from,
+                agency_service__date_from__lte=date_to
+            ).filter(
+                a_location_from__eq=location_from_id
+            ).filter(
+                a_location_to__eq=location_to_id
+            ).order_by(
+                ['agency_service__date_from', '-agency_service__date_to']
+            )
+        )
+        price, price_message = cls.find_amount(
+            False, service, date_from, date_to, adults, children,
+            1, 1, detail_list
+        )
+        return cls._get_result(cost, cost_message, price, price_message)
 
     @classmethod
     def extra_amounts(cls, service_id, date_from, date_to, adults, children, provider, agency,
@@ -81,7 +189,7 @@ class ConfigService(object):
             False, service, date_from, date_to, adults, children,
             quantity, parameter, detail_list
         )
-        return _get_result(cost, cost_message, price, price_message)
+        return cls._get_result(cost, cost_message, price, price_message)
 
     @classmethod
     def _get_result(cls, cost, cost_message, price, price_message):
