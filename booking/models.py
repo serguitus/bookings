@@ -78,6 +78,8 @@ class BookingPax(models.Model):
                                        blank=True, null=True)
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
 
+    def __str__(self):
+        return '%s (age: %s)' % (self.pax_name, self.pax_age)
 
 class BookingService(models.Model):
     """

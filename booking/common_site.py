@@ -27,6 +27,7 @@ from booking.forms import BookingForm, BookingAllotmentForm, BookingTransferForm
 from booking.models import (
     Booking,
     BookingPax,
+    BookingServicePax,
     BookingAllotment,
     BookingTransfer,
     BookingExtra,
@@ -47,6 +48,12 @@ class BookingPaxInline(TabularInline):
     model = BookingPax
     fields = ['pax_name', 'pax_group', 'pax_age']
     verbose_name_plural = 'Rooming List'
+
+
+class BookingServicePaxInline(TabularInline):
+    model = BookingServicePax
+    fields = ['booking_pax', 'group']
+    verbose_name_plural = 'Service Rooming List'
 
 
 class BookingAllotmentInLine(CommonTabularInline):
@@ -123,6 +130,7 @@ class BookingAllotmentSiteModel(SiteModel):
     search_fields = ['booking__reference', ]
     ordering = ('booking__reference', 'service__name',)
     form = BookingAllotmentForm
+    inlines = [BookingServicePaxInline]
 
 
 class BookingTransferSiteModel(SiteModel):
@@ -140,6 +148,7 @@ class BookingTransferSiteModel(SiteModel):
     search_fields = ['booking__reference',]
     ordering = ('booking__reference', 'service__name',)
     form = BookingTransferForm
+    inlines = [BookingServicePaxInline]
 
 
 class BookingExtraSiteModel(SiteModel):
@@ -154,6 +163,7 @@ class BookingExtraSiteModel(SiteModel):
     search_fields = ('booking__reference',)
     ordering = ('booking__reference', 'service__name',)
     form = BookingExtraForm
+    inlines = [BookingServicePaxInline]
 
 
 bookings_site.register(Booking, BookingSiteModel)
