@@ -330,7 +330,7 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
 class DepositSiteModel(BaseFinantialDocumentSiteModel):
     model_order = 2010
     menu_label = MENU_LABEL_FINANCE_BASIC
-    fields = ('name', 'account', 'amount', 'date', 'status')
+    fields = ('name', 'account', 'amount', 'date', 'status', 'details')
     list_display = ('name', 'account', 'amount', 'date', 'status')
     list_filter = ('currency', 'account', 'status', 'date')
     form = AccountingForm
