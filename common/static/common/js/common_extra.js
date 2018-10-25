@@ -1,5 +1,5 @@
 //Entry Points to get prices for each booking_service
-var bookingallotment_url = '/';
+var bookingallotment_url = '/bookings/booking/amounts/';
 var bookingtransfer_url = '/';
 var bookingextra_url = '/';
 

@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
+from dateutil.parser import parse
 
 from booking.models import BookingService, BookingServicePax
 
@@ -10,7 +11,6 @@ from config.constants import (
 from config.models import Service
 from config.services import ConfigService
 
-from dateutil.parser import parse
 
 from finance.models import Provider
 
