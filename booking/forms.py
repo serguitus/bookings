@@ -16,12 +16,13 @@ class BookingForm(forms.ModelForm):
 class BookingAllotmentForm(forms.ModelForm):
     class Meta:
         model = BookingAllotment
-        fields = ('__all__')
+        fields = '__all__'
         widgets = {
             'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
             'service': autocomplete.ModelSelect2(url='allotment-autocomplete'),
             'room_type': autocomplete.ModelSelect2(url='roomtype-autocomplete'),
         }
+    id = forms.CharField(widget=forms.HiddenInput())
 
 
 class BookingTransferForm(forms.ModelForm):
@@ -34,6 +35,7 @@ class BookingTransferForm(forms.ModelForm):
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
         }
+    id = forms.CharField(widget=forms.HiddenInput())
 
 
 class BookingExtraForm(forms.ModelForm):
@@ -44,3 +46,4 @@ class BookingExtraForm(forms.ModelForm):
             'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
             'service': autocomplete.ModelSelect2(url='extra-autocomplete'),
         }
+    id = forms.CharField(widget=forms.HiddenInput())

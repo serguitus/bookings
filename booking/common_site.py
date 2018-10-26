@@ -123,7 +123,8 @@ class BookingAllotmentSiteModel(SiteModel):
     menu_group = MENU_LABEL_BOOKING_SERVICES
 
     fields = ('booking', 'service', 'datetime_from', 'datetime_to', 'status',
-              'cost_amount', 'price_amount', 'room_type', 'board_type',)
+              'cost_amount', 'price_amount', 'room_type', 'board_type',
+              'provider', 'id')
     list_display = ('booking', 'service', 'datetime_from', 'datetime_to',
                     'status',)
     list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
@@ -141,7 +142,7 @@ class BookingTransferSiteModel(SiteModel):
     fields = ('booking', 'service',
               'location_from', 'location_to',
               'datetime_from', 'datetime_to', 'status',
-              'cost_amount', 'price_amount', 'provider')
+              'cost_amount', 'price_amount', 'provider', 'id')
     list_display = ('booking', 'name',
                     'datetime_from', 'datetime_to', 'status',)
     list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
@@ -156,8 +157,9 @@ class BookingExtraSiteModel(SiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_LABEL_BOOKING_SERVICES
 
-    fields = ('booking', 'service', 'quantity', 'parameter', 'datetime_from', 'datetime_to', 'status',
-        'cost_amount', 'price_amount',)
+    fields = ('booking', 'service', 'quantity', 'parameter',
+              'datetime_from', 'datetime_to', 'status',
+              'cost_amount', 'price_amount', 'provider', 'id')
     list_display = ('booking', 'service', 'quantity', 'parameter', 'datetime_from', 'datetime_to', 'status',)
     list_filter = ('service', 'datetime_from', 'status',)
     search_fields = ('booking__reference',)

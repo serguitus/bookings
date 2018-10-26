@@ -47,17 +47,17 @@ $(document).ready(function(){
 
   $('#bookingallotment_form input, #bookingallotment_form select').on('change', function(){
     data = $('#bookingallotment_form').serialize();
-    get_computed_amounts(bookingallotment_url, data)
+    get_computed_amounts(bookingallotment_url, data);
   });
 
   $('#bookingtransfer_form input, #bookingtransfer_form select').on('change', function(){
     data = $('#bookingtransfer_form').serialize();
-    get_computed_amounts(bookingtransfer_url, data)
+    get_computed_amounts(bookingtransfer_url, data);
   });
 
   $('#bookingextra_form input, #bookingextra_form select').on('change', function(){
     data = $('#bookingextra_form').serialize();
-    get_computed_amounts(bookingextra_url, data)
+    get_computed_amounts(bookingextra_url, data);
   });
 
 
