@@ -1,7 +1,7 @@
 //Entry Points to get prices for each booking_service
 var bookingallotment_url = '/bookings/booking/amounts/';
-var bookingtransfer_url = '/';
-var bookingextra_url = '/';
+var bookingtransfer_url = bookingallotment_url;
+var bookingextra_url = bookingallotment_url;
 
 $(document).ready(function(){
   $('#bookingallotment_form #id_cost_amount').after("<span class='computed-value'>Calculated: <b data-computed=cost>N/A</b></span>");
