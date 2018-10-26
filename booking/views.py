@@ -80,7 +80,7 @@ class BookingServiceAmountsView(View):
             booking_service = None
         agency = booking.agency
 
-        booking_service_id = request.POST.get('booking_service')
+        booking_service_id = request.POST.get('id')
         try:
             booking_service = BookingService.objects.get(pk=booking_service_id)
         except BookingService.DoesNotExist as ex:
