@@ -87,7 +87,7 @@
     border: 1px solid #ccc;
     padding: 2px 5px;
     margin: 0;
-    vertical-align: top;
+    vertical-align: inherit;
     font-size: 13px;
 }
 
@@ -164,6 +164,13 @@
 
 .changelist-filter a {
     display: block;
+    color: #999;
+    text-overflow: ellipsis;
+    overflow-x: hidden;
+}
+
+.changelist-filter a.choice-all {
+    display: initial;
     color: #999;
     text-overflow: ellipsis;
     overflow-x: hidden;
