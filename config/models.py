@@ -124,7 +124,7 @@ class AmountDetail(models.Model):
     """
     class Meta:
         abstract = True
-    ad_1_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1 Adult')
+    ad_1_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1 Adult / Fixed')
     ad_2_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2 Adults (each)')
     ad_3_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3 Adults (each)')
     ad_4_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='4 Adults (each)')
