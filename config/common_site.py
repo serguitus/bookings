@@ -17,7 +17,11 @@ from django.utils.encoding import force_text
 from django.utils.translation import ugettext as _, ungettext
 
 from config.forms import (
-    AllotmentRoomTypeInlineForm
+    ProviderAllotmentServiceForm, ProviderTransferServiceForm, ProviderExtraServiceForm,
+    ProviderAllotmentDetailInlineForm, ProviderTransferDetailInlineForm,
+    AgencyAllotmentServiceForm, AgencyTransferServiceForm, AgencyExtraServiceForm,
+    AgencyAllotmentDetailInlineForm, AgencyTransferDetailInlineForm,
+    AllotmentRoomTypeInlineForm,
 )
 from config.models import (
     Location, RoomType,
@@ -158,6 +162,7 @@ class ProviderAllotmentDetailInline(CommonStackedInline):
         ('ad_3_amount','ch_1_ad_3_amount','ch_2_ad_3_amount','ch_3_ad_3_amount',),
         ('ch_1_ad_0_amount','ch_2_ad_0_amount','ch_3_ad_0_amount',),
     )
+    form = ProviderAllotmentDetailInlineForm
 
 
 class ProviderAllotmentServiceSiteModel(SiteModel):
@@ -168,6 +173,7 @@ class ProviderAllotmentServiceSiteModel(SiteModel):
     list_display = ('provider', 'service', 'date_from', 'date_to',)
     search_fields = ('provider.name','service.name',)
     inlines = [ProviderAllotmentDetailInline]
+    form = ProviderAllotmentServiceForm
 
 
 class ProviderTransferDetailInline(CommonStackedInline):
@@ -180,6 +186,7 @@ class ProviderTransferDetailInline(CommonStackedInline):
         ('ad_3_amount','ch_1_ad_3_amount','ch_2_ad_3_amount','ch_3_ad_3_amount',),
         ('ch_1_ad_0_amount','ch_2_ad_0_amount','ch_3_ad_0_amount',),
     )
+    form = ProviderTransferDetailInlineForm
 
 
 class ProviderTransferServiceSiteModel(SiteModel):
@@ -190,6 +197,7 @@ class ProviderTransferServiceSiteModel(SiteModel):
     list_display = ('provider', 'service', 'date_from', 'date_to',)
     search_fields = ('provider.name','service.name',)
     inlines = [ProviderTransferDetailInline]
+    form = ProviderTransferServiceForm
 
 
 class ProviderExtraDetailInline(CommonStackedInline):
@@ -211,6 +219,7 @@ class ProviderExtraServiceSiteModel(SiteModel):
     list_display = ('provider', 'service', 'date_from', 'date_to',)
     search_fields = ('provider.name','service.name',)
     inlines = [ProviderExtraDetailInline]
+    form = ProviderExtraServiceForm
 
 
 class AgencyAllotmentDetailInline(CommonStackedInline):
@@ -223,6 +232,7 @@ class AgencyAllotmentDetailInline(CommonStackedInline):
         ('ad_3_amount','ch_1_ad_3_amount','ch_2_ad_3_amount','ch_3_ad_3_amount',),
         ('ch_1_ad_0_amount','ch_2_ad_0_amount','ch_3_ad_0_amount',),
     )
+    form = AgencyAllotmentDetailInlineForm
 
 
 class AgencyAllotmentServiceSiteModel(SiteModel):
@@ -233,6 +243,7 @@ class AgencyAllotmentServiceSiteModel(SiteModel):
     list_display = ('agency', 'service', 'date_from', 'date_to',)
     search_fields = ('agency.name','service.name',)
     inlines = [AgencyAllotmentDetailInline]
+    form = AgencyAllotmentServiceForm
 
 
 class AgencyTransferDetailInline(CommonStackedInline):
@@ -245,6 +256,7 @@ class AgencyTransferDetailInline(CommonStackedInline):
         ('ad_3_amount','ch_1_ad_3_amount','ch_2_ad_3_amount','ch_3_ad_3_amount',),
         ('ch_1_ad_0_amount','ch_2_ad_0_amount','ch_3_ad_0_amount',),
     )
+    form = AgencyTransferDetailInlineForm
 
 
 class AgencyTransferServiceSiteModel(SiteModel):
@@ -255,6 +267,7 @@ class AgencyTransferServiceSiteModel(SiteModel):
     list_display = ('agency', 'service', 'date_from', 'date_to',)
     search_fields = ('agency.name','service.name',)
     inlines = [AgencyTransferDetailInline]
+    form = AgencyTransferServiceForm
 
 
 class AgencyExtraDetailInline(CommonStackedInline):
@@ -276,6 +289,7 @@ class AgencyExtraServiceSiteModel(SiteModel):
     list_display = ('agency', 'service', 'date_from', 'date_to',)
     search_fields = ('agency.name','service.name',)
     inlines = [AgencyExtraDetailInline]
+    form = AgencyExtraServiceForm
 
 
 bookings_site.register(Location, LocationSiteModel)

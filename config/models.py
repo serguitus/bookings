@@ -124,25 +124,25 @@ class AmountDetail(models.Model):
     """
     class Meta:
         abstract = True
-    ad_1_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    ad_2_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    ad_3_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    ad_4_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    ch_1_ad_0_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    ch_1_ad_1_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    ch_1_ad_2_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    ch_1_ad_3_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    ch_1_ad_4_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    ch_2_ad_0_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    ch_2_ad_1_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    ch_2_ad_2_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    ch_2_ad_3_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    ch_2_ad_4_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    ch_3_ad_0_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    ch_3_ad_1_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    ch_3_ad_2_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    ch_3_ad_3_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    ch_3_ad_4_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
+    ad_1_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1 Adult')
+    ad_2_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2 Adults (each)')
+    ad_3_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3 Adults (each)')
+    ad_4_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='4 Adults (each)')
+    ch_1_ad_0_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1 Child')
+    ch_1_ad_1_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1 Child')
+    ch_1_ad_2_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1 Child')
+    ch_1_ad_3_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1 Child')
+    ch_1_ad_4_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1 Child')
+    ch_2_ad_0_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2 Children (each)')
+    ch_2_ad_1_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2 Children (each)')
+    ch_2_ad_2_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2 Children (each)')
+    ch_2_ad_3_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2 Children (each)')
+    ch_2_ad_4_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2 Children (each)')
+    ch_3_ad_0_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3 Children (each)')
+    ch_3_ad_1_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3 Children (each)')
+    ch_3_ad_2_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3 Children (each)')
+    ch_3_ad_3_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3 Children (each)')
+    ch_3_ad_4_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3 Children (each)')
 
 
 #===============================================================================
@@ -377,8 +377,8 @@ class ProviderTransferDetail(AmountDetail):
         verbose_name_plural = 'Providers Transfers Details'
         unique_together = (('provider_service', 'p_location_from', 'p_location_to',),)
     provider_service = models.ForeignKey(ProviderTransferService)
-    p_location_from = models.ForeignKey(Location, related_name='p_location_from')
-    p_location_to = models.ForeignKey(Location, related_name='p_location_to')
+    p_location_from = models.ForeignKey(Location, related_name='p_location_from', verbose_name='Location from')
+    p_location_to = models.ForeignKey(Location, related_name='p_location_to', verbose_name='Location to')
 
 
 class AgencyTransferService(AgencyCatalogue):
@@ -400,7 +400,7 @@ class AgencyTransferDetail(AmountDetail):
         verbose_name_plural = 'Agencies Transfers Details'
         unique_together = (('agency_service', 'a_location_from', 'a_location_to',),)
     agency_service = models.ForeignKey(AgencyTransferService)
-    a_location_from = models.ForeignKey(Location, related_name='a_location_from')
-    a_location_to = models.ForeignKey(Location, related_name='a_location_to')
+    a_location_from = models.ForeignKey(Location, related_name='a_location_from', verbose_name='Location from')
+    a_location_to = models.ForeignKey(Location, related_name='a_location_to', verbose_name='Location to')
 
 
