@@ -23,7 +23,9 @@ from django.utils.translation import ugettext as _, ungettext
 
 from django_tables2 import RequestConfig
 
-from booking.forms import BookingForm, BookingAllotmentForm, BookingTransferForm, BookingExtraForm
+from booking.forms import (BookingForm, BookingAllotmentForm,
+                           BookingTransferForm, BookingExtraForm,
+                           BookingServicePaxFormSet)
 from booking.models import (
     Booking,
     BookingPax,
@@ -54,6 +56,7 @@ class BookingServicePaxInline(TabularInline):
     model = BookingServicePax
     fields = ['booking_pax', 'group']
     verbose_name_plural = 'Service Rooming List'
+    formset = BookingServicePaxFormSet
 
 
 class BookingAllotmentInLine(CommonTabularInline):
