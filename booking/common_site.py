@@ -56,14 +56,15 @@ class BookingServicePaxInline(TabularInline):
     model = BookingServicePax
     fields = ['booking_pax', 'group']
     verbose_name_plural = 'Service Rooming List'
-    extra = 1
 
     def get_formset(self, request, obj=None, **kwargs):
         initial = []
         if request.method == "GET" and obj:
             saved = BookingServicePax.objects.filter(booking_service=obj.id)
             if not saved:
-                for bp in BookingPax.objects.filter(booking=obj.booking):
+                rooming = BookingPax.objects.filter(booking=obj.booking)
+                self.extra = len(rooming)
+                for bp in rooming:
                     new_pax = {'booking_pax': bp.id,
                                'group': bp.pax_group}
                     initial.append(new_pax)
