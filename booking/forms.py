@@ -1,6 +1,7 @@
 from dal import autocomplete
 
-from booking.models import Booking, BookingAllotment, BookingTransfer, BookingExtra
+from booking.models import (Booking, BookingAllotment, BookingTransfer,
+                            BookingExtra, BookingServicePax)
 from django import forms
 
 
