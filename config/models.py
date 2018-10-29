@@ -159,6 +159,7 @@ class Extra(Service):
         max_length=5, choices=EXTRA_COST_TYPES)
     parameter_type = models.CharField(
         max_length=5, choices=EXTRA_PARAMETER_TYPES)
+    max_capacity = models.IntegerField(blank=True, null=True)
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_EXTRA
@@ -344,6 +345,7 @@ class Transfer(Service):
         verbose_name = 'Transfer'
         verbose_name_plural = 'Transfers'
     cost_type = models.CharField(max_length=5, choices=TRANSFER_COST_TYPES)
+    max_capacity = models.IntegerField(blank=True, null=True)
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_TRANSFER
