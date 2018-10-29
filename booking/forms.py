@@ -1,6 +1,7 @@
 from dal import autocomplete
 
-from booking.models import Booking, BookingAllotment, BookingTransfer, BookingExtra
+from booking.models import (Booking, BookingAllotment, BookingTransfer,
+                            BookingExtra, BookingServicePax)
 from django import forms
 
 
@@ -47,9 +48,3 @@ class BookingExtraForm(forms.ModelForm):
             'service': autocomplete.ModelSelect2(url='extra-autocomplete'),
         }
     id = forms.CharField(widget=forms.HiddenInput())
-
-
-class BookingServicePaxFormSet(forms.models.BaseModelFormSet):
-    def __init__(self, *args, **kwargs):
-        super(BookingServicePaxFormSet, self).__init__(*args, **kwargs)
-        self.initial = [{'pax_name': 1, 'pax_group': 1, 'pax_age': 50}]

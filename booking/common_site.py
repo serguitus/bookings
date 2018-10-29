@@ -20,12 +20,12 @@ from django.shortcuts import render
 from django.template.response import SimpleTemplateResponse, TemplateResponse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext as _, ungettext
+from django.utils.functional import curry
 
 from django_tables2 import RequestConfig
 
 from booking.forms import (BookingForm, BookingAllotmentForm,
-                           BookingTransferForm, BookingExtraForm,
-                           BookingServicePaxFormSet)
+                           BookingTransferForm, BookingExtraForm,)
 from booking.models import (
     Booking,
     BookingPax,
@@ -56,8 +56,17 @@ class BookingServicePaxInline(TabularInline):
     model = BookingServicePax
     fields = ['booking_pax', 'group']
     verbose_name_plural = 'Service Rooming List'
-    formset = BookingServicePaxFormSet
 
+    def get_formset(self, request, obj=None, **kwargs):
+        initial = []
+        if request.method == "GET" and obj:
+            for bp in BookingPax.objects.filter(booking=obj.booking):
+                new_pax = {'booking_pax': bp.id,
+                           'group': bp.pax_group}
+                initial.append(new_pax)
+        formset = super(BookingServicePaxInline, self).get_formset(request, obj, **kwargs)
+        formset.__init__ = curry(formset.__init__, initial=initial)
+        return formset
 
 class BookingAllotmentInLine(CommonTabularInline):
     model = BookingAllotment
