@@ -136,7 +136,7 @@ class BookingServicePax(models.Model):
     def save(self, *args, **kwargs):
         self.fill_data()
         # Call the "real" save() method.
-        super().save(*args, **kwargs)
+        super(BookingServicePax, self).save(*args, **kwargs)
 
 
 class BookingServiceSupplement(models.Model):
@@ -159,7 +159,7 @@ class BookingServiceSupplement(models.Model):
     def save(self, *args, **kwargs):
         self.fill_data()
         # Call the "real" save() method.
-        super().save(*args, **kwargs)
+        super(BookingServiceSupplement, self).save(*args, **kwargs)
 
 
 class ServiceSupplementBookingPax(models.Model):
@@ -186,7 +186,7 @@ class ServiceSupplementBookingPax(models.Model):
     def save(self, *args, **kwargs):
         self.fill_data()
         # Call the "real" save() method.
-        super().save(*args, **kwargs)
+        super(ServiceSupplementBookingPax, self).save(*args, **kwargs)
 
 
 class BookingExtra(BookingService):

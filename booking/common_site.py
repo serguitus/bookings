@@ -56,14 +56,17 @@ class BookingServicePaxInline(TabularInline):
     model = BookingServicePax
     fields = ['booking_pax', 'group']
     verbose_name_plural = 'Service Rooming List'
+    extra = 1
 
     def get_formset(self, request, obj=None, **kwargs):
         initial = []
         if request.method == "GET" and obj:
-            for bp in BookingPax.objects.filter(booking=obj.booking):
-                new_pax = {'booking_pax': bp.id,
-                           'group': bp.pax_group}
-                initial.append(new_pax)
+            saved = BookingServicePax.objects.filter(booking_service=obj.id)
+            if not saved:
+                for bp in BookingPax.objects.filter(booking=obj.booking):
+                    new_pax = {'booking_pax': bp.id,
+                               'group': bp.pax_group}
+                    initial.append(new_pax)
         formset = super(BookingServicePaxInline, self).get_formset(request, obj, **kwargs)
         formset.__init__ = curry(formset.__init__, initial=initial)
         return formset
