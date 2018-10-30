@@ -54,7 +54,7 @@ class Order(models.Model):
             self.agency.name, self.reference, self.date_from, self.date_to, self.get_status_display())
 
 
-class OrderPax(models.Model):
+class OrderPaxVariant(models.Model):
     """
     Order Pax
     """
@@ -64,15 +64,21 @@ class OrderPax(models.Model):
         unique_together = (('order', 'pax_quantity'),)
     order = models.ForeignKey(Order)
     pax_quantity = models.SmallIntegerField()
-    cost_amount = models.DecimalField(max_digits=10, decimal_places=2,
-                                      blank=True, null=True)
-    cost_comments = models.CharField(max_length=1000, blank=True, null=True)
-    price_amount = models.DecimalField(max_digits=10, decimal_places=2,
-                                       blank=True, null=True)
-    price_comments = models.CharField(max_length=1000, blank=True, null=True)
+    cost_single_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True)
+    cost_double_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True)
+    cost_triple_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True)
+    price_single_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True)
+    price_double_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True)
+    price_triple_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True)
 
     def __str__(self):
-        return '%s (age: %s)' % (self.pax_name, self.pax_age)
+        return '%s' % self.pax_quantity
 
 
 class OrderService(models.Model):
@@ -150,29 +156,6 @@ class OrderExtra(OrderService):
 
     def fill_data(self):
         self.service_type = SERVICE_CATEGORY_EXTRA
-
-
-class OrderServicePax(models.Model):
-    """
-    Booking Service Pax
-    """
-    class Meta:
-        verbose_name = 'Order Service Pax'
-        verbose_name_plural = 'Orders Services Paxes'
-    order_pax = models.ForeignKey(OrderPax)
-    order_service = models.ForeignKey(OrderService)
-    cost_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    cost_comments = models.CharField(max_length=1000, blank=True, null=True)
-    price_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    price_comments = models.CharField(max_length=1000, blank=True, null=True)
-
-    def fill_data(self):
-        pass
-
-    def save(self, *args, **kwargs):
-        self.fill_data()
-        # Call the "real" save() method.
-        super(OrderServicePax, self).save(*args, **kwargs)
 
 
 class Booking(models.Model):
@@ -347,21 +330,6 @@ class ServiceSupplementBookingPax(models.Model):
         super(ServiceSupplementBookingPax, self).save(*args, **kwargs)
 
 
-class BookingExtra(BookingService):
-    """
-    Booking Service Extra
-    """
-    class Meta:
-        verbose_name = 'Booking Extra'
-        verbose_name_plural = 'Bookings Extras'
-    service = models.ForeignKey(Extra)
-    quantity = models.SmallIntegerField()
-    parameter = models.SmallIntegerField()
-
-    def fill_data(self):
-        self.service_type = SERVICE_CATEGORY_EXTRA
-
-
 class BookingAllotment(BookingService):
     """
     Booking Service Allotment
@@ -406,3 +374,20 @@ class BookingTransferSupplement(BookingServiceSupplement):
         verbose_name = 'Booking Transfer Line Supplement'
         verbose_name_plural = 'Bookings Transfers Lines Supplements'
     quantity = models.SmallIntegerField(default=1)
+
+
+class BookingExtra(BookingService):
+    """
+    Booking Service Extra
+    """
+    class Meta:
+        verbose_name = 'Booking Extra'
+        verbose_name_plural = 'Bookings Extras'
+    service = models.ForeignKey(Extra)
+    quantity = models.SmallIntegerField()
+    parameter = models.SmallIntegerField()
+
+    def fill_data(self):
+        self.service_type = SERVICE_CATEGORY_EXTRA
+
+
