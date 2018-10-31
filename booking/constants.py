@@ -39,8 +39,15 @@ SERVICE_STATUS_LIST = (
     (SERVICE_STATUS_CANCELLED, 'Cancelled'),
 )
 
+ORDERSERVICE_TYPES = {
+    SERVICE_CATEGORY_ALLOTMENT: 'orderallotment',
+    SERVICE_CATEGORY_TRANSFER: 'ordertransfer',
+    SERVICE_CATEGORY_EXTRA: 'orderextra',
+}
+
 BOOKINGSERVICE_TYPES = {
     SERVICE_CATEGORY_ALLOTMENT: 'bookingallotment',
     SERVICE_CATEGORY_TRANSFER: 'bookingtransfer',
     SERVICE_CATEGORY_EXTRA: 'bookingextra',
 }
+

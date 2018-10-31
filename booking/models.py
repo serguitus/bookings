@@ -36,7 +36,7 @@ class Order(models.Model):
     date_from = models.DateField(blank=True, null=True)
     date_to = models.DateField(blank=True, null=True)
     status = models.CharField(
-        max_length=5, choices=BOOKING_STATUS_LIST, default=ORDER_STATUS_PENDING)
+        max_length=5, choices=ORDER_STATUS_LIST, default=ORDER_STATUS_PENDING)
     currency = models.CharField(
         max_length=5, choices=CURRENCIES, default=CURRENCY_CUC)
     currency_factor = models.DecimalField(max_digits=12, decimal_places=6, default=1.0)
@@ -62,20 +62,20 @@ class OrderPaxVariant(models.Model):
         verbose_name = 'Order Pax'
         verbose_name_plural = 'Orders Paxes'
         unique_together = (('order', 'pax_quantity'),)
-    order = models.ForeignKey(Order)
+    order = models.ForeignKey(Order, related_name='order_paxvariants')
     pax_quantity = models.SmallIntegerField()
     cost_single_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True)
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost Single')
     cost_double_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True)
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost Double')
     cost_triple_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True)
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost Triple')
     price_single_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True)
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price Single')
     price_double_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True)
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price Double')
     price_triple_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True)
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price Triple')
 
     def __str__(self):
         return '%s' % self.pax_quantity
@@ -88,8 +88,8 @@ class OrderService(models.Model):
     class Meta:
         verbose_name = 'Order Service'
         verbose_name_plural = 'Order Services'
-    order = models.ForeignKey(Order)
-    name = models.CharField(max_length=250, default='Booking Service')
+    order = models.ForeignKey(Order, related_name='order_services')
+    name = models.CharField(max_length=250, default='Order Service')
     # this will store the child object type
     service_type = models.CharField(max_length=5, choices=SERVICE_CATEGORIES,
                                     blank=True, null=True)
@@ -133,8 +133,10 @@ class OrderTransfer(OrderService):
         verbose_name = 'Order Transfer'
         verbose_name_plural = 'Orders Transfers'
     service = models.ForeignKey(Transfer)
-    location_from = models.ForeignKey(Location, related_name='order_location_from', verbose_name='Location from')
-    location_to = models.ForeignKey(Location, related_name='order_location_to', verbose_name='Location to')
+    location_from = models.ForeignKey(
+        Location, related_name='order_location_from', verbose_name='Location from')
+    location_to = models.ForeignKey(
+        Location, related_name='order_location_to', verbose_name='Location to')
 
     def fill_data(self):
         # setting name for this booking_service
@@ -155,6 +157,7 @@ class OrderExtra(OrderService):
     parameter = models.SmallIntegerField()
 
     def fill_data(self):
+        self.name = self.service.name
         self.service_type = SERVICE_CATEGORY_EXTRA
 
 
