@@ -57,14 +57,14 @@ MENU_LABEL_BOOKING_SERVICES = 'Services By Type'
 
 class OrderPaxVariantInline(CommonStackedInline):
     model = OrderPaxVariant
-    extra = 1
+    extra = 0
     fields = ['pax_quantity',]
     verbose_name_plural = 'Paxes Variants'
 
 
 class OrderAllotmentInLine(CommonStackedInline):
     model = OrderAllotment
-    extra = 1
+    extra = 0
     fields = [
         ('service', 'status'), ('datetime_from', 'datetime_to'),
         ('room_type', 'board_type'), 'provider']
@@ -73,7 +73,7 @@ class OrderAllotmentInLine(CommonStackedInline):
 
 class OrderTransferInLine(CommonStackedInline):
     model = OrderTransfer
-    extra = 1
+    extra = 0
     fields = [
         ('service', 'status'), ('datetime_from', 'datetime_to'),
         ('location_from', 'location_to'), 'provider']
@@ -82,7 +82,7 @@ class OrderTransferInLine(CommonStackedInline):
 
 class OrderExtraInLine(CommonStackedInline):
     model = OrderExtra
-    extra = 1
+    extra = 0
     fields = [
         ('service', 'status'), ('datetime_from', 'datetime_to'),
         'parameter', 'provider']
@@ -141,8 +141,11 @@ class OrderExtraSiteModel(SiteModel):
     model_order = 540
     menu_label = MENU_LABEL_ORDER
 
-    fields = ('order', 'service', 'parameter',
-              'datetime_from', 'datetime_to', 'status', 'provider', 'id')
+    fields = (
+        'order',
+        ('service', 'status'),
+        ('datetime_from', 'datetime_to'),
+         'parameter', 'provider', 'id')
     list_display = ('order', 'service', 'parameter', 'datetime_from', 'datetime_to', 'status',)
     list_filter = ('service', 'datetime_from', 'status',)
     search_fields = ('order__reference',)
@@ -163,7 +166,7 @@ class BookingServicePaxInline(TabularInline):
     model = BookingServicePax
     fields = ['booking_pax', 'group']
     verbose_name_plural = 'Service Rooming List'
-    extra = 1
+    extra = 0
 
     def get_formset(self, request, obj=None, **kwargs):
         initial = []

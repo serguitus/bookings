@@ -33,7 +33,7 @@ class OrderServiceTable(tables.Table):
             'common:booking_%s_change' % (ORDERSERVICE_TYPES[record.service_type]),
             args=(quote(record.pk),)
         )
-        return format_html('<a href="%s">%s</a>' % (obj_url, value))
+        return format_html('<a class="related-widget-wrapper-link" href="%s?_popup=1">%s</a>' % (obj_url, value))
 
     def before_render(self, request):
         self.columns.hide('service_type')
