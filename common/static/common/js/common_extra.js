@@ -1,5 +1,6 @@
 //Entry Points to get prices for each booking_service
-var bookingallotment_url = '/bookings/booking/amounts/';
+var bookingallotment_url = base_url + 'booking/amounts/';
+// Right now it is the same url for all bookingService types
 var bookingtransfer_url = bookingallotment_url;
 var bookingextra_url = bookingallotment_url;
 
@@ -21,7 +22,7 @@ $(document).ready(function(){
     computedPrice.html('Loading...');
     // sending a request to get computed numbers
     $.ajax({
-      'url': bookingallotment_url,
+      'url': url,
       'async': true,
       'datatype': 'json',
       'type': 'POST',
