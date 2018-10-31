@@ -5,6 +5,7 @@ from django.views import View
 from dateutil.parser import parse
 
 from booking.models import Booking, BookingService, BookingServicePax
+from booking.services import BookingService as Booking_Service
 
 from config.constants import (
     SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER, SERVICE_CATEGORY_EXTRA
@@ -73,7 +74,7 @@ class BookingServiceAmountsView(View):
                 'cost': None,
                 'price': None,
             })
-        
+
         try:
             booking = Booking.objects.get(pk=booking_id)
         except Booking.DoesNotExist as ex:
@@ -86,7 +87,7 @@ class BookingServiceAmountsView(View):
         except BookingService.DoesNotExist as ex:
             booking_service = None
 
-        groups = self.find_groups(booking_service, service)
+        groups = Booking_Service.find_groups(booking_service, service)
         if groups is None:
             return JsonResponse({
                 'code': 3,
@@ -154,36 +155,6 @@ class BookingServiceAmountsView(View):
             'cost': cost,
             'price': price,
         })
-
-    def find_groups(self, booking_service, service):
-        if booking_service is None:
-            return None, None
-        pax_list = list(
-            BookingServicePax.objects.filter(booking_service=booking_service.id))
-        if service.grouping:
-            groups = dict()
-            for pax in pax_list:
-                if not groups.__contains__(pax.group):
-                    groups[pax.group] = dict()
-                    groups[pax.group][0] = 0
-                    groups[pax.group][1] = 0
-                if service.child_age is None or (pax.pax_age > service.child_age):
-                    groups[pax.group][0] += 1
-                else:
-                    groups[pax.group][1] += 1
-            return groups.values()
-        else:
-            if service.child_age is None:
-                return list({0: len(pax_list), 1: 0})
-            adults = 0
-            children = 0
-            for pax in pax_list:
-                if pax.pax_age > service.child_age:
-                    adults += 1
-                else:
-                    children += 1
-            return list({0: adults, 1: children})
-
 
 def booking_list(request, instance):
     """ a list of bookings with their services """
