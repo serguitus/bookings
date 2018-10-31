@@ -5,6 +5,7 @@ from django.views import View
 from dateutil.parser import parse
 
 from booking.models import Booking, BookingService, BookingServicePax
+from booking.services import BookingService as Booking_Service
 
 from config.constants import (
     SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER, SERVICE_CATEGORY_EXTRA
@@ -73,7 +74,7 @@ class BookingServiceAmountsView(View):
                 'cost': None,
                 'price': None,
             })
-        
+
         try:
             booking = Booking.objects.get(pk=booking_id)
         except Booking.DoesNotExist as ex:
@@ -86,39 +87,37 @@ class BookingServiceAmountsView(View):
         except BookingService.DoesNotExist as ex:
             booking_service = None
 
-        adults, children = self.find_paxes(booking_service, service)
+        groups = Booking_Service.find_groups(booking_service, service)
+        if groups is None:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Paxes Missing',
+                'cost': None,
+                'price': None,
+            })
 
         if service_type == SERVICE_CATEGORY_ALLOTMENT:
-            if adults is None or children is None:
+            board_type = request.POST.get('board_type')
+            if board_type is None or board_type == '':
                 return JsonResponse({
                     'code': 3,
-                    'message': 'Paxes Missing',
+                    'message': 'Board Missing',
                     'cost': None,
                     'price': None,
                 })
-                
-            else:
-                board_type = request.POST.get('board_type')
-                if board_type is None or board_type == '':
-                    return JsonResponse({
-                        'code': 3,
-                        'message': 'Board Missing',
-                        'cost': None,
-                        'price': None,
-                    })
-                room_type_id = request.POST.get('room_type')
-                if room_type_id is None or room_type_id == '':
-                    return JsonResponse({
-                        'code': 3,
-                        'message': 'Room Missing',
-                        'cost': None,
-                        'price': None,
-                    })
+            room_type_id = request.POST.get('room_type')
+            if room_type_id is None or room_type_id == '':
+                return JsonResponse({
+                    'code': 3,
+                    'message': 'Room Missing',
+                    'cost': None,
+                    'price': None,
+                })
 
-                code, message, cost, price = ConfigService.allotment_amounts(
-                    service_id, date_from, date_to, adults, children, provider, agency,
-                    board_type, room_type_id,
-                )
+            code, message, cost, price = ConfigService.allotment_amounts(
+                service_id, date_from, date_to, groups, provider, agency,
+                board_type, room_type_id,
+            )
                 
         if service_type == SERVICE_CATEGORY_TRANSFER:
             location_from_id = request.POST.get('location_from_id')
@@ -139,7 +138,7 @@ class BookingServiceAmountsView(View):
                 })
 
             code, message, cost, price = ConfigService.transfer_amounts(
-                service_id, date_from, date_to, adults, children, provider, agency,
+                service_id, date_from, date_to, groups, provider, agency,
                 location_from_id, location_to_id,
             )
         if service_type == SERVICE_CATEGORY_EXTRA:
@@ -147,7 +146,7 @@ class BookingServiceAmountsView(View):
             parameter = request.POST.get('parameter')
 
             code, message, cost, price = ConfigService.extra_amounts(
-                service_id, date_from, date_to, adults, children, provider, agency,
+                service_id, date_from, date_to, groups, provider, agency,
                 quantity, parameter,
             )
         return JsonResponse({
@@ -156,23 +155,6 @@ class BookingServiceAmountsView(View):
             'cost': cost,
             'price': price,
         })
-
-    def find_paxes(self, booking_service, service):
-        if booking_service is None:
-            return None, None
-        pax_list = list(
-            BookingServicePax.objects.filter(booking_service=booking_service.id))
-        if service.child_age is None:
-            return len(pax_list), 0
-        adults = 0
-        children = 0
-        for pax in pax_list:
-            if pax.pax_age > service.child_age:
-                adults += 1
-            else:
-                children += 1
-        return adults, children
-
 
 def booking_list(request, instance):
     """ a list of bookings with their services """

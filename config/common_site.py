@@ -154,7 +154,7 @@ class ExtraSiteModel(SiteModel):
 
 class ProviderAllotmentDetailInline(CommonStackedInline):
     model = ProviderAllotmentDetail
-    extra = 1
+    extra = 0
     fields = (
         ('room_type','board_type',),
         ('ad_1_amount','ch_1_ad_1_amount','ch_2_ad_1_amount','ch_3_ad_1_amount',),
@@ -177,7 +177,7 @@ class ProviderAllotmentServiceSiteModel(SiteModel):
 
 class ProviderTransferDetailInline(CommonStackedInline):
     model = ProviderTransferDetail
-    extra = 1
+    extra = 0
     fields = (
         ('p_location_from','p_location_to',),
         ('ad_1_amount','ch_1_ad_1_amount','ch_2_ad_1_amount','ch_3_ad_1_amount',),
@@ -201,7 +201,7 @@ class ProviderTransferServiceSiteModel(SiteModel):
 
 class ProviderExtraDetailInline(CommonStackedInline):
     model = ProviderExtraDetail
-    extra = 1
+    extra = 0
     fields = (
         ('ad_1_amount','ch_1_ad_1_amount','ch_2_ad_1_amount','ch_3_ad_1_amount',),
         ('ad_2_amount','ch_1_ad_2_amount','ch_2_ad_2_amount','ch_3_ad_2_amount',),
@@ -223,7 +223,7 @@ class ProviderExtraServiceSiteModel(SiteModel):
 
 class AgencyAllotmentDetailInline(CommonStackedInline):
     model = AgencyAllotmentDetail
-    extra = 1
+    extra = 0
     fields = (
         ('room_type','board_type',),
         ('ad_1_amount','ch_1_ad_1_amount','ch_2_ad_1_amount','ch_3_ad_1_amount',),
@@ -247,7 +247,7 @@ class AgencyAllotmentServiceSiteModel(SiteModel):
 
 class AgencyTransferDetailInline(CommonStackedInline):
     model = AgencyTransferDetail
-    extra = 1
+    extra = 0
     fields = (
         ('a_location_from','a_location_to',),
         ('ad_1_amount','ch_1_ad_1_amount','ch_2_ad_1_amount','ch_3_ad_1_amount',),
@@ -271,7 +271,7 @@ class AgencyTransferServiceSiteModel(SiteModel):
 
 class AgencyExtraDetailInline(CommonStackedInline):
     model = AgencyExtraDetail
-    extra = 1
+    extra = 0
     fields = (
         ('ad_1_amount','ch_1_ad_1_amount','ch_2_ad_1_amount','ch_3_ad_1_amount',),
         ('ad_2_amount','ch_1_ad_2_amount','ch_2_ad_2_amount','ch_3_ad_2_amount',),

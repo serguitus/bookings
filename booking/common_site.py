@@ -24,9 +24,14 @@ from django.utils.functional import curry
 
 from django_tables2 import RequestConfig
 
-from booking.forms import (BookingForm, BookingAllotmentForm,
-                           BookingTransferForm, BookingExtraForm,)
+from booking.forms import (
+    OrderForm, OrderAllotmentForm, OrderTransferForm, OrderExtraForm,
+    OrderAllotmentInlineForm, OrderTransferInlineForm, OrderExtraInlineForm,
+    BookingForm, BookingAllotmentForm, BookingTransferForm, BookingExtraForm,)
 from booking.models import (
+    Order,
+    OrderPaxVariant,
+    OrderAllotment, OrderTransfer, OrderExtra,
     Booking,
     BookingPax,
     BookingServicePax,
@@ -36,20 +41,125 @@ from booking.models import (
 )
 
 from common.filters import TextFilter
-from common.sites import CommonTabularInline
+from common.sites import CommonStackedInline, CommonTabularInline
 from functools import update_wrapper, partial
 
 from reservas.admin import bookings_site
 
 
+MENU_LABEL_ORDER = 'Order'
+
 MENU_LABEL_BOOKING = 'Booking'
 MENU_LABEL_BOOKING_SERVICES = 'Services By Type'
 
+
+# Starts Order Section
+
+class OrderPaxVariantInline(CommonStackedInline):
+    model = OrderPaxVariant
+    extra = 0
+    fields = ['pax_quantity',]
+    verbose_name_plural = 'Paxes Variants'
+
+
+class OrderAllotmentInLine(CommonStackedInline):
+    model = OrderAllotment
+    extra = 0
+    fields = [
+        ('service', 'status'), ('datetime_from', 'datetime_to'),
+        ('room_type', 'board_type'), 'provider']
+    form = OrderAllotmentInlineForm
+
+
+class OrderTransferInLine(CommonStackedInline):
+    model = OrderTransfer
+    extra = 0
+    fields = [
+        ('service', 'status'), ('datetime_from', 'datetime_to'),
+        ('location_from', 'location_to'), 'provider']
+    form = OrderTransferInlineForm
+
+
+class OrderExtraInLine(CommonStackedInline):
+    model = OrderExtra
+    extra = 0
+    fields = [
+        ('service', 'status'), ('datetime_from', 'datetime_to'),
+        'parameter', 'provider']
+    form = OrderExtraInlineForm
+
+
+class OrderSiteModel(SiteModel):
+    model_order = 510
+    menu_label = MENU_LABEL_ORDER
+
+    fields = ('reference', 'agency', 'date_from', 'date_to',
+              'status', 'currency',)
+    list_display = ('reference', 'agency', 'date_from',
+                    'date_to', 'status', 'currency',)
+    top_filters = ('reference', 'date_from', 'status')
+    ordering = ('reference',)
+    readonly_fields = ('date_from', 'date_to', 'status',)
+    details_template = 'booking/order_details.html'
+    inlines = [
+        OrderPaxVariantInline, OrderAllotmentInLine, OrderTransferInLine, OrderExtraInLine]
+    form = OrderForm
+
+
+class OrderAllotmentSiteModel(SiteModel):
+    model_order = 520
+    menu_label = MENU_LABEL_ORDER
+
+    fields = ('order', 'service', 'datetime_from', 'datetime_to', 'status',
+              'cost_amount', 'price_amount', 'room_type', 'board_type',
+              'provider', 'id')
+    list_display = ('order', 'service', 'datetime_from', 'datetime_to',
+                    'status',)
+    list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
+    search_fields = ['order__reference', ]
+    ordering = ('order__reference', 'service__name',)
+    form = OrderAllotmentForm
+
+
+class OrderTransferSiteModel(SiteModel):
+    model_order = 530
+    menu_label = MENU_LABEL_ORDER
+
+    fields = ('order', 'service',
+              'location_from', 'location_to',
+              'datetime_from', 'datetime_to', 'status',
+              'cost_amount', 'price_amount', 'provider', 'id')
+    list_display = ('order', 'name',
+                    'datetime_from', 'datetime_to', 'status',)
+    list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
+    search_fields = ['order__reference',]
+    ordering = ('order__reference', 'service__name',)
+    form = OrderTransferForm
+
+
+class OrderExtraSiteModel(SiteModel):
+    model_order = 540
+    menu_label = MENU_LABEL_ORDER
+
+    fields = (
+        'order',
+        ('service', 'status'),
+        ('datetime_from', 'datetime_to'),
+         'parameter', 'provider', 'id')
+    list_display = ('order', 'service', 'parameter', 'datetime_from', 'datetime_to', 'status',)
+    list_filter = ('service', 'datetime_from', 'status',)
+    search_fields = ('order__reference',)
+    ordering = ('order__reference', 'service__name',)
+    form = OrderExtraForm
+
+
+# Starts Booking Section
 
 class BookingPaxInline(TabularInline):
     model = BookingPax
     fields = ['pax_name', 'pax_group', 'pax_age']
     verbose_name_plural = 'Rooming List'
+    extra = 0
 
 
 class BookingServicePaxInline(TabularInline):
@@ -75,28 +185,28 @@ class BookingServicePaxInline(TabularInline):
 
 class BookingAllotmentInLine(CommonTabularInline):
     model = BookingAllotment
-    extra = 1
-    fields = ['service', 'datetime_from', 'datetime_to',
-              'provider', 'room_type', 'board_type', 'status']
+    extra = 0
+    fields = [('service', 'status'), ('datetime_from', 'datetime_to'),
+              ('room_type', 'board_type'), 'provider']
 
 
 class BookingTransferInLine(CommonTabularInline):
     model = BookingTransfer
-    extra = 1
-    fields = ['service', 'datetime_from', 'datetime_to',
-              'location_from', 'location_to', 'quantity',
-              'provider', 'status']
+    extra = 0
+    fields = [('service', 'status'), ('datetime_from', 'datetime_to'),
+              ('location_from', 'location_to'),
+              ('quantity', 'provider')]
 
 
 class BookingExtraInLine(CommonTabularInline):
     model = BookingExtra
-    extra = 1
-    fields = ['service', 'datetime_from', 'datetime_to',
-              'provider', 'quantity', 'parameter', 'status']
+    extra = 0
+    fields = [('service', 'status'), ('datetime_from', 'datetime_to'),
+              ('quantity', 'parameter'), 'provider']
 
 
 class BookingSiteModel(SiteModel):
-    model_order = 1010
+    model_order = 1110
     menu_label = MENU_LABEL_BOOKING
 
     fields = (('name', 'reference'), 'agency', 'status')
@@ -133,12 +243,12 @@ class BookingSiteModel(SiteModel):
     """
 
 class BookingAllotmentSiteModel(SiteModel):
-    model_order = 1110
+    model_order = 1210
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_LABEL_BOOKING_SERVICES
 
-    fields = ('booking', 'service', 'datetime_from', 'datetime_to', 'status',
-              'cost_amount', 'price_amount', 'room_type', 'board_type',
+    fields = ('booking', ('service', 'status'), ('datetime_from', 'datetime_to'),
+              ('room_type', 'board_type'), 'cost_amount', 'price_amount',
               'provider', 'id')
     list_display = ('booking', 'service', 'datetime_from', 'datetime_to',
                     'status',)
@@ -150,13 +260,13 @@ class BookingAllotmentSiteModel(SiteModel):
 
 
 class BookingTransferSiteModel(SiteModel):
-    model_order = 1120
+    model_order = 1220
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_LABEL_BOOKING_SERVICES
 
-    fields = ('booking', 'service',
-              'location_from', 'location_to',
-              'datetime_from', 'datetime_to', 'status',
+    fields = ('booking', ('service', 'status'),
+              ('datetime_from', 'datetime_to'),
+              ('location_from', 'location_to'),
               'cost_amount', 'price_amount', 'provider', 'id')
     list_display = ('booking', 'name',
                     'datetime_from', 'datetime_to', 'status',)
@@ -168,12 +278,13 @@ class BookingTransferSiteModel(SiteModel):
 
 
 class BookingExtraSiteModel(SiteModel):
-    model_order = 1130
+    model_order = 1230
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_LABEL_BOOKING_SERVICES
 
-    fields = ('booking', 'service', 'quantity', 'parameter',
-              'datetime_from', 'datetime_to', 'status',
+    fields = ('booking', ('service', 'status'),
+              ('datetime_from', 'datetime_to'),
+              ('quantity', 'parameter'),
               'cost_amount', 'price_amount', 'provider', 'id')
     list_display = ('booking', 'service', 'quantity', 'parameter', 'datetime_from', 'datetime_to', 'status',)
     list_filter = ('service', 'datetime_from', 'status',)
@@ -182,6 +293,14 @@ class BookingExtraSiteModel(SiteModel):
     form = BookingExtraForm
     inlines = [BookingServicePaxInline]
 
+
+# Starts Registration Section
+
+bookings_site.register(Order, OrderSiteModel)
+
+bookings_site.register(OrderAllotment, OrderAllotmentSiteModel)
+bookings_site.register(OrderTransfer, OrderTransferSiteModel)
+bookings_site.register(OrderExtra, OrderExtraSiteModel)
 
 bookings_site.register(Booking, BookingSiteModel)
 
