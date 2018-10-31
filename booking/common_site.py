@@ -72,6 +72,7 @@ class BookingServicePaxInline(TabularInline):
         formset.__init__ = curry(formset.__init__, initial=initial)
         return formset
 
+
 class BookingAllotmentInLine(CommonTabularInline):
     model = BookingAllotment
     extra = 1
@@ -98,10 +99,8 @@ class BookingSiteModel(SiteModel):
     model_order = 1010
     menu_label = MENU_LABEL_BOOKING
 
-    fields = ('reference', 'agency', 'date_from', 'date_to',
-              'status', 'currency', 'cost_amount',
-              'price_amount',)
-    list_display = ('reference', 'agency', 'date_from',
+    fields = (('name', 'reference'), 'agency', 'status')
+    list_display = ('name', 'reference', 'agency', 'date_from',
                     'date_to', 'status', 'currency', 'cost_amount',
                     'price_amount',)
     top_filters = ('reference','date_from',)

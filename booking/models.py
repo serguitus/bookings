@@ -30,9 +30,9 @@ class Booking(models.Model):
         verbose_name = 'Booking'
         verbose_name_plural = 'Bookings'
         default_permissions = ('add', 'change',)
-    description = models.CharField(max_length=1000)
+    name = models.CharField(max_length=100)
     agency = models.ForeignKey(Agency)
-    reference = models.CharField(max_length=250)
+    reference = models.CharField(max_length=25, blank=True, null=True)
     date_from = models.DateField(blank=True, null=True)
     date_to = models.DateField(blank=True, null=True)
     status = models.CharField(
