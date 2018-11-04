@@ -110,7 +110,8 @@ class AllotmentSiteModel(SiteModel):
     model_order = 6110
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
-    fields = ('name', 'location', 'time_from', 'time_to', 'enabled',)
+    fields = ('name', 'location', 'time_from', 'time_to', 'enabled',
+              'child_age')
     list_display = ('name', 'location', 'time_from', 'time_to', 'enabled',)
     list_filter = ('location', 'enabled',)
     search_fields = ('name', 'location__name',)

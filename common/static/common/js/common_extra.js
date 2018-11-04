@@ -5,17 +5,29 @@ var bookingtransfer_url = bookingallotment_url;
 var bookingextra_url = bookingallotment_url;
 
 $(document).ready(function(){
-  $('#bookingallotment_form #id_cost_amount').after("<span class='computed-value'>Calculated: <b data-computed=cost>N/A</b></span>");
-  $('#bookingallotment_form #id_price_amount').after("<span class='computed-value'>Calculated: <b data-computed=price>N/A</b></span>");
-  $('#bookingtransfer_form #id_cost_amount').after("<span class='computed-value'>Calculated: <b data-computed=cost>N/A</b></span>");
-  $('#bookingtransfer_form #id_price_amount').after("<span class='computed-value'>Calculated: <b data-computed=price>N/A</b></span>");
-    $('#bookingextra_form #id_cost_amount').after("<span class='computed-value'>Calculated: <b data-computed=cost>N/A</b></span>");
-  $('#bookingextra_form #id_price_amount').after("<span class='computed-value'>Calculated: <b data-computed=price>N/A</b></span>");
+  $('#bookingallotment_form #id_cost_amount').after("<button class='btn btn-success btn-copy btn-copy-cost'><<<</button><span class='computed-value'>Calculated: <b data-computed=cost>N/A</b></span>");
+  $('#bookingallotment_form #id_price_amount').after("<button class='btn btn-success btn-copy btn-copy-price'><<<</button><span class='computed-value'>Calculated: <b data-computed=price>N/A</b></span>");
+  $('#bookingtransfer_form #id_cost_amount').after("<button class='btn btn-success btn-copy btn-copy-cost'><<<</button><span class='computed-value'>Calculated: <b data-computed=cost>N/A</b></span>");
+  $('#bookingtransfer_form #id_price_amount').after("<button class='btn btn-success btn-copy btn-copy-price'><<<</button><span class='computed-value'>Calculated: <b data-computed=price>N/A</b></span>");
+    $('#bookingextra_form #id_cost_amount').after("<button class='btn btn-success btn-copy btn-copy-cost'><<<</button><span class='computed-value'>Calculated: <b data-computed=cost>N/A</b></span>");
+  $('#bookingextra_form #id_price_amount').after("<button class='btn btn-success btn-copy btn-copy-price'><<<</button><span class='computed-value'>Calculated: <b data-computed=price>N/A</b></span>");
 
 
   var computedCost = $('b[data-computed=cost]');
   var computedPrice = $('b[data-computed=price]');
   var costInputContainer = $('div.field-cost_amount');
+  var costInput = $('#id_cost_amount')[0];
+  var priceInput = $('#id_price_amount')[0];
+
+  function CompareNumbers(){
+    // a function to check if computed prices differ from set prices
+    // it highlights different numbers
+    if(costInput.value != Number(computedCost)){
+      // costs differ. put some alert to warn user
+      console.log('costos son diff');
+    }
+    return 0
+  }
 
   function get_computed_amounts(url, form_dict){
     computedCost.html('Loading...');
@@ -46,6 +58,15 @@ $(document).ready(function(){
     })
   }
 
+  if($('#bookingallotment_form').length){
+    data = $('#bookingallotment_form').serialize();
+  }else if($('#bookingtransfer_form').length){
+    data = $('#bookingtransfer_form').serialize();
+  }else if($('#bookingextra_form').length){
+    data = $('#bookingextra_form').serialize();
+  }
+  get_computed_amounts(bookingallotment_url, data);
+
   $('#bookingallotment_form input, #bookingallotment_form select').on('change', function(){
     data = $('#bookingallotment_form').serialize();
     get_computed_amounts(bookingallotment_url, data);
@@ -61,5 +82,18 @@ $(document).ready(function(){
     get_computed_amounts(bookingextra_url, data);
   });
 
+  $('.btn-copy-cost').on('click', function(e){
+    e.preventDefault();
+    if(Number(computedCost.html())){
+      costInput.value = Number(computedCost.html());
+    }
+  })
+
+    $('.btn-copy-price').on('click', function(e){
+    e.preventDefault();
+    if(Number(computedPrice.html())){
+      priceInput.value = Number(computedPrice.html());
+    }
+  })
 
 });

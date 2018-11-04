@@ -518,4 +518,9 @@ form .related-widget-wrapper ul {
 
 .computed-value{
     margin-left: 10px;
+    width: 50px;
+}
+
+.btn-copy{
+    margin-left: 10px;
 }

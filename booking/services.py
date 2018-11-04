@@ -155,7 +155,7 @@ class BookingService(object):
                     groups[pax.group] = dict()
                     groups[pax.group][0] = 0
                     groups[pax.group][1] = 0
-                if service.child_age is None or (pax.pax_age > service.child_age):
+                if service.child_age is None or (pax.booking_pax.pax_age > service.child_age):
                     groups[pax.group][0] += 1
                 else:
                     groups[pax.group][1] += 1

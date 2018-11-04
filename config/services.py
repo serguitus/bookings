@@ -21,6 +21,7 @@ from config.models import (
     AgencyExtraService, AgencyExtraDetail,
 )
 
+
 class ConfigService(object):
     """
     Config Service
@@ -30,6 +31,8 @@ class ConfigService(object):
             cls, service_id, date_from, date_to, groups, provider, agency,
             board_type, room_type_id):
 
+        date_from = date_from.date()
+        date_to = date_to.date()
         if groups is None:
             return 3, 'Paxes Missing', None, None
 
@@ -236,15 +239,16 @@ class ConfigService(object):
 
                 # verify current dat included
                 if amount_for_provider:
-                    detail_date_from = detail.provider_servide.date_from
-                    detail_date_to = detail.provider_servide.date_to
+                    detail_date_from = detail.provider_service.date_from
+                    detail_date_to = detail.provider_service.date_to
                 else:
                     detail_date_from = detail.agency_service.date_from
                     detail_date_to = detail.agency_service.date_to
 
-                if current_date.date() >= detail_date_from:
+                if current_date >= detail_date_from:
                     # verify final date included
-                    if detail_date_to >= date_to.date():
+                    end_date = detail_date_to + timedelta(days=1)
+                    if end_date >= date_to:
                         # full date range
                         result = cls._get_service_amount(
                             service, detail, current_date, date_to,
@@ -256,13 +260,12 @@ class ConfigService(object):
                             stop = True
                     else:
                         result = cls._get_service_amount(
-                            service, detail, current_date, detail_date_to,
+                            service, detail, current_date, end_date,
                             adults, children,
                             quantity, parameter)
                         if result and result >= 0:
                             amount += result
-                            one_day = timedelta(days=1)
-                            current_date = detail_date_to + one_day
+                            current_date = end_date
                 # remove detail from list
                 details.remove(detail)
             else:

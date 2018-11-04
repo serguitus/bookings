@@ -60,7 +60,7 @@ class BookingServiceAmountsView(View):
             })
         date_to = parse(date_to)
 
-        provider_id = request.POST.get('provider_id')
+        provider_id = request.POST.get('provider')
         try:
             provider = Provider.objects.get(pk=provider_id)
         except Provider.DoesNotExist as ex:
