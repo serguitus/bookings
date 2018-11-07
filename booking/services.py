@@ -39,6 +39,7 @@ class BookingService(object):
 
     @classmethod
     def find_quote_amounts(cls, quote):
+        result = dict()
         for pax_variant in quote.quote_paxvariants:
             cost_1 = 0
             cost_2 = 0
@@ -85,8 +86,10 @@ class BookingService(object):
                             qservice.board_type, qservice.room_type_id,
                             qservice.quantity,
                             qservice.provider, quote.agency)
-                        cost_2, cost_2_msg, price_2, price_2_msg = cost_1, cost_1_msg, price_1, price_1_msg
-                        cost_3, cost_3_msg, price_3, price_3_msg = cost_1, cost_1_msg, price_1, price_1_msg
+                        cost_2, cost_2_msg = cost_1, cost_1_msg
+                        price_2, price_2_msg = price_1, price_1_msg
+                        cost_3, cost_3_msg = cost_1, cost_1_msg
+                        price_3, price_3_msg = price_1, price_1_msg
                 if service_type == SERVICE_CATEGORY_TRANSFER:
                     if qservice.service.grouping:
                         cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_transfer_amounts(
@@ -118,8 +121,10 @@ class BookingService(object):
                             qservice.location_from_id, qservice.location_to_id,
                             qservice.quantity,
                             qservice.provider, quote.agency)
-                        cost_2, cost_2_msg, price_2, price_2_msg = cost_1, cost_1_msg, price_1, price_1_msg
-                        cost_3, cost_3_msg, price_3, price_3_msg = cost_1, cost_1_msg, price_1, price_1_msg
+                        cost_2, cost_2_msg = cost_1, cost_1_msg
+                        price_2, price_2_msg = price_1, price_1_msg
+                        cost_3, cost_3_msg = cost_1, cost_1_msg
+                        price_3, price_3_msg = price_1, price_1_msg
                 if service_type == SERVICE_CATEGORY_EXTRA:
                     if qservice.service.grouping:
                         cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_extra_amounts(
@@ -147,50 +152,137 @@ class BookingService(object):
                             list((pax_variant.pax_quantity, 0)),
                             qservice.quantity, qservice.parameter,
                             qservice.provider, quote.agency)
-                        cost_2, cost_2_msg, price_2, price_2_msg = cost_1, cost_1_msg, price_1, price_1_msg
-                        cost_3, cost_3_msg, price_3, price_3_msg = cost_1, cost_1_msg, price_1, price_1_msg
-
-
-
+                        cost_2, cost_2_msg = cost_1, cost_1_msg
+                        price_2, price_2_msg = price_1, price_1_msg
+                        cost_3, cost_3_msg = cost_1, cost_1_msg
+                        price_3, price_3_msg = price_1, price_1_msg
+            result.update({
+                pax_variant.pax_quantity: {
+                    cost_1: cost_1,
+                    cost_1_msg: cost_1_msg,
+                    cost_2: cost_2,
+                    cost_2_msg: cost_2_msg,
+                    cost_3: cost_3,
+                    cost_3_msg: cost_3_msg,
+                    price_1: price_1,
+                    price_1_msg: price_1_msg,
+                    price_2: price_2,
+                    price_2_msg: price_2_msg,
+                    price_3: price_3,
+                    price_3_msg: price_3_msg,
+                }
+            })
+            return result
 
     @classmethod
     def _quote_allotment_amounts(
             cls,
             cost, cost_msg, price, price_msg,
-            service, date_from, date_to, groups, board_type, room_type_id, quantity,
+            service, date_from, date_to, adults, board_type, room_type_id, quantity,
             provider, agency):
         if cost is None:
             if price is None:
-                return cost, cost_msg, price, price_msg
+                return None, cost_msg, None, price_msg
             else:
-                code, message, ncost, ncost_msg, nprice, nprice_msg = ConfigService.allotment_amounts(
-                        service, date_from, date_to, groups,
-                        None, agency,
-                        board_type, room_type_id, quantity)
-                            
+                code, msg, c, c_msg, p, p_msg = ConfigService.allotment_amounts(
+                    service, date_from, date_to, ((adults, 0)),
+                    None, agency,
+                    board_type, room_type_id, quantity)
+        else:
+            if price is None:
+                code, msg, c, c_msg, p, p_msg = ConfigService.allotment_amounts(
+                    service, date_from, date_to, ((adults, 0)),
+                    provider, None,
+                    board_type, room_type_id, quantity)
+            else:
+                code, msg, c, cost_msg, price, price_msg = ConfigService.allotment_amounts(
+                    service, date_from, date_to, ((adults, 0)),
+                    provider, agency,
+                    board_type, room_type_id, quantity)
+            return cls._quote_results(adults, cost, cost_msg, price, price_msg, c, c_msg, p, p_msg)
+
     @classmethod
     def _quote_transfer_amounts(
-        cls,
-        cost_1, cost_1_msg, price_1, price_1_msg,
-        service, date_from, date_to, groups, location_from_id, location_to_id, quantity,
-        provider, agency):
-                    code, message, cost, cost_msg, price, price_msg = ConfigService.transfer_amounts(
-                        qservice.service, qservice.date_from, qservice.date_to, groups,
-                        qservice.provider, quote.agency,
-                        qservice.location_from_id, qservice.location_to_id,
-                        qservice.quantity)
-                            
+            cls,
+            cost, cost_msg, price, price_msg,
+            service, date_from, date_to, adults, location_from_id, location_to_id, quantity,
+            provider, agency):
+        if cost is None:
+            if price is None:
+                return None, cost_msg, None, price_msg
+            else:
+                code, msg, c, c_msg, p, p_msg = ConfigService.transfer_amounts(
+                    service, date_from, date_to, ((adults, 0)),
+                    None, agency,
+                    location_from_id, location_to_id, quantity)
+        else:
+            if price is None:
+                code, msg, c, c_msg, p, p_msg = ConfigService.transfer_amounts(
+                    service, date_from, date_to, ((adults, 0)),
+                    provider, None,
+                    location_from_id, location_to_id, quantity)
+            else:
+                code, msg, c, cost_msg, price, price_msg = ConfigService.transfer_amounts(
+                    service, date_from, date_to, ((adults, 0)),
+                    provider, agency,
+                    location_from_id, location_to_id, quantity)
+            return cls._quote_results(adults, cost, cost_msg, price, price_msg, c, c_msg, p, p_msg)
+
     @classmethod
     def _quote_extra_amounts(
-        cls,
-        cost_1, cost_1_msg, price_1, price_1_msg,
-        service, date_from, date_to, groups, quantity, parameter,
-        provider, agency):
-                    code, message, cost, cost_msg, price, price_msg = ConfigService.extra_amounts(
-                        qservice.service, qservice.date_from, qservice.date_to, groups,
-                        qservice.provider, quote.agency,
-                        qservice.quantity, qservice.parameter)
-                            
+            cls,
+            cost, cost_msg, price, price_msg,
+            service, date_from, date_to, adults, quantity, parameter,
+            provider, agency):
+        if cost is None:
+            if price is None:
+                return None, cost_msg, None, price_msg
+            else:
+                code, msg, c, c_msg, p, p_msg = ConfigService.extra_amounts(
+                    service, date_from, date_to, ((adults, 0)),
+                    None, agency,
+                    quantity, parameter)
+        else:
+            if price is None:
+                code, msg, c, c_msg, p, p_msg = ConfigService.extra_amounts(
+                    service, date_from, date_to, ((adults, 0)),
+                    provider, None,
+                    quantity, parameter)
+            else:
+                code, msg, c, cost_msg, price, price_msg = ConfigService.extra_amounts(
+                    service, date_from, date_to, ((adults, 0)),
+                    provider, agency,
+                    quantity, parameter)
+            return cls._quote_results(adults, cost, cost_msg, price, price_msg, c, c_msg, p, p_msg)
+
+    @classmethod
+    def _quote_results(cls, adults, cost, cost_msg, price, price_msg, c, c_msg, p, p_msg):
+        if cost is None:
+            if price is None:
+                return None, cost_msg, None, price_msg
+            else:
+                if p is None:
+                    return None, cost_msg, None, p_msg
+                else:
+                    return None, cost_msg, price + round(0.999999 + p / adults), p_msg
+        else:
+            if price is None:
+                if c is None:
+                    return None, c_msg, None, price_msg
+                else:
+                    return cost + round(0.999999 + c / adults), c_msg, None, price_msg
+            else:
+                if c is None:
+                    if p is None:
+                        return None, c_msg, None, p_msg
+                    else:
+                        return None, c_msg, price + round(0.999999 + p / adults), p_msg
+                else:
+                    if p is None:
+                        return cost + round(0.999999 + c / adults), c_msg, None, p_msg
+                    else:
+                        return cost + round(0.999999 + c / adults), c_msg, price + round(0.999999 + p / adults), p_msg
+
     @classmethod
     def update_booking(cls, booking):
         cost = 0
