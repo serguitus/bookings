@@ -186,7 +186,7 @@ class BookingService(object):
                     'price_3_msg': price_3_msg,
                 }
             })
-            return 0, '', result
+        return 0, '', result
 
     @classmethod
     def _quote_allotment_amounts(
@@ -281,24 +281,24 @@ class BookingService(object):
                 if p is None:
                     return None, cost_msg, None, p_msg
                 else:
-                    return None, cost_msg, price + round(0.999999 + float(p / adults)), p_msg
+                    return None, cost_msg, price + round(0.499999 + float(p / adults)), p_msg
         else:
             if price is None:
                 if c is None:
                     return None, c_msg, None, price_msg
                 else:
-                    return cost + round(0.999999 + float(c / adults)), c_msg, None, price_msg
+                    return cost + round(0.499999 + float(c / adults)), c_msg, None, price_msg
             else:
                 if c is None:
                     if p is None:
                         return None, c_msg, None, p_msg
                     else:
-                        return None, c_msg, price + round(0.999999 + float(p / adults)), p_msg
+                        return None, c_msg, price + round(0.499999 + float(p / adults)), p_msg
                 else:
                     if p is None:
-                        return cost + round(0.999999 + float(c / adults)), c_msg, None, p_msg
+                        return cost + round(0.499999 + float(c / adults)), c_msg, None, p_msg
                     else:
-                        return cost + round(0.999999 + float(c / adults)), c_msg, price + round(0.999999 + float(p / adults)), p_msg
+                        return cost + round(0.499999 + float(c / adults)), c_msg, price + round(0.499999 + float(p / adults)), p_msg
 
     @classmethod
     def update_booking(cls, booking):
