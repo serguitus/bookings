@@ -4,7 +4,7 @@ from django.views import View
 
 from dateutil.parser import parse
 
-from booking.models import Booking, BookingService, BookingServicePax
+from booking.models import Quote, Booking, BookingService, BookingServicePax
 from booking.services import BookingService as Booking_Service
 
 from config.constants import (
@@ -14,6 +14,36 @@ from config.models import Service
 from config.services import ConfigService
 
 from finance.models import Provider
+
+
+class QuoteAmountsView(View):
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        quote_id = request.POST.get('quote')
+        if quote_id is None or quote_id == '':
+            return JsonResponse({
+                'code': 3,
+                'message': 'Quote Id Missing',
+                'results': None,
+            })
+        try:
+            quote = Quote.objects.get(pk=quote_id)
+        except Quote.DoesNotExist as ex:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Quote Not Found for Id: %s' % quote_id,
+                'results': None,
+            })
+
+        code, message, results = BookingService.find_quote_amounts(quote)
+
+        return JsonResponse({
+            'code': code,
+            'message': message,
+            'results': results,
+        })
 
 
 class BookingServiceAmountsView(View):
@@ -27,7 +57,9 @@ class BookingServiceAmountsView(View):
                 'code': 3,
                 'message': 'Service Id Missing',
                 'cost': None,
+                'cost_message': 'Service Id Missing',
                 'price': None,
+                'price_message': 'Service Id Missing',
             })
         try:
             service = Service.objects.get(pk=service_id)
@@ -36,7 +68,9 @@ class BookingServiceAmountsView(View):
                 'code': 3,
                 'message': 'Service Not Found for Id: %s' % service_id,
                 'cost': None,
+                'cost_message': 'Service Not Found for Id: %s' % service_id,
                 'price': None,
+                'price_message': 'Service Not Found for Id: %s' % service_id,
             })
         service_type = service.category
 
@@ -46,7 +80,9 @@ class BookingServiceAmountsView(View):
                 'code': 3,
                 'message': 'Date From Missing',
                 'cost': None,
+                'cost_message': 'Date From Missing',
                 'price': None,
+                'price_message': 'Date From Missing',
             })
         date_from = parse(date_from)
 
@@ -56,30 +92,11 @@ class BookingServiceAmountsView(View):
                 'code': 3,
                 'message': 'Date To Missing',
                 'cost': None,
+                'cost_message': 'Date To Missing',
                 'price': None,
+                'price_message': 'Date To Missing',
             })
         date_to = parse(date_to)
-
-        provider_id = request.POST.get('provider')
-        try:
-            provider = Provider.objects.get(pk=provider_id)
-        except Provider.DoesNotExist as ex:
-            provider = None
-
-        booking_id = request.POST.get('booking')
-        if booking_id is None or booking_id == '':
-            return JsonResponse({
-                'code': 3,
-                'message': 'Booking Id Missing',
-                'cost': None,
-                'price': None,
-            })
-
-        try:
-            booking = Booking.objects.get(pk=booking_id)
-        except Booking.DoesNotExist as ex:
-            booking_service = None
-        agency = booking.agency
 
         booking_service_id = request.POST.get('id')
         try:
@@ -93,8 +110,25 @@ class BookingServiceAmountsView(View):
                 'code': 3,
                 'message': 'Paxes Missing',
                 'cost': None,
+                'cost_message': 'Paxes Missing',
                 'price': None,
+                'price_message': 'Paxes Missing',
             })
+
+        provider_id = request.POST.get('provider')
+        try:
+            provider = Provider.objects.get(pk=provider_id)
+        except Provider.DoesNotExist as ex:
+            provider = None
+
+        agency = None
+        booking_id = request.POST.get('booking')
+        if not (booking_id is None or booking_id == ''):
+            try:
+                booking = Booking.objects.get(pk=booking_id)
+                agency = booking.agency
+            except Booking.DoesNotExist as ex:
+                booking = None
 
         if service_type == SERVICE_CATEGORY_ALLOTMENT:
             board_type = request.POST.get('board_type')
@@ -103,7 +137,9 @@ class BookingServiceAmountsView(View):
                     'code': 3,
                     'message': 'Board Missing',
                     'cost': None,
+                    'cost_message': 'Board Missing',
                     'price': None,
+                    'price_message': 'Board Missing',
                 })
             room_type_id = request.POST.get('room_type')
             if room_type_id is None or room_type_id == '':
@@ -111,14 +147,16 @@ class BookingServiceAmountsView(View):
                     'code': 3,
                     'message': 'Room Missing',
                     'cost': None,
+                    'cost_message': 'Room Missing',
                     'price': None,
+                    'price_message': 'Room Missing',
                 })
 
-            code, message, cost, price = ConfigService.allotment_amounts(
+            code, message, cost, cost_msg, price, price_msg = ConfigService.allotment_amounts(
                 service_id, date_from, date_to, groups, provider, agency,
                 board_type, room_type_id,
             )
-                
+
         if service_type == SERVICE_CATEGORY_TRANSFER:
             location_from_id = request.POST.get('location_from_id')
             if location_from_id is None or location_from_id == '':
@@ -126,7 +164,9 @@ class BookingServiceAmountsView(View):
                     'code': 3,
                     'message': 'Location From Missing',
                     'cost': None,
+                    'cost_message': 'Location From Missing',
                     'price': None,
+                    'price_message': 'Location From Missing',
                 })
             location_to_id = request.POST.get('location_to_id')
             if location_to_id is None or location_to_id == '':
@@ -134,10 +174,12 @@ class BookingServiceAmountsView(View):
                     'code': 3,
                     'message': 'Location To Missing',
                     'cost': None,
+                    'cost_message': 'Location To Missing',
                     'price': None,
+                    'price_message': 'Location To Missing',
                 })
 
-            code, message, cost, price = ConfigService.transfer_amounts(
+            code, message, cost, cost_msg, price, price_msg = ConfigService.transfer_amounts(
                 service_id, date_from, date_to, groups, provider, agency,
                 location_from_id, location_to_id,
             )
@@ -145,7 +187,7 @@ class BookingServiceAmountsView(View):
             quantity = request.POST.get('quantity')
             parameter = request.POST.get('parameter')
 
-            code, message, cost, price = ConfigService.extra_amounts(
+            code, message, cost, cost_msg, price, price_msg = ConfigService.extra_amounts(
                 service_id, date_from, date_to, groups, provider, agency,
                 quantity, parameter,
             )
@@ -153,7 +195,9 @@ class BookingServiceAmountsView(View):
             'code': code,
             'message': message,
             'cost': cost,
+            'cost_message': cost_msg,
             'price': price,
+            'price_message': price_msg,
         })
 
 def booking_list(request, instance):

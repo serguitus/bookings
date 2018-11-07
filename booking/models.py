@@ -183,7 +183,7 @@ class Booking(models.Model):
     cost_comments = models.CharField(max_length=1000, blank=True, null=True)
     price_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
-    agency_invoice = models.ForeignKey(AgencyInvoice,blank=True, null=True)
+    agency_invoice = models.ForeignKey(AgencyInvoice, blank=True, null=True)
 
     def internal_reference(self):
         code = self.id

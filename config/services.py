@@ -1,7 +1,7 @@
 """
 Config Service
 """
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from config.constants import (
     SERVICE_CATEGORY_EXTRA, SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER,
@@ -29,10 +29,8 @@ class ConfigService(object):
     @classmethod
     def allotment_amounts(
             cls, service_id, date_from, date_to, groups, provider, agency,
-            board_type, room_type_id):
+            board_type, room_type_id, quantity=None):
 
-        date_from = date_from.date()
-        date_to = date_to.date()
         if groups is None:
             return 3, 'Paxes Missing', None, None
 
@@ -56,7 +54,7 @@ class ConfigService(object):
             )
             cost, cost_message = cls.find_groups_amount(
                 True, service, date_from, date_to, groups,
-                1, 1, detail_list
+                quantity, None, detail_list
             )
 
         # agency price
@@ -77,7 +75,7 @@ class ConfigService(object):
             )
             price, price_message = cls.find_groups_amount(
                 False, service, date_from, date_to, groups,
-                1, 1, detail_list
+                quantity, None, detail_list
             )
 
         return cls._get_result(cost, cost_message, price, price_message)
@@ -85,7 +83,7 @@ class ConfigService(object):
     @classmethod
     def transfer_amounts(
             cls, service_id, date_from, date_to, groups, provider, agency,
-            location_from_id, location_to_id):
+            location_from_id, location_to_id, quantity=None):
         service = Transfer.objects.get(pk=service_id)
 
         if service.cost_type == TRANSFER_COST_TYPE_BY_PAX and (groups is None):
@@ -109,7 +107,7 @@ class ConfigService(object):
             )
             cost, cost_message = cls.find_groups_amount(
                 True, service, date_from, date_to, groups,
-                1, 1, detail_list
+                quantity, None, detail_list
             )
 
         # agency price
@@ -130,7 +128,7 @@ class ConfigService(object):
             )
             price, price_message = cls.find_groups_amount(
                 False, service, date_from, date_to, groups,
-                1, 1, detail_list
+                quantity, None, detail_list
             )
 
         return cls._get_result(cost, cost_message, price, price_message)
@@ -156,7 +154,7 @@ class ConfigService(object):
             detail_list = list(queryset)
             cost, cost_message = cls.find_groups_amount(
                 True, service, date_from, date_to, groups,
-                1, 1, detail_list
+                quantity, parameter, detail_list
             )
 
         # agency price
@@ -171,7 +169,7 @@ class ConfigService(object):
             detail_list = list(queryset)
             price, price_message = cls.find_groups_amount(
                 False, service, date_from, date_to, groups,
-                1, 1, detail_list
+                quantity, parameter, detail_list
             )
 
         return cls._get_result(cost, cost_message, price, price_message)
@@ -200,7 +198,7 @@ class ConfigService(object):
                 message = "Provider Cost and Agency Price NOT Found: %s - %s" % (
                     cost_message, price_message
                 )
-        return code, message, cost, price
+        return code, message, cost, cost_message, price, price_message
 
     @classmethod
     def find_groups_amount(
@@ -245,10 +243,10 @@ class ConfigService(object):
                     detail_date_from = detail.agency_service.date_from
                     detail_date_to = detail.agency_service.date_to
 
-                if current_date >= detail_date_from:
+                if current_date.date() >= detail_date_from:
                     # verify final date included
                     end_date = detail_date_to + timedelta(days=1)
-                    if end_date >= date_to:
+                    if end_date >= date_to.date():
                         # full date range
                         result = cls._get_service_amount(
                             service, detail, current_date, date_to,
@@ -260,12 +258,14 @@ class ConfigService(object):
                             stop = True
                     else:
                         result = cls._get_service_amount(
-                            service, detail, current_date, end_date,
+                            service, detail, current_date,
+                            datetime(year=end_date.year, month=end_date.month, day=end_date.day),
                             adults, children,
                             quantity, parameter)
                         if result and result >= 0:
                             amount += result
-                            current_date = end_date
+                            current_date = datetime(
+                                year=end_date.year, month=end_date.month, day=end_date.day)
                 # remove detail from list
                 details.remove(detail)
             else:
@@ -281,11 +281,12 @@ class ConfigService(object):
     def _get_service_amount(
             cls, service, detail, date_from, date_to, adults, children, quantity, parameter):
         if isinstance(service, Allotment):
+            interval = date_to - date_from
             return cls._get_allotment_amount(
-                service, detail, date_from, date_to, adults, children, quantity, parameter)
+                service, detail, interval.days, adults, children, quantity)
         if isinstance(service, Transfer):
             return cls._get_transfer_amount(
-                service, detail, date_from, date_to, adults, children, quantity, parameter)
+                service, detail, adults, children, quantity)
         if isinstance(service, Extra):
             return cls._get_extra_amount(
                 service, detail, date_from, date_to, adults, children, quantity, parameter)
@@ -293,16 +294,35 @@ class ConfigService(object):
 
     @classmethod
     def _get_allotment_amount(
-            cls, service, detail, date_from, date_to, adults, children, quantity, parameter):
-        days = date_to - date_from
-        amount = cls._find_detail_amount(detail, adults, children)
+            cls, service, detail, days, adults, children, quantity):
+        if quantity is None or (quantity < 1):
+            quantity = 1
+        if service.grouping:
+            amount = cls._find_detail_amount(detail, adults, children)
+        else:
+            adult_amount = 0
+            if adults > 0:
+                if detail.ad_1_amount is None:
+                    return None
+                adult_amount = adults * detail.ad_1_amount
+            children_amount = 0
+            if children > 0:
+                if detail.ch_1_ad_1_amount is None:
+                    return None
+                children_amount = children * detail.ch_1_ad_1_amount
+            amount = adult_amount + children_amount
         if amount and amount >= 0:
-            return amount * days.days
+            return amount * days * quantity
         return None
 
     @classmethod
     def _get_transfer_amount(
-            cls, service, detail, date_from, date_to, adults, children, quantity, parameter):
+            cls, service, detail, adults, children, quantity):
+        if quantity is None or (quantity < 1):
+            if service.max_capacity is None or (service.max_capacity < 1):
+                quantity = 1
+            else:
+                quantity = 1 + int((adults + children - 1) / service.max_capacity)
         if service.cost_type == TRANSFER_COST_TYPE_FIXED and detail.ad_1_amount:
             return detail.ad_1_amount * quantity
         if service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
@@ -320,16 +340,19 @@ class ConfigService(object):
                 amount = adult_amount + children_amount
             else:
                 amount = cls._find_detail_amount(detail, adults, children)
-            if amount and amount >= 0:
+            if amount and (amount >= 0):
                 return amount * quantity
         return None
 
     @classmethod
     def _get_extra_amount(
             cls, service, detail, date_from, date_to, adults, children, quantity, parameter):
-        if service.parameter_type == EXTRA_PARAMETER_TYPE_DAYS:
-            days = date_to - date_from
-            parameter = days.days
+        if parameter is None or parameter < 1:
+            interval = date_to - date_from
+            if service.parameter_type == EXTRA_PARAMETER_TYPE_DAYS:
+                parameter = interval.days
+            if service.parameter_type == EXTRA_PARAMETER_TYPE_HOURS:
+                parameter = interval.hours
         if service.cost_type == EXTRA_COST_TYPE_FIXED and detail.ad_1_amount:
             return detail.ad_1_amount * quantity * parameter
         if service.cost_type == EXTRA_COST_TYPE_BY_PAX:
