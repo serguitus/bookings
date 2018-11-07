@@ -18,10 +18,14 @@ from finance.models import Provider
 
 class QuoteAmountsView(View):
     def get(self, request, *args, **kwargs):
-        return self.post(request, *args, **kwargs)
+        quote_id = request.GET.get('quote')
+        return self._process_quote(quote_id)
 
     def post(self, request, *args, **kwargs):
         quote_id = request.POST.get('quote')
+        return self._process_quote(quote_id)
+
+    def _process_quote(self, quote_id):
         if quote_id is None or quote_id == '':
             return JsonResponse({
                 'code': 3,
@@ -37,7 +41,7 @@ class QuoteAmountsView(View):
                 'results': None,
             })
 
-        code, message, results = BookingService.find_quote_amounts(quote)
+        code, message, results = Booking_Service.find_quote_amounts(quote)
 
         return JsonResponse({
             'code': code,

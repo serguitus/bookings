@@ -1,14 +1,17 @@
 """
 Booking Service
 """
-
 from booking import constants
-from booking.models import BookingServicePax
+from booking.models import (
+    QuotePaxVariant, QuoteService, QuoteAllotment, QuoteTransfer, QuoteExtra,
+    BookingServicePax)
 
 from config.constants import (
     SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER, SERVICE_CATEGORY_EXTRA
 )
 from config.services import ConfigService
+
+from decimal import Decimal
 
 
 class BookingService(object):
@@ -40,7 +43,14 @@ class BookingService(object):
     @classmethod
     def find_quote_amounts(cls, quote):
         result = dict()
-        for pax_variant in quote.quote_paxvariants:
+
+        variant_list = list(QuotePaxVariant.objects.filter(quote=quote.id))
+        if not variant_list:
+            return 1, 'Pax Variants Missing', None
+        service_list = list(QuoteService.objects.filter(quote=quote.id))
+        if not service_list:
+            return 2, 'Services Missing', None
+        for pax_variant in variant_list:
             cost_1 = 0
             cost_2 = 0
             cost_3 = 0
@@ -53,71 +63,74 @@ class BookingService(object):
             price_1_msg = ''
             price_2_msg = ''
             price_3_msg = ''
-            for qservice in quote.quote_services:
-                service_type = qservice.service.category
+
+            for qservice in service_list:
+                service_type = qservice.service_type
                 if service_type == SERVICE_CATEGORY_ALLOTMENT:
+                    qservice = QuoteAllotment.objects.get(pk=qservice.id)
                     if qservice.service.grouping:
                         cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_allotment_amounts(
                             cost_1, cost_1_msg, price_1, price_1_msg,
-                            qservice.service, qservice.date_from, qservice.date_to,
-                            list((1, 0)),
+                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            1,
                             qservice.board_type, qservice.room_type_id,
-                            qservice.quantity,
+                            None,
                             qservice.provider, quote.agency)
                         cost_2, cost_2_msg, price_2, price_2_msg = cls._quote_allotment_amounts(
                             cost_2, cost_2_msg, price_2, price_2_msg,
-                            qservice.service, qservice.date_from, qservice.date_to,
-                            list((2, 0)),
+                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            2,
                             qservice.board_type, qservice.room_type_id,
-                            qservice.quantity,
+                            None,
                             qservice.provider, quote.agency)
                         cost_3, cost_3_msg, price_3, price_3_msg = cls._quote_allotment_amounts(
                             cost_3, cost_3_msg, price_3, price_3_msg,
-                            qservice.service, qservice.date_from, qservice.date_to,
-                            list((3, 0)),
+                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            3,
                             qservice.board_type, qservice.room_type_id,
-                            qservice.quantity,
+                            None,
                             qservice.provider, quote.agency)
                     else:
                         cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_allotment_amounts(
                             cost_1, cost_1_msg, price_1, price_1_msg,
-                            qservice.service, qservice.date_from, qservice.date_to,
-                            list((pax_variant.pax_quantity, 0)),
+                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            pax_variant.pax_quantity,
                             qservice.board_type, qservice.room_type_id,
-                            qservice.quantity,
+                            None,
                             qservice.provider, quote.agency)
                         cost_2, cost_2_msg = cost_1, cost_1_msg
                         price_2, price_2_msg = price_1, price_1_msg
                         cost_3, cost_3_msg = cost_1, cost_1_msg
                         price_3, price_3_msg = price_1, price_1_msg
                 if service_type == SERVICE_CATEGORY_TRANSFER:
+                    qservice = QuoteTransfer.objects.get(pk=qservice.id)
                     if qservice.service.grouping:
                         cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_transfer_amounts(
                             cost_1, cost_1_msg, price_1, price_1_msg,
-                            qservice.service, qservice.date_from, qservice.date_to,
-                            list((1, 0)),
+                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            1,
                             qservice.location_from_id, qservice.location_to_id,
                             qservice.quantity,
                             qservice.provider, quote.agency)
                         cost_2, cost_2_msg, price_2, price_2_msg = cls._quote_transfer_amounts(
                             cost_2, cost_2_msg, price_2, price_2_msg,
-                            qservice.service, qservice.date_from, qservice.date_to,
-                            list((2, 0)),
+                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            2,
                             qservice.location_from_id, qservice.location_to_id,
                             qservice.quantity,
                             qservice.provider, quote.agency)
                         cost_3, cost_3_msg, price_3, price_3_msg = cls._quote_transfer_amounts(
                             cost_3, cost_3_msg, price_3, price_3_msg,
-                            qservice.service, qservice.date_from, qservice.date_to,
-                            list((3, 0)),
+                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            3,
                             qservice.location_from_id, qservice.location_to_id,
                             qservice.quantity,
                             qservice.provider, quote.agency)
                     else:
                         cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_transfer_amounts(
                             cost_1, cost_1_msg, price_1, price_1_msg,
-                            qservice.service, qservice.date_from, qservice.date_to,
-                            list((pax_variant.pax_quantity, 0)),
+                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            pax_variant.pax_quantity,
                             qservice.location_from_id, qservice.location_to_id,
                             qservice.quantity,
                             qservice.provider, quote.agency)
@@ -126,30 +139,31 @@ class BookingService(object):
                         cost_3, cost_3_msg = cost_1, cost_1_msg
                         price_3, price_3_msg = price_1, price_1_msg
                 if service_type == SERVICE_CATEGORY_EXTRA:
+                    qservice = QuoteExtra.objects.get(pk=qservice.id)
                     if qservice.service.grouping:
                         cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_extra_amounts(
                             cost_1, cost_1_msg, price_1, price_1_msg,
-                            qservice.service, qservice.date_from, qservice.date_to,
-                            list((1, 0)),
+                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            1,
                             qservice.quantity, qservice.parameter,
                             qservice.provider, quote.agency)
                         cost_2, cost_2_msg, price_2, price_2_msg = cls._quote_extra_amounts(
                             cost_2, cost_2_msg, price_2, price_2_msg,
-                            qservice.service, qservice.date_from, qservice.date_to,
-                            list((2, 0)),
+                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            2,
                             qservice.quantity, qservice.parameter,
                             qservice.provider, quote.agency)
                         cost_3, cost_3_msg, price_3, price_3_msg = cls._quote_extra_amounts(
                             cost_3, cost_3_msg, price_3, price_3_msg,
-                            qservice.service, qservice.date_from, qservice.date_to,
-                            list((3, 0)),
+                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            3,
                             qservice.quantity, qservice.parameter,
                             qservice.provider, quote.agency)
                     else:
                         cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_extra_amounts(
                             cost_1, cost_1_msg, price_1, price_1_msg,
-                            qservice.service, qservice.date_from, qservice.date_to,
-                            list((pax_variant.pax_quantity, 0)),
+                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            pax_variant.pax_quantity,
                             qservice.quantity, qservice.parameter,
                             qservice.provider, quote.agency)
                         cost_2, cost_2_msg = cost_1, cost_1_msg
@@ -158,21 +172,21 @@ class BookingService(object):
                         price_3, price_3_msg = price_1, price_1_msg
             result.update({
                 pax_variant.pax_quantity: {
-                    cost_1: cost_1,
-                    cost_1_msg: cost_1_msg,
-                    cost_2: cost_2,
-                    cost_2_msg: cost_2_msg,
-                    cost_3: cost_3,
-                    cost_3_msg: cost_3_msg,
-                    price_1: price_1,
-                    price_1_msg: price_1_msg,
-                    price_2: price_2,
-                    price_2_msg: price_2_msg,
-                    price_3: price_3,
-                    price_3_msg: price_3_msg,
+                    'cost_1': cost_1,
+                    'cost_1_msg': cost_1_msg,
+                    'cost_2': cost_2,
+                    'cost_2_msg': cost_2_msg,
+                    'cost_3': cost_3,
+                    'cost_3_msg': cost_3_msg,
+                    'price_1': price_1,
+                    'price_1_msg': price_1_msg,
+                    'price_2': price_2,
+                    'price_2_msg': price_2_msg,
+                    'price_3': price_3,
+                    'price_3_msg': price_3_msg,
                 }
             })
-            return result
+            return 0, '', result
 
     @classmethod
     def _quote_allotment_amounts(
@@ -180,23 +194,24 @@ class BookingService(object):
             cost, cost_msg, price, price_msg,
             service, date_from, date_to, adults, board_type, room_type_id, quantity,
             provider, agency):
+        groups = ({0:adults, 1:0},)
         if cost is None:
             if price is None:
                 return None, cost_msg, None, price_msg
             else:
                 code, msg, c, c_msg, p, p_msg = ConfigService.allotment_amounts(
-                    service, date_from, date_to, ((adults, 0)),
+                    service, date_from, date_to, groups,
                     None, agency,
                     board_type, room_type_id, quantity)
         else:
             if price is None:
                 code, msg, c, c_msg, p, p_msg = ConfigService.allotment_amounts(
-                    service, date_from, date_to, ((adults, 0)),
+                    service, date_from, date_to, groups,
                     provider, None,
                     board_type, room_type_id, quantity)
             else:
-                code, msg, c, cost_msg, price, price_msg = ConfigService.allotment_amounts(
-                    service, date_from, date_to, ((adults, 0)),
+                code, msg, c, c_msg, p, p_msg = ConfigService.allotment_amounts(
+                    service, date_from, date_to, groups,
                     provider, agency,
                     board_type, room_type_id, quantity)
             return cls._quote_results(adults, cost, cost_msg, price, price_msg, c, c_msg, p, p_msg)
@@ -207,23 +222,24 @@ class BookingService(object):
             cost, cost_msg, price, price_msg,
             service, date_from, date_to, adults, location_from_id, location_to_id, quantity,
             provider, agency):
+        groups = ({0:adults, 1:0},)
         if cost is None:
             if price is None:
                 return None, cost_msg, None, price_msg
             else:
                 code, msg, c, c_msg, p, p_msg = ConfigService.transfer_amounts(
-                    service, date_from, date_to, ((adults, 0)),
+                    service, date_from, date_to, groups,
                     None, agency,
                     location_from_id, location_to_id, quantity)
         else:
             if price is None:
                 code, msg, c, c_msg, p, p_msg = ConfigService.transfer_amounts(
-                    service, date_from, date_to, ((adults, 0)),
+                    service, date_from, date_to, groups,
                     provider, None,
                     location_from_id, location_to_id, quantity)
             else:
-                code, msg, c, cost_msg, price, price_msg = ConfigService.transfer_amounts(
-                    service, date_from, date_to, ((adults, 0)),
+                code, msg, c, c_msg, p, p_msg = ConfigService.transfer_amounts(
+                    service, date_from, date_to, groups,
                     provider, agency,
                     location_from_id, location_to_id, quantity)
             return cls._quote_results(adults, cost, cost_msg, price, price_msg, c, c_msg, p, p_msg)
@@ -234,23 +250,24 @@ class BookingService(object):
             cost, cost_msg, price, price_msg,
             service, date_from, date_to, adults, quantity, parameter,
             provider, agency):
+        groups = ({0:adults, 1:0},)
         if cost is None:
             if price is None:
                 return None, cost_msg, None, price_msg
             else:
                 code, msg, c, c_msg, p, p_msg = ConfigService.extra_amounts(
-                    service, date_from, date_to, ((adults, 0)),
+                    service, date_from, date_to, groups,
                     None, agency,
                     quantity, parameter)
         else:
             if price is None:
                 code, msg, c, c_msg, p, p_msg = ConfigService.extra_amounts(
-                    service, date_from, date_to, ((adults, 0)),
+                    service, date_from, date_to, groups,
                     provider, None,
                     quantity, parameter)
             else:
-                code, msg, c, cost_msg, price, price_msg = ConfigService.extra_amounts(
-                    service, date_from, date_to, ((adults, 0)),
+                code, msg, c, c_msg, p, p_msg = ConfigService.extra_amounts(
+                    service, date_from, date_to, groups,
                     provider, agency,
                     quantity, parameter)
             return cls._quote_results(adults, cost, cost_msg, price, price_msg, c, c_msg, p, p_msg)
@@ -264,24 +281,24 @@ class BookingService(object):
                 if p is None:
                     return None, cost_msg, None, p_msg
                 else:
-                    return None, cost_msg, price + round(0.999999 + p / adults), p_msg
+                    return None, cost_msg, price + round(0.999999 + float(p / adults)), p_msg
         else:
             if price is None:
                 if c is None:
                     return None, c_msg, None, price_msg
                 else:
-                    return cost + round(0.999999 + c / adults), c_msg, None, price_msg
+                    return cost + round(0.999999 + float(c / adults)), c_msg, None, price_msg
             else:
                 if c is None:
                     if p is None:
                         return None, c_msg, None, p_msg
                     else:
-                        return None, c_msg, price + round(0.999999 + p / adults), p_msg
+                        return None, c_msg, price + round(0.999999 + float(p / adults)), p_msg
                 else:
                     if p is None:
-                        return cost + round(0.999999 + c / adults), c_msg, None, p_msg
+                        return cost + round(0.999999 + float(c / adults)), c_msg, None, p_msg
                     else:
-                        return cost + round(0.999999 + c / adults), c_msg, price + round(0.999999 + p / adults), p_msg
+                        return cost + round(0.999999 + float(c / adults)), c_msg, price + round(0.999999 + float(p / adults)), p_msg
 
     @classmethod
     def update_booking(cls, booking):
@@ -373,7 +390,7 @@ class BookingService(object):
             return groups.values()
         else:
             if service.child_age is None:
-                return list({0: len(pax_list), 1: 0})
+                return ({0: len(pax_list), 1: 0},)
             adults = 0
             children = 0
             for pax in pax_list:
@@ -381,5 +398,4 @@ class BookingService(object):
                     adults += 1
                 else:
                     children += 1
-            return list({0: adults, 1: children})
-
+            return ({0: adults, 1: children},)
