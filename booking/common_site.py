@@ -25,13 +25,13 @@ from django.utils.functional import curry
 from django_tables2 import RequestConfig
 
 from booking.forms import (
-    OrderForm, OrderAllotmentForm, OrderTransferForm, OrderExtraForm,
-    OrderAllotmentInlineForm, OrderTransferInlineForm, OrderExtraInlineForm,
+    QuoteForm, QuoteAllotmentForm, QuoteTransferForm, QuoteExtraForm,
+    QuoteAllotmentInlineForm, QuoteTransferInlineForm, QuoteExtraInlineForm,
     BookingForm, BookingAllotmentForm, BookingTransferForm, BookingExtraForm,)
 from booking.models import (
-    Order,
-    OrderPaxVariant,
-    OrderAllotment, OrderTransfer, OrderExtra,
+    Quote,
+    QuotePaxVariant,
+    QuoteAllotment, QuoteTransfer, QuoteExtra,
     Booking,
     BookingPax,
     BookingServicePax,
@@ -47,51 +47,51 @@ from functools import update_wrapper, partial
 from reservas.admin import bookings_site
 
 
-MENU_LABEL_ORDER = 'Order'
+MENU_LABEL_QUOTE = 'Quote'
 
 MENU_LABEL_BOOKING = 'Booking'
 MENU_LABEL_BOOKING_SERVICES = 'Services By Type'
 
 
-# Starts Order Section
+# Starts Quote Section
 
-class OrderPaxVariantInline(CommonStackedInline):
-    model = OrderPaxVariant
+class QuotePaxVariantInline(CommonStackedInline):
+    model = QuotePaxVariant
     extra = 0
     fields = ['pax_quantity',]
     verbose_name_plural = 'Paxes Variants'
 
 
-class OrderAllotmentInLine(CommonStackedInline):
-    model = OrderAllotment
+class QuoteAllotmentInLine(CommonStackedInline):
+    model = QuoteAllotment
     extra = 0
     fields = [
         ('service', 'status'), ('datetime_from', 'datetime_to'),
         ('room_type', 'board_type'), 'provider']
-    form = OrderAllotmentInlineForm
+    form = QuoteAllotmentInlineForm
 
 
-class OrderTransferInLine(CommonStackedInline):
-    model = OrderTransfer
+class QuoteTransferInLine(CommonStackedInline):
+    model = QuoteTransfer
     extra = 0
     fields = [
         ('service', 'status'), ('datetime_from', 'datetime_to'),
         ('location_from', 'location_to'), 'provider']
-    form = OrderTransferInlineForm
+    form = QuoteTransferInlineForm
 
 
-class OrderExtraInLine(CommonStackedInline):
-    model = OrderExtra
+class QuoteExtraInLine(CommonStackedInline):
+    model = QuoteExtra
     extra = 0
     fields = [
         ('service', 'status'), ('datetime_from', 'datetime_to'),
         'parameter', 'provider']
-    form = OrderExtraInlineForm
+    form = QuoteExtraInlineForm
 
 
-class OrderSiteModel(SiteModel):
+class QuoteSiteModel(SiteModel):
     model_order = 510
-    menu_label = MENU_LABEL_ORDER
+    menu_label = MENU_LABEL_QUOTE
 
     fields = ('reference', 'agency', 'date_from', 'date_to',
               'status', 'currency',)
@@ -100,57 +100,57 @@ class OrderSiteModel(SiteModel):
     top_filters = ('reference', 'date_from', 'status')
     ordering = ('reference',)
     readonly_fields = ('date_from', 'date_to', 'status',)
-    details_template = 'booking/order_details.html'
+    details_template = 'booking/quote_details.html'
     inlines = [
-        OrderPaxVariantInline, OrderAllotmentInLine, OrderTransferInLine, OrderExtraInLine]
-    form = OrderForm
+        QuotePaxVariantInline, QuoteAllotmentInLine, QuoteTransferInLine, QuoteExtraInLine]
+    form = QuoteForm
 
 
-class OrderAllotmentSiteModel(SiteModel):
+class QuoteAllotmentSiteModel(SiteModel):
     model_order = 520
-    menu_label = MENU_LABEL_ORDER
+    menu_label = MENU_LABEL_QUOTE
 
-    fields = ('order', 'service', 'datetime_from', 'datetime_to', 'status',
+    fields = ('quote', 'service', 'datetime_from', 'datetime_to', 'status',
               'cost_amount', 'price_amount', 'room_type', 'board_type',
               'provider', 'id')
-    list_display = ('order', 'service', 'datetime_from', 'datetime_to',
+    list_display = ('quote', 'service', 'datetime_from', 'datetime_to',
                     'status',)
     list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
-    search_fields = ['order__reference', ]
-    ordering = ('order__reference', 'service__name',)
-    form = OrderAllotmentForm
+    search_fields = ['quote__reference', ]
+    ordering = ('quote__reference', 'service__name',)
+    form = QuoteAllotmentForm
 
 
-class OrderTransferSiteModel(SiteModel):
+class QuoteTransferSiteModel(SiteModel):
     model_order = 530
-    menu_label = MENU_LABEL_ORDER
+    menu_label = MENU_LABEL_QUOTE
 
-    fields = ('order', 'service',
+    fields = ('quote', 'service',
               'location_from', 'location_to',
               'datetime_from', 'datetime_to', 'status',
               'cost_amount', 'price_amount', 'provider', 'id')
-    list_display = ('order', 'name',
+    list_display = ('quote', 'name',
                     'datetime_from', 'datetime_to', 'status',)
     list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
-    search_fields = ['order__reference',]
-    ordering = ('order__reference', 'service__name',)
-    form = OrderTransferForm
+    search_fields = ['quote__reference',]
+    ordering = ('quote__reference', 'service__name',)
+    form = QuoteTransferForm
 
 
-class OrderExtraSiteModel(SiteModel):
+class QuoteExtraSiteModel(SiteModel):
     model_order = 540
-    menu_label = MENU_LABEL_ORDER
+    menu_label = MENU_LABEL_QUOTE
 
     fields = (
-        'order',
+        'quote',
         ('service', 'status'),
         ('datetime_from', 'datetime_to'),
          'parameter', 'provider', 'id')
-    list_display = ('order', 'service', 'parameter', 'datetime_from', 'datetime_to', 'status',)
+    list_display = ('quote', 'service', 'parameter', 'datetime_from', 'datetime_to', 'status',)
     list_filter = ('service', 'datetime_from', 'status',)
-    search_fields = ('order__reference',)
-    ordering = ('order__reference', 'service__name',)
-    form = OrderExtraForm
+    search_fields = ('quote__reference',)
+    ordering = ('quote__reference', 'service__name',)
+    form = QuoteExtraForm
 
 
 # Starts Booking Section
@@ -296,11 +296,11 @@ class BookingExtraSiteModel(SiteModel):
 
 # Starts Registration Section
 
-bookings_site.register(Order, OrderSiteModel)
+bookings_site.register(Quote, QuoteSiteModel)
 
-bookings_site.register(OrderAllotment, OrderAllotmentSiteModel)
-bookings_site.register(OrderTransfer, OrderTransferSiteModel)
-bookings_site.register(OrderExtra, OrderExtraSiteModel)
+bookings_site.register(QuoteAllotment, QuoteAllotmentSiteModel)
+bookings_site.register(QuoteTransfer, QuoteTransferSiteModel)
+bookings_site.register(QuoteExtra, QuoteExtraSiteModel)
 
 bookings_site.register(Booking, BookingSiteModel)
 

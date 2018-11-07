@@ -6,7 +6,7 @@ from django.db import models
 from accounting.constants import CURRENCIES, CURRENCY_CUC
 
 from booking.constants import (
-    ORDER_STATUS_LIST, ORDER_STATUS_PENDING,
+    QUOTE_STATUS_LIST, QUOTE_STATUS_DRAFT,
     BOOKING_STATUS_LIST, BOOKING_STATUS_PENDING,
     SERVICE_STATUS_LIST, SERVICE_STATUS_PENDING)
 
@@ -23,20 +23,20 @@ from config.models import (
 
 from finance.models import Agency, AgencyInvoice, Provider, ProviderInvoice
 
-class Order(models.Model):
+class Quote(models.Model):
     """
-    Order
+    Quote
     """
     class Meta:
-        verbose_name = 'Order'
-        verbose_name_plural = 'Orders'
+        verbose_name = 'Quote'
+        verbose_name_plural = 'Quotes'
     description = models.CharField(max_length=1000)
     agency = models.ForeignKey(Agency)
     reference = models.CharField(max_length=250)
     date_from = models.DateField(blank=True, null=True)
     date_to = models.DateField(blank=True, null=True)
     status = models.CharField(
-        max_length=5, choices=ORDER_STATUS_LIST, default=ORDER_STATUS_PENDING)
+        max_length=5, choices=QUOTE_STATUS_LIST, default=QUOTE_STATUS_DRAFT)
     currency = models.CharField(
         max_length=5, choices=CURRENCIES, default=CURRENCY_CUC)
     currency_factor = models.DecimalField(max_digits=12, decimal_places=6, default=1.0)
@@ -47,22 +47,22 @@ class Order(models.Model):
     def save(self, *args, **kwargs):
         self.fill_data()
         # Call the "real" save() method.
-        super(Order, self).save(*args, **kwargs)
+        super(Quote, self).save(*args, **kwargs)
 
     def __str__(self):
         return '%s - %s %s-%s (%s)' % (
             self.agency.name, self.reference, self.date_from, self.date_to, self.get_status_display())
 
 
-class OrderPaxVariant(models.Model):
+class QuotePaxVariant(models.Model):
     """
-    Order Pax
+    Quote Pax
     """
     class Meta:
-        verbose_name = 'Order Pax'
-        verbose_name_plural = 'Orders Paxes'
-        unique_together = (('order', 'pax_quantity'),)
-    order = models.ForeignKey(Order, related_name='order_paxvariants')
+        verbose_name = 'Quote Pax'
+        verbose_name_plural = 'Quotes Paxes'
+        unique_together = (('quote', 'pax_quantity'),)
+    quote = models.ForeignKey(Quote, related_name='quote_paxvariants')
     pax_quantity = models.SmallIntegerField()
     cost_single_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost Single')
@@ -81,15 +81,15 @@ class OrderPaxVariant(models.Model):
         return '%s' % self.pax_quantity
 
 
-class OrderService(models.Model):
+class QuoteService(models.Model):
     """
-    Order Service
+    Quote Service
     """
     class Meta:
-        verbose_name = 'Order Service'
-        verbose_name_plural = 'Order Services'
-    order = models.ForeignKey(Order, related_name='order_services')
-    name = models.CharField(max_length=250, default='Order Service')
+        verbose_name = 'Quote Service'
+        verbose_name_plural = 'Quote Services'
+    quote = models.ForeignKey(Quote, related_name='quote_services')
+    name = models.CharField(max_length=250, default='Quote Service')
     # this will store the child object type
     service_type = models.CharField(max_length=5, choices=SERVICE_CATEGORIES,
                                     blank=True, null=True)
@@ -106,16 +106,16 @@ class OrderService(models.Model):
     def save(self, *args, **kwargs):
         self.fill_data()
         # Call the "real" save() method.
-        super(OrderService, self).save(*args, **kwargs)
+        super(QuoteService, self).save(*args, **kwargs)
 
 
-class OrderAllotment(OrderService):
+class QuoteAllotment(QuoteService):
     """
-    Order Service Allotment
+    Quote Service Allotment
     """
     class Meta:
-        verbose_name = 'Order Allotment'
-        verbose_name_plural = 'Orders Allotments'
+        verbose_name = 'Quote Allotment'
+        verbose_name_plural = 'Quotes Allotments'
     service = models.ForeignKey(Allotment)
     room_type = models.ForeignKey(RoomType)
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
@@ -125,18 +125,18 @@ class OrderAllotment(OrderService):
         self.service_type = SERVICE_CATEGORY_ALLOTMENT
 
 
-class OrderTransfer(OrderService):
+class QuoteTransfer(QuoteService):
     """
-    Order Service Transfer
+    Quote Service Transfer
     """
     class Meta:
-        verbose_name = 'Order Transfer'
-        verbose_name_plural = 'Orders Transfers'
+        verbose_name = 'Quote Transfer'
+        verbose_name_plural = 'Quotes Transfers'
     service = models.ForeignKey(Transfer)
     location_from = models.ForeignKey(
-        Location, related_name='order_location_from', verbose_name='Location from')
+        Location, related_name='quote_location_from', verbose_name='Location from')
     location_to = models.ForeignKey(
-        Location, related_name='order_location_to', verbose_name='Location to')
+        Location, related_name='quote_location_to', verbose_name='Location to')
 
     def fill_data(self):
         # setting name for this booking_service
@@ -146,13 +146,13 @@ class OrderTransfer(OrderService):
         self.service_type = SERVICE_CATEGORY_TRANSFER
 
 
-class OrderExtra(OrderService):
+class QuoteExtra(QuoteService):
     """
-    Order Service Extra
+    Quote Service Extra
     """
     class Meta:
-        verbose_name = 'Order Extra'
-        verbose_name_plural = 'Orders Extras'
+        verbose_name = 'Quote Extra'
+        verbose_name_plural = 'Quotes Extras'
     service = models.ForeignKey(Extra)
     parameter = models.SmallIntegerField()
 
