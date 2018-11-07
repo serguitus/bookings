@@ -99,7 +99,7 @@ class QuoteSiteModel(SiteModel):
                     'date_to', 'status', 'currency',)
     top_filters = ('reference', 'date_from', 'status')
     ordering = ('reference',)
-    readonly_fields = ('date_from', 'date_to', 'status',)
+    readonly_fields = ('date_from', 'date_to',)
     details_template = 'booking/quote_details.html'
     inlines = [
         QuotePaxVariantInline, QuoteAllotmentInLine, QuoteTransferInLine, QuoteExtraInLine]
