@@ -1,21 +1,21 @@
 from dal import autocomplete
 
 from booking.models import (
-    Order, OrderAllotment, OrderTransfer, OrderExtra,
+    Quote, QuoteAllotment, QuoteTransfer, QuoteExtra,
     Booking, BookingAllotment, BookingTransfer, BookingExtra)
 from django import forms
 
 
-class OrderForm(forms.ModelForm):
+class QuoteForm(forms.ModelForm):
     class Meta:
-        model = Order
+        model = Quote
         fields = ('__all__')
         widgets = {
             'agency': autocomplete.ModelSelect2(url='agency-autocomplete'),
         }
 
 
-class OrderAllotmentInlineForm(forms.ModelForm):
+class QuoteAllotmentInlineForm(forms.ModelForm):
     class Meta:
         fields = ('__all__')
         widgets = {
@@ -25,9 +25,9 @@ class OrderAllotmentInlineForm(forms.ModelForm):
         }
 
 
-class OrderAllotmentForm(forms.ModelForm):
+class QuoteAllotmentForm(forms.ModelForm):
     class Meta:
-        model = OrderAllotment
+        model = QuoteAllotment
         fields = '__all__'
         widgets = {
             'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
@@ -37,7 +37,7 @@ class OrderAllotmentForm(forms.ModelForm):
     id = forms.CharField(widget=forms.HiddenInput())
 
 
-class OrderTransferInlineForm(forms.ModelForm):
+class QuoteTransferInlineForm(forms.ModelForm):
     class Meta:
         fields = ('__all__')
         widgets = {
@@ -48,9 +48,9 @@ class OrderTransferInlineForm(forms.ModelForm):
         }
 
 
-class OrderTransferForm(forms.ModelForm):
+class QuoteTransferForm(forms.ModelForm):
     class Meta:
-        model = OrderTransfer
+        model = QuoteTransfer
         fields = ('__all__')
         widgets = {
             'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
@@ -61,7 +61,7 @@ class OrderTransferForm(forms.ModelForm):
     id = forms.CharField(widget=forms.HiddenInput())
 
 
-class OrderExtraInlineForm(forms.ModelForm):
+class QuoteExtraInlineForm(forms.ModelForm):
     class Meta:
         fields = ('__all__')
         widgets = {
@@ -70,9 +70,9 @@ class OrderExtraInlineForm(forms.ModelForm):
         }
 
 
-class OrderExtraForm(forms.ModelForm):
+class QuoteExtraForm(forms.ModelForm):
     class Meta:
-        model = OrderExtra
+        model = QuoteExtra
         fields = ('__all__')
         widgets = {
             'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),

@@ -1,23 +1,23 @@
 from django import template
 
 from booking.tables import (
-    OrderServiceTable, OrderPaxVariantTable, BookingServiceTable, BookingPaxTable)
+    QuoteServiceTable, QuotePaxVariantTable, BookingServiceTable, BookingPaxTable)
 
 register = template.Library()
 
 
 @register.simple_tag
-def orderservices_table(order):
-    table = OrderServiceTable(
-        order.order_services.all(),
+def quoteservices_table(quote):
+    table = QuoteServiceTable(
+        quote.quote_services.all(),
         order_by=('datetime_from', 'datetime_to'))
     return table
 
 
 @register.simple_tag
-def orderpaxvariant_table(order):
-    table = OrderPaxVariantTable(
-        order.order_paxvariants.all(),
+def quotepaxvariant_table(quote):
+    table = QuotePaxVariantTable(
+        quote.quote_paxvariants.all(),
         order_by=('pax_quantity',))
     return table
 

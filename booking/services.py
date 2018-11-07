@@ -12,65 +12,29 @@ class BookingService(object):
     """
 
     @classmethod
-    def update_order(cls, order):
+    def update_quote(cls, quote):
         date_from = None
         date_to = None
-        for service in order.orderservice_set:
+        for service in quote.quoteservice_set:
             # date_from
             if date_from is None or (date_from > service.date_from):
                 date_from = service.date_from
             # date_to
             if date_to is None or (date_to < service.date_to):
                 date_to = service.date_to
-            # cost
-            #cost += service.cost_amount
-            # price
-            #price += service.price_amount
-            # status
-            # pending sets always pending
-            #if service.status == constants.SERVICE_STATUS_PENDING:
-            #    status = constants.BOOKING_STATUS_PENDING
-            # requested sets requested when not pending
-            #elif (service.status == constants.SERVICE_STATUS_REQUEST) and (
-            #        status != constants.BOOKING_STATUS_PENDING):
-            #    status = constants.BOOKING_STATUS_REQUEST
-            # phone confirmed sets requested when not pending
-            #elif (service.status == constants.SERVICE_STATUS_PHONE_CONFIRMED) and (
-            #        status != constants.BOOKING_STATUS_PENDING):
-            #    status = constants.BOOKING_STATUS_REQUEST
-            # confirmed sets confirmed when not requested and not pending
-            #elif (service.status == constants.SERVICE_STATUS_CONFIRMED) and (
-            #        status != constants.BOOKING_STATUS_PENDING) and (
-            #            status != constants.BOOKING_STATUS_REQUEST):
-            #    status = constants.BOOKING_STATUS_CONFIRMED
-
         fields = []
-        if order.date_from != date_from:
+        if quote.date_from != date_from:
             fields.append('date_from')
-            order.date_from = date_from
-        if order.date_to != date_to:
+            quote.date_from = date_from
+        if quote.date_to != date_to:
             fields.append('date_to')
-            order.date_to = date_to
-        #if order.status != status:
-        #    fields.append('status')
-        #    order.status = status
-
+            quote.date_to = date_to
         if fields:
-            order.save(update_fields=fields)
-
+            quote.save(update_fields=fields)
 
     @classmethod
-    def update_paxvariants(cls, order):
-        for variant in order.orderpaxvariant_set:
-            cost_single = 0
-            cost_double = 0
-            cost_triple = 0
-            price_single = 0
-            price_double = 0
-            price_triple = 0
-            for service in order.orderservice_set:
-                pass
-
+    def find_quote_amounts(cls, quote):
+        pass
 
     @classmethod
     def update_booking(cls, booking):
