@@ -97,7 +97,8 @@ class QuoteService(models.Model):
     datetime_from = models.DateTimeField(blank=True, null=True)
     datetime_to = models.DateTimeField(blank=True, null=True)
     status = models.CharField(
-        max_length=5, choices=SERVICE_STATUS_LIST, default=SERVICE_STATUS_PENDING)
+        max_length=5, choices=SERVICE_STATUS_LIST,
+        default=SERVICE_STATUS_PENDING)
     provider = models.ForeignKey(Provider, blank=True, null=True)
 
     def fill_data(self):
