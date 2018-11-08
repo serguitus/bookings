@@ -41,14 +41,12 @@ class BookingService(object):
             quote.save(update_fields=fields)
 
     @classmethod
-    def find_quote_amounts(cls, quote):
+    def find_quote_amounts(cls, agency, variant_list, allotment_list, transfer_list, extra_list):
         result = dict()
 
-        variant_list = list(QuotePaxVariant.objects.filter(quote=quote.id))
         if not variant_list:
-            return 1, 'Pax Variants Missing', None
-        service_list = list(QuoteService.objects.filter(quote=quote.id))
-        if not service_list:
+            return 3, 'Pax Variants Missing', None
+        if (not allotment_list) and (not transfer_list) and (not extra_list):
             return 2, 'Services Missing', None
         for pax_variant in variant_list:
             cost_1 = 0
@@ -64,108 +62,120 @@ class BookingService(object):
             price_2_msg = ''
             price_3_msg = ''
 
-            for qservice in service_list:
-                service_type = qservice.service_type
-                if service_type == SERVICE_CATEGORY_ALLOTMENT:
-                    qservice = QuoteAllotment.objects.get(pk=qservice.id)
-                    if qservice.service.grouping:
+            if allotment_list:
+                for quote_allotment in allotment_list:
+                    if quote_allotment.service.grouping:
                         cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_allotment_amounts(
                             cost_1, cost_1_msg, price_1, price_1_msg,
-                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            quote_allotment.service,
+                            quote_allotment.datetime_from, quote_allotment.datetime_to,
                             1,
-                            qservice.board_type, qservice.room_type_id,
+                            quote_allotment.board_type, quote_allotment.room_type_id,
                             None,
-                            qservice.provider, quote.agency)
+                            quote_allotment.provider, agency)
                         cost_2, cost_2_msg, price_2, price_2_msg = cls._quote_allotment_amounts(
                             cost_2, cost_2_msg, price_2, price_2_msg,
-                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            quote_allotment.service,
+                            quote_allotment.datetime_from, quote_allotment.datetime_to,
                             2,
-                            qservice.board_type, qservice.room_type_id,
+                            quote_allotment.board_type, quote_allotment.room_type_id,
                             None,
-                            qservice.provider, quote.agency)
+                            quote_allotment.provider, agency)
                         cost_3, cost_3_msg, price_3, price_3_msg = cls._quote_allotment_amounts(
                             cost_3, cost_3_msg, price_3, price_3_msg,
-                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            quote_allotment.service,
+                            quote_allotment.datetime_from, quote_allotment.datetime_to,
                             3,
-                            qservice.board_type, qservice.room_type_id,
+                            quote_allotment.board_type, quote_allotment.room_type_id,
                             None,
-                            qservice.provider, quote.agency)
+                            quote_allotment.provider, agency)
                     else:
                         cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_allotment_amounts(
                             cost_1, cost_1_msg, price_1, price_1_msg,
-                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            quote_allotment.service,
+                            quote_allotment.datetime_from, quote_allotment.datetime_to,
                             pax_variant.pax_quantity,
-                            qservice.board_type, qservice.room_type_id,
+                            quote_allotment.board_type, quote_allotment.room_type_id,
                             None,
-                            qservice.provider, quote.agency)
+                            quote_allotment.provider, agency)
                         cost_2, cost_2_msg = cost_1, cost_1_msg
                         price_2, price_2_msg = price_1, price_1_msg
                         cost_3, cost_3_msg = cost_1, cost_1_msg
                         price_3, price_3_msg = price_1, price_1_msg
-                if service_type == SERVICE_CATEGORY_TRANSFER:
-                    qservice = QuoteTransfer.objects.get(pk=qservice.id)
-                    if qservice.service.grouping:
+
+            if transfer_list:
+                for quote_transfer in transfer_list:
+                    if quote_transfer.service.grouping:
                         cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_transfer_amounts(
                             cost_1, cost_1_msg, price_1, price_1_msg,
-                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            quote_transfer.service,
+                            quote_transfer.datetime_from, quote_transfer.datetime_to,
                             1,
-                            qservice.location_from_id, qservice.location_to_id,
-                            qservice.quantity,
-                            qservice.provider, quote.agency)
+                            quote_transfer.location_from_id, quote_transfer.location_to_id,
+                            quote_transfer.quantity,
+                            quote_transfer.provider, agency)
                         cost_2, cost_2_msg, price_2, price_2_msg = cls._quote_transfer_amounts(
                             cost_2, cost_2_msg, price_2, price_2_msg,
-                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            quote_transfer.service,
+                            quote_transfer.datetime_from, quote_transfer.datetime_to,
                             2,
-                            qservice.location_from_id, qservice.location_to_id,
-                            qservice.quantity,
-                            qservice.provider, quote.agency)
+                            quote_transfer.location_from_id, quote_transfer.location_to_id,
+                            quote_transfer.quantity,
+                            quote_transfer.provider, agency)
                         cost_3, cost_3_msg, price_3, price_3_msg = cls._quote_transfer_amounts(
                             cost_3, cost_3_msg, price_3, price_3_msg,
-                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            quote_transfer.service,
+                            quote_transfer.datetime_from, quote_transfer.datetime_to,
                             3,
-                            qservice.location_from_id, qservice.location_to_id,
-                            qservice.quantity,
-                            qservice.provider, quote.agency)
+                            quote_transfer.location_from_id, quote_transfer.location_to_id,
+                            quote_transfer.quantity,
+                            quote_transfer.provider, agency)
                     else:
                         cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_transfer_amounts(
                             cost_1, cost_1_msg, price_1, price_1_msg,
-                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            quote_transfer.service,
+                            quote_transfer.datetime_from, quote_transfer.datetime_to,
                             pax_variant.pax_quantity,
-                            qservice.location_from_id, qservice.location_to_id,
-                            qservice.quantity,
-                            qservice.provider, quote.agency)
+                            quote_transfer.location_from_id, quote_transfer.location_to_id,
+                            quote_transfer.quantity,
+                            quote_transfer.provider, agency)
                         cost_2, cost_2_msg = cost_1, cost_1_msg
                         price_2, price_2_msg = price_1, price_1_msg
                         cost_3, cost_3_msg = cost_1, cost_1_msg
                         price_3, price_3_msg = price_1, price_1_msg
-                if service_type == SERVICE_CATEGORY_EXTRA:
-                    qservice = QuoteExtra.objects.get(pk=qservice.id)
-                    if qservice.service.grouping:
+
+            if extra_list:
+                for quote_extra in extra_list:
+                    if quote_extra.service.grouping:
                         cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_extra_amounts(
                             cost_1, cost_1_msg, price_1, price_1_msg,
-                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            quote_extra.service,
+                            quote_extra.datetime_from, quote_extra.datetime_to,
                             1,
-                            qservice.quantity, qservice.parameter,
-                            qservice.provider, quote.agency)
+                            quote_extra.quantity, quote_extra.parameter,
+                            quote_extra.provider, agency)
                         cost_2, cost_2_msg, price_2, price_2_msg = cls._quote_extra_amounts(
                             cost_2, cost_2_msg, price_2, price_2_msg,
-                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            quote_extra.service,
+                            quote_extra.datetime_from, quote_extra.datetime_to,
                             2,
-                            qservice.quantity, qservice.parameter,
-                            qservice.provider, quote.agency)
+                            quote_extra.quantity, quote_extra.parameter,
+                            quote_extra.provider, agency)
                         cost_3, cost_3_msg, price_3, price_3_msg = cls._quote_extra_amounts(
                             cost_3, cost_3_msg, price_3, price_3_msg,
-                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            quote_extra.service,
+                            quote_extra.datetime_from, quote_extra.datetime_to,
                             3,
-                            qservice.quantity, qservice.parameter,
-                            qservice.provider, quote.agency)
+                            quote_extra.quantity, quote_extra.parameter,
+                            quote_extra.provider, agency)
                     else:
                         cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_extra_amounts(
                             cost_1, cost_1_msg, price_1, price_1_msg,
-                            qservice.service, qservice.datetime_from, qservice.datetime_to,
+                            quote_extra.service,
+                            quote_extra.datetime_from, quote_extra.datetime_to,
                             pax_variant.pax_quantity,
-                            qservice.quantity, qservice.parameter,
-                            qservice.provider, quote.agency)
+                            quote_extra.quantity, quote_extra.parameter,
+                            quote_extra.provider, agency)
                         cost_2, cost_2_msg = cost_1, cost_1_msg
                         price_2, price_2_msg = price_1, price_1_msg
                         cost_3, cost_3_msg = cost_1, cost_1_msg

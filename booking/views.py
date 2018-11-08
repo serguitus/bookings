@@ -4,7 +4,9 @@ from django.views import View
 
 from dateutil.parser import parse
 
-from booking.models import Quote, Booking, BookingService, BookingServicePax
+from booking.models import (
+    Quote, QuotePaxVariant, QuoteAllotment, QuoteTransfer, QuoteExtra, 
+    Booking, BookingService, BookingServicePax)
 from booking.services import BookingService as Booking_Service
 
 from config.constants import (
@@ -41,7 +43,25 @@ class QuoteAmountsView(View):
                 'results': None,
             })
 
-        code, message, results = Booking_Service.find_quote_amounts(quote)
+        variant_list = list(QuotePaxVariant.objects.filter(quote=quote.id))
+        if not variant_list:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Pax Variants Missing',
+                'results': None,
+            })
+        allotment_list = list(QuoteAllotment.objects.filter(quote=quote.id))
+        transfer_list = list(QuoteTransfer.objects.filter(quote=quote.id))
+        extra_list = list(QuoteExtra.objects.filter(quote=quote.id))
+        if (not allotment_list) and (not transfer_list) and (not extra_list):
+            return JsonResponse({
+                'code': 3,
+                'message': 'Services Missing',
+                'results': None,
+            })
+
+        code, message, results = Booking_Service.find_quote_amounts(
+            quote.agency, variant_list, allotment_list, transfer_list, extra_list)
 
         return JsonResponse({
             'code': code,
