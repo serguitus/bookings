@@ -163,6 +163,7 @@ class Extra(Service):
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_EXTRA
+        self.grouping = False
 
 
 class ExtraSupplement(ServiceSupplement):
@@ -349,6 +350,7 @@ class Transfer(Service):
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_TRANSFER
+        self.grouping = False
 
 
 class TransferSupplement(ServiceSupplement):
