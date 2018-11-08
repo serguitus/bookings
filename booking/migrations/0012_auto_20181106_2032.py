@@ -64,10 +64,13 @@ class Migration(migrations.Migration):
             model_name='ordertransfer',
             name='orderservice_ptr',
         ),
-        migrations.RemoveField(
-            model_name='ordertransfer',
-            name='service',
-        ),
+        # Manually removed this to avoid
+        # letting OrderTransfer field-less
+        #
+        # migrations.RemoveField(
+        #     model_name='ordertransfer',
+        #     name='service',
+        # ),
         migrations.DeleteModel(
             name='Order',
         ),
