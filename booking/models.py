@@ -250,6 +250,22 @@ class BookingService(models.Model):
     provider = models.ForeignKey(Provider, blank=True, null=True)
     provider_invoice = models.ForeignKey(ProviderInvoice, blank=True, null=True)
 
+    @property
+    def calculated_cost(self):
+        return 0.00
+
+    @property
+    def calculated_cost_msg(self):
+        return ''
+
+    @property
+    def calculated_price(self):
+        return 0.00
+
+    @property
+    def calculated_price_msg(self):
+        return 0.00
+
     def fill_data(self):
         pass
 

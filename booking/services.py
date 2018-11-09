@@ -11,8 +11,6 @@ from config.constants import (
 )
 from config.services import ConfigService
 
-from decimal import Decimal
-
 
 class BookingService(object):
     """
