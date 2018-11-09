@@ -169,6 +169,7 @@ class ProviderAllotmentServiceSiteModel(SiteModel):
     model_order = 7220
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Provider Catalogue'
+    recent_allowed = True
     fields = ('provider', 'service', 'date_from', 'date_to',)
     list_display = ('provider', 'service', 'date_from', 'date_to',)
     search_fields = ('provider.name','service.name',)
@@ -193,6 +194,7 @@ class ProviderTransferServiceSiteModel(SiteModel):
     model_order = 7230
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Provider Catalogue'
+    recent_allowed = True
     fields = ('provider', 'service', 'date_from', 'date_to',)
     list_display = ('provider', 'service', 'date_from', 'date_to',)
     search_fields = ('provider.name','service.name',)
@@ -215,6 +217,7 @@ class ProviderExtraServiceSiteModel(SiteModel):
     model_order = 7240
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Provider Catalogue'
+    recent_allowed = True
     fields = ('provider', 'service', 'date_from', 'date_to',)
     list_display = ('provider', 'service', 'date_from', 'date_to',)
     search_fields = ('provider.name','service.name',)
@@ -239,6 +242,7 @@ class AgencyAllotmentServiceSiteModel(SiteModel):
     model_order = 7120
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
+    recent_allowed = True
     fields = ('agency', 'service', 'date_from', 'date_to',)
     list_display = ('agency', 'service', 'date_from', 'date_to',)
     search_fields = ('agency.name','service.name',)
@@ -263,6 +267,7 @@ class AgencyTransferServiceSiteModel(SiteModel):
     model_order = 7130
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
+    recent_allowed = True
     fields = ('agency', 'service', 'date_from', 'date_to',)
     list_display = ('agency', 'service', 'date_from', 'date_to',)
     search_fields = ('agency.name','service.name',)
@@ -285,6 +290,7 @@ class AgencyExtraServiceSiteModel(SiteModel):
     model_order = 7140
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
+    recent_allowed = True
     fields = ('agency', 'service', 'date_from', 'date_to',)
     list_display = ('agency', 'service', 'date_from', 'date_to',)
     search_fields = ('agency.name','service.name',)

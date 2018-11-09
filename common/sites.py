@@ -329,7 +329,7 @@ class SiteModel(ModelAdmin):
     object_history_template = 'common/object_history.html'
     popup_response_template = None
 
-    recent_allowed = True
+    recent_allowed = False
 
 
     class Media:

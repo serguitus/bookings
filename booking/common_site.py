@@ -93,6 +93,7 @@ class QuoteSiteModel(SiteModel):
     model_order = 510
     menu_label = MENU_LABEL_QUOTE
 
+    recent_allowed = True
     fields = ('reference', 'agency', 'date_from', 'date_to',
               'status', 'currency',)
     list_display = ('reference', 'agency', 'date_from',
@@ -209,6 +210,7 @@ class BookingSiteModel(SiteModel):
     model_order = 1110
     menu_label = MENU_LABEL_BOOKING
 
+    recent_allowed = True
     fields = (('name', 'reference'), 'agency', 'status')
     list_display = ('name', 'reference', 'agency', 'date_from',
                     'date_to', 'status', 'currency', 'cost_amount',
