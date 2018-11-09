@@ -97,7 +97,8 @@ class QuoteService(models.Model):
     datetime_from = models.DateTimeField(blank=True, null=True)
     datetime_to = models.DateTimeField(blank=True, null=True)
     status = models.CharField(
-        max_length=5, choices=SERVICE_STATUS_LIST, default=SERVICE_STATUS_PENDING)
+        max_length=5, choices=SERVICE_STATUS_LIST,
+        default=SERVICE_STATUS_PENDING)
     provider = models.ForeignKey(Provider, blank=True, null=True)
 
     def fill_data(self):
@@ -208,7 +209,7 @@ class BookingPax(models.Model):
     """
     class Meta:
         verbose_name = 'Booking Pax'
-        verbose_name_plural = 'Bookings Paxes'
+        verbose_name_plural = 'Booking Rooming List'
         unique_together = (('booking', 'pax_name'),)
     booking = models.ForeignKey(Booking, related_name='rooming_list')
     pax_name = models.CharField(max_length=50)
@@ -281,7 +282,7 @@ class BookingServicePax(models.Model):
     """
     class Meta:
         verbose_name = 'Booking Service Pax'
-        verbose_name_plural = 'Bookings Services Paxes'
+        verbose_name_plural = 'Booking Service Rooming'
     booking_pax = models.ForeignKey(BookingPax)
     booking_service = models.ForeignKey(BookingService)
     group = models.SmallIntegerField()
@@ -354,8 +355,8 @@ class BookingAllotment(BookingService):
     Booking Service Allotment
     """
     class Meta:
-        verbose_name = 'Booking Allotment'
-        verbose_name_plural = 'Bookings Allotments'
+        verbose_name = 'Booking Accomodation'
+        verbose_name_plural = 'Booking Accomodation'
     service = models.ForeignKey(Allotment)
     room_type = models.ForeignKey(RoomType)
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
@@ -371,7 +372,7 @@ class BookingTransfer(BookingService):
     """
     class Meta:
         verbose_name = 'Booking Transfer'
-        verbose_name_plural = 'Bookings Transfers'
+        verbose_name_plural = 'Booking Transfers'
     service = models.ForeignKey(Transfer)
     location_from = models.ForeignKey(Location, related_name='location_from')
     location_to = models.ForeignKey(Location, related_name='location_to')
@@ -391,7 +392,7 @@ class BookingTransferSupplement(BookingServiceSupplement):
     """
     class Meta:
         verbose_name = 'Booking Transfer Line Supplement'
-        verbose_name_plural = 'Bookings Transfers Lines Supplements'
+        verbose_name_plural = 'Booking Transfer Line Supplements'
     quantity = models.SmallIntegerField(default=1)
 
 
@@ -401,7 +402,7 @@ class BookingExtra(BookingService):
     """
     class Meta:
         verbose_name = 'Booking Extra'
-        verbose_name_plural = 'Bookings Extras'
+        verbose_name_plural = 'Booking Extras'
     service = models.ForeignKey(Extra)
     quantity = models.SmallIntegerField()
     parameter = models.SmallIntegerField()

@@ -112,7 +112,8 @@ class QuoteAllotmentSiteModel(SiteModel):
     menu_label = MENU_LABEL_QUOTE
 
     fields = ('quote', 'service', 'datetime_from', 'datetime_to', 'status',
-              'cost_amount', 'price_amount', 'room_type', 'board_type',
+              # 'cost_amount', 'price_amount',
+              'room_type', 'board_type',
               'provider', 'id')
     list_display = ('quote', 'service', 'datetime_from', 'datetime_to',
                     'status',)

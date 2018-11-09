@@ -222,11 +222,11 @@ class AgencyExtraDetail(AmountDetail):
 #===============================================================================
 class Allotment(Service):
     """
-    Allotment
+    Accomodation
     """
     class Meta:
-        verbose_name = 'Allotment'
-        verbose_name_plural = 'Allotments'
+        verbose_name = 'Accomodation'
+        verbose_name_plural = 'Accomodation'
     location = models.ForeignKey(Location)
     time_from = models.TimeField(default='16:00')
     time_to = models.TimeField(default='12:00')
@@ -254,11 +254,11 @@ class AllotmentRoomType(models.Model):
 
 class AllotmentBoardType(models.Model):
     """
-    AllotmentBoardType
+    AccomodationBoardType
     """
     class Meta:
-        verbose_name = 'Allotment Board Type'
-        verbose_name_plural = 'Alloments Boards Types'
+        verbose_name = 'Accomodation Board Type'
+        verbose_name_plural = 'Accomodation Board Types'
         unique_together = (('allotment', 'board_type'),)
     allotment = models.ForeignKey(Allotment)
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
@@ -269,30 +269,30 @@ class AllotmentBoardType(models.Model):
 
 class AllotmentSupplement(ServiceSupplement):
     """
-    AllotmentSupplement
+    AccomodationSupplement
     """
     class Meta:
-        verbose_name = 'Allotment Supplement'
-        verbose_name_plural = 'Allotments Supplements'
+        verbose_name = 'Accomodation Supplement'
+        verbose_name_plural = 'Accomodation Supplements'
 
 
 class ProviderAllotmentService(ProviderCatalogue):
     """
-    ProviderAllotmentService
+    ProviderAccomodationService
     """
     class Meta:
-        verbose_name = 'Provider Allotment Service'
-        verbose_name_plural = 'Providers Allotments Services'
+        verbose_name = 'Accomodation Service Provider'
+        verbose_name_plural = 'Accomodation Service Providers'
     service = models.ForeignKey(Allotment)
 
 
 class ProviderAllotmentDetail(AmountDetail):
     """
-    ProviderAllotmentDetail
+    ProviderAccomodationDetail
     """
     class Meta:
-        verbose_name = 'Provider Allotment Detail'
-        verbose_name_plural = 'Providers Allotments Details'
+        verbose_name = 'Accomodation Provider Detail'
+        verbose_name_plural = 'Accomodation Provider Details'
         unique_together = (('provider_service', 'room_type', 'board_type'),)
     provider_service = models.ForeignKey(ProviderAllotmentService)
     room_type = models.ForeignKey(RoomType)
@@ -301,21 +301,21 @@ class ProviderAllotmentDetail(AmountDetail):
 
 class AgencyAllotmentService(AgencyCatalogue):
     """
-    AgencyAllotmentService
+    AgencyAccomodationService
     """
     class Meta:
-        verbose_name = 'Agency Allotment Service'
-        verbose_name_plural = 'Agencies Allotments Services'
+        verbose_name = 'Agency Accomodation Service'
+        verbose_name_plural = 'Agency Accomodation Services'
     service = models.ForeignKey(Allotment)
 
 
 class AgencyAllotmentDetail(AmountDetail):
     """
-    AgencyAllotmentDetail
+    AgencyAccomodationDetail
     """
     class Meta:
-        verbose_name = 'Agency Allotment Detail'
-        verbose_name_plural = 'Agencies Allotments Details'
+        verbose_name = 'Agency Accomodation Detail'
+        verbose_name_plural = 'Agency Accomodation Details'
         unique_together = (('agency_service', 'room_type', 'board_type'),)
     agency_service = models.ForeignKey(AgencyAllotmentService)
     room_type = models.ForeignKey(RoomType)
@@ -324,11 +324,11 @@ class AgencyAllotmentDetail(AmountDetail):
 
 class AllotmentRoomAvailability(models.Model):
     """
-    AllotmentRoomAvailability
+    AccomodationRoomAvailability
     """
     class Meta:
-        verbose_name = 'Allotment Availability'
-        verbose_name_plural = 'Allotments Availabilities'
+        verbose_name = 'Accomodation Availability'
+        verbose_name_plural = 'Accomodation Availabilities'
     room_type = models.ForeignKey(AllotmentRoomType)
     availability = models.SmallIntegerField(default=10)
     date_from = models.DateField()

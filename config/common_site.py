@@ -158,9 +158,9 @@ class ProviderAllotmentDetailInline(CommonStackedInline):
     extra = 0
     fields = (
         ('room_type','board_type',),
-        ('ad_1_amount','ch_1_ad_1_amount','ch_2_ad_1_amount','ch_3_ad_1_amount',),
-        ('ad_2_amount','ch_1_ad_2_amount','ch_2_ad_2_amount','ch_3_ad_2_amount',),
-        ('ad_3_amount','ch_1_ad_3_amount','ch_2_ad_3_amount','ch_3_ad_3_amount',),
+        ('ad_1_amount','ch_1_ad_1_amount','ch_2_ad_1_amount',), # 'ch_3_ad_1_amount',),
+        ('ad_2_amount','ch_1_ad_2_amount','ch_2_ad_2_amount',), # 'ch_3_ad_2_amount',),
+        ('ad_3_amount','ch_1_ad_3_amount','ch_2_ad_3_amount',), # 'ch_3_ad_3_amount',),
     )
     form = ProviderAllotmentDetailInlineForm
 
