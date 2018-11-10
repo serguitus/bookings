@@ -65,17 +65,41 @@ class QuotePaxVariant(models.Model):
     quote = models.ForeignKey(Quote, related_name='quote_paxvariants')
     pax_quantity = models.SmallIntegerField()
     cost_single_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost Single')
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost SGL')
     cost_double_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost Double')
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost DBL')
     cost_triple_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost Triple')
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost TPL')
     price_single_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price Single')
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price SGL')
     price_double_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price Double')
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price DBL')
     price_triple_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price Triple')
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price TPL')
+
+    @property
+    def calc_c_s(self):
+        return 'N/A'
+
+    @property
+    def calc_c_d(self):
+        return 'N/A'
+
+    @property
+    def calc_c_t(self):
+        return 'N/A'
+
+    @property
+    def calc_p_s(self):
+        return 'N/A'
+
+    @property
+    def calc_p_d(self):
+        return 'N/A'
+
+    @property
+    def calc_p_t(self):
+        return 'N/A'
 
     def __str__(self):
         return '%s' % self.pax_quantity

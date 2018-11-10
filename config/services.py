@@ -63,20 +63,24 @@ class ConfigService(object):
             price = None
             price_message = 'Agency Not Found'
         else:
-            queryset = cls._get_agency_queryset(
-                AgencyAllotmentDetail.objects,
-                agency.id, service_id, date_from, date_to)
-            detail_list = list(
-                queryset.filter(
-                    board_type=board_type
-                ).filter(
-                    room_type_id=room_type_id
+            if room_type_id is None:
+                price = None
+                price_message = 'Room Type Not Found'
+            else:
+                queryset = cls._get_agency_queryset(
+                    AgencyAllotmentDetail.objects,
+                    agency.id, service_id, date_from, date_to)
+                detail_list = list(
+                    queryset.filter(
+                        board_type=board_type
+                    ).filter(
+                        room_type_id=room_type_id
+                    )
                 )
-            )
-            price, price_message = cls.find_groups_amount(
-                False, service, date_from, date_to, groups,
-                quantity, None, detail_list
-            )
+                price, price_message = cls.find_groups_amount(
+                    False, service, date_from, date_to, groups,
+                    quantity, None, detail_list
+                )
 
         return cls._get_result(cost, cost_message, price, price_message)
 
@@ -440,6 +444,10 @@ class ConfigService(object):
     @classmethod
     def _get_agency_queryset(
             cls, manager, agency_id, service_id, date_from, date_to):
+        if date_from is None:
+            return manager.none()
+        if date_to is None:
+            return manager.none()
         return manager.select_related(
             'agency_service__service'
             ).filter(

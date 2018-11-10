@@ -1,13 +1,17 @@
+from django.forms.formsets import all_valid, DELETION_FIELD_NAME
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
 
 from dateutil.parser import parse
 
+from booking.common_site import QuoteSiteModel, BookingAllotmentSiteModel
 from booking.models import (
-    Quote, QuotePaxVariant, QuoteAllotment, QuoteTransfer, QuoteExtra, 
-    Booking, BookingService, BookingServicePax)
+    Quote, 
+    Booking, BookingService)
 from booking.services import BookingService as Booking_Service
+
+from common.views import ModelChangeFormProcessorView
 
 from config.constants import (
     SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER, SERVICE_CATEGORY_EXTRA
@@ -17,42 +21,31 @@ from config.services import ConfigService
 
 from finance.models import Provider
 
+from reservas.admin import bookings_site
 
-class QuoteAmountsView(View):
-    def get(self, request, *args, **kwargs):
-        quote_id = request.GET.get('quote')
-        return self._process_quote(quote_id)
 
-    def post(self, request, *args, **kwargs):
-        quote_id = request.POST.get('quote')
-        return self._process_quote(quote_id)
+class QuoteAmountsView(ModelChangeFormProcessorView):
 
-    def _process_quote(self, quote_id):
-        if quote_id is None or quote_id == '':
-            return JsonResponse({
-                'code': 3,
-                'message': 'Quote Id Missing',
-                'results': None,
-            })
-        try:
-            quote = Quote.objects.get(pk=quote_id)
-        except Quote.DoesNotExist as ex:
-            return JsonResponse({
-                'code': 3,
-                'message': 'Quote Not Found for Id: %s' % quote_id,
-                'results': None,
-            })
+    model = Quote
+    common_sitemodel = QuoteSiteModel
+    common_site = bookings_site
 
-        variant_list = list(QuotePaxVariant.objects.filter(quote=quote.id))
+    def process_data(self, quote, inlines):
+
+        variant_list = inlines[0]
         if not variant_list:
             return JsonResponse({
                 'code': 3,
                 'message': 'Pax Variants Missing',
                 'results': None,
             })
-        allotment_list = list(QuoteAllotment.objects.filter(quote=quote.id))
-        transfer_list = list(QuoteTransfer.objects.filter(quote=quote.id))
-        extra_list = list(QuoteExtra.objects.filter(quote=quote.id))
+
+        allotment_list = inlines[1]
+
+        transfer_list = inlines[2]
+
+        extra_list = inlines[3]
+
         if (not allotment_list) and (not transfer_list) and (not extra_list):
             return JsonResponse({
                 'code': 3,
@@ -70,7 +63,7 @@ class QuoteAmountsView(View):
         })
 
 
-class BookingServiceAmountsView(View):
+class BookingServiceAmountsView(ModelChangeFormProcessorView):
     def get(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
 
@@ -223,6 +216,7 @@ class BookingServiceAmountsView(View):
             'price': price,
             'price_message': price_msg,
         })
+
 
 def booking_list(request, instance):
     """ a list of bookings with their services """

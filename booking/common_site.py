@@ -58,7 +58,15 @@ MENU_LABEL_BOOKING_SERVICES = 'Services By Type'
 class QuotePaxVariantInline(CommonStackedInline):
     model = QuotePaxVariant
     extra = 0
-    fields = ['pax_quantity',]
+    fields = [
+        'pax_quantity',
+        ('cost_single_amount', 'calc_c_s', 'price_single_amount', 'calc_p_s'),
+        ('cost_double_amount', 'calc_c_d', 'price_double_amount', 'calc_p_d'),
+        ('cost_triple_amount', 'calc_c_t', 'price_triple_amount', 'calc_p_t')]
+    readonly_fields = [
+        'calc_c_s', 'calc_p_s',
+        'calc_c_d', 'calc_p_d',
+        'calc_c_t', 'calc_p_t']
     verbose_name_plural = 'Paxes Variants'
 
 
@@ -105,6 +113,7 @@ class QuoteSiteModel(SiteModel):
     inlines = [
         QuotePaxVariantInline, QuoteAllotmentInLine, QuoteTransferInLine, QuoteExtraInLine]
     form = QuoteForm
+    change_form_template = 'booking/quote_change_form.html'
 
 
 class QuoteAllotmentSiteModel(SiteModel):
