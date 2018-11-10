@@ -199,7 +199,7 @@ class ConfigService(object):
                 )
             else:
                 code = "3"
-                message = "Provider Cost and Agency Price NOT Found: %s - %s" % (
+                message = "Provider Cost and Agency Amounts NOT Found: %s - %s" % (
                     cost_message, price_message
                 )
         return code, message, cost, cost_message, price, price_message
@@ -275,7 +275,7 @@ class ConfigService(object):
             else:
                 # empty list, no solved all days
                 stop = True
-                message = 'Price Not Found for date %s' % current_date
+                message = 'Amount Not Found for date %s' % current_date.date()
         if not solved:
             amount = None
 

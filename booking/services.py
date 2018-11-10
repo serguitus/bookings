@@ -40,7 +40,7 @@ class BookingService(object):
 
     @classmethod
     def find_quote_amounts(cls, agency, variant_list, allotment_list, transfer_list, extra_list):
-        result = dict()
+        result = list()
 
         if not variant_list:
             return 3, 'Pax Variants Missing', None
@@ -184,8 +184,8 @@ class BookingService(object):
                         price_2, price_2_msg = price_1, price_1_msg
                         cost_3, cost_3_msg = cost_1, cost_1_msg
                         price_3, price_3_msg = price_1, price_1_msg
-            result.update({
-                pax_variant.pax_quantity: {
+            result.append({
+                    'paxes': pax_variant.pax_quantity,
                     'cost_1': cost_1,
                     'cost_1_msg': cost_1_msg,
                     'cost_2': cost_2,
@@ -198,7 +198,6 @@ class BookingService(object):
                     'price_2_msg': price_2_msg,
                     'price_3': price_3,
                     'price_3_msg': price_3_msg,
-                }
             })
         return 0, '', result
 
@@ -228,7 +227,7 @@ class BookingService(object):
                     service, date_from, date_to, groups,
                     provider, agency,
                     board_type, room_type_id, quantity)
-            return cls._quote_results(adults, cost, cost_msg, price, price_msg, c, c_msg, p, p_msg)
+        return cls._quote_results(adults, cost, cost_msg, price, price_msg, c, c_msg, p, p_msg)
 
     @classmethod
     def _quote_transfer_amounts(
