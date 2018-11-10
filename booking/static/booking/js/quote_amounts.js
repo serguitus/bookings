@@ -2,43 +2,6 @@
 var quote_url = base_url + 'booking/quote-amounts/';
 
 $(document).ready(function(){
-  $('div.field-box.field-calc_c_s').each(function(index) {
-    $( this ).children()[0].style = 'display: none;';
-  });
-  $('div.field-box.field-calc_c_d').each(function(index) {
-    $( this ).children()[0].style = 'display: none;';
-  });
-  $('div.field-box.field-calc_c_t').each(function(index) {
-    $( this ).children()[0].style = 'display: none;';
-  });
-  $('div.field-box.field-calc_p_s').each(function(index) {
-    $( this ).children()[0].style = 'display: none;';
-  });
-  $('div.field-box.field-calc_p_d').each(function(index) {
-    $( this ).children()[0].style = 'display: none;';
-  });
-  $('div.field-box.field-calc_p_t').each(function(index) {
-    $( this ).children()[0].style = 'display: none;';
-  });
-
-  $('div.field-box.field-calc_c_s').each(function(index) {
-    $( this ).children()[1].style = 'width: 170px; margin-left: 0px; margin-right:30px;';
-  });
-  $('div.field-box.field-calc_c_d').each(function(index) {
-    $( this ).children()[1].style = 'width: 170px; margin-left: 0px; margin-right:30px;';
-  });
-  $('div.field-box.field-calc_c_t').each(function(index) {
-    $( this ).children()[1].style = 'width: 170px; margin-left: 0px; margin-right:30px;';
-  });
-  $('div.field-box.field-calc_p_s').each(function(index) {
-    $( this ).children()[1].style = 'width: 170px; margin-left: 0px; margin-right:30px;';
-  });
-  $('div.field-box.field-calc_p_d').each(function(index) {
-    $( this ).children()[1].style = 'width: 170px; margin-left: 0px; margin-right:30px;';
-  });
-  $('div.field-box.field-calc_p_t').each(function(index) {
-    $( this ).children()[1].style = 'width: 170px; margin-left: 0px; margin-right:30px;';
-  });
 
   $("#quote_form").change(function () {
     get_computed_amounts();
@@ -48,95 +11,92 @@ $(document).ready(function(){
     for (idx = 0; idx < 50; idx++) {
       field = $('#id_quote_paxvariants-' + idx + '-cost_single_amount');
       if (field != undefined) {
-        $('#' + idx + '-cost-sgl').detach();
-        $('#' + idx + '-cost-dbl').detach();
-        $('#' + idx + '-cost-tpl').detach();
-        $('#' + idx + '-price-sgl').detach();
-        $('#' + idx + '-price-dbl').detach();
-        $('#' + idx + '-price-tpl').detach();
+        $('#' + idx + '-btn-c1').detach();
+        $('#' + idx + '-span-c1').detach();
+        $('#' + idx + '-btn-c2').detach();
+        $('#' + idx + '-span-c2').detach();
+        $('#' + idx + '-btn-c3').detach();
+        $('#' + idx + '-span-c3').detach();
+        $('#' + idx + '-btn-p1').detach();
+        $('#' + idx + '-span-p1').detach();
+        $('#' + idx + '-btn-p2').detach();
+        $('#' + idx + '-span-p2').detach();
+        $('#' + idx + '-btn-p3').detach();
+        $('#' + idx + '-span-p3').detach();
         
-        $('#id_quote_paxvariants-' + idx + '-cost_single_amount').after("<button id='" + idx + "-cost-sgl' class='btn btn-copy'><<</button>");
-        $('#id_quote_paxvariants-' + idx + '-cost_double_amount').after("<button id='" + idx + "-cost-dbl' class='btn btn-copy'><<</button>");
-        $('#id_quote_paxvariants-' + idx + '-cost_triple_amount').after("<button id='" + idx + "-cost-tpl' class='btn btn-copy'><<</button>");
-        $('#id_quote_paxvariants-' + idx + '-price_single_amount').after("<button id='" + idx + "-price-sgl' class='btn btn-copy'><<</button>");
-        $('#id_quote_paxvariants-' + idx + '-price_double_amount').after("<button id='" + idx + "-price-dbl' class='btn btn-copy'><<</button>");
-        $('#id_quote_paxvariants-' + idx + '-price_triple_amount').after("<button id='" + idx + "-price-tpl' class='btn btn-copy'><<</button>");
+        $('#id_quote_paxvariants-' + idx + '-cost_single_amount').after('<button id="' + idx + '-btn-c1" class="btn btn-copy"><<</button><span id="' + idx + '-span-c1" class="computed-value">N/A</span>');
+        $('#id_quote_paxvariants-' + idx + '-cost_double_amount').after('<button id="' + idx + '-btn-c2" class="btn btn-copy"><<</button><span id="' + idx + '-span-c2" class="computed-value">N/A</span>');
+        $('#id_quote_paxvariants-' + idx + '-cost_triple_amount').after('<button id="' + idx + '-btn-c3" class="btn btn-copy"><<</button><span id="' + idx + '-span-c3" class="computed-value">N/A</span>');
+        $('#id_quote_paxvariants-' + idx + '-price_single_amount').after('<button id="' + idx + '-btn-p1" class="btn btn-copy"><<</button><span id="' + idx + '-span-p1" class="computed-value">N/A</span>');
+        $('#id_quote_paxvariants-' + idx + '-price_double_amount').after('<button id="' + idx + '-btn-p2" class="btn btn-copy"><<</button><span id="' + idx + '-span-p2" class="computed-value">N/A</span>');
+        $('#id_quote_paxvariants-' + idx + '-price_triple_amount').after('<button id="' + idx + '-btn-p3" class="btn btn-copy"><<</button><span id="' + idx + '-span-p3" class="computed-value">N/A</span>');
       }
     }
     $('.btn-copy').on('click', function(e){
       e.preventDefault();
       button = $(this); 
       input = button.prev();
-      div = input.parent().next().children().last();
-      number = Number(div.html());
+      span = button.next();
+      number = Number(span.html());
       if (number) {
         input.val(number);
-        compare_amounts(input, div, button);
+        compare_amounts(input, span, button);
       }
       return false;
     })
   }
+
   function clear_values(msg) {
-    $('div.field-box.field-calc_c_s').each(function(index) {
-      $( this ).children().last().html(msg);
+    $('span.computed-value').each(function(index) {
+      $( this ).html(msg);
     });
-    $('div.field-box.field-calc_c_d').each(function(index) {
-      $($( this ).children()[1]).html(msg);
-    });
-    $('div.field-box.field-calc_c_t').each(function(index) {
-      $($( this ).children()[1]).html(msg);
-    });
-    $('div.field-box.field-calc_p_s').each(function(index) {
-      $($( this ).children()[1]).html(msg);
-    });
-    $('div.field-box.field-calc_p_d').each(function(index) {
-      $($( this ).children()[1]).html(msg);
-    });
-    $('div.field-box.field-calc_p_t').each(function(index) {
-      $($( this ).children()[1]).html(msg);
-    });
-    $('.btn-copy').each(function(index) {
+    $('button.btn-copy').each(function(index) {
       $( this ).removeClass('btn-success');
       $( this ).addClass('btn-danger');
     });
   }
+
   function compare_all_amounts() {
     for (idx = 0; idx < 50; idx++) {
       ic1 = $('#id_quote_paxvariants-' + idx + '-cost_single_amount');
-      dc1 = ic1.parent().next().children().last();
-      bc1 = $('#' + idx + '-cost-sgl');
-      compare_amounts(ic1, dc1, bc1);
-      ic2 = $('#id_quote_paxvariants-' + idx + '-cost_single_amount');
-      dc2 = ic2.parent().next().children().last();
-      bc2 = $('#' + idx + '-cost-dbl');
-      compare_amounts(ic2, dc2, bc2);
-      ic3 = $('#id_quote_paxvariants-' + idx + '-cost_single_amount');
-      dc3 = ic3.parent().next().children().last();
-      bc3 = $('#' + idx + '-cost-tpl');
-      compare_amounts(ic3, dc3, bc3);
-      ip1 = $('#id_quote_paxvariants-' + idx + '-cost_single_amount');
-      dp1 = ip1.parent().next().children().last();
-      bp1 = $('#' + idx + '-price-sgl');
-      compare_amounts(ip1, dp1, bp1);
-      ip2 = $('#id_quote_paxvariants-' + idx + '-cost_single_amount');
-      dp2 = ip2.parent().next().children().last();
-      bp2 = $('#' + idx + '-price-dbl');
-      compare_amounts(ip2, dp2, bp2);
-      ip3 = $('#id_quote_paxvariants-' + idx + '-cost_single_amount');
-      dp3 = ip3.parent().next().children().last();
-      bp3 = $('#' + idx + '-price-tpl');
-      compare_amounts(ip3, dp3, bp3);
+      sc1 = $('#' + idx + '-span-c1');
+      bc1 = $('#' + idx + '-btn-c1');
+      compare_amounts(ic1, sc1, bc1);
+      ic2 = $('#id_quote_paxvariants-' + idx + '-cost_double_amount');
+      sc2 = $('#' + idx + '-span-c2');
+      bc2 = $('#' + idx + '-btn-c2');
+      compare_amounts(ic2, sc2, bc2);
+      ic3 = $('#id_quote_paxvariants-' + idx + '-cost_triple_amount');
+      sc3 = $('#' + idx + '-span-c3');
+      bc3 = $('#' + idx + '-btn-c3');
+      compare_amounts(ic3, sc3, bc3);
+      ip1 = $('#id_quote_paxvariants-' + idx + '-price_single_amount');
+      sp1 = $('#' + idx + '-span-p1');
+      bp1 = $('#' + idx + '-btn-p1');
+      compare_amounts(ip1, sp1, bp1);
+      ip2 = $('#id_quote_paxvariants-' + idx + '-price_double_amount');
+      sp2 = $('#' + idx + '-span-p2');
+      bp2 = $('#' + idx + '-btn-p2');
+      compare_amounts(ip2, sp2, bp2);
+      ip3 = $('#id_quote_paxvariants-' + idx + '-price_triple_amount');
+      sp3 = $('#' + idx + '-span-p3');
+      bp3 = $('#' + idx + '-btn-p3');
+      compare_amounts(ip3, sp3, bp3);
     }
   }
-  function compare_amounts(input, div, btn) {
-    if(input.val() != Number(div.html())){
-      btn.removeClass('btn-success');
-      btn.addClass('btn-danger');
-    } else{
+
+  function compare_amounts(input, span, btn) {
+    iv = Number(input.val());
+    sv = Number(span.html());
+    if(sv && iv && sv == iv){
       btn.removeClass('btn-danger');
       btn.addClass('btn-success');
+    } else{
+      btn.removeClass('btn-success');
+      btn.addClass('btn-danger');
     }
   }
+
   function get_computed_amounts() {
     show_buttons();
     if($('#quote_form').length){
@@ -159,51 +119,51 @@ $(document).ready(function(){
             qtty = Number(qtty_input.val());
             if (qtty && qtty == paxes) {
               ic1 = $('#id_quote_paxvariants-' + idx + '-cost_single_amount');
-              dc1 = ic1.parent().next().children().last();
+              sc1 = $('#' + idx + '-span-c1');
               if (pax_data.cost_1) {
-                dc1.html(pax_data.cost_1);
+                sc1.html(pax_data.cost_1);
               } else {
-                dc1.html(pax_data.cost_1_msg);
+                sc1.html(pax_data.cost_1_msg);
               }
 
               ic2 = $('#id_quote_paxvariants-' + idx + '-cost_double_amount');
-              dc2 = ic2.parent().next().children().last();
+              sc2 = $('#' + idx + '-span-c2');
               if (pax_data.cost_2) {
-                dc2.html(pax_data.cost_2);
+                sc2.html(pax_data.cost_2);
               } else {
-                dc2.html(pax_data.cost_2_msg);
+                sc2.html(pax_data.cost_2_msg);
               }
 
               ic3 = $('#id_quote_paxvariants-' + idx + '-cost_triple_amount');
-              dc3 = ic3.parent().next().children().last();
+              sc3 = $('#' + idx + '-span-c3');
               if (pax_data.cost_3) {
-                dc3.html(pax_data.cost_3);
+                sc3.html(pax_data.cost_3);
               } else {
-                dc3.html(pax_data.cost_3_msg);
+                sc3.html(pax_data.cost_3_msg);
               }
 
               ip1 = $('#id_quote_paxvariants-' + idx + '-price_single_amount');
-              dp1 = ip1.parent().next().children().last();
+              sp1 = $('#' + idx + '-span-p1');
               if (pax_data.price_1) {
-                dp1.html(pax_data.price_1);
+                sp1.html(pax_data.price_1);
               } else {
-                dp1.html(pax_data.price_1_msg);
+                sp1.html(pax_data.price_1_msg);
               }
 
               ip2 = $('#id_quote_paxvariants-' + idx + '-price_double_amount');
-              dp2 = ip2.parent().next().children().last();
+              sp2 = $('#' + idx + '-span-p2');
               if (pax_data.price_2) {
-                dp2.html(pax_data.price_2);
+                sp2.html(pax_data.price_2);
               } else {
-                dp2.html(pax_data.price_2_msg);
+                sp2.html(pax_data.price_2_msg);
               }
 
               ip3 = $('#id_quote_paxvariants-' + idx + '-price_triple_amount');
-              dp3 = ip3.parent().next().children().last();
+              sp3 = $('#' + idx + '-span-p3');
               if (pax_data.price_3) {
-                dp3.html(pax_data.price_3);
+                sp3.html(pax_data.price_3);
               } else {
-                dp3.html(pax_data.price_3_msg);
+                sp3.html(pax_data.price_3_msg);
               }
             }
           }

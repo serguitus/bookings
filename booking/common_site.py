@@ -60,13 +60,9 @@ class QuotePaxVariantInline(CommonStackedInline):
     extra = 0
     fields = [
         'pax_quantity',
-        ('cost_single_amount', 'calc_c_s', 'price_single_amount', 'calc_p_s'),
-        ('cost_double_amount', 'calc_c_d', 'price_double_amount', 'calc_p_d'),
-        ('cost_triple_amount', 'calc_c_t', 'price_triple_amount', 'calc_p_t')]
-    readonly_fields = [
-        'calc_c_s', 'calc_p_s',
-        'calc_c_d', 'calc_p_d',
-        'calc_c_t', 'calc_p_t']
+        ('cost_single_amount', 'price_single_amount'),
+        ('cost_double_amount', 'price_double_amount'),
+        ('cost_triple_amount', 'price_triple_amount')]
     verbose_name_plural = 'Paxes Variants'
 
 
@@ -102,8 +98,11 @@ class QuoteSiteModel(SiteModel):
     menu_label = MENU_LABEL_QUOTE
 
     recent_allowed = True
-    fields = ('reference', 'agency', 'date_from', 'date_to',
-              'status', 'currency',)
+    fields = (
+        ('reference', 'agency'),
+        ('status', 'currency'),
+        ('date_from', 'date_to'),
+    )
     list_display = ('reference', 'agency', 'date_from',
                     'date_to', 'status', 'currency',)
     top_filters = ('reference', 'date_from', 'status')
@@ -261,12 +260,10 @@ class BookingAllotmentSiteModel(SiteModel):
 
     fields = ('booking', ('service', 'status'), ('datetime_from', 'datetime_to'),
               ('room_type', 'board_type'),
-              ('cost_amount', 'calculated_cost'), ('price_amount', 'calculated_price'),
-              'provider', 'id')
+              'cost_amount', 'price_amount', 'provider', 'id')
     list_display = ('booking', 'service', 'datetime_from', 'datetime_to',
                     'status',)
     list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
-    readonly_fields = ('calculated_cost', 'calculated_price')
     search_fields = ['booking__reference', ]
     ordering = ('booking__reference', 'service__name',)
     form = BookingAllotmentForm

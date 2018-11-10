@@ -77,30 +77,6 @@ class QuotePaxVariant(models.Model):
     price_triple_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price TPL')
 
-    @property
-    def calc_c_s(self):
-        return 'N/A'
-
-    @property
-    def calc_c_d(self):
-        return 'N/A'
-
-    @property
-    def calc_c_t(self):
-        return 'N/A'
-
-    @property
-    def calc_p_s(self):
-        return 'N/A'
-
-    @property
-    def calc_p_d(self):
-        return 'N/A'
-
-    @property
-    def calc_p_t(self):
-        return 'N/A'
-
     def __str__(self):
         return '%s' % self.pax_quantity
 
@@ -274,22 +250,6 @@ class BookingService(models.Model):
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
     provider = models.ForeignKey(Provider, blank=True, null=True)
     provider_invoice = models.ForeignKey(ProviderInvoice, blank=True, null=True)
-
-    @property
-    def calculated_cost(self):
-        return 0.00
-
-    @property
-    def calculated_cost_msg(self):
-        return ''
-
-    @property
-    def calculated_price(self):
-        return 0.00
-
-    @property
-    def calculated_price_msg(self):
-        return 0.00
 
     def fill_data(self):
         pass
