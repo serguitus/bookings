@@ -62,6 +62,8 @@ class BookingService(object):
 
             if allotment_list:
                 for quote_allotment in allotment_list:
+                    if not hasattr(quote_allotment, 'service'):
+                        return 3, 'Quote Allotment Service Missing', None
                     if quote_allotment.service.grouping:
                         cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_allotment_amounts(
                             cost_1, cost_1_msg, price_1, price_1_msg,
@@ -103,6 +105,8 @@ class BookingService(object):
 
             if transfer_list:
                 for quote_transfer in transfer_list:
+                    if not hasattr(quote_transfer, 'service'):
+                        return 3, 'Quote Transfer Service Missing', None
                     if quote_transfer.service.grouping:
                         cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_transfer_amounts(
                             cost_1, cost_1_msg, price_1, price_1_msg,
@@ -144,6 +148,8 @@ class BookingService(object):
 
             if extra_list:
                 for quote_extra in extra_list:
+                    if not hasattr(quote_extra, 'service'):
+                        return 3, 'Quote Extra Service Missing', None
                     if quote_extra.service.grouping:
                         cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_extra_amounts(
                             cost_1, cost_1_msg, price_1, price_1_msg,
