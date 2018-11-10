@@ -21,13 +21,13 @@ class BookingService(object):
     def update_quote(cls, quote):
         date_from = None
         date_to = None
-        for service in quote.quoteservice_set:
+        for service in quote.quote_services.all():
             # date_from
-            if date_from is None or (date_from > service.date_from):
-                date_from = service.date_from
+            if date_from is None or (date_from > service.datetime_from):
+                date_from = service.datetime_from
             # date_to
-            if date_to is None or (date_to < service.date_to):
-                date_to = service.date_to
+            if date_to is None or (date_to < service.datetime_to):
+                date_to = service.datetime_to
         fields = []
         if quote.date_from != date_from:
             fields.append('date_from')
