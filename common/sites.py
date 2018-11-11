@@ -1132,6 +1132,9 @@ class SiteModel(ModelAdmin):
         """
         return mark_safe('<button type="button" class="btn btn-default btn-xs collapsed" data-toggle="collapse" data-target="#div_' + str(obj.pk) +  '" aria-expanded="false"><span class="glyphicon"></span></button>')
 
+    def get_top_filters(self, request):
+        return self.top_filters
+
     @csrf_protect_m
     def changelist_view(self, request, extra_context=None):
         """
@@ -1146,6 +1149,7 @@ class SiteModel(ModelAdmin):
         list_display = self.get_list_display(request)
         list_display_links = self.get_list_display_links(request, list_display)
         list_filter = self.get_list_filter(request)
+        top_filters = self.get_top_filters(request)
         search_fields = self.get_search_fields(request)
         list_select_related = self.get_list_select_related(request)
 
@@ -1164,7 +1168,7 @@ class SiteModel(ModelAdmin):
         try:
             cl = ChangeListClass(
                 request, self.model, list_display,
-                list_display_links, list_filter, self.top_filters, self.date_hierarchy,
+                list_display_links, list_filter, top_filters, self.date_hierarchy,
                 search_fields, list_select_related, self.list_per_page,
                 self.list_max_show_all, self.list_editable, self
             )

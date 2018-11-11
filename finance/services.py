@@ -240,7 +240,7 @@ class FinanceService(object):
 
         # validation for total matched against document amount
         if total > parent.amount:
-            raise ValidationError('Matched amout %s bigger than amount %s' % (total, parent.amount))
+            raise ValidationError('Matched amount %s bigger than amount %s' % (total, parent.amount))
 
         # in current db matches are matches not found, for removing
         db_matches = list(current_db_matches)
@@ -450,7 +450,7 @@ class FinanceService(object):
 
         # validation for total matched against document amount
         if total > parent.amount:
-            raise ValidationError('Matched amout %s bigger than amount %s' % (total, parent.amount))
+            raise ValidationError('Matched amount %s bigger than amount %s' % (total, parent.amount))
 
         # in current db matches are matches not found, for removing
         db_matches = list(current_db_matches)
@@ -655,6 +655,76 @@ class FinanceService(object):
             return document
 
     @classmethod
+    def match_agency_document(cls, parent, matches, is_credit):
+
+        current_new_matches = list(matches)
+        current_db_matches = list(parent.agencymatch_set.all())
+
+        decrease_matches = list()
+        increase_matches = list()
+        add_matches = list()
+
+        total = 0
+
+        new_matches = list(current_new_matches)
+        for new_match in new_matches:
+            total += new_match['match_amount']
+            found = False
+            db_matches = list(current_db_matches)
+            for db_match in db_matches:
+                if new_match['match_id'] and new_match['match_id'] == db_match.pk:
+                    found = True
+                    current_new_matches.remove(new_match)
+                    current_db_matches.remove(db_match)
+                    if new_match.match_amount < db_match.matched_amount:
+                        db_match.matched_amount = new_match.match_amount
+                        decrease_matches.append(db_match)
+                    if new_match.match_amount > db_match.matched_amount:
+                        db_match.matched_amount = new_match.match_amount
+                        increase_matches.append(db_match)
+                    break
+            if not found:
+                add_matches.append(new_match)
+                current_new_matches.remove(new_match)
+
+        # validation for total matched against document amount
+        if total > parent.amount:
+            raise ValidationError('Matched amount %s bigger than amount %s' % (total, parent.amount))
+
+        # in current db matches are matches not found, for removing
+        db_matches = list(current_db_matches)
+        for db_match in current_db_matches:
+            # remove db matches not included in matches
+            cls.delete_agency_match(db_match.pk)
+
+        # save db matches that match amount decreased
+        for match in decrease_matches:
+            cls.save_agency_match(db_match)
+
+        # save db matches that match amount increased
+        for match in increase_matches:
+            cls.save_agency_match(db_match)
+
+        # save db matches that are new
+        for match in add_matches:
+            child = match['child']
+            if is_credit:
+                child_debit = AgencyDebitDocument.objects.get(pk=child.pk)
+                new_db_match = AgencyDocumentMatch(
+                    agency_credit=parent,
+                    agency_debit=child_debit,
+                    matched_amount=match['match_amount'],
+                )
+            else:
+                child_credit = AgencyCreditDocument.objects.get(pk=child.pk)
+                new_db_match = AgencyDocumentMatch(
+                    agency_credit=child_credit,
+                    agency_debit=parent,
+                    matched_amount=match['match_amount'],
+                )
+            cls.save_agency_match(new_db_match)
+
+    @classmethod
     def save_agency_match(cls, agency_match):
         """
         Save Agency Match
@@ -822,6 +892,76 @@ class FinanceService(object):
                 is_credit=True,
                 match_type=MATCH_TYPE_PROVIDER)
             return document
+
+    @classmethod
+    def match_provider_document(cls, parent, matches, is_credit):
+
+        current_new_matches = list(matches)
+        current_db_matches = list(parent.providermatch_set.all())
+
+        decrease_matches = list()
+        increase_matches = list()
+        add_matches = list()
+
+        total = 0
+
+        new_matches = list(current_new_matches)
+        for new_match in new_matches:
+            total += new_match['match_amount']
+            found = False
+            db_matches = list(current_db_matches)
+            for db_match in db_matches:
+                if new_match['match_id'] and new_match['match_id'] == db_match.pk:
+                    found = True
+                    current_new_matches.remove(new_match)
+                    current_db_matches.remove(db_match)
+                    if new_match.match_amount < db_match.matched_amount:
+                        db_match.matched_amount = new_match.match_amount
+                        decrease_matches.append(db_match)
+                    if new_match.match_amount > db_match.matched_amount:
+                        db_match.matched_amount = new_match.match_amount
+                        increase_matches.append(db_match)
+                    break
+            if not found:
+                add_matches.append(new_match)
+                current_new_matches.remove(new_match)
+
+        # validation for total matched against document amount
+        if total > parent.amount:
+            raise ValidationError('Matched amount %s bigger than amount %s' % (total, parent.amount))
+
+        # in current db matches are matches not found, for removing
+        db_matches = list(current_db_matches)
+        for db_match in current_db_matches:
+            # remove db matches not included in matches
+            cls.delete_provider_match(db_match.pk)
+
+        # save db matches that match amount decreased
+        for match in decrease_matches:
+            cls.save_provider_match(db_match)
+
+        # save db matches that match amount increased
+        for match in increase_matches:
+            cls.save_provider_match(db_match)
+
+        # save db matches that are new
+        for match in add_matches:
+            child = match['child']
+            if is_credit:
+                child_debit = ProviderDebitDocument.objects.get(pk=child.pk)
+                new_db_match = ProviderDocumentMatch(
+                    provider_credit=parent,
+                    provider_debit=child_debit,
+                    matched_amount=match['match_amount'],
+                )
+            else:
+                child_credit = ProviderCreditDocument.objects.get(pk=child.pk)
+                new_db_match = ProviderDocumentMatch(
+                    provider_credit=child_credit,
+                    provider_debit=parent,
+                    matched_amount=match['match_amount'],
+                )
+            cls.save_provider_match(new_db_match)
 
     @classmethod
     def save_provider_match(cls, provider_match):

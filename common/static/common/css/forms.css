@@ -71,9 +71,10 @@ form ul.inline li {
     display: block;
     padding: 4px 10px 0 0;
     float: left;
-    width: 160px;
+    width: 100px;
     word-wrap: break-word;
     line-height: 1;
+    text-align: right;
 }
 
 .aligned label:not(.vCheckboxLabel):after {
@@ -87,7 +88,7 @@ form ul.inline li {
     padding: 6px 0;
     margin-top: 0;
     margin-bottom: 0;
-    margin-left: 170px;
+    margin-left: 110px;
 }
 
 .aligned ul label {
@@ -180,6 +181,7 @@ form .aligned table p {
 fieldset .field-box {
     float: left;
     margin-right: 20px;
+    min-width: 450px;
 }
 
 /* WIDE FIELDSETS */
