@@ -15,6 +15,7 @@ from django.http import HttpResponseRedirect
 from django.template.response import SimpleTemplateResponse, TemplateResponse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext as _, ungettext
+from django.utils import six
 
 from finance.forms import (
     AccountingForm, CurrencyExchangeForm, TransferForm,
@@ -143,6 +144,17 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
         form = self.get_form(request, obj, fields=None)
         return list(form.base_fields) + list(self.get_readonly_fields(request, obj))
 
+    def get_match_parent_readonly_fields(self, request, obj=None):
+        result = list()
+        fieldsets = self.get_match_parent_fields(request, obj)
+        for fieldset in fieldsets:
+            if isinstance(fieldset, six.string_types):
+                result.append(fieldset)
+            else:
+               for field in fieldset:
+                    result.append(field)
+        return result
+
     def get_match_parent_fieldsets(self, request, obj=None):
         """
         Hook for specifying match parent fieldsets.
@@ -266,7 +278,7 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
             form,
             list(self.get_match_parent_fieldsets(request, obj)),
             self.get_prepopulated_fields(request, obj),
-            self.get_match_parent_fields(request, obj),
+            self.get_match_parent_readonly_fields(request, obj),
             model_admin=self)
         media = self.media + adminForm.media
 
@@ -405,7 +417,7 @@ class LoanEntityDocumentSiteModel(MatchableSiteModel):
 
     match_child_base_model = 'loanentitydocument_ptr'
     match_model = LoanEntityMatch
-    match_fields = ('name', 'loan_entity', 'account', 'amount', 'date', 'status')
+    match_fields = ('name', ('loan_entity', 'account'), ('amount', 'matched_amount'), ('date', 'status'))
     match_related_fields = ['account', 'loan_entity']
     match_list_display = [
         'name', 'included', 'match_amount'
@@ -479,7 +491,7 @@ class LoanAccountDocumentSiteModel(MatchableSiteModel):
 
     match_child_base_model = 'loanaccountdocument_ptr'
     match_model = LoanAccountMatch
-    match_fields = ('name', 'loan_account', 'account', 'amount', 'date', 'status')
+    match_fields = ('name', ('loan_account', 'account'), ('amount', 'matched_amount'), ('date', 'status'))
     match_related_fields = ['account', 'loan_account']
     match_list_display = [
         'name', 'included', 'match_amount'
