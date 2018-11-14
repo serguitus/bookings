@@ -157,7 +157,7 @@ class ProviderAllotmentDetailInline(CommonStackedInline):
     model = ProviderAllotmentDetail
     extra = 0
     fields = (
-        ('room_type','board_type',),
+        ('room_type','board_type', 'single_supplement', 'third_pax_discount'),
         ('ad_1_amount','ch_1_ad_1_amount','ch_2_ad_1_amount',), # 'ch_3_ad_1_amount',),
         ('ad_2_amount','ch_1_ad_2_amount','ch_2_ad_2_amount',), # 'ch_3_ad_2_amount',),
         ('ad_3_amount','ch_1_ad_3_amount','ch_2_ad_3_amount',), # 'ch_3_ad_3_amount',),
@@ -172,9 +172,10 @@ class ProviderAllotmentServiceSiteModel(SiteModel):
     recent_allowed = True
     fields = ('provider', 'service', 'date_from', 'date_to',)
     list_display = ('provider', 'service', 'date_from', 'date_to',)
-    search_fields = ('provider.name','service.name',)
+    search_fields = ('provider.name', 'service.name',)
     inlines = [ProviderAllotmentDetailInline]
     form = ProviderAllotmentServiceForm
+    change_form_template = 'config/provider_allotment_change_form.html'
 
 
 class ProviderTransferDetailInline(CommonStackedInline):

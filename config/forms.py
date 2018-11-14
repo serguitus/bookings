@@ -22,8 +22,16 @@ class ProviderAllotmentDetailInlineForm(forms.ModelForm):
     class Meta:
         fields = ('__all__')
         widgets = {
-            'room_type': autocomplete.ModelSelect2(url='roomtype-autocomplete'),
+            'room_type': autocomplete.ModelSelect2(
+                url='roomtype-autocomplete'),
         }
+    # Extra fields to help completting fields
+    # when set, they will autocomplete SGL and TPL fields
+    # using the DBL values.
+    single_supplement = forms.IntegerField(label='SGL Supplement',
+                                           required=False)
+    third_pax_discount = forms.IntegerField(label='3rd pax Discount',
+                                            required=False)
 
 
 class ProviderTransferServiceForm(forms.ModelForm):

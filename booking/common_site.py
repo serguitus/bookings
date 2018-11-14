@@ -110,7 +110,8 @@ class QuoteSiteModel(SiteModel):
     readonly_fields = ('date_from', 'date_to',)
     details_template = 'booking/quote_details.html'
     inlines = [
-        QuotePaxVariantInline, QuoteAllotmentInLine, QuoteTransferInLine, QuoteExtraInLine]
+        QuotePaxVariantInline, QuoteAllotmentInLine,
+        QuoteTransferInLine, QuoteExtraInLine]
     form = QuoteForm
     change_form_template = 'booking/quote_change_form.html'
 
