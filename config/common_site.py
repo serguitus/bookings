@@ -176,6 +176,7 @@ class ProviderAllotmentServiceSiteModel(SiteModel):
     inlines = [ProviderAllotmentDetailInline]
     form = ProviderAllotmentServiceForm
     change_form_template = 'config/provider_allotment_change_form.html'
+    add_form_template = 'config/provider_allotment_change_form.html'
 
 
 class ProviderTransferDetailInline(CommonStackedInline):
