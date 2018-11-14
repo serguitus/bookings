@@ -911,6 +911,9 @@ class Provider(models.Model):
     currency = models.CharField(
         max_length=5, choices=CURRENCIES, default=CURRENCY_CUC)
     enabled = models.BooleanField(default=True)
+    email = models.EmailField(blank=True, null=True)
+    address = models.CharField(max_length=500, blank=True, null=True)
+    phone = models.CharField(max_length=30, blank=True, null=True)
 
     def __str__(self):
         return self.name

@@ -169,7 +169,7 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
 
     def save_matches(self, parent, matches):
         pass
-        
+
     def _match_view(self, request, object_id, extra_context=None):
         """
         The 'match list' view for this model.
@@ -525,9 +525,10 @@ class ProviderSiteModel(SiteModel):
     model_order = 4010
     menu_label = MENU_LABEL_FINANCE_ADVANCED
     menu_group = 'Finace Provider'
-    list_display = ('name', 'currency', 'enabled')
+    list_display = ('name', 'email', 'phone',
+                    'currency', 'enabled')
     list_filter = ('name', 'currency', 'enabled')
-    search_fields = ['name']
+    search_fields = ['name', 'email']
     ordering = ('enabled', 'currency', 'name')
 
 
