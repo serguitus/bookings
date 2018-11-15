@@ -7,3 +7,7 @@
     width: 20%;
     float: right;
 }
+
+.field-conf_number .vTextField {
+    width: 150px;
+}

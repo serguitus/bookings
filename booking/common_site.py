@@ -197,14 +197,14 @@ class BookingServicePaxInline(TabularInline):
 class BookingAllotmentInLine(CommonTabularInline):
     model = BookingAllotment
     extra = 0
-    fields = [('service', 'status'), ('datetime_from', 'datetime_to'),
+    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
               ('room_type', 'board_type'), 'provider']
 
 
 class BookingTransferInLine(CommonTabularInline):
     model = BookingTransfer
     extra = 0
-    fields = [('service', 'status'), ('datetime_from', 'datetime_to'),
+    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
               ('location_from', 'location_to'),
               ('quantity', 'provider')]
 
@@ -212,7 +212,7 @@ class BookingTransferInLine(CommonTabularInline):
 class BookingExtraInLine(CommonTabularInline):
     model = BookingExtra
     extra = 0
-    fields = [('service', 'status'), ('datetime_from', 'datetime_to'),
+    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
               ('quantity', 'parameter'), 'provider']
 
 
@@ -259,7 +259,7 @@ class BookingAllotmentSiteModel(SiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_LABEL_BOOKING_SERVICES
 
-    fields = ('booking', ('service', 'status'), ('datetime_from', 'datetime_to'),
+    fields = ('booking', ('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
               ('room_type', 'board_type'),
               'cost_amount', 'price_amount', 'provider', 'id')
     list_display = ('booking', 'service', 'datetime_from', 'datetime_to',
@@ -277,7 +277,7 @@ class BookingTransferSiteModel(SiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_LABEL_BOOKING_SERVICES
 
-    fields = ('booking', ('service', 'status'),
+    fields = ('booking', ('service', 'status', 'conf_number'),
               ('datetime_from', 'datetime_to'),
               ('location_from', 'location_to'),
               'cost_amount', 'price_amount', 'provider', 'id')
@@ -296,7 +296,7 @@ class BookingExtraSiteModel(SiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_LABEL_BOOKING_SERVICES
 
-    fields = ('booking', ('service', 'status'),
+    fields = ('booking', ('service', 'status', 'conf_number'),
               ('datetime_from', 'datetime_to'),
               ('quantity', 'parameter'),
               'cost_amount', 'price_amount', 'provider', 'id')

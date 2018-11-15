@@ -244,6 +244,8 @@ class BookingService(models.Model):
     datetime_to = models.DateTimeField(blank=True, null=True)
     status = models.CharField(
         max_length=5, choices=SERVICE_STATUS_LIST, default=SERVICE_STATUS_PENDING)
+    # This holds the confirmation number when it exists
+    conf_number = models.CharField(max_length=20, blank=True, null=True)
     cost_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     cost_comments = models.CharField(max_length=1000, blank=True, null=True)
     price_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
