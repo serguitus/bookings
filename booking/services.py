@@ -323,18 +323,18 @@ class BookingService(object):
         services = False
         cancelled = True
         need_save = False
-        for service in booking.bookingservice_set:
+        for service in booking.booking_services.all():
             services = True
             # process only non cancelled services
             if service.status != constants.SERVICE_STATUS_CANCELLED:
                 # set not all cancelled
                 cancelled = False
                 # date_from
-                if date_from is None or (date_from > service.date_from):
-                    date_from = service.date_from
+                if date_from is None or (date_from > service.datetime_from):
+                    date_from = service.datetime_from
                 # date_to
-                if date_to is None or (date_to < service.date_to):
-                    date_to = service.date_to
+                if date_to is None or (date_to < service.datetime_to):
+                    date_to = service.datetime_to
                 # cost
                 cost += service.cost_amount
                 # price

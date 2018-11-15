@@ -13,8 +13,8 @@ class ProviderAllotmentServiceForm(forms.ModelForm):
         model = ProviderAllotmentService
         fields = ('__all__')
         widgets = {
-            'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
             'service': autocomplete.ModelSelect2(url='allotment-autocomplete'),
+            'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
         }
 
 
@@ -23,7 +23,8 @@ class ProviderAllotmentDetailInlineForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'room_type': autocomplete.ModelSelect2(
-                url='roomtype-autocomplete'),
+                url='roomtype-autocomplete',
+                forward=['service']),
         }
     # Extra fields to help completting fields
     # when set, they will autocomplete SGL and TPL fields
