@@ -88,12 +88,15 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
     
     change_actions = [dict(name='match', label='Match')]
 
+    match_model = None
     match_fieldsets = None
     match_fields = []
+
     match_child_model = None
-    match_child_base_model = None
+    match_child_model_keyfield = None
     match_related_fields = []
-    match_model = None
+
+    match_parent_model = None
     match_model_parent_field = None
     match_model_child_field = None
 
@@ -109,7 +112,7 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
 
     def get_changelist_form(self, request, **kwargs):
         return MatchableChangeListForm
-        
+
     def do_match_saving(self):
         pass
 
@@ -133,10 +136,17 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
                 self.formfield_for_dbfield, request=request),
         }
         defaults.update(kwargs)
-        return modelformset_factory(
-            self.model, self.get_changelist_form(request), extra=0,
+
+        if self.match_parent_model is None:
+            formset_parent_model = self.model
+        else:
+            formset_parent_model = self.match_parent_model
+            
+        result =  modelformset_factory(
+            formset_parent_model, self.get_changelist_form(request), extra=0,
             fields=self.match_list_editable, **defaults
         )
+        return result
 
     def get_match_parent_fields(self, request, obj=None):
         if self.match_fields:
@@ -172,7 +182,7 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
                     match_id = None
                     if hasattr(form.cleaned_data, 'match_id'):
                         match_id = form.cleaned_data['match_id']
-                    child = form.cleaned_data[self.match_child_base_model]
+                    child = form.cleaned_data[self.match_child_model_keyfield]
                     match_amount = form.cleaned_data['match_amount']
                     result.append(
                         dict(
@@ -192,6 +202,11 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
         """
         from django.contrib.admin.views.main import ERROR_FLAG
 
+        if self.match_parent_model is None:
+            match_parent_sitemodel = self
+        else:
+            match_parent_sitemodel = self.admin_site._registry[self.match_parent_model]
+ 
         match_child_sitemodel = self.admin_site._registry[self.match_child_model]
 
         opts = match_child_sitemodel.model._meta
@@ -228,7 +243,7 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
                 request, match_list_display,
                 match_list_display_links, match_list_filter, match_top_filters, match_date_hierarchy,
                 match_list_search_fields, match_list_select_related, match_list_per_page,
-                match_list_max_show_all, match_list_editable, self, object_id, match_child_sitemodel
+                match_list_max_show_all, match_list_editable, match_parent_sitemodel, object_id, match_child_sitemodel
             )
         except IncorrectLookupParameters:
             # Wacky lookup parameters were given, so redirect to the main
@@ -415,7 +430,7 @@ class LoanEntityDocumentSiteModel(MatchableSiteModel):
     readonly_fields = ('name', 'matched_amount',)
     form = LoanEntityDocumentForm
 
-    match_child_base_model = 'loanentitydocument_ptr'
+    match_child_model_keyfield = 'loanentitydocument_ptr'
     match_model = LoanEntityMatch
     match_fields = ('name', ('loan_entity', 'account'), ('amount', 'matched_amount'), ('date', 'status'))
     match_related_fields = ['account', 'loan_entity']
@@ -489,7 +504,7 @@ class LoanAccountDocumentSiteModel(MatchableSiteModel):
     readonly_fields = ('name', 'matched_amount',)
     form = LoanAccountDocumentForm
 
-    match_child_base_model = 'loanaccountdocument_ptr'
+    match_child_model_keyfield = 'loanaccountdocument_ptr'
     match_model = LoanAccountMatch
     match_fields = ('name', ('loan_account', 'account'), ('amount', 'matched_amount'), ('date', 'status'))
     match_related_fields = ['account', 'loan_account']
@@ -561,7 +576,7 @@ class ProviderDocumentSiteModel(MatchableSiteModel):
     form = ProviderDocumentForm
 
     match_model = ProviderDocumentMatch
-    match_fields = ('name', 'provider', 'amount')
+    match_fields = ('name', ('provider', 'currency'), ('amount', 'matched_amount'), ('date', 'status'))
     match_related_fields = ['provider', 'currency']
     match_list_display = [
         'name', 'included', 'match_amount'
@@ -572,14 +587,22 @@ class ProviderDebitDocumentSiteModel(ProviderDocumentSiteModel):
     """
     class for provider debit documents
     """
-    match_child_base_model = 'providercreditdocument_ptr'
+    match_model_parent_field = 'debit_document'
+    match_model_child_field = 'credit_document'
+    match_parent_model = ProviderDebitDocument
+    match_child_model = ProviderCreditDocument
+    match_child_model_keyfield = 'providerdocument_ptr'
 
 
 class ProviderCreditDocumentSiteModel(ProviderDocumentSiteModel):
     """
     class for provider credit documents
     """
-    match_child_base_model = 'providerdebitdocument_ptr'
+    match_model_parent_field = 'credit_document'
+    match_model_child_field = 'debit_document'
+    match_parent_model = ProviderCreditDocument
+    match_child_model = ProviderDebitDocument
+    match_child_model_keyfield = 'providerdocument_ptr'
 
 
 class ProviderInvoiceSiteModel(ProviderDebitDocumentSiteModel):
@@ -588,10 +611,6 @@ class ProviderInvoiceSiteModel(ProviderDebitDocumentSiteModel):
     """
     model_order = 4020
     menu_label = MENU_LABEL_FINANCE_ADVANCED
-
-    match_model_parent_field = 'debit_document'
-    match_model_child_field = 'credit_document'
-    match_child_model = ProviderCreditDocument
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
@@ -609,17 +628,13 @@ class ProviderPaymentSiteModel(ProviderCreditDocumentSiteModel):
     model_order = 4030
     menu_label = MENU_LABEL_FINANCE_ADVANCED
 
-    match_model_parent_field = 'credit_document'
-    match_model_child_field = 'debit_document'
-    match_child_model = ProviderDebitDocument
-
     def save_model(self, request, obj, form, change):
         # overrides base class method
         return FinanceService.save_provider_payment(request.user, obj)
 
     def save_matches(self, parent, matches):
         # overrides base class method
-        return FinanceService.match_provider_document(parent, matches, False)
+        return FinanceService.match_provider_document(parent, matches, True)
 
 
 class AgencySiteModel(SiteModel):
@@ -644,10 +659,10 @@ class AgencyDocumentSiteModel(MatchableSiteModel):
     form = AgencyDocumentForm
 
     match_model = AgencyDocumentMatch
-    match_fields = ('name', 'agency', 'amount')
+    match_fields = ('name', ('agency', 'currency'), ('amount', 'matched_amount'), ('date', 'status'))
     match_related_fields = ['agency', 'currency']
     match_list_display = [
-        'name', 'included', 'match_amount'
+        'name', 'included', 'match_amount', 'agencydocument_ptr'
     ]
 
 
@@ -655,14 +670,20 @@ class AgencyDebitDocumentSiteModel(AgencyDocumentSiteModel):
     """
     class for agency debit documents
     """
-    match_child_base_model = 'agencycreditdocument_ptr'
+    match_model_parent_field = 'debit_document'
+    match_model_child_field = 'credit_document'
+    match_child_model = AgencyCreditDocument
+    match_child_model_keyfield = 'agencydocument_ptr'
 
 
 class AgencyCreditDocumentSiteModel(AgencyDocumentSiteModel):
     """
     class for agency credit documents
     """
-    match_child_base_model = 'agencydebitdocument_ptr'
+    match_model_parent_field = 'credit_document'
+    match_model_child_field = 'debit_document'
+    match_child_model = AgencyDebitDocument
+    match_child_model_keyfield = 'agencydocument_ptr'
 
 
 class AgencyInvoiceSiteModel(MatchableSiteModel):
@@ -671,10 +692,6 @@ class AgencyInvoiceSiteModel(MatchableSiteModel):
     """
     model_order = 4120
     menu_label = MENU_LABEL_FINANCE_ADVANCED
-
-    match_model_parent_field = 'debit_document'
-    match_model_child_field = 'credit_document'
-    match_child_model = AgencyCreditDocument
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
@@ -692,17 +709,13 @@ class AgencyPaymentSiteModel(MatchableSiteModel):
     model_order = 4130
     menu_label = MENU_LABEL_FINANCE_ADVANCED
 
-    match_model_parent_field = 'credit_document'
-    match_model_child_field = 'debit_document'
-    match_child_model = AgencyDebitDocument
-
     def save_model(self, request, obj, form, change):
         # overrides base class method
         return FinanceService.save_agency_payment(request.user, obj)
 
     def save_matches(self, parent, matches):
         # overrides base class method
-        return FinanceService.match_agency_document(parent, matches, False)
+        return FinanceService.match_agency_document(parent, matches, True)
 
 
 bookings_site.register(Deposit, DepositSiteModel)

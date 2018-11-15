@@ -658,6 +658,10 @@ class FinanceService(object):
     def match_agency_document(cls, parent, matches, is_credit):
 
         current_new_matches = list(matches)
+        if is_credit:
+            parent = parent.agencycreditdocument_ptr
+        else:
+            parent = parent.agencydebitdocument_ptr
         current_db_matches = list(parent.agencymatch_set.all())
 
         decrease_matches = list()
@@ -711,15 +715,15 @@ class FinanceService(object):
             if is_credit:
                 child_debit = AgencyDebitDocument.objects.get(pk=child.pk)
                 new_db_match = AgencyDocumentMatch(
-                    agency_credit=parent,
-                    agency_debit=child_debit,
+                    credit_document=parent,
+                    debit_document=child_debit,
                     matched_amount=match['match_amount'],
                 )
             else:
                 child_credit = AgencyCreditDocument.objects.get(pk=child.pk)
                 new_db_match = AgencyDocumentMatch(
-                    agency_credit=child_credit,
-                    agency_debit=parent,
+                    credit_document=child_credit,
+                    debit_document=parent,
                     matched_amount=match['match_amount'],
                 )
             cls.save_agency_match(new_db_match)
@@ -800,7 +804,7 @@ class FinanceService(object):
             cls._process_summary_amount(
                 document=document,
                 db_document=db_provider_invoice,
-                is_credit=True,
+                is_credit=False,
                 match_type=MATCH_TYPE_PROVIDER)
             return document
 
@@ -832,7 +836,7 @@ class FinanceService(object):
             cls._process_summary_amount(
                 document=document,
                 db_document=db_provider_payment,
-                is_credit=False,
+                is_credit=True,
                 match_type=MATCH_TYPE_PROVIDER)
             return document
 
@@ -858,7 +862,7 @@ class FinanceService(object):
             cls._process_summary_amount(
                 document=document,
                 db_document=db_provider_discount,
-                is_credit=False,
+                is_credit=True,
                 match_type=MATCH_TYPE_PROVIDER)
             return document
 
@@ -889,7 +893,7 @@ class FinanceService(object):
             cls._process_summary_amount(
                 document=document,
                 db_document=db_provider_devolution,
-                is_credit=True,
+                is_credit=False,
                 match_type=MATCH_TYPE_PROVIDER)
             return document
 
@@ -897,7 +901,11 @@ class FinanceService(object):
     def match_provider_document(cls, parent, matches, is_credit):
 
         current_new_matches = list(matches)
-        current_db_matches = list(parent.providermatch_set.all())
+        if is_credit:
+            parent = parent.providercreditdocument_ptr
+        else:
+            parent = parent.providerdebitdocument_ptr
+        current_db_matches = list(parent.providerdocumentmatch_set.all())
 
         decrease_matches = list()
         increase_matches = list()
@@ -950,15 +958,15 @@ class FinanceService(object):
             if is_credit:
                 child_debit = ProviderDebitDocument.objects.get(pk=child.pk)
                 new_db_match = ProviderDocumentMatch(
-                    provider_credit=parent,
-                    provider_debit=child_debit,
+                    credit_document=parent,
+                    debit_document=child_debit,
                     matched_amount=match['match_amount'],
                 )
             else:
                 child_credit = ProviderCreditDocument.objects.get(pk=child.pk)
                 new_db_match = ProviderDocumentMatch(
-                    provider_credit=child_credit,
-                    provider_debit=parent,
+                    credit_document=child_credit,
+                    debit_document=parent,
                     matched_amount=match['match_amount'],
                 )
             cls.save_provider_match(new_db_match)
