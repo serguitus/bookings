@@ -15,16 +15,21 @@ from django.http import HttpResponseRedirect
 from django.template.response import SimpleTemplateResponse, TemplateResponse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext as _, ungettext
+from django.utils import six
 
 from finance.forms import (
     AccountingForm, CurrencyExchangeForm, TransferForm,
-    LoanEntityDocumentForm, LoanAccountDocumentForm)
+    LoanEntityDocumentForm, LoanAccountDocumentForm,
+    ProviderDocumentForm, AgencyDocumentForm)
 from finance.models import (
     FinantialDocument,
     Deposit, Withdraw, CurrencyExchange, Transfer,
     LoanAccount, LoanAccountDeposit, LoanAccountWithdraw, LoanAccountMatch,
     LoanEntity, LoanEntityDeposit, LoanEntityWithdraw, LoanEntityMatch,
-    Agency, Provider)
+    Agency, AgencyDocumentMatch, AgencyCreditDocument, AgencyDebitDocument,
+    AgencyInvoice, AgencyPayment,
+    Provider, ProviderDocumentMatch, ProviderCreditDocument, ProviderDebitDocument,
+    ProviderInvoice, ProviderPayment)
 from finance.services import FinanceService
 
 from functools import update_wrapper, partial
@@ -80,15 +85,18 @@ class MatchableChangeListForm(forms.ModelForm):
 
 
 class MatchableSiteModel(BaseFinantialDocumentSiteModel):
-
+    
     change_actions = [dict(name='match', label='Match')]
 
+    match_model = None
     match_fieldsets = None
     match_fields = []
+
     match_child_model = None
-    match_child_base_model = None
+    match_child_model_keyfield = None
     match_related_fields = []
-    match_model = None
+
+    match_parent_model = None
     match_model_parent_field = None
     match_model_child_field = None
 
@@ -104,7 +112,7 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
 
     def get_changelist_form(self, request, **kwargs):
         return MatchableChangeListForm
-        
+
     def do_match_saving(self):
         pass
 
@@ -128,16 +136,34 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
                 self.formfield_for_dbfield, request=request),
         }
         defaults.update(kwargs)
-        return modelformset_factory(
-            self.model, self.get_changelist_form(request), extra=0,
+
+        if self.match_parent_model is None:
+            formset_parent_model = self.model
+        else:
+            formset_parent_model = self.match_parent_model
+            
+        result =  modelformset_factory(
+            formset_parent_model, self.get_changelist_form(request), extra=0,
             fields=self.match_list_editable, **defaults
         )
+        return result
 
     def get_match_parent_fields(self, request, obj=None):
         if self.match_fields:
             return self.match_fields
         form = self.get_form(request, obj, fields=None)
         return list(form.base_fields) + list(self.get_readonly_fields(request, obj))
+
+    def get_match_parent_readonly_fields(self, request, obj=None):
+        result = list()
+        fieldsets = self.get_match_parent_fields(request, obj)
+        for fieldset in fieldsets:
+            if isinstance(fieldset, six.string_types):
+                result.append(fieldset)
+            else:
+               for field in fieldset:
+                    result.append(field)
+        return result
 
     def get_match_parent_fieldsets(self, request, obj=None):
         """
@@ -154,9 +180,9 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
                 included = form.cleaned_data['included']
                 if included:
                     match_id = None
-                    if hasattr(form.cleaned_data,'match_id'):
+                    if hasattr(form.cleaned_data, 'match_id'):
                         match_id = form.cleaned_data['match_id']
-                    child = form.cleaned_data[self.match_child_base_model]
+                    child = form.cleaned_data[self.match_child_model_keyfield]
                     match_amount = form.cleaned_data['match_amount']
                     result.append(
                         dict(
@@ -176,6 +202,11 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
         """
         from django.contrib.admin.views.main import ERROR_FLAG
 
+        if self.match_parent_model is None:
+            match_parent_sitemodel = self
+        else:
+            match_parent_sitemodel = self.admin_site._registry[self.match_parent_model]
+ 
         match_child_sitemodel = self.admin_site._registry[self.match_child_model]
 
         opts = match_child_sitemodel.model._meta
@@ -188,6 +219,7 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
         match_list_display = self.match_list_display
         match_list_display_links = match_child_sitemodel.get_list_display_links(request, match_list_display)
         match_list_filter = match_child_sitemodel.get_list_filter(request)
+        match_top_filters = match_child_sitemodel.get_top_filters(request)
         match_date_hierarchy = self.match_date_hierarchy
         match_list_search_fields = self.match_list_search_fields
         match_list_select_related = self.match_list_select_related
@@ -209,9 +241,9 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
         try:
             cl = MatchList(
                 request, match_list_display,
-                match_list_display_links, match_list_filter, match_date_hierarchy,
+                match_list_display_links, match_list_filter, match_top_filters, match_date_hierarchy,
                 match_list_search_fields, match_list_select_related, match_list_per_page,
-                match_list_max_show_all, match_list_editable, self, object_id, match_child_sitemodel
+                match_list_max_show_all, match_list_editable, match_parent_sitemodel, object_id, match_child_sitemodel
             )
         except IncorrectLookupParameters:
             # Wacky lookup parameters were given, so redirect to the main
@@ -261,7 +293,7 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
             form,
             list(self.get_match_parent_fieldsets(request, obj)),
             self.get_prepopulated_fields(request, obj),
-            self.get_match_parent_fields(request, obj),
+            self.get_match_parent_readonly_fields(request, obj),
             model_admin=self)
         media = self.media + adminForm.media
 
@@ -391,16 +423,16 @@ class LoanEntityDocumentSiteModel(MatchableSiteModel):
     """
     base class for loan entities deposits and withdraws
     """
-    fields = ('name', 'account', 'loan_entity', 'amount', 'date', 'status', 'matched_amount')
-    list_display = ['name', 'account', 'loan_entity', 'amount', 'date', 'status']
+    fields = ('name', ('loan_entity', 'account'), ('amount', 'matched_amount'), ('date', 'status'))
+    list_display = ['name', 'loan_entity', 'account', 'amount', 'matched_amount', 'date', 'status']
     list_filter = ('currency', 'account', 'status', 'date', 'loan_entity')
 
     readonly_fields = ('name', 'matched_amount',)
     form = LoanEntityDocumentForm
 
-    match_child_base_model = 'loanentitydocument_ptr'
+    match_child_model_keyfield = 'loanentitydocument_ptr'
     match_model = LoanEntityMatch
-    match_fields = ('name', 'account', 'loan_entity', 'amount')
+    match_fields = ('name', ('loan_entity', 'account'), ('amount', 'matched_amount'), ('date', 'status'))
     match_related_fields = ['account', 'loan_entity']
     match_list_display = [
         'name', 'included', 'match_amount'
@@ -465,16 +497,16 @@ class LoanAccountDocumentSiteModel(MatchableSiteModel):
     """
     base class for loan accounts deposits and withdraws
     """
-    fields = ('name', 'account', 'loan_account', 'amount', 'date', 'status')
-    list_display = ['name', 'account', 'loan_account', 'amount', 'date', 'status']
+    fields = ('name', ('loan_account', 'account'), ('amount', 'matched_amount'), ('date', 'status'))
+    list_display = ['name', 'loan_account', 'account', 'amount', 'matched_amount', 'date', 'status']
     list_filter = ('currency', 'account', 'status', 'date', 'loan_account')
 
     readonly_fields = ('name', 'matched_amount',)
     form = LoanAccountDocumentForm
 
-    match_child_base_model = 'loanaccountdocument_ptr'
+    match_child_model_keyfield = 'loanaccountdocument_ptr'
     match_model = LoanAccountMatch
-    match_fields = ('name', 'account', 'loan_account', 'amount')
+    match_fields = ('name', ('loan_account', 'account'), ('amount', 'matched_amount'), ('date', 'status'))
     match_related_fields = ['account', 'loan_account']
     match_list_display = [
         'name', 'included', 'match_amount'
@@ -532,6 +564,80 @@ class ProviderSiteModel(SiteModel):
     ordering = ('enabled', 'currency', 'name')
 
 
+class ProviderDocumentSiteModel(MatchableSiteModel):
+    """
+    class for provider documents
+    """
+    fields = ('name', 'provider', 'currency','amount', 'matched_amount', 'date', 'status')
+    list_display = ['name', 'provider', 'currency', 'amount', 'matched_amount', 'date', 'status']
+    top_filters = ('currency', 'provider', 'status', 'date')
+
+    readonly_fields = ('name', 'matched_amount',)
+
+    form = ProviderDocumentForm
+
+    match_model = ProviderDocumentMatch
+    match_fields = ('name', ('provider', 'currency'), ('amount', 'matched_amount'), ('date', 'status'))
+    match_related_fields = ['provider', 'currency']
+    match_list_display = [
+        'name', 'included', 'match_amount'
+    ]
+
+
+class ProviderDebitDocumentSiteModel(ProviderDocumentSiteModel):
+    """
+    class for provider debit documents
+    """
+    match_model_parent_field = 'debit_document'
+    match_model_child_field = 'credit_document'
+    match_parent_model = ProviderDebitDocument
+    match_child_model = ProviderCreditDocument
+    match_child_model_keyfield = 'providerdocument_ptr'
+
+
+class ProviderCreditDocumentSiteModel(ProviderDocumentSiteModel):
+    """
+    class for provider credit documents
+    """
+    match_model_parent_field = 'credit_document'
+    match_model_child_field = 'debit_document'
+    match_parent_model = ProviderCreditDocument
+    match_child_model = ProviderDebitDocument
+    match_child_model_keyfield = 'providerdocument_ptr'
+
+
+class ProviderInvoiceSiteModel(ProviderDebitDocumentSiteModel):
+    """
+    class for provider invoices
+    """
+    model_order = 4020
+    menu_label = MENU_LABEL_FINANCE_ADVANCED
+
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        return FinanceService.save_provider_invoice(request.user, obj)
+
+    def save_matches(self, parent, matches):
+        # overrides base class method
+        return FinanceService.match_provider_document(parent, matches, False)
+
+
+class ProviderPaymentSiteModel(ProviderCreditDocumentSiteModel):
+    """
+    class for provider payments
+    """
+    model_order = 4030
+    menu_label = MENU_LABEL_FINANCE_ADVANCED
+
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        return FinanceService.save_provider_payment(request.user, obj)
+
+    def save_matches(self, parent, matches):
+        # overrides base class method
+        return FinanceService.match_provider_document(parent, matches, True)
+
+
 class AgencySiteModel(SiteModel):
     model_order = 4110
     menu_label = MENU_LABEL_FINANCE_ADVANCED
@@ -540,6 +646,77 @@ class AgencySiteModel(SiteModel):
     list_filter = ('name', 'currency', 'enabled')
     search_fields = ['name']
     ordering = ('enabled', 'currency', 'name')
+
+
+class AgencyDocumentSiteModel(MatchableSiteModel):
+    """
+    class for agency documents
+    """
+    fields = ('name', 'agency', 'currency','amount', 'matched_amount', 'date', 'status')
+    list_display = ['name', 'agency', 'currency', 'amount', 'matched_amount', 'date', 'status']
+    top_filters = ('currency', 'agency', 'status', 'date')
+
+    readonly_fields = ('name', 'matched_amount',)
+    form = AgencyDocumentForm
+
+    match_model = AgencyDocumentMatch
+    match_fields = ('name', ('agency', 'currency'), ('amount', 'matched_amount'), ('date', 'status'))
+    match_related_fields = ['agency', 'currency']
+    match_list_display = [
+        'name', 'included', 'match_amount', 'agencydocument_ptr'
+    ]
+
+
+class AgencyDebitDocumentSiteModel(AgencyDocumentSiteModel):
+    """
+    class for agency debit documents
+    """
+    match_model_parent_field = 'debit_document'
+    match_model_child_field = 'credit_document'
+    match_child_model = AgencyCreditDocument
+    match_child_model_keyfield = 'agencydocument_ptr'
+
+
+class AgencyCreditDocumentSiteModel(AgencyDocumentSiteModel):
+    """
+    class for agency credit documents
+    """
+    match_model_parent_field = 'credit_document'
+    match_model_child_field = 'debit_document'
+    match_child_model = AgencyDebitDocument
+    match_child_model_keyfield = 'agencydocument_ptr'
+
+
+class AgencyInvoiceSiteModel(MatchableSiteModel):
+    """
+    class for agency invoices
+    """
+    model_order = 4120
+    menu_label = MENU_LABEL_FINANCE_ADVANCED
+
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        return FinanceService.save_agency_invoice(request.user, obj)
+
+    def save_matches(self, parent, matches):
+        # overrides base class method
+        return FinanceService.match_agency_document(parent, matches, False)
+
+
+class AgencyPaymentSiteModel(MatchableSiteModel):
+    """
+    class for agency payments
+    """
+    model_order = 4130
+    menu_label = MENU_LABEL_FINANCE_ADVANCED
+
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        return FinanceService.save_agency_payment(request.user, obj)
+
+    def save_matches(self, parent, matches):
+        # overrides base class method
+        return FinanceService.match_agency_document(parent, matches, True)
 
 
 bookings_site.register(Deposit, DepositSiteModel)
@@ -555,4 +732,13 @@ bookings_site.register(LoanAccountDeposit, LoanAccountDepositSiteModel)
 bookings_site.register(LoanAccountWithdraw, LoanAccountWithdrawSiteModel)
 
 bookings_site.register(Provider, ProviderSiteModel)
+bookings_site.register(ProviderCreditDocument, ProviderCreditDocumentSiteModel)
+bookings_site.register(ProviderDebitDocument, ProviderDebitDocumentSiteModel)
+bookings_site.register(ProviderPayment, ProviderPaymentSiteModel)
+bookings_site.register(ProviderInvoice, ProviderInvoiceSiteModel)
+
 bookings_site.register(Agency, AgencySiteModel)
+bookings_site.register(AgencyCreditDocument, AgencyCreditDocumentSiteModel)
+bookings_site.register(AgencyDebitDocument, AgencyDebitDocumentSiteModel)
+bookings_site.register(AgencyPayment, AgencyPaymentSiteModel)
+bookings_site.register(AgencyInvoice, AgencyInvoiceSiteModel)

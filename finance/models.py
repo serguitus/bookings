@@ -92,7 +92,8 @@ class AccountingDocumentHistory(models.Model):
 class MatchingDocument(models.Model):
     class Meta:
         abstract = True
-    matched_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    matched_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0, verbose_name='Matched')
     # next two fields are only for matching list view edit purposse
     match_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     included = models.BooleanField(default=False)

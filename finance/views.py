@@ -25,7 +25,7 @@ class LoanEntityAutocompleteView(autocomplete.Select2QuerySetView):
         # Don't forget to filter out results depending on the visitor !
         if not self.request.user.is_authenticated():
             return LoanEntity.objects.none()
-        qs = LoanEntity.objects.filter(enabled=True).all()
+        qs = LoanEntity.objects.all()
         if self.q:
             qs = qs.filter(name__istartswith=self.q)
         return qs[:20]
@@ -79,7 +79,7 @@ class MatchList(CommonChangeList):
     """
 
     def __init__(self, request, list_display, list_display_links,
-                 list_filter, date_hierarchy, search_fields,
+                 list_filter, top_filters, date_hierarchy, search_fields,
                  list_select_related, list_per_page, list_max_show_all,
                  list_editable, match_sitemodel, object_id, match_child_sitemodel):
         self.obj_id = object_id
@@ -87,7 +87,7 @@ class MatchList(CommonChangeList):
         self.match_child_sitemodel = match_child_sitemodel
         super(MatchList, self).__init__(
             request, self.match_child_sitemodel.model, list_display, list_display_links,
-            list_filter, date_hierarchy, search_fields, list_select_related,
+            list_filter, top_filters, date_hierarchy, search_fields, list_select_related,
             list_per_page, list_max_show_all, list_editable, self.match_child_sitemodel)
         self.title = ugettext(
             'Select %s to match') % force_text(self.opts.verbose_name)
