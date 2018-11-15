@@ -13,8 +13,8 @@ class ProviderAllotmentServiceForm(forms.ModelForm):
         model = ProviderAllotmentService
         fields = ('__all__')
         widgets = {
-            'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
             'service': autocomplete.ModelSelect2(url='allotment-autocomplete'),
+            'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
         }
 
 
@@ -22,7 +22,7 @@ class ProviderAllotmentDetailInlineForm(forms.ModelForm):
     class Meta:
         fields = ('__all__')
         widgets = {
-            'room_type': autocomplete.ModelSelect2(url='roomtype-autocomplete'),
+            'room_type': autocomplete.ModelSelect2(url='roomtype-autocomplete',  forward=['service']),
         }
 
 

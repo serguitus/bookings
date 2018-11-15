@@ -23,7 +23,13 @@ class RoomTypeAutocompleteView(autocomplete.Select2QuerySetView):
         # Don't forget to filter out results depending on the visitor !
         if not self.request.user.is_authenticated():
             return RoomType.objects.none()
-        qs = RoomType.objects.filter(enabled=True).all()
+        qs = RoomType.objects.filter(enabled=True).all().distinct()
+
+        service = self.forwarded.get('service', None)
+
+        if service:
+            qs = qs.filter(allotmentroomtype__allotment=service)
+
         if self.q:
             qs = qs.filter(name__icontains=self.q)
         return qs[:20]
