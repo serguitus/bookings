@@ -53,7 +53,7 @@ class LocationSiteModel(SiteModel):
     fields = ('name', 'enabled', 'short_name')
     list_display = ('name', 'enabled',)
     list_filter = ('enabled',)
-    search_fields = ('name',)
+    top_filters = ('name',)
 
 
 class RoomTypeSiteModel(SiteModel):
@@ -114,9 +114,11 @@ class AllotmentSiteModel(SiteModel):
               'child_age')
     list_display = ('name', 'location', 'time_from', 'time_to', 'enabled',)
     list_filter = ('location', 'enabled',)
-    search_fields = ('name', 'location__name',)
+    top_filters = ('name',)
+    # search_fields = ('name', 'location__name',)
     ordering = ('enabled', 'name',)
-    inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline, AllotmentSupplementInline]
+    inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline,
+               AllotmentSupplementInline]
 
 
 class TransferSupplementInline(CommonTabularInline):

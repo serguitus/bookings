@@ -225,7 +225,7 @@ class BookingSiteModel(SiteModel):
     list_display = ('name', 'reference', 'agency', 'date_from',
                     'date_to', 'status', 'currency', 'cost_amount',
                     'price_amount',)
-    top_filters = ('reference','date_from',)
+    top_filters = ('name', 'reference','date_from',)
     ordering = ('reference',)
     readonly_fields = ('status',)
     details_template = 'booking/booking_details.html'
@@ -265,7 +265,8 @@ class BookingAllotmentSiteModel(SiteModel):
     list_display = ('booking', 'service', 'datetime_from', 'datetime_to',
                     'status',)
     list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
-    search_fields = ['booking__reference', ]
+    top_filters = ('booking__name', 'service', 'booking__reference','datetime_from',)
+    # search_fields = ['booking__reference', ]
     ordering = ('booking__reference', 'service__name',)
     form = BookingAllotmentForm
     change_form_template = 'booking/bookingservices_change_form.html'
@@ -284,7 +285,8 @@ class BookingTransferSiteModel(SiteModel):
     list_display = ('booking', 'name',
                     'datetime_from', 'datetime_to', 'status',)
     list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
-    search_fields = ['booking__reference',]
+    top_filters = ('booking__name', 'service', 'booking__reference','datetime_from',)
+    # search_fields = ['booking__reference',]
     ordering = ('booking__reference', 'service__name',)
     form = BookingTransferForm
     change_form_template = 'booking/bookingservices_change_form.html'
@@ -302,7 +304,8 @@ class BookingExtraSiteModel(SiteModel):
               'cost_amount', 'price_amount', 'provider', 'id')
     list_display = ('booking', 'service', 'quantity', 'parameter', 'datetime_from', 'datetime_to', 'status',)
     list_filter = ('service', 'datetime_from', 'status',)
-    search_fields = ('booking__reference',)
+    top_filters = ('booking__name', 'service', 'booking__reference','datetime_from',)
+    # search_fields = ('booking__reference',)
     ordering = ('booking__reference', 'service__name',)
     form = BookingExtraForm
     change_form_template = 'booking/bookingservices_change_form.html'
