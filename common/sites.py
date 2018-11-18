@@ -935,6 +935,7 @@ class SiteModel(ModelAdmin):
 
             model = self.model
             opts = model._meta
+            opts.details_template = self.details_template
 
             if request.method == 'POST' and '_saveasnew' in request.POST:
                 object_id = None
@@ -1333,9 +1334,10 @@ class CommonChangeList(ChangeList):
         if SEARCH_VAR in self.hidden_params:
             self.hidden_params.pop(SEARCH_VAR)
 
-        super(CommonChangeList, self).__init__(request, model, list_display, list_display_links,
-                 list_filter, date_hierarchy, search_fields, list_select_related,
-                 list_per_page, list_max_show_all, list_editable, model_admin)
+        super(CommonChangeList, self).__init__(
+            request, model, list_display, list_display_links,
+            list_filter, date_hierarchy, search_fields, list_select_related,
+            list_per_page, list_max_show_all, list_editable, model_admin)
 
 
     def url_for_result(self, result):
@@ -1385,7 +1387,8 @@ class CommonChangeList(ChangeList):
             for top_filter in self.top_filters:
                 if callable(top_filter):
                     # This is simply a custom top filter class.
-                    spec = top_filter(request, lookup_params, hidden_params, self.model, self.model_admin)
+                    spec = top_filter(
+                        request, lookup_params, hidden_params, self.model, self.model_admin)
                 else:
                     field_path = None
                     if isinstance(top_filter, (tuple, list)):
@@ -1568,4 +1571,3 @@ class CommonStackedInline(CommonInlineModelAdmin):
 
 class CommonTabularInline(CommonInlineModelAdmin):
     template = 'common/edit_inline/tabular.html'
-
