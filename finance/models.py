@@ -1034,7 +1034,7 @@ class ProviderCreditDocument(ProviderDocument):
 class ProviderInvoice(ProviderDebitDocument):
     class Meta:
         verbose_name = 'Provider Invoice'
-        verbose_name_plural = 'Providers Invoices'
+        verbose_name_plural = 'Provider Invoices'
 
     def fill_data(self):
         self.document_type = DOC_TYPE_PROVIDER_INVOICE

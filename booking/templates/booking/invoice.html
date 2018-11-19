@@ -1,0 +1,11 @@
+<html>
+    <head>
+    </head>
+    <body>
+        <h1>Invoice for {{ booking.name }}</h1>
+        {% if booking.reference %}
+            <h2>Agency Ref: {{ booking.reference }}</h2>
+            {% endif %}
+    </body>
+    
+</html>

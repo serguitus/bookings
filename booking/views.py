@@ -1,5 +1,10 @@
 from django.forms.formsets import all_valid, DELETION_FIELD_NAME
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+
+import cStringIO as StringIO
+from xhtml2pdf import pisa
+from django.template.loader import get_template
+
 from django.shortcuts import render
 from django.views import View
 
@@ -223,3 +228,17 @@ def booking_list(request, instance):
     context = {}
     context.update(instance.get_model_extra_context(request))
     return render(request, 'booking/booking_list.html', context)
+
+
+def get_invoice(request, id):
+    template = get_template("booking/invoice.html")
+    booking = Booking.objects.get(id=id)
+    context = {'pagesize': 'Letter',
+               'booking': booking,}
+    html = template.render(context)
+    result = StringIO.StringIO()
+    pdf = pisa.pisaDocument(StringIO.StringIO(html), dest=result)
+    if not pdf.err:
+        return HttpResponse(result.getvalue(), content_type='application/pdf')
+    else:
+        return HttpResponse('Errors')

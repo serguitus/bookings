@@ -75,5 +75,6 @@ urlpatterns = [
         ExtraAutocompleteView.as_view(),
         name='extra-autocomplete',
     ),
-    url(r'^bookings/booking/', include(booking_urls.urlpatterns)),
+    url(r'^bookings/booking/',
+        include(booking_urls)),
 ]
