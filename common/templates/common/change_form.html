@@ -87,5 +87,10 @@
 
       </div>
     </form>
-  </div>
+    {% if object_id and opts.details_template %}
+    <div class="details" id="div_{{ object_id }}">
+      {% include opts.details_template with current=original %}
+    </div>
+    {% endif %}
+</div>
 {% endblock content %}
