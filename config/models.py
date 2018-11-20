@@ -230,6 +230,8 @@ class Allotment(Service):
     location = models.ForeignKey(Location)
     time_from = models.TimeField(default='16:00')
     time_to = models.TimeField(default='12:00')
+    address = models.CharField(max_length=500, blank=True, null=True)
+    phone = models.CharField(max_length=30, blank=True, null=True)
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_ALLOTMENT
