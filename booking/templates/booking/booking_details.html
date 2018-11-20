@@ -1,5 +1,15 @@
 {% load booking_tags %}
 {% load render_table from django_tables2 %}
+
+{# buttons to add new bookingServices to the current invoice #}
+<div id="add-buttons">
+    <span class="add-services">
+        <button class="btn btn-primary">+ Accomodation</button>
+        <button class="btn btn-primary">+ Transfer</button>
+        <button class="btn btn-primary">+ Extra</button>
+    </span>
+</div>
+
 {% bookingservices_table current as table %}
 <div class="bookingservices-container">
     {% render_table table %}
