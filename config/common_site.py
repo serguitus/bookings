@@ -260,11 +260,7 @@ class AgencyTransferDetailInline(CommonStackedInline):
     model = AgencyTransferDetail
     extra = 0
     fields = (
-        ('a_location_from','a_location_to',),
-        ('ad_1_amount','ch_1_ad_1_amount','ch_2_ad_1_amount','ch_3_ad_1_amount',),
-        ('ad_2_amount','ch_1_ad_2_amount','ch_2_ad_2_amount','ch_3_ad_2_amount',),
-        ('ad_3_amount','ch_1_ad_3_amount','ch_2_ad_3_amount','ch_3_ad_3_amount',),
-        ('ch_1_ad_0_amount','ch_2_ad_0_amount','ch_3_ad_0_amount',),
+        ('a_location_from','a_location_to', 'ad_1_amount'),
     )
     form = AgencyTransferDetailInlineForm
 
@@ -285,10 +281,7 @@ class AgencyExtraDetailInline(CommonStackedInline):
     model = AgencyExtraDetail
     extra = 0
     fields = (
-        ('ad_1_amount','ch_1_ad_1_amount','ch_2_ad_1_amount','ch_3_ad_1_amount',),
-        ('ad_2_amount','ch_1_ad_2_amount','ch_2_ad_2_amount','ch_3_ad_2_amount',),
-        ('ad_3_amount','ch_1_ad_3_amount','ch_2_ad_3_amount','ch_3_ad_3_amount',),
-        ('ch_1_ad_0_amount','ch_2_ad_0_amount','ch_3_ad_0_amount',),
+        'ad_1_amount',
     )
 
 
