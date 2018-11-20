@@ -11,3 +11,12 @@
 .field-conf_number .vTextField {
     width: 150px;
 }
+
+#detail-buttons{
+    margin: 10px;
+}
+
+#detail-buttons .btn{
+    margin-right: 10px;
+    color: white;
+}

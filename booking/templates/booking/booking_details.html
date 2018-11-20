@@ -2,11 +2,12 @@
 {% load render_table from django_tables2 %}
 
 {# buttons to add new bookingServices to the current invoice #}
-<div id="add-buttons">
+<div id="detail-buttons">
     <span class="add-services">
-        <button class="btn btn-primary">+ Accomodation</button>
-        <button class="btn btn-primary">+ Transfer</button>
-        <button class="btn btn-primary">+ Extra</button>
+        <a class="btn btn-success" href="{% url 'common:booking_bookingallotment_add' %}?booking={{ current.id }}">+ Accomodation</a>
+        <a class="btn btn-success" href="{% url 'common:booking_bookingtransfer_add' %}?booking={{ current.id }}">+ Transfer</a>
+        <a class="btn btn-success" href="{% url 'common:booking_bookingextra_add' %}?booking={{ current.id }}">+ Extra</a>
+        <a class="btn btn-primary" href="#">Invoice</a>
     </span>
 </div>
 
