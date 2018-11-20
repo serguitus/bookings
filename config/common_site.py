@@ -211,10 +211,11 @@ class ProviderExtraDetailInline(CommonStackedInline):
     model = ProviderExtraDetail
     extra = 0
     fields = (
-        ('ad_1_amount','ch_1_ad_1_amount','ch_2_ad_1_amount','ch_3_ad_1_amount',),
-        ('ad_2_amount','ch_1_ad_2_amount','ch_2_ad_2_amount','ch_3_ad_2_amount',),
-        ('ad_3_amount','ch_1_ad_3_amount','ch_2_ad_3_amount','ch_3_ad_3_amount',),
-        ('ch_1_ad_0_amount','ch_2_ad_0_amount','ch_3_ad_0_amount',),
+        'ad_1_amount',
+        # ('ad_1_amount','ch_1_ad_1_amount','ch_2_ad_1_amount','ch_3_ad_1_amount',),
+        # ('ad_2_amount','ch_1_ad_2_amount','ch_2_ad_2_amount','ch_3_ad_2_amount',),
+        # ('ad_3_amount','ch_1_ad_3_amount','ch_2_ad_3_amount','ch_3_ad_3_amount',),
+        # ('ch_1_ad_0_amount','ch_2_ad_0_amount','ch_3_ad_0_amount',),
     )
 
 
