@@ -1393,15 +1393,24 @@ class CommonChangeList(ChangeList):
                     field_path = None
                     if isinstance(top_filter, (tuple, list)):
                         # This is a custom Filter class for a given field.
-                        field, top_filter_class = top_filter[0], top_filter[1]
+                        if isinstance(top_filter[1], str):
+                            field, top_filter_class = top_filter, TopFilter.create
+                        else:
+                            field, top_filter_class = top_filter[0], top_filter[1]
                     else:
                         # This is simply a field name, so use the default
                         # TopFilter class that has been registered for
                         # the type of the given field.
                         field, top_filter_class = top_filter, TopFilter.create
-                    if not isinstance(field, models.Field):
-                        field_path = field
-                        field = get_fields_from_path(self.model, field_path)[-1]
+                    if  isinstance(field, (list, tuple)):
+                        if not isinstance(field[0], models.Field):
+                            field_path = field[0]
+                            field = list(
+                                (get_fields_from_path(self.model, field_path)[-1], field[1]))
+                    else:
+                        if not isinstance(field, models.Field):
+                            field_path = field
+                            field = get_fields_from_path(self.model, field_path)[-1]
 
                     lookup_params_count = len(lookup_params)
                     spec = top_filter_class(

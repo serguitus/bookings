@@ -1,8 +1,13 @@
 from django.forms.formsets import all_valid, DELETION_FIELD_NAME
 from django.http import JsonResponse, HttpResponse
 
-import cStringIO as StringIO
+try:
+    import cStringIO as StringIO
+except ImportError:
+    from io import StringIO
+
 from xhtml2pdf import pisa
+
 from django.template.loader import get_template
 
 from django.shortcuts import render

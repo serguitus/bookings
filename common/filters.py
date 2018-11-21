@@ -17,11 +17,16 @@ class TopFilter(object):
     _support_array = False
     template = 'common/filters/top_filter.html'
 
-    def __init__(self, field, request, params, hidden_params, model, model_admin, field_path):
-        self.field = field
+    def __init__(
+            self, field, request, params, hidden_params, model, model_admin, field_path):
+        if isinstance(field, (list, tuple)):
+            self.field = field[0]
+            self.title = field[1]
+        else:
+            self.field = field
+            self.title = capfirst(getattr(field, 'verbose_name', field_path))
         self.model = model
         self.field_path = field_path
-        self.title = capfirst(getattr(field, 'verbose_name', field_path))
         self._parameters = self.get_parameters(field, model, model_admin, field_path)
         self._values = self._extract_values(params, hidden_params)
         self.context = self.get_context()
@@ -40,11 +45,17 @@ class TopFilter(object):
 
     @classmethod
     def create(cls, field, request, params, hidden_params, model, model_admin, field_path):
+        if isinstance(field, (list, tuple)):
+            actual_field = field[0]
+        else:
+            actual_field = field
         for test, top_filter_class in cls._top_filters:
-            if not test(field):
+            if not test(actual_field):
                 continue
-            return top_filter_class(field, request, params, hidden_params, model, model_admin, field_path=field_path)
-        return TopFilter(field, request, params, hidden_params, model, model_admin, field_path=field_path)
+            return top_filter_class(
+                field, request, params, hidden_params, model, model_admin, field_path=field_path)
+        return TopFilter(
+            field, request, params, hidden_params, model, model_admin, field_path=field_path)
 
     def get_parameters(self, field, model, model_admin, field_path):
         return ('%s%s' % (PARAM_PREFIX, field_path),)
@@ -125,8 +136,8 @@ class ChoicesFilter(TopFilter):
     widget_attrs = {}
     choices = None
 
-    def __init__(self, field, request, params, hidden_params, model, model_admin, field_path):
-    
+    def __init__(
+            self, field, request, params, hidden_params, model, model_admin, field_path):
         super(ChoicesFilter, self).__init__(
             field, request, params, hidden_params, model, model_admin, field_path)
 
@@ -157,7 +168,8 @@ class ChoicesFilter(TopFilter):
     def _add_media(self, model_admin):
 
         if not hasattr(model_admin, 'Media'):
-            raise ImproperlyConfigured('Add empty Media class to %s. Sorry about this bug.' % model_admin)
+            raise ImproperlyConfigured(
+                'Add empty Media class to %s. Sorry about this bug.' % model_admin)
 
         def _get_media(obj):
             return Media(media=getattr(obj, 'Media', None))
@@ -186,8 +198,8 @@ class ForeignKeyFilter(TopFilter):
     widget_attrs = {}
     autocomplete_url = None
 
-    def __init__(self, field, request, params, hidden_params, model, model_admin, field_path):
-
+    def __init__(
+            self, field, request, params, hidden_params, model, model_admin, field_path):
         super(ForeignKeyFilter, self).__init__(
             field, request, params, hidden_params, model, model_admin, field_path)
 
@@ -217,7 +229,8 @@ class ForeignKeyFilter(TopFilter):
     def _add_media(self, model_admin):
 
         if not hasattr(model_admin, 'Media'):
-            raise ImproperlyConfigured('Add empty Media class to %s. Sorry about this bug.' % model_admin)
+            raise ImproperlyConfigured(
+                'Add empty Media class to %s. Sorry about this bug.' % model_admin)
 
         def _get_media(obj):
             return Media(media=getattr(obj, 'Media', None))
@@ -254,8 +267,8 @@ class DateFilter(TopFilter):
             )
         }
 
-    def __init__(self, field, request, params, hidden_params, model, model_admin, field_path):
-
+    def __init__(
+            self, field, request, params, hidden_params, model, model_admin, field_path):
         super(DateFilter, self).__init__(
             field, request, params, hidden_params, model, model_admin, field_path)
 
@@ -279,9 +292,10 @@ class DateFilter(TopFilter):
         })
 
     def _add_media(self, model_admin, widget):
-    
+
         if not hasattr(model_admin, 'Media'):
-            raise ImproperlyConfigured('Add empty Media class to %s. Sorry about this bug.' % model_admin)
+            raise ImproperlyConfigured(
+                'Add empty Media class to %s. Sorry about this bug.' % model_admin)
 
         def _get_media(obj):
             return Media(media=getattr(obj, 'Media', None))
