@@ -1388,7 +1388,7 @@ class CommonChangeList(ChangeList):
                 if callable(top_filter):
                     # This is simply a custom top filter class.
                     spec = top_filter(
-                        request, lookup_params, hidden_params, self.model, self.model_admin)
+                        '', request, lookup_params, hidden_params, self.model, self.model_admin, '')
                 else:
                     field_path = None
                     if isinstance(top_filter, (tuple, list)):

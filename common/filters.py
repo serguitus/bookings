@@ -197,14 +197,18 @@ class ForeignKeyFilter(TopFilter):
     template = 'common/filters/foreignkey_top_filter.html'
     widget_attrs = {}
     autocomplete_url = None
+    filter_queryset = None
 
     def __init__(
             self, field, request, params, hidden_params, model, model_admin, field_path):
         super(ForeignKeyFilter, self).__init__(
             field, request, params, hidden_params, model, model_admin, field_path)
 
+        if self.filter_queryset is None:
+            self.filter_queryset = getattr(model, self.field_path).get_queryset()
+
         field = forms.ModelChoiceField(
-            queryset=getattr(model, self.field_path).get_queryset(),
+            queryset=self.filter_queryset,
             required=False,
             empty_label='',
             widget=autocomplete.ModelSelect2Multiple(
