@@ -286,7 +286,6 @@ class BookingTransferSiteModel(SiteModel):
                     'datetime_from', 'datetime_to', 'status',)
     list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
     top_filters = ('booking__name', 'service', 'booking__reference','datetime_from',)
-    # search_fields = ['booking__reference',]
     ordering = ('booking__reference', 'service__name',)
     form = BookingTransferForm
     change_form_template = 'booking/bookingservices_change_form.html'
@@ -305,7 +304,6 @@ class BookingExtraSiteModel(SiteModel):
     list_display = ('booking', 'service', 'quantity', 'parameter', 'datetime_from', 'datetime_to', 'status',)
     list_filter = ('service', 'datetime_from', 'status',)
     top_filters = ('booking__name', 'service', 'booking__reference','datetime_from',)
-    # search_fields = ('booking__reference',)
     ordering = ('booking__reference', 'service__name',)
     form = BookingExtraForm
     change_form_template = 'booking/bookingservices_change_form.html'

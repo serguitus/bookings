@@ -117,9 +117,7 @@ class AllotmentSiteModel(SiteModel):
               'child_age')
     list_display = ('name', 'phone', 'location',
                     'enabled',)
-    list_filter = ('location', 'enabled',)
-    top_filters = ('name',)
-    # search_fields = ('name', 'location__name',)
+    top_filters = ('name', 'location')
     ordering = ('enabled', 'name',)
     inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline,
                AllotmentSupplementInline]
@@ -136,8 +134,7 @@ class TransferSiteModel(SiteModel):
     menu_group = 'Configuration Services'
     fields = ('name', 'cost_type', 'enabled',)
     list_display = ('name', 'cost_type', 'enabled',)
-    top_filter = ('enabled',)
-    search_fields = ('name',)
+    top_filters = ('name', 'enabled',)
     ordering = ('enabled', 'name',)
     inlines = [TransferSupplementInline]
 
@@ -153,8 +150,7 @@ class ExtraSiteModel(SiteModel):
     menu_group = 'Configuration Services'
     fields = ('name', 'cost_type', 'parameter_type', 'enabled',)
     list_display = ('name', 'cost_type', 'parameter_type', 'enabled',)
-    top_filter = ('enabled',)
-    search_fields = ('name',)
+    top_filters = ('name',)
     ordering = ('enabled', 'name',)
     inlines = [ExtraSupplementInline]
 
@@ -179,7 +175,7 @@ class ProviderAllotmentServiceSiteModel(SiteModel):
     recent_allowed = True
     fields = ('provider', 'service', 'date_from', 'date_to',)
     list_display = ('provider', 'service', 'date_from', 'date_to',)
-    search_fields = ('provider.name', 'service.name',)
+    top_filters = ('provider__name', 'service__name',)
     inlines = [ProviderAllotmentDetailInline]
     form = ProviderAllotmentServiceForm
     change_form_template = 'config/provider_allotment_change_form.html'
@@ -191,10 +187,6 @@ class ProviderTransferDetailInline(CommonStackedInline):
     extra = 0
     fields = (
         ('p_location_from','p_location_to', 'ad_1_amount'),
-        # ('ad_1_amount','ch_1_ad_1_amount','ch_2_ad_1_amount','ch_3_ad_1_amount',),
-        # ('ad_2_amount','ch_1_ad_2_amount','ch_2_ad_2_amount','ch_3_ad_2_amount',),
-        # ('ad_3_amount','ch_1_ad_3_amount','ch_2_ad_3_amount','ch_3_ad_3_amount',),
-        # ('ch_1_ad_0_amount','ch_2_ad_0_amount','ch_3_ad_0_amount',),
     )
     form = ProviderTransferDetailInlineForm
 
@@ -205,8 +197,8 @@ class ProviderTransferServiceSiteModel(SiteModel):
     menu_group = 'Provider Catalogue'
     recent_allowed = True
     fields = ('provider', 'service', 'date_from', 'date_to',)
-    list_display = ('provider', 'service', 'date_from', 'date_to',)
-    search_fields = ('provider.name','service.name',)
+    list_display = ('provider', 'service',  'date_from', 'date_to',)
+    top_filters = ('provider__name','service__name')
     inlines = [ProviderTransferDetailInline]
     form = ProviderTransferServiceForm
 
@@ -216,10 +208,6 @@ class ProviderExtraDetailInline(CommonStackedInline):
     extra = 0
     fields = (
         'ad_1_amount',
-        # ('ad_1_amount','ch_1_ad_1_amount','ch_2_ad_1_amount','ch_3_ad_1_amount',),
-        # ('ad_2_amount','ch_1_ad_2_amount','ch_2_ad_2_amount','ch_3_ad_2_amount',),
-        # ('ad_3_amount','ch_1_ad_3_amount','ch_2_ad_3_amount','ch_3_ad_3_amount',),
-        # ('ch_1_ad_0_amount','ch_2_ad_0_amount','ch_3_ad_0_amount',),
     )
 
 
