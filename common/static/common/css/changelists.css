@@ -348,3 +348,8 @@
 .div-changelist .actions .button:focus, .div-changelist .actions .button:hover {
     border-color: #999;
 }
+
+.div-changelist form.changelist-search .searchbar{
+    border: 1px solid black;
+    height: 36px !important;
+}

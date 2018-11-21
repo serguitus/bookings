@@ -1,12 +1,14 @@
 Diseño de Sitio
-- Main Menu siempre visible en el extremo izquierdo y a futuro replegable.
+OK - Main Menu siempre visible en el extremo izquierdo y a futuro replegable.
 - Recent actions reemplazarlo por informacion sobre elementos recientes accesados y siempre visible debajo de Main menu o a la derecha en cuyo caso, igual a futuro replegable.
-- Incorporar barra de navegacion en barra principal o eliminarla y señalizar en main menu.
+OK - Incorporar barra de navegacion en barra principal o eliminarla y señalizar en main menu.
 
 Filtros
 - Filtros de choices no exclusivos, que sean checkboxes que se marcan y desmarcan permitiendo filtrar por mas de un elemento.
-- Filtros de fechas personalizable a poder especificar anterior a y posterior a
+OK - Filtros de fechas personalizable a poder especificar anterior a y posterior a
 - Filtros replegables
 
 Vista de Edicion
 - Paneles con listados relacionados
+
+- Validar en BookingServices que fecha FROM sea menor que fecha TO
