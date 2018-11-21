@@ -197,8 +197,8 @@ class ProviderTransferServiceSiteModel(SiteModel):
     menu_group = 'Provider Catalogue'
     recent_allowed = True
     fields = ('provider', 'service', 'date_from', 'date_to',)
-    list_display = ('provider', 'service', 'date_from', 'date_to',)
-    search_fields = ('provider.name','service.name',)
+    list_display = ('provider', 'service',  'date_from', 'date_to',)
+    top_filters = ('provider__name','service__name')
     inlines = [ProviderTransferDetailInline]
     form = ProviderTransferServiceForm
 
