@@ -69,8 +69,13 @@ class BookingServiceTable(tables.Table):
     class Meta:
         model = BookingService
         template_name = 'booking/bookingservices_list.html'
-        fields = ['name', 'service_type', 'datetime_from', 'datetime_to', 'cost_amount',
-                  'price_amount']
+        fields = ['name', 'datetime_from', 'datetime_to', 'cost_amount',
+                  'price_amount', 'service_type']
+
+    def __init__(self, *args, **kwargs):
+        self.base_columns['service_type'].verbose_name='Request emails'
+        super(BookingServiceTable, self).__init__(*args, **kwargs)
+
     def render_name(self, value, record):
         obj_url = reverse(
             'common:booking_%s_change' % (BOOKINGSERVICE_TYPES[record.service_type]),
@@ -78,8 +83,15 @@ class BookingServiceTable(tables.Table):
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
-    def before_render(self, request):
-        self.columns.hide('service_type')
+    def render_service_type(self, value, record):
+        email_url = reverse(
+            'send_service_request',
+            args=(record.pk,)
+        )
+        return format_html('<a class="btn btn-primary" href="%s">Request</a>' % (email_url))
+
+#    def before_render(self, request):
+#        self.columns.hide('service_type')
 
 
 class BookingPaxTable(tables.Table):

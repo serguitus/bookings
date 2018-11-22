@@ -10,7 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
-from .custom_settings import ALLOWED_HOSTS, DATABASES, DEBUG, STATIC_URL, STATIC_ROOT
+from .custom_settings import (ALLOWED_HOSTS, DATABASES,
+                              DEBUG, STATIC_URL, STATIC_ROOT,
+                              EMAIL_BACKEND)
 
 import os
 

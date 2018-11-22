@@ -247,3 +247,10 @@ def get_invoice(request, id):
         return HttpResponse(result.getvalue(), content_type='application/pdf')
     else:
         return HttpResponse('Errors')
+
+
+def send_service_request(request, id):
+    """
+    This sends emails to service providers
+    """
+    return HttpResponse('success')
