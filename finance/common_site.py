@@ -22,6 +22,7 @@ from finance.forms import (
     LoanEntityDocumentForm, LoanAccountDocumentForm,
     ProviderDocumentForm, AgencyDocumentForm)
 from finance.models import (
+    Office,
     FinantialDocument,
     Deposit, Withdraw, CurrencyExchange, Transfer,
     LoanAccount, LoanAccountDeposit, LoanAccountWithdraw, LoanAccountMatch,
@@ -553,8 +554,15 @@ class LoanAccountWithdrawSiteModel(LoanAccountDocumentSiteModel):
         return FinanceService.match_loan_account_document(parent, matches, False)
 
 
-class ProviderSiteModel(SiteModel):
+class OfficeSiteModel(SiteModel):
     model_order = 4010
+    menu_label = MENU_LABEL_FINANCE_ADVANCED
+    fields = ('name', 'logo', 'address', 'detail1', 'detail2')
+    list_display = ('name', 'logo', 'address')
+
+
+class ProviderSiteModel(SiteModel):
+    model_order = 4110
     menu_label = MENU_LABEL_FINANCE_ADVANCED
     menu_group = 'Finace Provider'
     list_display = ('name', 'email', 'phone',
@@ -610,7 +618,7 @@ class ProviderInvoiceSiteModel(ProviderDebitDocumentSiteModel):
     """
     class for provider invoices
     """
-    model_order = 4020
+    model_order = 4120
     menu_label = MENU_LABEL_FINANCE_ADVANCED
 
     def save_model(self, request, obj, form, change):
@@ -626,7 +634,7 @@ class ProviderPaymentSiteModel(ProviderCreditDocumentSiteModel):
     """
     class for provider payments
     """
-    model_order = 4030
+    model_order = 4130
     menu_label = MENU_LABEL_FINANCE_ADVANCED
 
     def save_model(self, request, obj, form, change):
@@ -639,7 +647,7 @@ class ProviderPaymentSiteModel(ProviderCreditDocumentSiteModel):
 
 
 class AgencySiteModel(SiteModel):
-    model_order = 4110
+    model_order = 4210
     menu_label = MENU_LABEL_FINANCE_ADVANCED
     menu_group = 'Finace Agency'
     list_display = ('name', 'currency', 'enabled')
@@ -691,7 +699,7 @@ class AgencyInvoiceSiteModel(MatchableSiteModel):
     """
     class for agency invoices
     """
-    model_order = 4120
+    model_order = 4220
     menu_label = MENU_LABEL_FINANCE_ADVANCED
 
     def save_model(self, request, obj, form, change):
@@ -707,7 +715,7 @@ class AgencyPaymentSiteModel(MatchableSiteModel):
     """
     class for agency payments
     """
-    model_order = 4130
+    model_order = 4230
     menu_label = MENU_LABEL_FINANCE_ADVANCED
 
     def save_model(self, request, obj, form, change):
@@ -730,6 +738,8 @@ bookings_site.register(LoanEntityWithdraw, LoanEntityWithdrawSiteModel)
 bookings_site.register(LoanAccount, LoanAccountSiteModel)
 bookings_site.register(LoanAccountDeposit, LoanAccountDepositSiteModel)
 bookings_site.register(LoanAccountWithdraw, LoanAccountWithdrawSiteModel)
+
+bookings_site.register(Office, OfficeSiteModel)
 
 bookings_site.register(Provider, ProviderSiteModel)
 bookings_site.register(ProviderCreditDocument, ProviderCreditDocumentSiteModel)

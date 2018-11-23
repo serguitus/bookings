@@ -19,6 +19,24 @@ from finance.constants import (
     DOC_TYPE_PROVIDER_DEVOLUTION, DOC_TYPE_PROVIDER_DISCOUNT)
 
 
+class Office(models.Model):
+    """
+    Office
+    """
+    class Meta:
+        verbose_name = 'Office'
+        verbose_name_plural = 'Offices'
+        unique_together = (('name',),)
+    name = models.CharField(max_length=50)
+    logo = models.ImageField(blank=True, null=True)
+    address = models.CharField(max_length=100)
+    detail1 = models.CharField(max_length=100, blank=True, null=True)
+    detail2 = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+
 class SummaryModel(models.Model):
     class Meta:
         abstract = True
