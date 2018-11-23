@@ -350,6 +350,28 @@
 }
 
 .div-changelist form.changelist-search .searchbar{
-    border: 1px solid black;
-    height: 36px !important;
+    height: 28px !important;
+}
+
+.div-changelist form.changelist-search>div>span {
+    padding-left: 15px;
+}
+
+.div-changelist form.changelist-search>div>span.datetimeshortcuts {
+    padding-left: 2px;
+}
+
+.div-changelist .search-toolbar form input {
+    height: 28px;
+}
+
+.search-toolbar .select2-container--default .select2-selection--multiple .select2-selection__choice {
+    margin-top: 2px;
+}
+.search-toolbar .select2-container .select2-selection--multiple {
+    min-height: 28px;
+    height: 28px;
+}
+.search-toolbar .select2-container .select2-search--inline .select2-search__field {
+    margin-top: 2px;
 }

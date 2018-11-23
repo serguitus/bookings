@@ -16,6 +16,7 @@ class TopFilter(object):
     _take_priority_index = 0
     _support_array = False
     template = 'common/filters/top_filter.html'
+    filter_title = None
 
     def __init__(
             self, field, request, params, hidden_params, model, model_admin, field_path):
@@ -25,6 +26,8 @@ class TopFilter(object):
         else:
             self.field = field
             self.title = capfirst(getattr(field, 'verbose_name', field_path))
+        if not self.filter_title is None:
+            self.title = self.filter_title
         self.model = model
         self.field_path = field_path
         self._parameters = self.get_parameters(field, model, model_admin, field_path)
@@ -148,7 +151,11 @@ class ChoicesFilter(TopFilter):
         field = forms.MultipleChoiceField(
             choices=choices,
             required=False,
-            widget=autocomplete.Select2Multiple()
+            widget=autocomplete.Select2Multiple(
+                attrs={
+                    'data-placeholder': self.title,
+                },
+            )
         )
 
         self._add_media(model_admin)
@@ -213,6 +220,9 @@ class ForeignKeyFilter(TopFilter):
             empty_label='',
             widget=autocomplete.ModelSelect2Multiple(
                 url=self.autocomplete_url,
+                attrs={
+                    'data-placeholder': self.title,
+                },
             )
         )
 
@@ -280,14 +290,22 @@ class DateFilter(TopFilter):
 
         self._add_media(model_admin, widget)
 
+        attrs = self.widget_attrs.copy()
+        attrs['id'] = 'id-%s-dal-filter' % self.field_path
+        attrs['placeholder'] = 'Starting'
+
         from_widget = widget.render(
             name=self._parameters[0],
             value=self._values[0],
+            attrs=attrs
         )
+
+        attrs['placeholder'] = 'Ending'
 
         to_widget = widget.render(
             name=self._parameters[1],
             value=self._values[1],
+            attrs=attrs
         )
 
         self.context.update({

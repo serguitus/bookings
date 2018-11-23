@@ -9,7 +9,7 @@ class RoomTypeTopFilter(filters.ForeignKeyFilter):
 
 
 class LocationForProviderTransferTopFilter(filters.ForeignKeyFilter):
-
+    filter_title = 'Select Locations'
     filter_queryset = Location.objects.all()
     autocomplete_url = 'location-autocomplete'
 

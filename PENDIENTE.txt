@@ -1,18 +1,18 @@
 Diseño de Sitio
 OK - Main Menu siempre visible en el extremo izquierdo y a futuro replegable.
-- Recent actions reemplazarlo por informacion sobre elementos recientes accesados y siempre visible debajo de Main menu o a la derecha en cuyo caso, igual a futuro replegable.
+OK - Recent actions reemplazarlo por informacion sobre elementos recientes accesados y siempre visible debajo de Main menu o a la derecha en cuyo caso, igual a futuro replegable.
 OK - Incorporar barra de navegacion en barra principal o eliminarla y señalizar en main menu.
 
 Filtros
-- Filtros de choices no exclusivos, que sean checkboxes que se marcan y desmarcan permitiendo filtrar por mas de un elemento.
+OK - Filtros de choices no exclusivos, que sean checkboxes que se marcan y desmarcan permitiendo filtrar por mas de un elemento.
 OK - Filtros de fechas personalizable a poder especificar anterior a y posterior a
 - Filtros replegables
 
 Vista de Edicion
-- Paneles con listados relacionados
+OK - Paneles con listados relacionados
 
 
 ### TODO #####
 - Validar en BookingServices que fecha FROM sea menor que fecha TO
-- En ProviderTransferService change_list mostrar filtros por location_from y location_to
-- No se pueden salvar bookingservices nuevos desde el form_add (al parecer el id no esta tomando valor)
+OK - En ProviderTransferService change_list mostrar filtros por location_from y location_to
+(Sergio) - No se pueden salvar bookingservices nuevos desde el form_add (al parecer el id no esta tomando valor)
