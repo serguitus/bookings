@@ -25,6 +25,9 @@ class ProviderAllotmentDetailInlineForm(forms.ModelForm):
             'room_type': autocomplete.ModelSelect2(
                 url='roomtype-autocomplete',
                 forward=['service']),
+            'board_type': autocomplete.ListSelect2(
+                url='boardtype-autocomplete',
+                forward=['service']),
         }
     # Extra fields to help completting fields
     # when set, they will autocomplete SGL and TPL fields

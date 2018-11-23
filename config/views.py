@@ -4,7 +4,9 @@ from django.db.models import Exists, OuterRef, Subquery, Q, F, Value, DecimalFie
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext
 
-from config.models import Location, RoomType, Allotment, Transfer, Extra
+from config.models import (
+    Location, RoomType,
+    Allotment, AllotmentBoardType, Transfer, Extra)
 
 
 class LocationAutocompleteView(autocomplete.Select2QuerySetView):
@@ -33,6 +35,18 @@ class RoomTypeAutocompleteView(autocomplete.Select2QuerySetView):
         if self.q:
             qs = qs.filter(name__icontains=self.q)
         return qs[:20]
+
+
+class BoardTypeAutocompleteView(autocomplete.Select2ListView):
+    def get_list(self):
+        result = []
+        service = self.forwarded.get('service', None)
+        if not service is None:
+            allotment_boards = AllotmentBoardType.objects.filter(allotment=service).distinct().all()
+            for allotment_board in allotment_boards:
+                result.append(allotment_board.board_type)
+
+        return result
 
 
 class AllotmentAutocompleteView(autocomplete.Select2QuerySetView):
@@ -66,5 +80,3 @@ class ExtraAutocompleteView(autocomplete.Select2QuerySetView):
         if self.q:
             qs = qs.filter(name__icontains=self.q)
         return qs[:20]
-
-

@@ -151,11 +151,7 @@ class ChoicesFilter(TopFilter):
         field = forms.MultipleChoiceField(
             choices=choices,
             required=False,
-            widget=autocomplete.Select2Multiple(
-                attrs={
-                    'data-placeholder': self.title,
-                },
-            )
+            widget=autocomplete.Select2Multiple()
         )
 
         self._add_media(model_admin)
@@ -220,9 +216,6 @@ class ForeignKeyFilter(TopFilter):
             empty_label='',
             widget=autocomplete.ModelSelect2Multiple(
                 url=self.autocomplete_url,
-                attrs={
-                    'data-placeholder': self.title,
-                },
             )
         )
 

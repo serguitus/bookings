@@ -35,7 +35,9 @@ from config.models import (
     ProviderTransferService, ProviderTransferDetail,
     ProviderExtraService, ProviderExtraDetail,
 )
-from config.top_filters import RoomTypeTopFilter, LocationForProviderTransferTopFilter
+from config.top_filters import (
+    RoomTypeTopFilter, LocationTopFilter,
+    LocationForProviderTransferTopFilter)
 
 from functools import update_wrapper, partial
 
@@ -117,7 +119,7 @@ class AllotmentSiteModel(SiteModel):
               'child_age')
     list_display = ('name', 'phone', 'location',
                     'enabled',)
-    top_filters = ('name', 'location')
+    top_filters = ('name', ('location', LocationTopFilter))
     ordering = ('enabled', 'name',)
     inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline,
                AllotmentSupplementInline]

@@ -4,8 +4,13 @@ from config.models import Location
 
 
 class RoomTypeTopFilter(filters.ForeignKeyFilter):
-
+    filter_title = 'Select Room Types'
     autocomplete_url = 'roomtype-autocomplete'
+
+
+class LocationTopFilter(filters.ForeignKeyFilter):
+    filter_title = 'Select Locations'
+    autocomplete_url = 'location-autocomplete'
 
 
 class LocationForProviderTransferTopFilter(filters.ForeignKeyFilter):

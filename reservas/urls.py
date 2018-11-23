@@ -23,7 +23,7 @@ from finance.views import (
     AccountAutocompleteView, LoanEntityAutocompleteView, LoanAccountAutocompleteView,
     AgencyAutocompleteView, ProviderAutocompleteView)
 from config.views import (
-    LocationAutocompleteView, RoomTypeAutocompleteView,
+    LocationAutocompleteView, RoomTypeAutocompleteView, BoardTypeAutocompleteView,
     AllotmentAutocompleteView, TransferAutocompleteView, ExtraAutocompleteView,
     )
 from booking import urls as booking_urls
@@ -54,6 +54,10 @@ urlpatterns = [
     url(r'^roomtype-autocomplete/$',
         RoomTypeAutocompleteView.as_view(),
         name='roomtype-autocomplete',
+    ),
+    url(r'^boardtype-autocomplete/$',
+        BoardTypeAutocompleteView.as_view(),
+        name='boardtype-autocomplete',
     ),
     url(r'^provider-autocomplete/$',
         ProviderAutocompleteView.as_view(),
