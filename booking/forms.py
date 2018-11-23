@@ -34,7 +34,7 @@ class QuoteAllotmentForm(forms.ModelForm):
             'service': autocomplete.ModelSelect2(url='allotment-autocomplete'),
             'room_type': autocomplete.ModelSelect2(url='roomtype-autocomplete'),
         }
-    id = forms.CharField(widget=forms.HiddenInput())
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
 class QuoteTransferInlineForm(forms.ModelForm):
@@ -58,7 +58,7 @@ class QuoteTransferForm(forms.ModelForm):
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
         }
-    id = forms.CharField(widget=forms.HiddenInput())
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
 class QuoteExtraInlineForm(forms.ModelForm):
@@ -78,7 +78,7 @@ class QuoteExtraForm(forms.ModelForm):
             'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
             'service': autocomplete.ModelSelect2(url='extra-autocomplete'),
         }
-    id = forms.CharField(widget=forms.HiddenInput())
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
 class BookingForm(forms.ModelForm):
@@ -99,7 +99,7 @@ class BookingAllotmentForm(forms.ModelForm):
             'service': autocomplete.ModelSelect2(url='allotment-autocomplete'),
             'room_type': autocomplete.ModelSelect2(url='roomtype-autocomplete'),
         }
-    id = forms.CharField(widget=forms.HiddenInput())
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
 class BookingTransferForm(forms.ModelForm):
@@ -112,7 +112,7 @@ class BookingTransferForm(forms.ModelForm):
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
         }
-    id = forms.CharField(widget=forms.HiddenInput())
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
 class BookingExtraForm(forms.ModelForm):
@@ -123,4 +123,4 @@ class BookingExtraForm(forms.ModelForm):
             'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
             'service': autocomplete.ModelSelect2(url='extra-autocomplete'),
         }
-    id = forms.CharField(widget=forms.HiddenInput())
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
