@@ -297,13 +297,15 @@ class BookingExtraSiteModel(SiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_LABEL_BOOKING_SERVICES
 
-    fields = ('booking', ('service', 'status', 'conf_number'),
+    fields = ['booking', ('service', 'status', 'conf_number'),
               ('datetime_from', 'datetime_to'),
               ('quantity', 'parameter'),
-              'cost_amount', 'price_amount', 'provider', 'id')
-    list_display = ('booking', 'service', 'quantity', 'parameter', 'datetime_from', 'datetime_to', 'status',)
+              'cost_amount', 'price_amount', 'provider', 'id']
+    list_display = ('booking', 'service', 'quantity', 'parameter',
+                    'datetime_from', 'datetime_to', 'status',)
     list_filter = ('service', 'datetime_from', 'status',)
-    top_filters = ('booking__name', 'service', 'booking__reference','datetime_from',)
+    top_filters = ('booking__name', 'service', 'booking__reference',
+                   'datetime_from',)
     ordering = ('booking__reference', 'service__name',)
     form = BookingExtraForm
     change_form_template = 'booking/bookingservices_change_form.html'
