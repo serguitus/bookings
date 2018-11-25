@@ -320,13 +320,17 @@ class ConfigService(object):
         return None
 
     @classmethod
+    def get_service_quantity(cls, service, pax_qtty):
+        if not hasattr(service, 'max_capacity'):
+            return 1
+        if service.max_capacity is None or (service.max_capacity < 1):
+            return 1
+        return int((pax_qtty + service.max_capacity - 1) / service.max_capacity)
+
+    @classmethod
     def _get_transfer_amount(
             cls, service, detail, adults, children, quantity):
-        if quantity is None or (quantity < 1):
-            if service.max_capacity is None or (service.max_capacity < 1):
-                quantity = 1
-            else:
-                quantity = 1 + int((adults + children - 1) / service.max_capacity)
+        quantity = cls.get_service_quantity(service, adults + children)
         if service.cost_type == TRANSFER_COST_TYPE_FIXED and detail.ad_1_amount:
             return detail.ad_1_amount * quantity
         if service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
@@ -351,6 +355,8 @@ class ConfigService(object):
     @classmethod
     def _get_extra_amount(
             cls, service, detail, date_from, date_to, adults, children, quantity, parameter):
+        if quantity is None or quantity < 1:
+            quantity = cls.get_service_quantity(service, adults + children)
         if parameter is None or parameter < 1:
             interval = date_to - date_from
             if service.parameter_type == EXTRA_PARAMETER_TYPE_DAYS:
