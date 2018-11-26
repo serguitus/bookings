@@ -16,7 +16,23 @@ class LocationTopFilter(filters.ForeignKeyFilter):
 
 
 class LocationForProviderTransferTopFilter(filters.ForeignKeyFilter):
+    filter_field_path = 'loc1'
     filter_title = 'Select Locations'
+    filter_queryset = Location.objects.all()
+    autocomplete_url = 'location-autocomplete'
+
+    def queryset(self, request, queryset):
+        search_option = self._values[0]
+        if search_option and search_option != []:
+            queryset = queryset.distinct()
+            queryset = queryset.filter(
+                Q(providertransferdetail__p_location_from__in=search_option) |
+                Q(providertransferdetail__p_location_to__in=search_option))
+        return queryset
+
+class ExtraLocationForProviderTransferTopFilter(filters.ForeignKeyFilter):
+    filter_field_path = 'loc2'
+    filter_title = 'Select Other Locations'
     filter_queryset = Location.objects.all()
     autocomplete_url = 'location-autocomplete'
 

@@ -37,7 +37,7 @@ from config.models import (
 )
 from config.top_filters import (
     RoomTypeTopFilter, LocationTopFilter,
-    LocationForProviderTransferTopFilter)
+    LocationForProviderTransferTopFilter, ExtraLocationForProviderTransferTopFilter)
 
 from functools import update_wrapper, partial
 
@@ -201,7 +201,8 @@ class ProviderTransferServiceSiteModel(SiteModel):
     fields = ('provider', 'service', 'date_from', 'date_to',)
     list_display = ('provider', 'service',  'date_from', 'date_to',)
     top_filters = (
-        ('provider__name', 'Provider'), ('service__name', 'Service'), LocationForProviderTransferTopFilter)
+        ('provider__name', 'Provider'), ('service__name', 'Service'),
+        LocationForProviderTransferTopFilter, ExtraLocationForProviderTransferTopFilter)
     inlines = [ProviderTransferDetailInline]
     form = ProviderTransferServiceForm
 

@@ -17,6 +17,7 @@ class TopFilter(object):
     _support_array = False
     template = 'common/filters/top_filter.html'
     filter_title = None
+    filter_field_path = None
 
     def __init__(
             self, field, request, params, hidden_params, model, model_admin, field_path):
@@ -29,8 +30,11 @@ class TopFilter(object):
         if not self.filter_title is None:
             self.title = self.filter_title
         self.model = model
-        self.field_path = field_path
-        self._parameters = self.get_parameters(field, model, model_admin, field_path)
+        if self.filter_field_path is None:
+            self.field_path = field_path
+        else:
+            self.field_path = self.filter_field_path
+        self._parameters = self.get_parameters(field, model, model_admin, self.field_path)
         self._values = self._extract_values(params, hidden_params)
         self.context = self.get_context()
 
