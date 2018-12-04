@@ -567,8 +567,8 @@ class ProviderSiteModel(SiteModel):
     menu_group = 'Finace Provider'
     list_display = ('name', 'email', 'phone',
                     'currency', 'enabled')
-    list_filter = ('name', 'currency', 'enabled')
-    search_fields = ['name', 'email']
+    # list_filter = ('name', 'currency', 'enabled')
+    top_filters = ['name', 'email']
     ordering = ('enabled', 'currency', 'name')
 
 

@@ -124,3 +124,12 @@ class BookingExtraForm(forms.ModelForm):
             'service': autocomplete.ModelSelect2(url='extra-autocomplete'),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
+
+
+class EmailProviderForm(forms.Form):
+    from_address = forms.EmailField()
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super(EmailProviderForm, self).__init__(*args, **kwargs)
+        self.initial['from_address'] = self.user.email

@@ -16,7 +16,7 @@
     margin: 10px;
 }
 
-#detail-buttons .btn{
+#detail-buttons .btn, .service_type a.btn{
     margin-right: 10px;
     color: white;
 }

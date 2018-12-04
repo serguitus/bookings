@@ -8,16 +8,16 @@ except ImportError:
 
 from xhtml2pdf import pisa
 
-from django.template.loader import get_template
-
-from django.shortcuts import render
-from django.views import View
-
 from dateutil.parser import parse
 
-from booking.common_site import QuoteSiteModel, BookingAllotmentSiteModel
+from django.core.mail import EmailMessage
+from django.shortcuts import render
+from django.template.loader import get_template
+from django.views import View
+
+from booking.common_site import QuoteSiteModel
 from booking.models import (
-    Quote, 
+    Quote,
     Booking, BookingService)
 from booking.services import BookingService as Booking_Service
 
@@ -249,8 +249,35 @@ def get_invoice(request, id):
         return HttpResponse('Errors')
 
 
+class EmailProviderView(View):
+    """
+    A view to handle the email that will be sent to providers
+    It allows to customice the default email
+    """
+
+    def get(self, request, id, *args, **kwargs):
+        """
+        This will render the default email for certain provider
+        allowing it to be customiced
+        """
+        bs = BookingService.objects.get(id=id)
+        from booking.forms import EmailProviderForm
+        form = EmailProviderForm(request.user)
+        # print bs.service_type
+        context = dict()
+        context.update({'form': form})
+        # request.current_app = self.name
+        return render(request, 'booking/email_provider_form.html', context)
+
 def send_service_request(request, id):
     """
     This sends emails to service providers
     """
+    email = EmailMessage(
+        'subject xx',
+        '<b>body goes here!!!</b>',
+        'sales@thenaturexperts.com',
+        ['serguitus@gmail.com'],
+        ['bcc@thenaturexperts.com'])
+    email.send()
     return HttpResponse('success')
