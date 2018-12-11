@@ -54,8 +54,8 @@ class FinantialDocumentSiteModel(SiteModel):
     actions_on_top = False
     fields = ('name', 'currency', 'amount', 'date', 'status')
     list_display = ('name', 'currency', 'amount', 'date', 'status')
-    list_filter = ('currency', 'currency', 'status', 'date')
-    search_fields = ('name',)
+    #list_filter = ('currency', 'currency', 'status', 'date')
+    #search_fields = ('name',)
     ordering = ['-date', 'currency', 'status']
 
 
@@ -360,12 +360,13 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
 
         return MatchList
 
+
 class DepositSiteModel(BaseFinantialDocumentSiteModel):
     model_order = 2010
     menu_label = MENU_LABEL_FINANCE_BASIC
     fields = ('name', 'account', 'amount', 'date', 'status', 'details')
     list_display = ('name', 'account', 'amount', 'date', 'status')
-    list_filter = ('currency', 'account', 'status', 'date')
+    top_filters = ('name', 'account', 'status', 'date')
     form = AccountingForm
 
     def save_model(self, request, obj, form, change):

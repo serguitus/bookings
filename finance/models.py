@@ -116,6 +116,7 @@ class MatchingDocument(models.Model):
     match_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     included = models.BooleanField(default=False)
 
+
 class Deposit(FinantialDocument, AccountingDocument):
     class Meta:
         verbose_name = 'Deposit'
