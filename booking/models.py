@@ -361,7 +361,11 @@ class BookingTransfer(BookingService):
         verbose_name_plural = 'Booking Transfers'
     service = models.ForeignKey(Transfer)
     location_from = models.ForeignKey(Location, related_name='location_from')
+    pickup = models.ForeignKey(Allotment, related_name='transfer_pickup',
+                               null=True, blank=True)
     location_to = models.ForeignKey(Location, related_name='location_to')
+    dropoff = models.ForeignKey(Allotment, related_name='transfer_dropoff',
+                                null=True, blank=True)
     quantity = models.SmallIntegerField(default=1)
 
     def fill_data(self):

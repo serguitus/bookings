@@ -1,0 +1,6 @@
+{% load booking_tags %}Hola {{ provider }}:
+
+Por favor Confirmar:
+{% for booking_service in services %}{% render_service booking_service %}{% endfor %}Gracias
+
+{{ user }}

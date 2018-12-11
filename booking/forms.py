@@ -125,9 +125,28 @@ class BookingExtraForm(forms.ModelForm):
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
-
+from django.forms import widgets
 class EmailProviderForm(forms.Form):
-    from_address = forms.EmailField()
+    from_address = forms.EmailField(
+        label='From',
+        widget=widgets.TextInput(
+            attrs={'class': 'form-control'})
+    )
+    to_address = forms.EmailField(
+        label='To',
+        widget=widgets.TextInput(
+            attrs={'class': 'form-control'})
+    )
+    bcc_address = forms.EmailField(
+        label='BCC',
+        widget=widgets.TextInput(
+            attrs={'class': 'form-control'})
+    )
+    body = forms.CharField(
+        max_length=1000,
+        label='Body',
+        widget=widgets.Textarea(
+            attrs={'class': 'form-control'}))
 
     def __init__(self, user, *args, **kwargs):
         self.user = user

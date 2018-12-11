@@ -19,8 +19,9 @@ from booking.common_site import QuoteSiteModel
 from booking.models import (
     Quote,
     Booking, BookingService)
+from booking.forms import EmailProviderForm
 from booking.services import BookingService as Booking_Service
-
+from reservas.admin import bookings_site
 from common.views import ModelChangeFormProcessorView
 
 from config.constants import (
@@ -261,13 +262,29 @@ class EmailProviderView(View):
         allowing it to be customiced
         """
         bs = BookingService.objects.get(id=id)
-        from booking.forms import EmailProviderForm
-        form = EmailProviderForm(request.user)
-        # print bs.service_type
+        services = BookingService.objects.filter(
+            booking=bs.booking,
+            provider=bs.provider)
+
+        t = get_template('booking/emails/provider_email.html')
+        form = EmailProviderForm(request.user,
+                                 initial={
+                                     'body': t.render(
+                                         {
+                                             'services': services,
+                                             'provider': bs.provider.name,
+                                             'user': request.user}
+                                     )
+                                 })
         context = dict()
+        context.update(bookings_site.get_site_extra_context(request))
+        request.current_app = bookings_site.name
         context.update({'form': form})
-        # request.current_app = self.name
         return render(request, 'booking/email_provider_form.html', context)
+
+    def post(self, request, id, *args, **kwargs):
+        """ send the email to provider """
+        pass
 
 def send_service_request(request, id):
     """
