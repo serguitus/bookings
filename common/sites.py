@@ -5,18 +5,19 @@ import string
 import sys
 
 from functools import update_wrapper
+from totalsum.admin import TotalsumAdmin
 
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.contrib.admin.exceptions import DisallowedModelAdminLookup, DisallowedModelAdminToField
 from django.contrib.admin.options import (
-    InlineModelAdmin, csrf_protect_m, TO_FIELD_VAR, IS_POPUP_VAR, ModelAdmin,
+    InlineModelAdmin, csrf_protect_m, TO_FIELD_VAR, IS_POPUP_VAR, #ModelAdmin,
     IncorrectLookupParameters,)
 from django.contrib.admin.sites import AdminSite
 from django.contrib.admin.templatetags.admin_list import _coerce_field_name, result_headers
 from django.contrib.admin.utils import (
     quote, unquote, get_deleted_objects, get_fields_from_path,
-    lookup_field, lookup_needs_distinct,
+    lookup_field, lookup_needs_distinct, label_for_field,
     prepare_lookup_value, display_for_field, display_for_value)
 from django.contrib.admin.views.main import SEARCH_VAR, IGNORED_PARAMS, ChangeList
 from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
@@ -297,7 +298,7 @@ class CommonRelatedFieldWidgetWrapper(RelatedFieldWidgetWrapper):
             args=args)
 
 
-class SiteModel(ModelAdmin):
+class SiteModel(TotalsumAdmin):
     save_on_top = True
     site_actions = []
     add_readonly_fields = ()
@@ -1315,6 +1316,28 @@ class SiteModel(ModelAdmin):
         context.update(extra_context or {})
 
         request.current_app = self.admin_site.name
+
+        # taken from totalsum package to add totals...
+        filtered_query_set = cl.queryset
+        extra_context = extra_context or {}
+        extra_context['totals'] = {}
+        extra_context['unit_of_measure'] = self.unit_of_measure
+
+        for elem in self.totalsum_list:
+            try:
+                self.model._meta.get_field(elem)  # Checking if elem is a field
+                total = filtered_query_set.aggregate(totalsum_field=models.Sum(elem))['totalsum_field']
+                if total is not None:
+                    extra_context['totals'][label_for_field(elem, self.model, self)] = round(
+                        total, self.totalsum_decimal_places)
+            except FieldDoesNotExist:  # maybe it's a property
+                if hasattr(self.model, elem):
+                    total = 0
+                    for f in filtered_query_set:
+                        total += getattr(f, elem, 0)
+                    extra_context['totals'][label_for_field(elem, self.model, self)] = round(
+                        total, self.totalsum_decimal_places)
+        context.update(extra_context)
 
         return TemplateResponse(request, self.change_list_template or [
             'common/%s/%s/change_list.html' % (app_label, opts.model_name),

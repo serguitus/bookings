@@ -180,9 +180,12 @@ def _results(cl, namespace='common'):
 
 
 @register.inclusion_tag("common/change_list_results.html")
-def common_result_list(cl, namespace='common'):
+def common_result_list(cl, totals=None,
+                       unit_of_measure='', namespace='common'):
     """
     Displays the headers and data list together
+    totals: contains totals for certain columns
+    unit_of_measure: just symbols for those totals
     """
     headers = list(result_headers(cl))
     num_sorted_fields = 0
@@ -193,6 +196,8 @@ def common_result_list(cl, namespace='common'):
             'result_hidden_fields': list(result_hidden_fields(cl)),
             'result_headers': headers,
             'num_sorted_fields': num_sorted_fields,
+            'totals': totals,
+            'unit_of_measure': unit_of_measure,
             'results': list(_results(cl, namespace))}
 
 

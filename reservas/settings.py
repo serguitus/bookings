@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'dal',
     'dal_select2',
     'django_tables2',
+    'totalsum',
 
     'django.contrib.admin',
     'django.contrib.auth',

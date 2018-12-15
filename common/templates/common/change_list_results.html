@@ -1,4 +1,5 @@
 {% load i18n static common_utils %}
+{% load totalsum %}
 
 {% if result_hidden_fields %}
 	<div class="hiddenfields">{# DIV for HTML validation #}
@@ -59,6 +60,29 @@
 						</tr>
 					{% endif %}
 				{% endfor %}
+                                {% if pagination_required %}
+                                <tr class="totals">
+                                  {% for header in result_headers %}
+                                    {% with header.text as header_text %}
+                                      <td>
+                                      {% if totals|get_total:header_text != '' %}
+                                        <a href="?all=">...</a>
+                                      {% endif %}
+                                      </td>
+                                    {% endwith %}
+                                  {% endfor %}
+                                </tr>
+                                {% endif%}
+                                <tr class="totals">
+                                  {% for header in result_headers %}
+                                    {% with header.text as header_text %}
+                                        <td>{% if totals|get_total:header_text != '' %}
+                                          {{ totals|get_total:header_text }} {{ unit_of_measure|safe }}
+                                        {% endif %}
+                                      </td>
+                                    {% endwith %}
+                                  {% endfor %}
+                                </tr>
 			</tbody>
 		</table>
 	</div>

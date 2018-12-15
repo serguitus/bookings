@@ -23,6 +23,7 @@ class AccountSiteModel(SiteModel):
     # inlines = [AccountMovementInline]
     readonly_fields = ('balance',)
     change_readonly_fields = ('currency',)
+    totalsum_list = ['balance']
 
 
 class OperationSiteModel(SiteModel):
