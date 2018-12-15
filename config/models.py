@@ -159,6 +159,7 @@ class Extra(Service):
         max_length=5, choices=EXTRA_COST_TYPES)
     parameter_type = models.CharField(
         max_length=5, choices=EXTRA_PARAMETER_TYPES)
+    has_pax_range = models.BooleanField(default=False)
     max_capacity = models.IntegerField(blank=True, null=True)
 
     def fill_data(self):
@@ -194,6 +195,8 @@ class ProviderExtraDetail(AmountDetail):
         verbose_name_plural = 'Providers Extras Details'
         unique_together = (('provider_service',),)
     provider_service = models.ForeignKey(ProviderExtraService)
+    pax_range_min = models.SmallIntegerField(blank=True, null=True)
+    pax_range_max = models.SmallIntegerField(blank=True, null=True)
 
 
 class AgencyExtraService(AgencyCatalogue):
@@ -215,6 +218,8 @@ class AgencyExtraDetail(AmountDetail):
         verbose_name_plural = 'Agencies Extras Details'
         unique_together = (('agency_service',),)
     agency_service = models.ForeignKey(AgencyExtraService)
+    pax_range_min = models.SmallIntegerField(blank=True, null=True)
+    pax_range_max = models.SmallIntegerField(blank=True, null=True)
 
 
 #===============================================================================

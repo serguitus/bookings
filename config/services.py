@@ -100,7 +100,7 @@ class ConfigService(object):
             cost_message = 'Provider Not Found'
         else:
             queryset = cls._get_provider_queryset(
-                ProviderAllotmentDetail.objects,
+                ProviderTransferDetail.objects,
                 provider.id, service_id, date_from, date_to)
             detail_list = list(
                 queryset.filter(
@@ -121,7 +121,7 @@ class ConfigService(object):
             price_message = 'Agency Not Found'
         else:
             queryset = cls._get_agency_queryset(
-                AgencyAllotmentDetail.objects,
+                AgencyTransferDetail.objects,
                 agency.id, service_id, date_from, date_to)
             detail_list = list(
                 queryset.filter(
@@ -152,14 +152,42 @@ class ConfigService(object):
             cost = None
             cost_message = 'Provider Not Found'
         else:
-            queryset = cls._get_provider_queryset(
-                ProviderAllotmentDetail.objects,
-                provider.id, service_id, date_from, date_to)
-            detail_list = list(queryset)
-            cost, cost_message = cls.find_groups_amount(
-                True, service, date_from, date_to, groups,
-                quantity, parameter, detail_list
-            )
+            if service.has_pax_range:
+                cost = 0
+                cost_message = ''
+                # each group can have different details
+                for group in groups:
+                    paxes = group[0] + group[1]
+                    queryset = cls._get_provider_queryset(
+                        ProviderExtraDetail.objects,
+                        provider.id, service_id, date_from, date_to)
+                    detail_list = list(
+                        queryset.filter(
+                            pax_range_min__lte=paxes
+                        ).filter(
+                            pax_range_max__gte=paxes
+                        )
+                    )
+                    group_cost, group_cost_message = cls.find_group_amount(
+                        True, service, date_from, date_to, group,
+                        quantity, parameter, detail_list
+                    )
+                    if group_cost:
+                        cost += group_cost
+                        cost_message = group_cost_message
+                    else:
+                        cost = None
+                        cost_message = group_cost_message
+                        break
+            else:
+                queryset = cls._get_provider_queryset(
+                    ProviderExtraDetail.objects,
+                    provider.id, service_id, date_from, date_to)
+                detail_list = list(queryset)
+                cost, cost_message = cls.find_groups_amount(
+                    True, service, date_from, date_to, groups,
+                    quantity, parameter, detail_list
+                )
 
         # agency price
         # obtain details order by date_from asc, date_to desc
@@ -167,14 +195,42 @@ class ConfigService(object):
             price = None
             price_message = 'Agency Not Found'
         else:
-            queryset = cls._get_agency_queryset(
-                AgencyAllotmentDetail.objects,
-                agency.id, service_id, date_from, date_to)
-            detail_list = list(queryset)
-            price, price_message = cls.find_groups_amount(
-                False, service, date_from, date_to, groups,
-                quantity, parameter, detail_list
-            )
+            if service.has_pax_range:
+                price = 0
+                price_message = ''
+                # each group can have different details
+                for group in groups:
+                    paxes = group[0] + group[1]
+                    queryset = cls._get_agency_queryset(
+                        AgencyExtraDetail.objects,
+                        agency.id, service_id, date_from, date_to)
+                    detail_list = list(
+                        queryset.filter(
+                            pax_range_min__lte=paxes
+                        ).filter(
+                            pax_range_max__gte=paxes
+                        )
+                    )
+                    group_price, group_price_message = cls.find_group_amount(
+                        True, service, date_from, date_to, group,
+                        quantity, parameter, detail_list
+                    )
+                    if group_price:
+                        price += group_price
+                        price_message = group_price_message
+                    else:
+                        price = None
+                        price_message = group_price_message
+                        break
+            else:
+                queryset = cls._get_agency_queryset(
+                    AgencyExtraDetail.objects,
+                    agency.id, service_id, date_from, date_to)
+                detail_list = list(queryset)
+                price, price_message = cls.find_groups_amount(
+                    False, service, date_from, date_to, groups,
+                    quantity, parameter, detail_list
+                )
 
         return cls._get_result(cost, cost_message, price, price_message)
 
@@ -212,15 +268,28 @@ class ConfigService(object):
         groups_amount = 0
         groups_message = ''
         for group in groups:
-            amount, message = cls.find_amount(
-                amount_for_provider, service, date_from, date_to, group[0], group[1],
+            amount, message = cls.find_group_amount(
+                amount_for_provider, service, date_from, date_to, group,
                 quantity, parameter, detail_list)
-            if amount and amount >= 0:
+            if amount:
                 groups_amount += amount
                 groups_message = message
             else:
                 return None, message
         return groups_amount, groups_message
+
+    @classmethod
+    def find_group_amount(
+            cls, amount_for_provider, service, date_from, date_to, group,
+            quantity, parameter, detail_list):
+
+        amount, message = cls.find_amount(
+            amount_for_provider, service, date_from, date_to, group[0], group[1],
+            quantity, parameter, detail_list)
+        if amount and amount >= 0:
+            return amount, message
+        else:
+            return None, message
 
     @classmethod
     def find_amount(
