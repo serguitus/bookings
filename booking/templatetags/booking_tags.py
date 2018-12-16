@@ -49,18 +49,14 @@ def render_service(booking_service):
     """
     if booking_service.service_type == 'T':
         # Transfer service
-        html = 'transfer_service.html'
         bs = BookingTransfer.objects.get(id=booking_service.id)
     elif booking_service.service_type == 'A':
         # Accomodation service
-        html = 'allotment_service.html'
         bs = BookingAllotment.objects.get(id=booking_service.id)
     else:
         # Extra Service
-        html = 'extra_service.html'
         bs = BookingExtra.objects.get(id=booking_service.id)
 
     return {
-        'template': 'booking/emails/%s' % html,
         'bs': bs,
     }

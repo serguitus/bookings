@@ -289,6 +289,7 @@ class CommonSite(AdminSite):
             reverse('%s:login' % self.site_namespace, current_app=self.name)
         )
 
+
 class CommonRelatedFieldWidgetWrapper(RelatedFieldWidgetWrapper):
 
     def get_related_url(self, info, action, *args):

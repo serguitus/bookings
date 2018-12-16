@@ -265,16 +265,18 @@ class EmailProviderView(View):
         services = BookingService.objects.filter(
             booking=bs.booking,
             provider=bs.provider)
-
+        provider_name = ''
+        if bs.provider:
+            provider_name = bs.provider.name
+        initial = {
+            'services': services,
+            'provider': provider_name,
+            'user': request.user,
+        }
         t = get_template('booking/emails/provider_email.html')
         form = EmailProviderForm(request.user,
                                  initial={
-                                     'body': t.render(
-                                         {
-                                             'services': services,
-                                             'provider': bs.provider.name,
-                                             'user': request.user}
-                                     )
+                                     'body': t.render(initial)
                                  })
         context = dict()
         context.update(bookings_site.get_site_extra_context(request))

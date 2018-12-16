@@ -351,6 +351,10 @@ class BookingAllotment(BookingService):
         self.name = '%s' % (self.service,)
         self.service_type = SERVICE_CATEGORY_ALLOTMENT
 
+    def build_rooms(self):
+        """ makes a string detailing room quantity and types"""
+        pass
+
 
 class BookingTransfer(BookingService):
     """

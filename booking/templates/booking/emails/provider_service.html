@@ -1,10 +1,13 @@
 {% if bs.service_type == 'T' %}
-    TRANSFER: {{ bs.service}} {{ bs.location_from }} -> {{ bs.location_to }}
+    {{ bs.service}} {{ bs.location_from }} -> {{ bs.location_to }}
     Fecha: {{ bs.datetime_from }}
-    Pick Up: {{ bs.pickup.name }}({{ bs.pickup.address }})
-    Drop Off: {{ bs.pickup.name }}({{ bs.dropoff.address }})
+    Pick Up: {% if bs.pickup %}{{ bs.pickup.name }}({{ bs.pickup.address }}){% endif %}
+    Drop Off: {% if bs.dropoff %}{{ bs.dropoff.name }}({{ bs.dropoff.address }}){% endif %}
 {% elif bs.service_type == 'A' %}
-    ALOJAMIENTO: {{ bs.name }}
+    {{ bs.name }}
     Check In: {{ bs.datetime_from }}
     Check Out {{ bs.datetime_to }}
-{% else %}esto es un extra{% endif %}
+{% else %}
+    {{ bs.service }}
+    Fecha: {{ bs.datetime_from }}
+{% endif %}

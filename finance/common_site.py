@@ -368,6 +368,7 @@ class DepositSiteModel(BaseFinantialDocumentSiteModel):
     list_display = ('name', 'account', 'amount', 'date', 'status')
     top_filters = ('name', 'account', 'status', 'date')
     form = AccountingForm
+    totalsum_list = ['amount']
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
