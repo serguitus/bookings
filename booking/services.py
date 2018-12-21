@@ -28,29 +28,37 @@ class BookingService(object):
             if invoice is None:
                 new_invoice = True
                 invoice = AgencyInvoice()
-                invoice.agency = booking.agency
-                invoice.currency = booking.currency
-            # obtain lines, partials and calculate amount
-            booking_service_list = Booking_Service.objects.filter(booking=booking.id).all()
-            amount = 0
-            details = list()
-            for booking_service in booking_service_list:
-                invoice_line = AgencyInvoiceLine()
-                invoice_line.detail1 = booking_service.name
-                invoice_line.detail2 = booking_service.detail2
-                invoice_line.qtty = booking_service.qtty
-                invoice_line.unit = booking_service.unit
-                invoice_line.unit_amount = booking_service.unit_amount
-                invoice_line.line_amount = booking_service.line_amount
-                amount += invoice_line.line_amount
+            invoice.agency = booking.agency
+            invoice.currency = booking.currency
+            invoice.detail1 = booking.name
+            invoice.detail2 = booking.reference
+            invoice.date1 = booking.date_from
+            invoice.date2 = booking.date_to
 
-            invoice.amount = amount
+            invoice.amount = booking.price_amount
             invoice.save()
 
-            # save invoice lines
-            for line in lines:
-                line.invoice = invoice
-                line.save()
+            # obtain lines
+            booking_service_list = Booking_Service.objects.filter(booking=booking.id).all()
+            for booking_service in booking_service_list:
+                invoice_line = AgencyInvoiceLine()
+                invoice_line.invoice = invoice
+                invoice_line.date1 = booking_service.datetime_from
+                invoice_line.date2 = booking_service.datetime_to
+                invoice_line.detail1 = booking_service.name
+                invoice_line.detail2 = booking_service.service.name
+                invoice_line.line_amount = booking_service.price_amount
+ 
+                invoice_line.save()
+
+            # obtain partials
+            booking_pax_list = BookingPax.objects.filter(booking=booking.id).all()
+            for booking_pax in booking_pax_list:
+                invoice_partial = AgencyInvoicePartial()
+                invoice_partial.invoice = invoice
+                invoice_partial.detail1 = booking_pax.pax_name
+ 
+                invoice_partial.save()
 
             # verify if new invoice to save booking
             if new_invoice:

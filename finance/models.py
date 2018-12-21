@@ -867,6 +867,10 @@ class AgencyInvoice(AgencyDebitDocument):
     class Meta:
         verbose_name = 'Agency Invoice'
         verbose_name_plural = 'Agencies Invoices'
+    date1 = models.DateField(blank=True, null=True)
+    date2 = models.DateField(blank=True, null=True)
+    detail1 = models.CharField(max_length=100, blank=True, null=True)
+    detail2 = models.CharField(max_length=100, blank=True, null=True)
 
     def fill_data(self):
         self.document_type = DOC_TYPE_AGENCY_INVOICE
@@ -880,6 +884,8 @@ class AgencyInvoiceLine(models.Model):
         verbose_name = 'Agency Invoice Line'
         verbose_name_plural = 'Agencies Invoices Lines'
     invoice = models.ForeignKey(AgencyInvoice)
+    date1 = models.DateField(blank=True, null=True)
+    date2 = models.DateField(blank=True, null=True)
     detail1 = models.CharField(max_length=100, blank=True, null=True)
     detail2 = models.CharField(max_length=100, blank=True, null=True)
     qtty = models.IntegerField(blank=True, null=True)
