@@ -5,7 +5,9 @@ from booking.models import (
     BookingAllotment,
     BookingExtra)
 from booking.tables import (
-    QuoteServiceTable, QuotePaxVariantTable, BookingServiceTable, BookingPaxTable)
+    QuoteServiceTable, QuotePaxVariantTable,
+    BookingServiceTable, BookingPaxTable)
+from booking.services import BookingService
 
 register = template.Library()
 
@@ -60,3 +62,31 @@ def render_service(booking_service):
     return {
         'bs': bs,
     }
+
+@register.simple_tag
+def get_distribution(booking_service):
+    rooms = BookingService.find_groups(booking_service=booking_service,
+                                      service=booking_service.service)
+    dist = ''
+    room_count = {
+        0: 0,
+        1: 0,
+        2: 0,
+        3: 0
+    }
+    for room in rooms:
+        room_count[room[0]] += 1
+    if room_count[1]:
+        dist += '%d SGL' % room_count[1]
+    if room_count[2]:
+        if dist:
+            dist += ' + '
+        dist += '%d DBL' % room_count[2]
+    if room_count[3]:
+        if dist:
+            dist += ' + '
+        dist += '%d TPL' % room_count[3]
+    if dist:
+        dist += ' %s (%s)' % (booking_service.room_type,
+                              booking_service.board_type)
+    return dist

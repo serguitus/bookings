@@ -12,7 +12,8 @@ from booking.models import (
 
 from config.services import ConfigService
 
-from finance.models import AgencyInvoice, AgencyInvoiceLine, AgencyInvoicePartial
+from finance.models import (AgencyInvoice,
+                            AgencyInvoiceLine, AgencyInvoicePartial)
 
 
 class BookingService(object):
@@ -39,7 +40,8 @@ class BookingService(object):
             invoice.save()
 
             # obtain lines
-            booking_service_list = Booking_Service.objects.filter(booking=booking.id).all()
+            booking_service_list = Booking_Service.objects.filter(
+                booking=booking.id).all()
             for booking_service in booking_service_list:
                 invoice_line = AgencyInvoiceLine()
                 invoice_line.invoice = invoice
@@ -424,8 +426,8 @@ class BookingService(object):
             for pax in pax_list:
                 if not groups.__contains__(pax.group):
                     groups[pax.group] = dict()
-                    groups[pax.group][0] = 0
-                    groups[pax.group][1] = 0
+                    groups[pax.group][0] = 0 # adults count
+                    groups[pax.group][1] = 0 # child count
                 if service.child_age is None or (pax.booking_pax.pax_age > service.child_age):
                     groups[pax.group][0] += 1
                 else:

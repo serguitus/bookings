@@ -1,10 +1,11 @@
-{% if bs.service_type == 'T' %}
+{% load booking_tags %}{% if bs.service_type == 'T' %}
     {{ bs.service}} {{ bs.location_from }} -> {{ bs.location_to }}
     Fecha: {{ bs.datetime_from }}
     Pick Up: {% if bs.pickup %}{{ bs.pickup.name }}({{ bs.pickup.address }}){% endif %}
     Drop Off: {% if bs.dropoff %}{{ bs.dropoff.name }}({{ bs.dropoff.address }}){% endif %}
 {% elif bs.service_type == 'A' %}
     {{ bs.name }}
+    {% get_distribution bs %}
     Check In: {{ bs.datetime_from }}
     Check Out {{ bs.datetime_to }}
 {% else %}
