@@ -1,6 +1,6 @@
 appdirs==1.4.3
-backports.shutil-get-terminal-size==1.0.0
-base-theme==1.0
+# backports.shutil-get-terminal-size==1.0.0
+# base-theme==1.0
 decorator==4.0.11
 Django==1.11.13
 django-autocomplete-light==3.2.10
