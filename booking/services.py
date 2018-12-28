@@ -14,6 +14,8 @@ from config.services import ConfigService
 
 from finance.models import (AgencyInvoice,
                             AgencyInvoiceLine, AgencyInvoicePartial)
+from finance.constants import STATUS_CANCELLED, STATUS_READY
+from finance.services import FinanceService
 
 
 class BookingService(object):
@@ -22,22 +24,31 @@ class BookingService(object):
     """
 
     @classmethod
-    def booking_to_invoice(cls, booking):
+    def booking_to_invoice(cls, user, booking, force=False):
         with transaction.atomic(savepoint=False):
             invoice = booking.agency_invoice
             new_invoice = False
             if invoice is None:
                 new_invoice = True
                 invoice = AgencyInvoice()
+            else:
+                if force:
+                    invoice.status = STATUS_CANCELLED
+                    FinanceService.save_agency_invoice(user, invoice)
+                    new_invoice = True
+                    invoice = AgencyInvoice()
+                 
             invoice.agency = booking.agency
             invoice.currency = booking.currency
+            invoice.amount = booking.price_amount
+            invoice.status = STATUS_READY
+
             invoice.detail1 = booking.name
             invoice.detail2 = booking.reference
             invoice.date1 = booking.date_from
             invoice.date2 = booking.date_to
 
-            invoice.amount = booking.price_amount
-            invoice.save()
+            FinanceService.save_agency_invoice(user, invoice)
 
             # obtain lines
             booking_service_list = Booking_Service.objects.filter(
