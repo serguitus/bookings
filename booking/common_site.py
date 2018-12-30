@@ -126,8 +126,7 @@ class QuoteAllotmentSiteModel(SiteModel):
               'provider', 'id')
     list_display = ('quote', 'service', 'datetime_from', 'datetime_to',
                     'status',)
-    list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
-    search_fields = ['quote__reference', ]
+    top_filters = ('service', 'quote__reference', 'datetime_from', 'status',)
     ordering = ('quote__reference', 'service__name',)
     form = QuoteAllotmentForm
 
@@ -142,8 +141,7 @@ class QuoteTransferSiteModel(SiteModel):
               'cost_amount', 'price_amount', 'provider', 'id')
     list_display = ('quote', 'name',
                     'datetime_from', 'datetime_to', 'status',)
-    list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
-    search_fields = ['quote__reference',]
+    top_filters = ('service', 'quote__reference', 'datetime_from', 'status',)
     ordering = ('quote__reference', 'service__name',)
     form = QuoteTransferForm
 
@@ -158,8 +156,7 @@ class QuoteExtraSiteModel(SiteModel):
         ('datetime_from', 'datetime_to'),
          'parameter', 'provider', 'id')
     list_display = ('quote', 'service', 'parameter', 'datetime_from', 'datetime_to', 'status',)
-    list_filter = ('service', 'datetime_from', 'status',)
-    search_fields = ('quote__reference',)
+    top_filters = ('service', 'quote__reference', 'datetime_from', 'status',)
     ordering = ('quote__reference', 'service__name',)
     form = QuoteExtraForm
 
@@ -264,9 +261,7 @@ class BookingAllotmentSiteModel(SiteModel):
               'cost_amount', 'price_amount', 'provider', 'id')
     list_display = ('booking', 'service', 'datetime_from', 'datetime_to',
                     'status',)
-    list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
-    top_filters = ('booking__name', 'service', 'booking__reference','datetime_from',)
-    # search_fields = ['booking__reference', ]
+    top_filters = ('booking__name', 'service', 'booking__reference','datetime_from','status',)
     ordering = ('booking__reference', 'service__name',)
     form = BookingAllotmentForm
     change_form_template = 'booking/bookingservices_change_form.html'
@@ -284,9 +279,8 @@ class BookingTransferSiteModel(SiteModel):
               ('location_to', 'dropoff'),
               'cost_amount', 'price_amount', 'provider', 'id')
     list_display = ('booking', 'name',
-                    'datetime_from', 'datetime_to', 'status',)
-    list_filter = ('service', 'datetime_from', 'datetime_to', 'status',)
-    top_filters = ('booking__name', 'service', 'booking__reference','datetime_from',)
+                    'datetime_from', 'datetime_to',)
+    top_filters = ('booking__name', 'service', 'booking__reference','datetime_from','status',)
     ordering = ('booking__reference', 'service__name',)
     form = BookingTransferForm
     change_form_template = 'booking/bookingservices_change_form.html'
@@ -304,9 +298,8 @@ class BookingExtraSiteModel(SiteModel):
               'cost_amount', 'price_amount', 'provider', 'id']
     list_display = ('booking', 'service', 'quantity', 'parameter',
                     'datetime_from', 'datetime_to', 'status',)
-    list_filter = ('service', 'datetime_from', 'status',)
     top_filters = ('booking__name', 'service', 'booking__reference',
-                   'datetime_from',)
+                   'datetime_from','status',)
     ordering = ('booking__reference', 'service__name',)
     form = BookingExtraForm
     change_form_template = 'booking/bookingservices_change_form.html'

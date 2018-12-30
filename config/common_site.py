@@ -37,7 +37,10 @@ from config.models import (
 )
 from config.top_filters import (
     RoomTypeTopFilter, LocationTopFilter,
+    AllotmentTopFilter, TransferTopFilter, ExtraTopFilter,
     LocationForProviderTransferTopFilter, ExtraLocationForProviderTransferTopFilter)
+
+from finance.top_filters import ProviderTopFilter 
 
 from functools import update_wrapper, partial
 
@@ -54,8 +57,7 @@ class LocationSiteModel(SiteModel):
     menu_label = MENU_LABEL_CONFIG_BASIC
     fields = ('name', 'enabled', 'short_name')
     list_display = ('name', 'enabled',)
-    list_filter = ('enabled',)
-    top_filters = ('name',)
+    top_filters = ('name', 'enabled',)
 
 
 class RoomTypeSiteModel(SiteModel):
@@ -81,7 +83,6 @@ class AllotmentRoomTypeSiteModel(SiteModel):
     menu_group = 'Configuration Testing'
     fields = ('allotment', 'room_type', 'room_capacity',)
     list_display = ('allotment', 'room_type', 'room_capacity',)
-    list_filter = ('room_type', 'room_capacity',)
     top_filters = ('allotment__name', ('room_type', RoomTypeTopFilter),)
     ordering = ('allotment__name',)
 
@@ -97,9 +98,7 @@ class AllotmentBoardTypeSiteModel(SiteModel):
     menu_group = 'Configuration Testing'
     fields = ('allotment', 'board_type',)
     list_display = ('allotment', 'board_type',)
-    list_filter = ('board_type',)
-    top_filters = ('board_type',)
-    search_fields = ('allotment__name',)
+    top_filters = ('allotment__name', 'board_type',)
     ordering = ('allotment__name',)
 
 
@@ -177,7 +176,7 @@ class ProviderAllotmentServiceSiteModel(SiteModel):
     recent_allowed = True
     fields = ('provider', 'service', 'date_from', 'date_to',)
     list_display = ('provider', 'service', 'date_from', 'date_to',)
-    top_filters = ('provider__name', 'service__name',)
+    top_filters = (('provider', ProviderTopFilter), ('service', AllotmentTopFilter),)
     inlines = [ProviderAllotmentDetailInline]
     form = ProviderAllotmentServiceForm
     change_form_template = 'config/provider_allotment_change_form.html'
@@ -201,7 +200,7 @@ class ProviderTransferServiceSiteModel(SiteModel):
     fields = ('provider', 'service', 'date_from', 'date_to',)
     list_display = ('provider', 'service',  'date_from', 'date_to',)
     top_filters = (
-        ('provider__name', 'Provider'), ('service__name', 'Service'),
+        ('provider', ProviderTopFilter), ('service', TransferTopFilter),
         LocationForProviderTransferTopFilter, ExtraLocationForProviderTransferTopFilter)
     inlines = [ProviderTransferDetailInline]
     form = ProviderTransferServiceForm
@@ -222,7 +221,7 @@ class ProviderExtraServiceSiteModel(SiteModel):
     recent_allowed = True
     fields = ('provider', 'service', 'date_from', 'date_to',)
     list_display = ('provider', 'service', 'date_from', 'date_to',)
-    search_fields = ('provider.name','service.name',)
+    top_filters = (('provider', ProviderTopFilter), ('service', ExtraTopFilter),)
     inlines = [ProviderExtraDetailInline]
     form = ProviderExtraServiceForm
 
@@ -247,7 +246,7 @@ class AgencyAllotmentServiceSiteModel(SiteModel):
     recent_allowed = True
     fields = ('agency', 'service', 'date_from', 'date_to',)
     list_display = ('agency', 'service', 'date_from', 'date_to',)
-    search_fields = ('agency.name','service.name',)
+    top_filters = ('agency__name','service__name',)
     inlines = [AgencyAllotmentDetailInline]
     form = AgencyAllotmentServiceForm
 
@@ -268,7 +267,7 @@ class AgencyTransferServiceSiteModel(SiteModel):
     recent_allowed = True
     fields = ('agency', 'service', 'date_from', 'date_to',)
     list_display = ('agency', 'service', 'date_from', 'date_to',)
-    search_fields = ('agency.name','service.name',)
+    top_filters = ('agency__name','service__name',)
     inlines = [AgencyTransferDetailInline]
     form = AgencyTransferServiceForm
 
@@ -288,7 +287,7 @@ class AgencyExtraServiceSiteModel(SiteModel):
     recent_allowed = True
     fields = ('agency', 'service', 'date_from', 'date_to',)
     list_display = ('agency', 'service', 'date_from', 'date_to',)
-    search_fields = ('agency.name','service.name',)
+    top_filters = ('agency__name','service__name',)
     inlines = [AgencyExtraDetailInline]
     form = AgencyExtraServiceForm
 

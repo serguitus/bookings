@@ -185,6 +185,9 @@ class ProviderExtraService(ProviderCatalogue):
         verbose_name_plural = 'Providers Extras Services'
     service = models.ForeignKey(Extra)
 
+    def __str__(self):
+        return 'Prov.Extra - %s : %s' % (self.provider, self.service)
+
 
 class ProviderExtraDetail(AmountDetail):
     """
@@ -207,6 +210,9 @@ class AgencyExtraService(AgencyCatalogue):
         verbose_name = 'Agency Extra Service'
         verbose_name_plural = 'Agency Extras Services'
     service = models.ForeignKey(Extra)
+
+    def __str__(self):
+        return 'Ag.Extra - %s : %s' % (self.agency, self.service)
 
 
 class AgencyExtraDetail(AmountDetail):
@@ -292,6 +298,9 @@ class ProviderAllotmentService(ProviderCatalogue):
         verbose_name_plural = 'Accomodation Service Providers'
     service = models.ForeignKey(Allotment)
 
+    def __str__(self):
+        return 'Prov.Accom. - %s : %s' % (self.provider, self.service)
+
 
 class ProviderAllotmentDetail(AmountDetail):
     """
@@ -314,6 +323,9 @@ class AgencyAllotmentService(AgencyCatalogue):
         verbose_name = 'Agency Accomodation Service'
         verbose_name_plural = 'Agency Accomodation Services'
     service = models.ForeignKey(Allotment)
+
+    def __str__(self):
+        return 'Ag.Accom. - %s : %s' % (self.agency, self.service)
 
 
 class AgencyAllotmentDetail(AmountDetail):
@@ -378,6 +390,10 @@ class ProviderTransferService(ProviderCatalogue):
         verbose_name_plural = 'Providers Transfers Services'
     service = models.ForeignKey(Transfer)
 
+    def __str__(self):
+        return 'Prov.Transfer - %s : %s' % (self.provider, self.service)
+
+
 
 class ProviderTransferDetail(AmountDetail):
     """
@@ -400,6 +416,9 @@ class AgencyTransferService(AgencyCatalogue):
         verbose_name = 'Agency Transfer Service'
         verbose_name_plural = 'Agencies Transfers Services'
     service = models.ForeignKey(Transfer)
+
+    def __str__(self):
+        return 'Ag.Transfer - %s : %s' % (self.agency, self.service)
 
 
 class AgencyTransferDetail(AmountDetail):

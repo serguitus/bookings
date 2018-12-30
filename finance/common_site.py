@@ -32,6 +32,9 @@ from finance.models import (
     Provider, ProviderDocumentMatch, ProviderCreditDocument, ProviderDebitDocument,
     ProviderInvoice, ProviderPayment)
 from finance.services import FinanceService
+from finance.top_filters import LoanEntityTopFilter, LoanAccountTopFilter
+
+from accounting.top_filters import AccountTopFilter
 
 from functools import update_wrapper, partial
 
@@ -54,8 +57,7 @@ class FinantialDocumentSiteModel(SiteModel):
     actions_on_top = False
     fields = ('name', 'currency', 'amount', 'date', 'status')
     list_display = ('name', 'currency', 'amount', 'date', 'status')
-    #list_filter = ('currency', 'currency', 'status', 'date')
-    #search_fields = ('name',)
+    top_filters = ('name', 'currency', 'status', 'date')
     ordering = ['-date', 'currency', 'status']
 
 
@@ -389,7 +391,7 @@ class CurrencyExchangeSiteModel(BaseFinantialDocumentSiteModel):
     fields = ('name', 'account', 'amount', 'date', 'status', 'exchange_account', 'exchange_amount')
     list_display = (
         'name', 'account', 'amount', 'date', 'status', 'exchange_account', 'exchange_amount')
-    list_filter = ('currency', 'account', 'status', 'date')
+    top_filters = ('currency', ('account', AccountTopFilter), 'status', 'date')
     form = CurrencyExchangeForm
 
     def save_model(self, request, obj, form, change):
@@ -402,7 +404,7 @@ class TransferSiteModel(BaseFinantialDocumentSiteModel):
     menu_label = MENU_LABEL_FINANCE_BASIC
     fields = ('name', 'account', 'transfer_account', 'amount', 'date', 'status')
     list_display = ('name', 'account', 'transfer_account', 'amount', 'date', 'status')
-    list_filter = ('currency', 'account', 'status', 'date')
+    top_filters = ('currency', ('account',AccountTopFilter), 'status', 'date')
     form = TransferForm
 
     def save_model(self, request, obj, form, change):
@@ -417,8 +419,7 @@ class LoanEntitySiteModel(SiteModel):
 
     fields = ('name',)
     list_display = ('name',)
-    list_filter = ('name',)
-    search_fields = ['name',]
+    top_filters = ('name',)
     ordering = ('name',)
 
 
@@ -428,7 +429,9 @@ class LoanEntityDocumentSiteModel(MatchableSiteModel):
     """
     fields = ('name', ('loan_entity', 'account'), ('amount', 'matched_amount'), ('date', 'status'))
     list_display = ['name', 'loan_entity', 'account', 'amount', 'matched_amount', 'date', 'status']
-    list_filter = ('currency', 'account', 'status', 'date', 'loan_entity')
+    top_filters = (
+        'currency', ('account', AccountTopFilter), 'status', 'date',
+        ('loan_entity', LoanEntityTopFilter),)
 
     readonly_fields = ('name', 'matched_amount',)
     form = LoanEntityDocumentForm
@@ -489,7 +492,7 @@ class LoanAccountSiteModel(SiteModel):
 
     fields = ('account', 'credit_amount', 'debit_amount', 'matched_amount')
     list_display = ('account', 'credit_amount', 'debit_amount', 'matched_amount')
-    list_filter = ('account__name', 'account__currency',)
+    top_filters = ('account__name', 'account__currency',)
     ordering = ['account__name',]
     readonly_fields = ('credit_amount', 'debit_amount', 'matched_amount')
 
@@ -502,7 +505,7 @@ class LoanAccountDocumentSiteModel(MatchableSiteModel):
     """
     fields = ('name', ('loan_account', 'account'), ('amount', 'matched_amount'), ('date', 'status'))
     list_display = ['name', 'loan_account', 'account', 'amount', 'matched_amount', 'date', 'status']
-    list_filter = ('currency', 'account', 'status', 'date', 'loan_account')
+    top_filters = ('currency', ('account', AccountTopFilter), 'status', 'date', ('loan_account', LoanAccountTopFilter))
 
     readonly_fields = ('name', 'matched_amount',)
     form = LoanAccountDocumentForm
@@ -569,8 +572,7 @@ class ProviderSiteModel(SiteModel):
     menu_group = 'Finace Provider'
     list_display = ('name', 'email', 'phone',
                     'currency', 'enabled')
-    # list_filter = ('name', 'currency', 'enabled')
-    top_filters = ['name', 'email']
+    top_filters = ['name', 'email', 'currency', 'enabled']
     ordering = ('enabled', 'currency', 'name')
 
 
@@ -653,8 +655,7 @@ class AgencySiteModel(SiteModel):
     menu_label = MENU_LABEL_FINANCE_ADVANCED
     menu_group = 'Finace Agency'
     list_display = ('name', 'currency', 'enabled')
-    list_filter = ('name', 'currency', 'enabled')
-    search_fields = ['name']
+    top_filters = ('name', 'currency', 'enabled')
     ordering = ('enabled', 'currency', 'name')
 
 

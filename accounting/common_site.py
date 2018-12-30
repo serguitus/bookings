@@ -2,6 +2,7 @@
 accounting site models
 """
 from accounting.models import Account, Operation, OperationMovement
+from accounting.top_filters import AccountTopFilter
 
 from common.sites import SiteModel
 
@@ -17,8 +18,7 @@ class AccountSiteModel(SiteModel):
     actions_on_top = True
     list_editable = ('enabled',)
     list_display = ('name', 'currency', 'enabled', 'balance')
-    list_filter = ('name', 'currency', 'enabled', 'balance')
-    search_fields = ('name',)
+    top_filters = ('name', 'currency', 'enabled', 'balance')
     ordering = ['enabled', 'currency', 'name']
     # inlines = [AccountMovementInline]
     readonly_fields = ('balance',)
@@ -32,9 +32,8 @@ class OperationSiteModel(SiteModel):
     readonly_model = True
     actions_on_top = False
     list_display = ('datetime', 'concept', 'detail',)
-    list_filter = ('concept', 'datetime',)
+    top_filters = ('concept', 'detail', 'datetime',)
     ordering = ['-datetime',]
-    search_fields = ['concept', 'detail']
 
 
 class OperationMovementSiteModel(SiteModel):
@@ -43,9 +42,8 @@ class OperationMovementSiteModel(SiteModel):
     readonly_model = True
     actions_on_top = False
     list_display = ('operation', 'account', 'movement_type', 'amount',)
-    list_filter = ('account', 'movement_type',)
+    top_filters = (('account', AccountTopFilter), 'movement_type', 'amount',)
     ordering = ['operation',]
-    search_fields = ['account', 'amount']
 
 
 bookings_site.register(Account, AccountSiteModel)

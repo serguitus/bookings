@@ -15,6 +15,21 @@ class LocationTopFilter(filters.ForeignKeyFilter):
     autocomplete_url = 'location-autocomplete'
 
 
+class AllotmentTopFilter(filters.ForeignKeyFilter):
+    filter_title = 'Select Accomodations'
+    autocomplete_url = 'allotment-autocomplete'
+
+
+class TransferTopFilter(filters.ForeignKeyFilter):
+    filter_title = 'Select Transfers'
+    autocomplete_url = 'transfer-autocomplete'
+
+
+class ExtraTopFilter(filters.ForeignKeyFilter):
+    filter_title = 'Select Extras'
+    autocomplete_url = 'extra-autocomplete'
+
+
 class LocationForProviderTransferTopFilter(filters.ForeignKeyFilter):
     filter_field_path = 'loc1'
     filter_title = 'Select Locations'
