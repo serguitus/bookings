@@ -8,6 +8,8 @@ except ImportError:
 
 from xhtml2pdf import pisa
 
+from dal import autocomplete
+
 from dateutil.parser import parse
 
 from django.core.mail import EmailMessage
@@ -24,6 +26,8 @@ from booking.services import BookingService as Booking_Service
 from reservas.admin import bookings_site
 from common.views import ModelChangeFormProcessorView
 
+from booking.models import BookingPax
+
 from config.constants import (
     SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER, SERVICE_CATEGORY_EXTRA
 )
@@ -33,6 +37,22 @@ from config.services import ConfigService
 from finance.models import Provider
 
 from reservas.admin import bookings_site
+
+
+class BookingPaxAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if not self.request.user.is_authenticated():
+            return BookingPax.objects.none()
+        qs = BookingPax.objects.all()
+
+        booking = self.forwarded.get('booking', None)
+
+        if booking:
+            qs = qs.filter(booking=booking)
+
+        if self.q:
+            qs = qs.filter(pax_name__icontains=self.q)
+        return qs[:20]
 
 
 class QuoteAmountsView(ModelChangeFormProcessorView):

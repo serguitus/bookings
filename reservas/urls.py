@@ -19,13 +19,17 @@ from django.contrib import admin
 from reservas.admin import reservas_admin
 from reservas.admin import bookings_site
 
+from booking.views import (
+    BookingPaxAutocompleteView,
+)
 from finance.views import (
     AccountAutocompleteView, LoanEntityAutocompleteView, LoanAccountAutocompleteView,
-    AgencyAutocompleteView, ProviderAutocompleteView)
+    AgencyAutocompleteView, ProviderAutocompleteView,
+)
 from config.views import (
     LocationAutocompleteView, RoomTypeAutocompleteView, BoardTypeAutocompleteView,
     AllotmentAutocompleteView, TransferAutocompleteView, ExtraAutocompleteView,
-    )
+)
 from booking import urls as booking_urls
 
 
@@ -39,6 +43,26 @@ urlpatterns = [
         AccountAutocompleteView.as_view(),
         name='account-autocomplete',
     ),
+    url(r'^agency-autocomplete/$',
+        AgencyAutocompleteView.as_view(),
+        name='agency-autocomplete',
+    ),
+    url(r'^allotment-autocomplete/$',
+        AllotmentAutocompleteView.as_view(),
+        name='allotment-autocomplete',
+    ),
+    url(r'^boardtype-autocomplete/$',
+        BoardTypeAutocompleteView.as_view(),
+        name='boardtype-autocomplete',
+    ),
+    url(r'^bookingpax-autocomplete/$',
+        BookingPaxAutocompleteView.as_view(),
+        name='bookingpax-autocomplete',
+    ),
+    url(r'^extra-autocomplete/$',
+        ExtraAutocompleteView.as_view(),
+        name='extra-autocomplete',
+    ),
     url(r'^loanentity-autocomplete/$',
         LoanEntityAutocompleteView.as_view(),
         name='loanentity-autocomplete',
@@ -51,33 +75,17 @@ urlpatterns = [
         LocationAutocompleteView.as_view(),
         name='location-autocomplete',
     ),
-    url(r'^roomtype-autocomplete/$',
-        RoomTypeAutocompleteView.as_view(),
-        name='roomtype-autocomplete',
-    ),
-    url(r'^boardtype-autocomplete/$',
-        BoardTypeAutocompleteView.as_view(),
-        name='boardtype-autocomplete',
-    ),
     url(r'^provider-autocomplete/$',
         ProviderAutocompleteView.as_view(),
         name='provider-autocomplete',
     ),
-    url(r'^agency-autocomplete/$',
-        AgencyAutocompleteView.as_view(),
-        name='agency-autocomplete',
-    ),
-    url(r'^allotment-autocomplete/$',
-        AllotmentAutocompleteView.as_view(),
-        name='allotment-autocomplete',
+    url(r'^roomtype-autocomplete/$',
+        RoomTypeAutocompleteView.as_view(),
+        name='roomtype-autocomplete',
     ),
     url(r'^transfer-autocomplete/$',
         TransferAutocompleteView.as_view(),
         name='transfer-autocomplete',
-    ),
-    url(r'^extra-autocomplete/$',
-        ExtraAutocompleteView.as_view(),
-        name='extra-autocomplete',
     ),
     url(r'^bookings/booking/',
         include(booking_urls)),

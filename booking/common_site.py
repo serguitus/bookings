@@ -27,7 +27,9 @@ from django_tables2 import RequestConfig
 from booking.forms import (
     QuoteForm, QuoteAllotmentForm, QuoteTransferForm, QuoteExtraForm,
     QuoteAllotmentInlineForm, QuoteTransferInlineForm, QuoteExtraInlineForm,
-    BookingForm, BookingAllotmentForm, BookingTransferForm, BookingExtraForm,)
+    BookingForm,
+    BookingServicePaxInlineForm,
+    BookingAllotmentForm, BookingTransferForm, BookingExtraForm,)
 from booking.models import (
     Quote,
     QuotePaxVariant,
@@ -174,6 +176,7 @@ class BookingServicePaxInline(TabularInline):
     model = BookingServicePax
     fields = ['booking_pax', 'group']
     verbose_name_plural = 'Service Rooming List'
+    form = BookingServicePaxInlineForm
 
     def get_formset(self, request, obj=None, **kwargs):
         initial = []

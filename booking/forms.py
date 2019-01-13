@@ -2,7 +2,7 @@ from dal import autocomplete
 
 from booking.models import (
     Quote, QuoteAllotment, QuoteTransfer, QuoteExtra,
-    Booking, BookingAllotment, BookingTransfer, BookingExtra)
+    Booking, BookingServicePax, BookingAllotment, BookingTransfer, BookingExtra)
 from django import forms
 
 
@@ -87,6 +87,17 @@ class BookingForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'agency': autocomplete.ModelSelect2(url='agency-autocomplete'),
+        }
+
+
+class BookingServicePaxInlineForm(forms.ModelForm):
+    class Meta:
+        model = BookingServicePax
+        fields = '__all__'
+        widgets = {
+            'booking_pax': autocomplete.ModelSelect2(
+                url='bookingpax-autocomplete',
+                forward=['booking']),
         }
 
 
