@@ -26,7 +26,7 @@ from booking.services import BookingService as Booking_Service
 from reservas.admin import bookings_site
 from common.views import ModelChangeFormProcessorView
 
-from booking.models import BookingPax
+from booking.models import BookingPax, BookingServicePax
 
 from config.constants import (
     SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER, SERVICE_CATEGORY_EXTRA
@@ -46,9 +46,20 @@ class BookingPaxAutocompleteView(autocomplete.Select2QuerySetView):
         qs = BookingPax.objects.all()
 
         booking = self.forwarded.get('booking', None)
+        booking_service = self.forwarded.get('booking_service', None)
+
+        values = list()
+        if booking_service:
+            values = BookingServicePax.objects.filter(
+                booking_service=booking_service).values_list('booking_pax', flat=True)
 
         if booking:
-            qs = qs.filter(booking=booking)
+            if values:
+                qs = qs.exclude(id__in=list(values))
+
+            qs = qs.filter(
+                booking=booking,
+            )
 
         if self.q:
             qs = qs.filter(pax_name__icontains=self.q)

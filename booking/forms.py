@@ -126,7 +126,7 @@ class BookingServicePaxInlineForm(forms.ModelForm):
         widgets = {
             'booking_pax': autocomplete.ModelSelect2(
                 url='bookingpax-autocomplete',
-                forward=['booking']),
+                forward=['booking', 'booking_service']),
         }
 
 
