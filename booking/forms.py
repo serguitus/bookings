@@ -20,8 +20,17 @@ class QuoteAllotmentInlineForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'service': autocomplete.ModelSelect2(url='allotment-autocomplete'),
-            'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
-            'room_type': autocomplete.ModelSelect2(url='roomtype-autocomplete'),
+            'room_type': autocomplete.ModelSelect2(
+                url='roomtype-autocomplete',
+                forward=['service'],
+                ),
+            'board_type': autocomplete.ListSelect2(
+                url='boardtype-autocomplete',
+                forward=['service']),
+            'provider': autocomplete.ModelSelect2(
+                url='provider-autocomplete',
+                forward=['service', 'room_type', 'board_type'],
+                ),
         }
 
 
@@ -30,9 +39,18 @@ class QuoteAllotmentForm(forms.ModelForm):
         model = QuoteAllotment
         fields = '__all__'
         widgets = {
-            'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
             'service': autocomplete.ModelSelect2(url='allotment-autocomplete'),
-            'room_type': autocomplete.ModelSelect2(url='roomtype-autocomplete'),
+            'room_type': autocomplete.ModelSelect2(
+                url='roomtype-autocomplete',
+                forward=['service'],
+                ),
+            'board_type': autocomplete.ListSelect2(
+                url='boardtype-autocomplete',
+                forward=['service']),
+            'provider': autocomplete.ModelSelect2(
+                url='provider-autocomplete',
+                forward=['service', 'room_type', 'board_type'],
+                ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
@@ -42,9 +60,12 @@ class QuoteTransferInlineForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'service': autocomplete.ModelSelect2(url='transfer-autocomplete'),
-            'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'provider': autocomplete.ModelSelect2(
+                url='provider-autocomplete',
+                forward=['service', 'location_from', 'location_to'],
+                ),
         }
 
 
@@ -53,10 +74,13 @@ class QuoteTransferForm(forms.ModelForm):
         model = QuoteTransfer
         fields = ('__all__')
         widgets = {
-            'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
             'service': autocomplete.ModelSelect2(url='transfer-autocomplete'),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'provider': autocomplete.ModelSelect2(
+                url='provider-autocomplete',
+                forward=['service', 'location_from', 'location_to'],
+                ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
@@ -66,7 +90,10 @@ class QuoteExtraInlineForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'service': autocomplete.ModelSelect2(url='extra-autocomplete'),
-            'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
+            'provider': autocomplete.ModelSelect2(
+                url='provider-autocomplete',
+                forward=['service'],
+                ),
         }
 
 
@@ -75,8 +102,11 @@ class QuoteExtraForm(forms.ModelForm):
         model = QuoteExtra
         fields = ('__all__')
         widgets = {
-            'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
             'service': autocomplete.ModelSelect2(url='extra-autocomplete'),
+            'provider': autocomplete.ModelSelect2(
+                url='provider-autocomplete',
+                forward=['service'],
+                ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
@@ -92,7 +122,6 @@ class BookingForm(forms.ModelForm):
 
 class BookingServicePaxInlineForm(forms.ModelForm):
     class Meta:
-        model = BookingServicePax
         fields = '__all__'
         widgets = {
             'booking_pax': autocomplete.ModelSelect2(
@@ -101,16 +130,58 @@ class BookingServicePaxInlineForm(forms.ModelForm):
         }
 
 
+class BookingAllotmentInlineForm(forms.ModelForm):
+    class Meta:
+        fields = '__all__'
+        widgets = {
+            'service': autocomplete.ModelSelect2(url='allotment-autocomplete'),
+            'room_type': autocomplete.ModelSelect2(
+                url='roomtype-autocomplete',
+                forward=['service'],
+                ),
+            'board_type': autocomplete.ListSelect2(
+                url='boardtype-autocomplete',
+                forward=['service']),
+            'provider': autocomplete.ModelSelect2(
+                url='providerallotment-autocomplete',
+                forward=['service', 'room_type', 'board_type'],
+                ),
+        }
+
+
 class BookingAllotmentForm(forms.ModelForm):
     class Meta:
         model = BookingAllotment
         fields = '__all__'
         widgets = {
-            'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
             'service': autocomplete.ModelSelect2(url='allotment-autocomplete'),
-            'room_type': autocomplete.ModelSelect2(url='roomtype-autocomplete'),
+            'room_type': autocomplete.ModelSelect2(
+                url='roomtype-autocomplete',
+                forward=['service'],
+                ),
+            'board_type': autocomplete.ListSelect2(
+                url='boardtype-autocomplete',
+                forward=['service']),
+            'provider': autocomplete.ModelSelect2(
+                url='providerallotment-autocomplete',
+                forward=['service', 'room_type', 'board_type'],
+                ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
+
+
+class BookingTransferInlineForm(forms.ModelForm):
+    class Meta:
+        fields = ('__all__')
+        widgets = {
+            'service': autocomplete.ModelSelect2(url='transfer-autocomplete'),
+            'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'provider': autocomplete.ModelSelect2(
+                url='providertransfer-autocomplete',
+                forward=['service', 'location_from', 'location_to'],
+                ),
+        }
 
 
 class BookingTransferForm(forms.ModelForm):
@@ -118,12 +189,27 @@ class BookingTransferForm(forms.ModelForm):
         model = BookingTransfer
         fields = ('__all__')
         widgets = {
-            'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
             'service': autocomplete.ModelSelect2(url='transfer-autocomplete'),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'provider': autocomplete.ModelSelect2(
+                url='providertransfer-autocomplete',
+                forward=['service', 'location_from', 'location_to'],
+                ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
+
+
+class BookingExtraInlineForm(forms.ModelForm):
+    class Meta:
+        fields = ('__all__')
+        widgets = {
+            'service': autocomplete.ModelSelect2(url='extra-autocomplete'),
+            'provider': autocomplete.ModelSelect2(
+                url='providerextra-autocomplete',
+                forward=['service'],
+                ),
+        }
 
 
 class BookingExtraForm(forms.ModelForm):
@@ -131,10 +217,14 @@ class BookingExtraForm(forms.ModelForm):
         model = BookingExtra
         fields = ('__all__')
         widgets = {
-            'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
             'service': autocomplete.ModelSelect2(url='extra-autocomplete'),
+            'provider': autocomplete.ModelSelect2(
+                url='providerextra-autocomplete',
+                forward=['service'],
+                ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
+
 
 from django.forms import widgets
 class EmailProviderForm(forms.Form):

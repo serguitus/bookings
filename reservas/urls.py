@@ -28,7 +28,9 @@ from finance.views import (
 )
 from config.views import (
     LocationAutocompleteView, RoomTypeAutocompleteView, BoardTypeAutocompleteView,
-    AllotmentAutocompleteView, TransferAutocompleteView, ExtraAutocompleteView,
+    AllotmentAutocompleteView, ProviderAllotmentAutocompleteView,
+    TransferAutocompleteView, ProviderTransferAutocompleteView,
+    ExtraAutocompleteView, ProviderExtraAutocompleteView,
 )
 from booking import urls as booking_urls
 
@@ -78,6 +80,18 @@ urlpatterns = [
     url(r'^provider-autocomplete/$',
         ProviderAutocompleteView.as_view(),
         name='provider-autocomplete',
+    ),
+    url(r'^providerallotment-autocomplete/$',
+        ProviderAllotmentAutocompleteView.as_view(),
+        name='providerallotment-autocomplete',
+    ),
+    url(r'^providertransfer-autocomplete/$',
+        ProviderTransferAutocompleteView.as_view(),
+        name='providertransfer-autocomplete',
+    ),
+    url(r'^providerextra-autocomplete/$',
+        ProviderExtraAutocompleteView.as_view(),
+        name='providerextra-autocomplete',
     ),
     url(r'^roomtype-autocomplete/$',
         RoomTypeAutocompleteView.as_view(),

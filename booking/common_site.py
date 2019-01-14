@@ -29,7 +29,10 @@ from booking.forms import (
     QuoteAllotmentInlineForm, QuoteTransferInlineForm, QuoteExtraInlineForm,
     BookingForm,
     BookingServicePaxInlineForm,
-    BookingAllotmentForm, BookingTransferForm, BookingExtraForm,)
+    BookingAllotmentInlineForm, BookingAllotmentForm,
+    BookingTransferInlineForm, BookingTransferForm,
+    BookingExtraInlineForm, BookingExtraForm,
+)
 from booking.models import (
     Quote,
     QuotePaxVariant,
@@ -199,6 +202,7 @@ class BookingAllotmentInLine(CommonTabularInline):
     extra = 0
     fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
               ('room_type', 'board_type'), 'provider']
+    form = BookingAllotmentInlineForm
 
 
 class BookingTransferInLine(CommonTabularInline):
@@ -207,6 +211,7 @@ class BookingTransferInLine(CommonTabularInline):
     fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
               ('location_from', 'location_to'),
               ('quantity', 'provider')]
+    form = BookingTransferInlineForm
 
 
 class BookingExtraInLine(CommonTabularInline):
@@ -214,6 +219,7 @@ class BookingExtraInLine(CommonTabularInline):
     extra = 0
     fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
               ('quantity', 'parameter'), 'provider']
+    form = BookingExtraInlineForm
 
 
 class BookingSiteModel(SiteModel):
