@@ -221,7 +221,7 @@ class AgencyExtraDetail(AmountDetail):
     """
     class Meta:
         verbose_name = 'Agency Extra Detail'
-        verbose_name_plural = 'Agencies Extras Details'
+        verbose_name_plural = 'Agencies Extra Details'
         unique_together = (('agency_service',),)
     agency_service = models.ForeignKey(AgencyExtraService)
     pax_range_min = models.SmallIntegerField(blank=True, null=True)
