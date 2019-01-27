@@ -7,4 +7,4 @@ Nombres:
 {% for pax in rooming %}{{ pax.booking_pax.pax_name }}
 {% endfor %}
 Gracias
-{{ user }}
+{{ user.get_short_name }}
