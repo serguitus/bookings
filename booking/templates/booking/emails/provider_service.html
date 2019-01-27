@@ -1,6 +1,6 @@
-{% load booking_tags %}{% if bs.service_type == 'T' %}{# This is a Transfer #}
+{% load booking_tags i18n %}{% language 'es' %}{% if bs.service_type == 'T' %}{# This is a Transfer #}
     {{ bs.service}} {{ bs.location_from }} -> {{ bs.location_to }}
-    Fecha: {{ bs.datetime_from }}
+    Fecha: {{ bs.datetime_from|date:"d-b-Y" }}   Hora: {{ bs.datetime_from|time:"H:i" }}hrs
     Pick Up: {% if bs.pickup %}{{ bs.pickup.name }}({{ bs.pickup.address }}){% endif %}
     Drop Off: {% if bs.dropoff %}{{ bs.dropoff.name }}({{ bs.dropoff.address }}){% endif %}
 {% elif bs.service_type == 'A' %}{# This is an Accomodation #}
@@ -11,4 +11,4 @@
 {% else %}{# This is an Extra #}
     {{ bs.service }}
     Fecha: {{ bs.datetime_from }}
-{% endif %}----------------------------------
+{% endif %}----------------------------------{% endlanguage %}
