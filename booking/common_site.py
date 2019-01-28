@@ -208,7 +208,7 @@ class BookingAllotmentInLine(CommonTabularInline):
 class BookingTransferInLine(CommonTabularInline):
     model = BookingTransfer
     extra = 0
-    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
+    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to', 'time'),
               ('location_from', 'location_to'),
               ('quantity', 'provider')]
     form = BookingTransferInlineForm
@@ -217,7 +217,7 @@ class BookingTransferInLine(CommonTabularInline):
 class BookingExtraInLine(CommonTabularInline):
     model = BookingExtra
     extra = 0
-    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
+    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to', 'time'),
               ('quantity', 'parameter'), 'provider']
     form = BookingExtraInlineForm
 
@@ -268,9 +268,8 @@ class BookingAllotmentSiteModel(SiteModel):
     fields = ('booking', ('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
               ('room_type', 'board_type'),
               'cost_amount', 'price_amount', 'provider', 'id')
-    list_display = ('booking', 'service', 'datetime_from', 'datetime_to',
-                    'status',)
-    top_filters = ('booking__name', 'service', 'booking__reference','datetime_from','status',)
+    list_display = ('booking', 'service', 'datetime_from', 'datetime_to', 'status',)
+    top_filters = ('booking__name', 'name', 'booking__reference', 'datetime_from', 'status',)
     ordering = ('booking__reference', 'service__name',)
     form = BookingAllotmentForm
     change_form_template = 'booking/bookingservices_change_form.html'
@@ -283,13 +282,13 @@ class BookingTransferSiteModel(SiteModel):
     menu_group = MENU_LABEL_BOOKING_SERVICES
 
     fields = ('booking', ('service', 'status', 'conf_number'),
-              ('datetime_from', 'datetime_to'),
+              ('datetime_from', 'datetime_to', 'time'),
               ('location_from', 'pickup'),
               ('location_to', 'dropoff'),
               'cost_amount', 'price_amount', 'provider', 'id')
     list_display = ('booking', 'name',
-                    'datetime_from', 'datetime_to',)
-    top_filters = ('booking__name', 'service', 'booking__reference','datetime_from','status',)
+                    'datetime_from', 'datetime_to', 'time', 'status')
+    top_filters = ('booking__name', 'service', 'booking__reference', 'datetime_from', 'status',)
     ordering = ('booking__reference', 'service__name',)
     form = BookingTransferForm
     change_form_template = 'booking/bookingservices_change_form.html'
@@ -302,11 +301,11 @@ class BookingExtraSiteModel(SiteModel):
     menu_group = MENU_LABEL_BOOKING_SERVICES
 
     fields = ['booking', ('service', 'status', 'conf_number'),
-              ('datetime_from', 'datetime_to'),
+              ('datetime_from', 'datetime_to', 'time'),
               ('quantity', 'parameter'),
               'cost_amount', 'price_amount', 'provider', 'id']
-    list_display = ('booking', 'service', 'quantity', 'parameter',
-                    'datetime_from', 'datetime_to', 'status',)
+    list_display = ('booking', 'name', 'quantity', 'parameter',
+                    'datetime_from', 'datetime_to', 'time', 'status',)
     top_filters = ('booking__name', 'service', 'booking__reference',
                    'datetime_from','status',)
     ordering = ('booking__reference', 'service__name',)
