@@ -175,7 +175,7 @@ class ProviderAllotmentServiceSiteModel(SiteModel):
     menu_group = 'Provider Catalogue'
     recent_allowed = True
     fields = ('provider', 'service', 'date_from', 'date_to',)
-    list_display = ('provider', 'service', 'date_from', 'date_to',)
+    list_display = ('service', 'provider', 'date_from', 'date_to',)
     top_filters = (('provider', ProviderTopFilter), ('service', AllotmentTopFilter),)
     inlines = [ProviderAllotmentDetailInline]
     form = ProviderAllotmentServiceForm
@@ -198,7 +198,7 @@ class ProviderTransferServiceSiteModel(SiteModel):
     menu_group = 'Provider Catalogue'
     recent_allowed = True
     fields = ('provider', 'service', 'date_from', 'date_to',)
-    list_display = ('provider', 'service',  'date_from', 'date_to',)
+    list_display = ('service',  'provider', 'date_from', 'date_to',)
     top_filters = (
         ('provider', ProviderTopFilter), ('service', TransferTopFilter),
         LocationForProviderTransferTopFilter, ExtraLocationForProviderTransferTopFilter)
@@ -220,7 +220,7 @@ class ProviderExtraServiceSiteModel(SiteModel):
     menu_group = 'Provider Catalogue'
     recent_allowed = True
     fields = ('provider', 'service', 'date_from', 'date_to',)
-    list_display = ('provider', 'service', 'date_from', 'date_to',)
+    list_display = ('service', 'provider', 'date_from', 'date_to',)
     top_filters = (('provider', ProviderTopFilter), ('service', ExtraTopFilter),)
     inlines = [ProviderExtraDetailInline]
     form = ProviderExtraServiceForm
@@ -276,7 +276,7 @@ class AgencyExtraDetailInline(CommonStackedInline):
     model = AgencyExtraDetail
     extra = 0
     fields = (
-        'ad_1_amount',
+        ('ad_1_amount', 'pax_range_min', 'pax_range_max',),
     )
 
 
@@ -285,7 +285,7 @@ class AgencyExtraServiceSiteModel(SiteModel):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
     recent_allowed = True
-    fields = ('agency', 'service', 'date_from', 'date_to',)
+    fields = ('agency', 'service', 'date_from', 'date_to')
     list_display = ('agency', 'service', 'date_from', 'date_to',)
     top_filters = ('agency__name','service__name',)
     inlines = [AgencyExtraDetailInline]
