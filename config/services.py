@@ -316,10 +316,10 @@ class ConfigService(object):
                     detail_date_from = detail.agency_service.date_from
                     detail_date_to = detail.agency_service.date_to
 
-                if current_date.date() >= detail_date_from:
+                if current_date >= detail_date_from:
                     # verify final date included
                     end_date = detail_date_to + timedelta(days=1)
-                    if end_date >= date_to.date():
+                    if end_date >= date_to:
                         # full date range
                         result = cls._get_service_amount(
                             service, detail, current_date, date_to,
@@ -344,7 +344,7 @@ class ConfigService(object):
             else:
                 # empty list, no solved all days
                 stop = True
-                message = 'Amount Not Found for date %s' % current_date.date()
+                message = 'Amount Not Found for date %s' % current_date
         if not solved:
             amount = None
 
@@ -424,14 +424,18 @@ class ConfigService(object):
     @classmethod
     def _get_extra_amount(
             cls, service, detail, date_from, date_to, adults, children, quantity, parameter):
+        # now parameter must be provided for hours
+        if service.parameter_type == EXTRA_PARAMETER_TYPE_HOURS and parameter is None:
+            return None
         if quantity is None or quantity < 1:
             quantity = cls.get_service_quantity(service, adults + children)
         if parameter is None or parameter < 1:
             interval = date_to - date_from
             if service.parameter_type == EXTRA_PARAMETER_TYPE_DAYS:
                 parameter = interval.days
-            if service.parameter_type == EXTRA_PARAMETER_TYPE_HOURS:
-                parameter = interval.hours
+            # now this is not supported
+            # if service.parameter_type == EXTRA_PARAMETER_TYPE_HOURS:
+            #     parameter = interval.hours
         if service.cost_type == EXTRA_COST_TYPE_FIXED and detail.ad_1_amount:
             return detail.ad_1_amount * quantity * parameter
         if service.cost_type == EXTRA_COST_TYPE_BY_PAX:

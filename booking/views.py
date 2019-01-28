@@ -13,8 +13,10 @@ from dal import autocomplete
 from dateutil.parser import parse
 
 from django.core.mail import EmailMessage
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.template.loader import get_template
+from django.urls import reverse
 from django.views import View
 
 from booking.common_site import QuoteSiteModel
@@ -133,7 +135,7 @@ class BookingServiceAmountsView(ModelChangeFormProcessorView):
             })
         service_type = service.category
 
-        date_from = request.POST.get('datetime_from_0', None)
+        date_from = request.POST.get('datetime_from', None)
         if date_from is None or date_from == '':
             return JsonResponse({
                 'code': 3,
@@ -143,9 +145,9 @@ class BookingServiceAmountsView(ModelChangeFormProcessorView):
                 'price': None,
                 'price_message': 'Date From Missing',
             })
-        date_from = parse(date_from)
+        date_from = parse(date_from).date()
 
-        date_to = request.POST.get('datetime_to_0', None)
+        date_to = request.POST.get('datetime_to', None)
         if date_to is None or date_to == '':
             return JsonResponse({
                 'code': 3,
@@ -155,7 +157,7 @@ class BookingServiceAmountsView(ModelChangeFormProcessorView):
                 'price': None,
                 'price_message': 'Date To Missing',
             })
-        date_to = parse(date_to)
+        date_to = parse(date_to).date()
 
         booking_service_id = request.POST.get('id')
         try:
@@ -309,6 +311,7 @@ class EmailProviderView(View):
         t = get_template('booking/emails/provider_email.html')
         form = EmailProviderForm(request.user,
                                  initial={
+                                     'subject': 'Solicitud de Confirmación',
                                      'body': t.render(initial)
                                  })
         context = dict()
@@ -318,19 +321,43 @@ class EmailProviderView(View):
         return render(request, 'booking/email_provider_form.html', context)
 
     def post(self, request, id, *args, **kwargs):
-        """ send the email to provider """
-        pass
+        booking_service = BookingService.objects.get(id=id)
+        from_address = request.POST.get('from_address')
+        to_address = request.POST.get('to_address')
+        cc_address = request.POST.get('cc_address')
+        bcc_address = request.POST.get('bcc_address')
+        subject = request.POST.get('subject')
+        body = request.POST.get('body')
+
+        _send_service_request(
+            subject, body, from_address, to_address, cc_address, bcc_address, from_address)
+        return HttpResponseRedirect(
+            reverse('common:booking_booking_change', args=(booking_service.booking.id,)))
 
 
-def _send_service_request(subject, e_from, e_to, e_cc, e_bcc, body):
+def _send_service_request(
+        subject, body, from_address, to_address, cc_address, bcc_address, reply_address):
     """
     This helper sends emails
     """
     email = EmailMessage(
-        'subject xx',
-        '<b>body goes here!!!</b>',
-        'sales@thenaturexperts.com',
-        ['serguitus@gmail.com'],
-        ['bcc@thenaturexperts.com'])
+        subject=subject,
+        body=body,
+        from_email=from_address,
+        to=_find_address_list(to_address),
+        cc=_find_address_list(cc_address),
+        bcc=_find_address_list(bcc_address),
+        reply_to=_find_address_list(reply_address))
     email.send()
-    return HttpResponse('success')
+
+def _find_address_list(str_address=''):
+    address_list = list()
+    if str_address:
+        comma_addresses = str_address.split(',')
+        for comma_address in comma_addresses:
+            if comma_address:
+                split_addresses = comma_address.split(';')
+                for split_address in split_addresses:
+                    if split_address:
+                        address_list.append(split_address)
+    return address_list

@@ -238,11 +238,21 @@ class EmailProviderForm(forms.Form):
         widget=widgets.TextInput(
             attrs={'class': 'form-control'})
     )
+    cc_address = forms.EmailField(
+        label='CC',
+        widget=widgets.TextInput(
+            attrs={'class': 'form-control'})
+    )
     bcc_address = forms.EmailField(
         label='BCC',
         widget=widgets.TextInput(
             attrs={'class': 'form-control'})
     )
+    subject = forms.CharField(
+        max_length=100,
+        label='Subject',
+        widget=widgets.TextInput(
+            attrs={'class': 'form-control'}))
     body = forms.CharField(
         max_length=1000,
         label='Body',

@@ -94,8 +94,8 @@ class QuoteService(models.Model):
     service_type = models.CharField(max_length=5, choices=SERVICE_CATEGORIES,
                                     blank=True, null=True)
     description = models.CharField(max_length=1000, default='')
-    datetime_from = models.DateTimeField(blank=True, null=True)
-    datetime_to = models.DateTimeField(blank=True, null=True)
+    datetime_from = models.DateField(blank=True, null=True, verbose_name='Date From')
+    datetime_to = models.DateField(blank=True, null=True, verbose_name='Date To')
     status = models.CharField(
         max_length=5, choices=SERVICE_STATUS_LIST,
         default=SERVICE_STATUS_PENDING)
@@ -134,6 +134,7 @@ class QuoteTransfer(QuoteService):
         verbose_name = 'Quote Transfer'
         verbose_name_plural = 'Quotes Transfers'
     service = models.ForeignKey(Transfer)
+    time = models.TimeField(blank=True, null=True)
     location_from = models.ForeignKey(
         Location, related_name='quote_location_from', verbose_name='Location from')
     location_to = models.ForeignKey(
@@ -155,6 +156,7 @@ class QuoteExtra(QuoteService):
         verbose_name = 'Quote Extra'
         verbose_name_plural = 'Quotes Extras'
     service = models.ForeignKey(Extra)
+    time = models.TimeField(blank=True, null=True)
     parameter = models.SmallIntegerField()
 
     def fill_data(self):
@@ -240,8 +242,8 @@ class BookingService(models.Model):
     service_type = models.CharField(max_length=5, choices=SERVICE_CATEGORIES,
                                     blank=True, null=True)
     description = models.CharField(max_length=1000, default='')
-    datetime_from = models.DateTimeField(blank=True, null=True)
-    datetime_to = models.DateTimeField(blank=True, null=True)
+    datetime_from = models.DateField(blank=True, null=True, verbose_name='Date From')
+    datetime_to = models.DateField(blank=True, null=True, verbose_name='Date To')
     status = models.CharField(
         max_length=5, choices=SERVICE_STATUS_LIST, default=SERVICE_STATUS_PENDING)
     # This holds the confirmation number when it exists
@@ -364,6 +366,7 @@ class BookingTransfer(BookingService):
         verbose_name = 'Booking Transfer'
         verbose_name_plural = 'Bookings Transfers'
     service = models.ForeignKey(Transfer)
+    time = models.TimeField(blank=True, null=True)
     location_from = models.ForeignKey(Location, related_name='location_from')
     pickup = models.ForeignKey(Allotment, related_name='transfer_pickup',
                                null=True, blank=True)
@@ -398,10 +401,13 @@ class BookingExtra(BookingService):
         verbose_name = 'Booking Extra'
         verbose_name_plural = 'Bookings Extras'
     service = models.ForeignKey(Extra)
+    time = models.TimeField(blank=True, null=True)
     quantity = models.SmallIntegerField()
     parameter = models.SmallIntegerField()
 
     def fill_data(self):
+        # setting name for this booking_service
+        self.name = '%s' % (self.service)
         self.service_type = SERVICE_CATEGORY_EXTRA
 
 

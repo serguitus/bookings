@@ -1,9 +1,5 @@
-from django.forms.formsets import all_valid, DELETION_FIELD_NAME
-from django.http import JsonResponse
-from django.shortcuts import render
+from django.forms.formsets import DELETION_FIELD_NAME
 from django.views import View
-
-from dateutil.parser import parse
 
 class ModelChangeFormProcessorView(View):
 
@@ -21,7 +17,7 @@ class ModelChangeFormProcessorView(View):
         formsets, inline_instances = self._create_formsets(request, new_object)
         inlines = []
         for formset in formsets:
-            items = [];
+            items = []
             forms_to_delete = formset.deleted_forms
             for form in formset.initial_forms:
                 if form in forms_to_delete:
