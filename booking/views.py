@@ -311,7 +311,7 @@ class EmailProviderView(View):
         t = get_template('booking/emails/provider_email.html')
         form = EmailProviderForm(request.user,
                                  initial={
-                                     'subject': 'Solicitud de Confirmación',
+                                     'subject': 'Solicitud de Confirmacion',
                                      'body': t.render(initial)
                                  })
         context = dict()
