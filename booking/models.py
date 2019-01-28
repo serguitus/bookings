@@ -160,6 +160,7 @@ class QuoteExtra(QuoteService):
     parameter = models.SmallIntegerField()
 
     def fill_data(self):
+        # setting name for this booking_service
         self.name = self.service.name
         self.service_type = SERVICE_CATEGORY_EXTRA
 

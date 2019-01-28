@@ -246,8 +246,8 @@ class BookingServiceAmountsView(ModelChangeFormProcessorView):
                 location_from_id, location_to_id,
             )
         if service_type == SERVICE_CATEGORY_EXTRA:
-            quantity = request.POST.get('quantity')
-            parameter = request.POST.get('parameter')
+            quantity = int(request.POST.get('quantity'))
+            parameter = int(request.POST.get('parameter'))
 
             code, message, cost, cost_msg, price, price_msg = ConfigService.extra_amounts(
                 service_id, date_from, date_to, groups, provider, agency,
