@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.forms.formsets import all_valid, DELETION_FIELD_NAME
 from django.http import JsonResponse, HttpResponse
 
@@ -331,6 +332,10 @@ class EmailProviderView(View):
 
         _send_service_request(
             subject, body, from_address, to_address, cc_address, bcc_address, from_address)
+        messages.add_message(
+            request=request, level=messages.SUCCESS,
+            message='Email  sent successfully.',
+            extra_tags='', fail_silently=False)
         return HttpResponseRedirect(
             reverse('common:booking_booking_change', args=(booking_service.booking.id,)))
 
