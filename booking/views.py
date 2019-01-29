@@ -220,7 +220,7 @@ class BookingServiceAmountsView(ModelChangeFormProcessorView):
             )
 
         if service_type == SERVICE_CATEGORY_TRANSFER:
-            location_from_id = request.POST.get('location_from_id')
+            location_from_id = request.POST.get('location_from')
             if location_from_id is None or location_from_id == '':
                 return JsonResponse({
                     'code': 3,
@@ -230,7 +230,7 @@ class BookingServiceAmountsView(ModelChangeFormProcessorView):
                     'price': None,
                     'price_message': 'Location From Missing',
                 })
-            location_to_id = request.POST.get('location_to_id')
+            location_to_id = request.POST.get('location_to')
             if location_to_id is None or location_to_id == '':
                 return JsonResponse({
                     'code': 3,

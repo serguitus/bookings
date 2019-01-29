@@ -133,8 +133,8 @@ class TransferSiteModel(SiteModel):
     model_order = 6120
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
-    fields = ('name', 'cost_type', 'enabled',)
-    list_display = ('name', 'cost_type', 'enabled',)
+    fields = ('name', 'cost_type', 'max_capacity', 'enabled',)
+    list_display = ('name', 'cost_type', 'max_capacity', 'enabled',)
     top_filters = ('name', 'enabled',)
     ordering = ('enabled', 'name',)
     inlines = [TransferSupplementInline]
