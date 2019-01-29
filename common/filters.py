@@ -116,7 +116,7 @@ class TextFilter(TopFilter):
         return queryset
 
 
-TopFilter.register(lambda f: isinstance(f, (models.CharField,)) and not bool(f.choices), TextFilter)
+TopFilter.register(lambda f: isinstance(f, (models.CharField, models.TextField)) and not bool(f.choices), TextFilter)
 
 
 class BooleanFilter(TopFilter):
