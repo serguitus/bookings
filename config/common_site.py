@@ -221,7 +221,8 @@ class ProviderExtraServiceSiteModel(SiteModel):
     recent_allowed = True
     fields = ('provider', 'service', 'date_from', 'date_to',)
     list_display = ('service', 'provider', 'date_from', 'date_to',)
-    top_filters = (('provider', ProviderTopFilter), ('service', ExtraTopFilter),)
+    top_filters = (('provider', ProviderTopFilter),
+                   ('service', ExtraTopFilter),)
     inlines = [ProviderExtraDetailInline]
     form = ProviderExtraServiceForm
 
