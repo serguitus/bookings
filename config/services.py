@@ -8,6 +8,7 @@ from config.constants import (
     TRANSFER_COST_TYPE_FIXED, TRANSFER_COST_TYPE_BY_PAX,
     EXTRA_COST_TYPE_FIXED, EXTRA_COST_TYPE_BY_PAX,
     EXTRA_PARAMETER_TYPE_HOURS, EXTRA_PARAMETER_TYPE_DAYS,
+    EXTRA_PARAMETER_TYPE_NIGHTS, EXTRA_PARAMETER_TYPE_STAY,
     ERROR_INVALID_SERVICE_CATEGORY)
 from config.models import (
     Allotment,
@@ -432,7 +433,11 @@ class ConfigService(object):
         if parameter is None or parameter < 1:
             interval = date_to - date_from
             if service.parameter_type == EXTRA_PARAMETER_TYPE_DAYS:
+                parameter = interval.days + 1
+            elif service.parameter_type == EXTRA_PARAMETER_TYPE_NIGHTS:
                 parameter = interval.days
+            elif service.parameter_type == EXTRA_PARAMETER_TYPE_STAY:
+                parameter = 1
             # now this is not supported
             # if service.parameter_type == EXTRA_PARAMETER_TYPE_HOURS:
             #     parameter = interval.hours
