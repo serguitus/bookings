@@ -34,7 +34,7 @@ from booking.models import BookingPax, BookingServicePax
 from config.constants import (
     SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER, SERVICE_CATEGORY_EXTRA
 )
-from config.models import Service
+from config.models import Service, Allotment
 from config.services import ConfigService
 
 from finance.models import Provider
@@ -366,3 +366,41 @@ def _find_address_list(str_address=''):
                     if split_address:
                         address_list.append(split_address)
     return address_list
+
+
+class PickUpAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return Allotment.objects.none()
+        qs = Allotment.objects.filter(enabled=True).all()
+
+        location = self.forwarded.get('location_from', None)
+        if location:
+            qs = qs.filter(
+                location=location,
+            )
+
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs[:20]
+
+
+class DropOffAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return Allotment.objects.none()
+        qs = Allotment.objects.filter(enabled=True).all()
+
+        location = self.forwarded.get('location_to', None)
+        if location:
+            qs = qs.filter(
+                location=location,
+            )
+
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs[:20]
+
+

@@ -176,7 +176,15 @@ class BookingTransferInlineForm(forms.ModelForm):
         widgets = {
             'service': autocomplete.ModelSelect2(url='transfer-autocomplete'),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'pickup': autocomplete.ModelSelect2(
+                url='pickup-autocomplete',
+                forward=['location_from'],
+                ),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'dropoff': autocomplete.ModelSelect2(
+                url='dropoff-autocomplete',
+                forward=['location_to'],
+                ),
             'provider': autocomplete.ModelSelect2(
                 url='providertransfer-autocomplete',
                 forward=['service', 'location_from', 'location_to'],
@@ -191,7 +199,15 @@ class BookingTransferForm(forms.ModelForm):
         widgets = {
             'service': autocomplete.ModelSelect2(url='transfer-autocomplete'),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'pickup': autocomplete.ModelSelect2(
+                url='pickup-autocomplete',
+                forward=['location_from'],
+                ),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'dropoff': autocomplete.ModelSelect2(
+                url='dropoff-autocomplete',
+                forward=['location_to'],
+                ),
             'provider': autocomplete.ModelSelect2(
                 url='providertransfer-autocomplete',
                 forward=['service', 'location_from', 'location_to'],

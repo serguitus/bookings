@@ -210,7 +210,7 @@ class ProviderExtraDetailInline(CommonStackedInline):
     model = ProviderExtraDetail
     extra = 0
     fields = (
-        'ad_1_amount',
+        'ad_1_amount', 'pax_range_min', 'pax_range_max',
     )
 
 

@@ -33,6 +33,7 @@ from config.views import (
     ExtraAutocompleteView, ProviderExtraAutocompleteView,
 )
 from booking import urls as booking_urls
+from booking.views import PickUpAutocompleteView, DropOffAutocompleteView
 
 
 urlpatterns = [
@@ -102,5 +103,14 @@ urlpatterns = [
         name='transfer-autocomplete',
     ),
     url(r'^bookings/booking/',
-        include(booking_urls)),
+        include(booking_urls)
+    ),
+    url(r'^pickup-autocomplete/$',
+        PickUpAutocompleteView.as_view(),
+        name='pickup-autocomplete',
+    ),
+    url(r'^dropoff-autocomplete/$',
+        DropOffAutocompleteView.as_view(),
+        name='dropoff-autocomplete',
+    ),
 ]
