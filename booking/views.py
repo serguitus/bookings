@@ -34,7 +34,7 @@ from booking.models import BookingPax, BookingServicePax
 from config.constants import (
     SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER, SERVICE_CATEGORY_EXTRA
 )
-from config.models import Service
+from config.models import Service, Allotment
 from config.services import ConfigService
 
 from finance.models import Provider
@@ -220,7 +220,7 @@ class BookingServiceAmountsView(ModelChangeFormProcessorView):
             )
 
         if service_type == SERVICE_CATEGORY_TRANSFER:
-            location_from_id = request.POST.get('location_from_id')
+            location_from_id = request.POST.get('location_from')
             if location_from_id is None or location_from_id == '':
                 return JsonResponse({
                     'code': 3,
@@ -230,7 +230,7 @@ class BookingServiceAmountsView(ModelChangeFormProcessorView):
                     'price': None,
                     'price_message': 'Location From Missing',
                 })
-            location_to_id = request.POST.get('location_to_id')
+            location_to_id = request.POST.get('location_to')
             if location_to_id is None or location_to_id == '':
                 return JsonResponse({
                     'code': 3,
@@ -366,3 +366,41 @@ def _find_address_list(str_address=''):
                     if split_address:
                         address_list.append(split_address)
     return address_list
+
+
+class PickUpAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return Allotment.objects.none()
+        qs = Allotment.objects.filter(enabled=True).all()
+
+        location = self.forwarded.get('location_from', None)
+        if location:
+            qs = qs.filter(
+                location=location,
+            )
+
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs[:20]
+
+
+class DropOffAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return Allotment.objects.none()
+        qs = Allotment.objects.filter(enabled=True).all()
+
+        location = self.forwarded.get('location_to', None)
+        if location:
+            qs = qs.filter(
+                location=location,
+            )
+
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs[:20]
+
+

@@ -28,7 +28,7 @@ class QuoteAllotmentInlineForm(forms.ModelForm):
                 url='boardtype-autocomplete',
                 forward=['service']),
             'provider': autocomplete.ModelSelect2(
-                url='provider-autocomplete',
+                url='providerallotment-autocomplete',
                 forward=['service', 'room_type', 'board_type'],
                 ),
         }
@@ -48,7 +48,7 @@ class QuoteAllotmentForm(forms.ModelForm):
                 url='boardtype-autocomplete',
                 forward=['service']),
             'provider': autocomplete.ModelSelect2(
-                url='provider-autocomplete',
+                url='providerallotment-autocomplete',
                 forward=['service', 'room_type', 'board_type'],
                 ),
         }
@@ -63,7 +63,7 @@ class QuoteTransferInlineForm(forms.ModelForm):
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
             'provider': autocomplete.ModelSelect2(
-                url='provider-autocomplete',
+                url='providertransfer-autocomplete',
                 forward=['service', 'location_from', 'location_to'],
                 ),
         }
@@ -78,7 +78,7 @@ class QuoteTransferForm(forms.ModelForm):
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
             'provider': autocomplete.ModelSelect2(
-                url='provider-autocomplete',
+                url='providertransfer-autocomplete',
                 forward=['service', 'location_from', 'location_to'],
                 ),
         }
@@ -91,7 +91,7 @@ class QuoteExtraInlineForm(forms.ModelForm):
         widgets = {
             'service': autocomplete.ModelSelect2(url='extra-autocomplete'),
             'provider': autocomplete.ModelSelect2(
-                url='provider-autocomplete',
+                url='providerextra-autocomplete',
                 forward=['service'],
                 ),
         }
@@ -104,7 +104,7 @@ class QuoteExtraForm(forms.ModelForm):
         widgets = {
             'service': autocomplete.ModelSelect2(url='extra-autocomplete'),
             'provider': autocomplete.ModelSelect2(
-                url='provider-autocomplete',
+                url='providerextra-autocomplete',
                 forward=['service'],
                 ),
         }
@@ -176,7 +176,15 @@ class BookingTransferInlineForm(forms.ModelForm):
         widgets = {
             'service': autocomplete.ModelSelect2(url='transfer-autocomplete'),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'pickup': autocomplete.ModelSelect2(
+                url='pickup-autocomplete',
+                forward=['location_from'],
+                ),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'dropoff': autocomplete.ModelSelect2(
+                url='dropoff-autocomplete',
+                forward=['location_to'],
+                ),
             'provider': autocomplete.ModelSelect2(
                 url='providertransfer-autocomplete',
                 forward=['service', 'location_from', 'location_to'],
@@ -191,7 +199,15 @@ class BookingTransferForm(forms.ModelForm):
         widgets = {
             'service': autocomplete.ModelSelect2(url='transfer-autocomplete'),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'pickup': autocomplete.ModelSelect2(
+                url='pickup-autocomplete',
+                forward=['location_from'],
+                ),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'dropoff': autocomplete.ModelSelect2(
+                url='dropoff-autocomplete',
+                forward=['location_to'],
+                ),
             'provider': autocomplete.ModelSelect2(
                 url='providertransfer-autocomplete',
                 forward=['service', 'location_from', 'location_to'],

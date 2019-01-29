@@ -139,6 +139,7 @@ class QuoteTransfer(QuoteService):
         Location, related_name='quote_location_from', verbose_name='Location from')
     location_to = models.ForeignKey(
         Location, related_name='quote_location_to', verbose_name='Location to')
+    quantity = models.SmallIntegerField(default=1)
 
     def fill_data(self):
         # setting name for this booking_service
@@ -157,6 +158,7 @@ class QuoteExtra(QuoteService):
         verbose_name_plural = 'Quotes Extras'
     service = models.ForeignKey(Extra)
     time = models.TimeField(blank=True, null=True)
+    quantity = models.SmallIntegerField(default=1)
     parameter = models.SmallIntegerField()
 
     def fill_data(self):

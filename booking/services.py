@@ -37,7 +37,7 @@ class BookingService(object):
                     FinanceService.save_agency_invoice(user, invoice)
                     new_invoice = True
                     invoice = AgencyInvoice()
-                 
+
             invoice.agency = booking.agency
             invoice.currency = booking.currency
             invoice.amount = booking.price_amount
@@ -61,7 +61,7 @@ class BookingService(object):
                 invoice_line.detail1 = booking_service.name
                 invoice_line.detail2 = booking_service.service.name
                 invoice_line.line_amount = booking_service.price_amount
- 
+
                 invoice_line.save()
 
             # obtain partials
