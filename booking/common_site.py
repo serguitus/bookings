@@ -257,16 +257,21 @@ class BookingSiteModel(SiteModel):
         return render(request, 'booking/booking_list.html', context)
     """
 
+
 class BookingAllotmentSiteModel(SiteModel):
     model_order = 1210
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_LABEL_BOOKING_SERVICES
 
-    fields = ('booking', ('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
+    fields = ('booking', ('service', 'status', 'conf_number'),
+              ('datetime_from', 'datetime_to'),
               ('room_type', 'board_type'),
               'cost_amount', 'price_amount', 'provider', 'id')
-    list_display = ('booking', 'service', 'datetime_from', 'datetime_to', 'status',)
-    top_filters = ('booking__name', 'name', 'booking__reference', 'datetime_from', 'status',)
+    list_display = ('booking', 'service', 'datetime_from',
+                    'datetime_to', 'status',)
+    top_filters = (('booking__name', 'Booking'),
+                   ('name', 'Service'),
+                   'booking__reference', 'datetime_from', 'status',)
     ordering = ('booking__reference', 'service__name',)
     form = BookingAllotmentForm
     change_form_template = 'booking/bookingservices_change_form.html'
