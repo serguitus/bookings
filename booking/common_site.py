@@ -271,7 +271,8 @@ class BookingAllotmentSiteModel(SiteModel):
                     'datetime_to', 'status',)
     top_filters = (('booking__name', 'Booking'),
                    ('name', 'Service'),
-                   'booking__reference', 'datetime_from', 'status',)
+                   'booking__reference', 'conf_number',
+                   'datetime_from', 'status')
     ordering = ('booking__reference', 'service__name',)
     form = BookingAllotmentForm
     change_form_template = 'booking/bookingservices_change_form.html'
