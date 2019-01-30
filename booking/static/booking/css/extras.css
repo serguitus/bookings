@@ -20,3 +20,11 @@
     margin-right: 10px;
     color: white;
 }
+
+#rooming_list-group .tabular tr td.original{
+    width: 200px;
+}
+
+#rooming_list-group .tabular tr td.original p{
+    height: 20px;
+}
