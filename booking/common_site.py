@@ -19,11 +19,9 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.template.response import SimpleTemplateResponse, TemplateResponse
 from django.utils.encoding import force_text
-from django.utils.translation import ugettext as _, ungettext
+# from django.utils.translation import ugettext as _, ungettext
 from django.utils.functional import curry
-
-from django_tables2 import RequestConfig
-
+# from django_tables2 import RequestConfig
 from booking.forms import (
     QuoteForm, QuoteAllotmentForm, QuoteTransferForm, QuoteExtraForm,
     QuoteAllotmentInlineForm, QuoteTransferInlineForm, QuoteExtraInlineForm,
@@ -44,10 +42,9 @@ from booking.models import (
     BookingTransfer,
     BookingExtra,
 )
-
-from common.filters import TextFilter
+# from common.filters import TextFilter
 from common.sites import CommonStackedInline, CommonTabularInline
-from functools import update_wrapper, partial
+# from functools import update_wrapper, partial
 
 from reservas.admin import bookings_site
 

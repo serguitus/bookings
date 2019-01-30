@@ -204,8 +204,8 @@ class Booking(models.Model):
         super(Booking, self).save(*args, **kwargs)
 
     def __str__(self):
-        return '%s - %s %s-%s (%s)' % (
-            self.agency.name, self.reference, self.date_from, self.date_to, self.get_status_display())
+        return '%s - %s (%s) (%s)' % (
+            self.agency.name, self.name, self.reference, self.get_status_display())
 
 
 class BookingPax(models.Model):
