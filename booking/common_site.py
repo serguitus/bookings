@@ -16,7 +16,7 @@ from django.db import router, transaction
 from django import forms
 from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect, reverse
 from django.template.response import SimpleTemplateResponse, TemplateResponse
 from django.utils.encoding import force_text
 # from django.utils.translation import ugettext as _, ungettext
@@ -232,8 +232,8 @@ class BookingSiteModel(SiteModel):
     ordering = ('reference',)
     readonly_fields = ('status',)
     details_template = 'booking/booking_details.html'
-    inlines = [BookingPaxInline, BookingAllotmentInLine,
-               BookingTransferInLine, BookingExtraInLine]
+    inlines = [BookingPaxInline]  # , BookingAllotmentInLine,
+    # BookingTransferInLine, BookingExtraInLine]
     form = BookingForm
 
     """
@@ -278,6 +278,12 @@ class BookingAllotmentSiteModel(SiteModel):
     change_form_template = 'booking/bookingservices_change_form.html'
     inlines = [BookingServicePaxInline]
 
+    def response_add(self, request, obj, post_url_continue=None):
+        return redirect(reverse('common:booking_booking_change', args=[1]))
+
+    def response_change(self, request, obj, post_url_continue=None):
+        return redirect(reverse('common:booking_booking_change', args=[1]))
+
 
 class BookingTransferSiteModel(SiteModel):
     model_order = 1220
@@ -297,6 +303,12 @@ class BookingTransferSiteModel(SiteModel):
     change_form_template = 'booking/bookingservices_change_form.html'
     inlines = [BookingServicePaxInline]
 
+    def response_add(self, request, obj, post_url_continue=None):
+        return redirect(reverse('common:booking_booking_change', args=[1]))
+
+    def response_change(self, request, obj, post_url_continue=None):
+        return redirect(reverse('common:booking_booking_change', args=[1]))
+
 
 class BookingExtraSiteModel(SiteModel):
     model_order = 1230
@@ -315,6 +327,12 @@ class BookingExtraSiteModel(SiteModel):
     form = BookingExtraForm
     change_form_template = 'booking/bookingservices_change_form.html'
     inlines = [BookingServicePaxInline]
+
+    def response_add(self, request, obj, post_url_continue=None):
+        return redirect(reverse('common:booking_booking_change', args=[1]))
+
+    def response_change(self, request, obj, post_url_continue=None):
+        return redirect(reverse('common:booking_booking_change', args=[1]))
 
 
 # Starts Registration Section
