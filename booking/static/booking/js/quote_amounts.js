@@ -120,50 +120,50 @@ $(document).ready(function(){
             if (qtty && qtty == paxes) {
               ic1 = $('#id_quote_paxvariants-' + idx + '-cost_single_amount');
               sc1 = $('#' + idx + '-span-c1');
-              if (pax_data.cost_1) {
-                sc1.html(pax_data.cost_1);
+              if (pax_data.total.cost_1) {
+                sc1.html(pax_data.total.cost_1);
               } else {
-                sc1.html(pax_data.cost_1_msg);
+                sc1.html(pax_data.total.cost_1_msg);
               }
 
               ic2 = $('#id_quote_paxvariants-' + idx + '-cost_double_amount');
               sc2 = $('#' + idx + '-span-c2');
-              if (pax_data.cost_2) {
-                sc2.html(pax_data.cost_2);
+              if (pax_data.total.cost_2) {
+                sc2.html(pax_data.total.cost_2);
               } else {
-                sc2.html(pax_data.cost_2_msg);
+                sc2.html(pax_data.total.cost_2_msg);
               }
 
               ic3 = $('#id_quote_paxvariants-' + idx + '-cost_triple_amount');
               sc3 = $('#' + idx + '-span-c3');
-              if (pax_data.cost_3) {
-                sc3.html(pax_data.cost_3);
+              if (pax_data.total.cost_3) {
+                sc3.html(pax_data.total.cost_3);
               } else {
-                sc3.html(pax_data.cost_3_msg);
+                sc3.html(pax_data.total.cost_3_msg);
               }
 
               ip1 = $('#id_quote_paxvariants-' + idx + '-price_single_amount');
               sp1 = $('#' + idx + '-span-p1');
-              if (pax_data.price_1) {
-                sp1.html(pax_data.price_1);
+              if (pax_data.total.price_1) {
+                sp1.html(pax_data.total.price_1);
               } else {
-                sp1.html(pax_data.price_1_msg);
+                sp1.html(pax_data.total.price_1_msg);
               }
 
               ip2 = $('#id_quote_paxvariants-' + idx + '-price_double_amount');
               sp2 = $('#' + idx + '-span-p2');
-              if (pax_data.price_2) {
-                sp2.html(pax_data.price_2);
+              if (pax_data.total.price_2) {
+                sp2.html(pax_data.total.price_2);
               } else {
-                sp2.html(pax_data.price_2_msg);
+                sp2.html(pax_data.total.price_2_msg);
               }
 
               ip3 = $('#id_quote_paxvariants-' + idx + '-price_triple_amount');
               sp3 = $('#' + idx + '-span-p3');
-              if (pax_data.price_3) {
-                sp3.html(pax_data.price_3);
+              if (pax_data.total.price_3) {
+                sp3.html(pax_data.total.price_3);
               } else {
-                sp3.html(pax_data.price_3_msg);
+                sp3.html(pax_data.total.price_3_msg);
               }
             }
           }
