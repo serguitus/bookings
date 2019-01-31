@@ -279,10 +279,12 @@ class BookingAllotmentSiteModel(SiteModel):
     inlines = [BookingServicePaxInline]
 
     def response_add(self, request, obj, post_url_continue=None):
-        return redirect(reverse('common:booking_booking_change', args=[1]))
+        return redirect(reverse('common:booking_booking_change',
+                                args=[obj.booking.pk]))
 
     def response_change(self, request, obj, post_url_continue=None):
-        return redirect(reverse('common:booking_booking_change', args=[1]))
+        return redirect(reverse('common:booking_booking_change',
+                                args=[obj.booking.pk]))
 
 
 class BookingTransferSiteModel(SiteModel):
@@ -297,7 +299,8 @@ class BookingTransferSiteModel(SiteModel):
               'cost_amount', 'price_amount', 'provider', 'id')
     list_display = ('booking', 'name',
                     'datetime_from', 'datetime_to', 'time', 'status')
-    top_filters = ('booking__name', 'service', 'booking__reference', 'datetime_from', 'status',)
+    top_filters = ('booking__name', 'service', 'booking__reference',
+                   'datetime_from', 'status',)
     ordering = ('booking__reference', 'service__name',)
     form = BookingTransferForm
     change_form_template = 'booking/bookingservices_change_form.html'
