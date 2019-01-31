@@ -178,11 +178,13 @@ class BookingService(object):
         date_to = None
         for service in quote.quote_services.all():
             # date_from
-            if date_from is None or (date_from > service.datetime_from):
-                date_from = service.datetime_from
+            if service.datetime_from is not None:
+                if date_from is None or (date_from > service.datetime_from):
+                    date_from = service.datetime_from
             # date_to
-            if date_to is None or (date_to < service.datetime_to):
-                date_to = service.datetime_to
+            if service.datetime_to is not None:
+                if date_to is None or (date_to < service.datetime_to):
+                    date_to = service.datetime_to
         fields = []
         if quote.date_from != date_from:
             fields.append('date_from')
@@ -201,7 +203,11 @@ class BookingService(object):
             return 3, 'Pax Variants Missing', None
         if (not allotment_list) and (not transfer_list) and (not extra_list):
             return 2, 'Services Missing', None
+
         for pax_variant in variant_list:
+            variant_dict = dict()
+            variant_dict.update({'paxes': pax_variant.pax_quantity})
+
             cost_1 = 0
             cost_2 = 0
             cost_3 = 0
@@ -216,145 +222,277 @@ class BookingService(object):
             price_3_msg = ''
 
             if allotment_list:
+                counter = 0
                 for quote_allotment in allotment_list:
+                    key = '%s' % counter
                     if not hasattr(quote_allotment, 'service'):
-                        return 3, 'Quote Allotment Service Missing', None
-                    if quote_allotment.service.grouping:
-                        cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_allotment_amounts(
-                            cost_1, cost_1_msg, price_1, price_1_msg,
-                            quote_allotment.service,
-                            quote_allotment.datetime_from, quote_allotment.datetime_to,
-                            1,
-                            quote_allotment.board_type, quote_allotment.room_type_id,
-                            None,
-                            quote_allotment.provider, agency)
-                        cost_2, cost_2_msg, price_2, price_2_msg = cls._quote_allotment_amounts(
-                            cost_2, cost_2_msg, price_2, price_2_msg,
-                            quote_allotment.service,
-                            quote_allotment.datetime_from, quote_allotment.datetime_to,
-                            2,
-                            quote_allotment.board_type, quote_allotment.room_type_id,
-                            None,
-                            quote_allotment.provider, agency)
-                        cost_3, cost_3_msg, price_3, price_3_msg = cls._quote_allotment_amounts(
-                            cost_3, cost_3_msg, price_3, price_3_msg,
-                            quote_allotment.service,
-                            quote_allotment.datetime_from, quote_allotment.datetime_to,
-                            3,
-                            quote_allotment.board_type, quote_allotment.room_type_id,
-                            None,
-                            quote_allotment.provider, agency)
+                        variant_dict.update({key: cls._no_service_dict()})
                     else:
-                        cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_allotment_amounts(
-                            cost_1, cost_1_msg, price_1, price_1_msg,
-                            quote_allotment.service,
-                            quote_allotment.datetime_from, quote_allotment.datetime_to,
-                            pax_variant.pax_quantity,
-                            quote_allotment.board_type, quote_allotment.room_type_id,
-                            None,
-                            quote_allotment.provider, agency)
-                        cost_2, cost_2_msg = cost_1, cost_1_msg
-                        price_2, price_2_msg = price_1, price_1_msg
-                        cost_3, cost_3_msg = cost_1, cost_1_msg
-                        price_3, price_3_msg = price_1, price_1_msg
+                        if quote_allotment.service.grouping:
+                            # grouping means passing 1,2,3 as pax quantity
+                            code, msg, c1, c1_msg, p1, p1_msg = ConfigService.allotment_amounts(
+                                quote_allotment.service,
+                                quote_allotment.datetime_from, quote_allotment.datetime_to,
+                                ({0:1, 1:0},),
+                                quote_allotment.provider, agency,
+                                quote_allotment.board_type, quote_allotment.room_type_id)
+                            if c1:
+                                c1 = round(float(c1), 2)
+                            if p1:
+                                p1 = round(0.499999 + float(p1), 0)
+                            code, msg, c2, c2_msg, p2, p2_msg = ConfigService.allotment_amounts(
+                                quote_allotment.service,
+                                quote_allotment.datetime_from, quote_allotment.datetime_to,
+                                ({0:2, 1:0},),
+                                quote_allotment.provider, agency,
+                                quote_allotment.board_type, quote_allotment.room_type_id)
+                            if c2:
+                                c2 = round(float(c2) / 2, 2)
+                            if p2:
+                                p2 = round(0.499999 + float(p2) / 2, 0)
+                            code, msg, c3, c3_msg, p3, p3_msg = ConfigService.allotment_amounts(
+                                quote_allotment.service,
+                                quote_allotment.datetime_from, quote_allotment.datetime_to,
+                                ({0:3, 1:0},),
+                                quote_allotment.provider, agency,
+                                quote_allotment.board_type, quote_allotment.room_type_id)
+                            if c3:
+                                c3 = round(float(c3) / 3, 2)
+                            if p3:
+                                p3 = round(0.499999 + float(p3) / 3, 0)
+                        else:
+                            # no grouping means passing total pax quantity
+                            code, msg, c1, c1_msg, p1, p1_msg = ConfigService.allotment_amounts(
+                                quote_allotment.service,
+                                quote_allotment.datetime_from, quote_allotment.datetime_to,
+                                ({0:pax_variant.pax_quantity, 1:0},),
+                                quote_allotment.provider, agency,
+                                quote_allotment.board_type, quote_allotment.room_type_id)
+                            if c1:
+                                c1 = round(float(c1) / pax_variant.pax_quantity, 2)
+                            if p1:
+                                p1 = round(0.499999 + float(p1) / pax_variant.pax_quantity, 0)
+                            c2, c2_msg, p2, p2_msg = c1, c1_msg, p1, p1_msg
+                            c3, c3_msg, p3, p3_msg = c1, c1_msg, p1, p1_msg
+                        # service amounts
+                        variant_dict.update({key: cls._quote_amounts_dict(
+                            c1, c1_msg, p1, p1_msg,
+                            c2, c2_msg, p2, p2_msg,
+                            c3, c3_msg, p3, p3_msg
+                        )})
+                        # variants totals
+                        cost_1, cost_1_msg, price_1, price_1_msg, \
+                        cost_2, cost_2_msg, price_2, price_2_msg, \
+                        cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
+                            cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
+                            cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
+                            cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
+                    counter = counter + 1
 
             if transfer_list:
+                counter = 0
                 for quote_transfer in transfer_list:
+                    key = '2_%s' % counter
                     if not hasattr(quote_transfer, 'service'):
-                        return 3, 'Quote Transfer Service Missing', None
-                    if quote_transfer.service.grouping:
-                        cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_transfer_amounts(
-                            cost_1, cost_1_msg, price_1, price_1_msg,
-                            quote_transfer.service,
-                            quote_transfer.datetime_from, quote_transfer.datetime_to,
-                            1,
-                            quote_transfer.location_from_id, quote_transfer.location_to_id,
-                            quote_transfer.quantity,
-                            quote_transfer.provider, agency)
-                        cost_2, cost_2_msg, price_2, price_2_msg = cls._quote_transfer_amounts(
-                            cost_2, cost_2_msg, price_2, price_2_msg,
-                            quote_transfer.service,
-                            quote_transfer.datetime_from, quote_transfer.datetime_to,
-                            2,
-                            quote_transfer.location_from_id, quote_transfer.location_to_id,
-                            quote_transfer.quantity,
-                            quote_transfer.provider, agency)
-                        cost_3, cost_3_msg, price_3, price_3_msg = cls._quote_transfer_amounts(
-                            cost_3, cost_3_msg, price_3, price_3_msg,
-                            quote_transfer.service,
-                            quote_transfer.datetime_from, quote_transfer.datetime_to,
-                            3,
-                            quote_transfer.location_from_id, quote_transfer.location_to_id,
-                            quote_transfer.quantity,
-                            quote_transfer.provider, agency)
+                        variant_dict.update({key: cls._no_service_dict()})
                     else:
-                        cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_transfer_amounts(
-                            cost_1, cost_1_msg, price_1, price_1_msg,
-                            quote_transfer.service,
-                            quote_transfer.datetime_from, quote_transfer.datetime_to,
-                            pax_variant.pax_quantity,
-                            quote_transfer.location_from_id, quote_transfer.location_to_id,
-                            quote_transfer.quantity,
-                            quote_transfer.provider, agency)
-                        cost_2, cost_2_msg = cost_1, cost_1_msg
-                        price_2, price_2_msg = price_1, price_1_msg
-                        cost_3, cost_3_msg = cost_1, cost_1_msg
-                        price_3, price_3_msg = price_1, price_1_msg
+                        if quote_transfer.service.grouping:
+                            # grouping means passing 1,2,3 as pax quantity
+                            code, msg, c1, c1_msg, p1, p1_msg = ConfigService.transfer_amounts(
+                                quote_transfer.service,
+                                quote_transfer.datetime_from, quote_transfer.datetime_to,
+                                ({0:1, 1:0},),
+                                quote_transfer.provider, agency,
+                                quote_transfer.location_from_id, quote_transfer.location_to_id,
+                                quote_transfer.quantity)
+                            if c1:
+                                c1 = round(float(c1), 2)
+                            if p1:
+                                p1 = round(0.499999 + float(p1), 0)
+                            code, msg, c2, c2_msg, p2, p2_msg = ConfigService.transfer_amounts(
+                                quote_transfer.service,
+                                quote_transfer.datetime_from, quote_transfer.datetime_to,
+                                ({0:2, 1:0},),
+                                quote_transfer.provider, agency,
+                                quote_transfer.location_from_id, quote_transfer.location_to_id,
+                                quote_transfer.quantity)
+                            if c2:
+                                c2 = round(float(c2) / 2, 2)
+                            if p2:
+                                p2 = round(0.499999 + float(p2) / 2, 0)
+                            code, msg, c3, c3_msg, p3, p3_msg = ConfigService.transfer_amounts(
+                                quote_transfer.service,
+                                quote_transfer.datetime_from, quote_transfer.datetime_to,
+                                ({0:3, 1:0},),
+                                quote_transfer.provider, agency,
+                                quote_transfer.location_from_id, quote_transfer.location_to_id,
+                                quote_transfer.quantity)
+                            if c3:
+                                c3 = round(float(c3) / 3, 2)
+                            if p2:
+                                p3 = round(0.499999 + float(p3) / 3, 0)
+                        else:
+                            # no grouping means passing total pax quantity
+                            code, msg, c1, c1_msg, p1, p1_msg = ConfigService.transfer_amounts(
+                                quote_transfer.service,
+                                quote_transfer.datetime_from, quote_transfer.datetime_to,
+                                ({0:pax_variant.pax_quantity, 1:0},),
+                                quote_transfer.provider, agency,
+                                quote_transfer.location_from_id, quote_transfer.location_to_id,
+                                quote_transfer.quantity)
+                            if c1:
+                                c1 = round(float(c1) / pax_variant.pax_quantity, 2)
+                            if p1:
+                                p1 = round(0.499999 + float(p1) / pax_variant.pax_quantity, 0)
+                            c2, c2_msg, p2, p2_msg = c1, c1_msg, p1, p1_msg
+                            c3, c3_msg, p3, p3_msg = c1, c1_msg, p1, p1_msg
+                        # service amounts
+                        variant_dict.update({key: cls._quote_amounts_dict(
+                            c1, c1_msg, p1, p1_msg,
+                            c2, c2_msg, p2, p2_msg,
+                            c3, c3_msg, p3, p3_msg
+                        )})
+                        # variants totals
+                        cost_1, cost_1_msg, price_1, price_1_msg, \
+                        cost_2, cost_2_msg, price_2, price_2_msg, \
+                        cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
+                            cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
+                            cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
+                            cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
+                    counter = counter + 1
 
             if extra_list:
+                counter = 0
                 for quote_extra in extra_list:
+                    key = '3_%s' % counter
                     if not hasattr(quote_extra, 'service'):
-                        return 3, 'Quote Extra Service Missing', None
-                    if quote_extra.service.grouping:
-                        cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_extra_amounts(
-                            cost_1, cost_1_msg, price_1, price_1_msg,
-                            quote_extra.service,
-                            quote_extra.datetime_from, quote_extra.datetime_to,
-                            1,
-                            quote_extra.quantity, quote_extra.parameter,
-                            quote_extra.provider, agency)
-                        cost_2, cost_2_msg, price_2, price_2_msg = cls._quote_extra_amounts(
-                            cost_2, cost_2_msg, price_2, price_2_msg,
-                            quote_extra.service,
-                            quote_extra.datetime_from, quote_extra.datetime_to,
-                            2,
-                            quote_extra.quantity, quote_extra.parameter,
-                            quote_extra.provider, agency)
-                        cost_3, cost_3_msg, price_3, price_3_msg = cls._quote_extra_amounts(
-                            cost_3, cost_3_msg, price_3, price_3_msg,
-                            quote_extra.service,
-                            quote_extra.datetime_from, quote_extra.datetime_to,
-                            3,
-                            quote_extra.quantity, quote_extra.parameter,
-                            quote_extra.provider, agency)
+                        variant_dict.update({key: cls._no_service_dict()})
                     else:
-                        cost_1, cost_1_msg, price_1, price_1_msg = cls._quote_extra_amounts(
-                            cost_1, cost_1_msg, price_1, price_1_msg,
-                            quote_extra.service,
-                            quote_extra.datetime_from, quote_extra.datetime_to,
-                            pax_variant.pax_quantity,
-                            quote_extra.quantity, quote_extra.parameter,
-                            quote_extra.provider, agency)
-                        cost_2, cost_2_msg = cost_1, cost_1_msg
-                        price_2, price_2_msg = price_1, price_1_msg
-                        cost_3, cost_3_msg = cost_1, cost_1_msg
-                        price_3, price_3_msg = price_1, price_1_msg
-            result.append({
-                'paxes': pax_variant.pax_quantity,
-                'cost_1': cost_1,
-                'cost_1_msg': cost_1_msg,
-                'cost_2': cost_2,
-                'cost_2_msg': cost_2_msg,
-                'cost_3': cost_3,
-                'cost_3_msg': cost_3_msg,
-                'price_1': price_1,
-                'price_1_msg': price_1_msg,
-                'price_2': price_2,
-                'price_2_msg': price_2_msg,
-                'price_3': price_3,
-                'price_3_msg': price_3_msg,
-            })
+                        if quote_extra.service.grouping:
+                            # grouping means passing 1,2,3 as pax quantity
+                            code, msg, c1, c1_msg, p1, p1_msg = ConfigService.extra_amounts(
+                                quote_extra.service,
+                                quote_extra.datetime_from, quote_extra.datetime_to,
+                                ({0:1, 1:0},),
+                                quote_extra.provider, agency,
+                                quote_extra.quantity, quote_extra.parameter)
+                            if c1:
+                                c1 = round(float(c1), 2)
+                            if p1:
+                                p1 = round(0.499999 + float(p1), 0)
+                            code, msg, c2, c2_msg, p2, p2_msg = ConfigService.extra_amounts(
+                                quote_extra.service,
+                                quote_extra.datetime_from, quote_extra.datetime_to,
+                                ({0:2, 1:0},),
+                                quote_extra.provider, agency,
+                                quote_extra.quantity, quote_extra.parameter)
+                            if c2:
+                                c2 = round(float(c2) / 2, 2)
+                            if p2:
+                                p2 = round(0.499999 + float(p2), 0)
+                            code, msg, c3, c3_msg, p3, p3_msg = ConfigService.extra_amounts(
+                                quote_extra.service,
+                                quote_extra.datetime_from, quote_extra.datetime_to,
+                                ({0:3, 1:0},),
+                                quote_extra.provider, agency,
+                                quote_extra.quantity, quote_extra.parameter)
+                            if c3:
+                                c3 = round(float(c3) / 2, 2)
+                            if p3:
+                                p3 = round(0.499999 + float(p3), 0)
+
+                        else:
+                            # no grouping means passing total pax quantity
+                            code, msg, c1, c1_msg, p1, p1_msg = ConfigService.extra_amounts(
+                                quote_extra.service,
+                                quote_extra.datetime_from, quote_extra.datetime_to,
+                                ({0:pax_variant.pax_quantity, 1:0},),
+                                quote_extra.provider, agency,
+                                quote_extra.quantity, quote_extra.parameter)
+                            if c1:
+                                c1 = round(float(c1) / pax_variant.pax_quantity, 2)
+                            if p1:
+                                p1 = round(0.499999 + float(p1) / pax_variant.pax_quantity, 0)
+                            c2, c2_msg, p2, p2_msg = c1, c1_msg, p1, p1_msg
+                            c3, c3_msg, p3, p3_msg = c1, c1_msg, p1, p1_msg
+                        # service amounts
+                        variant_dict.update({key: cls._quote_amounts_dict(
+                            c1, c1_msg, p1, p1_msg,
+                            c2, c2_msg, p2, p2_msg,
+                            c3, c3_msg, p3, p3_msg
+                        )})
+                        # variants totals
+                        cost_1, cost_1_msg, price_1, price_1_msg, \
+                        cost_2, cost_2_msg, price_2, price_2_msg, \
+                        cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
+                            cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
+                            cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
+                            cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
+                    counter = counter + 1
+
+            variant_dict.update({'total': cls._quote_amounts_dict(
+                cost_1, cost_1_msg, price_1, price_1_msg,
+                cost_2, cost_2_msg, price_2, price_2_msg,
+                cost_3, cost_3_msg, price_3, price_3_msg)})
+
+            result.append(variant_dict)
+
         return 0, '', result
+
+    @classmethod
+    def _quote_amounts_dict(
+            cls,
+            cost_1, cost_1_msg, price_1, price_1_msg,
+            cost_2, cost_2_msg, price_2, price_2_msg,
+            cost_3, cost_3_msg, price_3, price_3_msg,
+            ):
+        return {
+            'cost_1': cost_1,
+            'cost_1_msg': cost_1_msg,
+            'price_1': price_1,
+            'price_1_msg': price_1_msg,
+            'cost_2': cost_2,
+            'price_2': price_2,
+            'price_2_msg': price_2_msg,
+            'cost_2_msg': cost_2_msg,
+            'cost_3': cost_3,
+            'cost_3_msg': cost_3_msg,
+            'price_3': price_3,
+            'price_3_msg': price_3_msg,
+        }
+
+    @classmethod
+    def _no_service_dict(cls):
+        return cls._quote_amounts_dict(
+            None, 'No Service', None, 'No Service', None, 'No Service',
+            None, 'No Service', None, 'No Service', None, 'No Service'
+        )
+
+    @classmethod
+    def _variant_totals(
+            cls,
+            cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
+            cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
+            cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg):
+        rc1, rc1_msg = cls._merge_amounts(cost_1, cost_1_msg, c1, c1_msg)
+        rp1, rp1_msg = cls._merge_amounts(price_1, price_1_msg, p1, p1_msg)
+        rc2, rc2_msg = cls._merge_amounts(cost_2, cost_2_msg, c2, c2_msg)
+        rp2, rp2_msg = cls._merge_amounts(price_2, price_2_msg, p2, p2_msg)
+        rc3, rc3_msg = cls._merge_amounts(cost_3, cost_3_msg, c3, c3_msg)
+        rp3, rp3_msg = cls._merge_amounts(price_3, price_3_msg, p3, p3_msg)
+
+        return rc1, rc1_msg, rp1, rp1_msg, rc2, rc2_msg, rp2, rp2_msg, rc3, rc3_msg, rp3, rp3_msg
+
+    @classmethod
+    def _merge_amounts(
+            cls,
+            prev_amount, prev_msg, amount, msg):
+        if prev_amount is None:
+            return None, prev_msg
+        elif amount is None:
+            return None, msg
+        else:
+            return prev_amount + amount, msg
 
     @classmethod
     def update_booking(cls, booking):
