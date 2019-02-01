@@ -75,6 +75,7 @@ class QuoteAllotmentInLine(CommonStackedInline):
         ('service', 'status'), ('datetime_from', 'datetime_to'),
         ('room_type', 'board_type'), 'provider']
     form = QuoteAllotmentInlineForm
+    template = 'booking/tabular.html'
 
 
 class QuoteTransferInLine(CommonStackedInline):

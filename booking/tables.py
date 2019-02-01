@@ -90,8 +90,8 @@ class BookingServiceTable(tables.Table):
         )
         return format_html('<a class="btn btn-primary" href="%s">Request</a>' % (email_url))
 
-#    def before_render(self, request):
-#        self.columns.hide('service_type')
+    #    def before_render(self, request):
+    #        self.columns.hide('service_type')
 
 
 class BookingPaxTable(tables.Table):

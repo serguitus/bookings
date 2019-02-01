@@ -196,7 +196,9 @@ class ProviderExtraDetail(AmountDetail):
     class Meta:
         verbose_name = 'Provider Extra Detail'
         verbose_name_plural = 'Providers Extras Details'
-        unique_together = (('provider_service',),)
+        unique_together = ('provider_service',
+                           'pax_range_min',
+                           'pax_range_max')
     provider_service = models.ForeignKey(ProviderExtraService)
     pax_range_min = models.SmallIntegerField(blank=True, null=True)
     pax_range_max = models.SmallIntegerField(blank=True, null=True)
@@ -222,7 +224,9 @@ class AgencyExtraDetail(AmountDetail):
     class Meta:
         verbose_name = 'Agency Extra Detail'
         verbose_name_plural = 'Agencies Extra Details'
-        unique_together = (('agency_service',),)
+        unique_together = ('agency_service',
+                           'pax_range_min',
+                           'pax_range_max')
     agency_service = models.ForeignKey(AgencyExtraService)
     pax_range_min = models.SmallIntegerField(blank=True, null=True)
     pax_range_max = models.SmallIntegerField(blank=True, null=True)
@@ -402,7 +406,7 @@ class ProviderTransferDetail(AmountDetail):
     class Meta:
         verbose_name = 'Provider Transfer Detail'
         verbose_name_plural = 'Providers Transfers Details'
-        unique_together = (('provider_service', 'p_location_from', 'p_location_to',),)
+        unique_together = ('provider_service', 'p_location_from', 'p_location_to',)
     provider_service = models.ForeignKey(ProviderTransferService)
     p_location_from = models.ForeignKey(Location, related_name='p_location_from', verbose_name='Location from')
     p_location_to = models.ForeignKey(Location, related_name='p_location_to', verbose_name='Location to')
