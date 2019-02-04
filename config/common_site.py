@@ -149,8 +149,9 @@ class ExtraSiteModel(SiteModel):
     model_order = 6130
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
-    fields = ('name', 'cost_type', 'parameter_type', 'enabled',)
-    list_display = ('name', 'cost_type', 'parameter_type', 'enabled',)
+    fields = ('name', 'location', 'cost_type', 'parameter_type', 'enabled',)
+    list_display = ('name', 'location', 'cost_type',
+                    'parameter_type', 'enabled',)
     top_filters = ('name',)
     ordering = ('enabled', 'name',)
     inlines = [ExtraSupplementInline]

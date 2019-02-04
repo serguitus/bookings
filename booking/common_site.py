@@ -233,8 +233,8 @@ class BookingSiteModel(SiteModel):
     ordering = ('reference',)
     readonly_fields = ('status',)
     details_template = 'booking/booking_details.html'
-    inlines = [BookingPaxInline]  # , BookingAllotmentInLine,
-    # BookingTransferInLine, BookingExtraInLine]
+    inlines = [BookingPaxInline, BookingAllotmentInLine,
+               BookingTransferInLine, BookingExtraInLine]
     form = BookingForm
 
     """

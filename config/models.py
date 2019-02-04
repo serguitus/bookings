@@ -161,6 +161,7 @@ class Extra(Service):
         max_length=5, choices=EXTRA_PARAMETER_TYPES)
     has_pax_range = models.BooleanField(default=False)
     max_capacity = models.IntegerField(blank=True, null=True)
+    location = models.ForeignKey(Location)
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_EXTRA
