@@ -15,10 +15,10 @@ from config.constants import (BOARD_TYPES, SERVICE_CATEGORIES,
                               SERVICE_CATEGORY_ALLOTMENT,
                               SERVICE_CATEGORY_EXTRA)
 from config.models import (
-    Service, ServiceSupplement,
-    RoomType, Allotment, AllotmentRoomType, AllotmentBoardType,
+    ServiceSupplement,
+    RoomType, Allotment,
     Transfer, Location,
-    Extra,
+    Extra, Addon,
 )
 
 from finance.models import Agency, AgencyInvoice, Provider, ProviderInvoice
@@ -157,6 +157,7 @@ class QuoteExtra(QuoteService):
         verbose_name = 'Quote Extra'
         verbose_name_plural = 'Quotes Extras'
     service = models.ForeignKey(Extra)
+    addon = models.ForeignKey(Addon, blank=True, null=True)
     time = models.TimeField(blank=True, null=True)
     quantity = models.SmallIntegerField(default=1)
     parameter = models.SmallIntegerField()
@@ -404,6 +405,7 @@ class BookingExtra(BookingService):
         verbose_name = 'Booking Extra'
         verbose_name_plural = 'Bookings Extras'
     service = models.ForeignKey(Extra)
+    addon = models.ForeignKey(Addon, blank=True, null=True)
     time = models.TimeField(blank=True, null=True)
     quantity = models.SmallIntegerField()
     parameter = models.SmallIntegerField()

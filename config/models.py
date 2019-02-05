@@ -148,6 +148,21 @@ class AmountDetail(models.Model):
 #===============================================================================
 # Extra
 #===============================================================================
+class Addon(models.Model):
+    """
+    Addon
+    """
+    class Meta:
+        verbose_name = 'Addon'
+        verbose_name_plural = 'Addons'
+        unique_together = (('name',),)
+    name = models.CharField(max_length=50)
+    enabled = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Extra(Service):
     """
     Extra
@@ -166,6 +181,21 @@ class Extra(Service):
     def fill_data(self):
         self.category = SERVICE_CATEGORY_EXTRA
         self.grouping = False
+
+
+class ExtraAddon(models.Model):
+    """
+    ExtraAddon
+    """
+    class Meta:
+        verbose_name = 'Extra Addon'
+        verbose_name_plural = 'Extras Addons'
+        unique_together = (('extra', 'addon',),)
+    extra = models.ForeignKey(Extra)
+    addon = models.ForeignKey(Addon)
+
+    def __str__(self):
+        return '%s' % (self.addon)
 
 
 class ExtraSupplement(ServiceSupplement):
