@@ -3,6 +3,8 @@ Config Service
 """
 from datetime import datetime, timedelta
 
+from django.db.models import Q
+
 from config.constants import (
     SERVICE_CATEGORY_EXTRA, SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER,
     TRANSFER_COST_TYPE_FIXED, TRANSFER_COST_TYPE_BY_PAX,
@@ -162,26 +164,20 @@ class ConfigService(object):
                     queryset = cls._get_provider_queryset(
                         ProviderExtraDetail.objects,
                         provider.id, service_id, date_from, date_to)
+                    # pax range filtering
+                    queryset = queryset.filter(
+                        (Q(pax_range_min__isnull=True) & Q(pax_range_max__gte=paxes)) |
+                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__gte=paxes)) |
+                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__isnull=True))
+                    )
+                    # addon filtering
                     if addon_id:
-                        detail_list = list(
-                            queryset.filter(
-                                pax_range_min__lte=paxes
-                            ).filter(
-                                pax_range_max__gte=paxes
-                            ).filter(
-                                addon_id=addon_id
-                            )
-                        )
+                        queryset = queryset.filter(addon_id=addon_id)
                     else:
-                        detail_list = list(
-                            queryset.filter(
-                                pax_range_min__lte=paxes
-                            ).filter(
-                                pax_range_max__gte=paxes
-                            ).filter(
-                                addon_id__isnull=True
-                            )
-                        )
+                        queryset = queryset.filter(addon_id__isnull=True)
+
+                    detail_list = list(queryset)
+                    
                     group_cost, group_cost_message = cls.find_group_amount(
                         True, service, date_from, date_to, group,
                         quantity, parameter, detail_list
@@ -197,7 +193,14 @@ class ConfigService(object):
                 queryset = cls._get_provider_queryset(
                     ProviderExtraDetail.objects,
                     provider.id, service_id, date_from, date_to)
+                # addon filtering
+                if addon_id:
+                    queryset = queryset.filter(addon_id=addon_id)
+                else:
+                    queryset = queryset.filter(addon_id__isnull=True)
+
                 detail_list = list(queryset)
+
                 cost, cost_message = cls.find_groups_amount(
                     True, service, date_from, date_to, groups,
                     quantity, parameter, detail_list
@@ -218,26 +221,19 @@ class ConfigService(object):
                     queryset = cls._get_agency_queryset(
                         AgencyExtraDetail.objects,
                         agency.id, service_id, date_from, date_to)
+                    # pax range filtering
+                    queryset = queryset.filter(
+                        (Q(pax_range_min__isnull=True) & Q(pax_range_max__gte=paxes)) |
+                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__gte=paxes)) |
+                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__isnull=True))
+                    )
+                    # addon filtering
                     if addon_id:
-                        detail_list = list(
-                            queryset.filter(
-                                pax_range_min__lte=paxes
-                            ).filter(
-                                pax_range_max__gte=paxes
-                            ).filter(
-                                addon_id=addon_id
-                            )
-                        )
+                        queryset = queryset.filter(addon_id=addon_id)
                     else:
-                        detail_list = list(
-                            queryset.filter(
-                                pax_range_min__lte=paxes
-                            ).filter(
-                                pax_range_max__gte=paxes
-                            ).filter(
-                                addon_id__isnull=True
-                            )
-                        )
+                        queryset = queryset.filter(addon_id__isnull=True)
+
+                    detail_list = list(queryset)
                     group_price, group_price_message = cls.find_group_amount(
                         False, service, date_from, date_to, group,
                         quantity, parameter, detail_list
@@ -253,7 +249,14 @@ class ConfigService(object):
                 queryset = cls._get_agency_queryset(
                     AgencyExtraDetail.objects,
                     agency.id, service_id, date_from, date_to)
+                # addon filtering
+                if addon_id:
+                    queryset = queryset.filter(addon_id=addon_id)
+                else:
+                    queryset = queryset.filter(addon_id__isnull=True)
+
                 detail_list = list(queryset)
+
                 price, price_message = cls.find_groups_amount(
                     False, service, date_from, date_to, groups,
                     quantity, parameter, detail_list
