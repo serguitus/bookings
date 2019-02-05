@@ -141,7 +141,7 @@ class ConfigService(object):
     @classmethod
     def extra_amounts(
             cls, service_id, date_from, date_to, groups, provider, agency,
-            quantity, parameter):
+            addon_id, quantity, parameter):
         service = Extra.objects.get(pk=service_id)
 
         if service.cost_type == EXTRA_COST_TYPE_BY_PAX and (groups is None):
@@ -162,13 +162,26 @@ class ConfigService(object):
                     queryset = cls._get_provider_queryset(
                         ProviderExtraDetail.objects,
                         provider.id, service_id, date_from, date_to)
-                    detail_list = list(
-                        queryset.filter(
-                            pax_range_min__lte=paxes
-                        ).filter(
-                            pax_range_max__gte=paxes
+                    if addon_id:
+                        detail_list = list(
+                            queryset.filter(
+                                pax_range_min__lte=paxes
+                            ).filter(
+                                pax_range_max__gte=paxes
+                            ).filter(
+                                addon_id=addon_id
+                            )
                         )
-                    )
+                    else:
+                        detail_list = list(
+                            queryset.filter(
+                                pax_range_min__lte=paxes
+                            ).filter(
+                                pax_range_max__gte=paxes
+                            ).filter(
+                                addon_id__isnull=True
+                            )
+                        )
                     group_cost, group_cost_message = cls.find_group_amount(
                         True, service, date_from, date_to, group,
                         quantity, parameter, detail_list
@@ -205,13 +218,26 @@ class ConfigService(object):
                     queryset = cls._get_agency_queryset(
                         AgencyExtraDetail.objects,
                         agency.id, service_id, date_from, date_to)
-                    detail_list = list(
-                        queryset.filter(
-                            pax_range_min__lte=paxes
-                        ).filter(
-                            pax_range_max__gte=paxes
+                    if addon_id:
+                        detail_list = list(
+                            queryset.filter(
+                                pax_range_min__lte=paxes
+                            ).filter(
+                                pax_range_max__gte=paxes
+                            ).filter(
+                                addon_id=addon_id
+                            )
                         )
-                    )
+                    else:
+                        detail_list = list(
+                            queryset.filter(
+                                pax_range_min__lte=paxes
+                            ).filter(
+                                pax_range_max__gte=paxes
+                            ).filter(
+                                addon_id__isnull=True
+                            )
+                        )
                     group_price, group_price_message = cls.find_group_amount(
                         False, service, date_from, date_to, group,
                         quantity, parameter, detail_list
