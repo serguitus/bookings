@@ -279,11 +279,16 @@ class BookingServicePax(models.Model):
         verbose_name = 'Booking Service Pax'
         verbose_name_plural = 'Booking Service Rooming'
     booking_pax = models.ForeignKey(BookingPax)
-    booking_service = models.ForeignKey(BookingService, related_name='rooming_list')
-    group = models.SmallIntegerField()
-    cost_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    booking_service = models.ForeignKey(BookingService,
+                                        related_name='rooming_list')
+    group = models.SmallIntegerField(verbose_name='Room')
+    cost_amount = models.DecimalField(max_digits=10, decimal_places=2,
+                                      blank=True, null=True,
+                                      verbose_name='Cost')
     cost_comments = models.CharField(max_length=1000, blank=True, null=True)
-    price_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    price_amount = models.DecimalField(max_digits=10, decimal_places=2,
+                                       blank=True, null=True,
+                                       verbose_name='Price')
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
 
     def fill_data(self):
