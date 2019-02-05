@@ -375,6 +375,7 @@ class BookingService(object):
                                 quote_extra.datetime_from, quote_extra.datetime_to,
                                 ({0:1, 1:0},),
                                 quote_extra.provider, agency,
+                                quote_extra.addon_id,
                                 quote_extra.quantity, quote_extra.parameter)
                             if c1:
                                 c1 = round(float(c1), 2)
@@ -385,6 +386,7 @@ class BookingService(object):
                                 quote_extra.datetime_from, quote_extra.datetime_to,
                                 ({0:2, 1:0},),
                                 quote_extra.provider, agency,
+                                quote_extra.addon_id,
                                 quote_extra.quantity, quote_extra.parameter)
                             if c2:
                                 c2 = round(float(c2) / 2, 2)
@@ -395,6 +397,7 @@ class BookingService(object):
                                 quote_extra.datetime_from, quote_extra.datetime_to,
                                 ({0:3, 1:0},),
                                 quote_extra.provider, agency,
+                                quote_extra.addon_id,
                                 quote_extra.quantity, quote_extra.parameter)
                             if c3:
                                 c3 = round(float(c3) / 2, 2)
@@ -408,6 +411,7 @@ class BookingService(object):
                                 quote_extra.datetime_from, quote_extra.datetime_to,
                                 ({0:pax_variant.pax_quantity, 1:0},),
                                 quote_extra.provider, agency,
+                                quote_extra.addon_id,
                                 quote_extra.quantity, quote_extra.parameter)
                             if c1:
                                 c1 = round(float(c1) / pax_variant.pax_quantity, 2)
@@ -655,7 +659,7 @@ class BookingService(object):
     def _quote_extra_amounts(
             cls,
             cost, cost_msg, price, price_msg,
-            service, date_from, date_to, adults, quantity, parameter,
+            service, date_from, date_to, adults, addon_id, quantity, parameter,
             provider, agency):
         groups = ({0:adults, 1:0},)
         if cost is None:
@@ -665,18 +669,18 @@ class BookingService(object):
                 code, msg, c, c_msg, p, p_msg = ConfigService.extra_amounts(
                     service, date_from, date_to, groups,
                     None, agency,
-                    quantity, parameter)
+                    addon_id, quantity, parameter)
         else:
             if price is None:
                 code, msg, c, c_msg, p, p_msg = ConfigService.extra_amounts(
                     service, date_from, date_to, groups,
                     provider, None,
-                    quantity, parameter)
+                    addon_id, quantity, parameter)
             else:
                 code, msg, c, c_msg, p, p_msg = ConfigService.extra_amounts(
                     service, date_from, date_to, groups,
                     provider, agency,
-                    quantity, parameter)
+                    addon_id, quantity, parameter)
             return cls._quote_results(adults, cost, cost_msg, price, price_msg, c, c_msg, p, p_msg)
 
     @classmethod
