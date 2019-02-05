@@ -407,8 +407,8 @@ class BookingExtra(BookingService):
     service = models.ForeignKey(Extra)
     addon = models.ForeignKey(Addon, blank=True, null=True)
     time = models.TimeField(blank=True, null=True)
-    quantity = models.SmallIntegerField()
-    parameter = models.SmallIntegerField()
+    quantity = models.SmallIntegerField(default=1)
+    parameter = models.SmallIntegerField(default=0)
 
     def fill_data(self):
         # setting name for this booking_service
