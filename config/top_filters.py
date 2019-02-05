@@ -10,6 +10,11 @@ class RoomTypeTopFilter(filters.ForeignKeyFilter):
     autocomplete_url = 'roomtype-autocomplete'
 
 
+class AddonTopFilter(filters.ForeignKeyFilter):
+    filter_title = 'Select Addons'
+    autocomplete_url = 'addon-autocomplete'
+
+
 class LocationTopFilter(filters.ForeignKeyFilter):
     filter_title = 'Select Locations'
     autocomplete_url = 'location-autocomplete'

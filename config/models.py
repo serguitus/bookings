@@ -231,6 +231,7 @@ class ProviderExtraDetail(AmountDetail):
                            'pax_range_min',
                            'pax_range_max')
     provider_service = models.ForeignKey(ProviderExtraService)
+    addon = models.ForeignKey(Addon, blank=True, null=True)
     pax_range_min = models.SmallIntegerField(blank=True, null=True)
     pax_range_max = models.SmallIntegerField(blank=True, null=True)
 
@@ -259,6 +260,7 @@ class AgencyExtraDetail(AmountDetail):
                            'pax_range_min',
                            'pax_range_max')
     agency_service = models.ForeignKey(AgencyExtraService)
+    addon = models.ForeignKey(Addon, blank=True, null=True)
     pax_range_min = models.SmallIntegerField(blank=True, null=True)
     pax_range_max = models.SmallIntegerField(blank=True, null=True)
 

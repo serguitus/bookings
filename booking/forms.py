@@ -221,6 +221,10 @@ class BookingExtraInlineForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'service': autocomplete.ModelSelect2(url='extra-autocomplete'),
+            'addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['service'],
+                ),
             'provider': autocomplete.ModelSelect2(
                 url='providerextra-autocomplete',
                 forward=['service'],
@@ -234,6 +238,10 @@ class BookingExtraForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'service': autocomplete.ModelSelect2(url='extra-autocomplete'),
+            'addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['service'],
+                ),
             'provider': autocomplete.ModelSelect2(
                 url='providerextra-autocomplete',
                 forward=['service'],
