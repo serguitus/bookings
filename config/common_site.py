@@ -185,7 +185,7 @@ class ExtraSiteModel(SiteModel):
                     'parameter_type', 'enabled',)
     top_filters = ('name',)
     ordering = ('enabled', 'name',)
-    inlines = [ExtraSupplementInline]
+    inlines = [ExtraAddonInline, ExtraSupplementInline]
 
 
 class ProviderAllotmentDetailInline(CommonStackedInline):

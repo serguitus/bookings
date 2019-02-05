@@ -228,6 +228,7 @@ class ProviderExtraDetail(AmountDetail):
         verbose_name = 'Provider Extra Detail'
         verbose_name_plural = 'Providers Extras Details'
         unique_together = ('provider_service',
+                           'addon',
                            'pax_range_min',
                            'pax_range_max')
     provider_service = models.ForeignKey(ProviderExtraService)
@@ -257,6 +258,7 @@ class AgencyExtraDetail(AmountDetail):
         verbose_name = 'Agency Extra Detail'
         verbose_name_plural = 'Agencies Extra Details'
         unique_together = ('agency_service',
+                           'addon',
                            'pax_range_min',
                            'pax_range_max')
     agency_service = models.ForeignKey(AgencyExtraService)
