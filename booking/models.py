@@ -219,13 +219,16 @@ class BookingPax(models.Model):
         unique_together = (('booking', 'pax_name'),)
     booking = models.ForeignKey(Booking, related_name='rooming_list')
     pax_name = models.CharField(max_length=50)
-    pax_age = models.SmallIntegerField(blank=True, null=True)
-    pax_group = models.SmallIntegerField()
+    pax_age = models.SmallIntegerField(blank=True, null=True,
+                                       verbose_name='Age')
+    pax_group = models.SmallIntegerField(verbose_name='Room')
     cost_amount = models.DecimalField(max_digits=10, decimal_places=2,
-                                      blank=True, null=True)
+                                      blank=True, null=True,
+                                      verbose_name='Cost')
     cost_comments = models.CharField(max_length=1000, blank=True, null=True)
     price_amount = models.DecimalField(max_digits=10, decimal_places=2,
-                                       blank=True, null=True)
+                                       blank=True, null=True,
+                                       verbose_name='Price')
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
 
     def __str__(self):
