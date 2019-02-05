@@ -30,6 +30,7 @@ from config.views import (
     LocationAutocompleteView, RoomTypeAutocompleteView, BoardTypeAutocompleteView,
     AllotmentAutocompleteView, ProviderAllotmentAutocompleteView,
     TransferAutocompleteView, ProviderTransferAutocompleteView,
+    AddonAutocompleteView,
     ExtraAutocompleteView, ProviderExtraAutocompleteView,
 )
 from booking import urls as booking_urls
@@ -112,5 +113,9 @@ urlpatterns = [
     url(r'^dropoff-autocomplete/$',
         DropOffAutocompleteView.as_view(),
         name='dropoff-autocomplete',
+    ),
+    url(r'^addon-autocomplete/$',
+        AddonAutocompleteView.as_view(),
+        name='addon-autocomplete',
     ),
 ]
