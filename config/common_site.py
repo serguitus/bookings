@@ -149,7 +149,8 @@ class ExtraSiteModel(SiteModel):
     model_order = 6130
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
-    fields = ('name', 'location', 'has_pax_range', 'cost_type', 'parameter_type', 'enabled',)
+    fields = ('name', 'location', 'cost_type', 'parameter_type',
+              'has_pax_range', 'enabled',)
     list_display = ('name', 'location', 'cost_type',
                     'parameter_type', 'enabled',)
     top_filters = ('name',)
