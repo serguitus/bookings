@@ -228,9 +228,11 @@ class ProviderExtraDetail(AmountDetail):
         verbose_name = 'Provider Extra Detail'
         verbose_name_plural = 'Providers Extras Details'
         unique_together = ('provider_service',
+                           'addon',
                            'pax_range_min',
                            'pax_range_max')
     provider_service = models.ForeignKey(ProviderExtraService)
+    addon = models.ForeignKey(Addon, blank=True, null=True)
     pax_range_min = models.SmallIntegerField(blank=True, null=True)
     pax_range_max = models.SmallIntegerField(blank=True, null=True)
 
@@ -256,9 +258,11 @@ class AgencyExtraDetail(AmountDetail):
         verbose_name = 'Agency Extra Detail'
         verbose_name_plural = 'Agencies Extra Details'
         unique_together = ('agency_service',
+                           'addon',
                            'pax_range_min',
                            'pax_range_max')
     agency_service = models.ForeignKey(AgencyExtraService)
+    addon = models.ForeignKey(Addon, blank=True, null=True)
     pax_range_min = models.SmallIntegerField(blank=True, null=True)
     pax_range_max = models.SmallIntegerField(blank=True, null=True)
 

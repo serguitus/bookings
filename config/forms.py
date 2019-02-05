@@ -57,6 +57,16 @@ class ProviderTransferDetailInlineForm(forms.ModelForm):
         }
 
 
+class ProviderExtraDetailInlineForm(forms.ModelForm):
+    class Meta:
+        fields = ('__all__')
+        widgets = {
+            'addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['service']),
+        }
+
+
 class ProviderExtraServiceForm(forms.ModelForm):
     class Meta:
         model = AgencyExtraService
@@ -104,6 +114,16 @@ class AgencyTransferDetailInlineForm(forms.ModelForm):
         }
 
 
+class AgencyExtraDetailInlineForm(forms.ModelForm):
+    class Meta:
+        fields = ('__all__')
+        widgets = {
+            'addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['service']),
+        }
+
+
 class AgencyExtraServiceForm(forms.ModelForm):
     class Meta:
         model = AgencyExtraService
@@ -119,4 +139,12 @@ class AllotmentRoomTypeInlineForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'room_type': autocomplete.ModelSelect2(url='roomtype-autocomplete'),
+        }
+
+
+class ExtraAddonInlineForm(forms.ModelForm):
+    class Meta:
+        fields = ('__all__')
+        widgets = {
+            'addon': autocomplete.ModelSelect2(url='addon-autocomplete'),
         }

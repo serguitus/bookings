@@ -156,9 +156,12 @@ class QuoteExtraSiteModel(SiteModel):
     fields = (
         'quote',
         ('service', 'status'),
-        ('datetime_from', 'datetime_to'),
-         'parameter', 'provider', 'id')
-    list_display = ('quote', 'service', 'parameter', 'datetime_from', 'datetime_to', 'status',)
+        ('datetime_from', 'datetime_to', 'time'),
+        ('addon', 'quantity', 'parameter'),
+        'provider', 'id')
+    list_display = (
+        'quote', 'service', 'addon', 'quantity', 'parameter',
+        'datetime_from', 'datetime_to', 'time', 'status',)
     top_filters = ('service', 'quote__reference', 'datetime_from', 'status',)
     ordering = ('quote__reference', 'service__name',)
     form = QuoteExtraForm
@@ -323,9 +326,9 @@ class BookingExtraSiteModel(SiteModel):
 
     fields = ['booking', ('service', 'status', 'conf_number'),
               ('datetime_from', 'datetime_to', 'time'),
-              ('quantity', 'parameter'),
+              ('addon', 'quantity', 'parameter'),
               'cost_amount', 'price_amount', 'provider', 'id']
-    list_display = ('booking', 'name', 'quantity', 'parameter',
+    list_display = ('booking', 'name', 'addon', 'quantity', 'parameter',
                     'datetime_from', 'datetime_to', 'time', 'status',)
     top_filters = ('booking__name', 'service', 'booking__reference',
                    'datetime_from','status',)

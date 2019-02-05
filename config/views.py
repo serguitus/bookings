@@ -5,7 +5,7 @@ from django.utils.encoding import force_text
 from django.utils.translation import ugettext
 
 from config.models import (
-    Location, RoomType,
+    Location, RoomType, Addon,
     Allotment, AllotmentBoardType, Transfer, Extra
 )
 
@@ -52,6 +52,23 @@ class BoardTypeAutocompleteView(autocomplete.Select2ListView):
                 result.append(allotment_board.board_type)
 
         return result
+
+
+class AddonAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return Addon.objects.none()
+        qs = Addon.objects.filter(enabled=True).all().distinct()
+
+        service = self.forwarded.get('service', None)
+
+        if service:
+            qs = qs.filter(extraaddon__extra=service)
+
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs[:20]
 
 
 class AllotmentAutocompleteView(autocomplete.Select2QuerySetView):

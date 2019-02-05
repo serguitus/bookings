@@ -19,15 +19,17 @@ from django.utils.translation import ugettext as _, ungettext
 from config.forms import (
     ProviderAllotmentServiceForm, ProviderTransferServiceForm, ProviderExtraServiceForm,
     ProviderAllotmentDetailInlineForm, ProviderTransferDetailInlineForm,
+    ProviderExtraDetailInlineForm,
     AgencyAllotmentServiceForm, AgencyTransferServiceForm, AgencyExtraServiceForm,
     AgencyAllotmentDetailInlineForm, AgencyTransferDetailInlineForm,
-    AllotmentRoomTypeInlineForm,
+    AgencyExtraDetailInlineForm,
+    AllotmentRoomTypeInlineForm, ExtraAddonInlineForm
 )
 from config.models import (
-    Location, RoomType,
+    Location, RoomType, Addon,
     Allotment, AllotmentRoomType, AllotmentBoardType, AllotmentSupplement,
     Transfer, TransferSupplement,
-    Extra, ExtraSupplement,
+    Extra, ExtraAddon, ExtraSupplement,
     AgencyAllotmentService, AgencyAllotmentDetail,
     AgencyTransferService, AgencyTransferDetail,
     AgencyExtraService, AgencyExtraDetail,
@@ -37,6 +39,7 @@ from config.models import (
 )
 from config.top_filters import (
     RoomTypeTopFilter, LocationTopFilter,
+    AddonTopFilter,
     AllotmentTopFilter, TransferTopFilter, ExtraTopFilter,
     LocationForProviderTransferTopFilter, ExtraLocationForProviderTransferTopFilter)
 
@@ -69,6 +72,15 @@ class RoomTypeSiteModel(SiteModel):
     top_filters = ('name', 'enabled',)
 
 
+class AddonSiteModel(SiteModel):
+    model_order = 6030
+    menu_label = MENU_LABEL_CONFIG_BASIC
+    fields = ('name', 'enabled',)
+    list_display = ('name', 'enabled',)
+    list_editable = ('enabled',)
+    top_filters = ('name', 'enabled',)
+
+
 class AllotmentRoomTypeInline(CommonTabularInline):
     model = AllotmentRoomType
     extra = 0
@@ -81,8 +93,8 @@ class AllotmentRoomTypeSiteModel(SiteModel):
     model_order = 8110
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Testing'
-    fields = ('allotment', 'room_type', 'room_capacity',)
-    list_display = ('allotment', 'room_type', 'room_capacity',)
+    fields = ('allotment', 'room_type',)
+    list_display = ('allotment', 'room_type',)
     top_filters = ('allotment__name', ('room_type', RoomTypeTopFilter),)
     ordering = ('allotment__name',)
 
@@ -140,6 +152,24 @@ class TransferSiteModel(SiteModel):
     inlines = [TransferSupplementInline]
 
 
+class ExtraAddonInline(CommonTabularInline):
+    model = ExtraAddon
+    extra = 0
+    show_change_link = True
+
+    form = ExtraAddonInlineForm
+
+
+class ExtraAddonSiteModel(SiteModel):
+    model_order = 8120
+    menu_label = MENU_LABEL_CONFIG_BASIC
+    menu_group = 'Configuration Testing'
+    fields = ('extra', 'addon',)
+    list_display = ('extra', 'addon',)
+    top_filters = ('extra__name', ('addon', AddonTopFilter),)
+    ordering = ('extra__name',)
+
+
 class ExtraSupplementInline(CommonTabularInline):
     model = ExtraSupplement
     extra = 0
@@ -155,7 +185,7 @@ class ExtraSiteModel(SiteModel):
                     'parameter_type', 'enabled',)
     top_filters = ('name',)
     ordering = ('enabled', 'name',)
-    inlines = [ExtraSupplementInline]
+    inlines = [ExtraAddonInline, ExtraSupplementInline]
 
 
 class ProviderAllotmentDetailInline(CommonStackedInline):
@@ -212,8 +242,8 @@ class ProviderExtraDetailInline(CommonStackedInline):
     model = ProviderExtraDetail
     extra = 0
     fields = (
-        'ad_1_amount', 'pax_range_min', 'pax_range_max',
-    )
+        ('addon', 'ad_1_amount'), ('pax_range_min', 'pax_range_max'))
+    form = ProviderExtraDetailInlineForm
 
 
 class ProviderExtraServiceSiteModel(SiteModel):
@@ -279,8 +309,8 @@ class AgencyExtraDetailInline(CommonStackedInline):
     model = AgencyExtraDetail
     extra = 0
     fields = (
-        ('ad_1_amount', 'pax_range_min', 'pax_range_max',),
-    )
+        ('addon', 'ad_1_amount'), ('pax_range_min', 'pax_range_max'),)
+    form = AgencyExtraDetailInlineForm
 
 
 class AgencyExtraServiceSiteModel(SiteModel):
@@ -297,9 +327,11 @@ class AgencyExtraServiceSiteModel(SiteModel):
 
 bookings_site.register(Location, LocationSiteModel)
 bookings_site.register(RoomType, RoomTypeSiteModel)
+bookings_site.register(Addon, AddonSiteModel)
 
 bookings_site.register(AllotmentRoomType, AllotmentRoomTypeSiteModel)
 bookings_site.register(AllotmentBoardType, AllotmentBoardTypeSiteModel)
+bookings_site.register(ExtraAddon, ExtraAddonSiteModel)
 
 bookings_site.register(Allotment, AllotmentSiteModel)
 bookings_site.register(Transfer, TransferSiteModel)
