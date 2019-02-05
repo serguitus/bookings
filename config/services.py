@@ -213,7 +213,7 @@ class ConfigService(object):
                         )
                     )
                     group_price, group_price_message = cls.find_group_amount(
-                        True, service, date_from, date_to, group,
+                        False, service, date_from, date_to, group,
                         quantity, parameter, detail_list
                     )
                     if group_price:
