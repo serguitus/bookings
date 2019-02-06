@@ -91,8 +91,9 @@ class QuoteExtraInLine(CommonStackedInline):
     model = QuoteExtra
     extra = 0
     fields = [
-        ('service', 'status'), ('datetime_from', 'datetime_to'),
-        'parameter', 'provider']
+        ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
+        ('addon', 'quantity', 'parameter'),
+        'provider']
     form = QuoteExtraInlineForm
 
 

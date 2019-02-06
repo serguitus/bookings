@@ -90,9 +90,13 @@ class QuoteExtraInlineForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'service': autocomplete.ModelSelect2(url='extra-autocomplete'),
+            'addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['service'],
+                ),
             'provider': autocomplete.ModelSelect2(
                 url='providerextra-autocomplete',
-                forward=['service'],
+                forward=['service', 'addon'],
                 ),
         }
 
@@ -103,9 +107,13 @@ class QuoteExtraForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'service': autocomplete.ModelSelect2(url='extra-autocomplete'),
+            'addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['service'],
+                ),
             'provider': autocomplete.ModelSelect2(
                 url='providerextra-autocomplete',
-                forward=['service'],
+                forward=['service', 'addon'],
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
@@ -227,7 +235,7 @@ class BookingExtraInlineForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providerextra-autocomplete',
-                forward=['service'],
+                forward=['service', 'addon'],
                 ),
         }
 
@@ -244,7 +252,7 @@ class BookingExtraForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providerextra-autocomplete',
-                forward=['service'],
+                forward=['service', 'addon'],
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
