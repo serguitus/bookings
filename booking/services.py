@@ -496,7 +496,7 @@ class BookingService(object):
         elif amount is None:
             return None, msg
         else:
-            return prev_amount + amount, msg
+            return float(prev_amount) + float(amount), msg
 
     @classmethod
     def update_booking(cls, booking):
