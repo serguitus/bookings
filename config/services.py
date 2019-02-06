@@ -301,11 +301,11 @@ class ConfigService(object):
             amount, message = cls.find_group_amount(
                 amount_for_provider, service, date_from, date_to, group,
                 quantity, parameter, detail_list)
-            if amount:
-                groups_amount += amount
-                groups_message = message
-            else:
+            if amount is None:
                 return None, message
+            groups_amount += amount
+            groups_message = message
+
         return groups_amount, groups_message
 
     @classmethod
@@ -316,7 +316,7 @@ class ConfigService(object):
         amount, message = cls.find_amount(
             amount_for_provider, service, date_from, date_to, group[0], group[1],
             quantity, parameter, detail_list)
-        if amount and amount >= 0:
+        if amount is not None and amount >= 0:
             return amount, message
         else:
             return None, message
@@ -355,7 +355,7 @@ class ConfigService(object):
                             service, detail, current_date, date_to,
                             adults, children,
                             quantity, parameter)
-                        if result and result >= 0:
+                        if result is not None and result >= 0:
                             amount += result
                             solved = True
                             stop = True
@@ -365,7 +365,7 @@ class ConfigService(object):
                             datetime(year=end_date.year, month=end_date.month, day=end_date.day),
                             adults, children,
                             quantity, parameter)
-                        if result and result >= 0:
+                        if result is not None and result >= 0:
                             amount += result
                             current_date = datetime(
                                 year=end_date.year, month=end_date.month, day=end_date.day)
@@ -487,7 +487,7 @@ class ConfigService(object):
                 amount = adult_amount + children_amount
             else:
                 amount = cls._find_detail_amount(detail, adults, children)
-            if amount and amount >= 0:
+            if amount is not None and amount >= 0:
                 return amount * quantity * parameter
         return None
 
