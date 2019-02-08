@@ -1,8 +1,8 @@
-from dal import autocomplete
+"""
+Config Views
+"""
 
-from django.db.models import Exists, OuterRef, Subquery, Q, F, Value, DecimalField
-from django.utils.encoding import force_text
-from django.utils.translation import ugettext
+from dal import autocomplete
 
 from config.models import (
     Location, RoomType, Addon,
@@ -215,14 +215,29 @@ class ProviderExtraAutocompleteView(autocomplete.Select2QuerySetView):
         qs = Provider.objects.filter(enabled=True).all().distinct()
 
         service = self.forwarded.get('service', None)
+        addon = self.forwarded.get('addon', None)
 
         if service:
-            qs = qs.filter(
-                providerextraservice__service=service,
-            )
+            if addon:
+                qs = qs.filter(
+                    providerextraservice__service=service,
+                    providerextraservice__providerextradetail__addon=addon,
+                )
+            else:
+                qs = qs.filter(
+                    providertransferservice__service=service,
+                    providerextraservice__providerextradetail__addon__isnull=True,
+                )
+        else:
+            if addon:
+                qs = qs.filter(
+                    providerextraservice__providerextradetail__addon=addon,
+                )
+            else:
+                qs = qs.filter(
+                    providerextraservice__providerextradetail__addon__isnull=True,
+                )
 
         if self.q:
             qs = qs.filter(name__icontains=self.q)
         return qs[:20]
-
-
