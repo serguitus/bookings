@@ -225,7 +225,7 @@ class ProviderExtraAutocompleteView(autocomplete.Select2QuerySetView):
                 )
             else:
                 qs = qs.filter(
-                    providertransferservice__service=service,
+                    providerextraservice__service=service,
                     providerextraservice__providerextradetail__addon__isnull=True,
                 )
         else:
