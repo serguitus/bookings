@@ -85,6 +85,7 @@ class QuoteTransferInLine(CommonStackedInline):
         ('service', 'status'), ('datetime_from', 'datetime_to'),
         ('location_from', 'location_to'), 'provider']
     form = QuoteTransferInlineForm
+    template = 'booking/tabular.html'
 
 
 class QuoteExtraInLine(CommonStackedInline):
@@ -94,6 +95,7 @@ class QuoteExtraInLine(CommonStackedInline):
         ('service', 'status'), ('datetime_from', 'datetime_to'),
         'parameter', 'provider']
     form = QuoteExtraInlineForm
+    template = 'booking/tabular.html'
 
 
 class QuoteSiteModel(SiteModel):

@@ -167,6 +167,7 @@ $(document).ready(function(){
               }
             }
           }
+          fill_subtotal(paxes, pax_data);
         });
         compare_all_amounts();  
       }else{
@@ -177,6 +178,35 @@ $(document).ready(function(){
     })
   }
 
+  function fill_subtotal(pax_variant, data){
+    // This fills all service subtotal for specified pax_variant
+    for(var service in data){
+      if(service != 'total' && service != 'paxes'){
+        // just iterate over subtotals
+        $('.subtotal-quote_services-'+ service + '-' + data.paxes).remove();
+          $('.subtotal-quote_services-'+ service).append(
+            sub_total_line(service, data.paxes, data[service].cost_1,
+                           data[service].cost_2, data[service].cost_3,
+                           data[service].price_1, data[service].price_2,
+                           data[service].price_3));
+        //console.log(data[service].cost_1);
+      }
+    }
+  }
+
   get_computed_amounts();
 
 });
+
+function sub_total_line(id, pax, sc, dc, tc, sp, dp, tp){
+  // this is the line that prints each sub-total line
+  return "<div class='subtotal-quote_services-" + id + "-" + pax +
+    "'><span class='subprice-pax-limit'>pax Limit: " + pax +
+    "</span><span class='sub-costs'><span class='sub_cost_1'> SGL:" + sc +
+    "</span><span class='sub_cost_2'> DBL:" + dc +
+    "</span><span class='sub_cost_3'> TPL:" + tc +
+    "</span></span><span class='sub-prices'><span class='sub_price_1'>  SGL" + sp +
+    "</span><span class='sub_price_2'> DBL:" + dp +
+    "</span><span class='sub_price_3'> TPL:" + tp +
+    "</span></span></div>"
+}

@@ -292,7 +292,7 @@ class BookingService(object):
             if transfer_list:
                 counter = 0
                 for quote_transfer in transfer_list:
-                    key = '2_%s' % counter
+                    key = '2-%s' % counter
                     if not hasattr(quote_transfer, 'service'):
                         variant_dict.update({key: cls._no_service_dict()})
                     else:
@@ -364,7 +364,7 @@ class BookingService(object):
             if extra_list:
                 counter = 0
                 for quote_extra in extra_list:
-                    key = '3_%s' % counter
+                    key = '3-%s' % counter
                     if not hasattr(quote_extra, 'service'):
                         variant_dict.update({key: cls._no_service_dict()})
                     else:
