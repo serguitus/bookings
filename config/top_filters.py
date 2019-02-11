@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+
 from django.db.models import Q
 
 from common import filters
@@ -64,3 +66,38 @@ class ExtraLocationForProviderTransferTopFilter(filters.ForeignKeyFilter):
                 Q(providertransferdetail__p_location_from__in=search_option) |
                 Q(providertransferdetail__p_location_to__in=search_option))
         return queryset
+
+
+class LocationForAgencyTransferTopFilter(filters.ForeignKeyFilter):
+    filter_field_path = 'loc1'
+    filter_title = 'Select Locations'
+    filter_queryset = Location.objects.all()
+    autocomplete_url = 'location-autocomplete'
+
+    def queryset(self, request, queryset):
+        search_option = self._values[0]
+        if search_option and search_option != []:
+            queryset = queryset.distinct()
+            queryset = queryset.filter(
+                Q(agencytransferdetail__a_location_from__in=search_option) |
+                Q(agencytransferdetail__a_location_to__in=search_option))
+        return queryset
+
+class ExtraLocationForAgencyTransferTopFilter(filters.ForeignKeyFilter):
+    filter_field_path = 'loc2'
+    filter_title = 'Select Other Locations'
+    filter_queryset = Location.objects.all()
+    autocomplete_url = 'location-autocomplete'
+
+    def queryset(self, request, queryset):
+        search_option = self._values[0]
+        if search_option and search_option != []:
+            queryset = queryset.distinct()
+            queryset = queryset.filter(
+                Q(agencytransferdetail__a_location_from__in=search_option) |
+                Q(agencytransferdetail__a_location_to__in=search_option))
+        return queryset
+
+
+class DateToTopFilter(filters.DateFilter):
+    default_value = [date.today() - timedelta(days=30), None]

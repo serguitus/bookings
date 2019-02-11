@@ -41,7 +41,8 @@ from config.top_filters import (
     RoomTypeTopFilter, LocationTopFilter,
     AddonTopFilter,
     AllotmentTopFilter, TransferTopFilter, ExtraTopFilter,
-    LocationForProviderTransferTopFilter, ExtraLocationForProviderTransferTopFilter)
+    LocationForProviderTransferTopFilter, ExtraLocationForProviderTransferTopFilter,
+    DateToTopFilter)
 
 from finance.top_filters import ProviderTopFilter, AgencyTopFilter 
 
@@ -223,7 +224,9 @@ class ProviderAllotmentServiceSiteModel(SiteModel):
     recent_allowed = True
     fields = ('provider', 'service', 'date_from', 'date_to',)
     list_display = ('service', 'provider', 'date_from', 'date_to',)
-    top_filters = (('service', AllotmentTopFilter), ('provider', ProviderTopFilter),)
+    top_filters = (
+        ('service', AllotmentTopFilter), ('provider', ProviderTopFilter),
+        ('date_to', DateToTopFilter))
     inlines = [ProviderAllotmentDetailInline]
     ordering = ['service', 'provider', '-date_from']
     form = ProviderAllotmentServiceForm
@@ -250,6 +253,7 @@ class ProviderTransferServiceSiteModel(SiteModel):
     list_display = ('service', 'provider', 'date_from', 'date_to',)
     top_filters = (
         ('service', TransferTopFilter), ('provider', ProviderTopFilter),
+        ('date_to', DateToTopFilter),
         LocationForProviderTransferTopFilter, ExtraLocationForProviderTransferTopFilter)
     inlines = [ProviderTransferDetailInline]
     ordering = ['service', 'provider', '-date_from']
@@ -272,7 +276,9 @@ class ProviderExtraServiceSiteModel(SiteModel):
     recent_allowed = True
     fields = ('provider', 'service', 'date_from', 'date_to',)
     list_display = ('service', 'provider', 'date_from', 'date_to',)
-    top_filters = (('service', ExtraTopFilter), ('provider', ProviderTopFilter),)
+    top_filters = (
+        ('service', ExtraTopFilter), ('provider', ProviderTopFilter),
+        ('date_to', DateToTopFilter))
     inlines = [ProviderExtraDetailInline]
     ordering = ['service', 'provider', '-date_from']
     form = ProviderExtraServiceForm
@@ -299,7 +305,9 @@ class AgencyAllotmentServiceSiteModel(SiteModel):
     recent_allowed = True
     fields = ('agency', 'service', 'date_from', 'date_to',)
     list_display = ('agency', 'service', 'date_from', 'date_to',)
-    top_filters = (('service', AllotmentTopFilter), ('agency', AgencyTopFilter),)
+    top_filters = (
+        ('service', AllotmentTopFilter), ('agency', AgencyTopFilter),
+        ('date_to', DateToTopFilter))
     inlines = [AgencyAllotmentDetailInline]
     ordering = ['service', 'agency', '-date_from']
     form = AgencyAllotmentServiceForm
