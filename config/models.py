@@ -8,7 +8,7 @@ from config.constants import (
     SERVICE_CATEGORY_EXTRA, SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER,
     ROOM_CAPACITIES,
     BOARD_TYPES,
-    EXTRA_COST_TYPES, EXTRA_PARAMETER_TYPES,
+    EXTRA_COST_TYPES, EXTRA_PARAMETER_TYPES, EXTRA_PARAMETER_TYPE_HOURS,
     ALLOTMENT_SUPPLEMENT_COST_TYPES, TRANSFER_SUPPLEMENT_COST_TYPES,
     TRANSFER_COST_TYPES)
 
@@ -124,25 +124,44 @@ class AmountDetail(models.Model):
     """
     class Meta:
         abstract = True
-    ad_1_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='SGL')
-    ad_2_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='DBL')
-    ad_3_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='TPL')
-    ad_4_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='QAD')
-    ch_1_ad_0_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1st CHD')
-    ch_1_ad_1_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1st CHD')
-    ch_1_ad_2_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1st CHD')
-    ch_1_ad_3_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1st CHD')
-    ch_1_ad_4_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1st CHD')
-    ch_2_ad_0_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2nd CHD')
-    ch_2_ad_1_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2nd CHD')
-    ch_2_ad_2_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2nd CHD')
-    ch_2_ad_3_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2nd CHD')
-    ch_2_ad_4_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2nd CHD')
-    ch_3_ad_0_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3rd CHD')
-    ch_3_ad_1_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3rd CHD')
-    ch_3_ad_2_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3rd CHD')
-    ch_3_ad_3_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3rd CHD')
-    ch_3_ad_4_amount = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3rd CHD')
+    ad_1_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='SGL')
+    ad_2_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='DBL')
+    ad_3_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='TPL')
+    ad_4_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='QAD')
+    ch_1_ad_0_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1st CHD')
+    ch_1_ad_1_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1st CHD')
+    ch_1_ad_2_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1st CHD')
+    ch_1_ad_3_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1st CHD')
+    ch_1_ad_4_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1st CHD')
+    ch_2_ad_0_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2nd CHD')
+    ch_2_ad_1_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2nd CHD')
+    ch_2_ad_2_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2nd CHD')
+    ch_2_ad_3_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2nd CHD')
+    ch_2_ad_4_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2nd CHD')
+    ch_3_ad_0_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3rd CHD')
+    ch_3_ad_1_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3rd CHD')
+    ch_3_ad_2_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3rd CHD')
+    ch_3_ad_3_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3rd CHD')
+    ch_3_ad_4_amount = models.DecimalField(
+        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3rd CHD')
 
 
 #===============================================================================
@@ -181,6 +200,11 @@ class Extra(Service):
     def fill_data(self):
         self.category = SERVICE_CATEGORY_EXTRA
         self.grouping = False
+
+    def __str__(self):
+        if self.parameter_type == EXTRA_PARAMETER_TYPE_HOURS:
+            return '%s (Hours)'  % self.name
+        return '%s'  % self.name
 
 
 class ExtraAddon(models.Model):
@@ -359,8 +383,8 @@ class AgencyAllotmentService(AgencyCatalogue):
     AgencyAccomodationService
     """
     class Meta:
-        verbose_name = 'Agency Accomodation Service'
-        verbose_name_plural = 'Agency Accomodation Services'
+        verbose_name = 'Accomodation Service Agency'
+        verbose_name_plural = 'Accomodation Service Agencies'
     service = models.ForeignKey(Allotment)
 
     def __str__(self):
@@ -372,8 +396,8 @@ class AgencyAllotmentDetail(AmountDetail):
     AgencyAccomodationDetail
     """
     class Meta:
-        verbose_name = 'Agency Accomodation Detail'
-        verbose_name_plural = 'Agency Accomodation Details'
+        verbose_name = 'Accomodation Agency Detail'
+        verbose_name_plural = 'Accomodation Agency Details'
         unique_together = (('agency_service', 'room_type', 'board_type'),)
     agency_service = models.ForeignKey(AgencyAllotmentService)
     room_type = models.ForeignKey(RoomType)
@@ -425,8 +449,8 @@ class ProviderTransferService(ProviderCatalogue):
     ProviderTransferService
     """
     class Meta:
-        verbose_name = 'Provider Transfer Service'
-        verbose_name_plural = 'Providers Transfers Services'
+        verbose_name = 'Transfer Service Provider'
+        verbose_name_plural = 'Transfer Service Providers'
     service = models.ForeignKey(Transfer)
 
     def __str__(self):
@@ -439,12 +463,14 @@ class ProviderTransferDetail(AmountDetail):
     ProviderTransferDetail
     """
     class Meta:
-        verbose_name = 'Provider Transfer Detail'
-        verbose_name_plural = 'Providers Transfers Details'
+        verbose_name = 'Transfer Provider Detail'
+        verbose_name_plural = 'Transfer Provider Details'
         unique_together = ('provider_service', 'p_location_from', 'p_location_to',)
     provider_service = models.ForeignKey(ProviderTransferService)
-    p_location_from = models.ForeignKey(Location, related_name='p_location_from', verbose_name='Location from')
-    p_location_to = models.ForeignKey(Location, related_name='p_location_to', verbose_name='Location to')
+    p_location_from = models.ForeignKey(
+        Location, related_name='p_location_from', verbose_name='Location from')
+    p_location_to = models.ForeignKey(
+        Location, related_name='p_location_to', verbose_name='Location to')
 
 
 class AgencyTransferService(AgencyCatalogue):
@@ -452,8 +478,8 @@ class AgencyTransferService(AgencyCatalogue):
     AgencyTransferService
     """
     class Meta:
-        verbose_name = 'Agency Transfer Service'
-        verbose_name_plural = 'Agencies Transfers Services'
+        verbose_name = 'Transfer Service Agency'
+        verbose_name_plural = 'Transfer Service Agencies'
     service = models.ForeignKey(Transfer)
 
     def __str__(self):
@@ -465,11 +491,13 @@ class AgencyTransferDetail(AmountDetail):
     AgencyTransferDetail
     """
     class Meta:
-        verbose_name = 'Agency Transfer Detail'
-        verbose_name_plural = 'Agencies Transfers Details'
+        verbose_name = 'Transfer Agency Detail'
+        verbose_name_plural = 'Transfer Agency Details'
         unique_together = (('agency_service', 'a_location_from', 'a_location_to',),)
     agency_service = models.ForeignKey(AgencyTransferService)
-    a_location_from = models.ForeignKey(Location, related_name='a_location_from', verbose_name='Location from')
-    a_location_to = models.ForeignKey(Location, related_name='a_location_to', verbose_name='Location to')
+    a_location_from = models.ForeignKey(
+        Location, related_name='a_location_from', verbose_name='Location from')
+    a_location_to = models.ForeignKey(
+        Location, related_name='a_location_to', verbose_name='Location to')
 
 

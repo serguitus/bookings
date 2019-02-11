@@ -160,7 +160,7 @@ class QuoteExtra(QuoteService):
     addon = models.ForeignKey(Addon, blank=True, null=True)
     time = models.TimeField(blank=True, null=True)
     quantity = models.SmallIntegerField(default=1)
-    parameter = models.SmallIntegerField()
+    parameter = models.SmallIntegerField(default=0, verbose_name='Hours')
 
     def fill_data(self):
         # setting name for this booking_service
@@ -416,7 +416,7 @@ class BookingExtra(BookingService):
     addon = models.ForeignKey(Addon, blank=True, null=True)
     time = models.TimeField(blank=True, null=True)
     quantity = models.SmallIntegerField(default=1)
-    parameter = models.SmallIntegerField(default=0)
+    parameter = models.SmallIntegerField(default=0, verbose_name='Hours')
 
     def fill_data(self):
         # setting name for this booking_service

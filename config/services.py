@@ -1,5 +1,5 @@
 """
-Config Service
+config services
 """
 from datetime import datetime, timedelta
 
@@ -27,8 +27,209 @@ from config.models import (
 
 class ConfigService(object):
     """
-    Config Service
+    ConfigService
     """
+
+    @classmethod
+    def process_agency_allotments_amounts(
+            cls, agency, allotments_ids, gain_percent):
+        """
+        process_agency_allotments_amounts
+        """
+
+        from multiprocessing import Process
+
+        if __name__ == '__main__':
+            p = Process(
+                target=cls.generate_agency_allotments_amounts,
+                args=(agency, allotments_ids, gain_percent,))
+            p.start()
+            p.join()
+
+
+
+    @classmethod
+    def generate_agency_allotments_amounts(
+            cls, agency_id, allotments_ids, gain_percent):
+        """
+        generate_agency_amounts
+        """
+        # for each service
+        for service_id in allotments_ids:
+            # find providerservice list
+            provider_services = list(ProviderAllotmentService.objects.filter(service=service_id))
+            # for each providerservice create agencyservice
+            for provider_service in provider_services:
+                agency_service, created = AgencyAllotmentService.objects.get_or_create(
+                    agency_id=agency_id,
+                    date_from=provider_service.date_from,
+                    date_to=provider_service.date_to,
+                    service=provider_service.service
+                )
+                # find details
+                details = list(
+                    ProviderAllotmentDetail.objects.filter(provider_service=provider_service))
+                # for each providerdetail create agencydetail
+                for detail in details:
+                    agency_detail, created = AgencyAllotmentDetail.objects.get_or_create(
+                        agency_service=agency_service,
+                        room_type=detail.room_type,
+                        board_type=detail.board_type,
+                        defaults=cls._default_amounts(detail, gain_percent)
+                    )
+                    # if already exists ensure higher amounts
+                    if not created:
+                        cls._ensure_higher_amounts(agency_detail, detail)
+        # finally fix agency allotments amounts
+        cls.fix_agency_allotments_amounts(agency_id)
+
+    @classmethod
+    def fix_agency_allotments_amounts(cls, agency_id):
+        """
+        fix_agency_allotments_amounts
+        """
+        # get all agency services sorted by service, date_from asc, date_to desc
+        agency_services = list()
+        prev_agency_service = None
+        for agency_service in agency_services:
+            if prev_agency_service is not None:
+                # verify date overlap
+                if agency_service.date_from <= prev_agency_service.date_to:
+                    pass
+
+
+
+            prev_agency_service = agency_service
+
+    @classmethod
+    def _default_amounts(cls, detail, gain_percent):
+        return {
+            'ad_1_amount': cls._calculate_price(detail.ad_1_amount, gain_percent),
+            'ad_2_amount': cls._calculate_price(detail.ad_2_amount, gain_percent),
+            'ad_3_amount': cls._calculate_price(detail.ad_3_amount, gain_percent),
+            'ad_4_amount': cls._calculate_price(detail.ad_4_amount, gain_percent),
+            'ch_1_ad_0_amount': cls._calculate_price(
+                detail.ch_1_ad_0_amount, gain_percent),
+            'ch_1_ad_1_amount': cls._calculate_price(
+                detail.ch_1_ad_1_amount, gain_percent),
+            'ch_1_ad_2_amount': cls._calculate_price(
+                detail.ch_1_ad_2_amount, gain_percent),
+            'ch_1_ad_3_amount': cls._calculate_price(
+                detail.ch_1_ad_3_amount, gain_percent),
+            'ch_1_ad_4_amount': cls._calculate_price(
+                detail.ch_1_ad_4_amount, gain_percent),
+            'ch_2_ad_0_amount': cls._calculate_price(
+                detail.ch_2_ad_0_amount, gain_percent),
+            'ch_2_ad_1_amount': cls._calculate_price(
+                detail.ch_2_ad_1_amount, gain_percent),
+            'ch_2_ad_2_amount': cls._calculate_price(
+                detail.ch_2_ad_2_amount, gain_percent),
+            'ch_2_ad_3_amount': cls._calculate_price(
+                detail.ch_2_ad_3_amount, gain_percent),
+            'ch_2_ad_4_amount': cls._calculate_price(
+                detail.ch_2_ad_4_amount, gain_percent),
+            'ch_3_ad_0_amount': cls._calculate_price(
+                detail.ch_3_ad_0_amount, gain_percent),
+            'ch_3_ad_1_amount': cls._calculate_price(
+                detail.ch_3_ad_1_amount, gain_percent),
+            'ch_3_ad_2_amount': cls._calculate_price(
+                detail.ch_3_ad_2_amount, gain_percent),
+            'ch_3_ad_3_amount': cls._calculate_price(
+                detail.ch_3_ad_3_amount, gain_percent),
+            'ch_3_ad_4_amount': cls._calculate_price(
+                detail.ch_3_ad_4_amount, gain_percent)
+        }
+
+    @classmethod
+    def _ensure_higher_amounts(cls, agency_detail, detail):
+        modified = False
+        if cls._need_update(agency_detail.ad_1_amount, detail.ad_1_amount):
+            agency_detail.ad_1_amount = detail.ad_1_amount
+            modified = True
+        if cls._need_update(agency_detail.ad_2_amount, detail.ad_2_amount):
+            agency_detail.ad_2_amount = detail.ad_2_amount
+            modified = True
+        if cls._need_update(agency_detail.ad_3_amount, detail.ad_3_amount):
+            agency_detail.ad_3_amount = detail.ad_3_amount
+            modified = True
+        if cls._need_update(agency_detail.ad_4_amount, detail.ad_4_amount):
+            agency_detail.ad_4_amount = detail.ad_4_amount
+            modified = True
+        if cls._need_update(
+                agency_detail.ch_1_ad_0_amount, detail.ch_1_ad_0_amount):
+            agency_detail.ch_1_ad_0_amount = detail.ch_1_ad_0_amount
+            modified = True
+        if cls._need_update(
+                agency_detail.ch_1_ad_1_amount, detail.ch_1_ad_1_amount):
+            agency_detail.ch_1_ad_1_amount = detail.ch_1_ad_1_amount
+            modified = True
+        if cls._need_update(
+                agency_detail.ch_1_ad_2_amount, detail.ch_1_ad_2_amount):
+            agency_detail.ch_1_ad_2_amount = detail.ch_1_ad_2_amount
+            modified = True
+        if cls._need_update(
+                agency_detail.ch_1_ad_3_amount, detail.ch_1_ad_3_amount):
+            agency_detail.ch_1_ad_3_amount = detail.ch_1_ad_3_amount
+            modified = True
+        if cls._need_update(
+                agency_detail.ch_1_ad_4_amount, detail.ch_1_ad_4_amount):
+            agency_detail.ch_1_ad_4_amount = detail.ch_1_ad_4_amount
+            modified = True
+        if cls._need_update(
+                agency_detail.ch_2_ad_0_amount, detail.ch_2_ad_0_amount):
+            agency_detail.ch_2_ad_0_amount = detail.ch_2_ad_0_amount
+            modified = True
+        if cls._need_update(
+                agency_detail.ch_2_ad_1_amount, detail.ch_2_ad_1_amount):
+            agency_detail.ch_2_ad_1_amount = detail.ch_2_ad_1_amount
+            modified = True
+        if cls._need_update(
+                agency_detail.ch_2_ad_2_amount, detail.ch_2_ad_2_amount):
+            agency_detail.ch_2_ad_2_amount = detail.ch_2_ad_2_amount
+            modified = True
+        if cls._need_update(
+                agency_detail.ch_2_ad_3_amount, detail.ch_2_ad_3_amount):
+            agency_detail.ch_2_ad_3_amount = detail.ch_2_ad_3_amount
+            modified = True
+        if cls._need_update(
+                agency_detail.ch_2_ad_4_amount, detail.ch_2_ad_4_amount):
+            agency_detail.ch_2_ad_4_amount = detail.ch_2_ad_4_amount
+            modified = True
+        if cls._need_update(
+                agency_detail.ch_3_ad_0_amount, detail.ch_3_ad_0_amount):
+            agency_detail.ch_3_ad_0_amount = detail.ch_3_ad_0_amount
+            modified = True
+        if cls._need_update(
+                agency_detail.ch_3_ad_1_amount, detail.ch_3_ad_1_amount):
+            agency_detail.ch_3_ad_1_amount = detail.ch_3_ad_1_amount
+            modified = True
+        if cls._need_update(
+                agency_detail.ch_3_ad_2_amount, detail.ch_3_ad_2_amount):
+            agency_detail.ch_3_ad_2_amount = detail.ch_3_ad_2_amount
+            modified = True
+        if cls._need_update(
+                agency_detail.ch_3_ad_3_amount, detail.ch_3_ad_3_amount):
+            agency_detail.ch_3_ad_3_amount = detail.ch_3_ad_3_amount
+            modified = True
+        if cls._need_update(
+                agency_detail.ch_3_ad_4_amount, detail.ch_3_ad_4_amount):
+            agency_detail.ch_3_ad_4_amount = detail.ch_3_ad_4_amount
+            modified = True
+        if modified:
+            agency_detail.save()
+
+    @classmethod
+    def _calculate_price(cls, cost, gain_percent):
+        if cost is None:
+            return None
+        if gain_percent is None:
+            return cost
+        return round(0.499999 + float(cost) * (1.0 + float(gain_percent) / 100.0))
+
+    @classmethod
+    def _need_update(cls, old_value, new_value):
+        return new_value is not None and (old_value is None or old_value < new_value)
+
     @classmethod
     def allotment_amounts(
             cls, service_id, date_from, date_to, groups, provider, agency,
@@ -177,7 +378,7 @@ class ConfigService(object):
                         queryset = queryset.filter(addon_id__isnull=True)
 
                     detail_list = list(queryset)
-                    
+
                     group_cost, group_cost_message = cls.find_group_amount(
                         True, service, date_from, date_to, group,
                         quantity, parameter, detail_list
@@ -454,22 +655,22 @@ class ConfigService(object):
     @classmethod
     def _get_extra_amount(
             cls, service, detail, date_from, date_to, adults, children, quantity, parameter):
-        # now parameter must be provided for hours
-        if service.parameter_type == EXTRA_PARAMETER_TYPE_HOURS and parameter is None:
-            return None
-        if quantity is None or quantity < 1:
-            quantity = cls.get_service_quantity(service, adults + children)
-        if parameter is None or parameter < 1:
+        if service.parameter_type == EXTRA_PARAMETER_TYPE_HOURS:
+            # parameter hours mandatory
+            if parameter is None:
+                return None
+        elif service.parameter_type == EXTRA_PARAMETER_TYPE_STAY:
+            parameter = 1
+        else:
             interval = date_to - date_from
             if service.parameter_type == EXTRA_PARAMETER_TYPE_DAYS:
                 parameter = interval.days + 1
             elif service.parameter_type == EXTRA_PARAMETER_TYPE_NIGHTS:
                 parameter = interval.days
-            elif service.parameter_type == EXTRA_PARAMETER_TYPE_STAY:
-                parameter = 1
-            # now this is not supported
-            # if service.parameter_type == EXTRA_PARAMETER_TYPE_HOURS:
-            #     parameter = interval.hours
+            else:
+                return None
+        if quantity is None or quantity < 1:
+            quantity = cls.get_service_quantity(service, adults + children)
         if service.cost_type == EXTRA_COST_TYPE_FIXED and detail.ad_1_amount:
             return detail.ad_1_amount * quantity * parameter
         if service.cost_type == EXTRA_COST_TYPE_BY_PAX:

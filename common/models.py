@@ -9,7 +9,7 @@ class RecentLink(models.Model):
         verbose_name_plural = 'Recents Entries'
         unique_together = (('user', 'link_url'),)
         index_together = (('user', 'link_time'),)
-        ordering = ('user', '-link_time',)
+        ordering = ['user', '-link_time']
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

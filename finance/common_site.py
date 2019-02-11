@@ -420,7 +420,7 @@ class LoanEntitySiteModel(SiteModel):
     fields = ('name',)
     list_display = ('name',)
     top_filters = ('name',)
-    ordering = ('name',)
+    ordering = ['name']
 
 
 class LoanEntityDocumentSiteModel(MatchableSiteModel):
@@ -493,7 +493,7 @@ class LoanAccountSiteModel(SiteModel):
     fields = ('account', 'credit_amount', 'debit_amount', 'matched_amount')
     list_display = ('account', 'credit_amount', 'debit_amount', 'matched_amount')
     top_filters = ('account__name', 'account__currency',)
-    ordering = ['account__name',]
+    ordering = ['account__name']
     readonly_fields = ('credit_amount', 'debit_amount', 'matched_amount')
 
     form = AccountingForm
@@ -573,7 +573,7 @@ class ProviderSiteModel(SiteModel):
     list_display = ('name', 'email', 'phone',
                     'currency', 'enabled')
     top_filters = ['name', 'email', 'currency', 'enabled']
-    ordering = ('enabled', 'currency', 'name')
+    ordering = ['enabled', 'currency', 'name']
 
 
 class ProviderDocumentSiteModel(MatchableSiteModel):
@@ -656,7 +656,7 @@ class AgencySiteModel(SiteModel):
     menu_group = 'Finace Agency'
     list_display = ('name', 'currency', 'enabled')
     top_filters = ('name', 'currency', 'enabled')
-    ordering = ('enabled', 'currency', 'name')
+    ordering = ['enabled', 'currency', 'name']
 
 
 class AgencyDocumentSiteModel(MatchableSiteModel):

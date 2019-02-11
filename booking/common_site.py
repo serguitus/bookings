@@ -42,6 +42,8 @@ from booking.models import (
     BookingTransfer,
     BookingExtra,
 )
+from booking.top_filters import DateTopFilter
+
 # from common.filters import TextFilter
 from common.sites import CommonStackedInline, CommonTabularInline
 # from functools import update_wrapper, partial
@@ -74,6 +76,7 @@ class QuoteAllotmentInLine(CommonStackedInline):
     fields = [
         ('service', 'status'), ('datetime_from', 'datetime_to'),
         ('room_type', 'board_type'), 'provider']
+    ordering = ['datetime_from']
     form = QuoteAllotmentInlineForm
     template = 'booking/tabular.html'
 
@@ -84,6 +87,7 @@ class QuoteTransferInLine(CommonStackedInline):
     fields = [
         ('service', 'status'), ('datetime_from', 'datetime_to'),
         ('location_from', 'location_to'), 'provider']
+    ordering = ['datetime_from']
     form = QuoteTransferInlineForm
     template = 'booking/tabular.html'
 
@@ -95,6 +99,7 @@ class QuoteExtraInLine(CommonStackedInline):
         ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
         ('addon', 'quantity', 'parameter'),
         'provider']
+    ordering = ['datetime_from']
     form = QuoteExtraInlineForm
     template = 'booking/tabular.html'
 
@@ -111,8 +116,8 @@ class QuoteSiteModel(SiteModel):
     )
     list_display = ('reference', 'agency', 'date_from',
                     'date_to', 'status', 'currency',)
-    top_filters = ('reference', 'date_from', 'status')
-    ordering = ('reference',)
+    top_filters = ('reference', ('date_from', DateTopFilter), 'status')
+    ordering = ('date_from', 'reference',)
     readonly_fields = ('date_from', 'date_to',)
     details_template = 'booking/quote_details.html'
     inlines = [
@@ -132,8 +137,8 @@ class QuoteAllotmentSiteModel(SiteModel):
               'provider', 'id')
     list_display = ('quote', 'service', 'datetime_from', 'datetime_to',
                     'status',)
-    top_filters = ('service', 'quote__reference', 'datetime_from', 'status',)
-    ordering = ('quote__reference', 'service__name',)
+    top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
+    ordering = ('datetime_from', 'quote__reference', 'service__name',)
     form = QuoteAllotmentForm
 
 
@@ -147,8 +152,8 @@ class QuoteTransferSiteModel(SiteModel):
               'cost_amount', 'price_amount', 'provider', 'id')
     list_display = ('quote', 'name',
                     'datetime_from', 'datetime_to', 'status',)
-    top_filters = ('service', 'quote__reference', 'datetime_from', 'status',)
-    ordering = ('quote__reference', 'service__name',)
+    top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
+    ordering = ('datetime_from', 'quote__reference', 'service__name',)
     form = QuoteTransferForm
 
 
@@ -165,8 +170,8 @@ class QuoteExtraSiteModel(SiteModel):
     list_display = (
         'quote', 'service', 'addon', 'quantity', 'parameter',
         'datetime_from', 'datetime_to', 'time', 'status',)
-    top_filters = ('service', 'quote__reference', 'datetime_from', 'status',)
-    ordering = ('quote__reference', 'service__name',)
+    top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
+    ordering = ('datetime_from', 'quote__reference', 'service__name',)
     form = QuoteExtraForm
 
 
@@ -206,6 +211,7 @@ class BookingAllotmentInLine(CommonTabularInline):
     extra = 0
     fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
               ('room_type', 'board_type'), 'provider']
+    ordering = ['datetime_from']
     form = BookingAllotmentInlineForm
 
 
@@ -215,6 +221,7 @@ class BookingTransferInLine(CommonTabularInline):
     fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to', 'time'),
               ('location_from', 'location_to'),
               ('quantity', 'provider')]
+    ordering = ['datetime_from']
     form = BookingTransferInlineForm
 
 
@@ -223,6 +230,7 @@ class BookingExtraInLine(CommonTabularInline):
     extra = 0
     fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to', 'time'),
               ('quantity', 'parameter'), 'provider']
+    ordering = ['datetime_from']
     form = BookingExtraInlineForm
 
 
@@ -235,8 +243,8 @@ class BookingSiteModel(SiteModel):
     list_display = ('name', 'reference', 'agency', 'date_from',
                     'date_to', 'status', 'currency', 'cost_amount',
                     'price_amount',)
-    top_filters = (('name', 'Booking Name'), 'reference', 'date_from', 'rooming_list__pax_name')
-    ordering = ('reference',)
+    top_filters = (('name', 'Booking Name'), 'reference', ('date_from', DateTopFilter), 'rooming_list__pax_name')
+    ordering = ['date_from', 'reference']
     readonly_fields = ('status',)
     details_template = 'booking/booking_details.html'
     inlines = [BookingPaxInline, BookingAllotmentInLine,
@@ -279,8 +287,8 @@ class BookingAllotmentSiteModel(SiteModel):
     top_filters = (('booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking__reference', 'conf_number',
-                   'datetime_from', 'status')
-    ordering = ('booking__reference', 'service__name',)
+                   ('datetime_from', DateTopFilter), 'status')
+    ordering = ('datetime_from', 'booking__reference', 'service__name',)
     form = BookingAllotmentForm
     change_form_template = 'booking/bookingservices_change_form.html'
     inlines = [BookingServicePaxInline]
@@ -307,8 +315,8 @@ class BookingTransferSiteModel(SiteModel):
     list_display = ('booking', 'name',
                     'datetime_from', 'datetime_to', 'time', 'status')
     top_filters = ('booking__name', 'service', 'booking__reference',
-                   'datetime_from', 'status',)
-    ordering = ('booking__reference', 'service__name',)
+                   ('datetime_from', DateTopFilter), 'status',)
+    ordering = ('datetime_from', 'booking__reference', 'service__name',)
     form = BookingTransferForm
     change_form_template = 'booking/bookingservices_change_form.html'
     inlines = [BookingServicePaxInline]
@@ -334,8 +342,8 @@ class BookingExtraSiteModel(SiteModel):
     list_display = ('booking', 'name', 'addon', 'quantity', 'parameter',
                     'datetime_from', 'datetime_to', 'time', 'status',)
     top_filters = ('booking__name', 'service', 'booking__reference',
-                   'datetime_from','status',)
-    ordering = ('booking__reference', 'service__name',)
+                   ('datetime_from', DateTopFilter),'status',)
+    ordering = ('datetime_from', 'booking__reference', 'service__name',)
     form = BookingExtraForm
     change_form_template = 'booking/bookingservices_change_form.html'
     inlines = [BookingServicePaxInline]

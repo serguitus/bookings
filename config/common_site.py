@@ -43,7 +43,7 @@ from config.top_filters import (
     AllotmentTopFilter, TransferTopFilter, ExtraTopFilter,
     LocationForProviderTransferTopFilter, ExtraLocationForProviderTransferTopFilter)
 
-from finance.top_filters import ProviderTopFilter 
+from finance.top_filters import ProviderTopFilter, AgencyTopFilter 
 
 from functools import update_wrapper, partial
 
@@ -96,7 +96,7 @@ class AllotmentRoomTypeSiteModel(SiteModel):
     fields = ('allotment', 'room_type',)
     list_display = ('allotment', 'room_type',)
     top_filters = ('allotment__name', ('room_type', RoomTypeTopFilter),)
-    ordering = ('allotment__name',)
+    ordering = ['allotment__name']
 
 
 class AllotmentBoardTypeInline(CommonTabularInline):
@@ -111,13 +111,12 @@ class AllotmentBoardTypeSiteModel(SiteModel):
     fields = ('allotment', 'board_type',)
     list_display = ('allotment', 'board_type',)
     top_filters = ('allotment__name', 'board_type',)
-    ordering = ('allotment__name',)
+    ordering = ['allotment__name']
 
 
 class AllotmentSupplementInline(CommonTabularInline):
     model = AllotmentSupplement
     extra = 0
-
 
 class AllotmentSiteModel(SiteModel):
     model_order = 6110
@@ -131,9 +130,14 @@ class AllotmentSiteModel(SiteModel):
     list_display = ('name', 'phone', 'location',
                     'enabled',)
     top_filters = ('name', ('location', LocationTopFilter))
-    ordering = ('enabled', 'name',)
+    ordering = ['enabled', 'name']
     inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline,
                AllotmentSupplementInline]
+    actions = ['generate_agency_amounts']
+
+    def generate_agency_amounts(self, request, queryset):
+        pass
+    generate_agency_amounts.short_description = "Generate Agency Prices"
 
 
 class TransferSupplementInline(CommonTabularInline):
@@ -148,8 +152,13 @@ class TransferSiteModel(SiteModel):
     fields = ('name', 'cost_type', 'max_capacity', 'enabled',)
     list_display = ('name', 'cost_type', 'max_capacity', 'enabled',)
     top_filters = ('name', 'enabled',)
-    ordering = ('enabled', 'name',)
+    ordering = ['enabled', 'name']
     inlines = [TransferSupplementInline]
+    actions = ['generate_agency_amounts']
+
+    def generate_agency_amounts(self, request, queryset):
+        pass
+    generate_agency_amounts.short_description = "Generate Agency Prices"
 
 
 class ExtraAddonInline(CommonTabularInline):
@@ -167,7 +176,7 @@ class ExtraAddonSiteModel(SiteModel):
     fields = ('extra', 'addon',)
     list_display = ('extra', 'addon',)
     top_filters = ('extra__name', ('addon', AddonTopFilter),)
-    ordering = ('extra__name',)
+    ordering = ['extra__name']
 
 
 class ExtraSupplementInline(CommonTabularInline):
@@ -184,8 +193,13 @@ class ExtraSiteModel(SiteModel):
     list_display = ('name', 'location', 'cost_type',
                     'parameter_type', 'enabled',)
     top_filters = ('name',)
-    ordering = ('enabled', 'name',)
+    ordering = ['enabled', 'name']
     inlines = [ExtraAddonInline, ExtraSupplementInline]
+    actions = ['generate_agency_amounts']
+
+    def generate_agency_amounts(self, request, queryset):
+        pass
+    generate_agency_amounts.short_description = "Generate Agency Prices"
 
 
 class ProviderAllotmentDetailInline(CommonStackedInline):
@@ -193,11 +207,12 @@ class ProviderAllotmentDetailInline(CommonStackedInline):
     extra = 0
     fields = (
         ('single_supplement', 'third_pax_discount'),
-        ('room_type','board_type'),
-        ('ad_1_amount','ch_1_ad_1_amount','ch_2_ad_1_amount',), # 'ch_3_ad_1_amount',),
-        ('ad_2_amount','ch_1_ad_2_amount','ch_2_ad_2_amount',), # 'ch_3_ad_2_amount',),
-        ('ad_3_amount','ch_1_ad_3_amount','ch_2_ad_3_amount',), # 'ch_3_ad_3_amount',),
+        ('room_type', 'board_type'),
+        ('ad_1_amount', 'ch_1_ad_1_amount', 'ch_2_ad_1_amount',), # 'ch_3_ad_1_amount',),
+        ('ad_2_amount', 'ch_1_ad_2_amount', 'ch_2_ad_2_amount',), # 'ch_3_ad_2_amount',),
+        ('ad_3_amount', 'ch_1_ad_3_amount', 'ch_2_ad_3_amount',), # 'ch_3_ad_3_amount',),
     )
+    ordering = ['room_type', 'board_type']
     form = ProviderAllotmentDetailInlineForm
 
 
@@ -208,8 +223,9 @@ class ProviderAllotmentServiceSiteModel(SiteModel):
     recent_allowed = True
     fields = ('provider', 'service', 'date_from', 'date_to',)
     list_display = ('service', 'provider', 'date_from', 'date_to',)
-    top_filters = (('provider', ProviderTopFilter), ('service', AllotmentTopFilter),)
+    top_filters = (('service', AllotmentTopFilter), ('provider', ProviderTopFilter),)
     inlines = [ProviderAllotmentDetailInline]
+    ordering = ['service', 'provider', '-date_from']
     form = ProviderAllotmentServiceForm
     change_form_template = 'config/provider_allotment_change_form.html'
     add_form_template = 'config/provider_allotment_change_form.html'
@@ -219,8 +235,9 @@ class ProviderTransferDetailInline(CommonStackedInline):
     model = ProviderTransferDetail
     extra = 0
     fields = (
-        ('p_location_from','p_location_to', 'ad_1_amount'),
+        ('p_location_from', 'p_location_to', 'ad_1_amount'),
     )
+    ordering = ['p_location_from', 'p_location_to']
     form = ProviderTransferDetailInlineForm
 
 
@@ -230,11 +247,12 @@ class ProviderTransferServiceSiteModel(SiteModel):
     menu_group = 'Provider Catalogue'
     recent_allowed = True
     fields = ('provider', 'service', 'date_from', 'date_to',)
-    list_display = ('service',  'provider', 'date_from', 'date_to',)
+    list_display = ('service', 'provider', 'date_from', 'date_to',)
     top_filters = (
-        ('provider', ProviderTopFilter), ('service', TransferTopFilter),
+        ('service', TransferTopFilter), ('provider', ProviderTopFilter),
         LocationForProviderTransferTopFilter, ExtraLocationForProviderTransferTopFilter)
     inlines = [ProviderTransferDetailInline]
+    ordering = ['service', 'provider', '-date_from']
     form = ProviderTransferServiceForm
 
 
@@ -243,6 +261,7 @@ class ProviderExtraDetailInline(CommonStackedInline):
     extra = 0
     fields = (
         ('addon', 'ad_1_amount'), ('pax_range_min', 'pax_range_max'))
+    ordering = ['addon']
     form = ProviderExtraDetailInlineForm
 
 
@@ -253,9 +272,9 @@ class ProviderExtraServiceSiteModel(SiteModel):
     recent_allowed = True
     fields = ('provider', 'service', 'date_from', 'date_to',)
     list_display = ('service', 'provider', 'date_from', 'date_to',)
-    top_filters = (('provider', ProviderTopFilter),
-                   ('service', ExtraTopFilter),)
+    top_filters = (('service', ExtraTopFilter), ('provider', ProviderTopFilter),)
     inlines = [ProviderExtraDetailInline]
+    ordering = ['service', 'provider', '-date_from']
     form = ProviderExtraServiceForm
 
 
@@ -263,12 +282,13 @@ class AgencyAllotmentDetailInline(CommonStackedInline):
     model = AgencyAllotmentDetail
     extra = 0
     fields = (
-        ('room_type','board_type',),
-        ('ad_1_amount','ch_1_ad_1_amount','ch_2_ad_1_amount','ch_3_ad_1_amount',),
-        ('ad_2_amount','ch_1_ad_2_amount','ch_2_ad_2_amount','ch_3_ad_2_amount',),
-        ('ad_3_amount','ch_1_ad_3_amount','ch_2_ad_3_amount','ch_3_ad_3_amount',),
-        ('ch_1_ad_0_amount','ch_2_ad_0_amount','ch_3_ad_0_amount',),
+        ('room_type', 'board_type',),
+        ('ad_1_amount', 'ch_1_ad_1_amount', 'ch_2_ad_1_amount', 'ch_3_ad_1_amount',),
+        ('ad_2_amount', 'ch_1_ad_2_amount', 'ch_2_ad_2_amount', 'ch_3_ad_2_amount',),
+        ('ad_3_amount', 'ch_1_ad_3_amount', 'ch_2_ad_3_amount', 'ch_3_ad_3_amount',),
+        ('ch_1_ad_0_amount', 'ch_2_ad_0_amount', 'ch_3_ad_0_amount',),
     )
+    ordering = ['room_type', 'board_type']
     form = AgencyAllotmentDetailInlineForm
 
 
@@ -279,8 +299,9 @@ class AgencyAllotmentServiceSiteModel(SiteModel):
     recent_allowed = True
     fields = ('agency', 'service', 'date_from', 'date_to',)
     list_display = ('agency', 'service', 'date_from', 'date_to',)
-    top_filters = ('agency__name','service__name',)
+    top_filters = (('service', AllotmentTopFilter), ('agency', AgencyTopFilter),)
     inlines = [AgencyAllotmentDetailInline]
+    ordering = ['service', 'agency', '-date_from']
     form = AgencyAllotmentServiceForm
 
 
@@ -288,8 +309,9 @@ class AgencyTransferDetailInline(CommonStackedInline):
     model = AgencyTransferDetail
     extra = 0
     fields = (
-        ('a_location_from','a_location_to', 'ad_1_amount'),
+        ('a_location_from', 'a_location_to', 'ad_1_amount'),
     )
+    ordering = ['a_location_from', 'a_location_to']
     form = AgencyTransferDetailInlineForm
 
 
@@ -300,8 +322,9 @@ class AgencyTransferServiceSiteModel(SiteModel):
     recent_allowed = True
     fields = ('agency', 'service', 'date_from', 'date_to',)
     list_display = ('agency', 'service', 'date_from', 'date_to',)
-    top_filters = ('agency__name','service__name',)
+    top_filters = (('service', TransferTopFilter), ('agency', AgencyTopFilter),)
     inlines = [AgencyTransferDetailInline]
+    ordering = ['service', 'agency', '-date_from']
     form = AgencyTransferServiceForm
 
 
@@ -310,6 +333,7 @@ class AgencyExtraDetailInline(CommonStackedInline):
     extra = 0
     fields = (
         ('addon', 'ad_1_amount'), ('pax_range_min', 'pax_range_max'),)
+    ordering = ['addon']
     form = AgencyExtraDetailInlineForm
 
 
@@ -320,8 +344,9 @@ class AgencyExtraServiceSiteModel(SiteModel):
     recent_allowed = True
     fields = ('agency', 'service', 'date_from', 'date_to')
     list_display = ('agency', 'service', 'date_from', 'date_to',)
-    top_filters = ('agency__name','service__name',)
+    top_filters = (('service', ExtraTopFilter), ('agency', AgencyTopFilter),)
     inlines = [AgencyExtraDetailInline]
+    ordering = ['service', 'agency', '-date_from']
     form = AgencyExtraServiceForm
 
 

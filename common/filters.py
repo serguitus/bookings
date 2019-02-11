@@ -18,6 +18,7 @@ class TopFilter(object):
     template = 'common/filters/top_filter.html'
     filter_title = None
     filter_field_path = None
+    default_value = None
 
     def __init__(
             self, field, request, params, hidden_params, model, model_admin, field_path):
@@ -34,6 +35,7 @@ class TopFilter(object):
             self.field_path = field_path
         else:
             self.field_path = self.filter_field_path
+        self.default_value = self.get_default_value()
         self._parameters = self.get_parameters(field, model, model_admin, self.field_path)
         self._values = self._extract_values(params, hidden_params)
         self.context = self.get_context()
@@ -64,11 +66,15 @@ class TopFilter(object):
         return TopFilter(
             field, request, params, hidden_params, model, model_admin, field_path=field_path)
 
+    def get_default_value(self):
+        return self.default_value
+
     def get_parameters(self, field, model, model_admin, field_path):
         return ('%s%s' % (PARAM_PREFIX, field_path),)
 
     def _extract_values(self, params, hidden_params):
         result = []
+        param_idx = 0
         for parameter in self._parameters:
             if parameter in hidden_params:
                 hidden_params.pop(parameter)
@@ -80,10 +86,20 @@ class TopFilter(object):
                 else:
                     value = value[0]
             else:
-                value = []
-                if not self._support_array:
-                    value = ''
+                default_value = self.get_default_value()
+                if default_value is None:
+                    value = []
+                    if not self._support_array:
+                        value = ''
+                else:
+                    value = default_value
+                    if self._support_array:
+                        if '' in value:
+                            value.remove('')
+                    else:
+                        value = value[param_idx]
             result.append(value)
+            param_idx += 1
         return result
 
     def get_context(self):

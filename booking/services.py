@@ -239,7 +239,7 @@ class BookingService(object):
                             if c1:
                                 c1 = round(float(c1), 2)
                             if p1:
-                                p1 = round(0.499999 + float(p1), 0)
+                                p1 = round(0.499999 + float(p1))
                             code, msg, c2, c2_msg, p2, p2_msg = ConfigService.allotment_amounts(
                                 quote_allotment.service,
                                 quote_allotment.datetime_from, quote_allotment.datetime_to,
@@ -249,7 +249,7 @@ class BookingService(object):
                             if c2:
                                 c2 = round(float(c2) / 2, 2)
                             if p2:
-                                p2 = round(0.499999 + float(p2) / 2, 0)
+                                p2 = round(0.499999 + float(p2) / 2)
                             code, msg, c3, c3_msg, p3, p3_msg = ConfigService.allotment_amounts(
                                 quote_allotment.service,
                                 quote_allotment.datetime_from, quote_allotment.datetime_to,
@@ -259,7 +259,7 @@ class BookingService(object):
                             if c3:
                                 c3 = round(float(c3) / 3, 2)
                             if p3:
-                                p3 = round(0.499999 + float(p3) / 3, 0)
+                                p3 = round(0.499999 + float(p3) / 3)
                         else:
                             # no grouping means passing total pax quantity
                             code, msg, c1, c1_msg, p1, p1_msg = ConfigService.allotment_amounts(
@@ -271,7 +271,7 @@ class BookingService(object):
                             if c1:
                                 c1 = round(float(c1) / pax_variant.pax_quantity, 2)
                             if p1:
-                                p1 = round(0.499999 + float(p1) / pax_variant.pax_quantity, 0)
+                                p1 = round(0.499999 + float(p1) / pax_variant.pax_quantity)
                             c2, c2_msg, p2, p2_msg = c1, c1_msg, p1, p1_msg
                             c3, c3_msg, p3, p3_msg = c1, c1_msg, p1, p1_msg
                         # service amounts
@@ -308,7 +308,7 @@ class BookingService(object):
                             if c1:
                                 c1 = round(float(c1), 2)
                             if p1:
-                                p1 = round(0.499999 + float(p1), 0)
+                                p1 = round(0.499999 + float(p1))
                             code, msg, c2, c2_msg, p2, p2_msg = ConfigService.transfer_amounts(
                                 quote_transfer.service,
                                 quote_transfer.datetime_from, quote_transfer.datetime_to,
@@ -319,7 +319,7 @@ class BookingService(object):
                             if c2:
                                 c2 = round(float(c2) / 2, 2)
                             if p2:
-                                p2 = round(0.499999 + float(p2) / 2, 0)
+                                p2 = round(0.499999 + float(p2) / 2)
                             code, msg, c3, c3_msg, p3, p3_msg = ConfigService.transfer_amounts(
                                 quote_transfer.service,
                                 quote_transfer.datetime_from, quote_transfer.datetime_to,
@@ -330,7 +330,7 @@ class BookingService(object):
                             if c3:
                                 c3 = round(float(c3) / 3, 2)
                             if p2:
-                                p3 = round(0.499999 + float(p3) / 3, 0)
+                                p3 = round(0.499999 + float(p3) / 3)
                         else:
                             # no grouping means passing total pax quantity
                             code, msg, c1, c1_msg, p1, p1_msg = ConfigService.transfer_amounts(
@@ -343,7 +343,7 @@ class BookingService(object):
                             if c1:
                                 c1 = round(float(c1) / pax_variant.pax_quantity, 2)
                             if p1:
-                                p1 = round(0.499999 + float(p1) / pax_variant.pax_quantity, 0)
+                                p1 = round(0.499999 + float(p1) / pax_variant.pax_quantity)
                             c2, c2_msg, p2, p2_msg = c1, c1_msg, p1, p1_msg
                             c3, c3_msg, p3, p3_msg = c1, c1_msg, p1, p1_msg
                         # service amounts
@@ -380,7 +380,7 @@ class BookingService(object):
                             if c1:
                                 c1 = round(float(c1), 2)
                             if p1:
-                                p1 = round(0.499999 + float(p1), 0)
+                                p1 = round(0.499999 + float(p1))
                             code, msg, c2, c2_msg, p2, p2_msg = ConfigService.extra_amounts(
                                 quote_extra.service,
                                 quote_extra.datetime_from, quote_extra.datetime_to,
@@ -391,7 +391,7 @@ class BookingService(object):
                             if c2:
                                 c2 = round(float(c2) / 2, 2)
                             if p2:
-                                p2 = round(0.499999 + float(p2), 0)
+                                p2 = round(0.499999 + float(p2))
                             code, msg, c3, c3_msg, p3, p3_msg = ConfigService.extra_amounts(
                                 quote_extra.service,
                                 quote_extra.datetime_from, quote_extra.datetime_to,
@@ -402,7 +402,7 @@ class BookingService(object):
                             if c3:
                                 c3 = round(float(c3) / 2, 2)
                             if p3:
-                                p3 = round(0.499999 + float(p3), 0)
+                                p3 = round(0.499999 + float(p3))
 
                         else:
                             # no grouping means passing total pax quantity
@@ -416,7 +416,7 @@ class BookingService(object):
                             if c1:
                                 c1 = round(float(c1) / pax_variant.pax_quantity, 2)
                             if p1:
-                                p1 = round(0.499999 + float(p1) / pax_variant.pax_quantity, 0)
+                                p1 = round(0.499999 + float(p1) / pax_variant.pax_quantity)
                             c2, c2_msg, p2, p2_msg = c1, c1_msg, p1, p1_msg
                             c3, c3_msg, p3, p3_msg = c1, c1_msg, p1, p1_msg
                         # service amounts
@@ -698,7 +698,7 @@ class BookingService(object):
                 if c is None:
                     return None, c_msg, None, price_msg
                 else:
-                    return cost + round(0.499999 + float(c / adults)), c_msg, None, price_msg
+                    return cost + round(float(c / adults), 2), c_msg, None, price_msg
             else:
                 if c is None:
                     if p is None:
@@ -707,6 +707,6 @@ class BookingService(object):
                         return None, c_msg, price + round(0.499999 + float(p / adults)), p_msg
                 else:
                     if p is None:
-                        return cost + round(0.499999 + float(c / adults)), c_msg, None, p_msg
+                        return cost + round(float(c / adults), 2), c_msg, None, p_msg
                     else:
-                        return cost + round(0.499999 + float(c / adults)), c_msg, price + round(0.499999 + float(p / adults)), p_msg
+                        return cost + round(float(c / adults), 2), c_msg, price + round(0.499999 + float(p / adults)), p_msg
