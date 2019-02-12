@@ -83,6 +83,7 @@ class LocationForAgencyTransferTopFilter(filters.ForeignKeyFilter):
                 Q(agencytransferdetail__a_location_to__in=search_option))
         return queryset
 
+
 class ExtraLocationForAgencyTransferTopFilter(filters.ForeignKeyFilter):
     filter_field_path = 'loc2'
     filter_title = 'Select Other Locations'

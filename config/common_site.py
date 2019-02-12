@@ -42,6 +42,7 @@ from config.top_filters import (
     AddonTopFilter,
     AllotmentTopFilter, TransferTopFilter, ExtraTopFilter,
     LocationForProviderTransferTopFilter, ExtraLocationForProviderTransferTopFilter,
+    LocationForAgencyTransferTopFilter, ExtraLocationForAgencyTransferTopFilter,
     DateToTopFilter)
 
 from finance.top_filters import ProviderTopFilter, AgencyTopFilter 
@@ -330,7 +331,10 @@ class AgencyTransferServiceSiteModel(SiteModel):
     recent_allowed = True
     fields = ('agency', 'service', 'date_from', 'date_to',)
     list_display = ('agency', 'service', 'date_from', 'date_to',)
-    top_filters = (('service', TransferTopFilter), ('agency', AgencyTopFilter),)
+    top_filters = (
+        ('service', TransferTopFilter), ('agency', AgencyTopFilter),
+        ('date_to', DateToTopFilter),
+        LocationForAgencyTransferTopFilter, ExtraLocationForAgencyTransferTopFilter)
     inlines = [AgencyTransferDetailInline]
     ordering = ['service', 'agency', '-date_from']
     form = AgencyTransferServiceForm
@@ -352,7 +356,9 @@ class AgencyExtraServiceSiteModel(SiteModel):
     recent_allowed = True
     fields = ('agency', 'service', 'date_from', 'date_to')
     list_display = ('agency', 'service', 'date_from', 'date_to',)
-    top_filters = (('service', ExtraTopFilter), ('agency', AgencyTopFilter),)
+    top_filters = (
+        ('service', ExtraTopFilter), ('agency', AgencyTopFilter),
+        ('date_to', DateToTopFilter))
     inlines = [AgencyExtraDetailInline]
     ordering = ['service', 'agency', '-date_from']
     form = AgencyExtraServiceForm
