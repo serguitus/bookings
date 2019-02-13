@@ -659,6 +659,18 @@ class AgencySiteModel(SiteModel):
     top_filters = ('name', 'currency', 'enabled')
     ordering = ['enabled', 'currency', 'name']
 
+    actions = ['generate_agency_amounts']
+
+    def generate_agency_amounts(self, request, queryset):
+
+        agencies = list(queryset.all())
+
+        from config.services import ConfigService
+
+        ConfigService.process_agencies_amounts(agencies)
+
+    generate_agency_amounts.short_description = "Generate Agency Prices"
+
 
 class AgencyDocumentSiteModel(MatchableSiteModel):
     """

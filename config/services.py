@@ -23,12 +23,145 @@ from config.models import (
     ProviderExtraService, ProviderExtraDetail,
     AgencyExtraService, AgencyExtraDetail,
 )
+from finance.models import Agency
 
 
 class ConfigService(object):
     """
     ConfigService
     """
+
+    @classmethod
+    def process_agencies_amounts(cls, agencies):
+        """
+        process_agencies_amounts
+        """
+        cls.generate_agencies_amounts(agencies)
+        return
+
+        # from multiprocessing import Process
+        # if __name__ == 'config.services':
+        #    p = Process(target=cls.generate_agencies_amounts, args=(agencies))
+        #    p.start()
+        #    p.join()
+
+
+    @classmethod
+    def generate_agencies_amounts(cls, agencies):
+        """
+        generate_agencies_amounts
+        """
+        # load source agency
+
+        from reservas.custom_settings import AGENCY_FOR_AMOUNTS
+
+        try:
+            src_agency = Agency.objects.get(id=AGENCY_FOR_AMOUNTS)
+        except Exception as ex:
+            print(ex)
+            # 'Source Agency not Found'
+            return
+        for dst_agency in agencies:
+            cls.copy_agency_amounts(src_agency, dst_agency)
+
+
+    @classmethod
+    def copy_agency_amounts(cls, src_agency, dst_agency):
+        """
+        copy_agency_amounts
+        """
+        cls._copy_allotments(src_agency, dst_agency)
+        cls._copy_transfers(src_agency, dst_agency)
+        cls._copy_extras(src_agency, dst_agency)
+
+
+    @classmethod
+    def _copy_allotments(cls, src_agency, dst_agency):
+        # find agencyservice list
+        src_agency_services = list(AgencyAllotmentService.objects.filter(agency=src_agency.id))
+        # for each agencyservice create agencyservice
+        for src_agency_service in src_agency_services:
+            dst_agency_service, created = AgencyAllotmentService.objects.get_or_create(
+                agency_id=dst_agency.id,
+                date_from=src_agency_service.date_from,
+                date_to=src_agency_service.date_to,
+                service_id=src_agency_service.service_id
+            )
+            # find details
+            details = list(
+                AgencyAllotmentDetail.objects.filter(agency_service=src_agency_service))
+            # for each src agency detail create dst agency detail
+            for detail in details:
+                agency_detail, created = AgencyAllotmentDetail.objects.get_or_create(
+                    agency_service_id=dst_agency_service.id,
+                    room_type_id=detail.room_type_id,
+                    board_type=detail.board_type,
+                    defaults=cls._default_amounts(
+                        detail, src_agency.gain_percent, dst_agency.gain_percent)
+                )
+                # if already exists ensure higher amounts
+                if not created:
+                    cls._ensure_higher_amounts(agency_detail, detail)
+
+
+    @classmethod
+    def _copy_transfers(cls, src_agency, dst_agency):
+        # find agencyservice list
+        src_agency_services = list(AgencyTransferService.objects.filter(agency=src_agency.id))
+        # for each agencyservice create agencyservice
+        for src_agency_service in src_agency_services:
+            dst_agency_service, created = AgencyTransferService.objects.get_or_create(
+                agency_id=dst_agency.id,
+                date_from=src_agency_service.date_from,
+                date_to=src_agency_service.date_to,
+                service_id=src_agency_service.service_id
+            )
+            # find details
+            details = list(
+                AgencyTransferDetail.objects.filter(agency_service=src_agency_service))
+            # for each src agency detail create dst agency detail
+            for detail in details:
+                agency_detail, created = AgencyTransferDetail.objects.get_or_create(
+                    agency_service_id=dst_agency_service.id,
+                    a_location_from_id=detail.a_location_from_id,
+                    a_location_to_id=detail.a_location_to_id,
+                    defaults=cls._default_amounts(
+                        detail, src_agency.gain_percent, dst_agency.gain_percent)
+                )
+                # if already exists ensure higher amounts
+                if not created:
+                    cls._ensure_higher_amounts(agency_detail, detail)
+
+
+    @classmethod
+    def _copy_extras(cls, src_agency, dst_agency):
+        # find agencyservice list
+        src_agency_services = list(AgencyExtraService.objects.filter(agency=src_agency.id))
+        # for each agencyservice create agencyservice
+        for src_agency_service in src_agency_services:
+            dst_agency_service, created = AgencyExtraService.objects.get_or_create(
+                agency_id=dst_agency.id,
+                date_from=src_agency_service.date_from,
+                date_to=src_agency_service.date_to,
+                service_id=src_agency_service.service_id
+            )
+            # find details
+            details = list(
+                AgencyExtraDetail.objects.filter(agency_service=src_agency_service))
+            # for each src agency detail create dst agency detail
+            for detail in details:
+                agency_detail, created = AgencyExtraDetail.objects.get_or_create(
+                    agency_service_id=dst_agency_service.id,
+                    addon_id=detail.addon_id,
+                    pax_range_min=detail.pax_range_min,
+                    pax_range_max=detail.pax_range_max,
+                    defaults=cls._default_amounts(
+                        detail, src_agency.gain_percent, dst_agency.gain_percent)
+                )
+                # if already exists ensure higher amounts
+                if not created:
+                    cls._ensure_higher_amounts(agency_detail, detail)
+
 
     @classmethod
     def process_agency_allotments_amounts(
@@ -45,7 +178,6 @@ class ConfigService(object):
                 args=(agency, allotments_ids, gain_percent,))
             p.start()
             p.join()
-
 
 
     @classmethod
@@ -75,69 +207,55 @@ class ConfigService(object):
                         agency_service=agency_service,
                         room_type=detail.room_type,
                         board_type=detail.board_type,
-                        defaults=cls._default_amounts(detail, gain_percent)
+                        # from provider src gain is 0
+                        defaults=cls._default_amounts(detail, 0, gain_percent)
                     )
                     # if already exists ensure higher amounts
                     if not created:
                         cls._ensure_higher_amounts(agency_detail, detail)
-        # finally fix agency allotments amounts
-        cls.fix_agency_allotments_amounts(agency_id)
+
 
     @classmethod
-    def fix_agency_allotments_amounts(cls, agency_id):
-        """
-        fix_agency_allotments_amounts
-        """
-        # get all agency services sorted by service, date_from asc, date_to desc
-        agency_services = list()
-        prev_agency_service = None
-        for agency_service in agency_services:
-            if prev_agency_service is not None:
-                # verify date overlap
-                if agency_service.date_from <= prev_agency_service.date_to:
-                    pass
-
-
-
-            prev_agency_service = agency_service
-
-    @classmethod
-    def _default_amounts(cls, detail, gain_percent):
+    def _default_amounts(cls, detail, src_gain_percent, dst_gain_percent):
         return {
-            'ad_1_amount': cls._calculate_price(detail.ad_1_amount, gain_percent),
-            'ad_2_amount': cls._calculate_price(detail.ad_2_amount, gain_percent),
-            'ad_3_amount': cls._calculate_price(detail.ad_3_amount, gain_percent),
-            'ad_4_amount': cls._calculate_price(detail.ad_4_amount, gain_percent),
+            'ad_1_amount': cls._calculate_price(
+                detail.ad_1_amount, src_gain_percent, dst_gain_percent),
+            'ad_2_amount': cls._calculate_price(
+                detail.ad_2_amount, src_gain_percent, dst_gain_percent),
+            'ad_3_amount': cls._calculate_price(
+                detail.ad_3_amount, src_gain_percent, dst_gain_percent),
+            'ad_4_amount': cls._calculate_price(
+                detail.ad_4_amount, src_gain_percent, dst_gain_percent),
             'ch_1_ad_0_amount': cls._calculate_price(
-                detail.ch_1_ad_0_amount, gain_percent),
+                detail.ch_1_ad_0_amount, src_gain_percent, dst_gain_percent),
             'ch_1_ad_1_amount': cls._calculate_price(
-                detail.ch_1_ad_1_amount, gain_percent),
+                detail.ch_1_ad_1_amount, src_gain_percent, dst_gain_percent),
             'ch_1_ad_2_amount': cls._calculate_price(
-                detail.ch_1_ad_2_amount, gain_percent),
+                detail.ch_1_ad_2_amount, src_gain_percent, dst_gain_percent),
             'ch_1_ad_3_amount': cls._calculate_price(
-                detail.ch_1_ad_3_amount, gain_percent),
+                detail.ch_1_ad_3_amount, src_gain_percent, dst_gain_percent),
             'ch_1_ad_4_amount': cls._calculate_price(
-                detail.ch_1_ad_4_amount, gain_percent),
+                detail.ch_1_ad_4_amount, src_gain_percent, dst_gain_percent),
             'ch_2_ad_0_amount': cls._calculate_price(
-                detail.ch_2_ad_0_amount, gain_percent),
+                detail.ch_2_ad_0_amount, src_gain_percent, dst_gain_percent),
             'ch_2_ad_1_amount': cls._calculate_price(
-                detail.ch_2_ad_1_amount, gain_percent),
+                detail.ch_2_ad_1_amount, src_gain_percent, dst_gain_percent),
             'ch_2_ad_2_amount': cls._calculate_price(
-                detail.ch_2_ad_2_amount, gain_percent),
+                detail.ch_2_ad_2_amount, src_gain_percent, dst_gain_percent),
             'ch_2_ad_3_amount': cls._calculate_price(
-                detail.ch_2_ad_3_amount, gain_percent),
+                detail.ch_2_ad_3_amount, src_gain_percent, dst_gain_percent),
             'ch_2_ad_4_amount': cls._calculate_price(
-                detail.ch_2_ad_4_amount, gain_percent),
+                detail.ch_2_ad_4_amount, src_gain_percent, dst_gain_percent),
             'ch_3_ad_0_amount': cls._calculate_price(
-                detail.ch_3_ad_0_amount, gain_percent),
+                detail.ch_3_ad_0_amount, src_gain_percent, dst_gain_percent),
             'ch_3_ad_1_amount': cls._calculate_price(
-                detail.ch_3_ad_1_amount, gain_percent),
+                detail.ch_3_ad_1_amount, src_gain_percent, dst_gain_percent),
             'ch_3_ad_2_amount': cls._calculate_price(
-                detail.ch_3_ad_2_amount, gain_percent),
+                detail.ch_3_ad_2_amount, src_gain_percent, dst_gain_percent),
             'ch_3_ad_3_amount': cls._calculate_price(
-                detail.ch_3_ad_3_amount, gain_percent),
+                detail.ch_3_ad_3_amount, src_gain_percent, dst_gain_percent),
             'ch_3_ad_4_amount': cls._calculate_price(
-                detail.ch_3_ad_4_amount, gain_percent)
+                detail.ch_3_ad_4_amount, src_gain_percent, dst_gain_percent)
         }
 
     @classmethod
@@ -219,12 +337,13 @@ class ConfigService(object):
             agency_detail.save()
 
     @classmethod
-    def _calculate_price(cls, cost, gain_percent):
-        if cost is None:
+    def _calculate_price(cls, src_price, src_gain_percent, dst_gain_percent):
+        if src_price is None:
             return None
-        if gain_percent is None:
-            return cost
-        return round(0.499999 + float(cost) * (1.0 + float(gain_percent) / 100.0))
+        if src_gain_percent is None or dst_gain_percent is None:
+            return src_price
+        return round(
+            0.499999 + float(src_price) * (100.0 + float(dst_gain_percent)) / (100.0 + float(src_gain_percent)))
 
     @classmethod
     def _need_update(cls, old_value, new_value):

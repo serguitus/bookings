@@ -91,7 +91,12 @@ class AgencyAllotmentDetailInlineForm(forms.ModelForm):
     class Meta:
         fields = ('__all__')
         widgets = {
-            'room_type': autocomplete.ModelSelect2(url='roomtype-autocomplete'),
+            'room_type': autocomplete.ModelSelect2(
+                url='roomtype-autocomplete',
+                forward=['service']),
+            'board_type': autocomplete.ListSelect2(
+                url='boardtype-autocomplete',
+                forward=['service']),
         }
 
 
