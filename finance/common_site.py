@@ -402,9 +402,10 @@ class CurrencyExchangeSiteModel(BaseFinantialDocumentSiteModel):
 class TransferSiteModel(BaseFinantialDocumentSiteModel):
     model_order = 2040
     menu_label = MENU_LABEL_FINANCE_BASIC
-    fields = ('name', 'account', 'transfer_account', 'amount', 'date', 'status')
-    list_display = ('name', 'account', 'transfer_account', 'amount', 'date', 'status')
-    top_filters = ('currency', ('account',AccountTopFilter), 'status', 'date')
+    fields = ('name', 'account', 'transfer_account', 'amount', 'operation_cost', 'date', 'status')
+    list_display = (
+        'name', 'account', 'transfer_account', 'amount', 'operation_cost', 'date', 'status')
+    top_filters = ('currency', ('account', AccountTopFilter), 'status', 'date')
     form = TransferForm
 
     def save_model(self, request, obj, form, change):

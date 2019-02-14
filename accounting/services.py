@@ -43,9 +43,7 @@ class AccountingService():
             cls._validate_account(account=other_account)
             movement_amount = amount
             if other_amount:
-                # must be accounts with different currencies
-                if account.currency == other_account.currency:
-                    raise ValidationError(ERROR_SAME_CURRENCY % (account, other_account))
+                # can be transfer with or without operation_cost, or exchange 
                 cls._validate_amount(amount=other_amount)
                 movement_amount = other_amount
             else:

@@ -96,17 +96,31 @@ class FinanceService(object):
                 pk=transfer.pk, model_class=Transfer)
             # define db others
             db_other_account_id = None
+            db_other_amount = None
             if db_transfer:
                 db_other_account_id = db_transfer.transfer_account_id
+                db_other_amount = db_transfer.amount + db_transfer.operation_cost
             # manage saving
-            return cls._document_save(
-                user=user,
-                document=transfer,
-                db_document=db_transfer,
-                account=account,
-                movement_type=MOVEMENT_TYPE_INPUT,
-                other_account=other_account,
-                db_other_account_id=db_other_account_id)
+            if transfer.operation_cost == 0:
+                return cls._document_save(
+                    user=user,
+                    document=transfer,
+                    db_document=db_transfer,
+                    account=account,
+                    movement_type=MOVEMENT_TYPE_INPUT,
+                    other_account=other_account,
+                    db_other_account_id=db_other_account_id)
+            else:
+                return cls._document_save(
+                    user=user,
+                    document=transfer,
+                    db_document=db_transfer,
+                    account=account,
+                    movement_type=MOVEMENT_TYPE_INPUT,
+                    other_account=other_account,
+                    db_other_account_id=db_other_account_id,
+                    other_amount=transfer.amount + transfer.operation_cost,
+                    db_other_amount=db_other_amount)
 
     @classmethod
     def save_currency_exchange(cls, user, currency_exchange):

@@ -166,13 +166,19 @@ class Transfer(FinantialDocument, AccountingDocument):
         verbose_name = 'Transfer'
         verbose_name_plural = 'Transfers'
     transfer_account = models.ForeignKey(Account, related_name='transfer_account')
+    operation_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def fill_data(self):
         self.document_type = DOC_TYPE_TRANSFER
         account = Account.objects.get(pk=self.account_id)
         transfer_account = Account.objects.get(pk=self.transfer_account_id)
-        self.name = '%s - Transfer to %s of %s %s from %s' % (
-            self.date, account, self.amount, account.currency, transfer_account)
+        if self.operation_cost == 0:
+            self.name = '%s - Transfer to %s of %s %s from %s' % (
+                self.date, account, self.amount, account.currency, transfer_account)
+        else:
+            self.name = '%s - Transfer to %s of %s %s from %s (operation cost %s)' % (
+                self.date, account, self.amount, account.currency, transfer_account,
+                self.operation_cost)
 
 
 class LoanDocument(FinantialDocument, AccountingDocument, MatchingDocument):
