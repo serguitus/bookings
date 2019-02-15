@@ -183,12 +183,12 @@ $(document).ready(function(){
     for(var service in data){
       if(service != 'total' && service != 'paxes'){
         // just iterate over subtotals
-        $('.subtotal-quote_services-'+ service + '-' + data.paxes).remove();
-          $('.subtotal-quote_services-'+ service).append(
-            sub_total_line(service, data.paxes, data[service].cost_1,
-                           data[service].cost_2, data[service].cost_3,
-                           data[service].price_1, data[service].price_2,
-                           data[service].price_3));
+        $('.subtotal-quote_services-'+ service + '-pax-' + data.paxes).remove();
+        $('.subtotal-quote_services-'+ service).append(
+          sub_total_line(service, data.paxes, data[service].cost_1,
+                         data[service].cost_2, data[service].cost_3,
+                         data[service].price_1, data[service].price_2,
+                         data[service].price_3));
         //console.log(data[service].cost_1);
       }
     }
@@ -200,7 +200,7 @@ $(document).ready(function(){
 
 function sub_total_line(id, pax, sc, dc, tc, sp, dp, tp){
   // this is the line that prints each sub-total line
-  return "<div class='subtotal-quote_services-" + id + "-" + pax +
+  return "<div class='subtotal-quote_services-" + id + "-pax-" + pax +
     "'><span class='subprice-pax-limit'>pax Limit: " + pax +
     "</span><span class='sub-costs'><span class='sub_cost_1'> SGL:" + sc +
     "</span><span class='sub_cost_2'> DBL:" + dc +
