@@ -26,7 +26,7 @@ from config.forms import (
     AllotmentRoomTypeInlineForm, ExtraAddonInlineForm
 )
 from config.models import (
-    Location, Place, RoomType, Addon,
+    Location, Place, TransferInterval, Schedule, RoomType, Addon,
     Allotment, AllotmentRoomType, AllotmentBoardType, AllotmentSupplement,
     Transfer, TransferSupplement,
     Extra, ExtraAddon, ExtraSupplement,
@@ -57,10 +57,26 @@ MENU_LABEL_CONFIG_BASIC = 'Configuration'
 class IncorrectLookupParameters(Exception):
     pass
 
-class LocationPlaceInline(CommonTabularInline):
+class LocationPlaceInline(CommonStackedInline):
     model = Place
     extra = 0
-    show_change_link = True
+    ordering = ['name',]
+
+
+class LocationTransferIntervalInline(CommonStackedInline):
+    model = TransferInterval
+    fk_name = 'location'
+    extra = 0
+    fields = [('t_location_from', 'interval'),]
+    ordering = ['t_location_from__name',]
+
+
+class LocationScheduleInline(CommonStackedInline):
+    model = Schedule
+    fk_name = 'location'
+    extra = 0
+    fields = [('is_arrival', 'number'),]
+    ordering = ['is_arrival', 'number',]
 
 
 class LocationSiteModel(SiteModel):
@@ -69,7 +85,7 @@ class LocationSiteModel(SiteModel):
     fields = ('name', 'enabled', 'short_name')
     list_display = ('name', 'enabled',)
     top_filters = ('name', 'enabled',)
-    inlines = [LocationPlaceInline]
+    inlines = [LocationPlaceInline, LocationTransferIntervalInline, LocationScheduleInline]
 
 
 class RoomTypeSiteModel(SiteModel):

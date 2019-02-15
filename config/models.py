@@ -46,6 +46,34 @@ class Place(models.Model):
         return self.name
 
 
+class TransferInterval(models.Model):
+    """
+    TransferInterval
+    """
+    class Meta:
+        verbose_name = 'Transfer Interval'
+        verbose_name_plural = 'Transfers Intervals'
+        unique_together = (('location', 't_location_from',),)
+    location = models.ForeignKey(Location)
+    t_location_from = models.ForeignKey(
+        Location, related_name='t_location_from', verbose_name='Location From')
+    interval = models.TimeField()
+
+
+class Schedule(models.Model):
+    """
+    Schedule
+    """
+    class Meta:
+        verbose_name = 'Schedule'
+        verbose_name_plural = 'Schedules'
+        unique_together = (('location', 'number', 'is_arrival'),)
+    location = models.ForeignKey(Location)
+    number = models.CharField(max_length=20)
+    is_arrival = models.BooleanField()
+    time = models.TimeField()
+
+
 class RoomType(models.Model):
     """
     RoomType
