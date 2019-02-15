@@ -790,7 +790,9 @@ class ConfigService(object):
                 return None
         if quantity is None or quantity < 1:
             quantity = cls.get_service_quantity(service, adults + children)
-        if service.cost_type == EXTRA_COST_TYPE_FIXED and detail.ad_1_amount:
+        if (
+                service.cost_type == EXTRA_COST_TYPE_FIXED and
+                detail.ad_1_amount is not None):
             return detail.ad_1_amount * quantity * parameter
         if service.cost_type == EXTRA_COST_TYPE_BY_PAX:
             if not service.grouping:
