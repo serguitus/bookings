@@ -31,6 +31,21 @@ class Location(models.Model):
         return self.name
 
 
+class Place(models.Model):
+    """
+    Place
+    """
+    class Meta:
+        verbose_name = 'Place'
+        verbose_name_plural = 'Places'
+        unique_together = (('location', 'name',),)
+    location = models.ForeignKey(Location)
+    name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
+
+
 class RoomType(models.Model):
     """
     RoomType

@@ -34,7 +34,7 @@ from booking.models import BookingPax, BookingServicePax
 from config.constants import (
     SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER, SERVICE_CATEGORY_EXTRA
 )
-from config.models import Service, Allotment
+from config.models import Service, Allotment, Place
 from config.services import ConfigService
 
 from finance.models import Provider
@@ -402,6 +402,30 @@ class DropOffAutocompleteView(autocomplete.Select2QuerySetView):
         if location:
             qs = qs.filter(
                 location=location,
+            )
+
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs[:20]
+
+
+class PlaceAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return Place.objects.none()
+        qs = Place.objects.all()
+
+        location_from = self.forwarded.get('location_from', None)
+        location_to = self.forwarded.get('location_to', None)
+
+        if location_from:
+            qs = qs.filter(
+                location=location_from,
+            )
+        if location_to:
+            qs = qs.filter(
+                location=location_to,
             )
 
         if self.q:

@@ -17,7 +17,7 @@ from config.constants import (BOARD_TYPES, SERVICE_CATEGORIES,
 from config.models import (
     ServiceSupplement,
     RoomType, Allotment,
-    Transfer, Location,
+    Transfer, Location, Place,
     Extra, Addon,
 )
 
@@ -380,9 +380,11 @@ class BookingTransfer(BookingService):
     service = models.ForeignKey(Transfer)
     time = models.TimeField(blank=True, null=True)
     location_from = models.ForeignKey(Location, related_name='location_from')
+    place_from = models.ForeignKey(Place, related_name='place_from', blank=True, null=True)
     pickup = models.ForeignKey(Allotment, related_name='transfer_pickup',
                                null=True, blank=True)
     location_to = models.ForeignKey(Location, related_name='location_to')
+    place_to = models.ForeignKey(Place, related_name='place_to', blank=True, null=True)
     dropoff = models.ForeignKey(Allotment, related_name='transfer_dropoff',
                                 null=True, blank=True)
     quantity = models.SmallIntegerField(default=1)

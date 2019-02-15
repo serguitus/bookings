@@ -34,7 +34,7 @@ from config.views import (
     ExtraAutocompleteView, ProviderExtraAutocompleteView,
 )
 from booking import urls as booking_urls
-from booking.views import PickUpAutocompleteView, DropOffAutocompleteView
+from booking.views import PickUpAutocompleteView, DropOffAutocompleteView, PlaceAutocompleteView
 
 
 urlpatterns = [
@@ -117,5 +117,9 @@ urlpatterns = [
     url(r'^addon-autocomplete/$',
         AddonAutocompleteView.as_view(),
         name='addon-autocomplete',
+    ),
+    url(r'^place-autocomplete/$',
+        PlaceAutocompleteView.as_view(),
+        name='place-autocomplete',
     ),
 ]

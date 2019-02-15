@@ -26,7 +26,7 @@ from config.forms import (
     AllotmentRoomTypeInlineForm, ExtraAddonInlineForm
 )
 from config.models import (
-    Location, RoomType, Addon,
+    Location, Place, RoomType, Addon,
     Allotment, AllotmentRoomType, AllotmentBoardType, AllotmentSupplement,
     Transfer, TransferSupplement,
     Extra, ExtraAddon, ExtraSupplement,
@@ -57,12 +57,19 @@ MENU_LABEL_CONFIG_BASIC = 'Configuration'
 class IncorrectLookupParameters(Exception):
     pass
 
+class LocationPlaceInline(CommonTabularInline):
+    model = Place
+    extra = 0
+    show_change_link = True
+
+
 class LocationSiteModel(SiteModel):
     model_order = 6010
     menu_label = MENU_LABEL_CONFIG_BASIC
     fields = ('name', 'enabled', 'short_name')
     list_display = ('name', 'enabled',)
     top_filters = ('name', 'enabled',)
+    inlines = [LocationPlaceInline]
 
 
 class RoomTypeSiteModel(SiteModel):
