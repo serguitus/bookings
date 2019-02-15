@@ -299,6 +299,10 @@ class BookingServicePax(models.Model):
         # Call the "real" save() method.
         super(BookingServicePax, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return '%s (age: %s)' % (self.booking_pax.pax_name,
+                                 self.booking_pax.pax_age)
+
 
 class BookingServiceSupplement(models.Model):
     """
