@@ -290,7 +290,7 @@ class BookingAllotmentSiteModel(SiteModel):
                    ('datetime_from', DateTopFilter), 'status')
     ordering = ('datetime_from', 'booking__reference', 'service__name',)
     form = BookingAllotmentForm
-    change_form_template = 'booking/bookingservices_change_form.html'
+    change_form_template = 'booking/bookingservice_change_form.html'
     inlines = [BookingServicePaxInline]
 
     def response_add(self, request, obj, post_url_continue=None):
@@ -309,8 +309,10 @@ class BookingTransferSiteModel(SiteModel):
 
     fields = ('booking', ('service', 'status', 'conf_number'),
               ('datetime_from', 'datetime_to', 'time'),
-              ('location_from', 'place_from', 'pickup'),
-              ('location_to', 'place_to', 'dropoff'),
+              ('location_from', 'pickup', 'schedule_from'),
+              ('place_from', 'pickup_time'),
+              ('location_to', 'dropoff', 'schedule_to'),
+              ('place_to', 'dropoff_time'),
               'cost_amount', 'price_amount', 'provider', 'id')
     list_display = ('booking', 'name',
                     'datetime_from', 'datetime_to', 'time', 'status')
@@ -318,7 +320,7 @@ class BookingTransferSiteModel(SiteModel):
                    ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'booking__reference', 'service__name',)
     form = BookingTransferForm
-    change_form_template = 'booking/bookingservices_change_form.html'
+    change_form_template = 'booking/bookingservice_change_form.html'
     inlines = [BookingServicePaxInline]
 
     def response_add(self, request, obj, post_url_continue=None):
@@ -345,7 +347,7 @@ class BookingExtraSiteModel(SiteModel):
                    ('datetime_from', DateTopFilter),'status',)
     ordering = ('datetime_from', 'booking__reference', 'service__name',)
     form = BookingExtraForm
-    change_form_template = 'booking/bookingservices_change_form.html'
+    change_form_template = 'booking/bookingservice_change_form.html'
     inlines = [BookingServicePaxInline]
 
     def response_add(self, request, obj, post_url_continue=None):

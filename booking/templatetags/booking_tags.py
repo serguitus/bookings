@@ -13,7 +13,7 @@ register = template.Library()
 
 
 @register.simple_tag
-def quoteservices_table(quote):
+def quoteservice_table(quote):
     table = QuoteServiceTable(
         quote.quote_services.all(),
         order_by=('datetime_from', 'datetime_to'))
@@ -29,7 +29,7 @@ def quotepaxvariant_table(quote):
 
 
 @register.simple_tag
-def bookingservices_table(booking):
+def bookingservice_table(booking):
     table = BookingServiceTable(
         booking.booking_services.all(),
         order_by=('datetime_from', 'datetime_to'))

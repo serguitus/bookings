@@ -34,7 +34,7 @@ from booking.models import BookingPax, BookingServicePax
 from config.constants import (
     SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER, SERVICE_CATEGORY_EXTRA
 )
-from config.models import Service, Allotment, Place
+from config.models import Service, Allotment, Place, Schedule
 from config.services import ConfigService
 
 from finance.models import Provider
@@ -268,6 +268,66 @@ class BookingServiceAmountsView(ModelChangeFormProcessorView):
         })
 
 
+class BookingTransferTimesView(ModelChangeFormProcessorView):
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+
+        location_from_id = request.POST.get('location_from')
+        if location_from_id is None or location_from_id == '':
+            return JsonResponse({
+                'code': 3,
+                'message': 'Location From Missing',
+                'pickup_time': None,
+                'pickup_time_message': 'Location From Missing',
+                'dropoff_time': None,
+                'dropoff_time_message': 'Location From Missing',
+            })
+        schedule_from_id = request.POST.get('schedule_from')
+        if schedule_from_id is None or schedule_from_id == '':
+            return JsonResponse({
+                'code': 3,
+                'message': 'Schedule From Missing',
+                'pickup_time': None,
+                'pickup_time_message': 'Schedule From Missing',
+                'dropoff_time': None,
+                'dropoff_time_message': 'Schedule From Missing',
+            })
+        location_to_id = request.POST.get('location_to')
+        if location_to_id is None or location_to_id == '':
+            return JsonResponse({
+                'code': 3,
+                'message': 'Location To Missing',
+                'pickup_time': None,
+                'pickup_time_message': 'Location To Missing',
+                'dropoff_time': None,
+                'dropoff_time_message': 'Location To Missing',
+            })
+        schedule_to_id = request.POST.get('schedule_to')
+        if schedule_to_id is None or schedule_to_id == '':
+            return JsonResponse({
+                'code': 3,
+                'message': 'Schedule to Missing',
+                'pickup_time': None,
+                'pickup_time_message': 'Schedule To Missing',
+                'dropoff_time': None,
+                'dropoff_time_message': 'Schedule To Missing',
+            })
+
+        code, message, pickup_time, pickup_time_msg, dropoff_time, dropoff_time_msg = ConfigService.transfer_times(
+                location_from_id, schedule_from_id, location_to_id, schedule_to_id)
+
+        return JsonResponse({
+            'code': code,
+            'message': message,
+            'pickup_time': pickup_time,
+            'pickup_time_message': pickup_time_msg,
+            'dropoff_time': dropoff_time,
+            'dropoff_time_message': dropoff_time_msg,
+        })
+
+
 def booking_list(request, instance):
     """ a list of bookings with their services """
     context = {}
@@ -433,3 +493,39 @@ class PlaceAutocompleteView(autocomplete.Select2QuerySetView):
         return qs[:20]
 
 
+class ScheduleArrivalAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return Schedule.objects.none()
+        qs = Schedule.objects.filter(is_arrival=True).all()
+
+        location = self.forwarded.get('location_from', None)
+
+        if location:
+            qs = qs.filter(
+                location=location,
+            )
+
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs[:20]
+
+
+class ScheduleDepartureAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return Schedule.objects.none()
+        qs = Schedule.objects.filter(is_arrival=False).all()
+
+        location = self.forwarded.get('location_to', None)
+
+        if location:
+            qs = qs.filter(
+                location=location,
+            )
+
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs[:20]

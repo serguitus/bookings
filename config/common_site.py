@@ -23,7 +23,8 @@ from config.forms import (
     AgencyAllotmentServiceForm, AgencyTransferServiceForm, AgencyExtraServiceForm,
     AgencyAllotmentDetailInlineForm, AgencyTransferDetailInlineForm,
     AgencyExtraDetailInlineForm,
-    AllotmentRoomTypeInlineForm, ExtraAddonInlineForm
+    AllotmentRoomTypeInlineForm, ExtraAddonInlineForm,
+    LocationTransferIntervalInlineForm
 )
 from config.models import (
     Location, Place, TransferInterval, Schedule, RoomType, Addon,
@@ -70,12 +71,14 @@ class LocationTransferIntervalInline(CommonStackedInline):
     fields = [('t_location_from', 'interval'),]
     ordering = ['t_location_from__name',]
 
+    form = LocationTransferIntervalInlineForm
+
 
 class LocationScheduleInline(CommonStackedInline):
     model = Schedule
     fk_name = 'location'
     extra = 0
-    fields = [('is_arrival', 'number'),]
+    fields = [('is_arrival', 'number', 'time'),]
     ordering = ['is_arrival', 'number',]
 
 
