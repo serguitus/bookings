@@ -27,7 +27,7 @@ class QuoteServiceTable(tables.Table):
     class Meta:
         model = QuoteService
         template_name = 'booking/quoteservice_list.html'
-        fields = ['name', 'service_type', 'datetime_from', 'datetime_to', 'status']
+        fields = ['name', 'service_type', 'datetime_from', 'datetime_to']
     def render_name(self, value, record):
         obj_url = reverse(
             'common:booking_%s_change' % (QUOTESERVICE_TYPES[record.service_type]),
@@ -70,7 +70,7 @@ class BookingServiceTable(tables.Table):
         model = BookingService
         template_name = 'booking/bookingservice_list.html'
         fields = ['name', 'datetime_from', 'datetime_to', 'cost_amount',
-                  'price_amount', 'service_type']
+                  'price_amount', 'service_type', 'status']
 
     def __init__(self, *args, **kwargs):
         self.base_columns['service_type'].verbose_name='Request emails'
