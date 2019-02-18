@@ -27,7 +27,7 @@
         {% endif %}
         {% if not forloop.last %}
             <tr>
-                <td colspan="{{ inline_admin_form|cell_count }}" class="computed-subtotals subtotal-{{ inline_admin_formset.formset.prefix }}-{{ forloop.counter0 }}">
+                <td colspan="{{ inline_admin_form|cell_count }}" class="computed-subtotals subtotal-{{ inline_admin_formset.formset.prefix }}-{{ forloop.counter0 }} {% cycle "row1" "row2" %}">
                     {# add computed subtotals here through js #}
                 </td>
             </tr>

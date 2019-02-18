@@ -149,7 +149,7 @@ class QuoteTransferSiteModel(SiteModel):
     fields = ('quote', 'service',
               'location_from', 'location_to',
               'datetime_from', 'datetime_to', 'status',
-              'cost_amount', 'price_amount', 'provider', 'id')
+              'provider', 'id')
     list_display = ('quote', 'name',
                     'datetime_from', 'datetime_to', 'status',)
     top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
