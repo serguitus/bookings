@@ -1,7 +1,8 @@
 //Entry Points to get amounts for each booking_service
 var bookingservice_amounts_url = base_url + 'booking/bookingservice-amounts/';
-//Entry Points to get times for booking transfer
-var bookingtransfer_times_url = base_url + 'booking/bookingtransfer-times/';
+//Entry Points to get time for booking transfer
+var bookingtransfer_time_url = base_url + 'booking/bookingtransfer-time/';
+var time_autofilled = false;
 
 $(document).ready(function(){
   $('#bookingallotment_form #id_cost_amount').after("<button class='btn btn-success btn-copy btn-copy-cost'><<</button><span class='computed-value'>Calculated: <b data-computed=cost>N/A</b></span>");
@@ -11,23 +12,19 @@ $(document).ready(function(){
   $('#bookingextra_form #id_cost_amount').after("<button class='btn btn-success btn-copy btn-copy-cost'><<</button><span class='computed-value'>Calculated: <b data-computed=cost>N/A</b></span>");
   $('#bookingextra_form #id_price_amount').after("<button class='btn btn-success btn-copy btn-copy-price'><<</button><span class='computed-value'>Calculated: <b data-computed=price>N/A</b></span>");
 
-  $('#bookingtransfer_form #id_pickup_time').after("<button class='btn btn-success btn-copy btn-copy-pickup-time'><<</button><span class='computed-value'>Calculated: <b data-computed=pickup-time>N/A</b></span>");
-  $('#bookingtransfer_form #id_dropoff_time').after("<button class='btn btn-success btn-copy btn-copy-dropoff-time'><<</button><span class='computed-value'>Calculated: <b data-computed=dropoff-time>N/A</b></span>");
+  $('#bookingtransfer_form #id_time').after("<button class='btn btn-success btn-copy btn-copy-time'><<</button><span class='computed-value'>Calculated: <b data-computed=time>N/A</b></span>");
 
   var computedCost = $('b[data-computed=cost]');
   var computedPrice = $('b[data-computed=price]');
-  var computedPickupTime = $('b[data-computed=pickup-time]');
-  var computedDropoffTime = $('b[data-computed=dropoff-time]');
+  var computedTime = $('b[data-computed=time]');
 
   var costInput = $('#id_cost_amount')[0];
   var priceInput = $('#id_price_amount')[0];
-  var pickupTimeInput = $('#id_pickup_time')[0];
-  var dropoffTimeInput = $('#id_dropoff_time')[0];
+  var timeInput = $('#id_time')[0];
 
   var calcCost = $('div.field-box.field-calculated_cost').children()[1];
   var calcPrice = $('div.field-box.field-calculated_price').children()[1];
-  var calcPickupTime = $('div.field-box.field-calculated_pickup_time').children()[1];
-  var calcDropoffTime = $('div.field-box.field-calculated_dropoff_time').children()[1];
+  var calcTime = $('div.field-box.field-calculated_time').children()[1];
 
   function compare_numbers() {
     // a function to check if computed prices differ from set prices
@@ -49,22 +46,47 @@ $(document).ready(function(){
     return 0
   }
 
-  function compare_times() {
+  function compare_time() {
     // a function to check if computed values differ from set values
     // it highlights different values
-    if(pickupTimeInput.value != Number(computedPickupTime.html())){
-      $('.btn-copy-pickup-time').removeClass('btn-success');
-      $('.btn-copy-pickup-time').addClass('btn-danger');
-    } else{
-      $('.btn-copy-pickup-time').removeClass('btn-danger');
-      $('.btn-copy-pickup-time').addClass('btn-success');
-    }
-    if(dropoffTimeInput.value != Number(computedDropoffTime.html())){
-      $('.btn-copy-dropoff-time').removeClass('btn-success');
-      $('.btn-copy-dropoff-time').addClass('btn-danger');
-    } else{
-      $('.btn-copy-dropoff-time').removeClass('btn-danger');
-      $('.btn-copy-dropoff-time').addClass('btn-success');
+    if (timeInput.value == '') {
+      if (isTime(computedTime.html())) {
+        timeInput.value = computedTime.html();
+        time_autofilled = true;
+        $('.btn-copy-time').removeClass('btn-danger');
+        $('.btn-copy-time').removeClass('btn-warning');
+        $('.btn-copy-time').addClass('btn-success');
+        }
+    } else {
+      if (time_autofilled) {
+        if (isTime(computedTime.html())) {
+          timeInput.value = computedTime.html();
+          $('.btn-copy-time').removeClass('btn-danger');
+          $('.btn-copy-time').removeClass('btn-warning');
+          $('.btn-copy-time').addClass('btn-success');
+        } else {
+          timeInput.value = '';
+          $('.btn-copy-time').removeClass('btn-danger');
+          $('.btn-copy-time').removeClass('btn-warning');
+          $('.btn-copy-time').removeClass('btn-success');
+        }
+      } else {
+        if (isTime(computedTime.html())) {
+          if (seconds(timeInput.value) != seconds(computedTime.html())){
+            $('.btn-copy-time').removeClass('btn-success');
+            $('.btn-copy-time').removeClass('btn-warning');
+            $('.btn-copy-time').addClass('btn-danger');
+          } else{
+            $('.btn-copy-time').removeClass('btn-danger');
+            $('.btn-copy-time').removeClass('btn-warning');
+            $('.btn-copy-time').addClass('btn-success');
+          }
+        } else {
+          $('.btn-copy-time').removeClass('btn-danger');
+          $('.btn-copy-time').removeClass('btn-warning');
+          $('.btn-copy-time').removeClass('btn-success');
+        }
+      }
     }
     return 0
   }
@@ -99,10 +121,9 @@ $(document).ready(function(){
       compare_numbers();
     })
   }
-  function get_computed_times(url, form_dict){
-    computedPickupTime.html('Loading...');
-    computedDropoffTime.html('Loading...');
-    // sending a request to get computed values
+  function get_computed_time(url, form_dict){
+    computedTime.html('Loading...');
+    // sending a request to get computed value
     $.ajax({
       'url': url,
       'async': true,
@@ -110,21 +131,15 @@ $(document).ready(function(){
       'type': 'POST',
       'data': form_dict,
     }).done(function(data){
-      if(data['pickup_time']){
-        computedPickupTime.html(data['pickup_time']);
+      if(data['time']){
+        computedTime.html(data['time']);
       } else {
-        computedPickupTime.html(data['pickup_time_message']);
+        computedTime.html(data['time_message']);
       }
-      if(data['dropoff_time']){
-        computedDropoffTime.html(data['dropoff_time']);
-      } else {
-        computedDropoffTime.html(data['dropoff_time_message']);
-      }
-      compare_times();
+      compare_time();
     }).fail(function(){
-      computedPickupTime.html('N/A');
-      computedDropoffTime.html('N/A');
-      compare_times();
+      computedTime.html('N/A');
+      compare_time();
     })
   }
 
@@ -132,7 +147,7 @@ $(document).ready(function(){
     data = $('#bookingallotment_form').serialize();
   } else if ($('#bookingtransfer_form').length){
     data = $('#bookingtransfer_form').serialize();
-    get_computed_times(bookingtransfer_times_url, data);
+    get_computed_time(bookingtransfer_time_url, data);
   } else if ($('#bookingextra_form').length){
     data = $('#bookingextra_form').serialize();
   }
@@ -146,7 +161,7 @@ $(document).ready(function(){
   $('#bookingtransfer_form input, #bookingtransfer_form select').on('change', function(){
     data = $('#bookingtransfer_form').serialize();
     get_computed_amounts(bookingservice_amounts_url, data);
-    get_computed_times(bookingtransfer_times_url, data);
+    get_computed_time(bookingtransfer_time_url, data);
   });
 
   $('#bookingextra_form input, #bookingextra_form select').on('change', function(){
@@ -170,20 +185,12 @@ $(document).ready(function(){
     compare_numbers()
   })
 
-  $('.btn-copy-pickup-time').on('click', function(e){
+  $('.btn-copy-time').on('click', function(e){
     e.preventDefault();
-    if(Number(computedPickupTime.html())){
-      pickupTimeInput.value = Number(computedPickupTime.html());
+    if(Number(computedTime.html())){
+      timeInput.value = Number(computedTime.html());
     }
-    compare_times()
-  })
-
-  $('.btn-copy-dropoff-time').on('click', function(e){
-    e.preventDefault();
-    if(Number(computedDropoffTime.html())){
-      dropoffTimeInput.value = Number(computedDropoffTime.html());
-    }
-    compare_times()
+    compare_time()
   })
 
 });

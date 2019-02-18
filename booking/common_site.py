@@ -310,9 +310,9 @@ class BookingTransferSiteModel(SiteModel):
     fields = ('booking', ('service', 'status', 'conf_number'),
               ('datetime_from', 'datetime_to', 'time'),
               ('location_from', 'pickup', 'schedule_from'),
-              ('place_from', 'pickup_time'),
+              ('place_from'),
               ('location_to', 'dropoff', 'schedule_to'),
-              ('place_to', 'dropoff_time'),
+              ('place_to'),
               'cost_amount', 'price_amount', 'provider', 'id')
     list_display = ('booking', 'name',
                     'datetime_from', 'datetime_to', 'time', 'status')

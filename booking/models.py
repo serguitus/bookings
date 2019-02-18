@@ -384,13 +384,11 @@ class BookingTransfer(BookingService):
     schedule_from = models.ForeignKey(Schedule, related_name='schedule_from', blank=True, null=True)
     pickup = models.ForeignKey(Allotment, related_name='transfer_pickup',
                                null=True, blank=True)
-    pickup_time = models.TimeField(blank=True, null=True)
     location_to = models.ForeignKey(Location, related_name='location_to')
     place_to = models.ForeignKey(Place, related_name='place_to', blank=True, null=True)
     schedule_to = models.ForeignKey(Schedule, related_name='schedule_to', blank=True, null=True)
     dropoff = models.ForeignKey(Allotment, related_name='transfer_dropoff',
                                 null=True, blank=True)
-    dropoff_time = models.TimeField(blank=True, null=True)
     quantity = models.SmallIntegerField(default=1)
 
     def fill_data(self):

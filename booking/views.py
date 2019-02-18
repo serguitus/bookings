@@ -268,63 +268,23 @@ class BookingServiceAmountsView(ModelChangeFormProcessorView):
         })
 
 
-class BookingTransferTimesView(ModelChangeFormProcessorView):
+class BookingTransferTimeView(ModelChangeFormProcessorView):
     def get(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
 
-        location_from_id = request.POST.get('location_from')
-        if location_from_id is None or location_from_id == '':
-            return JsonResponse({
-                'code': 3,
-                'message': 'Location From Missing',
-                'pickup_time': None,
-                'pickup_time_message': 'Location From Missing',
-                'dropoff_time': None,
-                'dropoff_time_message': 'Location From Missing',
-            })
         schedule_from_id = request.POST.get('schedule_from')
-        if schedule_from_id is None or schedule_from_id == '':
-            return JsonResponse({
-                'code': 3,
-                'message': 'Schedule From Missing',
-                'pickup_time': None,
-                'pickup_time_message': 'Schedule From Missing',
-                'dropoff_time': None,
-                'dropoff_time_message': 'Schedule From Missing',
-            })
-        location_to_id = request.POST.get('location_to')
-        if location_to_id is None or location_to_id == '':
-            return JsonResponse({
-                'code': 3,
-                'message': 'Location To Missing',
-                'pickup_time': None,
-                'pickup_time_message': 'Location To Missing',
-                'dropoff_time': None,
-                'dropoff_time_message': 'Location To Missing',
-            })
         schedule_to_id = request.POST.get('schedule_to')
-        if schedule_to_id is None or schedule_to_id == '':
-            return JsonResponse({
-                'code': 3,
-                'message': 'Schedule to Missing',
-                'pickup_time': None,
-                'pickup_time_message': 'Schedule To Missing',
-                'dropoff_time': None,
-                'dropoff_time_message': 'Schedule To Missing',
-            })
+        location_from_id = request.POST.get('location_from')
+        location_to_id = request.POST.get('location_to')
 
-        code, message, pickup_time, pickup_time_msg, dropoff_time, dropoff_time_msg = ConfigService.transfer_times(
-                location_from_id, schedule_from_id, location_to_id, schedule_to_id)
+        pickup_time, pickup_time_msg = ConfigService.transfer_time(
+                schedule_from_id, schedule_to_id, location_from_id, location_to_id)
 
         return JsonResponse({
-            'code': code,
-            'message': message,
-            'pickup_time': pickup_time,
-            'pickup_time_message': pickup_time_msg,
-            'dropoff_time': dropoff_time,
-            'dropoff_time_message': dropoff_time_msg,
+            'time': pickup_time,
+            'time_message': pickup_time_msg,
         })
 
 

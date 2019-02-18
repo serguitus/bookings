@@ -1,7 +1,7 @@
 """
 config services
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 
 from django.db.models import Q
 
@@ -22,6 +22,7 @@ from config.models import (
     Extra,
     ProviderExtraService, ProviderExtraDetail,
     AgencyExtraService, AgencyExtraDetail,
+    Schedule, TransferInterval,
 )
 from finance.models import Agency
 
@@ -32,11 +33,11 @@ class ConfigService(object):
     """
 
     @classmethod
-    def process_agencies_amounts(cls, agencies):
+    def process_agencies_amounts(cls, agencies, is_update):
         """
         process_agencies_amounts
         """
-        cls.generate_agencies_amounts(agencies)
+        cls.generate_agencies_amounts(agencies, is_update)
         return
 
         # from multiprocessing import Process
@@ -47,7 +48,7 @@ class ConfigService(object):
 
 
     @classmethod
-    def generate_agencies_amounts(cls, agencies):
+    def generate_agencies_amounts(cls, agencies, is_update):
         """
         generate_agencies_amounts
         """
@@ -62,21 +63,21 @@ class ConfigService(object):
             # 'Source Agency not Found'
             return
         for dst_agency in agencies:
-            cls.copy_agency_amounts(src_agency, dst_agency)
+            cls.copy_agency_amounts(src_agency, dst_agency, is_update)
 
 
     @classmethod
-    def copy_agency_amounts(cls, src_agency, dst_agency):
+    def copy_agency_amounts(cls, src_agency, dst_agency, is_update):
         """
         copy_agency_amounts
         """
-        cls._copy_allotments(src_agency, dst_agency)
-        cls._copy_transfers(src_agency, dst_agency)
-        cls._copy_extras(src_agency, dst_agency)
+        cls._copy_allotments(src_agency, dst_agency, is_update)
+        cls._copy_transfers(src_agency, dst_agency, is_update)
+        cls._copy_extras(src_agency, dst_agency, is_update)
 
 
     @classmethod
-    def _copy_allotments(cls, src_agency, dst_agency):
+    def _copy_allotments(cls, src_agency, dst_agency, is_update):
         # find agencyservice list
         src_agency_services = list(AgencyAllotmentService.objects.filter(agency=src_agency.id))
         # for each agencyservice create agencyservice
@@ -92,20 +93,28 @@ class ConfigService(object):
                 AgencyAllotmentDetail.objects.filter(agency_service=src_agency_service))
             # for each src agency detail create dst agency detail
             for detail in details:
-                agency_detail, created = AgencyAllotmentDetail.objects.get_or_create(
-                    agency_service_id=dst_agency_service.id,
-                    room_type_id=detail.room_type_id,
-                    board_type=detail.board_type,
-                    defaults=cls._default_amounts(
-                        detail, src_agency.gain_percent, dst_agency.gain_percent)
-                )
-                # if already exists ensure higher amounts
-                if not created:
-                    cls._ensure_higher_amounts(agency_detail, detail)
+                if is_update:
+                    # update - dont modify if exists
+                    agency_detail, created = AgencyAllotmentDetail.objects.get_or_create(
+                        agency_service_id=dst_agency_service.id,
+                        room_type_id=detail.room_type_id,
+                        board_type=detail.board_type,
+                        defaults=cls._default_amounts(
+                            detail, src_agency.gain_percent, dst_agency.gain_percent)
+                    )
+                else:
+                    # rewrite - modify if exists
+                    agency_detail, created = AgencyAllotmentDetail.objects.update_or_create(
+                        agency_service_id=dst_agency_service.id,
+                        room_type_id=detail.room_type_id,
+                        board_type=detail.board_type,
+                        defaults=cls._default_amounts(
+                            detail, src_agency.gain_percent, dst_agency.gain_percent)
+                    )
 
 
     @classmethod
-    def _copy_transfers(cls, src_agency, dst_agency):
+    def _copy_transfers(cls, src_agency, dst_agency, is_update):
         # find agencyservice list
         src_agency_services = list(AgencyTransferService.objects.filter(agency=src_agency.id))
         # for each agencyservice create agencyservice
@@ -121,20 +130,28 @@ class ConfigService(object):
                 AgencyTransferDetail.objects.filter(agency_service=src_agency_service))
             # for each src agency detail create dst agency detail
             for detail in details:
-                agency_detail, created = AgencyTransferDetail.objects.get_or_create(
-                    agency_service_id=dst_agency_service.id,
-                    a_location_from_id=detail.a_location_from_id,
-                    a_location_to_id=detail.a_location_to_id,
-                    defaults=cls._default_amounts(
-                        detail, src_agency.gain_percent, dst_agency.gain_percent)
-                )
-                # if already exists ensure higher amounts
-                if not created:
-                    cls._ensure_higher_amounts(agency_detail, detail)
+                if is_update:
+                    # update - dont modify if exists
+                    agency_detail, created = AgencyTransferDetail.objects.get_or_create(
+                        agency_service_id=dst_agency_service.id,
+                        a_location_from_id=detail.a_location_from_id,
+                        a_location_to_id=detail.a_location_to_id,
+                        defaults=cls._default_amounts(
+                            detail, src_agency.gain_percent, dst_agency.gain_percent)
+                    )
+                else:
+                    # rewrite - modify if exists
+                    agency_detail, created = AgencyTransferDetail.objects.update_or_create(
+                        agency_service_id=dst_agency_service.id,
+                        a_location_from_id=detail.a_location_from_id,
+                        a_location_to_id=detail.a_location_to_id,
+                        defaults=cls._default_amounts(
+                            detail, src_agency.gain_percent, dst_agency.gain_percent)
+                    )
 
 
     @classmethod
-    def _copy_extras(cls, src_agency, dst_agency):
+    def _copy_extras(cls, src_agency, dst_agency, is_update):
         # find agencyservice list
         src_agency_services = list(AgencyExtraService.objects.filter(agency=src_agency.id))
         # for each agencyservice create agencyservice
@@ -150,17 +167,26 @@ class ConfigService(object):
                 AgencyExtraDetail.objects.filter(agency_service=src_agency_service))
             # for each src agency detail create dst agency detail
             for detail in details:
-                agency_detail, created = AgencyExtraDetail.objects.get_or_create(
-                    agency_service_id=dst_agency_service.id,
-                    addon_id=detail.addon_id,
-                    pax_range_min=detail.pax_range_min,
-                    pax_range_max=detail.pax_range_max,
-                    defaults=cls._default_amounts(
-                        detail, src_agency.gain_percent, dst_agency.gain_percent)
-                )
-                # if already exists ensure higher amounts
-                if not created:
-                    cls._ensure_higher_amounts(agency_detail, detail)
+                if is_update:
+                    # update - dont modify if exists
+                    agency_detail, created = AgencyExtraDetail.objects.get_or_create(
+                        agency_service_id=dst_agency_service.id,
+                        addon_id=detail.addon_id,
+                        pax_range_min=detail.pax_range_min,
+                        pax_range_max=detail.pax_range_max,
+                        defaults=cls._default_amounts(
+                            detail, src_agency.gain_percent, dst_agency.gain_percent)
+                    )
+                else:
+                    # rewrite - modify if exists
+                    agency_detail, created = AgencyExtraDetail.objects.update_or_create(
+                        agency_service_id=dst_agency_service.id,
+                        addon_id=detail.addon_id,
+                        pax_range_min=detail.pax_range_min,
+                        pax_range_max=detail.pax_range_max,
+                        defaults=cls._default_amounts(
+                            detail, src_agency.gain_percent, dst_agency.gain_percent)
+                    )
 
 
     @classmethod
@@ -895,3 +921,38 @@ class ConfigService(object):
             ).order_by(
                 'agency_service__date_from', '-agency_service__date_to'
             )
+
+
+    @classmethod
+    def transfer_time(
+            cls, schedule_from_id, schedule_to_id, location_from_id, location_to_id):
+        if (schedule_from_id and schedule_from_id != ''):
+            # pickup schedule specified
+            schedule = Schedule.objects.get(pk=schedule_from_id)
+            return schedule.time, 'Scheduled Pickup'
+        if (schedule_to_id and schedule_to_id != ''):
+            # dropoff schedule specified
+            schedule = Schedule.objects.get(pk=schedule_to_id)
+            if location_from_id is None or location_from_id == '':
+                return None, 'Location From Missing'
+            if location_to_id is None or location_to_id == '':
+                return None, 'Location To Missing'
+            intervals = list(
+                TransferInterval.objects
+                .filter(t_location_from_id=location_from_id)
+                .filter(location_id=location_to_id))
+            if intervals:
+                t = schedule.time
+                it = intervals[0].interval
+                interval = timedelta(hours=it.hour, minutes=it.minute)
+                drop_time = timedelta(hours=t.hour, minutes=t.minute)
+                pickup = drop_time - interval
+                if pickup < timedelta(hours=0):
+                    pickup = pickup + timedelta(hours=24)
+                pickup_time = time(hour=pickup.seconds // 3600, minute=(pickup.seconds // 60) % 60)
+                return pickup_time, 'Scheduled Droppoff'
+            else:
+                return None, 'Transfer Interval Missing for those Locations'
+        else:
+            # no schedule
+            return None, 'Non-Scheduled Time - Set Manually'

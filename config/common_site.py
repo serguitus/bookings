@@ -161,11 +161,6 @@ class AllotmentSiteModel(SiteModel):
     ordering = ['enabled', 'name']
     inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline,
                AllotmentSupplementInline]
-    actions = ['generate_agency_amounts']
-
-    def generate_agency_amounts(self, request, queryset):
-        pass
-    generate_agency_amounts.short_description = "Generate Agency Prices"
 
 
 class TransferSupplementInline(CommonTabularInline):
@@ -182,11 +177,6 @@ class TransferSiteModel(SiteModel):
     top_filters = ('name', 'enabled',)
     ordering = ['enabled', 'name']
     inlines = [TransferSupplementInline]
-    actions = ['generate_agency_amounts']
-
-    def generate_agency_amounts(self, request, queryset):
-        pass
-    generate_agency_amounts.short_description = "Generate Agency Prices"
 
 
 class ExtraAddonInline(CommonTabularInline):
@@ -223,11 +213,6 @@ class ExtraSiteModel(SiteModel):
     top_filters = ('name',)
     ordering = ['enabled', 'name']
     inlines = [ExtraAddonInline, ExtraSupplementInline]
-    actions = ['generate_agency_amounts']
-
-    def generate_agency_amounts(self, request, queryset):
-        pass
-    generate_agency_amounts.short_description = "Generate Agency Prices"
 
 
 class ProviderAllotmentDetailInline(CommonStackedInline):

@@ -660,17 +660,27 @@ class AgencySiteModel(SiteModel):
     top_filters = ('name', 'currency', 'enabled')
     ordering = ['enabled', 'currency', 'name']
 
-    actions = ['generate_agency_amounts']
+    actions = ['rewrite_agency_amounts', 'update_agency_amounts']
 
-    def generate_agency_amounts(self, request, queryset):
+    def rewrite_agency_amounts(self, request, queryset):
 
         agencies = list(queryset.all())
 
         from config.services import ConfigService
 
-        ConfigService.process_agencies_amounts(agencies)
+        ConfigService.process_agencies_amounts(agencies, False)
 
-    generate_agency_amounts.short_description = "Generate Agency Prices"
+    rewrite_agency_amounts.short_description = "Copy All Agency Prices"
+
+    def update_agency_amounts(self, request, queryset):
+    
+        agencies = list(queryset.all())
+
+        from config.services import ConfigService
+
+        ConfigService.process_agencies_amounts(agencies, True)
+
+    update_agency_amounts.short_description = "Copy New Agency Prices"
 
 
 class AgencyDocumentSiteModel(MatchableSiteModel):
