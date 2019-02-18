@@ -23,10 +23,11 @@ from config.forms import (
     AgencyAllotmentServiceForm, AgencyTransferServiceForm, AgencyExtraServiceForm,
     AgencyAllotmentDetailInlineForm, AgencyTransferDetailInlineForm,
     AgencyExtraDetailInlineForm,
-    AllotmentRoomTypeInlineForm, ExtraAddonInlineForm
+    AllotmentRoomTypeInlineForm, ExtraAddonInlineForm,
+    LocationTransferIntervalInlineForm
 )
 from config.models import (
-    Location, RoomType, Addon,
+    Location, Place, TransferInterval, Schedule, RoomType, Addon,
     Allotment, AllotmentRoomType, AllotmentBoardType, AllotmentSupplement,
     Transfer, TransferSupplement,
     Extra, ExtraAddon, ExtraSupplement,
@@ -57,12 +58,37 @@ MENU_LABEL_CONFIG_BASIC = 'Configuration'
 class IncorrectLookupParameters(Exception):
     pass
 
+class LocationPlaceInline(CommonStackedInline):
+    model = Place
+    extra = 0
+    ordering = ['name',]
+
+
+class LocationTransferIntervalInline(CommonStackedInline):
+    model = TransferInterval
+    fk_name = 'location'
+    extra = 0
+    fields = [('t_location_from', 'interval'),]
+    ordering = ['t_location_from__name',]
+
+    form = LocationTransferIntervalInlineForm
+
+
+class LocationScheduleInline(CommonStackedInline):
+    model = Schedule
+    fk_name = 'location'
+    extra = 0
+    fields = [('is_arrival', 'number', 'time'),]
+    ordering = ['is_arrival', 'number',]
+
+
 class LocationSiteModel(SiteModel):
     model_order = 6010
     menu_label = MENU_LABEL_CONFIG_BASIC
     fields = ('name', 'enabled', 'short_name')
     list_display = ('name', 'enabled',)
     top_filters = ('name', 'enabled',)
+    inlines = [LocationPlaceInline, LocationTransferIntervalInline, LocationScheduleInline]
 
 
 class RoomTypeSiteModel(SiteModel):

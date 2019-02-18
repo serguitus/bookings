@@ -26,7 +26,7 @@ class QuoteTable(tables.Table):
 class QuoteServiceTable(tables.Table):
     class Meta:
         model = QuoteService
-        template_name = 'booking/quoteservices_list.html'
+        template_name = 'booking/quoteservice_list.html'
         fields = ['name', 'service_type', 'datetime_from', 'datetime_to']
     def render_name(self, value, record):
         obj_url = reverse(
@@ -43,7 +43,7 @@ class QuoteServiceTable(tables.Table):
 class QuotePaxVariantTable(tables.Table):
     class Meta:
         model = QuotePaxVariant
-        template_name = 'booking/quoteservices_list.html'
+        template_name = 'booking/quoteservice_list.html'
         fields = [
             'pax_quantity',
             'cost_single_amount', 'cost_double_amount', 'cost_triple_amount',
@@ -68,7 +68,7 @@ class BookingTable(tables.Table):
 class BookingServiceTable(tables.Table):
     class Meta:
         model = BookingService
-        template_name = 'booking/bookingservices_list.html'
+        template_name = 'booking/bookingservice_list.html'
         fields = ['name', 'datetime_from', 'datetime_to', 'cost_amount',
                   'price_amount', 'service_type', 'status']
 
@@ -97,5 +97,5 @@ class BookingServiceTable(tables.Table):
 class BookingPaxTable(tables.Table):
     class Meta:
         model = BookingPax
-        template_name = 'booking/bookingservices_list.html'
+        template_name = 'booking/bookingservice_list.html'
         fields = ['pax_name', 'pax_age']

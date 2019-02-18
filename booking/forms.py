@@ -207,13 +207,29 @@ class BookingTransferForm(forms.ModelForm):
         widgets = {
             'service': autocomplete.ModelSelect2(url='transfer-autocomplete'),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'place_from': autocomplete.ModelSelect2(
+                url='place-autocomplete',
+                forward=['location_from'],
+                ),
             'pickup': autocomplete.ModelSelect2(
                 url='pickup-autocomplete',
                 forward=['location_from'],
                 ),
+            'schedule_from': autocomplete.ModelSelect2(
+                url='arrival-autocomplete',
+                forward=['location_from'],
+                ),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'place_to': autocomplete.ModelSelect2(
+                url='place-autocomplete',
+                forward=['location_to'],
+                ),
             'dropoff': autocomplete.ModelSelect2(
                 url='dropoff-autocomplete',
+                forward=['location_to'],
+                ),
+            'schedule_to': autocomplete.ModelSelect2(
+                url='departure-autocomplete',
                 forward=['location_to'],
                 ),
             'provider': autocomplete.ModelSelect2(

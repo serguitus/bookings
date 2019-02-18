@@ -8,6 +8,14 @@ from config.models import (
 )
 
 
+class LocationTransferIntervalInlineForm(forms.ModelForm):
+    class Meta:
+        fields = ('__all__')
+        widgets = {
+            't_location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
+        }
+
+
 class ProviderAllotmentServiceForm(forms.ModelForm):
     class Meta:
         model = ProviderAllotmentService
