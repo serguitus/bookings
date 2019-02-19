@@ -239,13 +239,13 @@ class BookingSiteModel(SiteModel):
     menu_label = MENU_LABEL_BOOKING
 
     recent_allowed = True
-    fields = (('name', 'reference'), ('date_from', 'date_to'), 'agency', 'status')
+    fields = (('name', 'reference'), ('agency', 'date_from', 'date_to'), 'status')
     list_display = ('name', 'reference', 'agency', 'date_from',
                     'date_to', 'status', 'currency', 'cost_amount',
                     'price_amount',)
     top_filters = (('name', 'Booking Name'), 'reference', ('date_from', DateTopFilter), 'rooming_list__pax_name')
     ordering = ['date_from', 'reference']
-    readonly_fields = ('status',)
+    readonly_fields = ('date_from', 'date_to', 'status',)
     details_template = 'booking/booking_details.html'
     inlines = [BookingPaxInline, BookingAllotmentInLine,
                BookingTransferInLine, BookingExtraInLine]
