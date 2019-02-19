@@ -150,14 +150,13 @@ class AllotmentSiteModel(SiteModel):
     model_order = 6110
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
-    fields = (('name', 'location'),
+    fields = (('name', 'location', 'is_shared_point'),
               ('phone', 'address'),
               ('time_from', 'time_to'),
               'enabled',
               'child_age')
-    list_display = ('name', 'phone', 'location',
-                    'enabled',)
-    top_filters = ('name', ('location', LocationTopFilter))
+    list_display = ('name', 'phone', 'location', 'is_shared_point', 'enabled',)
+    top_filters = ('name', ('location', LocationTopFilter), 'is_shared_point', 'enabled')
     ordering = ['enabled', 'name']
     inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline,
                AllotmentSupplementInline]
@@ -172,9 +171,9 @@ class TransferSiteModel(SiteModel):
     model_order = 6120
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
-    fields = ('name', 'cost_type', 'max_capacity', 'enabled',)
-    list_display = ('name', 'cost_type', 'max_capacity', 'enabled',)
-    top_filters = ('name', 'enabled',)
+    fields = ('name', 'cost_type', 'max_capacity', 'is_shared','enabled',)
+    list_display = ('name', 'cost_type', 'max_capacity', 'is_shared', 'enabled',)
+    top_filters = ('name', 'is_shared', 'enabled',)
     ordering = ['enabled', 'name']
     inlines = [TransferSupplementInline]
 

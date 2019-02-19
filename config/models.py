@@ -352,6 +352,7 @@ class Allotment(Service):
     time_to = models.TimeField(default='12:00')
     address = models.CharField(max_length=500, blank=True, null=True)
     phone = models.CharField(max_length=30, blank=True, null=True)
+    is_shared_point = models.BooleanField(default=False)
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_ALLOTMENT
@@ -475,6 +476,7 @@ class Transfer(Service):
         verbose_name_plural = 'Transfers'
     cost_type = models.CharField(max_length=5, choices=TRANSFER_COST_TYPES)
     max_capacity = models.IntegerField(blank=True, null=True)
+    is_shared = models.BooleanField(default=False)
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_TRANSFER

@@ -293,13 +293,11 @@ class BookingAllotmentSiteModel(SiteModel):
     change_form_template = 'booking/bookingservice_change_form.html'
     inlines = [BookingServicePaxInline]
 
-    def response_add(self, request, obj, post_url_continue=None):
-        return redirect(reverse('common:booking_booking_change',
-                                args=[obj.booking.pk]))
+    def response_post_save_add(self, request, obj):
+        return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
 
-    def response_change(self, request, obj, post_url_continue=None):
-        return redirect(reverse('common:booking_booking_change',
-                                args=[obj.booking.pk]))
+    def response_post_save_change(self, request, obj):
+        return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
 
 
 class BookingTransferSiteModel(SiteModel):
@@ -323,13 +321,11 @@ class BookingTransferSiteModel(SiteModel):
     change_form_template = 'booking/bookingservice_change_form.html'
     inlines = [BookingServicePaxInline]
 
-    def response_add(self, request, obj, post_url_continue=None):
-        return redirect(reverse('common:booking_booking_change',
-                                args=[obj.booking.pk]))
+    def response_post_save_add(self, request, obj):
+        return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
 
-    def response_change(self, request, obj, post_url_continue=None):
-        return redirect(reverse('common:booking_booking_change',
-                                args=[obj.booking.pk]))
+    def response_post_save_change(self, request, obj):
+        return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
 
 
 class BookingExtraSiteModel(SiteModel):
@@ -350,13 +346,11 @@ class BookingExtraSiteModel(SiteModel):
     change_form_template = 'booking/bookingservice_change_form.html'
     inlines = [BookingServicePaxInline]
 
-    def response_add(self, request, obj, post_url_continue=None):
-        return redirect(reverse('common:booking_booking_change',
-                                args=[obj.booking.pk]))
+    def response_post_save_add(self, request, obj):
+        return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
 
-    def response_change(self, request, obj, post_url_continue=None):
-        return redirect(reverse('common:booking_booking_change',
-                                args=[obj.booking.pk]))
+    def response_post_save_change(self, request, obj):
+        return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
 
 
 # Starts Registration Section
