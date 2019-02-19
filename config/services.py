@@ -381,7 +381,11 @@ class ConfigService(object):
             board_type, room_type_id, quantity=None):
 
         if groups is None:
-            return 3, 'Paxes Missing', None, None
+            return 3, 'Paxes Missing', None, 'Paxes Missing', None, 'Paxes Missing'
+        if date_from is None:
+            return 3, 'Date from Missing', None, 'Date from Missing', None, 'Date from Missing'
+        if date_to is None:
+            return 3, 'Date to Missing', None, 'Date to Missing', None, 'Date to Missing'
 
         service = Allotment.objects.get(pk=service_id)
 
@@ -439,8 +443,14 @@ class ConfigService(object):
             location_from_id, location_to_id, quantity=None):
         service = Transfer.objects.get(pk=service_id)
 
-        if service.cost_type == TRANSFER_COST_TYPE_BY_PAX and (groups is None):
-            return 3, 'Paxes Missing', None, None
+        if groups is None and service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
+            return 3, 'Paxes Missing', None, 'Paxes Missing', None, 'Paxes Missing'
+        if date_from is None and date_to is None:
+            return 3, 'Both Dates are Missing', None, 'Both Dates are Missing', None, 'Both Dates are Missing'
+        if date_from is None:
+            date_from = date_to
+        if date_to is None:
+            date_to = date_from
 
         # provider cost
         # obtain details order by date_from asc, date_to desc
@@ -492,8 +502,20 @@ class ConfigService(object):
             addon_id, quantity, parameter):
         service = Extra.objects.get(pk=service_id)
 
-        if service.cost_type == EXTRA_COST_TYPE_BY_PAX and (groups is None):
-            return 3, 'Paxes Missing', None, None
+        if groups is None and service.cost_type == EXTRA_COST_TYPE_BY_PAX:
+            return 3, 'Paxes Missing', None, 'Paxes Missing', None, 'Paxes Missing'
+        if date_from is None and date_to is None:
+            return 3, 'Both Dates are Missing', None, 'Both Dates are Missing', None, 'Both Dates are Missing'
+        if date_from is None:
+            if (service.parameter_type == EXTRA_PARAMETER_TYPE_DAYS
+                    or service.parameter_type == EXTRA_PARAMETER_TYPE_NIGHTS):
+                return 3, 'Date from is Missing', None, 'Date from is Missing', None, 'Date from is Missing'
+            date_from = date_to
+        if date_to is None:
+            if (service.parameter_type == EXTRA_PARAMETER_TYPE_DAYS
+                    or service.parameter_type == EXTRA_PARAMETER_TYPE_NIGHTS):
+                return 3, 'Date to is Missing', None, 'Date to is Missing', None, 'Date to is Missing'
+            date_to = date_from
 
         # provider cost
         # obtain details order by date_from asc, date_to desc
