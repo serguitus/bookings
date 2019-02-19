@@ -186,12 +186,12 @@ class BookingTransferInlineForm(forms.ModelForm):
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'pickup': autocomplete.ModelSelect2(
                 url='pickup-autocomplete',
-                forward=['location_from'],
+                forward=['location_from', 'service'],
                 ),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
             'dropoff': autocomplete.ModelSelect2(
                 url='dropoff-autocomplete',
-                forward=['location_to'],
+                forward=['location_to', 'service'],
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providertransfer-autocomplete',
@@ -213,7 +213,7 @@ class BookingTransferForm(forms.ModelForm):
                 ),
             'pickup': autocomplete.ModelSelect2(
                 url='pickup-autocomplete',
-                forward=['location_from'],
+                forward=['location_from', 'service'],
                 ),
             'schedule_from': autocomplete.ModelSelect2(
                 url='arrival-autocomplete',
@@ -226,7 +226,7 @@ class BookingTransferForm(forms.ModelForm):
                 ),
             'dropoff': autocomplete.ModelSelect2(
                 url='dropoff-autocomplete',
-                forward=['location_to'],
+                forward=['location_to', 'service'],
                 ),
             'schedule_to': autocomplete.ModelSelect2(
                 url='departure-autocomplete',

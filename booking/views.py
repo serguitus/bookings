@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.db.models import Q
 from django.forms.formsets import all_valid, DELETION_FIELD_NAME
 from django.http import JsonResponse, HttpResponse
 
@@ -34,7 +35,7 @@ from booking.models import BookingPax, BookingServicePax
 from config.constants import (
     SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER, SERVICE_CATEGORY_EXTRA
 )
-from config.models import Service, Allotment, Place, Schedule
+from config.models import Service, Allotment, Place, Schedule, Transfer
 from config.services import ConfigService
 
 from finance.models import Provider
@@ -402,9 +403,13 @@ class PickUpAutocompleteView(autocomplete.Select2QuerySetView):
 
         location = self.forwarded.get('location_from', None)
         if location:
-            qs = qs.filter(
-                location=location,
-            )
+            qs = qs.filter(location=location)
+
+        service = self.forwarded.get('service', None)
+        if service:
+            transfer = Transfer.objects.get(pk=service)
+            if transfer.is_shared:
+                qs = qs.filter(is_shared_point=True)
 
         if self.q:
             qs = qs.filter(name__icontains=self.q)
@@ -420,9 +425,13 @@ class DropOffAutocompleteView(autocomplete.Select2QuerySetView):
 
         location = self.forwarded.get('location_to', None)
         if location:
-            qs = qs.filter(
-                location=location,
-            )
+            qs = qs.filter(location=location)
+
+        service = self.forwarded.get('service', None)
+        if service:
+            transfer = Transfer.objects.get(pk=service)
+            if transfer.is_shared:
+                qs = qs.filter(is_shared_point=True)
 
         if self.q:
             qs = qs.filter(name__icontains=self.q)
