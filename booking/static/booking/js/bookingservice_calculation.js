@@ -255,10 +255,10 @@ $(document).ready(function(){
 
   $('.btn-copy-time').on('click', function(e){
     e.preventDefault();
-    if(Number(computedTime.html())){
-      timeInput.value = Number(computedTime.html());
+    if(is_time(computedTime.html())){
+      timeInput.value = computedTime.html();
     }
-    compare_time()
+    compare_time(e)
   })
 
 });
