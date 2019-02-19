@@ -138,10 +138,14 @@ class BookingServiceAmountsView(ModelChangeFormProcessorView):
         service_type = service.category
 
         date_from = request.POST.get('datetime_from', None)
+        if date_from == '':
+            date_from = None
         if date_from is not None:
             date_from = parse(date_from).date()
 
         date_to = request.POST.get('datetime_to', None)
+        if date_to == '':
+            date_to = None
         if date_to is not None:
             date_to = parse(date_to).date()
 
