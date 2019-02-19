@@ -138,28 +138,12 @@ class BookingServiceAmountsView(ModelChangeFormProcessorView):
         service_type = service.category
 
         date_from = request.POST.get('datetime_from', None)
-        if date_from is None or date_from == '':
-            return JsonResponse({
-                'code': 3,
-                'message': 'Date From Missing',
-                'cost': None,
-                'cost_message': 'Date From Missing',
-                'price': None,
-                'price_message': 'Date From Missing',
-            })
-        date_from = parse(date_from).date()
+        if date_from is not None:
+            date_from = parse(date_from).date()
 
         date_to = request.POST.get('datetime_to', None)
-        if date_to is None or date_to == '':
-            return JsonResponse({
-                'code': 3,
-                'message': 'Date To Missing',
-                'cost': None,
-                'cost_message': 'Date To Missing',
-                'price': None,
-                'price_message': 'Date To Missing',
-            })
-        date_to = parse(date_to).date()
+        if date_to is not None:
+            date_to = parse(date_to).date()
 
         booking_service_id = request.POST.get('id')
         try:
@@ -168,15 +152,6 @@ class BookingServiceAmountsView(ModelChangeFormProcessorView):
             booking_service = None
 
         groups = Booking_Service.find_groups(booking_service, service)
-        if groups is None:
-            return JsonResponse({
-                'code': 3,
-                'message': 'Paxes Missing',
-                'cost': None,
-                'cost_message': 'Paxes Missing',
-                'price': None,
-                'price_message': 'Paxes Missing',
-            })
 
         provider_id = request.POST.get('provider')
         try:
