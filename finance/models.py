@@ -874,41 +874,12 @@ class AgencyInvoice(AgencyDebitDocument):
     class Meta:
         verbose_name = 'Agency Invoice'
         verbose_name_plural = 'Agencies Invoices'
-    date1 = models.DateField(blank=True, null=True)
-    date2 = models.DateField(blank=True, null=True)
-    detail1 = models.CharField(max_length=100, blank=True, null=True)
-    detail2 = models.CharField(max_length=100, blank=True, null=True)
 
     def fill_data(self):
         self.document_type = DOC_TYPE_AGENCY_INVOICE
         agency = Agency.objects.get(pk=self.agency_id)
         self.name = '%s - Agency Invoice to %s for %s %s' % (
             self.date, agency, self.amount, self.get_currency_display())
-
-
-class AgencyInvoiceLine(models.Model):
-    class Meta:
-        verbose_name = 'Agency Invoice Line'
-        verbose_name_plural = 'Agencies Invoices Lines'
-    invoice = models.ForeignKey(AgencyInvoice)
-    date1 = models.DateField(blank=True, null=True)
-    date2 = models.DateField(blank=True, null=True)
-    detail1 = models.CharField(max_length=100, blank=True, null=True)
-    detail2 = models.CharField(max_length=100, blank=True, null=True)
-    qtty = models.IntegerField(blank=True, null=True)
-    unit = models.CharField(max_length=20, blank=True, null=True)
-    unit_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    line_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-
-
-class AgencyInvoicePartial(models.Model):
-    class Meta:
-        verbose_name = 'Agency Invoice Partial'
-        verbose_name_plural = 'Agencies Invoices Partials'
-    invoice = models.ForeignKey(AgencyInvoice)
-    detail1 = models.CharField(max_length=100, blank=True, null=True)
-    detail2 = models.CharField(max_length=100, blank=True, null=True)
-    partial_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
 
 class AgencyPayment(AgencyCreditDocument, AccountingDocument):

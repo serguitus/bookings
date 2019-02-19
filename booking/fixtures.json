@@ -15,7 +15,7 @@
         "cost_comments": null,
         "price_amount": "0.00",
         "price_comments": null,
-        "agency_invoice": null
+        "invoice": null
     }
 },
 {
@@ -34,7 +34,7 @@
         "cost_comments": null,
         "price_amount": "0.00",
         "price_comments": null,
-        "agency_invoice": null
+        "invoice": null
     }
 },
 {

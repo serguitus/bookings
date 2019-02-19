@@ -310,6 +310,20 @@ def get_invoice(request, id):
         return HttpResponse('Errors')
 
 
+def build_voucher(request, id):
+    template = get_template("booking/voucher.html")
+    booking = Booking.objects.get(id=id)
+    context = {'pagesize': 'Letter',
+               'booking': booking,}
+    html = template.render(context)
+    result = StringIO.StringIO()
+    pdf = pisa.pisaDocument(StringIO.StringIO(html), dest=result)
+    if not pdf.err:
+        return HttpResponse(result.getvalue(), content_type='application/pdf')
+    else:
+        return HttpResponse('Errors')
+
+
 class EmailProviderView(View):
     """
     A view to handle the email that will be sent to providers

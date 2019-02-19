@@ -8,12 +8,11 @@ from booking import constants
 from booking.models import (
     QuoteAllotment, QuoteTransfer, QuoteExtra,
     Booking, BookingService as Booking_Service, BookingPax, BookingServicePax,
-    BookingAllotment, BookingTransfer, BookingExtra)
+    BookingAllotment, BookingTransfer, BookingExtra,
+    BookingInvoice, BookingInvoiceLine, BookingInvoicePartial)
 
 from config.services import ConfigService
 
-from finance.models import (AgencyInvoice,
-                            AgencyInvoiceLine, AgencyInvoicePartial)
 from finance.constants import STATUS_CANCELLED, STATUS_READY
 from finance.services import FinanceService
 
@@ -26,27 +25,27 @@ class BookingService(object):
     @classmethod
     def booking_to_invoice(cls, user, booking, force=False):
         with transaction.atomic(savepoint=False):
-            invoice = booking.agency_invoice
+            invoice = booking.invoice
             new_invoice = False
             if invoice is None:
                 new_invoice = True
-                invoice = AgencyInvoice()
+                invoice = BookingInvoice()
             else:
                 if force:
                     invoice.status = STATUS_CANCELLED
                     FinanceService.save_agency_invoice(user, invoice)
                     new_invoice = True
-                    invoice = AgencyInvoice()
+                    invoice = BookingInvoice()
 
             invoice.agency = booking.agency
             invoice.currency = booking.currency
             invoice.amount = booking.price_amount
             invoice.status = STATUS_READY
 
-            invoice.detail1 = booking.name
-            invoice.detail2 = booking.reference
-            invoice.date1 = booking.date_from
-            invoice.date2 = booking.date_to
+            invoice.booking_name = booking.name
+            invoice.reference = booking.reference
+            invoice.date_from = booking.date_from
+            invoice.date_to = booking.date_to
 
             FinanceService.save_agency_invoice(user, invoice)
 
@@ -54,22 +53,22 @@ class BookingService(object):
             booking_service_list = Booking_Service.objects.filter(
                 booking=booking.id).all()
             for booking_service in booking_service_list:
-                invoice_line = AgencyInvoiceLine()
+                invoice_line = BookingInvoiceLine()
                 invoice_line.invoice = invoice
-                invoice_line.date1 = booking_service.datetime_from
-                invoice_line.date2 = booking_service.datetime_to
-                invoice_line.detail1 = booking_service.name
-                invoice_line.detail2 = booking_service.service.name
-                invoice_line.line_amount = booking_service.price_amount
+                invoice_line.date_from = booking_service.datetime_from
+                invoice_line.date_to = booking_service.datetime_to
+                invoice_line.bookingservice_name = booking_service.name
+                invoice_line.service_name = booking_service.service.name
+                invoice_line.price = booking_service.price_amount
 
                 invoice_line.save()
 
             # obtain partials
             booking_pax_list = BookingPax.objects.filter(booking=booking.id).all()
             for booking_pax in booking_pax_list:
-                invoice_partial = AgencyInvoicePartial()
+                invoice_partial = BookingInvoicePartial()
                 invoice_partial.invoice = invoice
-                invoice_partial.detail1 = booking_pax.pax_name
+                invoice_partial.pax_name = booking_pax.pax_name
  
                 invoice_partial.save()
 
@@ -515,10 +514,14 @@ class BookingService(object):
                 # set not all cancelled
                 cancelled = False
                 # date_from
-                if date_from is None or (date_from > service.datetime_from):
+                if (service.datetime_from is not None
+                        and (date_from is None or date_from > service.datetime_from)):
                     date_from = service.datetime_from
                 # date_to
-                if date_to is None or (date_to < service.datetime_to):
+                if service.datetime_to is None:
+                    service.datetime_to = service.datetime_from
+                if (service.datetime_to is not None
+                        and (date_to is None or date_to < service.datetime_to)):
                     date_to = service.datetime_to
                 # cost
                 cost += service.cost_amount

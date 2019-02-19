@@ -168,6 +168,46 @@ class QuoteExtra(QuoteService):
         self.service_type = SERVICE_CATEGORY_EXTRA
 
 
+class BookingInvoice(AgencyInvoice):
+    class Meta:
+        verbose_name = 'Booking Invoice'
+        verbose_name_plural = 'Bookings Invoices'
+    booking_name = models.CharField(max_length=100, blank=True, null=True)
+    reference = models.CharField(max_length=25, blank=True, null=True)
+    date_from = models.DateField(blank=True, null=True)
+    date_to = models.DateField(blank=True, null=True)
+
+    def fill_data(self):
+        super(BookingInvoice, self).fill_data()
+        self.name = 'Booking Invoice to %s - %s Price %s %s' % (
+            self.agency, self.date, self.amount, self.get_currency_display())
+
+
+class BookingInvoiceLine(models.Model):
+    class Meta:
+        verbose_name = 'Booking Invoice Line'
+        verbose_name_plural = 'Bookings Invoices Lines'
+    invoice = models.ForeignKey(BookingInvoice)
+    bookingservice_name = models.CharField(max_length=100, blank=True, null=True)
+    service_name = models.CharField(max_length=100, blank=True, null=True)
+    date_from = models.DateField(blank=True, null=True)
+    date_to = models.DateField(blank=True, null=True)
+    qtty = models.IntegerField(blank=True, null=True)
+    unit = models.CharField(max_length=20, blank=True, null=True)
+    unit_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+
+class BookingInvoicePartial(models.Model):
+    class Meta:
+        verbose_name = 'Booking Invoice Partial'
+        verbose_name_plural = 'Bookings Invoices Partials'
+    invoice = models.ForeignKey(BookingInvoice)
+    pax_name = models.CharField(max_length=100, blank=True, null=True)
+    detail2 = models.CharField(max_length=100, blank=True, null=True)
+    partial_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+
 class Booking(models.Model):
     """
     Booking
@@ -190,7 +230,7 @@ class Booking(models.Model):
     cost_comments = models.CharField(max_length=1000, blank=True, null=True)
     price_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
-    agency_invoice = models.ForeignKey(AgencyInvoice, blank=True, null=True)
+    invoice = models.ForeignKey(BookingInvoice, blank=True, null=True)
 
     def internal_reference(self):
         code = self.id
