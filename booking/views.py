@@ -32,8 +32,10 @@ from common.views import ModelChangeFormProcessorView
 
 from booking.models import BookingPax, BookingServicePax
 
+from booking.constants import ACTIONS
 from config.constants import (
-    SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER, SERVICE_CATEGORY_EXTRA
+    SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER,
+    SERVICE_CATEGORY_EXTRA
 )
 from config.models import Service, Allotment, Place, Schedule, Transfer
 from config.services import ConfigService
@@ -491,3 +493,23 @@ class ScheduleDepartureAutocompleteView(autocomplete.Select2QuerySetView):
         if self.q:
             qs = qs.filter(name__icontains=self.q)
         return qs[:20]
+
+
+def BookingActions(request):
+    """
+    This works as an entry point for any actions defined at the
+    booking details view. There is one option for every defined action
+    This view will redirect to the corresponding action view. All actions
+    end redirecting to referer
+    """
+    action = request.POST.get('action-selector', None)
+    if action:
+        items = request.POST.get('pk', None)
+        return getattr(ACTIONS, action)(request, items)
+    # here show some error message for unknown action
+    return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+
+def config_vouchers(request, services):
+    # here comes the voucher config page
+    print 'ya llegueeeeeee'

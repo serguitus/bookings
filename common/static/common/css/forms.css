@@ -241,6 +241,10 @@ fieldset.collapsed .collapse-toggle {
     color: #447e9b;
 }
 
+fieldset.collapse {
+    display: inherit;
+}
+
 /* MONOSPACE TEXTAREAS */
 
 fieldset.monospace textarea {

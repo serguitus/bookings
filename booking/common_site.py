@@ -213,6 +213,7 @@ class BookingAllotmentInLine(CommonTabularInline):
               ('room_type', 'board_type'), 'provider']
     ordering = ['datetime_from']
     form = BookingAllotmentInlineForm
+    classes = ['collapse']
 
 
 class BookingTransferInLine(CommonTabularInline):
@@ -223,6 +224,7 @@ class BookingTransferInLine(CommonTabularInline):
               ('quantity', 'provider')]
     ordering = ['datetime_from']
     form = BookingTransferInlineForm
+    classes = ['collapse']
 
 
 class BookingExtraInLine(CommonTabularInline):
@@ -232,6 +234,7 @@ class BookingExtraInLine(CommonTabularInline):
               ('quantity', 'parameter'), 'provider']
     ordering = ['datetime_from']
     form = BookingExtraInlineForm
+    classes = ('collapse',)
 
 
 class BookingSiteModel(SiteModel):

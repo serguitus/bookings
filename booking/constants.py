@@ -49,3 +49,6 @@ BOOKINGSERVICE_TYPES = {
     SERVICE_CATEGORY_EXTRA: 'bookingextra',
 }
 
+ACTIONS = {
+    'vouchers': 'config_vouchers',
+}

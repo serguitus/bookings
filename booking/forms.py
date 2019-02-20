@@ -1,4 +1,5 @@
 from dal import autocomplete
+from django.forms import widgets
 
 from booking.models import (
     Quote, QuoteAllotment, QuoteTransfer, QuoteExtra,
@@ -274,7 +275,6 @@ class BookingExtraForm(forms.ModelForm):
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
-from django.forms import widgets
 class EmailProviderForm(forms.Form):
     from_address = forms.EmailField(
         label='From',
@@ -311,3 +311,11 @@ class EmailProviderForm(forms.Form):
         self.user = user
         super(EmailProviderForm, self).__init__(*args, **kwargs)
         self.initial['from_address'] = self.user.email
+
+
+class VouchersConfigForm(forms.Form):
+    # states = forms.ChoiceField(settings.ESTADOS)
+    # this helps to point back to current booking
+    referer = forms.HiddenInput()
+    # the list of selected services to make vouchers from
+    id = forms.MultiValueField()
