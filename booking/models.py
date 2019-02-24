@@ -76,6 +76,7 @@ class QuotePaxVariant(models.Model):
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price DBL')
     price_triple_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price TPL')
+    price_percent = models.SmallIntegerField(blank=True, null=True, verbose_name='Price %')
 
     def __str__(self):
         return '%s' % self.pax_quantity

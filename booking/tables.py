@@ -48,6 +48,7 @@ class QuotePaxVariantTable(tables.Table):
         fields = [
             'pax_quantity',
             'cost_single_amount', 'cost_double_amount', 'cost_triple_amount',
+            'price_percent',
             'price_single_amount', 'price_double_amount', 'price_triple_amount']
 
 
