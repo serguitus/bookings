@@ -512,7 +512,6 @@ def booking_actions(request, id):
                                         args=(id,)))
 
 
-<<<<<<< HEAD
 # def config_vouchers(request, services):
 #     # here comes the voucher config page
 #     print 'ya llegueeeeeee'
