@@ -275,6 +275,29 @@ class BookingSiteModel(SiteModel):
         return render(request, 'booking/booking_list.html', context)
     """
 
+    def get_urls(self):
+
+        info = self.model._meta.app_label, self.model._meta.model_name
+        urls = super(BookingSiteModel, self).get_urls()
+        urlpatterns = [
+            self.build_url(r'^invoices/(?P<id>\d+)/config/?',
+                           self.config_invoice, 'config_invoice'),
+            self.build_url(r'^voucher/(?P<id>\d+)/config/?',
+                           self.config_vouchers,
+                           '%s_%s_config_vouchers' % info),
+        ]
+        return urlpatterns + urls
+
+    def config_invoice(self, id):
+        # this handles configuration form to build invoices
+        pass
+
+    @classmethod
+    def config_vouchers(self, id):
+        # this handles configuration form to build vouchers
+        print 'lo consegui!!!!!'
+        return redirect(reverse('common:index'))
+
 
 class BookingAllotmentSiteModel(SiteModel):
     model_order = 1210
