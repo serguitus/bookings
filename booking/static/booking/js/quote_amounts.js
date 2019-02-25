@@ -1,5 +1,5 @@
 //Entry Points to get prices for each booking_service
-var quote_url = base_url + 'booking/quote-amounts/';
+var quote_amounts_url = base_url + 'booking/quote-amounts/';
 
 $(document).ready(function(){
 
@@ -103,7 +103,7 @@ $(document).ready(function(){
       data = $('#quote_form').serialize();
     }
     $.ajax({
-      'url': quote_url,
+      'url': quote_amounts_url,
       'async': true,
       'datatype': 'json',
       'type': 'POST',
@@ -142,28 +142,67 @@ $(document).ready(function(){
                 sc3.html(pax_data.total.cost_3_msg);
               }
 
-              ip1 = $('#id_quote_paxvariants-' + idx + '-price_single_amount');
-              sp1 = $('#' + idx + '-span-p1');
-              if (pax_data.total.price_1) {
-                sp1.html(pax_data.total.price_1);
+              ipp = $('#id_quote_paxvariants-' + idx + '-price_percent');
+              if (ipp.val() != '' && !isNaN(ipp.val())) {
+                var percent = Number(ipp.val());
+                ip1 = $('#id_quote_paxvariants-' + idx + '-price_single_amount');
+                sp1 = $('#' + idx + '-span-p1');
+                if (isNaN(ic1.val())) {
+                  sp1.html('Cost for % is empty');
+                } else {
+                  price = Math.round(0.499999 + Number(ic1.val()) * (1.0 + percent / 100.0));
+                  sp1.html(price);
+                  if (ip1.val() == '') {
+                    ip1.val(price);
+                  }
+                }
+                ip2 = $('#id_quote_paxvariants-' + idx + '-price_double_amount');
+                sp2 = $('#' + idx + '-span-p2');
+                if (isNaN(ic2.val())) {
+                  sp2.html('Cost for % is empty');
+                } else {
+                  price = Math.round(0.499999 + Number(ic2.val()) * (1.0 + percent / 100.0));
+                  sp2.html(price);
+                  if (ip2.val() == '') {
+                    ip2.val(price);
+                  }
+                }
+                ip3 = $('#id_quote_paxvariants-' + idx + '-price_triple_amount');
+                sp3 = $('#' + idx + '-span-p3');
+                if (isNaN(ic3.val())) {
+                  sp3.html('Cost for % is empty');
+                } else {
+                  price = Math.round(0.499999 + Number(ic3.val()) * (1.0 + percent / 100.0));
+                  sp3.html(price);
+                  if (ip3.val() == '') {
+                    ip3.val(price);
+                  }
+                }
               } else {
-                sp1.html(pax_data.total.price_1_msg);
-              }
-
-              ip2 = $('#id_quote_paxvariants-' + idx + '-price_double_amount');
-              sp2 = $('#' + idx + '-span-p2');
-              if (pax_data.total.price_2) {
-                sp2.html(pax_data.total.price_2);
-              } else {
-                sp2.html(pax_data.total.price_2_msg);
-              }
-
-              ip3 = $('#id_quote_paxvariants-' + idx + '-price_triple_amount');
-              sp3 = $('#' + idx + '-span-p3');
-              if (pax_data.total.price_3) {
-                sp3.html(pax_data.total.price_3);
-              } else {
-                sp3.html(pax_data.total.price_3_msg);
+                ip1 = $('#id_quote_paxvariants-' + idx + '-price_single_amount');
+                sp1 = $('#' + idx + '-span-p1');
+                if (pax_data.total.price_1) {
+                  sp1.html(pax_data.total.price_1);
+                } else {
+                  sp1.html(pax_data.total.price_1_msg);
+                }
+  
+                ip2 = $('#id_quote_paxvariants-' + idx + '-price_double_amount');
+                sp2 = $('#' + idx + '-span-p2');
+                if (pax_data.total.price_2) {
+                  sp2.html(pax_data.total.price_2);
+                } else {
+                  sp2.html(pax_data.total.price_2_msg);
+                }
+  
+                ip3 = $('#id_quote_paxvariants-' + idx + '-price_triple_amount');
+                sp3 = $('#' + idx + '-span-p3');
+                if (pax_data.total.price_3) {
+                  sp3.html(pax_data.total.price_3);
+                } else {
+                  sp3.html(pax_data.total.price_3_msg);
+                }
+  
               }
             }
           }
