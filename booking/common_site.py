@@ -293,6 +293,7 @@ class BookingAllotmentSiteModel(SiteModel):
                    ('datetime_from', DateTopFilter), 'status')
     ordering = ('datetime_from', 'booking__reference', 'service__name',)
     form = BookingAllotmentForm
+    add_form_template = 'booking/bookingservice_change_form.html'
     change_form_template = 'booking/bookingservice_change_form.html'
     inlines = [BookingServicePaxInline]
 
@@ -321,6 +322,7 @@ class BookingTransferSiteModel(SiteModel):
                    ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'booking__reference', 'service__name',)
     form = BookingTransferForm
+    add_form_template = 'booking/bookingservice_change_form.html'
     change_form_template = 'booking/bookingservice_change_form.html'
     inlines = [BookingServicePaxInline]
 
@@ -346,6 +348,7 @@ class BookingExtraSiteModel(SiteModel):
                    ('datetime_from', DateTopFilter),'status',)
     ordering = ('datetime_from', 'booking__reference', 'service__name',)
     form = BookingExtraForm
+    add_form_template = 'booking/bookingservice_change_form.html'
     change_form_template = 'booking/bookingservice_change_form.html'
     inlines = [BookingServicePaxInline]
 
