@@ -89,6 +89,7 @@ class LocationSiteModel(SiteModel):
     list_display = ('name', 'enabled',)
     top_filters = ('name', 'enabled',)
     inlines = [LocationPlaceInline, LocationTransferIntervalInline, LocationScheduleInline]
+    save_as = True
 
 
 class RoomTypeSiteModel(SiteModel):
@@ -243,6 +244,7 @@ class ProviderAllotmentServiceSiteModel(SiteModel):
     form = ProviderAllotmentServiceForm
     change_form_template = 'config/provider_allotment_change_form.html'
     add_form_template = 'config/provider_allotment_change_form.html'
+    save_as = True
 
 
 class ProviderTransferDetailInline(CommonStackedInline):
@@ -269,6 +271,7 @@ class ProviderTransferServiceSiteModel(SiteModel):
     inlines = [ProviderTransferDetailInline]
     ordering = ['service', 'provider', '-date_from']
     form = ProviderTransferServiceForm
+    save_as = True
 
 
 class ProviderExtraDetailInline(CommonStackedInline):
@@ -293,6 +296,7 @@ class ProviderExtraServiceSiteModel(SiteModel):
     inlines = [ProviderExtraDetailInline]
     ordering = ['service', 'provider', '-date_from']
     form = ProviderExtraServiceForm
+    save_as = True
 
 
 class AgencyAllotmentDetailInline(CommonStackedInline):
@@ -322,6 +326,7 @@ class AgencyAllotmentServiceSiteModel(SiteModel):
     inlines = [AgencyAllotmentDetailInline]
     ordering = ['service', 'agency', '-date_from']
     form = AgencyAllotmentServiceForm
+    save_as = True
 
 
 class AgencyTransferDetailInline(CommonStackedInline):
@@ -348,6 +353,7 @@ class AgencyTransferServiceSiteModel(SiteModel):
     inlines = [AgencyTransferDetailInline]
     ordering = ['service', 'agency', '-date_from']
     form = AgencyTransferServiceForm
+    save_as = True
 
 
 class AgencyExtraDetailInline(CommonStackedInline):
@@ -372,6 +378,7 @@ class AgencyExtraServiceSiteModel(SiteModel):
     inlines = [AgencyExtraDetailInline]
     ordering = ['service', 'agency', '-date_from']
     form = AgencyExtraServiceForm
+    save_as = True
 
 
 bookings_site.register(Location, LocationSiteModel)

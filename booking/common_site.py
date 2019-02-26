@@ -309,6 +309,7 @@ class BookingSiteModel(SiteModel):
             return render(request, 'booking/voucher_config.html', context)
         else:
             # This is a POST. render vouchers
+            print request.POST.get('id', None)
             return redirect(reverse('common:booking_booking_change',
                                     args=[id]))
 

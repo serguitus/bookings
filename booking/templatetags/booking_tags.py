@@ -6,7 +6,8 @@ from booking.models import (
     BookingExtra)
 from booking.tables import (
     QuoteServiceTable, QuotePaxVariantTable,
-    BookingServiceTable, BookingPaxTable)
+    BookingServiceTable, BookingPaxTable,
+    BookingVouchersTable)
 from booking.services import BookingService
 
 register = template.Library()
@@ -36,6 +37,14 @@ def bookingservice_table(booking):
     return table
     # table = BookingServiceTable(bs)
     # return {'table': bs}
+
+
+@register.simple_tag
+def vouchers_table(booking):
+    table = BookingVouchersTable(
+        booking.booking_services.all(),
+        order_by=('datetime_from', 'datetime_to'))
+    return table
 
 
 @register.simple_tag
