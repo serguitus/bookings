@@ -183,6 +183,7 @@ class BookingPaxInline(TabularInline):
     fields = ['pax_name', 'pax_group', 'pax_age']
     verbose_name_plural = 'Rooming List'
     extra = 0
+    ordering = ('pax_group', 'pax_name')
 
 
 class BookingServicePaxInline(TabularInline):
@@ -190,6 +191,7 @@ class BookingServicePaxInline(TabularInline):
     fields = ['booking_pax', 'group']
     verbose_name_plural = 'Service Rooming List'
     form = BookingServicePaxInlineForm
+    ordering = ('group', 'booking_pax__pax_name')
 
     def get_formset(self, request, obj=None, **kwargs):
         initial = []
