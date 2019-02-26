@@ -1,16 +1,12 @@
 //Entry Points to get amounts for each booking_service
-var bookingservice_amounts_url = base_url + 'booking/bookingservice-amounts/';
+var bookingtransfer_amounts_url = base_url + 'booking/bookingtransfer-amounts/';
 //Entry Points to get time for booking transfer
 var bookingtransfer_time_url = base_url + 'booking/bookingtransfer-time/';
 var time_autofilled = false;
 
 $(document).ready(function(){
-  $('#bookingallotment_form #id_cost_amount').after("<button class='btn btn-success btn-copy btn-copy-cost'><<</button><span class='computed-value'>Calculated: <b data-computed=cost>N/A</b></span>");
-  $('#bookingallotment_form #id_price_amount').after("<button class='btn btn-success btn-copy btn-copy-price'><<</button><span class='computed-value'>Calculated: <b data-computed=price>N/A</b></span>");
   $('#bookingtransfer_form #id_cost_amount').after("<button class='btn btn-success btn-copy btn-copy-cost'><<</button><span class='computed-value'>Calculated: <b data-computed=cost>N/A</b></span>");
   $('#bookingtransfer_form #id_price_amount').after("<button class='btn btn-success btn-copy btn-copy-price'><<</button><span class='computed-value'>Calculated: <b data-computed=price>N/A</b></span>");
-  $('#bookingextra_form #id_cost_amount').after("<button class='btn btn-success btn-copy btn-copy-cost'><<</button><span class='computed-value'>Calculated: <b data-computed=cost>N/A</b></span>");
-  $('#bookingextra_form #id_price_amount').after("<button class='btn btn-success btn-copy btn-copy-price'><<</button><span class='computed-value'>Calculated: <b data-computed=price>N/A</b></span>");
 
   $('#bookingtransfer_form #id_time').after("<button class='btn btn-success btn-copy btn-copy-time'><<</button><span class='computed-value'>Calculated: <b data-computed=time>N/A</b></span>");
 
@@ -211,30 +207,14 @@ $(document).ready(function(){
     })
   }
 
-  if($('#bookingallotment_form').length){
-    data = $('#bookingallotment_form').serialize();
-  } else if ($('#bookingtransfer_form').length){
-    data = $('#bookingtransfer_form').serialize();
-    get_computed_time(bookingtransfer_time_url, data);
-  } else if ($('#bookingextra_form').length){
-    data = $('#bookingextra_form').serialize();
-  }
-  get_computed_amounts(bookingservice_amounts_url, data);
-
-  $('#bookingallotment_form input, #bookingallotment_form select').on('change', function(){
-    data = $('#bookingallotment_form').serialize();
-    get_computed_amounts(bookingservice_amounts_url, data);
-  });
+  data = $('#bookingtransfer_form').serialize();
+  get_computed_time(bookingtransfer_time_url, data);
+  get_computed_amounts(bookingtransfer_amounts_url, data);
 
   $('#bookingtransfer_form input, #bookingtransfer_form select').on('change', function(evt){
     data = $('#bookingtransfer_form').serialize();
-    get_computed_amounts(bookingservice_amounts_url, data);
+    get_computed_amounts(bookingtransfer_amounts_url, data);
     get_computed_time(bookingtransfer_time_url, data, evt);
-  });
-
-  $('#bookingextra_form input, #bookingextra_form select').on('change', function(){
-    data = $('#bookingextra_form').serialize();
-    get_computed_amounts(bookingservice_amounts_url, data);
   });
 
   $('.btn-copy-cost').on('click', function(e){

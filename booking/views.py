@@ -21,18 +21,22 @@ from django.template.loader import get_template
 from django.urls import reverse
 from django.views import View
 
-from booking.common_site import QuoteSiteModel
+from booking.common_site import (
+    QuoteSiteModel,
+    BookingAllotmentSiteModel, BookingTransferSiteModel, BookingExtraSiteModel
+)
+from booking.constants import ACTIONS
 from booking.models import (
     Quote,
-    Booking, BookingService)
+    Booking, BookingService,
+    BookingPax, BookingServicePax,
+    BookingAllotment, BookingTransfer, BookingExtra
+)
 from booking.forms import EmailProviderForm
 from booking.services import BookingService as Booking_Service
-from reservas.admin import bookings_site
+
 from common.views import ModelChangeFormProcessorView
 
-from booking.models import BookingPax, BookingServicePax
-
-from booking.constants import ACTIONS
 from config.constants import (
     SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER,
     SERVICE_CATEGORY_EXTRA
@@ -111,13 +115,22 @@ class QuoteAmountsView(ModelChangeFormProcessorView):
         })
 
 
-class BookingServiceAmountsView(ModelChangeFormProcessorView):
-    def get(self, request, *args, **kwargs):
-        return self.post(request, *args, **kwargs)
+class BookingAllotmentAmountsView(ModelChangeFormProcessorView):
+    model = BookingAllotment
+    common_sitemodel = BookingAllotmentSiteModel
+    common_site = bookings_site
 
-    def post(self, request, *args, **kwargs):
-        service_id = request.POST.get('service')
-        if service_id is None or service_id == '':
+    def process_data(self, bookingallotment, inlines):
+        if not bookingallotment.booking:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Booking Id Missing',
+                'cost': None,
+                'cost_message': 'Booking Id Missing',
+                'price': None,
+                'price_message': 'Booking Id Missing',
+            })
+        if not bookingallotment.service:
             return JsonResponse({
                 'code': 3,
                 'message': 'Service Id Missing',
@@ -126,120 +139,183 @@ class BookingServiceAmountsView(ModelChangeFormProcessorView):
                 'price': None,
                 'price_message': 'Service Id Missing',
             })
-        try:
-            service = Service.objects.get(pk=service_id)
-        except Service.DoesNotExist as ex:
+        pax_list = inlines[0]
+        if not pax_list:
             return JsonResponse({
                 'code': 3,
-                'message': 'Service Not Found for Id: %s' % service_id,
+                'message': 'Paxes Missing',
                 'cost': None,
-                'cost_message': 'Service Not Found for Id: %s' % service_id,
+                'cost_message': 'Paxes Missing',
                 'price': None,
-                'price_message': 'Service Not Found for Id: %s' % service_id,
+                'price_message': 'Paxes Missing',
             })
-        service_type = service.category
+        service = bookingallotment.service
+        groups = Booking_Service.find_paxes_groups(pax_list, service)
+        date_from = bookingallotment.datetime_from
+        date_to = bookingallotment.datetime_to
 
-        date_from = request.POST.get('datetime_from', None)
-        if date_from == '':
-            date_from = None
-        if date_from is not None:
-            date_from = parse(date_from).date()
+        board_type = bookingallotment.board_type
+        if board_type is None or board_type == '':
+            return JsonResponse({
+                'code': 3,
+                'message': 'Board Missing',
+                'cost': None,
+                'cost_message': 'Board Missing',
+                'price': None,
+                'price_message': 'Board Missing',
+            })
+        room_type_id = bookingallotment.room_type_id
+        if room_type_id is None or room_type_id == '':
+            return JsonResponse({
+                'code': 3,
+                'message': 'Room Missing',
+                'cost': None,
+                'cost_message': 'Room Missing',
+                'price': None,
+                'price_message': 'Room Missing',
+            })
 
-        date_to = request.POST.get('datetime_to', None)
-        if date_to == '':
-            date_to = None
-        if date_to is not None:
-            date_to = parse(date_to).date()
-
-        booking_service_id = request.POST.get('id')
-        try:
-            booking_service = BookingService.objects.get(pk=booking_service_id)
-        except BookingService.DoesNotExist as ex:
-            booking_service = None
-
-        groups = Booking_Service.find_groups(booking_service, service)
-
-        provider_id = request.POST.get('provider')
-        try:
-            provider = Provider.objects.get(pk=provider_id)
-        except Provider.DoesNotExist as ex:
-            provider = None
-
-        agency = None
-        booking_id = request.POST.get('booking')
-        if not (booking_id is None or booking_id == ''):
-            try:
-                booking = Booking.objects.get(pk=booking_id)
-                agency = booking.agency
-            except Booking.DoesNotExist as ex:
-                booking = None
-
-        if service_type == SERVICE_CATEGORY_ALLOTMENT:
-            board_type = request.POST.get('board_type')
-            if board_type is None or board_type == '':
-                return JsonResponse({
-                    'code': 3,
-                    'message': 'Board Missing',
-                    'cost': None,
-                    'cost_message': 'Board Missing',
-                    'price': None,
-                    'price_message': 'Board Missing',
-                })
-            room_type_id = request.POST.get('room_type')
-            if room_type_id is None or room_type_id == '':
-                return JsonResponse({
-                    'code': 3,
-                    'message': 'Room Missing',
-                    'cost': None,
-                    'cost_message': 'Room Missing',
-                    'price': None,
-                    'price_message': 'Room Missing',
-                })
-
-            code, message, cost, cost_msg, price, price_msg = ConfigService.allotment_amounts(
-                service_id, date_from, date_to, groups, provider, agency,
-                board_type, room_type_id,
-            )
-
-        if service_type == SERVICE_CATEGORY_TRANSFER:
-            location_from_id = request.POST.get('location_from')
-            if location_from_id is None or location_from_id == '':
-                return JsonResponse({
-                    'code': 3,
-                    'message': 'Location From Missing',
-                    'cost': None,
-                    'cost_message': 'Location From Missing',
-                    'price': None,
-                    'price_message': 'Location From Missing',
-                })
-            location_to_id = request.POST.get('location_to')
-            if location_to_id is None or location_to_id == '':
-                return JsonResponse({
-                    'code': 3,
-                    'message': 'Location To Missing',
-                    'cost': None,
-                    'cost_message': 'Location To Missing',
-                    'price': None,
-                    'price_message': 'Location To Missing',
-                })
-
-            code, message, cost, cost_msg, price, price_msg = ConfigService.transfer_amounts(
-                service_id, date_from, date_to, groups, provider, agency,
-                location_from_id, location_to_id,
-            )
+        code, message, cost, cost_msg, price, price_msg = ConfigService.allotment_amounts(
+            bookingallotment.service_id, date_from, date_to, groups,
+            bookingallotment.provider, bookingallotment.booking.agency,
+            board_type, room_type_id,
+        )
+        return JsonResponse({
+            'code': code,
+            'message': message,
+            'cost': cost,
+            'cost_message': cost_msg,
+            'price': price,
+            'price_message': price_msg,
+        })
 
 
-        if service_type == SERVICE_CATEGORY_EXTRA:
-            addon_id = request.POST.get('addon')
-            if addon_id == '':
-                addon_id = None
-            quantity = int(request.POST.get('quantity'))
-            parameter = int(request.POST.get('parameter'))
+class BookingTransferAmountsView(ModelChangeFormProcessorView):
+    model = BookingTransfer
+    common_sitemodel = BookingTransferSiteModel
+    common_site = bookings_site
 
-            code, message, cost, cost_msg, price, price_msg = ConfigService.extra_amounts(
-                service_id, date_from, date_to, groups, provider, agency,
-                addon_id, quantity, parameter,
-            )
+    def process_data(self, bookingtransfer, inlines):
+        if not bookingtransfer.booking:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Booking Id Missing',
+                'cost': None,
+                'cost_message': 'Booking Id Missing',
+                'price': None,
+                'price_message': 'Booking Id Missing',
+            })
+        if not bookingtransfer.service:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Service Id Missing',
+                'cost': None,
+                'cost_message': 'Service Id Missing',
+                'price': None,
+                'price_message': 'Service Id Missing',
+            })
+        pax_list = inlines[0]
+        if not pax_list:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Paxes Missing',
+                'cost': None,
+                'cost_message': 'Paxes Missing',
+                'price': None,
+                'price_message': 'Paxes Missing',
+            })
+        service = bookingtransfer.service
+        groups = Booking_Service.find_paxes_groups(pax_list, service)
+        date_from = bookingtransfer.datetime_from
+        date_to = bookingtransfer.datetime_to
+
+        location_from_id = bookingtransfer.location_from
+        if location_from_id is None or location_from_id == '':
+            return JsonResponse({
+                'code': 3,
+                'message': 'Location From Missing',
+                'cost': None,
+                'cost_message': 'Location From Missing',
+                'price': None,
+                'price_message': 'Location From Missing',
+            })
+        location_to_id = bookingtransfer.location_to
+        if location_to_id is None or location_to_id == '':
+            return JsonResponse({
+                'code': 3,
+                'message': 'Location To Missing',
+                'cost': None,
+                'cost_message': 'Location To Missing',
+                'price': None,
+                'price_message': 'Location To Missing',
+            })
+
+        code, message, cost, cost_msg, price, price_msg = ConfigService.transfer_amounts(
+            bookingtransfer.service_id, date_from, date_to, groups,
+            bookingtransfer.provider, bookingtransfer.booking.agency,
+            location_from_id, location_to_id,
+        )
+        return JsonResponse({
+            'code': code,
+            'message': message,
+            'cost': cost,
+            'cost_message': cost_msg,
+            'price': price,
+            'price_message': price_msg,
+        })
+
+
+class BookingExtraAmountsView(ModelChangeFormProcessorView):
+    model = BookingExtra
+    common_sitemodel = BookingExtraSiteModel
+    common_site = bookings_site
+
+    def process_data(self, bookingextra, inlines):
+        if not bookingextra.booking:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Booking Id Missing',
+                'cost': None,
+                'cost_message': 'Booking Id Missing',
+                'price': None,
+                'price_message': 'Booking Id Missing',
+            })
+        if not bookingextra.service:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Service Id Missing',
+                'cost': None,
+                'cost_message': 'Service Id Missing',
+                'price': None,
+                'price_message': 'Service Id Missing',
+            })
+        pax_list = inlines[0]
+        if not pax_list:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Paxes Missing',
+                'cost': None,
+                'cost_message': 'Paxes Missing',
+                'price': None,
+                'price_message': 'Paxes Missing',
+            })
+        service = bookingextra.service
+        groups = Booking_Service.find_paxes_groups(pax_list, service)
+        date_from = bookingextra.datetime_from
+        date_to = bookingextra.datetime_to
+
+        addon_id = bookingextra.addon
+        if addon_id == '':
+            addon_id = None
+        quantity = int(bookingextra.quantity)
+        parameter = int(bookingextra.parameter)
+
+        code, message, cost, cost_msg, price, price_msg = ConfigService.extra_amounts(
+            bookingextra.service_id, date_from, date_to, groups,
+            bookingextra.provider, bookingextra.booking.agency,
+            addon_id, quantity, parameter,
+        )
+
         return JsonResponse({
             'code': code,
             'message': message,

@@ -14,13 +14,19 @@ class ModelChangeFormProcessorView(View):
             new_object = form.save(commit=False)
         else:
             new_object = form.instance
-        formsets, inline_instances = self._create_formsets(request, new_object)
+        inlines = self.build_inlines(request, new_object)
+        return self.process_data(new_object, inlines)
+
+    def build_inlines(self, request, obj):
+        formsets, inline_instances = self._create_formsets(request, obj)
         inlines = []
         for formset in formsets:
             items = []
             forms_to_delete = formset.deleted_forms
             for form in formset.initial_forms:
                 if form in forms_to_delete:
+                    continue
+                if form.cleaned_data.get(DELETION_FIELD_NAME, False):
                     continue
                 item = form.instance
                 items.append(item)
@@ -30,8 +36,7 @@ class ModelChangeFormProcessorView(View):
                 item = form.instance
                 items.append(item)
             inlines.append(items)
-
-        return self.process_data(new_object, inlines)
+        return inlines
 
     def process_data(self, object, inlines):
         pass

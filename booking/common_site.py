@@ -295,8 +295,8 @@ class BookingAllotmentSiteModel(SiteModel):
                    ('datetime_from', DateTopFilter), 'status')
     ordering = ('datetime_from', 'booking__reference', 'service__name',)
     form = BookingAllotmentForm
-    add_form_template = 'booking/bookingservice_change_form.html'
-    change_form_template = 'booking/bookingservice_change_form.html'
+    add_form_template = 'booking/bookingallotment_change_form.html'
+    change_form_template = 'booking/bookingallotment_change_form.html'
     inlines = [BookingServicePaxInline]
 
     def response_post_save_add(self, request, obj):
@@ -324,8 +324,8 @@ class BookingTransferSiteModel(SiteModel):
                    ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'booking__reference', 'service__name',)
     form = BookingTransferForm
-    add_form_template = 'booking/bookingservice_change_form.html'
-    change_form_template = 'booking/bookingservice_change_form.html'
+    add_form_template = 'booking/bookingtransfer_change_form.html'
+    change_form_template = 'booking/bookingtransfer_change_form.html'
     inlines = [BookingServicePaxInline]
 
     def response_post_save_add(self, request, obj):
@@ -347,11 +347,11 @@ class BookingExtraSiteModel(SiteModel):
     list_display = ('booking', 'name', 'addon', 'quantity', 'parameter',
                     'datetime_from', 'datetime_to', 'time', 'status',)
     top_filters = ('booking__name', 'service', 'booking__reference',
-                   ('datetime_from', DateTopFilter),'status',)
+                   ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'booking__reference', 'service__name',)
     form = BookingExtraForm
-    add_form_template = 'booking/bookingservice_change_form.html'
-    change_form_template = 'booking/bookingservice_change_form.html'
+    add_form_template = 'booking/bookingextra_change_form.html'
+    change_form_template = 'booking/bookingextra_change_form.html'
     inlines = [BookingServicePaxInline]
 
     def response_post_save_add(self, request, obj):
