@@ -200,7 +200,9 @@ class BookingServicePaxInline(TabularInline):
             if obj:
                 saved = BookingServicePax.objects.filter(booking_service=obj.id)
             if not saved:
-                rooming = BookingPax.objects.filter(booking=request.GET['booking'])
+                rooming = BookingPax.objects.filter(
+                    booking=request.GET['booking']).order_by(
+                        'pax_group')
                 self.extra = len(rooming)
                 for bp in rooming:
                     new_pax = {'booking_pax': bp.id,
