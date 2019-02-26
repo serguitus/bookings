@@ -192,10 +192,12 @@ class BookingServicePaxInline(TabularInline):
 
     def get_formset(self, request, obj=None, **kwargs):
         initial = []
-        if request.method == "GET" and obj:
-            saved = BookingServicePax.objects.filter(booking_service=obj.id)
+        if request.method == "GET":
+            saved = None
+            if obj:
+                saved = BookingServicePax.objects.filter(booking_service=obj.id)
             if not saved:
-                rooming = BookingPax.objects.filter(booking=obj.booking)
+                rooming = BookingPax.objects.filter(booking=request.GET['booking'])
                 self.extra = len(rooming)
                 for bp in rooming:
                     new_pax = {'booking_pax': bp.id,
@@ -316,6 +318,7 @@ class BookingAllotmentSiteModel(SiteModel):
                    ('datetime_from', DateTopFilter), 'status')
     ordering = ('datetime_from', 'booking__reference', 'service__name',)
     form = BookingAllotmentForm
+    add_form_template = 'booking/bookingservice_change_form.html'
     change_form_template = 'booking/bookingservice_change_form.html'
     inlines = [BookingServicePaxInline]
 
@@ -344,6 +347,7 @@ class BookingTransferSiteModel(SiteModel):
                    ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'booking__reference', 'service__name',)
     form = BookingTransferForm
+    add_form_template = 'booking/bookingservice_change_form.html'
     change_form_template = 'booking/bookingservice_change_form.html'
     inlines = [BookingServicePaxInline]
 
@@ -369,6 +373,7 @@ class BookingExtraSiteModel(SiteModel):
                    ('datetime_from', DateTopFilter),'status',)
     ordering = ('datetime_from', 'booking__reference', 'service__name',)
     form = BookingExtraForm
+    add_form_template = 'booking/bookingservice_change_form.html'
     change_form_template = 'booking/bookingservice_change_form.html'
     inlines = [BookingServicePaxInline]
 
