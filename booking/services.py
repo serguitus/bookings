@@ -577,29 +577,38 @@ class BookingService(object):
             return None, None
         pax_list = list(
             BookingServicePax.objects.filter(booking_service=booking_service.id))
+        return cls.find_paxes_groups(pax_list, service)
+
+    @classmethod
+    def find_paxes_groups(cls, pax_list, service):
         if service.grouping:
             groups = dict()
             for pax in pax_list:
-                if not groups.__contains__(pax.group):
-                    groups[pax.group] = dict()
-                    groups[pax.group][0] = 0 # adults count
-                    groups[pax.group][1] = 0 # child count
-                if (service.child_age is None) or (pax.booking_pax.pax_age is None) or (
-                        pax.booking_pax.pax_age > service.child_age):
-                    groups[pax.group][0] += 1
-                else:
-                    groups[pax.group][1] += 1
+                if pax.booking_pax_id and pax.group:
+                    if not groups.__contains__(pax.group):
+                        groups[pax.group] = dict()
+                        groups[pax.group][0] = 0 # adults count
+                        groups[pax.group][1] = 0 # child count
+                    if (service.child_age is None) or (pax.booking_pax.pax_age is None) or (
+                            pax.booking_pax.pax_age > service.child_age):
+                        groups[pax.group][0] += 1
+                    else:
+                        groups[pax.group][1] += 1
             return groups.values()
         else:
-            if service.child_age is None:
-                return ({0: len(pax_list), 1: 0},)
             adults = 0
+            if service.child_age is None:
+                for pax in pax_list:
+                    if pax.booking_pax_id:
+                        adults += 1
+                return ({0: adults, 1: 0},)
             children = 0
             for pax in pax_list:
-                if pax.pax_age > service.child_age:
-                    adults += 1
-                else:
-                    children += 1
+                if pax.booking_pax_id:
+                    if pax.pax_age > service.child_age:
+                        adults += 1
+                    else:
+                        children += 1
             return ({0: adults, 1: children},)
 
     @classmethod

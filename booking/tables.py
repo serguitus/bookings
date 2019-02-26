@@ -76,7 +76,7 @@ class BookingServiceTable(tables.Table):
     pk = tables.CheckBoxColumn(accessor='pk')
 
     def __init__(self, *args, **kwargs):
-        self.base_columns['service_type'].verbose_name='Request emails'
+        # self.base_columns['service_type'].verbose_name='Request emails'
         super(BookingServiceTable, self).__init__(*args, **kwargs)
 
     def render_name(self, value, record):

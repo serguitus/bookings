@@ -4,7 +4,9 @@ from booking import views
 
 urlpatterns = [
     url(r'^quote-amounts/?', views.QuoteAmountsView.as_view(), name='quote_amounts'),
-    url(r'^bookingservice-amounts/?', views.BookingServiceAmountsView.as_view(), name='booking_amounts'),
+    url(r'^bookingallotment-amounts/?', views.BookingAllotmentAmountsView.as_view(), name='bookingallotment_amounts'),
+    url(r'^bookingtransfer-amounts/?', views.BookingTransferAmountsView.as_view(), name='bookingtransfer_amounts'),
+    url(r'^bookingextra-amounts/?', views.BookingExtraAmountsView.as_view(), name='bookingextra_amounts'),
     url(r'^bookingtransfer-time/?', views.BookingTransferTimeView.as_view(), name='bookingtransfer_time'),
     url(r'^invoices/(?P<id>\d+)/print/?', views.get_invoice, name='get_invoice'),
     url(r'^voucher/(?P<id>\d+)/print/?', views.build_voucher, name='build_voucher'),
