@@ -16,7 +16,7 @@ from dateutil.parser import parse
 
 from django.core.mail import EmailMessage
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.template.loader import get_template
 from django.urls import reverse
 from django.views import View
@@ -354,7 +354,7 @@ def booking_list(request, instance):
 
 
 def get_invoice(request, id):
-    template = get_template("booking/invoice.html")
+    template = get_template("booking/pdf/invoice.html")
     booking = Booking.objects.get(id=id)
     context = {'pagesize': 'Letter',
                'booking': booking,}
@@ -368,7 +368,7 @@ def get_invoice(request, id):
 
 
 def build_voucher(request, id):
-    template = get_template("booking/voucher.html")
+    template = get_template("booking/pdf/voucher.html")
     booking = Booking.objects.get(id=id)
     context = {'pagesize': 'Letter',
                'booking': booking,}
@@ -571,21 +571,23 @@ class ScheduleDepartureAutocompleteView(autocomplete.Select2QuerySetView):
         return qs[:20]
 
 
-def BookingActions(request):
+def booking_actions(request, id):
     """
     This works as an entry point for any actions defined at the
     booking details view. There is one option for every defined action
     This view will redirect to the corresponding action view. All actions
     end redirecting to referer
     """
+    from common_site import BookingSiteModel
     action = request.POST.get('action-selector', None)
     if action:
         items = request.POST.get('pk', None)
         return getattr(ACTIONS, action)(request, items)
     # here show some error message for unknown action
-    return HttpResponseRedirect(request.META['HTTP_REFERER'])
+    return redirect(reverse('common:booking_booking_change',
+                                        args=(id,)))
 
 
-def config_vouchers(request, services):
-    # here comes the voucher config page
-    print ('ya llegueeeeeee')
+# def config_vouchers(request, services):
+#     # here comes the voucher config page
+#     print 'ya llegueeeeeee'

@@ -44,12 +44,12 @@ class Hello1SiteModel(SiteModel):
     def get_urls(self):
 
         info = self.model._meta.app_label, self.model._meta.model_name
-
+        urls = super(Hello1SiteModel, self).get_urls()
         urlpatterns = [
             self.build_url(r'^$', self.hello1_index, '%s_%s_hello1_index' % info),
             self.build_url(r'^second/$', self.hello1_second, '%s_%s_hello1_second' % info),
         ]
-        return urlpatterns
+        return urlpatterns + urls
 
     def hello1_index(self, request, extra_context=None):
         context = {}

@@ -50,5 +50,5 @@ BOOKINGSERVICE_TYPES = {
 }
 
 ACTIONS = {
-    'vouchers': 'config_vouchers',
+    'vouchers': 'BookingSiteModel.config_vouchers',
 }
