@@ -127,7 +127,7 @@ $(document).ready(function(){
     for (let index = 0; index < parts.length; index++) {
       if (parts[index] && isNaN(parts[index])) {
         return false;
-      }
+      };
     }
     return true;
   }
