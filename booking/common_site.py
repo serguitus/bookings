@@ -297,7 +297,7 @@ class BookingSiteModel(SiteModel):
     @classmethod
     def config_vouchers(self, id):
         # this handles configuration form to build vouchers
-        print 'lo consegui!!!!!'
+        print ('lo consegui!!!!!')
         return redirect(reverse('common:index'))
 
 
