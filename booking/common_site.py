@@ -30,6 +30,7 @@ from booking.forms import (
     BookingAllotmentInlineForm, BookingAllotmentForm,
     BookingTransferInlineForm, BookingTransferForm,
     BookingExtraInlineForm, BookingExtraForm,
+    VouchersConfigForm,
 )
 from booking.models import (
     Quote,
@@ -290,15 +291,24 @@ class BookingSiteModel(SiteModel):
         ]
         return urlpatterns + urls
 
-    def config_invoice(self, id):
+    def config_invoice(self, request, id):
         # this handles configuration form to build invoices
         pass
 
-    @classmethod
-    def config_vouchers(self, id):
+    def config_vouchers(self, request, id, extra_context=None):
         # this handles configuration form to build vouchers
-        print 'lo consegui!!!!!'
-        return redirect(reverse('common:index'))
+        context = {}
+        if request.method == 'GET':
+            form = VouchersConfigForm()
+            context.update(self.get_model_extra_context(request))
+            context.update(extra_context or {})
+            context.update({'current': Booking.objects.get(id=id)})
+            context.update({'form': form})
+            return render(request, 'booking/voucher_config.html', context)
+        else:
+            # This is a POST. render vouchers
+            return redirect(reverse('common:booking_booking_change',
+                                    args=[id]))
 
 
 class BookingAllotmentSiteModel(SiteModel):

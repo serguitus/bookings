@@ -316,6 +316,7 @@ class EmailProviderForm(forms.Form):
 class VouchersConfigForm(forms.Form):
     # states = forms.ChoiceField(settings.ESTADOS)
     # this helps to point back to current booking
-    referer = forms.HiddenInput()
+    # referer = forms.HiddenInput()
     # the list of selected services to make vouchers from
     id = forms.MultiValueField()
+    # here comes also some inputs to select logo and other details
