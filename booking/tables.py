@@ -71,9 +71,8 @@ class BookingServiceTable(tables.Table):
     class Meta:
         model = BookingService
         template_name = 'booking/bookingservice_list.html'
-        fields = ['pk', 'name', 'datetime_from', 'datetime_to', 'cost_amount',
-                  'price_amount', 'service_type', 'status']
-    pk = tables.CheckBoxColumn(accessor='pk')
+        fields = ['name', 'datetime_from', 'datetime_to', 'cost_amount',
+                  'price_amount', 'provider', 'service_type', 'status']
 
     def __init__(self, *args, **kwargs):
         # self.base_columns['service_type'].verbose_name='Request emails'
@@ -108,8 +107,8 @@ class BookingVouchersTable(tables.Table):
     class Meta:
         model = BookingService
         template_name = 'booking/bookingservice_list.html'
-        fields = ['pk', 'name', 'datetime_from', 'datetime_to', 'cost_amount',
-                  'price_amount', 'service_type', 'status', 'conf_number']
+        fields = ['pk', 'name', 'datetime_from', 'datetime_to',
+                  'status', 'conf_number', 'provider']
     pk = tables.CheckBoxColumn(accessor='pk')
 
     def __init__(self, *args, **kwargs):
@@ -122,10 +121,3 @@ class BookingVouchersTable(tables.Table):
             args=(quote(record.pk),)
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
-
-    def render_service_type(self, value, record):
-        email_url = reverse(
-            'send_service_request',
-            args=(record.pk,)
-        )
-        return format_html('<a class="btn btn-primary" href="%s">Request</a>' % (email_url))

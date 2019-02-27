@@ -1,0 +1,14 @@
+{% extends "common/base_site.html" %}
+{% load booking_tags %}
+{% load render_table from django_tables2 %}
+{% block content %}
+  <form method="post" novalidate>{% csrf_token %}
+      {% vouchers_table current as table %}
+      <div class="bookingvouchers-container">
+          {% render_table table %}
+      </div>
+    <div class="submitbtn vouchers-submit">  
+        <button class="btn btn-primary" id="btn-build" type="submit">Generate</button>
+    </div>
+  </form>
+{% endblock content %}

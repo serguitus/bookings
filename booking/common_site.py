@@ -311,7 +311,8 @@ class BookingSiteModel(SiteModel):
             return render(request, 'booking/voucher_config.html', context)
         else:
             # This is a POST. render vouchers
-            print request.POST.get('id', None)
+            ids = request.POST.getlist('pk', [])
+            # here we have the list of services to build vouchers to at 'ids'
             return redirect(reverse('common:booking_booking_change',
                                     args=[id]))
 
