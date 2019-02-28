@@ -1,12 +1,18 @@
 {% extends "common/base_site.html" %}
-{% load booking_tags %}
+{% load booking_tags static %}
 {% load render_table from django_tables2 %}
+{% block head_extra %}
+    <script src="{% static 'admin/js/jquery.init.js' %}"></script>
+    <script type="text/javascript" src="/admin/jsi18n/"></script>
+    <script src="{% static 'admin/js/actions.js' %}"></script>
+{% endblock head_extra %}
 {% block content %}
   <form method="post" novalidate>{% csrf_token %}
       {% vouchers_table current as table %}
       <div class="bookingvouchers-container">
           {% render_table table %}
       </div>
+      {{ form }}
     <div class="submitbtn vouchers-submit">  
         <button class="btn btn-primary" id="btn-build" type="submit">Generate</button>
     </div>

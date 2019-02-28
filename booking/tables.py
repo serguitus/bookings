@@ -109,7 +109,13 @@ class BookingVouchersTable(tables.Table):
         template_name = 'booking/bookingservice_list.html'
         fields = ['pk', 'name', 'datetime_from', 'datetime_to',
                   'status', 'conf_number', 'provider']
-    pk = tables.CheckBoxColumn(accessor='pk')
+    pk = tables.CheckBoxColumn(accessor='pk',
+                               attrs={
+                                   'th__input': {
+                                       'id': 'action-toggle'},
+                                   'td__input': {
+                                       'class': 'action-select'},
+                               })
 
     def __init__(self, *args, **kwargs):
         # self.base_columns['service_type'].verbose_name='Request emails'

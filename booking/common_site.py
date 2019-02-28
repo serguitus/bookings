@@ -312,7 +312,9 @@ class BookingSiteModel(SiteModel):
         else:
             # This is a POST. render vouchers
             ids = request.POST.getlist('pk', [])
-            # here we have the list of services to build vouchers to at 'ids'
+            office = request.POST.get('office', None)
+            # use this two parameters to call methods to build pdf
+            # it should return the pisa object to add it to the response object
             return redirect(reverse('common:booking_booking_change',
                                     args=[id]))
 
