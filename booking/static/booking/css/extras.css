@@ -28,3 +28,7 @@
 #rooming_list-group .tabular tr td.original p{
     height: 20px;
 }
+
+a.build-booking {
+    color: white;
+}

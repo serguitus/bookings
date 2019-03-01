@@ -1,0 +1,29 @@
+{% extends "common/base_site.html" %}
+
+{% load static %}
+
+{% block head_extra %}
+  {{ block.super }}
+  <script type="text/javascript" src="{% static 'booking/js/dynamic_formset.js' %}"></script>
+{% endblock head_extra %}
+
+{% block content %}
+  <h2>Booking Paxes</h2>
+  <form method="post"  novalidate>
+    {% csrf_token %}
+    <input type="hidden" id="quote_id" name="quote_id" value="{{ quote_id }}">
+    {{ formset.management_form }}
+    {% for form in formset.forms %}
+      <div class="dynamic-row">
+        {{ form }}
+        <a class="btn btn-primary delete-row">Delete</a>
+        <p>
+      </div>
+    {% endfor %}
+    <p><a id="add" class="btn btn-primary add-row">Add Row</a></p>
+    <button class="btn btn-primary" id="btn-build" type="submit">Build Booking</button>
+    <a class="btn btn-success build-booking" href="{% url 'common:booking_quote_change' quote_id %}">
+      Cancel
+    </a>
+  </form>
+{% endblock content %}

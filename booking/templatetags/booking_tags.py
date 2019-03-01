@@ -8,7 +8,7 @@ from booking.tables import (
     QuoteServiceTable, QuotePaxVariantTable,
     BookingServiceTable, BookingPaxTable,
     BookingVouchersTable)
-from booking.services import BookingService
+from booking.services import BookingServices
 
 register = template.Library()
 
@@ -75,7 +75,7 @@ def render_service(booking_service):
 
 @register.simple_tag
 def get_distribution(booking_service):
-    rooms = BookingService.find_groups(booking_service=booking_service,
+    rooms = BookingServices.find_groups(booking_service=booking_service,
                                       service=booking_service.service)
     dist = ''
     room_count = {

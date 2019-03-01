@@ -6,8 +6,9 @@ from django.db import transaction
 
 from booking import constants
 from booking.models import (
+    Quote,
     QuoteAllotment, QuoteTransfer, QuoteExtra,
-    Booking, BookingService as Booking_Service, BookingPax, BookingServicePax,
+    Booking, BookingService, BookingPax, BookingServicePax,
     BookingAllotment, BookingTransfer, BookingExtra,
     BookingInvoice, BookingInvoiceLine, BookingInvoicePartial)
 
@@ -17,9 +18,9 @@ from finance.constants import STATUS_CANCELLED, STATUS_READY
 from finance.services import FinanceService
 
 
-class BookingService(object):
+class BookingServices(object):
     """
-    Booking Service
+    Booking Services
     """
 
     @classmethod
@@ -79,97 +80,146 @@ class BookingService(object):
 
 
     @classmethod
-    def quote_to_booking(cls, quote, rooming):
-        with transaction.atomic(savepoint=False):
-            # create booking
-            booking = Booking()
-            booking.agency = quote.agency
-            booking.currency = quote.currency
-            booking.currency_factor = quote.currency_factor
-            booking.save()
-            # create bookingpax list
-            booking_pax_list = list()
-            for pax in rooming:
-                booking_pax = BookingPax()
-                booking_pax.booking = booking
-                booking_pax.pax_name = pax.pax_name
-                booking_pax.pax_age = pax.pax_age
-                booking_pax.pax_group = pax.pax_group
-                booking_pax.save()
-                booking_pax_list.append(booking_pax)
-            # create bookingallotment list
-            for quote_allotment in QuoteAllotment.objects.filter(quote_id=quote.id).all():
-                booking_allotment = BookingAllotment()
-                booking_allotment.booking = booking
-                booking_allotment.description = quote_allotment.description
-                booking_allotment.service = quote_allotment.service
-                booking_allotment.description = quote_allotment.description
-                booking_allotment.datetime_from = quote_allotment.datetime_from
-                booking_allotment.datetime_to = quote_allotment.datetime_to
-                booking_allotment.room_type = quote_allotment.room_type
-                booking_allotment.board_type = quote_allotment.board_type
-                booking_allotment.provider = quote_allotment.provider
-                booking_allotment.save()
-                # create bookingservicepax list
-                for booking_pax in booking_pax_list:
-                    bookingservice_pax = BookingServicePax()
-                    bookingservice_pax.booking_sevice = booking_allotment
-                    bookingservice_pax.group = booking_pax.pax_group
-                    bookingservice_pax.save()
+    def build_booking(cls, quote_id, rooming):
+        quote = list(Quote.objects.filter(pk=quote_id).all())
+        if not quote:
+            return None, 'Quote Not Found'
+        quote = quote[0]
+        try:
+            with transaction.atomic(savepoint=False):
+                # create booking
+                booking = Booking()
+                booking.name = '< booking name >'
+                booking.agency = quote.agency
+                booking.reference = '< reference> '
+                # date_from auto
+                # date_to auto
+                # status auto
+                booking.currency = quote.currency
+                booking.currency_factor = quote.currency_factor
+                # cost_amount auto
+                # cost_comments auto
+                # price_amount auto
+                # cost_comments auto
+                # invoice empty
+                booking.save()
+                # create bookingpax list
+                booking_pax_list = list()
+                for pax in rooming:
+                    if pax['pax_name'] and pax['pax_group']:
+                        booking_pax = BookingPax()
+                        booking_pax.booking = booking
+                        booking_pax.pax_name = pax['pax_name']
+                        booking_pax.pax_age = pax['pax_age']
+                        booking_pax.pax_group = pax['pax_group']
+                        booking_pax.save()
+                        booking_pax_list.append(booking_pax)
+                # create bookingallotment list
+                for quote_allotment in QuoteAllotment.objects.filter(quote_id=quote.id).all():
+                    booking_allotment = BookingAllotment()
+                    booking_allotment.booking = booking
+                    booking_allotment.conf_number = '< confirm number >'
+                    # cost_amount
+                    # cost_comment
+                    # price_amount
+                    # price_comment
+                    # provider_invoice
+                    booking_allotment.name = quote_allotment.name
+                    # service_type auto
+                    booking_allotment.description = quote_allotment.description
+                    booking_allotment.datetime_from = quote_allotment.datetime_from
+                    booking_allotment.datetime_to = quote_allotment.datetime_to
+                    booking_allotment.status = constants.SERVICE_STATUS_PENDING
+                    booking_allotment.provider = quote_allotment.provider
+                    booking_allotment.service = quote_allotment.service
+                    booking_allotment.room_type = quote_allotment.room_type
+                    booking_allotment.board_type = quote_allotment.board_type
+                    booking_allotment.save()
+                    # create bookingservicepax list
+                    for booking_pax in booking_pax_list:
+                        bookingservice_pax = BookingServicePax()
+                        bookingservice_pax.booking_service = booking_allotment
+                        bookingservice_pax.booking_pax = booking_pax
+                        bookingservice_pax.group = booking_pax.pax_group
+                        bookingservice_pax.save()
 
-            # create bookingtransfer list
-            for quote_transfer in QuoteTransfer.objects.filter(quote_id=quote.id).all():
-                booking_transfer = BookingTransfer()
-                booking_transfer.booking = booking
-                booking_transfer.description = quote_transfer.description
-                booking_transfer.service = quote_transfer.service
-                booking_transfer.description = quote_transfer.description
-                booking_transfer.datetime_from = quote_transfer.datetime_from
-                booking_transfer.datetime_to = quote_transfer.datetime_to
-                booking_transfer.location_from = quote_transfer.location_from
-                booking_transfer.location_to = quote_transfer.location_to
-                booking_transfer.provider = quote_transfer.provider
+                # create bookingtransfer list
+                for quote_transfer in QuoteTransfer.objects.filter(quote_id=quote.id).all():
+                    booking_transfer = BookingTransfer()
+                    booking_transfer.booking = booking
+                    booking_transfer.conf_number = '< confirm number >'
+                    # cost_amount
+                    # cost_comment
+                    # price_amount
+                    # price_comment
+                    # provider_invoice
+                    booking_transfer.name = quote_transfer.name
+                    # service_type auto
+                    booking_transfer.description = quote_transfer.description
+                    booking_transfer.datetime_from = quote_transfer.datetime_from
+                    booking_transfer.datetime_to = quote_transfer.datetime_to
+                    booking_transfer.status = constants.SERVICE_STATUS_PENDING
+                    booking_transfer.provider = quote_transfer.provider
+                    booking_transfer.service = quote_transfer.service
+                    # time
+                    booking_transfer.quantity = ConfigService.get_service_quantity(
+                        booking_transfer.service, len(booking_pax_list))
+                    booking_transfer.location_from = quote_transfer.location_from
+                    # place_from
+                    # schedule_from
+                    # pickup
+                    booking_transfer.location_to = quote_transfer.location_to
+                    # place_to
+                    # schedule_to
+                    # dropoff
+                    booking_transfer.save()
 
-                booking_transfer.quantity = ConfigService.get_service_quantity(
-                    booking_transfer.service, len(booking_pax_list))
+                    # create bookingservicepax list
+                    for booking_pax in booking_pax_list:
+                        bookingservice_pax = BookingServicePax()
+                        bookingservice_pax.booking_service = booking_transfer
+                        bookingservice_pax.booking_pax = booking_pax
+                        bookingservice_pax.group = booking_pax.pax_group
+                        bookingservice_pax.save()
 
-                booking_transfer.save()
+                # create bookingextra list
+                for quote_extra in QuoteExtra.objects.filter(quote_id=quote.id).all():
+                    booking_extra = BookingExtra()
+                    booking_extra.booking = booking
+                    booking_extra.conf_number = '< confirm number >'
+                    # cost_amount
+                    # cost_comment
+                    # price_amount
+                    # price_comment
+                    # provider_invoice
+                    booking_extra.name = quote_extra.name
+                    # service_type auto
+                    booking_extra.description = quote_extra.description
+                    booking_extra.datetime_from = quote_extra.datetime_from
+                    booking_extra.datetime_to = quote_extra.datetime_to
+                    booking_extra.status = constants.SERVICE_STATUS_PENDING
+                    booking_extra.provider = quote_extra.provider
+                    booking_extra.service = quote_extra.service
+                    booking_extra.addon = quote_extra.addon
+                    booking_extra.time = quote_extra.time
+                    booking_extra.quantity = quote_extra.quantity
+                    booking_extra.parameter = quote_extra.parameter
+                    booking_extra.save()
 
-                # create bookingservicepax list
-                for booking_pax in booking_pax_list:
-                    bookingservice_pax = BookingServicePax()
-                    bookingservice_pax.booking_sevice = booking_transfer
-                    bookingservice_pax.group = booking_pax.pax_group
-                    bookingservice_pax.save()
+                    # create bookingservicepax list
+                    for booking_pax in booking_pax_list:
+                        bookingservice_pax = BookingServicePax()
+                        bookingservice_pax.booking_service = booking_extra
+                        bookingservice_pax.booking_pax = booking_pax
+                        bookingservice_pax.group = booking_pax.pax_group
+                        bookingservice_pax.save()
 
-            # create bookingextra list
-            for quote_extra in QuoteExtra.objects.filter(quote_id=quote.id).all():
-                booking_extra = BookingExtra()
-                booking_extra.booking = booking
-                booking_extra.description = quote_extra.description
-                booking_extra.service = quote_extra.service
-                booking_extra.description = quote_extra.description
-                booking_extra.datetime_from = quote_extra.datetime_from
-                booking_extra.datetime_to = quote_extra.datetime_to
-                booking_extra.parameter = quote_extra.parameter
-                booking_extra.provider = quote_extra.provider
-
-                booking_extra.quantity = ConfigService.get_service_quantity(
-                    booking_extra.service, len(booking_pax_list))
-
-                booking_extra.save()
-
-                # create bookingservicepax list
-                for booking_pax in booking_pax_list:
-                    bookingservice_pax = BookingServicePax()
-                    bookingservice_pax.booking_sevice = booking_extra
-                    bookingservice_pax.group = booking_pax.pax_group
-                    bookingservice_pax.save()
-
-            # update booking
-            cls.update_booking(booking)
-
-            return booking
+                # update booking
+                cls.update_booking(booking)
+                return booking, 'Booking Succesfully Created'
+        except Exception as ex:
+            return None, 'Error on Booking Building : %s' % (ex)
+        return None, 'Error on Booking Building'
 
     @classmethod
     def update_quote(cls, quote):
