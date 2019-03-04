@@ -5,6 +5,7 @@ from booking.models import (
     PackageAllotment, PackageTransfer, PackageExtra,
     Quote, QuoteAllotment, QuoteTransfer, QuoteExtra,
     Booking, BookingServicePax, BookingAllotment, BookingTransfer, BookingExtra)
+from finance.models import Office
 from django import forms
 
 
@@ -447,5 +448,8 @@ class VouchersConfigForm(forms.Form):
     # this helps to point back to current booking
     # referer = forms.HiddenInput()
     # the list of selected services to make vouchers from
-    id = forms.MultiValueField()
+    # id = forms.MultiValueField()
     # here comes also some inputs to select logo and other details
+    office = forms.ModelChoiceField(queryset=Office.objects.all(),
+                                    initial=Office.objects.get(id=1))
+    # extra = forms.CharField()
