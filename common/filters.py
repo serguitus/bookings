@@ -1,4 +1,5 @@
 from dal import autocomplete
+from datetime import datetime
 
 from django import forms
 from django.contrib.admin.filters import FieldListFilter, DateFieldListFilter
@@ -7,9 +8,11 @@ from django.contrib.admin.widgets import AdminDateWidget
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.forms.widgets import Media, MEDIA_TYPES
+from django.utils.formats import get_format
 from django.utils.text import capfirst
 
 PARAM_PREFIX = 'srch_'
+
 
 class TopFilter(object):
     _top_filters = []
@@ -343,7 +346,8 @@ class DateFilter(TopFilter):
     def queryset(self, request, queryset):
         from_option = self._values[0]
         if from_option:
-            if isinstance(from_option, str):
+            if isinstance(from_option, str) or isinstance(
+                    from_option, unicode):
                 from_option = parse_date(from_option)
             if from_option:
                 lookup = '%s__gte' % self.field_path
@@ -366,8 +370,6 @@ class DateFilter(TopFilter):
 
 TopFilter.register(lambda f: isinstance(f, (models.DateField,)), DateFilter)
 
-from datetime import datetime
-from django.utils.formats import get_format
 
 def parse_date(date_str):
     """Parse date from string by DATE_INPUT_FORMATS of current language"""
@@ -376,5 +378,4 @@ def parse_date(date_str):
             return datetime.strptime(date_str, item).date()
         except (ValueError, TypeError):
             continue
-
     return None
