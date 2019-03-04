@@ -33,7 +33,7 @@ from booking.models import (
     BookingAllotment, BookingTransfer, BookingExtra
 )
 from booking.forms import EmailProviderForm
-from booking.services import BookingService as Booking_Service
+from booking.services import BookingServices
 
 from common.views import ModelChangeFormProcessorView
 
@@ -105,7 +105,7 @@ class QuoteAmountsView(ModelChangeFormProcessorView):
                 'results': None,
             })
 
-        code, message, results = Booking_Service.find_quote_amounts(
+        code, message, results = BookingServices.find_quote_amounts(
             quote.agency, variant_list, allotment_list, transfer_list, extra_list)
 
         return JsonResponse({
@@ -150,7 +150,7 @@ class BookingAllotmentAmountsView(ModelChangeFormProcessorView):
                 'price_message': 'Paxes Missing',
             })
         service = bookingallotment.service
-        groups = Booking_Service.find_paxes_groups(pax_list, service)
+        groups = BookingServices.find_paxes_groups(pax_list, service)
         date_from = bookingallotment.datetime_from
         date_to = bookingallotment.datetime_to
 
@@ -225,7 +225,7 @@ class BookingTransferAmountsView(ModelChangeFormProcessorView):
                 'price_message': 'Paxes Missing',
             })
         service = bookingtransfer.service
-        groups = Booking_Service.find_paxes_groups(pax_list, service)
+        groups = BookingServices.find_paxes_groups(pax_list, service)
         date_from = bookingtransfer.datetime_from
         date_to = bookingtransfer.datetime_to
 
@@ -300,7 +300,7 @@ class BookingExtraAmountsView(ModelChangeFormProcessorView):
                 'price_message': 'Paxes Missing',
             })
         service = bookingextra.service
-        groups = Booking_Service.find_paxes_groups(pax_list, service)
+        groups = BookingServices.find_paxes_groups(pax_list, service)
         date_from = bookingextra.datetime_from
         date_to = bookingextra.datetime_to
 
@@ -588,6 +588,6 @@ def booking_actions(request, id):
                                         args=(id,)))
 
 
-# def config_vouchers(request, services):
-#     # here comes the voucher config page
-#     print 'ya llegueeeeeee'
+#def config_vouchers(request, services):
+     # here comes the voucher config page
+#     print ('ya llegueeeeeee')

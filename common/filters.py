@@ -342,20 +342,39 @@ class DateFilter(TopFilter):
 
     def queryset(self, request, queryset):
         from_option = self._values[0]
-        if from_option and from_option != "" and from_option != "''":
-            lookup = '%s__gte' % self.field_path
-            if lookup_needs_distinct(self.model._meta, lookup):
-                queryset = queryset.distinct()
-            queryset = queryset.filter(**{lookup: from_option})
+        if from_option:
+            if isinstance(from_option, str):
+                from_option = parse_date(from_option)
+            if from_option:
+                lookup = '%s__gte' % self.field_path
+                if lookup_needs_distinct(self.model._meta, lookup):
+                    queryset = queryset.distinct()
+                queryset = queryset.filter(**{lookup: from_option})
 
         to_option = self._values[1]
-        if to_option and to_option != "" and to_option != "''":
-            lookup = '%s__lte' % self.field_path
-            if lookup_needs_distinct(self.model._meta, lookup):
-                queryset = queryset.distinct()
-            queryset = queryset.filter(**{lookup: to_option})
+        if to_option:
+            if isinstance(to_option, str):
+                to_option = parse_date(to_option)
+            if to_option:
+                lookup = '%s__lte' % self.field_path
+                if lookup_needs_distinct(self.model._meta, lookup):
+                    queryset = queryset.distinct()
+                queryset = queryset.filter(**{lookup: to_option})
 
         return queryset
 
 
 TopFilter.register(lambda f: isinstance(f, (models.DateField,)), DateFilter)
+
+from datetime import datetime
+from django.utils.formats import get_format
+
+def parse_date(date_str):
+    """Parse date from string by DATE_INPUT_FORMATS of current language"""
+    for item in get_format('DATE_INPUT_FORMATS'):
+        try:
+            return datetime.strptime(date_str, item).date()
+        except (ValueError, TypeError):
+            continue
+
+    return None

@@ -43,6 +43,7 @@ from booking.models import (
     BookingTransfer,
     BookingExtra,
 )
+from booking.services import BookingServices
 from booking.top_filters import DateTopFilter
 
 # from common.filters import TextFilter
@@ -126,6 +127,47 @@ class QuoteSiteModel(SiteModel):
         QuoteTransferInLine, QuoteExtraInLine]
     form = QuoteForm
     change_form_template = 'booking/quote_change_form.html'
+
+    def get_urls(self):
+    
+        info = self.model._meta.app_label, self.model._meta.model_name
+        urls = super(QuoteSiteModel, self).get_urls()
+        urlpatterns = [
+            self.build_url(r'^(?P<id>\d+)/booking/build/?',
+                           self.booking_build,
+                           '%s_%s_booking_build' % info),
+        ]
+        return urlpatterns + urls
+
+    def booking_build(self, request, id, extra_context=None):
+        PaxFormSet = modelformset_factory(
+            model=BookingPax,
+            fields=['pax_name', 'pax_age', 'pax_group'],
+            extra=1,
+        )
+        formset = None
+        if request.method == 'POST':
+            quote_id = request.POST.get('quote_id', None)
+            if quote_id:
+                formset = PaxFormSet(request.POST)
+                formset.is_valid()
+                booking, msg = BookingServices.build_booking(quote_id, formset.cleaned_data)
+                if booking:
+                    return redirect(reverse('common:booking_booking_change', args=[booking.id]))
+                else:
+                    self.message_user(request, msg, messages.ERROR)
+            else:
+                self.message_user(request, 'Quote Missing', messages.ERROR)
+
+        if not formset:
+            formset = PaxFormSet(queryset=BookingPax.objects.none())
+
+        context = {}
+        context.update(self.get_model_extra_context(request))
+        context.update(extra_context or {})
+        context.update({'quote_id': id})
+        context.update({'formset': formset})
+        return render(request, 'booking/quote_booking_build.html', context)
 
 
 class QuoteAllotmentSiteModel(SiteModel):
