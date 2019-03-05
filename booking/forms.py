@@ -450,6 +450,5 @@ class VouchersConfigForm(forms.Form):
     # the list of selected services to make vouchers from
     # id = forms.MultiValueField()
     # here comes also some inputs to select logo and other details
-    office = forms.ModelChoiceField(queryset=Office.objects.all(),
-                                    initial=Office.objects.get(id=1))
+    office = forms.ModelChoiceField(queryset=Office.objects.all())
     # extra = forms.CharField()
