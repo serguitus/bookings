@@ -5,12 +5,21 @@ from booking.models import (
     BookingAllotment,
     BookingExtra)
 from booking.tables import (
+    PackageServiceTable,
     QuoteServiceTable, QuotePaxVariantTable,
     BookingServiceTable, BookingPaxTable,
     BookingVouchersTable)
 from booking.services import BookingServices
 
 register = template.Library()
+
+
+@register.simple_tag
+def packageservice_table(package):
+    table = PackageServiceTable(
+        package.package_services.all(),
+        order_by=('days_after', 'days_duration'))
+    return table
 
 
 @register.simple_tag

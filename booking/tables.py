@@ -4,9 +4,28 @@ from django.urls import reverse
 from django.contrib.admin.utils import quote
 from django.utils.html import format_html
 from booking.models import (
+    PackageService,
     Quote, QuoteService, QuotePaxVariant,
     Booking, BookingService, BookingPax)
-from booking.constants import QUOTESERVICE_TYPES, BOOKINGSERVICE_TYPES
+from booking.constants import PACKAGESERVICE_TYPES, QUOTESERVICE_TYPES, BOOKINGSERVICE_TYPES
+
+
+class PackageServiceTable(tables.Table):
+    class Meta:
+        model = PackageService
+        template_name = 'booking/packageservice_list.html'
+        fields = ['name', 'service_type', 'days_after', 'days_duration']
+
+    def render_name(self, value, record):
+        obj_url = reverse(
+            'common:booking_%s_change' % (PACKAGESERVICE_TYPES[record.service_type]),
+            args=(quote(record.pk),)
+        )
+        return format_html(
+            '<a class="related-widget-wrapper-link" href="%s?_popup=1">%s</a>' % (obj_url, value))
+
+    def before_render(self, request):
+        self.columns.hide('service_type')
 
 
 class QuoteTable(tables.Table):

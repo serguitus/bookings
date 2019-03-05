@@ -2,6 +2,14 @@ from config.constants import (SERVICE_CATEGORY_EXTRA,
                               SERVICE_CATEGORY_ALLOTMENT,
                               SERVICE_CATEGORY_TRANSFER)
 
+SERVICE_CATEGORY_PACKAGE = 'P'
+SERVICE_CATEGORIES = (
+    (SERVICE_CATEGORY_ALLOTMENT, 'Allotment'),
+    (SERVICE_CATEGORY_TRANSFER, 'Transfer'),
+    (SERVICE_CATEGORY_EXTRA, 'Extra'),
+    (SERVICE_CATEGORY_PACKAGE, 'Package'),
+)
+
 QUOTE_STATUS_DRAFT = 'DR'
 QUOTE_STATUS_READY = 'RD'
 QUOTE_STATUS_LIST = (
@@ -37,16 +45,24 @@ SERVICE_STATUS_LIST = (
     (SERVICE_STATUS_CANCELLED, 'Cancelled'),
 )
 
+PACKAGESERVICE_TYPES = {
+    SERVICE_CATEGORY_ALLOTMENT: 'packageallotment',
+    SERVICE_CATEGORY_TRANSFER: 'packagetransfer',
+    SERVICE_CATEGORY_EXTRA: 'packageextra',
+}
+
 QUOTESERVICE_TYPES = {
     SERVICE_CATEGORY_ALLOTMENT: 'quoteallotment',
     SERVICE_CATEGORY_TRANSFER: 'quotetransfer',
     SERVICE_CATEGORY_EXTRA: 'quoteextra',
+    SERVICE_CATEGORY_PACKAGE: 'quotepackage',
 }
 
 BOOKINGSERVICE_TYPES = {
     SERVICE_CATEGORY_ALLOTMENT: 'bookingallotment',
     SERVICE_CATEGORY_TRANSFER: 'bookingtransfer',
     SERVICE_CATEGORY_EXTRA: 'bookingextra',
+    SERVICE_CATEGORY_PACKAGE: 'bookingpackage',
 }
 
 ACTIONS = {

@@ -6,15 +6,17 @@ from django.db import models
 from accounting.constants import CURRENCIES, CURRENCY_CUC
 
 from booking.constants import (
+    SERVICE_CATEGORY_PACKAGE, SERVICE_CATEGORIES,
     QUOTE_STATUS_LIST, QUOTE_STATUS_DRAFT,
     BOOKING_STATUS_LIST, BOOKING_STATUS_PENDING,
     SERVICE_STATUS_LIST, SERVICE_STATUS_PENDING)
 
-from config.constants import (BOARD_TYPES, SERVICE_CATEGORIES,
+from config.constants import (BOARD_TYPES,
                               SERVICE_CATEGORY_TRANSFER,
                               SERVICE_CATEGORY_ALLOTMENT,
                               SERVICE_CATEGORY_EXTRA)
 from config.models import (
+    Service,
     ServiceSupplement,
     RoomType, Allotment,
     Transfer, Location, Place, Schedule,
@@ -22,6 +24,158 @@ from config.models import (
 )
 
 from finance.models import Agency, AgencyInvoice, Provider, ProviderInvoice
+
+
+class RelativeInterval(models.Model):
+    class Meta:
+        abstract = True
+    days_after = models.SmallIntegerField(default=0, blank=True, null=True, verbose_name='Days after')
+    days_duration = models.SmallIntegerField(default=0, blank=True, null=True, verbose_name='Days duration')
+
+
+class DateInterval(models.Model):
+    class Meta:
+        abstract = True
+    datetime_from = models.DateField(blank=True, null=True, verbose_name='Date From')
+    datetime_to = models.DateField(blank=True, null=True, verbose_name='Date To')
+
+
+class BaseService(models.Model):
+    class Meta:
+        abstract = True
+    name = models.CharField(max_length=250, default='Base Service')
+    # this will store the child object type
+    service_type = models.CharField(max_length=5, choices=SERVICE_CATEGORIES,
+                                    blank=True, null=True)
+    description = models.CharField(max_length=1000, default='')
+    status = models.CharField(
+        max_length=5, choices=SERVICE_STATUS_LIST,
+        default=SERVICE_STATUS_PENDING)
+    provider = models.ForeignKey(Provider, blank=True, null=True)
+
+
+class BaseAllotment(BaseService):
+    """
+    Base Service Allotment
+    """
+    class Meta:
+        abstract = True
+    service = models.ForeignKey(Allotment)
+    room_type = models.ForeignKey(RoomType)
+    board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
+
+
+class BaseTransfer(BaseService):
+    """
+    Base Service Transfer
+    """
+    class Meta:
+        abstract = True
+    service = models.ForeignKey(Transfer)
+    time = models.TimeField(blank=True, null=True)
+    quantity = models.SmallIntegerField(default=1)
+
+
+class BaseExtra(BaseService):
+    """
+    Base Service Extra
+    """
+    class Meta:
+        abstract = True
+    service = models.ForeignKey(Extra)
+    addon = models.ForeignKey(Addon, blank=True, null=True)
+    time = models.TimeField(blank=True, null=True)
+    quantity = models.SmallIntegerField(default=1)
+    parameter = models.SmallIntegerField(default=0, verbose_name='Hours')
+
+
+class Package(Service):
+    """
+    Package Service
+    """
+    class Meta:
+        verbose_name = 'Package'
+        verbose_name_plural = 'Packages'
+
+    def fill_data(self):
+        self.category = SERVICE_CATEGORY_PACKAGE
+
+    def __str__(self):
+        return '%s'  % self.name
+
+
+class PackageService(BaseService, RelativeInterval):
+    """
+    Package Service
+    """
+    class Meta:
+        verbose_name = 'Package Service'
+        verbose_name_plural = 'Packages Services'
+    package = models.ForeignKey(Package, related_name='package_services')
+
+    def fill_data(self):
+        pass
+
+    def save(self, *args, **kwargs):
+        self.fill_data()
+        # Call the "real" save() method.
+        super(PackageService, self).save(*args, **kwargs)
+
+
+class PackageAllotment(PackageService, BaseAllotment):
+    """
+    Package Service Allotment
+    """
+    class Meta:
+        verbose_name = 'Package Accomodation'
+        verbose_name_plural = 'Packages Accomodations'
+
+    def fill_data(self):
+        self.name = '%s' % (self.service,)
+        self.service_type = SERVICE_CATEGORY_ALLOTMENT
+
+
+class PackageTransfer(PackageService, BaseTransfer):
+    """
+    Package Service Transfer
+    """
+    class Meta:
+        verbose_name = 'Package Transfer'
+        verbose_name_plural = 'Packages Transfers'
+    location_from = models.ForeignKey(
+        Location, related_name='package_location_from', verbose_name='Location from')
+    place_from = models.ForeignKey(Place, related_name='package_place_from', blank=True, null=True)
+    schedule_from = models.ForeignKey(Schedule, related_name='package_schedule_from', blank=True, null=True)
+    pickup = models.ForeignKey(Allotment, related_name='package_pickup',
+                               null=True, blank=True)
+    location_to = models.ForeignKey(
+        Location, related_name='package_location_to', verbose_name='Location to')
+    place_to = models.ForeignKey(Place, related_name='package_place_to', blank=True, null=True)
+    schedule_to = models.ForeignKey(Schedule, related_name='package_schedule_to', blank=True, null=True)
+    dropoff = models.ForeignKey(Allotment, related_name='package_dropoff',
+                                null=True, blank=True)
+
+    def fill_data(self):
+        # setting name for this booking_service
+        self.name = '%s (%s -> %s)' % (self.service,
+                                       self.location_from.short_name or self.location_from,
+                                       self.location_to.short_name or self.location_to)
+        self.service_type = SERVICE_CATEGORY_TRANSFER
+
+
+class PackageExtra(PackageService, BaseExtra):
+    """
+    Package Service Extra
+    """
+    class Meta:
+        verbose_name = 'Package Extra'
+        verbose_name_plural = 'Packages Extras'
+
+    def fill_data(self):
+        # setting name for this booking_service
+        self.name = self.service.name
+        self.service_type = SERVICE_CATEGORY_EXTRA
+
 
 class Quote(models.Model):
     """
@@ -82,7 +236,7 @@ class QuotePaxVariant(models.Model):
         return '%s' % self.pax_quantity
 
 
-class QuoteService(models.Model):
+class QuoteService(BaseService, DateInterval):
     """
     Quote Service
     """
@@ -90,20 +244,6 @@ class QuoteService(models.Model):
         verbose_name = 'Quote Service'
         verbose_name_plural = 'Quote Services'
     quote = models.ForeignKey(Quote, related_name='quote_services')
-    name = models.CharField(max_length=250, default='Quote Service')
-    # this will store the child object type
-    service_type = models.CharField(max_length=5, choices=SERVICE_CATEGORIES,
-                                    blank=True, null=True)
-    description = models.CharField(max_length=1000, default='')
-    datetime_from = models.DateField(blank=True, null=True, verbose_name='Date From')
-    datetime_to = models.DateField(blank=True, null=True, verbose_name='Date To')
-    status = models.CharField(
-        max_length=5, choices=SERVICE_STATUS_LIST,
-        default=SERVICE_STATUS_PENDING)
-    provider = models.ForeignKey(Provider, blank=True, null=True)
-
-    def fill_data(self):
-        pass
 
     def save(self, *args, **kwargs):
         self.fill_data()
@@ -111,36 +251,30 @@ class QuoteService(models.Model):
         super(QuoteService, self).save(*args, **kwargs)
 
 
-class QuoteAllotment(QuoteService):
+class QuoteAllotment(QuoteService, BaseAllotment):
     """
     Quote Service Allotment
     """
     class Meta:
         verbose_name = 'Quote Accomodation'
         verbose_name_plural = 'Quotes Accomodations'
-    service = models.ForeignKey(Allotment)
-    room_type = models.ForeignKey(RoomType)
-    board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
 
     def fill_data(self):
         self.name = '%s' % (self.service,)
         self.service_type = SERVICE_CATEGORY_ALLOTMENT
 
 
-class QuoteTransfer(QuoteService):
+class QuoteTransfer(QuoteService, BaseTransfer):
     """
     Quote Service Transfer
     """
     class Meta:
         verbose_name = 'Quote Transfer'
         verbose_name_plural = 'Quotes Transfers'
-    service = models.ForeignKey(Transfer)
-    time = models.TimeField(blank=True, null=True)
     location_from = models.ForeignKey(
         Location, related_name='quote_location_from', verbose_name='Location from')
     location_to = models.ForeignKey(
         Location, related_name='quote_location_to', verbose_name='Location to')
-    quantity = models.SmallIntegerField(default=1)
 
     def fill_data(self):
         # setting name for this booking_service
@@ -150,23 +284,82 @@ class QuoteTransfer(QuoteService):
         self.service_type = SERVICE_CATEGORY_TRANSFER
 
 
-class QuoteExtra(QuoteService):
+class QuoteExtra(QuoteService, BaseExtra):
     """
     Quote Service Extra
     """
     class Meta:
         verbose_name = 'Quote Extra'
         verbose_name_plural = 'Quotes Extras'
-    service = models.ForeignKey(Extra)
-    addon = models.ForeignKey(Addon, blank=True, null=True)
-    time = models.TimeField(blank=True, null=True)
-    quantity = models.SmallIntegerField(default=1)
-    parameter = models.SmallIntegerField(default=0, verbose_name='Hours')
 
     def fill_data(self):
         # setting name for this booking_service
         self.name = self.service.name
         self.service_type = SERVICE_CATEGORY_EXTRA
+
+
+class QuotePackage(QuoteService):
+    """
+    Quote Service Package
+    """
+    class Meta:
+        verbose_name = 'Quote Package'
+        verbose_name_plural = 'Quotes Packages'
+    service = models.ForeignKey(Package)
+
+    def fill_data(self):
+        # setting name for this booking_service
+        self.name = self.service.name
+        self.service_type = SERVICE_CATEGORY_PACKAGE
+
+
+class QuotePackageService(BaseService, DateInterval):
+    """
+    Quote Package Service
+    """
+    class Meta:
+        verbose_name = 'Quote Package Service'
+        verbose_name_plural = 'Quotes Packages Services'
+    quote_package = models.ForeignKey(QuotePackage, related_name='quote_package_services')
+
+    def fill_data(self):
+        pass
+
+    def save(self, *args, **kwargs):
+        self.fill_data()
+        # Call the "real" save() method.
+        super(QuotePackageService, self).save(*args, **kwargs)
+
+
+class QuotePackageAllotment(QuotePackageService, BaseAllotment):
+    """
+    Quote Package Service Allotment
+    """
+    class Meta:
+        verbose_name = 'Quote Package Accomodation'
+        verbose_name_plural = 'Quotes Packages Accomodations'
+
+
+class QuotePackageTransfer(QuotePackageService, BaseTransfer):
+    """
+    Quote Package Service Transfer
+    """
+    class Meta:
+        verbose_name = 'Quote Package Transfer'
+        verbose_name_plural = 'Quotes Packages Transfers'
+    location_from = models.ForeignKey(
+        Location, related_name='quote_package_location_from', verbose_name='Location from')
+    location_to = models.ForeignKey(
+        Location, related_name='quote_package_location_to', verbose_name='Location to')
+
+
+class QuotePackageExtra(QuotePackageService, BaseExtra):
+    """
+    Quote Service Extra
+    """
+    class Meta:
+        verbose_name = 'Quote Extra'
+        verbose_name_plural = 'Quotes Extras'
 
 
 class BookingInvoice(AgencyInvoice):
@@ -273,10 +466,14 @@ class BookingPax(models.Model):
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
 
     def __str__(self):
-        return '%s (age: %s)' % (self.pax_name, self.pax_age)
+        if self.pax_age:
+            return '%s (age: %s)' % (self.pax_name, self.pax_age)
+        else:
+            return '%s' % (self.pax_name)
+            
 
 
-class BookingService(models.Model):
+class BookingService(BaseService, DateInterval):
     """
     Booking Service
     """
@@ -285,22 +482,12 @@ class BookingService(models.Model):
         verbose_name_plural = 'Booking Services'
         default_permissions = ('add', 'change',)
     booking = models.ForeignKey(Booking, related_name='booking_services')
-    name = models.CharField(max_length=250, default='Booking Service')
-    # this will store the child object type
-    service_type = models.CharField(max_length=5, choices=SERVICE_CATEGORIES,
-                                    blank=True, null=True)
-    description = models.CharField(max_length=1000, default='')
-    datetime_from = models.DateField(blank=True, null=True, verbose_name='Date From')
-    datetime_to = models.DateField(blank=True, null=True, verbose_name='Date To')
-    status = models.CharField(
-        max_length=5, choices=SERVICE_STATUS_LIST, default=SERVICE_STATUS_PENDING)
     # This holds the confirmation number when it exists
     conf_number = models.CharField(max_length=20, blank=True, null=True)
     cost_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     cost_comments = models.CharField(max_length=1000, blank=True, null=True)
     price_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
-    provider = models.ForeignKey(Provider, blank=True, null=True)
     provider_invoice = models.ForeignKey(ProviderInvoice, blank=True, null=True)
 
     def fill_data(self):
@@ -341,8 +528,13 @@ class BookingServicePax(models.Model):
         super(BookingServicePax, self).save(*args, **kwargs)
 
     def __str__(self):
-        return '%s (age: %s)' % (self.booking_pax.pax_name,
-                                 self.booking_pax.pax_age)
+        if self.booking_pax.pax_age:
+            return '%s (age: %s)' % (
+                self.booking_pax.pax_name,
+                self.booking_pax.pax_age)
+        else:
+            return '%s' % (self.booking_pax.pax_name)
+            
 
 
 class BookingServiceSupplement(models.Model):
@@ -395,46 +587,42 @@ class ServiceSupplementBookingPax(models.Model):
         super(ServiceSupplementBookingPax, self).save(*args, **kwargs)
 
 
-class BookingAllotment(BookingService):
+class BookingAllotment(BookingService, BaseAllotment):
     """
     Booking Service Allotment
     """
     class Meta:
         verbose_name = 'Booking Accomodation'
         verbose_name_plural = 'Bookings Accomodations'
-    service = models.ForeignKey(Allotment)
-    room_type = models.ForeignKey(RoomType)
-    board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
-
-    def fill_data(self):
-        self.name = '%s' % (self.service,)
-        self.service_type = SERVICE_CATEGORY_ALLOTMENT
 
     def build_rooms(self):
         """ makes a string detailing room quantity and types"""
         pass
 
+    def fill_data(self):
+        self.name = '%s' % (self.service,)
+        self.service_type = SERVICE_CATEGORY_ALLOTMENT
 
-class BookingTransfer(BookingService):
+
+class BookingTransfer(BookingService, BaseTransfer):
     """
     Booking Service Transfer
     """
     class Meta:
         verbose_name = 'Booking Transfer'
         verbose_name_plural = 'Bookings Transfers'
-    service = models.ForeignKey(Transfer)
-    time = models.TimeField(blank=True, null=True)
-    location_from = models.ForeignKey(Location, related_name='location_from')
+    location_from = models.ForeignKey(
+        Location, related_name='location_from', verbose_name='Location from')
     place_from = models.ForeignKey(Place, related_name='place_from', blank=True, null=True)
     schedule_from = models.ForeignKey(Schedule, related_name='schedule_from', blank=True, null=True)
     pickup = models.ForeignKey(Allotment, related_name='transfer_pickup',
                                null=True, blank=True)
-    location_to = models.ForeignKey(Location, related_name='location_to')
+    location_to = models.ForeignKey(
+        Location, related_name='location_to', verbose_name='Location to')
     place_to = models.ForeignKey(Place, related_name='place_to', blank=True, null=True)
     schedule_to = models.ForeignKey(Schedule, related_name='schedule_to', blank=True, null=True)
     dropoff = models.ForeignKey(Allotment, related_name='transfer_dropoff',
                                 null=True, blank=True)
-    quantity = models.SmallIntegerField(default=1)
 
     def fill_data(self):
         # setting name for this booking_service
@@ -454,22 +642,15 @@ class BookingTransferSupplement(BookingServiceSupplement):
     quantity = models.SmallIntegerField(default=1)
 
 
-class BookingExtra(BookingService):
+class BookingExtra(BookingService, BaseExtra):
     """
     Booking Service Extra
     """
     class Meta:
         verbose_name = 'Booking Extra'
         verbose_name_plural = 'Bookings Extras'
-    service = models.ForeignKey(Extra)
-    addon = models.ForeignKey(Addon, blank=True, null=True)
-    time = models.TimeField(blank=True, null=True)
-    quantity = models.SmallIntegerField(default=1)
-    parameter = models.SmallIntegerField(default=0, verbose_name='Hours')
 
     def fill_data(self):
         # setting name for this booking_service
-        self.name = '%s' % (self.service)
+        self.name = self.service.name
         self.service_type = SERVICE_CATEGORY_EXTRA
-
-

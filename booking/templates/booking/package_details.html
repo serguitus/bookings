@@ -1,0 +1,7 @@
+{% load booking_tags %}
+{% load render_table from django_tables2 %}
+
+{% packageservice_table current as table %}
+<div class="packageservices-container">
+    {% render_table table %}
+</div>
