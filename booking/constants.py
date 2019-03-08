@@ -58,6 +58,12 @@ QUOTESERVICE_TYPES = {
     SERVICE_CATEGORY_PACKAGE: 'quotepackage',
 }
 
+QUOTEPACKAGESERVICE_TYPES = {
+    SERVICE_CATEGORY_ALLOTMENT: 'quotepackageallotment',
+    SERVICE_CATEGORY_TRANSFER: 'quotepackagetransfer',
+    SERVICE_CATEGORY_EXTRA: 'quotepackageextra',
+}
+
 BOOKINGSERVICE_TYPES = {
     SERVICE_CATEGORY_ALLOTMENT: 'bookingallotment',
     SERVICE_CATEGORY_TRANSFER: 'bookingtransfer',

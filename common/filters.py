@@ -9,6 +9,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.forms.widgets import Media, MEDIA_TYPES
 from django.utils.formats import get_format
+from django.utils.six import text_type
 from django.utils.text import capfirst
 
 PARAM_PREFIX = 'srch_'
@@ -346,8 +347,7 @@ class DateFilter(TopFilter):
     def queryset(self, request, queryset):
         from_option = self._values[0]
         if from_option:
-            if isinstance(from_option, str) or isinstance(
-                    from_option, unicode):
+            if isinstance(from_option, text_type):
                 from_option = parse_date(from_option)
             if from_option:
                 lookup = '%s__gte' % self.field_path

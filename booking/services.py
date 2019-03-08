@@ -1,13 +1,16 @@
 """
 Booking Service
 """
+from datetime import date, timedelta
 
 from django.db import transaction
 
 from booking import constants
 from booking.models import (
     Quote,
-    QuoteAllotment, QuoteTransfer, QuoteExtra,
+    QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
+    QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
+    Package, PackageAllotment, PackageTransfer, PackageExtra,
     Booking, BookingService, BookingPax, BookingServicePax,
     BookingAllotment, BookingTransfer, BookingExtra,
     BookingInvoice, BookingInvoiceLine, BookingInvoicePartial)
@@ -51,7 +54,7 @@ class BookingServices(object):
             FinanceService.save_agency_invoice(user, invoice)
 
             # obtain lines
-            booking_service_list = Booking_Service.objects.filter(
+            booking_service_list = BookingService.objects.filter(
                 booking=booking.id).all()
             for booking_service in booking_service_list:
                 invoice_line = BookingInvoiceLine()
@@ -126,12 +129,8 @@ class BookingServices(object):
                     # provider_invoice
                     booking_allotment.name = quote_allotment.name
                     # service_type auto
-                    booking_allotment.description = quote_allotment.description
-                    booking_allotment.datetime_from = quote_allotment.datetime_from
-                    booking_allotment.datetime_to = quote_allotment.datetime_to
-                    booking_allotment.status = constants.SERVICE_STATUS_PENDING
-                    booking_allotment.provider = quote_allotment.provider
-                    booking_allotment.service = quote_allotment.service
+                    cls.copy_service_info(
+                        dst_service=booking_allotment, src_service=quote_allotment)
                     booking_allotment.room_type = quote_allotment.room_type
                     booking_allotment.board_type = quote_allotment.board_type
                     booking_allotment.save()
@@ -155,12 +154,7 @@ class BookingServices(object):
                     # provider_invoice
                     booking_transfer.name = quote_transfer.name
                     # service_type auto
-                    booking_transfer.description = quote_transfer.description
-                    booking_transfer.datetime_from = quote_transfer.datetime_from
-                    booking_transfer.datetime_to = quote_transfer.datetime_to
-                    booking_transfer.status = constants.SERVICE_STATUS_PENDING
-                    booking_transfer.provider = quote_transfer.provider
-                    booking_transfer.service = quote_transfer.service
+                    cls.copy_service_info(dst_service=booking_transfer, src_service=quote_transfer)
                     # time
                     booking_transfer.quantity = ConfigService.get_service_quantity(
                         booking_transfer.service, len(booking_pax_list))
@@ -194,12 +188,7 @@ class BookingServices(object):
                     # provider_invoice
                     booking_extra.name = quote_extra.name
                     # service_type auto
-                    booking_extra.description = quote_extra.description
-                    booking_extra.datetime_from = quote_extra.datetime_from
-                    booking_extra.datetime_to = quote_extra.datetime_to
-                    booking_extra.status = constants.SERVICE_STATUS_PENDING
-                    booking_extra.provider = quote_extra.provider
-                    booking_extra.service = quote_extra.service
+                    cls.copy_service_info(dst_service=booking_extra, src_service=quote_extra)
                     booking_extra.addon = quote_extra.addon
                     booking_extra.time = quote_extra.time
                     booking_extra.quantity = quote_extra.quantity
@@ -243,6 +232,108 @@ class BookingServices(object):
             quote.date_to = date_to
         if fields:
             quote.save(update_fields=fields)
+
+    @classmethod
+    def update_quote_package(cls, quote_package):
+        print ('ENTRANDO B for de allotment')
+        package = quote_package.service
+        # create bookingallotment list
+        print ('ENTRANDO A for de allotment')
+        for package_allotment in PackageAllotment.objects.filter(package_id=package.id).all():
+            print ('EN for de allotment')
+            quote_package_allotment = QuotePackageAllotment()
+            quote_package_allotment.quote_package = quote_package
+            quote_package_allotment.conf_number = '< confirm number >'
+            # cost_amount
+            # cost_comment
+            # price_amount
+            # price_comment
+            # provider_invoice
+
+            # name auto
+            # service_type auto
+            cls.copy_package_info(
+                dst_package=quote_package_allotment, src_package=package_allotment)
+            quote_package_allotment.room_type = package_allotment.room_type
+            quote_package_allotment.board_type = package_allotment.board_type
+            quote_package_allotment.save()
+
+        # create bookingtransfer list
+        print ('ENTRANDO A for de transfer')
+        for package_transfer in PackageTransfer.objects.filter(package_id=package.id).all():
+            print ('EN for de transfer')
+            quote_package_transfer = QuotePackageTransfer()
+            quote_package_transfer.quote_package = quote_package
+            quote_package_transfer.conf_number = '< confirm number >'
+            # cost_amount
+            # cost_comment
+            # price_amount
+            # price_comment
+            # provider_invoice
+            # name auto
+            # service_type auto
+            cls.copy_package_info(
+                dst_package=quote_package_transfer, src_package=package_transfer)
+            # time
+            # quantity auto
+            quote_package_transfer.location_from = package_transfer.location_from
+            # place_from
+            # schedule_from
+            # pickup
+            quote_package_transfer.location_to = package_transfer.location_to
+            # place_to
+            # schedule_to
+            # dropoff
+            quote_package_transfer.save()
+
+        # create bookingextra list
+        for package_extra in PackageExtra.objects.filter(package_id=package.id).all():
+            quote_package_extra = QuotePackageExtra()
+            quote_package_extra.quote_package = quote_package
+            quote_package_extra.conf_number = '< confirm number >'
+            # cost_amount
+            # cost_comment
+            # price_amount
+            # price_comment
+            # provider_invoice
+            # name auto
+            # service_type auto
+            cls.copy_package_info(
+                dst_package=quote_package_extra, src_package=package_extra)
+            quote_package_extra.addon = package_extra.addon
+            quote_package_extra.time = package_extra.time
+            quote_package_extra.quantity = package_extra.quantity
+            quote_package_extra.parameter = package_extra.parameter
+            quote_package_extra.save()
+
+
+    @classmethod
+    def copy_service_info(cls, dst_service, src_service):
+        dst_service.description = src_service.description
+        dst_service.datetime_from = src_service.datetime_from
+        dst_service.datetime_to = src_service.datetime_to
+        dst_service.status = constants.SERVICE_STATUS_PENDING
+        dst_service.provider = src_service.provider
+        dst_service.service = src_service.service
+
+
+    @classmethod
+    def copy_package_info(cls, dst_package, src_package):
+        dst_package.description = src_package.description
+
+        days_after = src_package.days_after
+        if days_after is None:
+            days_after = 0
+        dst_package.datetime_from = dst_package.quote_package.datetime_from + timedelta(
+                days=days_after)
+        days_duration = src_package.days_duration
+        if days_duration is None:
+            days_duration = 0
+        dst_package.datetime_to = dst_package.datetime_from + timedelta(days=days_duration)
+        dst_package.status = constants.SERVICE_STATUS_PENDING
+        dst_package.provider = src_package.provider
+        dst_package.service = src_package.service
+
 
     @classmethod
     def find_quote_amounts(cls, agency, variant_list, allotment_list, transfer_list, extra_list):
@@ -556,7 +647,6 @@ class BookingServices(object):
         status = constants.BOOKING_STATUS_COORDINATED
         services = False
         cancelled = True
-        need_save = False
         for service in booking.booking_services.all():
             services = True
             # process only non cancelled services

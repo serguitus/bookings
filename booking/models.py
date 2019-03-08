@@ -1,7 +1,7 @@
 """
 Booking models
 """
-from django.db import models
+from django.db import models, transaction
 
 from accounting.constants import CURRENCIES, CURRENCY_CUC
 
@@ -308,9 +308,13 @@ class QuotePackage(QuoteService):
     service = models.ForeignKey(Package)
 
     def fill_data(self):
-        # setting name for this booking_service
+        # setting name for this quote_service
         self.name = self.service.name
         self.service_type = SERVICE_CATEGORY_PACKAGE
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic(savepoint=False):
+            super(QuotePackage, self).save(*args, **kwargs)
 
 
 class QuotePackageService(BaseService, DateInterval):
@@ -339,6 +343,10 @@ class QuotePackageAllotment(QuotePackageService, BaseAllotment):
         verbose_name = 'Quote Package Accomodation'
         verbose_name_plural = 'Quotes Packages Accomodations'
 
+    def fill_data(self):
+        self.name = '%s' % (self.service,)
+        self.service_type = SERVICE_CATEGORY_ALLOTMENT
+
 
 class QuotePackageTransfer(QuotePackageService, BaseTransfer):
     """
@@ -352,6 +360,13 @@ class QuotePackageTransfer(QuotePackageService, BaseTransfer):
     location_to = models.ForeignKey(
         Location, related_name='quote_package_location_to', verbose_name='Location to')
 
+    def fill_data(self):
+        # setting name for this quote_service
+        self.name = '%s (%s -> %s)' % (self.service,
+                                       self.location_from.short_name or self.location_from,
+                                       self.location_to.short_name or self.location_to)
+        self.service_type = SERVICE_CATEGORY_TRANSFER
+
 
 class QuotePackageExtra(QuotePackageService, BaseExtra):
     """
@@ -360,6 +375,11 @@ class QuotePackageExtra(QuotePackageService, BaseExtra):
     class Meta:
         verbose_name = 'Quote Extra'
         verbose_name_plural = 'Quotes Extras'
+
+    def fill_data(self):
+        # setting name for this quote_service
+        self.name = self.service.name
+        self.service_type = SERVICE_CATEGORY_EXTRA
 
 
 class BookingInvoice(AgencyInvoice):

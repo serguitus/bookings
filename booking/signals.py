@@ -1,9 +1,11 @@
 
+from django.db import transaction
 from django.db.models.signals import post_save
+
 from django.dispatch import receiver
 
 from booking.models import (
-    QuoteAllotment, QuoteTransfer, QuoteExtra,
+    QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
     BookingAllotment, BookingTransfer, BookingExtra)
 from booking.services import BookingServices
 
@@ -24,6 +26,14 @@ def update_transfer_quote(sender, instance, **kwargs):
 def update_extra_quote(sender, instance, **kwargs):
     quote = instance.quote
     BookingServices.update_quote(quote)
+
+
+@receiver(post_save, sender=QuotePackage)
+def update_package_quote(sender, instance, **kwargs):
+    with transaction.atomic(savepoint=False):
+        BookingServices.update_quote_package(instance)
+        quote = instance.quote
+        BookingServices.update_quote(quote)
 
 
 @receiver(post_save, sender=BookingAllotment)

@@ -27,6 +27,7 @@ from booking.common_site import (
 )
 from booking.constants import ACTIONS
 from booking.models import (
+    Package,
     Quote,
     Booking, BookingService,
     BookingPax, BookingServicePax,
@@ -588,6 +589,30 @@ def booking_actions(request, id):
                                         args=(id,)))
 
 
-#def config_vouchers(request, services):
-     # here comes the voucher config page
-#     print ('ya llegueeeeeee')
+class PackageAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return Package.objects.none()
+        qs = Package.objects.filter(enabled=True).all()
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs[:20]
+
+
+class ProviderPackageAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if not self.request.user.is_authenticated():
+            return Provider.objects.none()
+        qs = Provider.objects.filter(enabled=True).all().distinct()
+
+        service = self.forwarded.get('service', None)
+
+        if service:
+            qs = qs.filter(
+                providerpackageservice__service=service,
+            )
+
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs[:20]

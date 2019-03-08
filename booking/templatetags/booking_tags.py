@@ -7,6 +7,7 @@ from booking.models import (
 from booking.tables import (
     PackageServiceTable,
     QuoteServiceTable, QuotePaxVariantTable,
+    QuotePackageServiceTable,
     BookingServiceTable, BookingPaxTable,
     BookingVouchersTable)
 from booking.services import BookingServices
@@ -19,6 +20,14 @@ def packageservice_table(package):
     table = PackageServiceTable(
         package.package_services.all(),
         order_by=('days_after', 'days_duration'))
+    return table
+
+
+@register.simple_tag
+def quotepackage_table(quotepackage):
+    table = QuotePackageServiceTable(
+        quotepackage.quote_package_services.all(),
+        order_by=('datetime_from', 'datetime_to'))
     return table
 
 

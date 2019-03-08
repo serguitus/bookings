@@ -5,8 +5,8 @@ Config Views
 from dal import autocomplete
 
 from config.models import (
-    Location, RoomType, Addon,
-    Allotment, AllotmentBoardType, Transfer, Extra
+    Location, RoomType, Addon, AllotmentBoardType,
+    Allotment, Transfer, Extra
 )
 
 from finance.models import (
@@ -138,7 +138,7 @@ class TransferAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
         if not self.request.user.is_authenticated():
-            return Allotment.objects.none()
+            return Transfer.objects.none()
         qs = Transfer.objects.filter(enabled=True).all()
         if self.q:
             qs = qs.filter(name__icontains=self.q)
@@ -201,7 +201,7 @@ class ExtraAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
         if not self.request.user.is_authenticated():
-            return Allotment.objects.none()
+            return Extra.objects.none()
         qs = Extra.objects.filter(enabled=True).all()
         if self.q:
             qs = qs.filter(name__icontains=self.q)
