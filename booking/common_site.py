@@ -488,9 +488,8 @@ class BookingServicePaxInline(TabularInline):
             if obj:
                 saved = BookingServicePax.objects.filter(booking_service=obj.id)
             if not saved:
-                rooming = BookingPax.objects.filter(
-                    booking=request.GET['booking']).order_by(
-                        'pax_group')
+                booking = request.GET.get('booking')
+                rooming = BookingPax.objects.filter(booking=booking).order_by('pax_group')
                 self.extra = len(rooming)
                 for bp in rooming:
                     new_pax = {'booking_pax': bp.id,
@@ -538,9 +537,10 @@ class BookingSiteModel(SiteModel):
 
     recent_allowed = True
     fields = (
-        ('name', 'reference'),
+        ('name', 'reference', 'status'),
         ('agency', 'date_from', 'date_to'),
-        ('status', 'cost_amount', 'price_amount'))
+        ('is_package_price', 'cost_amount', 'price_amount'),
+        ('package_sgl_price_amount', 'package_dbl_price_amount', 'package_tpl_price_amount'))
     list_display = ('name', 'reference', 'agency', 'date_from',
                     'date_to', 'status', 'currency', 'cost_amount',
                     'price_amount',)
@@ -598,7 +598,7 @@ class BookingAllotmentSiteModel(SiteModel):
               ('datetime_from', 'datetime_to'),
               ('room_type', 'board_type'),
               'cost_amount', 'price_amount', 'provider', 'id')
-    list_display = ('booking', 'service', 'datetime_from',
+    list_display = ('booking', 'name', 'datetime_from',
                     'datetime_to', 'status',)
     top_filters = (('booking__name', 'Booking'),
                    ('name', 'Service'),
@@ -631,7 +631,9 @@ class BookingTransferSiteModel(SiteModel):
               'cost_amount', 'price_amount', 'provider', 'id')
     list_display = ('booking', 'name',
                     'datetime_from', 'time', 'status')
-    top_filters = ('booking__name', 'service', 'booking__reference',
+    top_filters = (('booking__name', 'Booking'),
+                    ('name', 'Service'),
+                    'booking__reference', 'conf_number',
                    ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'booking__reference', 'service__name',)
     form = BookingTransferForm

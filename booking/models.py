@@ -445,10 +445,13 @@ class Booking(models.Model):
     price_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
     invoice = models.ForeignKey(BookingInvoice, blank=True, null=True)
-    is_package_price = models.BooleanField(default=False)
-    package_sgl_price_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
-    package_dbl_price_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
-    package_tpl_price_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    is_package_price = models.BooleanField(default=False, verbose_name = 'Package Price')
+    package_sgl_price_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.0, verbose_name = 'Price SGL')
+    package_dbl_price_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.0, verbose_name = 'Price DBL')
+    package_tpl_price_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.0, verbose_name = 'Price TPL')
 
     def internal_reference(self):
         code = self.id
