@@ -685,6 +685,18 @@ class BookingServices(object):
             # status cancelled
             status = constants.BOOKING_STATUS_CANCELLED
 
+        # verify package prices
+        if booking.is_package_price:
+            groups = cls.find_booking_groups(booking)
+            price = 0
+            for pax_qtty in groups:
+                if pax_qtty == 1:
+                    price += booking.package_sgl_price_amount
+                elif pax_qtty == 2:
+                    price += 2 * booking.package_dbl_price_amount
+                elif pax_qtty == 3:
+                    price += 3 * booking.package_tpl_price_amount
+
         fields = []
         if booking.date_from != date_from:
             fields.append('date_from')
@@ -704,6 +716,17 @@ class BookingServices(object):
 
         if fields:
             booking.save(update_fields=fields)
+
+
+    @classmethod
+    def find_booking_groups(cls, booking):
+        pax_list = list(BookingPax.objects.filter(booking=booking.id))
+        groups = dict()
+        for pax in pax_list:
+            if not groups.__contains__(pax.pax_group):
+                groups[pax.pax_group] = 0
+            groups[pax.pax_group] += 1
+        return groups.values()
 
 
     @classmethod

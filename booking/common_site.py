@@ -539,7 +539,7 @@ class BookingSiteModel(SiteModel):
     fields = (
         ('name', 'reference', 'status'),
         ('agency', 'date_from', 'date_to'),
-        ('is_package_price', 'cost_amount', 'price_amount'),
+        ('is_package_price', 'price_amount', 'cost_amount'),
         ('package_sgl_price_amount', 'package_dbl_price_amount', 'package_tpl_price_amount'))
     list_display = ('name', 'reference', 'agency', 'date_from',
                     'date_to', 'status', 'currency', 'cost_amount',
@@ -551,6 +551,8 @@ class BookingSiteModel(SiteModel):
     inlines = [BookingPaxInline, BookingAllotmentInLine,
                BookingTransferInLine, BookingExtraInLine]
     form = BookingForm
+    add_form_template = 'booking/booking_change_form.html'
+    change_form_template = 'booking/booking_change_form.html'
 
     def get_urls(self):
 

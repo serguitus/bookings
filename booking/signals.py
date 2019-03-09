@@ -6,7 +6,7 @@ from django.dispatch import receiver
 
 from booking.models import (
     QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
-    BookingAllotment, BookingTransfer, BookingExtra)
+    Booking, BookingPax, BookingAllotment, BookingTransfer, BookingExtra)
 from booking.services import BookingServices
 
 
@@ -34,6 +34,18 @@ def update_package_quote(sender, instance, **kwargs):
         BookingServices.update_quote_package(instance)
         quote = instance.quote
         BookingServices.update_quote(quote)
+
+
+@receiver(post_save, sender=Booking)
+def update_booking(sender, instance, **kwargs):
+    booking = instance
+    BookingServices.update_booking(booking)
+
+
+@receiver(post_save, sender=BookingPax)
+def update_pax_booking(sender, instance, **kwargs):
+    booking = instance.booking
+    BookingServices.update_booking(booking)
 
 
 @receiver(post_save, sender=BookingAllotment)
