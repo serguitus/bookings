@@ -235,12 +235,9 @@ class BookingServices(object):
 
     @classmethod
     def update_quote_package(cls, quote_package):
-        print ('ENTRANDO B for de allotment')
         package = quote_package.service
         # create bookingallotment list
-        print ('ENTRANDO A for de allotment')
         for package_allotment in PackageAllotment.objects.filter(package_id=package.id).all():
-            print ('EN for de allotment')
             quote_package_allotment = QuotePackageAllotment()
             quote_package_allotment.quote_package = quote_package
             quote_package_allotment.conf_number = '< confirm number >'
@@ -259,9 +256,7 @@ class BookingServices(object):
             quote_package_allotment.save()
 
         # create bookingtransfer list
-        print ('ENTRANDO A for de transfer')
         for package_transfer in PackageTransfer.objects.filter(package_id=package.id).all():
-            print ('EN for de transfer')
             quote_package_transfer = QuotePackageTransfer()
             quote_package_transfer.quote_package = quote_package
             quote_package_transfer.conf_number = '< confirm number >'
