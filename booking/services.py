@@ -7,7 +7,7 @@ from django.db import transaction
 
 from booking import constants
 from booking.models import (
-    Quote,
+    Quote, QuotePaxVariant,
     QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
     QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
     Package, PackageAllotment, PackageTransfer, PackageExtra,
@@ -105,6 +105,12 @@ class BookingServices(object):
                 # price_amount auto
                 # cost_comments auto
                 # invoice empty
+                booking.is_package_price = True
+                pax_variant = cls.find_pax_variant(quote, rooming)
+                booking.package_sgl_price_amount = pax_variant.price_single_amount
+                booking.package_dbl_price_amount = pax_variant.price_double_amount
+                booking.package_tpl_price_amount = pax_variant.price_triple_amount
+
                 booking.save()
                 # create bookingpax list
                 booking_pax_list = list()
@@ -209,6 +215,21 @@ class BookingServices(object):
         except Exception as ex:
             return None, 'Error on Booking Building : %s' % (ex)
         return None, 'Error on Booking Building'
+
+    @classmethod
+    def find_pax_variant(cls, quote, rooming):
+        pax_qtty = 0
+        for pax in rooming:
+            if pax['pax_name'] and pax['pax_group']:
+                pax_qtty += 1
+        variants = list(
+            QuotePaxVariant.objects.filter(quote=quote.id).all().order_by('pax_quantity'))
+        result = variants[0]
+        for variant in variants:
+            if variant.pax_quantity < pax_qtty:
+                result = variant
+        return result
+
 
     @classmethod
     def update_quote(cls, quote):
