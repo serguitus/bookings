@@ -99,6 +99,8 @@ class QuoteAmountsView(ModelChangeFormProcessorView):
 
         extra_list = inlines[3]
 
+        package_list = inlines[4]
+
         if (not allotment_list) and (not transfer_list) and (not extra_list):
             return JsonResponse({
                 'code': 3,
@@ -107,7 +109,7 @@ class QuoteAmountsView(ModelChangeFormProcessorView):
             })
 
         code, message, results = BookingServices.find_quote_amounts(
-            quote.agency, variant_list, allotment_list, transfer_list, extra_list)
+            quote.agency, variant_list, allotment_list, transfer_list, extra_list, package_list)
 
         return JsonResponse({
             'code': code,

@@ -241,7 +241,7 @@ class Extra(Service):
         max_length=5, choices=EXTRA_PARAMETER_TYPES)
     has_pax_range = models.BooleanField(default=False)
     max_capacity = models.IntegerField(blank=True, null=True)
-    location = models.ForeignKey(Location)
+    location = models.ForeignKey(Location, blank=True, null=True)
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_EXTRA
@@ -284,6 +284,7 @@ class ProviderExtraService(ProviderCatalogue):
     class Meta:
         verbose_name = 'Provider Extra Service'
         verbose_name_plural = 'Providers Extras Services'
+        unique_together = (('provider', 'service', 'date_from', 'date_to'),)
     service = models.ForeignKey(Extra)
 
     def __str__(self):
@@ -314,6 +315,7 @@ class AgencyExtraService(AgencyCatalogue):
     class Meta:
         verbose_name = 'Agency Extra Service'
         verbose_name_plural = 'Agency Extras Services'
+        unique_together = (('agency', 'service', 'date_from', 'date_to'),)
     service = models.ForeignKey(Extra)
 
     def __str__(self):
@@ -406,6 +408,7 @@ class ProviderAllotmentService(ProviderCatalogue):
     class Meta:
         verbose_name = 'Accomodation Service Provider'
         verbose_name_plural = 'Accomodation Service Providers'
+        unique_together = (('provider', 'service', 'date_from', 'date_to'),)
     service = models.ForeignKey(Allotment)
 
     def __str__(self):
@@ -432,6 +435,7 @@ class AgencyAllotmentService(AgencyCatalogue):
     class Meta:
         verbose_name = 'Accomodation Service Agency'
         verbose_name_plural = 'Accomodation Service Agencies'
+        unique_together = (('agency', 'service', 'date_from', 'date_to'),)
     service = models.ForeignKey(Allotment)
 
     def __str__(self):
@@ -499,6 +503,7 @@ class ProviderTransferService(ProviderCatalogue):
     class Meta:
         verbose_name = 'Transfer Service Provider'
         verbose_name_plural = 'Transfer Service Providers'
+        unique_together = (('provider', 'service', 'date_from', 'date_to'),)
     service = models.ForeignKey(Transfer)
 
     def __str__(self):
@@ -528,6 +533,7 @@ class AgencyTransferService(AgencyCatalogue):
     class Meta:
         verbose_name = 'Transfer Service Agency'
         verbose_name_plural = 'Transfer Service Agencies'
+        unique_together = (('agency', 'service', 'date_from', 'date_to'),)
     service = models.ForeignKey(Transfer)
 
     def __str__(self):

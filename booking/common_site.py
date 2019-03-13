@@ -348,7 +348,7 @@ class QuoteSiteModel(SiteModel):
     details_template = 'booking/quote_details.html'
     inlines = [
         QuotePaxVariantInline, QuoteAllotmentInLine,
-        QuoteTransferInLine, QuoteExtraInLine]
+        QuoteTransferInLine, QuoteExtraInLine, QuotePackageInLine]
     form = QuoteForm
     change_form_template = 'booking/quote_change_form.html'
 
