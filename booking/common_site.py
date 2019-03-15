@@ -560,6 +560,7 @@ class BookingSiteModel(SiteModel):
     form = BookingForm
     add_form_template = 'booking/booking_change_form.html'
     change_form_template = 'booking/booking_change_form.html'
+    totalsum_list = ['cost_amount', 'price_amount']
 
     def get_urls(self):
 
