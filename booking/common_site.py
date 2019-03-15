@@ -536,11 +536,18 @@ class BookingSiteModel(SiteModel):
     menu_label = MENU_LABEL_BOOKING
 
     recent_allowed = True
-    fields = (
+    fieldsets = (
+        (None, {
+            'fields': (
         ('name', 'reference', 'status'),
         ('agency', 'date_from', 'date_to'),
         ('is_package_price', 'price_amount', 'cost_amount'),
-        ('package_sgl_price_amount', 'package_dbl_price_amount', 'package_tpl_price_amount'))
+        ('package_sgl_price_amount', 'package_dbl_price_amount',
+         'package_tpl_price_amount'),)
+        }),
+        ('General Notes', {'fields': ('p_notes',),
+                   'classes': ('collapse', 'wide')})
+    )
     list_display = ('name', 'reference', 'agency', 'date_from',
                     'date_to', 'status', 'currency', 'cost_amount',
                     'price_amount',)

@@ -387,6 +387,7 @@ class BookingForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'agency': autocomplete.ModelSelect2(url='agency-autocomplete'),
+            'p_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
         }
 
 

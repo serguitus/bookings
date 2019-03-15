@@ -452,6 +452,9 @@ class Booking(models.Model):
         max_digits=10, decimal_places=2, default=0.0, verbose_name = 'Price DBL')
     package_tpl_price_amount = models.DecimalField(
         max_digits=10, decimal_places=2, default=0.0, verbose_name = 'Price TPL')
+    # a field to add global notes to a booking
+    p_notes = models.CharField(max_length=1000, blank=True, null=True,
+                               verbose_name='Private Notes')
 
     def internal_reference(self):
         code = self.id
