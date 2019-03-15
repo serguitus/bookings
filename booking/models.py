@@ -500,7 +500,6 @@ class BookingPax(models.Model):
             return '%s (age: %s)' % (self.pax_name, self.pax_age)
         else:
             return '%s' % (self.pax_name)
-            
 
 
 class BookingService(BaseService, DateInterval):
@@ -519,6 +518,13 @@ class BookingService(BaseService, DateInterval):
     price_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
     provider_invoice = models.ForeignKey(ProviderInvoice, blank=True, null=True)
+    p_notes = models.CharField(max_length=1000, blank=True, null=True,
+                               verbose_name='Private Notes')
+    v_notes = models.CharField(max_length=1000, blank=True, null=True,
+                               verbose_name='Voucher Notes')
+    provider_notes = models.CharField(max_length=1000, blank=True, null=True,
+                               verbose_name='Provider Notes')
+
 
     def fill_data(self):
         pass

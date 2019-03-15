@@ -437,6 +437,9 @@ class BookingAllotmentForm(forms.ModelForm):
                 url='providerallotment-autocomplete',
                 forward=['service', 'room_type', 'board_type'],
                 ),
+            'p_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
+            'v_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
+            'provider_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
@@ -499,6 +502,9 @@ class BookingTransferForm(forms.ModelForm):
                 url='providertransfer-autocomplete',
                 forward=['service', 'location_from', 'location_to'],
                 ),
+            'p_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
+            'v_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
+            'provider_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
@@ -533,6 +539,9 @@ class BookingExtraForm(forms.ModelForm):
                 url='providerextra-autocomplete',
                 forward=['service', 'addon'],
                 ),
+            'p_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
+            'v_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
+            'provider_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 

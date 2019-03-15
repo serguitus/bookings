@@ -603,10 +603,18 @@ class BookingAllotmentSiteModel(SiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
 
-    fields = ('booking', ('service', 'status', 'conf_number'),
-              ('datetime_from', 'datetime_to'),
-              ('room_type', 'board_type'),
-              'cost_amount', 'price_amount', 'provider', 'id')
+    fieldsets = (
+        (None, {
+            'fields': (
+                'booking', ('service', 'status', 'conf_number'),
+                ('datetime_from', 'datetime_to'),
+                ('room_type', 'board_type'),
+                'cost_amount', 'price_amount', 'provider', 'id')
+        }),
+        ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
+                   'classes': ('collapse', 'wide')})
+    )
+
     list_display = ('booking', 'name', 'datetime_from',
                     'datetime_to', 'status',)
     top_filters = (('booking__name', 'Booking'),
@@ -631,13 +639,20 @@ class BookingTransferSiteModel(SiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
 
-    fields = ('booking', ('service', 'status', 'conf_number'),
-              ('datetime_from', 'datetime_to', 'time'),
-              ('location_from', 'pickup', 'schedule_from'),
-              ('place_from'),
-              ('location_to', 'dropoff', 'schedule_to'),
-              ('place_to'),
-              'cost_amount', 'price_amount', 'provider', 'id')
+    fieldsets = (
+        (None, {
+            'fields': (
+                'booking', ('service', 'status', 'conf_number'),
+                ('datetime_from', 'datetime_to', 'time'),
+                ('location_from', 'pickup', 'schedule_from'),
+                ('place_from'),
+                ('location_to', 'dropoff', 'schedule_to'),
+                ('place_to'),
+                'cost_amount', 'price_amount', 'provider', 'id')
+        }),
+        ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
+                   'classes': ('collapse', 'wide')})
+    )
     list_display = ('booking', 'name',
                     'datetime_from', 'time', 'status')
     top_filters = (('booking__name', 'Booking'),
@@ -662,10 +677,17 @@ class BookingExtraSiteModel(SiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
 
-    fields = ['booking', ('service', 'status', 'conf_number'),
-              ('datetime_from', 'datetime_to', 'time'),
-              ('addon', 'quantity', 'parameter'),
-              'cost_amount', 'price_amount', 'provider', 'id']
+    fieldsets = (
+        (None, {
+            'fields': (
+                'booking', ('service', 'status', 'conf_number'),
+                ('datetime_from', 'datetime_to', 'time'),
+                ('addon', 'quantity', 'parameter'),
+                'cost_amount', 'price_amount', 'provider', 'id')
+        }),
+        ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
+                   'classes': ('collapse', 'wide')})
+    )
     list_display = ('booking', 'name', 'addon', 'quantity', 'parameter',
                     'datetime_from', 'datetime_to', 'time', 'status',)
     top_filters = ('booking__name', 'service', 'booking__reference',
