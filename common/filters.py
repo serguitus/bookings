@@ -357,7 +357,7 @@ class DateFilter(TopFilter):
 
         to_option = self._values[1]
         if to_option:
-            if isinstance(to_option, str):
+            if isinstance(to_option, text_type):
                 to_option = parse_date(to_option)
             if to_option:
                 lookup = '%s__lte' % self.field_path
