@@ -2,7 +2,7 @@ appdirs==1.4.3
 # backports.shutil-get-terminal-size==1.0.0
 # base-theme==1.0
 decorator==4.0.11
-Django==1.11.18
+Django==1.11.20
 django-autocomplete-light==3.2.10
 django-bootstrap-themes==3.3.6
 django-bootstrap3==10.0.1
@@ -24,7 +24,7 @@ Pygments==2.2.0
 pyparsing==2.2.0
 python-dateutil==2.7.3
 pytz==2018.4
-PyYAML==3.12
+PyYAML==4.2b1
 scandir==1.5
 simplegeneric==0.8.1
 six==1.10.0
