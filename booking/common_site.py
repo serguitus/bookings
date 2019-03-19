@@ -324,7 +324,7 @@ class QuotePackageInLine(CommonStackedInline):
     extra = 0
     fields = [
         ('service', 'status'), ('datetime_from', 'datetime_to'),
-        'provider']
+        'provider', 'quoteservice_ptr']
     ordering = ['datetime_from']
     form = QuotePackageInlineForm
     template = 'booking/tabular.html'
