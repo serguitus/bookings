@@ -101,7 +101,11 @@ class QuoteAmountsView(ModelChangeFormProcessorView):
 
         package_list = inlines[4]
 
-        if (not allotment_list) and (not transfer_list) and (not extra_list):
+        if (
+                (not allotment_list) and
+                (not transfer_list) and
+                (not extra_list) and
+                (not package_list)):
             return JsonResponse({
                 'code': 3,
                 'message': 'Services Missing',

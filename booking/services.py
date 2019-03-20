@@ -360,7 +360,11 @@ class BookingServices(object):
 
         if not variant_list:
             return 3, 'Pax Variants Missing', None
-        if (not allotment_list) and (not transfer_list) and (not extra_list):
+        if (
+                (not allotment_list)and
+                (not transfer_list) and
+                (not extra_list) and
+                (not package_list)):
             return 2, 'Services Missing', None
 
         for pax_variant in variant_list:
