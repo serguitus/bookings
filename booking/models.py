@@ -205,7 +205,8 @@ class Quote(models.Model):
 
     def __str__(self):
         return '%s - %s %s-%s (%s)' % (
-            self.agency.name, self.reference, self.date_from, self.date_to, self.get_status_display())
+            self.agency.name, self.reference,
+            self.date_from, self.date_to, self.get_status_display())
 
 
 class QuotePaxVariant(models.Model):
@@ -445,13 +446,13 @@ class Booking(models.Model):
     price_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
     invoice = models.ForeignKey(BookingInvoice, blank=True, null=True)
-    is_package_price = models.BooleanField(default=False, verbose_name = 'Package Price')
+    is_package_price = models.BooleanField(default=False, verbose_name='Package Price')
     package_sgl_price_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, default=0.0, verbose_name = 'Price SGL')
+        max_digits=10, decimal_places=2, default=0.0, verbose_name='Price SGL')
     package_dbl_price_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, default=0.0, verbose_name = 'Price DBL')
+        max_digits=10, decimal_places=2, default=0.0, verbose_name='Price DBL')
     package_tpl_price_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, default=0.0, verbose_name = 'Price TPL')
+        max_digits=10, decimal_places=2, default=0.0, verbose_name='Price TPL')
     # a field to add global notes to a booking
     p_notes = models.CharField(max_length=1000, blank=True, null=True,
                                verbose_name='Private Notes')
@@ -550,10 +551,12 @@ class BookingServicePax(models.Model):
                                       blank=True, null=True,
                                       verbose_name='Cost')
     cost_comments = models.CharField(max_length=1000, blank=True, null=True)
+    is_cost_free = models.BooleanField(default=False)
     price_amount = models.DecimalField(max_digits=10, decimal_places=2,
                                        blank=True, null=True,
                                        verbose_name='Price')
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
+    is_price_free = models.BooleanField(default=False)
 
     def fill_data(self):
         pass
