@@ -157,7 +157,8 @@ class BookingAllotmentAmountsView(ModelChangeFormProcessorView):
                 'price_message': 'Paxes Missing',
             })
         service = bookingallotment.service
-        groups = BookingServices.find_paxes_groups(pax_list, service)
+        cost_groups = BookingServices.find_paxes_groups(pax_list, service, True)
+        price_groups = BookingServices.find_paxes_groups(pax_list, service, False)
         date_from = bookingallotment.datetime_from
         date_to = bookingallotment.datetime_to
 
@@ -183,7 +184,7 @@ class BookingAllotmentAmountsView(ModelChangeFormProcessorView):
             })
 
         code, message, cost, cost_msg, price, price_msg = ConfigService.allotment_amounts(
-            bookingallotment.service_id, date_from, date_to, groups,
+            bookingallotment.service_id, date_from, date_to, cost_groups, price_groups,
             bookingallotment.provider, bookingallotment.booking.agency,
             board_type, room_type_id,
         )
@@ -232,7 +233,8 @@ class BookingTransferAmountsView(ModelChangeFormProcessorView):
                 'price_message': 'Paxes Missing',
             })
         service = bookingtransfer.service
-        groups = BookingServices.find_paxes_groups(pax_list, service)
+        cost_groups = BookingServices.find_paxes_groups(pax_list, service, True)
+        price_groups = BookingServices.find_paxes_groups(pax_list, service, False)
         date_from = bookingtransfer.datetime_from
         date_to = bookingtransfer.datetime_to
 
@@ -258,7 +260,7 @@ class BookingTransferAmountsView(ModelChangeFormProcessorView):
             })
 
         code, message, cost, cost_msg, price, price_msg = ConfigService.transfer_amounts(
-            bookingtransfer.service_id, date_from, date_to, groups,
+            bookingtransfer.service_id, date_from, date_to, cost_groups, price_groups,
             bookingtransfer.provider, bookingtransfer.booking.agency,
             location_from_id, location_to_id,
         )
@@ -307,7 +309,8 @@ class BookingExtraAmountsView(ModelChangeFormProcessorView):
                 'price_message': 'Paxes Missing',
             })
         service = bookingextra.service
-        groups = BookingServices.find_paxes_groups(pax_list, service)
+        cost_groups = BookingServices.find_paxes_groups(pax_list, service, True)
+        price_groups = BookingServices.find_paxes_groups(pax_list, service, False)
         date_from = bookingextra.datetime_from
         date_to = bookingextra.datetime_to
 
@@ -318,7 +321,7 @@ class BookingExtraAmountsView(ModelChangeFormProcessorView):
         parameter = int(bookingextra.parameter)
 
         code, message, cost, cost_msg, price, price_msg = ConfigService.extra_amounts(
-            bookingextra.service_id, date_from, date_to, groups,
+            bookingextra.service_id, date_from, date_to, cost_groups, price_groups,
             bookingextra.provider, bookingextra.booking.agency,
             addon_id, quantity, parameter,
         )

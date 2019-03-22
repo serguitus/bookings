@@ -166,17 +166,17 @@ $(document).ready(function(){
       'type': 'POST',
       'data': form_dict,
     }).done(function(data){
-      if(data['cost']){
+      if(data['cost_message']){
+        computedCost.html(data['cost_message']);
+      }
+      else{
         computedCost.html(data['cost']);
       }
-      else{
-        computedCost.html('N/A');
+      if(data['price_message']){
+        computedPrice.html(data['price_message']);
       }
-      if(data['price']){
+      else{
         computedPrice.html(data['price']);
-      }
-      else{
-        computedPrice.html('N/A');
       }
       compare_numbers();
     }).fail(function(){
