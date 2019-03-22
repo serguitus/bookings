@@ -73,7 +73,7 @@ class BookingServices(object):
                 invoice_partial = BookingInvoicePartial()
                 invoice_partial.invoice = invoice
                 invoice_partial.pax_name = booking_pax.pax_name
- 
+
                 invoice_partial.save()
 
             # verify if new invoice to save booking
@@ -678,12 +678,23 @@ class BookingServices(object):
 
         # for saved ones use saved quote package services
 
-        allotment_list = list(
-            QuotePackageAllotment.objects.filter(quote_package=package.quoteservice_ptr_id).all())
-        transfer_list = list(
-            QuotePackageTransfer.objects.filter(quote_package=package.quoteservice_ptr_id).all())
-        extra_list = list(
-            QuotePackageExtra.objects.filter(quote_package=package.quoteservice_ptr_id).all())
+        if package.quoteservice_ptr_id is None:
+            allotment_list = list(
+                PackageAllotment.objects.filter(package=package.service_id).all())
+            transfer_list = list(
+                PackageTransfer.objects.filter(package=package.service_id).all())
+            extra_list = list(
+                PackageExtra.objects.filter(package=package.service_id).all())
+        else:
+            allotment_list = list(
+                QuotePackageAllotment.objects.filter(
+                    quote_package=package.quoteservice_ptr_id).all())
+            transfer_list = list(
+                QuotePackageTransfer.objects.filter(
+                    quote_package=package.quoteservice_ptr_id).all())
+            extra_list = list(
+                QuotePackageExtra.objects.filter(
+                    quote_package=package.quoteservice_ptr_id).all())
 
         if allotment_list:
             for allotment in allotment_list:
@@ -691,13 +702,28 @@ class BookingServices(object):
                     provider = package.provider
                     if provider is None:
                         provider = allotment.provider
+                    date_from = None
+                    date_to = None
+                    if isinstance(allotment, QuoteAllotment):
+                        date_from = allotment.datetime_from
+                        date_to = allotment.datetime_to
+                    if isinstance(allotment, PackageAllotment):
+                        days_after = allotment.days_after
+                        if days_after is None:
+                            days_after = 0
+                        if not package.datetime_from is None:
+                            date_from = package.datetime_from + timedelta(days=days_after)
+                            days_duration = allotment.days_duration
+                            if days_duration is None:
+                                days_duration = 0
+                            date_to = date_from + timedelta(days=days_duration)
                     c1, c1_msg, p1, p1_msg, \
                     c2, c2_msg, p2, p2_msg, \
                     c3, c3_msg, p3, p3_msg = cls._find_service_allotment_amounts(
                         pax_variant=pax_variant,
                         service=allotment.service,
-                        date_from=package.datetime_from,
-                        date_to=package.datetime_to,
+                        date_from=date_from,
+                        date_to=date_to,
                         room_type_id=allotment.room_type_id,
                         board_type=allotment.board_type,
                         provider=provider,
@@ -716,13 +742,28 @@ class BookingServices(object):
                     provider = package.provider
                     if provider is None:
                         provider = transfer.provider
+                    date_from = None
+                    date_to = None
+                    if isinstance(transfer, QuoteTransfer):
+                        date_from = transfer.datetime_from
+                        date_to = transfer.datetime_to
+                    if isinstance(transfer, PackageTransfer):
+                        days_after = transfer.days_after
+                        if days_after is None:
+                            days_after = 0
+                        if not package.datetime_from is None:
+                            date_from = package.datetime_from + timedelta(days=days_after)
+                            days_duration = transfer.days_duration
+                            if days_duration is None:
+                                days_duration = 0
+                            date_to = date_from + timedelta(days=days_duration)
                     c1, c1_msg, p1, p1_msg, \
                     c2, c2_msg, p2, p2_msg, \
                     c3, c3_msg, p3, p3_msg = cls._find_service_transfer_amounts(
                         pax_variant=pax_variant,
                         service=transfer.service,
-                        date_from=package.datetime_from,
-                        date_to=package.datetime_to,
+                        date_from=date_from,
+                        date_to=date_to,
                         location_from_id=transfer.location_from_id,
                         location_to_id=transfer.location_to_id,
                         quantity=transfer.quantity,
@@ -741,13 +782,28 @@ class BookingServices(object):
                     provider = package.provider
                     if provider is None:
                         provider = extra.provider
+                    date_from = None
+                    date_to = None
+                    if isinstance(extra, QuoteExtra):
+                        date_from = extra.datetime_from
+                        date_to = extra.datetime_to
+                    if isinstance(extra, PackageExtra):
+                        days_after = extra.days_after
+                        if days_after is None:
+                            days_after = 0
+                        if not package.datetime_from is None:
+                            date_from = package.datetime_from + timedelta(days=days_after)
+                            days_duration = extra.days_duration
+                            if days_duration is None:
+                                days_duration = 0
+                            date_to = date_from + timedelta(days=days_duration)
                     c1, c1_msg, p1, p1_msg, \
                     c2, c2_msg, p2, p2_msg, \
                     c3, c3_msg, p3, p3_msg = cls._find_service_extra_amounts(
                         pax_variant=pax_variant,
                         service=extra.service,
-                        date_from=package.datetime_from,
-                        date_to=package.datetime_to,
+                        date_from=date_from,
+                        date_to=date_to,
                         addon_id=extra.addon_id,
                         quantity=extra.quantity,
                         parameter=extra.parameter,
