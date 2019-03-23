@@ -6,9 +6,10 @@ from django.utils.html import format_html
 from booking.models import (
     PackageService,
     Quote, QuoteService, QuotePaxVariant, QuotePackageService,
-    Booking, BookingService, BookingPax)
+    Booking, BookingService, BookingPax, BookingPackageService)
 from booking.constants import (
-    PACKAGESERVICE_TYPES, QUOTESERVICE_TYPES, QUOTEPACKAGESERVICE_TYPES, BOOKINGSERVICE_TYPES)
+    PACKAGESERVICE_TYPES, QUOTESERVICE_TYPES, QUOTEPACKAGESERVICE_TYPES,
+    BOOKINGSERVICE_TYPES, BOOKINGPACKAGESERVICE_TYPES)
 
 
 class PackageServiceTable(tables.Table):
@@ -165,3 +166,21 @@ class BookingVouchersTable(tables.Table):
             args=(quote(record.pk),)
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
+
+
+class BookingPackageServiceTable(tables.Table):
+    class Meta:
+        model = BookingPackageService
+        template_name = 'booking/bookingpackageservice_list.html'
+        fields = ['name', 'service_type', 'datetime_from', 'datetime_to']
+
+    def render_name(self, value, record):
+        obj_url = reverse(
+            'common:booking_%s_change' % (BOOKINGPACKAGESERVICE_TYPES[record.service_type]),
+            args=(quote(record.pk),)
+        )
+        return format_html(
+            '<a class="related-widget-wrapper-link" href="%s?_popup=1">%s</a>' % (obj_url, value))
+
+    def before_render(self, request):
+        self.columns.hide('service_type')

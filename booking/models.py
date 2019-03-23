@@ -208,7 +208,7 @@ class Quote(models.Model):
         super(Quote, self).save(*args, **kwargs)
 
     def __str__(self):
-        return '%s - %s %s-%s (%s)' % (
+        return '%s - %s %s - %s (%s)' % (
             self.agency.name, self.reference,
             self.date_from, self.date_to, self.get_status_display())
 
@@ -321,6 +321,9 @@ class QuotePackage(QuoteService):
         with transaction.atomic(savepoint=False):
             super(QuotePackage, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return '%s - %s' % (self.quote, self.service)
+
 
 class QuotePackageService(BaseService, DateInterval):
     """
@@ -378,8 +381,8 @@ class QuotePackageExtra(QuotePackageService, BaseExtra):
     Quote Service Extra
     """
     class Meta:
-        verbose_name = 'Quote Extra'
-        verbose_name_plural = 'Quotes Extras'
+        verbose_name = 'Quote Package Extra'
+        verbose_name_plural = 'Quotes Packages Extras'
 
     def fill_data(self):
         # setting name for this quote_service
@@ -724,6 +727,7 @@ class BookingPackageService(BaseService, DateInterval):
         verbose_name = 'Booking Package Service'
         verbose_name_plural = 'Bookingss Packages Services'
     booking_package = models.ForeignKey(BookingPackage, related_name='booking_package_services')
+    conf_number = models.CharField(max_length=20, blank=True, null=True)
 
     def fill_data(self):
         pass

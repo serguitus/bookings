@@ -12,7 +12,7 @@ from booking.models import (
     QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
     Package, PackageAllotment, PackageTransfer, PackageExtra,
     Booking, BookingService, BookingPax, BookingServicePax,
-    BookingAllotment, BookingTransfer, BookingExtra,
+    BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
     BookingInvoice, BookingInvoiceLine, BookingInvoicePartial)
 
 from config.services import ConfigService
@@ -108,8 +108,14 @@ class BookingServices(object):
                 booking.is_package_price = True
                 pax_variant = cls._find_pax_variant(quote, rooming)
                 booking.package_sgl_price_amount = pax_variant.price_single_amount
+                if booking.package_sgl_price_amount is None:
+                    booking.package_sgl_price_amount = 0
                 booking.package_dbl_price_amount = pax_variant.price_double_amount
+                if booking.package_dbl_price_amount is None:
+                    booking.package_dbl_price_amount = 0
                 booking.package_tpl_price_amount = pax_variant.price_triple_amount
+                if booking.package_tpl_price_amount is None:
+                    booking.package_tpl_price_amount = 0
 
                 booking.save()
                 # create bookingpax list
@@ -207,6 +213,31 @@ class BookingServices(object):
                     for booking_pax in booking_pax_list:
                         bookingservice_pax = BookingServicePax()
                         bookingservice_pax.booking_service = booking_extra
+                        bookingservice_pax.booking_pax = booking_pax
+                        bookingservice_pax.group = booking_pax.pax_group
+                        bookingservice_pax.save()
+
+                # create bookingpackage list
+                for quote_package in QuotePackage.objects.filter(quote_id=quote.id).all():
+                    booking_package = BookingPackage()
+                    booking_package.booking = booking
+                    booking_package.conf_number = '< confirm number >'
+                    # cost_amount
+                    # cost_comment
+                    # price_amount
+                    # price_comment
+                    # provider_invoice
+                    booking_package.name = quote_package.name
+                    # service_type auto
+                    cls._copy_service_info(
+                        dst_service=booking_package, src_service=quote_package)
+                    booking_package.avoid_package_services = True
+                    booking_package.save()
+
+                    # create bookingservicepax list
+                    for booking_pax in booking_pax_list:
+                        bookingservice_pax = BookingServicePax()
+                        bookingservice_pax.booking_service = booking_package
                         bookingservice_pax.booking_pax = booking_pax
                         bookingservice_pax.group = booking_pax.pax_group
                         bookingservice_pax.save()
@@ -1160,3 +1191,74 @@ class BookingServices(object):
                     else:
                         return cost + round(float(c / adults), 2), c_msg, \
                             price + round(0.499999 + float(p / adults)), p_msg
+
+
+    @classmethod
+    def update_booking_package(cls, booking_package, avoid_package_services):
+        if avoid_package_services:
+            return
+        package = booking_package.service
+        # create bookingallotment list
+        for package_allotment in PackageAllotment.objects.filter(package_id=package.id).all():
+            booking_package_allotment = BookingPackageAllotment()
+            booking_package_allotment.booking_package = booking_package
+            booking_package_allotment.conf_number = '< confirm number >'
+            # cost_amount
+            # cost_comment
+            # price_amount
+            # price_comment
+            # provider_invoice
+
+            # name auto
+            # service_type auto
+            cls._copy_package_info(
+                dst_package=booking_package_allotment, src_package=package_allotment)
+            booking_package_allotment.room_type = package_allotment.room_type
+            booking_package_allotment.board_type = package_allotment.board_type
+            booking_package_allotment.save()
+
+        # create bookingtransfer list
+        for package_transfer in PackageTransfer.objects.filter(package_id=package.id).all():
+            booking_package_transfer = BookingPackageTransfer()
+            booking_package_transfer.booking_package = booking_package
+            booking_package_transfer.conf_number = '< confirm number >'
+            # cost_amount
+            # cost_comment
+            # price_amount
+            # price_comment
+            # provider_invoice
+            # name auto
+            # service_type auto
+            cls._copy_package_info(
+                dst_package=booking_package_transfer, src_package=package_transfer)
+            # time
+            # quantity auto
+            booking_package_transfer.location_from = package_transfer.location_from
+            booking_package_transfer.place_from = package_transfer.place_from
+            booking_package_transfer.schedule_from = package_transfer.schedule_from
+            booking_package_transfer.pickup = package_transfer.pickup
+            booking_package_transfer.location_to = package_transfer.location_to
+            booking_package_transfer.place_to = package_transfer.place_to
+            booking_package_transfer.schedule_to = package_transfer.schedule_to
+            booking_package_transfer.dropoff = package_transfer.dropoff
+            quote_package_transfer.save()
+
+        # create bookingextra list
+        for package_extra in PackageExtra.objects.filter(package_id=package.id).all():
+            booking_package_extra = BookingPackageExtra()
+            booking_package_extra.booking_package = booking_package
+            booking_package_extra.conf_number = '< confirm number >'
+            # cost_amount
+            # cost_comment
+            # price_amount
+            # price_comment
+            # provider_invoice
+            # name auto
+            # service_type auto
+            cls._copy_package_info(
+                dst_package=booking_package_extra, src_package=package_extra)
+            booking_package_extra.addon = package_extra.addon
+            booking_package_extra.time = package_extra.time
+            booking_package_extra.quantity = package_extra.quantity
+            booking_package_extra.parameter = package_extra.parameter
+            booking_package_extra.save()

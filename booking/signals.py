@@ -6,7 +6,7 @@ from django.dispatch import receiver
 
 from booking.models import (
     QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
-    Booking, BookingPax, BookingAllotment, BookingTransfer, BookingExtra)
+    Booking, BookingPax, BookingAllotment, BookingTransfer, BookingExtra, BookingPackage)
 from booking.services import BookingServices
 
 
@@ -64,3 +64,14 @@ def update_transfer_booking(sender, instance, **kwargs):
 def update_extra_booking(sender, instance, **kwargs):
     booking = instance.booking
     BookingServices.update_booking(booking)
+
+
+@receiver(post_save, sender=BookingPackage)
+def update_package_booking(sender, instance, **kwargs):
+    avoid_package_services = None
+    if hasattr(instance, 'avoid_package_services'):
+        avoid_package_services = instance.avoid_package_services
+    with transaction.atomic(savepoint=False):
+        BookingServices.update_booking_package(instance, avoid_package_services)
+        booking = instance.booking
+        BookingServices.update_booking(booking)
