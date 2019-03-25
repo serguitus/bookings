@@ -9,7 +9,8 @@ from booking.tables import (
     QuoteServiceTable, QuotePaxVariantTable,
     QuotePackageServiceTable,
     BookingServiceTable, BookingPaxTable,
-    BookingVouchersTable)
+    BookingVouchersTable,
+    BookingPackageServiceTable)
 from booking.services import BookingServices
 
 register = template.Library()
@@ -71,6 +72,14 @@ def booking_pax_table(booking):
     return BookingPaxTable(booking.rooming_list.all())
 
 
+@register.simple_tag
+def bookingpackage_table(bookingpackage):
+    table = BookingPackageServiceTable(
+        bookingpackage.booking_package_services.all(),
+        order_by=('datetime_from', 'datetime_to'))
+    return table
+
+
 @register.inclusion_tag('booking/emails/provider_service.html')
 def render_service(booking_service):
     """
@@ -93,8 +102,8 @@ def render_service(booking_service):
 
 @register.simple_tag
 def get_distribution(booking_service):
-    rooms = BookingServices.find_groups(booking_service=booking_service,
-                                      service=booking_service.service)
+    rooms = BookingServices.find_groups(
+        booking_service=booking_service, service=booking_service.service, for_cost=True)
     dist = ''
     room_count = {
         '10': 0,  # SGL counter

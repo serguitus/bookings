@@ -27,9 +27,9 @@ from config.models import (
 from finance.models import Agency
 
 
-class ConfigService(object):
+class ConfigServices(object):
     """
-    ConfigService
+    ConfigServices
     """
 
     @classmethod
@@ -377,11 +377,9 @@ class ConfigService(object):
 
     @classmethod
     def allotment_amounts(
-            cls, service_id, date_from, date_to, groups, provider, agency,
+            cls, service_id, date_from, date_to, cost_groups, price_groups, provider, agency,
             board_type, room_type_id, quantity=None):
 
-        if groups is None:
-            return 3, 'Paxes Missing', None, 'Paxes Missing', None, 'Paxes Missing'
         if date_from is None:
             return 3, 'Date from Missing', None, 'Date from Missing', None, 'Date from Missing'
         if date_to is None:
@@ -391,7 +389,10 @@ class ConfigService(object):
 
         # provider cost
         # obtain details order by date_from asc, date_to desc
-        if provider is None:
+        if cost_groups is None:
+            cost = None
+            cost_message = 'Paxes Missing'
+        elif provider is None:
             cost = None
             cost_message = 'Provider Not Found'
         else:
@@ -406,13 +407,16 @@ class ConfigService(object):
                 )
             )
             cost, cost_message = cls.find_groups_amount(
-                True, service, date_from, date_to, groups,
+                True, service, date_from, date_to, cost_groups,
                 quantity, None, detail_list
             )
 
         # agency price
         # obtain details order by date_from asc, date_to desc
-        if agency is None:
+        if price_groups is None:
+            price = None
+            price_message = 'Paxes Missing'
+        elif agency is None:
             price = None
             price_message = 'Agency Not Found'
         else:
@@ -431,20 +435,18 @@ class ConfigService(object):
                     )
                 )
                 price, price_message = cls.find_groups_amount(
-                    False, service, date_from, date_to, groups,
+                    False, service, date_from, date_to, price_groups,
                     quantity, None, detail_list
                 )
 
-        return cls._get_result(cost, cost_message, price, price_message)
+        return cls.build_amounts_result(cost, cost_message, price, price_message)
 
     @classmethod
     def transfer_amounts(
-            cls, service_id, date_from, date_to, groups, provider, agency,
+            cls, service_id, date_from, date_to, cost_groups, price_groups, provider, agency,
             location_from_id, location_to_id, quantity=None):
         service = Transfer.objects.get(pk=service_id)
 
-        if groups is None and service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
-            return 3, 'Paxes Missing', None, 'Paxes Missing', None, 'Paxes Missing'
         if date_from is None and date_to is None:
             return 3, 'Both Dates are Missing', None, 'Both Dates are Missing', None, 'Both Dates are Missing'
         if date_from is None:
@@ -454,7 +456,10 @@ class ConfigService(object):
 
         # provider cost
         # obtain details order by date_from asc, date_to desc
-        if provider is None:
+        if cost_groups is None and service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
+            cost = None
+            cost_message = 'Paxes Missing'
+        elif provider is None:
             cost = None
             cost_message = 'Provider Not Found'
         else:
@@ -469,13 +474,16 @@ class ConfigService(object):
                 )
             )
             cost, cost_message = cls.find_groups_amount(
-                True, service, date_from, date_to, groups,
+                True, service, date_from, date_to, cost_groups,
                 quantity, None, detail_list
             )
 
         # agency price
         # obtain details order by date_from asc, date_to desc
-        if agency is None:
+        if price_groups is None and service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
+            price = None
+            price_message = 'Paxes Missing'
+        elif agency is None:
             price = None
             price_message = 'Agency Not Found'
         else:
@@ -490,20 +498,18 @@ class ConfigService(object):
                 )
             )
             price, price_message = cls.find_groups_amount(
-                False, service, date_from, date_to, groups,
+                False, service, date_from, date_to, price_groups,
                 quantity, None, detail_list
             )
 
-        return cls._get_result(cost, cost_message, price, price_message)
+        return cls.build_amounts_result(cost, cost_message, price, price_message)
 
     @classmethod
     def extra_amounts(
-            cls, service_id, date_from, date_to, groups, provider, agency,
+            cls, service_id, date_from, date_to, cost_groups, price_groups, provider, agency,
             addon_id, quantity, parameter):
         service = Extra.objects.get(pk=service_id)
 
-        if groups is None and service.cost_type == EXTRA_COST_TYPE_BY_PAX:
-            return 3, 'Paxes Missing', None, 'Paxes Missing', None, 'Paxes Missing'
         if date_from is None and date_to is None:
             return 3, 'Both Dates are Missing', None, 'Both Dates are Missing', None, 'Both Dates are Missing'
         if date_from is None:
@@ -519,7 +525,10 @@ class ConfigService(object):
 
         # provider cost
         # obtain details order by date_from asc, date_to desc
-        if provider is None:
+        if cost_groups is None and service.cost_type == EXTRA_COST_TYPE_BY_PAX:
+            cost = None
+            cost_message = 'Paxes Missing'
+        elif provider is None:
             cost = None
             cost_message = 'Provider Not Found'
         else:
@@ -527,8 +536,10 @@ class ConfigService(object):
                 cost = 0
                 cost_message = ''
                 # each group can have different details
-                for group in groups:
+                for group in cost_groups:
                     paxes = group[0] + group[1]
+                    if paxes == 0:
+                        continue
                     queryset = cls._get_provider_queryset(
                         ProviderExtraDetail.objects,
                         provider.id, service_id, date_from, date_to)
@@ -570,13 +581,16 @@ class ConfigService(object):
                 detail_list = list(queryset)
 
                 cost, cost_message = cls.find_groups_amount(
-                    True, service, date_from, date_to, groups,
+                    True, service, date_from, date_to, cost_groups,
                     quantity, parameter, detail_list
                 )
 
         # agency price
         # obtain details order by date_from asc, date_to desc
-        if agency is None:
+        if price_groups is None and service.cost_type == EXTRA_COST_TYPE_BY_PAX:
+            price = None
+            price_message = 'Paxes Missing'
+        elif agency is None:
             price = None
             price_message = 'Agency Not Found'
         else:
@@ -584,7 +598,7 @@ class ConfigService(object):
                 price = 0
                 price_message = ''
                 # each group can have different details
-                for group in groups:
+                for group in price_groups:
                     paxes = group[0] + group[1]
                     queryset = cls._get_agency_queryset(
                         AgencyExtraDetail.objects,
@@ -626,16 +640,16 @@ class ConfigService(object):
                 detail_list = list(queryset)
 
                 price, price_message = cls.find_groups_amount(
-                    False, service, date_from, date_to, groups,
+                    False, service, date_from, date_to, price_groups,
                     quantity, parameter, detail_list
                 )
 
-        return cls._get_result(cost, cost_message, price, price_message)
+        return cls.build_amounts_result(cost, cost_message, price, price_message)
 
     @classmethod
-    def _get_result(cls, cost, cost_message, price, price_message):
-        if cost and cost >= 0:
-            if price and price >= 0:
+    def build_amounts_result(cls, cost, cost_message, price, price_message):
+        if not cost is None and cost >= 0:
+            if not price is None and price >= 0:
                 code = "0"
                 message = "Provider Cost and Agency Price Found: %s - %s" % (
                     cost_message, price_message
@@ -646,7 +660,7 @@ class ConfigService(object):
                     cost_message, price_message
                 )
         else:
-            if price and price >= 0:
+            if not price is None and price >= 0:
                 code = "1"
                 message = "Only Agency Price Found: %s - %s" % (
                     cost_message, price_message
@@ -693,6 +707,8 @@ class ConfigService(object):
     def find_amount(
             cls, amount_for_provider, service, date_from, date_to, adults, children,
             quantity, parameter, detail_list):
+        if adults + children == 0:
+            return 0, ''
         message = ''
         stop = False
         solved = False

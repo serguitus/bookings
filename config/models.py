@@ -104,6 +104,7 @@ class Service(models.Model):
     category = models.CharField(max_length=5, choices=SERVICE_CATEGORIES)
     grouping = models.BooleanField(default=False)
     child_age = models.IntegerField(blank=True, null=True)
+    infant_age = models.IntegerField(default=2, blank=True, null=True)
     enabled = models.BooleanField(default=True)
 
     def __init__(self, *args, **kwargs):

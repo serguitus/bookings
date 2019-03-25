@@ -22,19 +22,24 @@ from django.utils.encoding import force_text
 # from django.utils.translation import ugettext as _, ungettext
 from django.utils.functional import curry
 # from django_tables2 import RequestConfig
+
 from booking.forms import (
     PackageAllotmentInlineForm, PackageTransferInlineForm, PackageExtraInlineForm,
     PackageAllotmentForm, PackageTransferForm, PackageExtraForm,
     QuoteForm, QuoteAllotmentForm, QuoteTransferForm, QuoteExtraForm, QuotePackageForm,
     QuoteAllotmentInlineForm, QuoteTransferInlineForm,
     QuoteExtraInlineForm, QuotePackageInlineForm,
-    QuotePackageAllotmentForm, QuotePackageTransferForm, QuotePackageExtraForm,
     QuotePackageAllotmentInlineForm, QuotePackageTransferInlineForm, QuotePackageExtraInlineForm,
+    QuotePackageAllotmentForm, QuotePackageTransferForm, QuotePackageExtraForm,
     BookingForm,
     BookingServicePaxInlineForm,
     BookingAllotmentInlineForm, BookingAllotmentForm,
     BookingTransferInlineForm, BookingTransferForm,
     BookingExtraInlineForm, BookingExtraForm,
+    BookingPackageInlineForm, BookingPackageForm,
+    BookingPackageAllotmentInlineForm, BookingPackageAllotmentForm,
+    BookingPackageTransferInlineForm, BookingPackageTransferForm,
+    BookingPackageExtraInlineForm, BookingPackageExtraForm,
     VouchersConfigForm,
 )
 from booking.models import (
@@ -46,8 +51,8 @@ from booking.models import (
     Booking,
     BookingPax,
     BookingServicePax,
-    BookingAllotment, BookingTransfer, BookingExtra, #BookingPackage,
-    #BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
+    BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
+    BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
 )
 from booking.services import BookingServices
 from booking.top_filters import DateTopFilter
@@ -57,6 +62,7 @@ from common.sites import CommonStackedInline, CommonTabularInline
 # from functools import update_wrapper, partial
 
 from reservas.admin import bookings_site
+
 
 MENU_LABEL_PACKAGE = 'Package'
 MENU_LABEL_QUOTE = 'Quote'
@@ -211,20 +217,18 @@ class QuotePackageAllotmentInLine(CommonStackedInline):
     ordering = ['datetime_from']
     form = QuotePackageAllotmentInlineForm
 
-
 class QuotePackageAllotmentSiteModel(SiteModel):
     model_order = 560
     menu_label = MENU_LABEL_QUOTE
     menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
 
     fields = ('quote_package', 'service', 'datetime_from', 'datetime_to', 'status',
-              # 'cost_amount', 'price_amount',
               'room_type', 'board_type',
               'provider', 'id')
     list_display = ('quote_package', 'service', 'datetime_from', 'datetime_to',
                     'status',)
-    top_filters = ('service', 'quote_package__reference', ('datetime_from', DateTopFilter), 'status',)
-    ordering = ('datetime_from', 'quote_package__reference', 'service__name',)
+    top_filters = ('service', 'quote_package__quote__reference', ('datetime_from', DateTopFilter), 'status',)
+    ordering = ('datetime_from', 'quote_package__quote__reference', 'service__name',)
     form = QuotePackageAllotmentForm
 
 
@@ -248,8 +252,8 @@ class QuotePackageTransferSiteModel(SiteModel):
               'datetime_from', 'datetime_to', 'status',
               'provider', 'id')
     list_display = ('quote_package', 'name', 'datetime_from', 'status',)
-    top_filters = ('service', 'quote_package__reference', ('datetime_from', DateTopFilter), 'status',)
-    ordering = ('datetime_from', 'quote_package__reference', 'service__name',)
+    top_filters = ('service', 'quote_package__quote__reference', ('datetime_from', DateTopFilter), 'status',)
+    ordering = ('datetime_from', 'quote_package__quote__reference', 'service__name',)
     form = QuotePackageTransferForm
 
 
@@ -278,8 +282,8 @@ class QuotePackageExtraSiteModel(SiteModel):
     list_display = (
         'quote_package', 'service', 'addon', 'quantity', 'parameter',
         'datetime_from', 'datetime_to', 'time', 'status',)
-    top_filters = ('service', 'quote_package__reference', ('datetime_from', DateTopFilter), 'status',)
-    ordering = ('datetime_from', 'quote_package__reference', 'service__name',)
+    top_filters = ('service', 'quote_package__quote__reference', ('datetime_from', DateTopFilter), 'status',)
+    ordering = ('datetime_from', 'quote_package__quote__reference', 'service__name',)
     form = QuotePackageExtraForm
 
 
@@ -476,7 +480,7 @@ class BookingPaxInline(TabularInline):
 
 class BookingServicePaxInline(TabularInline):
     model = BookingServicePax
-    fields = ['booking_pax', 'group']
+    fields = ['booking_pax', 'group', 'is_cost_free', 'is_price_free']
     verbose_name_plural = 'Service Rooming List'
     form = BookingServicePaxInlineForm
     ordering = ('group', 'booking_pax__pax_name')
@@ -656,10 +660,11 @@ class BookingTransferSiteModel(SiteModel):
     )
     list_display = ('booking', 'name',
                     'datetime_from', 'time', 'status')
-    top_filters = (('booking__name', 'Booking'),
-                    ('name', 'Service'),
-                    'booking__reference', 'conf_number',
-                   ('datetime_from', DateTopFilter), 'status',)
+    top_filters = (
+        ('booking__name', 'Booking'),
+        ('name', 'Service'),
+        'booking__reference', 'conf_number',
+        ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'booking__reference', 'service__name',)
     form = BookingTransferForm
     add_form_template = 'booking/bookingtransfer_change_form.html'
@@ -705,8 +710,8 @@ class BookingExtraSiteModel(SiteModel):
     def response_post_save_change(self, request, obj):
         return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
 
-"""
-class BookingPackageAllotmentInLine(CommonTabularInline):
+
+class BookingPackageAllotmentInLine(CommonStackedInline):
     model = BookingPackageAllotment
     extra = 0
     fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
@@ -716,51 +721,113 @@ class BookingPackageAllotmentInLine(CommonTabularInline):
     classes = ['collapse']
 
 
-class BookingPackageTransferInLine(CommonTabularInline):
+class BookingPackageAllotmentSiteModel(SiteModel):
+    model_order = 1310
+    menu_label = MENU_LABEL_BOOKING
+    menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
+
+    fields = ['booking_package', ('service', 'status', 'conf_number'),
+                ('datetime_from', 'datetime_to'),
+                ('room_type', 'board_type'),
+                'provider', 'id']
+    list_display = ('booking_package', 'name', 'datetime_from',
+                    'datetime_to', 'status',)
+    top_filters = (('booking_package__booking__name', 'booking_package__Booking'),
+                   ('name', 'Service'),
+                   'booking_package__booking__reference', 'conf_number',
+                   ('datetime_from', DateTopFilter), 'status')
+    ordering = ('datetime_from', 'booking_package', 'service__name',)
+    form = BookingPackageAllotmentForm
+
+    def response_post_save_add(self, request, obj):
+        return redirect(
+            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
+
+    def response_post_save_change(self, request, obj):
+        return redirect(
+            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
+
+
+class BookingPackageTransferInLine(CommonStackedInline):
     model = BookingPackageTransfer
     extra = 0
-    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to', 'time'),
-              ('location_from', 'location_to'),
-              ('quantity', 'provider')]
+    fields = [
+        ('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to', 'time'),
+        ('location_from', 'pickup', 'schedule_from'),
+        ('place_from'),
+        ('location_to', 'dropoff', 'schedule_to'),
+        ('place_to'),
+        ('quantity', 'provider')]
     ordering = ['datetime_from']
     form = BookingPackageTransferInlineForm
     classes = ['collapse']
 
 
-class BookingPackageExtraInLine(CommonTabularInline):
+class BookingPackageTransferSiteModel(SiteModel):
+    model_order = 1320
+    menu_label = MENU_LABEL_BOOKING
+    menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
+
+    fields = [
+        'booking_package', ('service', 'status', 'conf_number'),
+        ('datetime_from', 'datetime_to', 'time'),
+        ('location_from', 'pickup', 'schedule_from'),
+        ('place_from'),
+        ('location_to', 'dropoff', 'schedule_to'),
+        ('place_to'),
+        'provider', 'id']
+    list_display = ('booking_package', 'name', 'datetime_from', 'time', 'status')
+    top_filters = (
+        ('booking_package__booking__name', 'Booking_package'),
+        ('name', 'Service'),
+        'booking_package__booking__reference', 'conf_number',
+        ('datetime_from', DateTopFilter), 'status',)
+    ordering = ('datetime_from', 'booking_package', 'service__name',)
+    form = BookingPackageTransferForm
+
+    def response_post_save_add(self, request, obj):
+        return redirect(
+            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
+
+    def response_post_save_change(self, request, obj):
+        return redirect(
+            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
+
+
+class BookingPackageExtraInLine(CommonStackedInline):
     model = BookingPackageExtra
     extra = 0
     fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to', 'time'),
-              ('quantity', 'parameter'), 'provider']
+              ('addon', 'quantity', 'parameter'), 'provider']
     ordering = ['datetime_from']
     form = BookingPackageExtraInlineForm
     classes = ('collapse',)
 
 
 class BookingPackageExtraSiteModel(SiteModel):
-    model_order = 1230
+    model_order = 1330
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
 
-    fields = ['booking', ('service', 'status', 'conf_number'),
+    fields = ['booking_package', ('service', 'status', 'conf_number'),
               ('datetime_from', 'datetime_to', 'time'),
               ('addon', 'quantity', 'parameter'),
-              'cost_amount', 'price_amount', 'provider', 'id']
-    list_display = ('booking', 'name', 'addon', 'quantity', 'parameter',
+              'provider', 'id']
+    list_display = ('booking_package', 'name', 'addon', 'quantity', 'parameter',
                     'datetime_from', 'datetime_to', 'time', 'status',)
-    top_filters = ('booking__name', 'service', 'booking__reference',
-                   ('datetime_from', DateTopFilter), 'status',)
-    ordering = ('datetime_from', 'booking__reference', 'service__name',)
-    form = BookingExtraForm
-    add_form_template = 'booking/bookingextra_change_form.html'
-    change_form_template = 'booking/bookingextra_change_form.html'
-    inlines = [BookingServicePaxInline]
+    top_filters = (
+        'booking_package__booking__name', 'service', 'booking_package__booking__reference',
+        ('datetime_from', DateTopFilter), 'status',)
+    ordering = ('datetime_from', 'booking_package', 'service__name',)
+    form = BookingPackageExtraForm
 
     def response_post_save_add(self, request, obj):
-        return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
+        return redirect(
+            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
 
     def response_post_save_change(self, request, obj):
-        return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
+        return redirect(
+            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
 
 
 class BookingPackageSiteModel(SiteModel):
@@ -775,13 +842,21 @@ class BookingPackageSiteModel(SiteModel):
     list_display = ['booking', 'name', 'datetime_from', 'datetime_to', 'status']
     top_filters = ['booking__name', 'service', 'booking__reference',
                    ('datetime_from', DateTopFilter), 'status']
-    ordering = ['datetime_from', 'booking_reference', 'service__name']
+    ordering = ['datetime_from', 'booking__reference', 'service__name']
     readonly_fields = ['datetime_from', 'datetime_to', 'status']
     details_template = 'booking/bookingpackage_details.html'
     inlines = [BookingServicePaxInline, BookingPackageAllotmentInLine,
                BookingPackageTransferInLine, BookingPackageExtraInLine]
     form = BookingPackageForm
-"""
+    add_form_template = 'booking/bookingpackage_change_form.html'
+    change_form_template = 'booking/bookingpackage_change_form.html'
+
+    def response_post_save_add(self, request, obj):
+        return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
+
+    def response_post_save_change(self, request, obj):
+        return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
+
 
 # Starts Registration Section
 
@@ -808,9 +883,7 @@ bookings_site.register(Booking, BookingSiteModel)
 bookings_site.register(BookingAllotment, BookingAllotmentSiteModel)
 bookings_site.register(BookingTransfer, BookingTransferSiteModel)
 bookings_site.register(BookingExtra, BookingExtraSiteModel)
-"""
 bookings_site.register(BookingPackage, BookingPackageSiteModel)
 bookings_site.register(BookingPackageAllotment, BookingPackageAllotmentSiteModel)
 bookings_site.register(BookingPackageTransfer, BookingPackageTransferSiteModel)
 bookings_site.register(BookingPackageExtra, BookingPackageExtraSiteModel)
-"""

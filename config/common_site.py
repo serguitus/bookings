@@ -155,7 +155,7 @@ class AllotmentSiteModel(SiteModel):
               ('phone', 'address'),
               ('time_from', 'time_to'),
               'enabled',
-              'child_age')
+              ('child_age', 'infant_age'))
     list_display = ('name', 'phone', 'location', 'is_shared_point', 'enabled',)
     top_filters = ('name', ('location', LocationTopFilter), 'is_shared_point', 'enabled')
     ordering = ['enabled', 'name']

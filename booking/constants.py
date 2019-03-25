@@ -71,6 +71,12 @@ BOOKINGSERVICE_TYPES = {
     SERVICE_CATEGORY_PACKAGE: 'bookingpackage',
 }
 
+BOOKINGPACKAGESERVICE_TYPES = {
+    SERVICE_CATEGORY_ALLOTMENT: 'bookingpackageallotment',
+    SERVICE_CATEGORY_TRANSFER: 'bookingpackagetransfer',
+    SERVICE_CATEGORY_EXTRA: 'bookingpackageextra',
+}
+
 ACTIONS = {
     'vouchers': 'BookingSiteModel.config_vouchers',
 }

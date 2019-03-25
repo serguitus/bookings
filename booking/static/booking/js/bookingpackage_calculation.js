@@ -1,13 +1,12 @@
 //Entry Points to get amounts
-var bookingextra_amounts_url = base_url + 'booking/bookingextra-amounts/';
+var bookingpackage_amounts_url = base_url + 'booking/bookingpackage-amounts/';
 
 $(document).ready(function(){
-  $('#bookingextra_form #id_cost_amount').after("<button class='btn btn-success btn-copy btn-copy-cost'><<</button><span class='computed-value'>Calculated: <b data-computed=cost>N/A</b></span>");
-  $('#bookingextra_form #id_price_amount').after("<button class='btn btn-success btn-copy btn-copy-price'><<</button><span class='computed-value'>Calculated: <b data-computed=price>N/A</b></span>");
+  $('#bookingpackage_form #id_cost_amount').after("<button class='btn btn-success btn-copy btn-copy-cost'><<</button><span class='computed-value'>Calculated: <b data-computed=cost>N/A</b></span>");
+  $('#bookingpackage_form #id_price_amount').after("<button class='btn btn-success btn-copy btn-copy-price'><<</button><span class='computed-value'>Calculated: <b data-computed=price>N/A</b></span>");
 
   var computedCost = $('b[data-computed=cost]');
   var computedPrice = $('b[data-computed=price]');
-  var computedTime = $('b[data-computed=time]');
 
   var costInput = $('#id_cost_amount')[0];
   var priceInput = $('#id_price_amount')[0];
@@ -66,12 +65,12 @@ $(document).ready(function(){
     })
   }
 
-  data = $('#bookingextra_form').serialize();
-  get_computed_amounts(bookingextra_amounts_url, data);
+  data = $('#bookingpackage_form').serialize();
+  get_computed_amounts(bookingpackage_amounts_url, data);
 
-  $('#bookingextra_form input, #bookingextra_form select').on('change', function(){
-    data = $('#bookingextra_form').serialize();
-    get_computed_amounts(bookingextra_amounts_url, data);
+  $('#bookingpackage_form input, #bookingpackage_form select').on('change', function(evt){
+    data = $('#bookingpackage_form').serialize();
+    get_computed_amounts(bookingpackage_amounts_url, data);
   });
 
   $('.btn-copy-cost').on('click', function(e){

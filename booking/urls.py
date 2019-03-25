@@ -7,6 +7,7 @@ urlpatterns = [
     url(r'^bookingallotment-amounts/?', views.BookingAllotmentAmountsView.as_view(), name='bookingallotment_amounts'),
     url(r'^bookingtransfer-amounts/?', views.BookingTransferAmountsView.as_view(), name='bookingtransfer_amounts'),
     url(r'^bookingextra-amounts/?', views.BookingExtraAmountsView.as_view(), name='bookingextra_amounts'),
+    url(r'^bookingpackage-amounts/?', views.BookingPackageAmountsView.as_view(), name='bookingpackage_amounts'),
     url(r'^bookingtransfer-time/?', views.BookingTransferTimeView.as_view(), name='bookingtransfer_time'),
     url(r'^invoices/(?P<id>\d+)/print/?', views.get_invoice, name='get_invoice'),
     url(r'^voucher/(?P<id>\d+)/print/?', views.build_voucher, name='build_voucher'),
