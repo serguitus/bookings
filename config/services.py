@@ -27,9 +27,9 @@ from config.models import (
 from finance.models import Agency
 
 
-class ConfigService(object):
+class ConfigServices(object):
     """
-    ConfigService
+    ConfigServices
     """
 
     @classmethod
@@ -439,7 +439,7 @@ class ConfigService(object):
                     quantity, None, detail_list
                 )
 
-        return cls._get_result(cost, cost_message, price, price_message)
+        return cls.build_amounts_result(cost, cost_message, price, price_message)
 
     @classmethod
     def transfer_amounts(
@@ -502,7 +502,7 @@ class ConfigService(object):
                 quantity, None, detail_list
             )
 
-        return cls._get_result(cost, cost_message, price, price_message)
+        return cls.build_amounts_result(cost, cost_message, price, price_message)
 
     @classmethod
     def extra_amounts(
@@ -644,10 +644,10 @@ class ConfigService(object):
                     quantity, parameter, detail_list
                 )
 
-        return cls._get_result(cost, cost_message, price, price_message)
+        return cls.build_amounts_result(cost, cost_message, price, price_message)
 
     @classmethod
-    def _get_result(cls, cost, cost_message, price, price_message):
+    def build_amounts_result(cls, cost, cost_message, price, price_message):
         if not cost is None and cost >= 0:
             if not price is None and price >= 0:
                 code = "0"

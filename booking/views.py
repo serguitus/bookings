@@ -23,7 +23,10 @@ from django.views import View
 
 from booking.common_site import (
     QuoteSiteModel,
-    BookingAllotmentSiteModel, BookingTransferSiteModel, BookingExtraSiteModel
+    BookingAllotmentSiteModel,
+    BookingTransferSiteModel,
+    BookingExtraSiteModel,
+    BookingPackageSiteModel
 )
 from booking.constants import ACTIONS
 from booking.models import (
@@ -31,7 +34,7 @@ from booking.models import (
     Quote,
     Booking, BookingService,
     BookingPax, BookingServicePax,
-    BookingAllotment, BookingTransfer, BookingExtra
+    BookingAllotment, BookingTransfer, BookingExtra, BookingPackage
 )
 from booking.forms import EmailProviderForm
 from booking.services import BookingServices
@@ -43,7 +46,7 @@ from config.constants import (
     SERVICE_CATEGORY_EXTRA
 )
 from config.models import Service, Allotment, Place, Schedule, Transfer
-from config.services import ConfigService
+from config.services import ConfigServices
 
 from finance.models import Provider
 
@@ -183,7 +186,7 @@ class BookingAllotmentAmountsView(ModelChangeFormProcessorView):
                 'price_message': 'Room Missing',
             })
 
-        code, message, cost, cost_msg, price, price_msg = ConfigService.allotment_amounts(
+        code, message, cost, cost_msg, price, price_msg = ConfigServices.allotment_amounts(
             bookingallotment.service_id, date_from, date_to, cost_groups, price_groups,
             bookingallotment.provider, bookingallotment.booking.agency,
             board_type, room_type_id,
@@ -259,7 +262,7 @@ class BookingTransferAmountsView(ModelChangeFormProcessorView):
                 'price_message': 'Location To Missing',
             })
 
-        code, message, cost, cost_msg, price, price_msg = ConfigService.transfer_amounts(
+        code, message, cost, cost_msg, price, price_msg = ConfigServices.transfer_amounts(
             bookingtransfer.service_id, date_from, date_to, cost_groups, price_groups,
             bookingtransfer.provider, bookingtransfer.booking.agency,
             location_from_id, location_to_id,
@@ -320,10 +323,69 @@ class BookingExtraAmountsView(ModelChangeFormProcessorView):
         quantity = int(bookingextra.quantity)
         parameter = int(bookingextra.parameter)
 
-        code, message, cost, cost_msg, price, price_msg = ConfigService.extra_amounts(
+        code, message, cost, cost_msg, price, price_msg = ConfigServices.extra_amounts(
             bookingextra.service_id, date_from, date_to, cost_groups, price_groups,
             bookingextra.provider, bookingextra.booking.agency,
             addon_id, quantity, parameter,
+        )
+
+        return JsonResponse({
+            'code': code,
+            'message': message,
+            'cost': cost,
+            'cost_message': cost_msg,
+            'price': price,
+            'price_message': price_msg,
+        })
+
+
+class BookingPackageAmountsView(ModelChangeFormProcessorView):
+    model = BookingPackage
+    common_sitemodel = BookingPackageSiteModel
+    common_site = bookings_site
+
+    def process_data(self, bookingpackage, inlines):
+        if not bookingpackage.booking:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Booking Id Missing',
+                'cost': None,
+                'cost_message': 'Booking Id Missing',
+                'price': None,
+                'price_message': 'Booking Id Missing',
+            })
+        if not bookingpackage.service:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Service Id Missing',
+                'cost': None,
+                'cost_message': 'Service Id Missing',
+                'price': None,
+                'price_message': 'Service Id Missing',
+            })
+        pax_list = inlines[0]
+        if not pax_list:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Paxes Missing',
+                'cost': None,
+                'cost_message': 'Paxes Missing',
+                'price': None,
+                'price_message': 'Paxes Missing',
+            })
+        allotment_list = inlines[1]
+        transfer_list = inlines[2]
+        extra_list = inlines[3]
+        service = bookingpackage.service
+        cost_groups = BookingServices.find_paxes_groups(pax_list, service, True)
+        price_groups = BookingServices.find_paxes_groups(pax_list, service, False)
+        date_from = bookingpackage.datetime_from
+        date_to = bookingpackage.datetime_to
+
+        code, message, cost, cost_msg, price, price_msg = BookingServices.bookingpackage_amounts(
+            bookingpackage.service_id, date_from, date_to, cost_groups, price_groups,
+            bookingpackage.provider, bookingpackage.booking.agency,
+            allotment_list, transfer_list, extra_list,
         )
 
         return JsonResponse({
@@ -347,7 +409,7 @@ class BookingTransferTimeView(ModelChangeFormProcessorView):
         location_from_id = request.POST.get('location_from')
         location_to_id = request.POST.get('location_to')
 
-        pickup_time, pickup_time_msg = ConfigService.transfer_time(
+        pickup_time, pickup_time_msg = ConfigServices.transfer_time(
                 schedule_from_id, schedule_to_id, location_from_id, location_to_id)
 
         return JsonResponse({

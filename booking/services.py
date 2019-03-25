@@ -15,7 +15,7 @@ from booking.models import (
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
     BookingInvoice, BookingInvoiceLine, BookingInvoicePartial)
 
-from config.services import ConfigService
+from config.services import ConfigServices
 
 from finance.constants import STATUS_CANCELLED, STATUS_READY
 from finance.services import FinanceService
@@ -169,7 +169,7 @@ class BookingServices(object):
                     cls._copy_service_info(
                         dst_service=booking_transfer, src_service=quote_transfer)
                     # time
-                    booking_transfer.quantity = ConfigService.get_service_quantity(
+                    booking_transfer.quantity = ConfigServices.get_service_quantity(
                         booking_transfer.service, len(booking_pax_list))
                     booking_transfer.location_from = quote_transfer.location_from
                     # place_from
@@ -502,7 +502,7 @@ class BookingServices(object):
                     else:
                         c1, c1_msg, p1, p1_msg, \
                         c2, c2_msg, p2, p2_msg, \
-                        c3, c3_msg, p3, p3_msg = cls._find_package_amounts(
+                        c3, c3_msg, p3, p3_msg = cls._find_quotepackage_amounts(
                             pax_variant=pax_variant, package=package, agency=agency)
                         # service amounts
                         variant_dict.update({key: cls._quote_amounts_dict(
@@ -530,6 +530,66 @@ class BookingServices(object):
 
 
     @classmethod
+    def bookingpackage_amounts(
+            cls, service_id, date_from, date_to, cost_groups, price_groups, provider, agency,
+            allotment_list, transfer_list, extra_list):
+        service = Package.objects.get(pk=service_id)
+
+        pck_cost = 0
+        pck_cost_msg = ''
+        pck_price = 0
+        pck_price_msg = ''
+
+        if allotment_list:
+            for allotment in allotment_list:
+                allotment_provider = provider
+                if allotment_provider is None:
+                    allotment_provider = allotment.provider
+                code, message, cost, cost_msg, price, price_msg = ConfigServices.allotment_amounts(
+                    allotment.service_id, allotment.datetime_from, allotment.datetime_to,
+                    cost_groups, price_groups, allotment_provider, agency,
+                    allotment.board_type, allotment.room_type_id)
+
+                pck_cost, pck_cost_msg = cls._merge_amounts(
+                    cost, cost_msg, pck_cost, pck_cost_msg)
+                pck_price, pck_price_msg = cls._merge_amounts(
+                    price, price_msg, pck_price, pck_price_msg)
+
+        if transfer_list:
+            for transfer in transfer_list:
+                transfer_provider = provider
+                if transfer_provider is None:
+                    transfer_provider = transfer.provider
+                code, message, cost, cost_msg, price, price_msg = ConfigServices.transfer_amounts(
+                    transfer.service_id, transfer.datetime_from, transfer.datetime_to,
+                    cost_groups, price_groups, transfer_provider, agency,
+                    transfer.location_from_id, transfer.location_to_id, transfer.quantity)
+
+                pck_cost, pck_cost_msg = cls._merge_amounts(
+                    cost, cost_msg, pck_cost, pck_cost_msg)
+                pck_price, pck_price_msg = cls._merge_amounts(
+                    price, price_msg, pck_price, pck_price_msg)
+
+        if extra_list:
+            for extra in extra_list:
+                extra_provider = provider
+                if extra_provider is None:
+                    extra_provider = extra.provider
+                code, message, cost, cost_msg, price, price_msg = ConfigServices.extra_amounts(
+                    extra.service_id, extra.datetime_from, extra.datetime_to,
+                    cost_groups, price_groups, extra_provider, agency,
+                    extra.addon_id, extra.quantity, extra.parameter)
+
+                pck_cost, pck_cost_msg = cls._merge_amounts(
+                    cost, cost_msg, pck_cost, pck_cost_msg)
+                pck_price, pck_price_msg = cls._merge_amounts(
+                    price, price_msg, pck_price, pck_price_msg)
+
+        return ConfigServices.build_amounts_result(
+            pck_cost, pck_cost_msg, pck_price, pck_price_msg)
+
+
+    @classmethod
     def _find_allotment_amounts(cls, pax_variant, allotment, agency):
         return cls._find_service_allotment_amounts(
             pax_variant=pax_variant,
@@ -547,21 +607,21 @@ class BookingServices(object):
             room_type_id, board_type, provider, agency):
         if service.grouping:
             # grouping means passing 1,2,3 as pax quantity
-            code, msg, c1, c1_msg, p1, p1_msg = ConfigService.allotment_amounts(
+            code, msg, c1, c1_msg, p1, p1_msg = ConfigServices.allotment_amounts(
                 service, date_from, date_to, ({0:1, 1:0},), ({0:1, 1:0},), provider, agency,
                 board_type, room_type_id)
             if c1:
                 c1 = round(float(c1), 2)
             if p1:
                 p1 = round(0.499999 + float(p1))
-            code, msg, c2, c2_msg, p2, p2_msg = ConfigService.allotment_amounts(
+            code, msg, c2, c2_msg, p2, p2_msg = ConfigServices.allotment_amounts(
                 service, date_from, date_to, ({0:2, 1:0},), ({0:2, 1:0},), provider, agency,
                 board_type, room_type_id)
             if c2:
                 c2 = round(float(c2) / 2, 2)
             if p2:
                 p2 = round(0.499999 + float(p2) / 2)
-            code, msg, c3, c3_msg, p3, p3_msg = ConfigService.allotment_amounts(
+            code, msg, c3, c3_msg, p3, p3_msg = ConfigServices.allotment_amounts(
                 service, date_from, date_to, ({0:3, 1:0},), ({0:3, 1:0},), provider, agency,
                 board_type, room_type_id)
             if c3:
@@ -570,7 +630,7 @@ class BookingServices(object):
                 p3 = round(0.499999 + float(p3) / 3)
         else:
             # no grouping means passing total pax quantity
-            code, msg, c1, c1_msg, p1, p1_msg = ConfigService.allotment_amounts(
+            code, msg, c1, c1_msg, p1, p1_msg = ConfigServices.allotment_amounts(
                 service, date_from, date_to,
                 ({0:pax_variant.pax_quantity, 1:0},), ({0:pax_variant.pax_quantity, 1:0},),
                 provider, agency,
@@ -604,21 +664,21 @@ class BookingServices(object):
             location_from_id, location_to_id, quantity, provider, agency):
         if service.grouping:
             # grouping means passing 1,2,3 as pax quantity
-            code, msg, c1, c1_msg, p1, p1_msg = ConfigService.transfer_amounts(
+            code, msg, c1, c1_msg, p1, p1_msg = ConfigServices.transfer_amounts(
                 service, date_from, date_to, ({0:1, 1:0},), ({0:1, 1:0},), provider, agency,
                 location_from_id, location_to_id, quantity)
             if c1:
                 c1 = round(float(c1), 2)
             if p1:
                 p1 = round(0.499999 + float(p1))
-            code, msg, c2, c2_msg, p2, p2_msg = ConfigService.transfer_amounts(
+            code, msg, c2, c2_msg, p2, p2_msg = ConfigServices.transfer_amounts(
                 service, date_from, date_to, ({0:2, 1:0},), ({0:2, 1:0},), provider, agency,
                 location_from_id, location_to_id, quantity)
             if c2:
                 c2 = round(float(c2) / 2, 2)
             if p2:
                 p2 = round(0.499999 + float(p2) / 2)
-            code, msg, c3, c3_msg, p3, p3_msg = ConfigService.transfer_amounts(
+            code, msg, c3, c3_msg, p3, p3_msg = ConfigServices.transfer_amounts(
                 service, date_from, date_to, ({0:3, 1:0},), ({0:3, 1:0},), provider, agency,
                 location_from_id, location_to_id, quantity)
             if c3:
@@ -627,7 +687,7 @@ class BookingServices(object):
                 p3 = round(0.499999 + float(p3) / 3)
         else:
             # no grouping means passing total pax quantity
-            code, msg, c1, c1_msg, p1, p1_msg = ConfigService.transfer_amounts(
+            code, msg, c1, c1_msg, p1, p1_msg = ConfigServices.transfer_amounts(
                 service, date_from, date_to,
                 ({0:pax_variant.pax_quantity, 1:0},), ({0:pax_variant.pax_quantity, 1:0},),
                 provider, agency,
@@ -661,21 +721,21 @@ class BookingServices(object):
             addon_id, quantity, parameter, provider, agency):
         if service.grouping:
             # grouping means passing 1,2,3 as pax quantity
-            code, msg, c1, c1_msg, p1, p1_msg = ConfigService.extra_amounts(
+            code, msg, c1, c1_msg, p1, p1_msg = ConfigServices.extra_amounts(
                 service, date_from, date_to, ({0:1, 1:0},), ({0:1, 1:0},), provider, agency,
                 addon_id, quantity, parameter)
             if c1:
                 c1 = round(float(c1), 2)
             if p1:
                 p1 = round(0.499999 + float(p1))
-            code, msg, c2, c2_msg, p2, p2_msg = ConfigService.extra_amounts(
+            code, msg, c2, c2_msg, p2, p2_msg = ConfigServices.extra_amounts(
                 service, date_from, date_to, ({0:2, 1:0},), ({0:2, 1:0},), provider, agency,
                 addon_id, quantity, parameter)
             if c2:
                 c2 = round(float(c2) / 2, 2)
             if p2:
                 p2 = round(0.499999 + float(p2))
-            code, msg, c3, c3_msg, p3, p3_msg = ConfigService.extra_amounts(
+            code, msg, c3, c3_msg, p3, p3_msg = ConfigServices.extra_amounts(
                 service, date_from, date_to, ({0:3, 1:0},), ({0:3, 1:0},), provider, agency,
                 addon_id, quantity, parameter)
             if c3:
@@ -684,7 +744,7 @@ class BookingServices(object):
                 p3 = round(0.499999 + float(p3))
         else:
             # no grouping means passing total pax quantity
-            code, msg, c1, c1_msg, p1, p1_msg = ConfigService.extra_amounts(
+            code, msg, c1, c1_msg, p1, p1_msg = ConfigServices.extra_amounts(
                 service, date_from, date_to,
                 ({0:pax_variant.pax_quantity, 1:0},), ({0:pax_variant.pax_quantity, 1:0},),
                 provider, agency,
@@ -699,7 +759,7 @@ class BookingServices(object):
 
 
     @classmethod
-    def _find_package_amounts(cls, pax_variant, package, agency):
+    def _find_quotepackage_amounts(cls, pax_variant, package, agency):
         cost_1 = 0
         cost_2 = 0
         cost_3 = 0
@@ -1090,18 +1150,18 @@ class BookingServices(object):
             if price is None:
                 return None, cost_msg, None, price_msg
             else:
-                code, msg, c, c_msg, p, p_msg = ConfigService.allotment_amounts(
+                code, msg, c, c_msg, p, p_msg = ConfigServices.allotment_amounts(
                     service, date_from, date_to, groups, groups,
                     None, agency,
                     board_type, room_type_id, quantity)
         else:
             if price is None:
-                code, msg, c, c_msg, p, p_msg = ConfigService.allotment_amounts(
+                code, msg, c, c_msg, p, p_msg = ConfigServices.allotment_amounts(
                     service, date_from, date_to, groups, groups,
                     provider, None,
                     board_type, room_type_id, quantity)
             else:
-                code, msg, c, c_msg, p, p_msg = ConfigService.allotment_amounts(
+                code, msg, c, c_msg, p, p_msg = ConfigServices.allotment_amounts(
                     service, date_from, date_to, groups, groups,
                     provider, agency,
                     board_type, room_type_id, quantity)
@@ -1118,18 +1178,18 @@ class BookingServices(object):
             if price is None:
                 return None, cost_msg, None, price_msg
             else:
-                code, msg, c, c_msg, p, p_msg = ConfigService.transfer_amounts(
+                code, msg, c, c_msg, p, p_msg = ConfigServices.transfer_amounts(
                     service, date_from, date_to, groups, groups,
                     None, agency,
                     location_from_id, location_to_id, quantity)
         else:
             if price is None:
-                code, msg, c, c_msg, p, p_msg = ConfigService.transfer_amounts(
+                code, msg, c, c_msg, p, p_msg = ConfigServices.transfer_amounts(
                     service, date_from, date_to, groups, groups,
                     provider, None,
                     location_from_id, location_to_id, quantity)
             else:
-                code, msg, c, c_msg, p, p_msg = ConfigService.transfer_amounts(
+                code, msg, c, c_msg, p, p_msg = ConfigServices.transfer_amounts(
                     service, date_from, date_to, groups, groups,
                     provider, agency,
                     location_from_id, location_to_id, quantity)
@@ -1146,18 +1206,18 @@ class BookingServices(object):
             if price is None:
                 return None, cost_msg, None, price_msg
             else:
-                code, msg, c, c_msg, p, p_msg = ConfigService.extra_amounts(
+                code, msg, c, c_msg, p, p_msg = ConfigServices.extra_amounts(
                     service, date_from, date_to, groups, groups,
                     None, agency,
                     addon_id, quantity, parameter)
         else:
             if price is None:
-                code, msg, c, c_msg, p, p_msg = ConfigService.extra_amounts(
+                code, msg, c, c_msg, p, p_msg = ConfigServices.extra_amounts(
                     service, date_from, date_to, groups, groups,
                     provider, None,
                     addon_id, quantity, parameter)
             else:
-                code, msg, c, c_msg, p, p_msg = ConfigService.extra_amounts(
+                code, msg, c, c_msg, p, p_msg = ConfigServices.extra_amounts(
                     service, date_from, date_to, groups, groups,
                     provider, agency,
                     addon_id, quantity, parameter)

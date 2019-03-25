@@ -13,7 +13,6 @@ $(document).ready(function(){
 
   var calcCost = $('div.field-box.field-calculated_cost').children()[1];
   var calcPrice = $('div.field-box.field-calculated_price').children()[1];
-  var calcTime = $('div.field-box.field-calculated_time').children()[1];
 
   function compare_numbers() {
     // a function to check if computed prices differ from set prices
@@ -63,27 +62,6 @@ $(document).ready(function(){
       computedCost.html('N/A');
       computedPrice.html('N/A');
       compare_numbers();
-    })
-  }
-  function get_computed_time(url, form_dict, evt){
-    computedTime.html('Loading...');
-    // sending a request to get computed value
-    $.ajax({
-      'url': url,
-      'async': true,
-      'datatype': 'json',
-      'type': 'POST',
-      'data': form_dict,
-    }).done(function(data){
-      if(data['time']){
-        computedTime.html(data['time']);
-      } else {
-        computedTime.html(data['time_message']);
-      }
-      compare_time(evt);
-    }).fail(function(){
-      computedTime.html('N/A');
-      compare_time(evt);
     })
   }
 

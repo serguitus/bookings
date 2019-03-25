@@ -595,6 +595,26 @@ class BookingPackageAllotmentInlineForm(forms.ModelForm):
         }
 
 
+class BookingPackageAllotmentForm(forms.ModelForm):
+    class Meta:
+        fields = '__all__'
+        widgets = {
+            'service': autocomplete.ModelSelect2(url='allotment-autocomplete'),
+            'room_type': autocomplete.ModelSelect2(
+                url='roomtype-autocomplete',
+                forward=['service'],
+                ),
+            'board_type': autocomplete.ListSelect2(
+                url='boardtype-autocomplete',
+                forward=['service']),
+            'provider': autocomplete.ModelSelect2(
+                url='providerallotment-autocomplete',
+                forward=['service', 'room_type', 'board_type'],
+                ),
+        }
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
+
+
 class BookingPackageTransferInlineForm(forms.ModelForm):
     class Meta:
         fields = ('__all__')
@@ -633,6 +653,45 @@ class BookingPackageTransferInlineForm(forms.ModelForm):
         }
 
 
+class BookingPackageTransferForm(forms.ModelForm):
+    class Meta:
+        fields = ('__all__')
+        widgets = {
+            'service': autocomplete.ModelSelect2(url='transfer-autocomplete'),
+            'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'place_from': autocomplete.ModelSelect2(
+                url='place-autocomplete',
+                forward=['location_from'],
+                ),
+            'pickup': autocomplete.ModelSelect2(
+                url='pickup-autocomplete',
+                forward=['location_from', 'service'],
+                ),
+            'schedule_from': autocomplete.ModelSelect2(
+                url='arrival-autocomplete',
+                forward=['location_from'],
+                ),
+            'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'place_to': autocomplete.ModelSelect2(
+                url='place-autocomplete',
+                forward=['location_to'],
+                ),
+            'dropoff': autocomplete.ModelSelect2(
+                url='dropoff-autocomplete',
+                forward=['location_to', 'service'],
+                ),
+            'schedule_to': autocomplete.ModelSelect2(
+                url='departure-autocomplete',
+                forward=['location_to'],
+                ),
+            'provider': autocomplete.ModelSelect2(
+                url='providertransfer-autocomplete',
+                forward=['service', 'location_from', 'location_to'],
+                ),
+        }
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
+
+
 class BookingPackageExtraInlineForm(forms.ModelForm):
     class Meta:
         fields = ('__all__')
@@ -647,6 +706,24 @@ class BookingPackageExtraInlineForm(forms.ModelForm):
                 forward=['service', 'addon'],
                 ),
         }
+
+
+class BookingPackageExtraForm(forms.ModelForm):
+    class Meta:
+        model = QuotePackageExtra
+        fields = ('__all__')
+        widgets = {
+            'service': autocomplete.ModelSelect2(url='extra-autocomplete'),
+            'addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['service'],
+                ),
+            'provider': autocomplete.ModelSelect2(
+                url='providerextra-autocomplete',
+                forward=['service', 'addon'],
+                ),
+        }
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
 class EmailProviderForm(forms.Form):

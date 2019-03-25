@@ -789,8 +789,8 @@ class BookingPackageExtra(BookingPackageService, BaseExtra):
     Booking Service Extra
     """
     class Meta:
-        verbose_name = 'Booking Extra'
-        verbose_name_plural = 'Bookings Extras'
+        verbose_name = 'Booking Package Extra'
+        verbose_name_plural = 'Bookings Packages Extras'
 
     def fill_data(self):
         # setting name for this quote_service

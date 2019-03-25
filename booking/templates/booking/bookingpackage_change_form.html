@@ -1,0 +1,8 @@
+{% extends "common/change_form.html" %}
+
+{% load static %}
+
+{% block head_extra %}
+  {{ block.super }}
+  <script type="text/javascript" src="{% static 'booking/js/bookingpackage_calculation.js' %}"></script>
+{% endblock head_extra %}

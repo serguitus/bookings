@@ -37,9 +37,9 @@ from booking.forms import (
     BookingTransferInlineForm, BookingTransferForm,
     BookingExtraInlineForm, BookingExtraForm,
     BookingPackageInlineForm, BookingPackageForm,
-    BookingPackageAllotmentInlineForm,
-    BookingPackageTransferInlineForm,
-    BookingPackageExtraInlineForm,
+    BookingPackageAllotmentInlineForm, BookingPackageAllotmentForm,
+    BookingPackageTransferInlineForm, BookingPackageTransferForm,
+    BookingPackageExtraInlineForm, BookingPackageExtraForm,
     VouchersConfigForm,
 )
 from booking.models import (
@@ -721,6 +721,33 @@ class BookingPackageAllotmentInLine(CommonStackedInline):
     classes = ['collapse']
 
 
+class BookingPackageAllotmentSiteModel(SiteModel):
+    model_order = 1310
+    menu_label = MENU_LABEL_BOOKING
+    menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
+
+    fields = ['booking_package', ('service', 'status', 'conf_number'),
+                ('datetime_from', 'datetime_to'),
+                ('room_type', 'board_type'),
+                'provider', 'id']
+    list_display = ('booking_package', 'name', 'datetime_from',
+                    'datetime_to', 'status',)
+    top_filters = (('booking_package__booking__name', 'booking_package__Booking'),
+                   ('name', 'Service'),
+                   'booking_package__booking__reference', 'conf_number',
+                   ('datetime_from', DateTopFilter), 'status')
+    ordering = ('datetime_from', 'booking_package', 'service__name',)
+    form = BookingPackageAllotmentForm
+
+    def response_post_save_add(self, request, obj):
+        return redirect(
+            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
+
+    def response_post_save_change(self, request, obj):
+        return redirect(
+            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
+
+
 class BookingPackageTransferInLine(CommonStackedInline):
     model = BookingPackageTransfer
     extra = 0
@@ -736,6 +763,37 @@ class BookingPackageTransferInLine(CommonStackedInline):
     classes = ['collapse']
 
 
+class BookingPackageTransferSiteModel(SiteModel):
+    model_order = 1320
+    menu_label = MENU_LABEL_BOOKING
+    menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
+
+    fields = [
+        'booking_package', ('service', 'status', 'conf_number'),
+        ('datetime_from', 'datetime_to', 'time'),
+        ('location_from', 'pickup', 'schedule_from'),
+        ('place_from'),
+        ('location_to', 'dropoff', 'schedule_to'),
+        ('place_to'),
+        'provider', 'id']
+    list_display = ('booking_package', 'name', 'datetime_from', 'time', 'status')
+    top_filters = (
+        ('booking_package__booking__name', 'Booking_package'),
+        ('name', 'Service'),
+        'booking_package__booking__reference', 'conf_number',
+        ('datetime_from', DateTopFilter), 'status',)
+    ordering = ('datetime_from', 'booking_package', 'service__name',)
+    form = BookingPackageTransferForm
+
+    def response_post_save_add(self, request, obj):
+        return redirect(
+            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
+
+    def response_post_save_change(self, request, obj):
+        return redirect(
+            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
+
+
 class BookingPackageExtraInLine(CommonStackedInline):
     model = BookingPackageExtra
     extra = 0
@@ -746,32 +804,30 @@ class BookingPackageExtraInLine(CommonStackedInline):
     classes = ('collapse',)
 
 
-"""
 class BookingPackageExtraSiteModel(SiteModel):
-    model_order = 1230
+    model_order = 1330
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
 
-    fields = ['booking', ('service', 'status', 'conf_number'),
+    fields = ['booking_package', ('service', 'status', 'conf_number'),
               ('datetime_from', 'datetime_to', 'time'),
               ('addon', 'quantity', 'parameter'),
-              'cost_amount', 'price_amount', 'provider', 'id']
-    list_display = ('booking', 'name', 'addon', 'quantity', 'parameter',
+              'provider', 'id']
+    list_display = ('booking_package', 'name', 'addon', 'quantity', 'parameter',
                     'datetime_from', 'datetime_to', 'time', 'status',)
-    top_filters = ('booking__name', 'service', 'booking__reference',
-                   ('datetime_from', DateTopFilter), 'status',)
-    ordering = ('datetime_from', 'booking__reference', 'service__name',)
-    form = BookingExtraForm
-    add_form_template = 'booking/bookingextra_change_form.html'
-    change_form_template = 'booking/bookingextra_change_form.html'
-    inlines = [BookingServicePaxInline]
+    top_filters = (
+        'booking_package__booking__name', 'service', 'booking_package__booking__reference',
+        ('datetime_from', DateTopFilter), 'status',)
+    ordering = ('datetime_from', 'booking_package', 'service__name',)
+    form = BookingPackageExtraForm
 
     def response_post_save_add(self, request, obj):
-        return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
+        return redirect(
+            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
 
     def response_post_save_change(self, request, obj):
-        return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
-"""
+        return redirect(
+            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
 
 
 class BookingPackageSiteModel(SiteModel):
@@ -792,6 +848,8 @@ class BookingPackageSiteModel(SiteModel):
     inlines = [BookingServicePaxInline, BookingPackageAllotmentInLine,
                BookingPackageTransferInLine, BookingPackageExtraInLine]
     form = BookingPackageForm
+    add_form_template = 'booking/bookingpackage_change_form.html'
+    change_form_template = 'booking/bookingpackage_change_form.html'
 
     def response_post_save_add(self, request, obj):
         return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
@@ -826,8 +884,6 @@ bookings_site.register(BookingAllotment, BookingAllotmentSiteModel)
 bookings_site.register(BookingTransfer, BookingTransferSiteModel)
 bookings_site.register(BookingExtra, BookingExtraSiteModel)
 bookings_site.register(BookingPackage, BookingPackageSiteModel)
-"""
 bookings_site.register(BookingPackageAllotment, BookingPackageAllotmentSiteModel)
 bookings_site.register(BookingPackageTransfer, BookingPackageTransferSiteModel)
 bookings_site.register(BookingPackageExtra, BookingPackageExtraSiteModel)
-"""
