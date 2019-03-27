@@ -41,6 +41,8 @@ from functools import update_wrapper, partial
 from reservas.admin import reservas_admin, ExtendedModelAdmin
 from reservas.admin import bookings_site
 
+from accounting.common_site import MENU_LABEL_ACCOUNTING
+
 
 MENU_LABEL_FINANCE_BASIC = 'Finance Basic'
 MENU_LABEL_FINANCE_LOAN = 'Finance Loan'
@@ -365,7 +367,7 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
 
 class DepositSiteModel(BaseFinantialDocumentSiteModel):
     model_order = 2010
-    menu_label = MENU_LABEL_FINANCE_BASIC
+    menu_label = MENU_LABEL_ACCOUNTING
     fields = ('name', 'account', 'amount', 'date', 'status', 'details')
     list_display = ('details', 'account', 'amount', 'date', 'status')
     top_filters = ('details', 'account', 'status', 'date')
@@ -387,7 +389,7 @@ class WithdrawSiteModel(DepositSiteModel):
 
 class CurrencyExchangeSiteModel(BaseFinantialDocumentSiteModel):
     model_order = 2030
-    menu_label = MENU_LABEL_FINANCE_BASIC
+    menu_label = MENU_LABEL_ACCOUNTING
     fields = ('name', 'account', 'amount', 'date', 'status', 'exchange_account', 'exchange_amount')
     list_display = (
         'name', 'account', 'amount', 'date', 'status', 'exchange_account', 'exchange_amount')
@@ -401,7 +403,7 @@ class CurrencyExchangeSiteModel(BaseFinantialDocumentSiteModel):
 
 class TransferSiteModel(BaseFinantialDocumentSiteModel):
     model_order = 2040
-    menu_label = MENU_LABEL_FINANCE_BASIC
+    menu_label = MENU_LABEL_ACCOUNTING
     fields = ('name', 'account', 'transfer_account', 'amount', 'operation_cost', 'date', 'status')
     list_display = (
         'name', 'account', 'transfer_account', 'amount', 'operation_cost', 'date', 'status')

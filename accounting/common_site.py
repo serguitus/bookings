@@ -10,11 +10,13 @@ from reservas.admin import bookings_site
 
 
 MENU_LABEL_ACCOUNTING = 'Accounting'
+MENU_GROUP_LABEL_ACCOUNTING = 'Accounts'
 
 
 class AccountSiteModel(SiteModel):
     model_order = 5010
     menu_label = MENU_LABEL_ACCOUNTING
+    menu_group = MENU_GROUP_LABEL_ACCOUNTING
     actions_on_top = True
     list_editable = ('enabled',)
     list_display = ('name', 'currency', 'enabled', 'balance')
@@ -29,6 +31,7 @@ class AccountSiteModel(SiteModel):
 class OperationSiteModel(SiteModel):
     model_order = 5020
     menu_label = MENU_LABEL_ACCOUNTING
+    menu_group = MENU_GROUP_LABEL_ACCOUNTING
     readonly_model = True
     actions_on_top = False
     list_display = ('datetime', 'concept', 'detail',)
@@ -39,6 +42,7 @@ class OperationSiteModel(SiteModel):
 class OperationMovementSiteModel(SiteModel):
     model_order = 5030
     menu_label = MENU_LABEL_ACCOUNTING
+    menu_group = MENU_GROUP_LABEL_ACCOUNTING
     readonly_model = True
     actions_on_top = False
     list_display = ('operation', 'account', 'movement_type', 'amount',)

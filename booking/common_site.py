@@ -1,3 +1,9 @@
+try:
+    import cStringIO as StringIO
+except ImportError:
+    from io import StringIO
+from xhtml2pdf import pisa
+
 from common.sites import SiteModel
 
 from django.conf.urls import url
@@ -18,6 +24,7 @@ from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect, reverse
 from django.template.response import SimpleTemplateResponse, TemplateResponse
+from django.template.loader import get_template
 from django.utils.encoding import force_text
 # from django.utils.translation import ugettext as _, ungettext
 from django.utils.functional import curry
@@ -51,6 +58,7 @@ from booking.models import (
     Booking,
     BookingPax,
     BookingServicePax,
+    BookingService,
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
     BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
 )
@@ -71,6 +79,7 @@ MENU_GROUP_LABEL_SERVICES = 'Services By Type'
 MENU_GROUP_LABEL_PACKAGE_SERVICES = 'Package Services By Type'
 
 # Starts Package Section
+
 
 class PackageAllotmentInLine(CommonStackedInline):
     model = PackageAllotment
@@ -111,7 +120,7 @@ class PackageExtraInLine(CommonStackedInline):
 
 
 class PackageSiteModel(SiteModel):
-    model_order = 1210
+    model_order = 1010
     menu_label = MENU_LABEL_PACKAGE
     fields = (
         ('name', 'enabled'),
@@ -126,7 +135,7 @@ class PackageSiteModel(SiteModel):
 
 
 class PackageAllotmentSiteModel(SiteModel):
-    model_order = 1220
+    model_order = 1020
     menu_label = MENU_LABEL_PACKAGE
     menu_group = MENU_GROUP_LABEL_SERVICES
 
@@ -147,7 +156,7 @@ class PackageAllotmentSiteModel(SiteModel):
 
 
 class PackageTransferSiteModel(SiteModel):
-    model_order = 1230
+    model_order = 1030
     menu_label = MENU_LABEL_PACKAGE
     menu_group = MENU_GROUP_LABEL_SERVICES
 
@@ -172,7 +181,7 @@ class PackageTransferSiteModel(SiteModel):
 
 
 class PackageExtraSiteModel(SiteModel):
-    model_order = 1240
+    model_order = 1040
     menu_label = MENU_LABEL_PACKAGE
     menu_group = MENU_GROUP_LABEL_SERVICES
 
@@ -597,10 +606,26 @@ class BookingSiteModel(SiteModel):
             # This is a POST. render vouchers
             ids = request.POST.getlist('pk', [])
             office = request.POST.get('office', None)
+            pdf = self.build_vouchers(id, ids, office)
             # use this two parameters to call methods to build pdf
             # it should return the pisa object to add it to the response object
             return redirect(reverse('common:booking_booking_change',
                                     args=[id]))
+
+    def build_vouchers(self, bk, service_ids, office):
+        # This helper builds the PDF object with all vouchers
+        template = get_template("booking/pdf/voucher.html")
+        booking = Booking.objects.get(id=bk)
+        services = BookingService.objects.filter(pk__in=service_ids)
+        context = {'pagesize': 'Letter',
+                   'booking': booking,
+                   'services': services}
+        html = template.render(context)
+        result = StringIO.StringIO()
+        pdf = pisa.pisaDocument(StringIO.StringIO(html), dest=result)
+        if pdf.err:
+            return False
+        return pdf
 
 
 class BookingAllotmentSiteModel(SiteModel):
