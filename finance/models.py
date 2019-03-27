@@ -746,8 +746,8 @@ class LoanAccountMatch(models.Model):
 
 class Agency(models.Model):
     class Meta:
-        verbose_name = 'Agency'
-        verbose_name_plural = 'Agencies'
+        verbose_name = 'TTOO'
+        verbose_name_plural = 'TTOOs'
         unique_together = (('name',),)
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=500, blank=True, null=True)
@@ -758,6 +758,7 @@ class Agency(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class AgencyCurrency(SummaryModel):
     class Meta:
@@ -872,8 +873,8 @@ class AgencyCreditDocument(AgencyDocument):
 
 class AgencyInvoice(AgencyDebitDocument):
     class Meta:
-        verbose_name = 'Agency Invoice'
-        verbose_name_plural = 'Agencies Invoices'
+        verbose_name = 'TTOO Invoice'
+        verbose_name_plural = 'TTOO Invoices'
 
     def fill_data(self):
         self.document_type = DOC_TYPE_AGENCY_INVOICE
@@ -884,8 +885,8 @@ class AgencyInvoice(AgencyDebitDocument):
 
 class AgencyPayment(AgencyCreditDocument, AccountingDocument):
     class Meta:
-        verbose_name = 'Agency Payment'
-        verbose_name_plural = 'Agencies Payments'
+        verbose_name = 'TTOO Payment'
+        verbose_name_plural = 'TTOO Payments'
 
     def fill_data(self):
         self.document_type = DOC_TYPE_AGENCY_PAYMENT

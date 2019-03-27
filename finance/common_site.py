@@ -46,7 +46,9 @@ from accounting.common_site import MENU_LABEL_ACCOUNTING
 
 MENU_LABEL_FINANCE_BASIC = 'Finance Basic'
 MENU_LABEL_FINANCE_LOAN = 'Finance Loan'
-MENU_LABEL_FINANCE_ADVANCED = 'Finance Advanced'
+MENU_LABEL_FINANCE_ADVANCED = 'Dossier'
+MENU_GROUP_LABEL_FINANCE_BASIC = 'Basic'
+MENU_GROUP_LABEL_FINANCE_ADVANCED = 'Advanced'
 
 
 class IncorrectLookupParameters(Exception):
@@ -90,7 +92,7 @@ class MatchableChangeListForm(forms.ModelForm):
 
 
 class MatchableSiteModel(BaseFinantialDocumentSiteModel):
-    
+
     change_actions = [dict(name='match', label='Match')]
 
     match_model = None
@@ -211,7 +213,7 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
             match_parent_sitemodel = self
         else:
             match_parent_sitemodel = self.admin_site._registry[self.match_parent_model]
- 
+
         match_child_sitemodel = self.admin_site._registry[self.match_child_model]
 
         opts = match_child_sitemodel.model._meta
@@ -368,6 +370,7 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
 class DepositSiteModel(BaseFinantialDocumentSiteModel):
     model_order = 2010
     menu_label = MENU_LABEL_ACCOUNTING
+    menu_group = MENU_GROUP_LABEL_FINANCE_BASIC
     fields = ('name', 'account', 'amount', 'date', 'status', 'details')
     list_display = ('details', 'account', 'amount', 'date', 'status')
     top_filters = ('details', 'account', 'status', 'date')
@@ -390,6 +393,7 @@ class WithdrawSiteModel(DepositSiteModel):
 class CurrencyExchangeSiteModel(BaseFinantialDocumentSiteModel):
     model_order = 2030
     menu_label = MENU_LABEL_ACCOUNTING
+    menu_group = MENU_GROUP_LABEL_FINANCE_BASIC
     fields = ('name', 'account', 'amount', 'date', 'status', 'exchange_account', 'exchange_amount')
     list_display = (
         'name', 'account', 'amount', 'date', 'status', 'exchange_account', 'exchange_amount')
@@ -404,6 +408,7 @@ class CurrencyExchangeSiteModel(BaseFinantialDocumentSiteModel):
 class TransferSiteModel(BaseFinantialDocumentSiteModel):
     model_order = 2040
     menu_label = MENU_LABEL_ACCOUNTING
+    menu_group = MENU_GROUP_LABEL_FINANCE_BASIC
     fields = ('name', 'account', 'transfer_account', 'amount', 'operation_cost', 'date', 'status')
     list_display = (
         'name', 'account', 'transfer_account', 'amount', 'operation_cost', 'date', 'status')
@@ -572,7 +577,7 @@ class OfficeSiteModel(SiteModel):
 class ProviderSiteModel(SiteModel):
     model_order = 4110
     menu_label = MENU_LABEL_FINANCE_ADVANCED
-    menu_group = 'Finace Provider'
+    menu_group = 'Providers'
     list_display = ('name', 'email', 'phone',
                     'currency', 'enabled')
     top_filters = ['name', 'email', 'currency', 'enabled']
@@ -656,7 +661,7 @@ class ProviderPaymentSiteModel(ProviderCreditDocumentSiteModel):
 class AgencySiteModel(SiteModel):
     model_order = 4210
     menu_label = MENU_LABEL_FINANCE_ADVANCED
-    menu_group = 'Finace Agency'
+    menu_group = 'Tour Operators'
     list_display = ('name', 'currency', 'gain_percent', 'enabled')
     list_editable = ('gain_percent', 'enabled',)
     top_filters = ('name', 'currency', 'enabled')
@@ -675,7 +680,7 @@ class AgencySiteModel(SiteModel):
     rewrite_agency_amounts.short_description = "Copy All Agency Prices"
 
     def update_agency_amounts(self, request, queryset):
-    
+
         agencies = list(queryset.all())
 
         from config.services import ConfigServices
