@@ -32,3 +32,25 @@
 a.build-booking {
     color: white;
 }
+
+/*********** VOUCHERS' STYLES **************/
+
+div.voucher-main{
+}
+
+div.voucher-header{
+    width: 900px;
+}
+
+div.voucher-header-logo, div.voucher-header-center{
+    width: 33%;
+    float: left;
+}
+
+div.voucher-header-center{
+    margin-top: 50px;
+
+div.voucher-header-address{
+    width: 33%;
+    float: left;
+}

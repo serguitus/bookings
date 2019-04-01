@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 try:
     import cStringIO as StringIO
 except ImportError:
@@ -21,7 +23,7 @@ from django.core.exceptions import (FieldDoesNotExist,
 from django.db import router, transaction
 from django import forms
 from django.forms.models import modelformset_factory
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, reverse
 from django.template.response import SimpleTemplateResponse, TemplateResponse
 from django.template.loader import get_template
@@ -606,9 +608,13 @@ class BookingSiteModel(SiteModel):
             # This is a POST. render vouchers
             ids = request.POST.getlist('pk', [])
             office = request.POST.get('office', None)
-            pdf = self.build_vouchers(id, ids, office)
             # use this two parameters to call methods to build pdf
             # it should return the pisa object to add it to the response object
+            pdf = self.build_vouchers(id, ids, office)
+            if pdf:
+                return HttpResponse(pdf.getvalue(),
+                                    content_type='application/pdf')
+            # there was an error. show an error message
             return redirect(reverse('common:booking_booking_change',
                                     args=[id]))
 
@@ -625,7 +631,7 @@ class BookingSiteModel(SiteModel):
         pdf = pisa.pisaDocument(StringIO.StringIO(html), dest=result)
         if pdf.err:
             return False
-        return pdf
+        return result
 
 
 class BookingAllotmentSiteModel(SiteModel):

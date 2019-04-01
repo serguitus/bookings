@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from dal import autocomplete
 from django.forms import widgets
 

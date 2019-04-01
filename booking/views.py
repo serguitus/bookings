@@ -48,7 +48,7 @@ from config.constants import (
 from config.models import Service, Allotment, Place, Schedule, Transfer
 from config.services import ConfigServices
 
-from finance.models import Provider
+from finance.models import Provider, Office
 
 from reservas.admin import bookings_site
 
@@ -443,14 +443,17 @@ def build_voucher(request, id):
     template = get_template("booking/pdf/voucher.html")
     booking = Booking.objects.get(id=id)
     context = {'pagesize': 'Letter',
-               'booking': booking,}
-    html = template.render(context)
-    result = StringIO.StringIO()
-    pdf = pisa.pisaDocument(StringIO.StringIO(html), dest=result)
-    if not pdf.err:
-        return HttpResponse(result.getvalue(), content_type='application/pdf')
-    else:
-        return HttpResponse('Errors')
+               'booking': booking,
+               'office': Office.objects.get(id=1),
+               'services': [2, 1],}
+    # html = template.render(context)
+    # result = StringIO.StringIO()
+    # pdf = pisa.pisaDocument(StringIO.StringIO(html), dest=result)
+    # if not pdf.err:
+    #     return HttpResponse(result.getvalue(), content_type='application/pdf')
+    # else:
+    #     return HttpResponse('Errors')
+    return render(request, 'booking/pdf/voucher.html', context)
 
 
 class EmailProviderView(View):
