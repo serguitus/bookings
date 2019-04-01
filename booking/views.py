@@ -513,7 +513,8 @@ class EmailProviderView(View):
 
 
 def _send_service_request(
-        subject, body, from_address, to_address, cc_address, bcc_address, reply_address):
+        subject, body, from_address, to_address,
+        cc_address, bcc_address, reply_address):
     """
     This helper sends emails
     """
@@ -526,6 +527,7 @@ def _send_service_request(
         bcc=_find_address_list(bcc_address),
         reply_to=_find_address_list(reply_address))
     email.send()
+
 
 def _find_address_list(str_address=''):
     address_list = list()
