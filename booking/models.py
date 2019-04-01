@@ -441,7 +441,7 @@ class Booking(models.Model):
         default_permissions = ('add', 'change',)
     name = models.CharField(max_length=100)
     agency = models.ForeignKey(Agency)
-    reference = models.CharField(max_length=25, blank=True, null=True)
+    reference = models.CharField(max_length=25, blank=True, null=True, verbose_name='TTOO Ref')
     date_from = models.DateField(blank=True, null=True)
     date_to = models.DateField(blank=True, null=True)
     status = models.CharField(
@@ -466,8 +466,11 @@ class Booking(models.Model):
         max_length=1000, blank=True, null=True, verbose_name='Private Notes')
 
     def internal_reference(self):
-        code = self.id
-        return 'I-%s' % code
+        if self.id:
+            code = self.id
+            return '%s' % (20000 + int(code))
+        return ''
+    internal_reference.short_description = 'TNX'
 
     def fill_data(self):
         pass

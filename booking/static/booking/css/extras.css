@@ -54,6 +54,7 @@ div.voucher-header-logo, div.voucher-header-center{
 
 div.voucher-header-center{
     margin-top: 50px;
+    text-align: center;
 }
 
 div.voucher-header-address{
@@ -75,6 +76,10 @@ div.voucher-title-label{
 div.voucher-title-date-in{
     float: left;
     width: 300px;
+}
+
+div.voucher-content{
+    padding: 10px 10px 0 10px;
 }
 
 div.voucher-content-client{

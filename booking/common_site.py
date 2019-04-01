@@ -554,21 +554,26 @@ class BookingSiteModel(SiteModel):
     fieldsets = (
         (None, {
             'fields': (
-        ('name', 'reference', 'status'),
-        ('agency', 'date_from', 'date_to'),
-        ('is_package_price', 'price_amount', 'cost_amount'),
-        ('package_sgl_price_amount', 'package_dbl_price_amount',
-         'package_tpl_price_amount'),)
+                'internal_reference',
+                ('name', 'reference', 'status'),
+                ('agency', 'date_from', 'date_to'),
+                ('is_package_price', 'price_amount', 'cost_amount'),
+                ('package_sgl_price_amount', 'package_dbl_price_amount',
+                 'package_tpl_price_amount'),)
         }),
         ('General Notes', {'fields': ('p_notes',),
-                   'classes': ('collapse', 'wide')})
+                           'classes': ('collapse', 'wide')})
     )
-    list_display = ('name', 'reference', 'agency', 'date_from',
-                    'date_to', 'status', 'currency', 'cost_amount',
+    list_display = ('name', 'internal_reference', 'agency',
+                    'reference', 'date_from',
+                    'date_to', 'status', 'cost_amount',
                     'price_amount',)
-    top_filters = (('name', 'Booking Name'), 'reference', ('date_from', DateTopFilter), 'rooming_list__pax_name')
+    top_filters = (('name', 'Booking Name'), 'reference',
+                   ('date_from', DateTopFilter), 'rooming_list__pax_name')
     ordering = ['date_from', 'reference']
-    readonly_fields = ('date_from', 'date_to', 'status', 'cost_amount', 'price_amount')
+    readonly_fields = ('date_from', 'date_to', 'status',
+                       'cost_amount', 'price_amount',
+                       'internal_reference')
     details_template = 'booking/booking_details.html'
     inlines = [BookingPaxInline, BookingAllotmentInLine,
                BookingTransferInLine, BookingExtraInLine]
@@ -645,7 +650,7 @@ class BookingAllotmentSiteModel(SiteModel):
                 'booking', ('service', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to'),
                 ('room_type', 'board_type'),
-                'cost_amount', 'price_amount', 'provider', 'id')
+                'provider', 'cost_amount', 'price_amount', 'id')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -658,6 +663,7 @@ class BookingAllotmentSiteModel(SiteModel):
                    'booking__reference', 'conf_number',
                    ('datetime_from', DateTopFilter), 'status')
     ordering = ('datetime_from', 'booking__reference', 'service__name',)
+    save_as = True
     form = BookingAllotmentForm
     add_form_template = 'booking/bookingallotment_change_form.html'
     change_form_template = 'booking/bookingallotment_change_form.html'
@@ -684,7 +690,7 @@ class BookingTransferSiteModel(SiteModel):
                 ('place_from'),
                 ('location_to', 'dropoff', 'schedule_to'),
                 ('place_to'),
-                'cost_amount', 'price_amount', 'provider', 'id')
+                 'provider', 'cost_amount', 'price_amount','id')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -720,7 +726,7 @@ class BookingExtraSiteModel(SiteModel):
                 'booking', ('service', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
                 ('addon', 'quantity', 'parameter'),
-                'cost_amount', 'price_amount', 'provider', 'id')
+                'provider', 'cost_amount', 'price_amount', 'id')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
