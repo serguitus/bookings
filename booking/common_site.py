@@ -30,9 +30,11 @@ from django.utils.encoding import force_text
 from django.utils.functional import curry
 # from django_tables2 import RequestConfig
 
+from finance.top_filters import AgencyTopFilter
+
 from booking.forms import (
     PackageAllotmentInlineForm, PackageTransferInlineForm, PackageExtraInlineForm,
-    PackageAllotmentForm, PackageTransferForm, PackageExtraForm,
+    PackageAllotmentForm, PackageTransferForm, PackageExtraForm, AgencyPackageServiceForm,
     QuoteForm, QuoteAllotmentForm, QuoteTransferForm, QuoteExtraForm, QuotePackageForm,
     QuoteAllotmentInlineForm, QuoteTransferInlineForm,
     QuoteExtraInlineForm, QuotePackageInlineForm,
@@ -51,6 +53,7 @@ from booking.forms import (
 )
 from booking.models import (
     Package, PackageAllotment, PackageTransfer, PackageExtra,
+    AgencyPackageService, AgencyPackageDetail,
     Quote,
     QuotePaxVariant,
     QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
@@ -63,7 +66,7 @@ from booking.models import (
     BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
 )
 from booking.services import BookingServices
-from booking.top_filters import DateTopFilter
+from booking.top_filters import DateTopFilter, PackageTopFilter
 
 # from common.filters import TextFilter
 from common.sites import CommonStackedInline, CommonTabularInline
@@ -72,6 +75,7 @@ from common.sites import CommonStackedInline, CommonTabularInline
 from reservas.admin import bookings_site
 
 
+MENU_LABEL_CONFIG_BASIC = 'Configuration'
 MENU_LABEL_PACKAGE = 'Package'
 MENU_LABEL_QUOTE = 'Quote'
 MENU_LABEL_BOOKING = 'Booking'
@@ -337,7 +341,7 @@ class QuotePackageInLine(CommonStackedInline):
     extra = 0
     fields = [
         ('service', 'status'), ('datetime_from', 'datetime_to'),
-        'provider', 'quoteservice_ptr']
+        ('provider', 'priceByPackageCatalogue'), 'quoteservice_ptr']
     ordering = ['datetime_from']
     form = QuotePackageInlineForm
     template = 'booking/tabular.html'
@@ -465,7 +469,7 @@ class QuotePackageSiteModel(SiteModel):
         'quote',
         ('service', 'status'),
         ('datetime_from', 'datetime_to'),
-        'provider', 'id')
+        ('provider', 'priceByPackageCatalogue'), 'id')
     list_display = (
         'quote', 'service', 'datetime_from', 'datetime_to', 'status',)
     top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
@@ -544,6 +548,16 @@ class BookingExtraInLine(CommonTabularInline):
     classes = ('collapse',)
 
 
+class BookingPackageInLine(CommonTabularInline):
+    model = BookingPackage
+    extra = 0
+    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
+              ('provider', 'priceByPackageCatalogue')]
+    ordering = ['datetime_from']
+    form = BookingExtraInlineForm
+    classes = ('collapse',)
+
+
 class BookingSiteModel(SiteModel):
     model_order = 1110
     menu_label = MENU_LABEL_BOOKING
@@ -569,7 +583,7 @@ class BookingSiteModel(SiteModel):
     readonly_fields = ('date_from', 'date_to', 'status', 'cost_amount', 'price_amount')
     details_template = 'booking/booking_details.html'
     inlines = [BookingPaxInline, BookingAllotmentInLine,
-               BookingTransferInLine, BookingExtraInLine]
+               BookingTransferInLine, BookingExtraInLine, BookingPackageInLine]
     form = BookingForm
     add_form_template = 'booking/booking_change_form.html'
     change_form_template = 'booking/booking_change_form.html'
@@ -863,7 +877,7 @@ class BookingPackageSiteModel(SiteModel):
     fields = [
         'booking', ('service', 'status', 'conf_number'),
         ('datetime_from', 'datetime_to'),
-        'cost_amount', 'price_amount', 'provider', 'id']
+        'provider', 'cost_amount', 'priceByPackageCatalogue', 'price_amount', 'id']
     list_display = ['booking', 'name', 'datetime_from', 'datetime_to', 'status']
     top_filters = ['booking__name', 'service', 'booking__reference',
                    ('datetime_from', DateTopFilter), 'status']
@@ -883,6 +897,28 @@ class BookingPackageSiteModel(SiteModel):
         return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
 
 
+class AgencyPackageDetailInline(CommonStackedInline):
+    model = AgencyPackageDetail
+    extra = 0
+    fields = (('ad_1_amount'),)
+
+
+class AgencyPackageServiceSiteModel(SiteModel):
+    model_order = 7140
+    menu_label = MENU_LABEL_CONFIG_BASIC
+    menu_group = 'Agency Catalogue'
+    recent_allowed = True
+    fields = ('agency', 'service', 'date_from', 'date_to')
+    list_display = ('agency', 'service', 'date_from', 'date_to',)
+    top_filters = (
+        ('service', PackageTopFilter), ('agency', AgencyTopFilter),
+        ('date_to', DateTopFilter))
+    inlines = [AgencyPackageDetailInline]
+    ordering = ['service', 'agency', '-date_from']
+    form = AgencyPackageServiceForm
+    save_as = True
+
+
 # Starts Registration Section
 
 bookings_site.register(Package, PackageSiteModel)
@@ -891,6 +927,7 @@ bookings_site.register(PackageAllotment, PackageAllotmentSiteModel)
 bookings_site.register(PackageTransfer, PackageTransferSiteModel)
 bookings_site.register(PackageExtra, PackageExtraSiteModel)
 
+bookings_site.register(AgencyPackageService, AgencyPackageServiceSiteModel)
 
 bookings_site.register(Quote, QuoteSiteModel)
 

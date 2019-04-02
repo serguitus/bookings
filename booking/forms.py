@@ -2,7 +2,7 @@ from dal import autocomplete
 from django.forms import widgets
 
 from booking.models import (
-    PackageAllotment, PackageTransfer, PackageExtra,
+    PackageAllotment, PackageTransfer, PackageExtra, AgencyPackageService,
     Quote, QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
     QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
     Booking, BookingServicePax, BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
@@ -724,6 +724,16 @@ class BookingPackageExtraForm(forms.ModelForm):
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
+
+
+class AgencyPackageServiceForm(forms.ModelForm):
+    class Meta:
+        model = AgencyPackageService
+        fields = ('__all__')
+        widgets = {
+            'agency': autocomplete.ModelSelect2(url='agency-autocomplete'),
+            'service': autocomplete.ModelSelect2(url='package-autocomplete'),
+        }
 
 
 class EmailProviderForm(forms.Form):
