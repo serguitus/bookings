@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from common.sites import SiteModel
 
 from django.conf.urls import url

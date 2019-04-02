@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import unicode_literals
 try:
     import cStringIO as StringIO
 except ImportError:
@@ -518,7 +518,8 @@ class BookingServicePaxInline(TabularInline):
 class BookingAllotmentInLine(CommonTabularInline):
     model = BookingAllotment
     extra = 0
-    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
+    fields = [('service', 'status', 'conf_number'),
+              ('datetime_from', 'datetime_to'),
               ('room_type', 'board_type'), 'provider']
     ordering = ['datetime_from']
     form = BookingAllotmentInlineForm
@@ -528,7 +529,8 @@ class BookingAllotmentInLine(CommonTabularInline):
 class BookingTransferInLine(CommonTabularInline):
     model = BookingTransfer
     extra = 0
-    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to', 'time'),
+    fields = [('service', 'status', 'conf_number'),
+              ('datetime_from', 'datetime_to', 'time'),
               ('location_from', 'location_to'),
               ('quantity', 'provider')]
     ordering = ['datetime_from']
@@ -539,7 +541,8 @@ class BookingTransferInLine(CommonTabularInline):
 class BookingExtraInLine(CommonTabularInline):
     model = BookingExtra
     extra = 0
-    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to', 'time'),
+    fields = [('service', 'status', 'conf_number'),
+              ('datetime_from', 'datetime_to', 'time'),
               ('quantity', 'parameter'), 'provider']
     ordering = ['datetime_from']
     form = BookingExtraInlineForm

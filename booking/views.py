@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from django.contrib import messages
 from django.db.models import Q
 from django.forms.formsets import all_valid, DELETION_FIELD_NAME
@@ -12,7 +13,7 @@ from xhtml2pdf import pisa
 
 from dal import autocomplete
 
-from dateutil.parser import parse
+# from dateutil.parser import parse
 
 from django.core.mail import EmailMessage
 from django.http import HttpResponseRedirect

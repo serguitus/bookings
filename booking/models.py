@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 """
 Booking models
 """
@@ -480,9 +481,13 @@ class Booking(models.Model):
         # Call the "real" save() method.
         super(Booking, self).save(*args, **kwargs)
 
-    def __str__(self):
+    def __unicode__(self):
         return '%s - %s (%s) (%s)' % (
-            self.agency.name, self.name, self.reference, self.get_status_display())
+            self.agency.name, self.name,
+            self.reference, self.get_status_display())
+
+    def __str__(self):
+        return self.__unicode__()
 
 
 class BookingPax(models.Model):
@@ -504,11 +509,14 @@ class BookingPax(models.Model):
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price')
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
 
-    def __str__(self):
+    def __unicode__(self):
         if self.pax_age:
             return '%s (age: %s)' % (self.pax_name, self.pax_age)
         else:
             return '%s' % (self.pax_name)
+
+    def __str__(self):
+        return self.__unicode__()
 
 
 class BookingService(BaseService, DateInterval):
@@ -570,13 +578,16 @@ class BookingServicePax(models.Model):
         # Call the "real" save() method.
         super(BookingServicePax, self).save(*args, **kwargs)
 
-    def __str__(self):
+    def __unicode__(self):
         if self.booking_pax.pax_age:
             return '%s (age: %s)' % (
                 self.booking_pax.pax_name,
                 self.booking_pax.pax_age)
         else:
             return '%s' % (self.booking_pax.pax_name)
+
+    def __str__(self):
+        return self.__unicode__()
 
 
 class BookingServiceSupplement(models.Model):
