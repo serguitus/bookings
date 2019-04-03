@@ -585,7 +585,7 @@ class BookingSiteModel(SiteModel):
                     'reference', 'date_from',
                     'date_to', 'status', 'cost_amount',
                     'price_amount',)
-    top_filters = (('name', 'Booking Name'), 'reference',
+    top_filters = (('name', 'Booking Name'), 'reference', 'agency',
                    ('date_from', DateTopFilter), 'rooming_list__pax_name')
     ordering = ['date_from', 'reference']
     readonly_fields = ('date_from', 'date_to', 'status',

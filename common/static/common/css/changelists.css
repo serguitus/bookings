@@ -99,7 +99,7 @@
     border: 1px solid #ccc;
     padding: 2px 10px;
     margin: 0;
-    vertical-align: middle;
+    vertical-align: top;
     background: #fff;
     box-shadow: 0 -15px 20px -10px rgba(0, 0, 0, 0.15) inset;
     cursor: pointer;
@@ -359,6 +359,10 @@
 
 .div-changelist form.changelist-search>div>span.datetimeshortcuts {
     padding-left: 2px;
+}
+
+form.changelist-search .select2-container{
+    vertical-align: top;  /* a custom style to align autocomplete in top-filters*/
 }
 
 .div-changelist .search-toolbar form input {
