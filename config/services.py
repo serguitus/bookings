@@ -1,6 +1,7 @@
 """
 config services
 """
+from __future__ import unicode_literals
 from datetime import datetime, timedelta, time
 
 from django.db.models import Q

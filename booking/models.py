@@ -486,9 +486,6 @@ class Booking(models.Model):
             self.agency.name, self.name,
             self.reference, self.get_status_display())
 
-    def __str__(self):
-        return self.__unicode__()
-
 
 class BookingPax(models.Model):
     """
@@ -514,9 +511,6 @@ class BookingPax(models.Model):
             return '%s (age: %s)' % (self.pax_name, self.pax_age)
         else:
             return '%s' % (self.pax_name)
-
-    def __str__(self):
-        return self.__unicode__()
 
 
 class BookingService(BaseService, DateInterval):
@@ -585,9 +579,6 @@ class BookingServicePax(models.Model):
                 self.booking_pax.pax_age)
         else:
             return '%s' % (self.booking_pax.pax_name)
-
-    def __str__(self):
-        return self.__unicode__()
 
 
 class BookingServiceSupplement(models.Model):

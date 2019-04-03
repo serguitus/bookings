@@ -1419,7 +1419,7 @@ class CommonChangeList(ChangeList):
                     field_path = None
                     if isinstance(top_filter, (tuple, list)):
                         # This is a custom Filter class for a given field.
-                        if isinstance(top_filter[1], str):
+                        if isinstance(top_filter[1], six.text_type):
                             field, top_filter_class = top_filter, TopFilter.create
                         else:
                             field, top_filter_class = top_filter[0], top_filter[1]
