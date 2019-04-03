@@ -23,6 +23,7 @@ from config.models import (
     RoomType, Allotment,
     Transfer, Location, Place, Schedule,
     Extra, Addon,
+    AmountDetail, AgencyCatalogue,
 )
 
 from finance.models import Agency, AgencyInvoice, Provider, ProviderInvoice
@@ -313,6 +314,8 @@ class QuotePackage(QuoteService):
         verbose_name = 'Quote Package'
         verbose_name_plural = 'Quotes Packages'
     service = models.ForeignKey(Package)
+    priceByPackageCatalogue = models.BooleanField(
+        default=False, verbose_name='By Catalogue')
 
     def fill_data(self):
         # setting name for this quote_service
@@ -749,6 +752,8 @@ class BookingPackage(BookingService):
         verbose_name = 'Booking Package'
         verbose_name_plural = 'Bookings Packages'
     service = models.ForeignKey(Package)
+    priceByPackageCatalogue = models.BooleanField(
+        default=False, verbose_name='By Catalogue')
 
     def fill_data(self):
         # setting name for this booking_service
@@ -837,3 +842,28 @@ class BookingPackageExtra(BookingPackageService, BaseExtra):
         # setting name for this quote_service
         self.name = self.service.name
         self.service_type = SERVICE_CATEGORY_EXTRA
+
+
+class AgencyPackageService(AgencyCatalogue):
+    """
+    AgencyPackageService
+    """
+    class Meta:
+        verbose_name = 'Agency Package Service'
+        verbose_name_plural = 'Agency Packages Services'
+        unique_together = (('agency', 'service', 'date_from', 'date_to'),)
+    service = models.ForeignKey(Package)
+
+    def __str__(self):
+        return 'Ag.Package - %s : %s' % (self.agency, self.service)
+
+
+class AgencyPackageDetail(AmountDetail):
+    """
+    AgencyPackageDetail
+    """
+    class Meta:
+        verbose_name = 'Agency Package Detail'
+        verbose_name_plural = 'Agencies Package Details'
+        unique_together = ('agency_service',)
+    agency_service = models.ForeignKey(AgencyPackageService)
