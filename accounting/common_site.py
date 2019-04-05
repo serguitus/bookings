@@ -36,7 +36,7 @@ class OperationSiteModel(SiteModel):
     actions_on_top = False
     list_display = ('datetime', 'concept', 'detail',)
     top_filters = ('concept', 'detail', 'datetime',)
-    ordering = ['-datetime',]
+    ordering = ['-datetime', ]
 
 
 class OperationMovementSiteModel(SiteModel):

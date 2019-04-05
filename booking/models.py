@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 """
 Booking models
 """
@@ -447,7 +449,7 @@ class Booking(models.Model):
         default_permissions = ('add', 'change',)
     name = models.CharField(max_length=100)
     agency = models.ForeignKey(Agency)
-    reference = models.CharField(max_length=25, blank=True, null=True)
+    reference = models.CharField(max_length=25, blank=True, null=True, verbose_name='TTOO Ref')
     date_from = models.DateField(blank=True, null=True)
     date_to = models.DateField(blank=True, null=True)
     status = models.CharField(
@@ -472,8 +474,11 @@ class Booking(models.Model):
         max_length=1000, blank=True, null=True, verbose_name='Private Notes')
 
     def internal_reference(self):
-        code = self.id
-        return 'I-%s' % code
+        if self.id:
+            code = self.id
+            return '%s' % (20000 + int(code))
+        return ''
+    internal_reference.short_description = 'TNX'
 
     def fill_data(self):
         pass
@@ -483,9 +488,10 @@ class Booking(models.Model):
         # Call the "real" save() method.
         super(Booking, self).save(*args, **kwargs)
 
-    def __str__(self):
+    def __unicode__(self):
         return '%s - %s (%s) (%s)' % (
-            self.agency.name, self.name, self.reference, self.get_status_display())
+            self.agency.name, self.name,
+            self.reference, self.get_status_display())
 
 
 class BookingPax(models.Model):
@@ -507,7 +513,7 @@ class BookingPax(models.Model):
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price')
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
 
-    def __str__(self):
+    def __unicode__(self):
         if self.pax_age:
             return '%s (age: %s)' % (self.pax_name, self.pax_age)
         else:
@@ -573,14 +579,13 @@ class BookingServicePax(models.Model):
         # Call the "real" save() method.
         super(BookingServicePax, self).save(*args, **kwargs)
 
-    def __str__(self):
+    def __unicode__(self):
         if self.booking_pax.pax_age:
             return '%s (age: %s)' % (
                 self.booking_pax.pax_name,
                 self.booking_pax.pax_age)
         else:
             return '%s' % (self.booking_pax.pax_name)
-            
 
 
 class BookingServiceSupplement(models.Model):
@@ -643,11 +648,39 @@ class BookingAllotment(BookingService, BaseAllotment):
 
     def build_rooms(self):
         """ makes a string detailing room quantity and types"""
-        pass
+        from booking.services import BookingServices
+        rooms = BookingServices.find_groups(
+            booking_service=self, service=self.service, for_cost=True)
+        dist = ''
+        room_count = {
+            '10': 0,  # SGL counter
+            '20': 0,  # DBL counter
+            '30': 0,  # TPL counter
+            '21': 0,  # DBL+1Child
+            '22': 0,  # DBL+2Child
+            '31': 0,  # TPL+1Child
+        }
+        room_types = {
+            '10': 'SGL',
+            '20': 'DBL',
+            '30': 'TPL',
+            '21': 'DBL+1Chld',
+            '22': 'DBL+2Chld',
+            '31': 'TPL+1Chld',
+        }
+        for room in rooms:
+            room_count['%d%d' % (room[0], room[1])] += 1
+        for k in room_count.keys():
+            if room_count[k]:
+                if dist:
+                    dist += ' + '
+                dist += '%d %s' % (room_count[k], room_types[k])
+        return dist
 
     def fill_data(self):
         self.name = '%s' % (self.service,)
         self.service_type = SERVICE_CATEGORY_ALLOTMENT
+        self.description = self.build_rooms()
 
 
 class BookingTransfer(BookingService, BaseTransfer):
@@ -674,6 +707,9 @@ class BookingTransfer(BookingService, BaseTransfer):
     dropoff = models.ForeignKey(
         Allotment, related_name='transfer_dropoff', null=True, blank=True)
 
+    def build_description(self):
+        return '%s pax' % self.rooming_list.count()
+
     def fill_data(self):
         # setting name for this booking_service
         self.name = '%s (%s -> %s)' % (
@@ -681,6 +717,7 @@ class BookingTransfer(BookingService, BaseTransfer):
             self.location_from.short_name or self.location_from,
             self.location_to.short_name or self.location_to)
         self.service_type = SERVICE_CATEGORY_TRANSFER
+        self.description = self.build_description()
 
 
 class BookingTransferSupplement(BookingServiceSupplement):
@@ -701,10 +738,14 @@ class BookingExtra(BookingService, BaseExtra):
         verbose_name = 'Booking Extra'
         verbose_name_plural = 'Bookings Extras'
 
+    def build_description(self):
+        return '%s pax' % self.rooming_list.count()
+
     def fill_data(self):
         # setting name for this booking_service
         self.name = self.service.name
         self.service_type = SERVICE_CATEGORY_EXTRA
+        self.description = self.build_description()
 
 
 class BookingPackage(BookingService):

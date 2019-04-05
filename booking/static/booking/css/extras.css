@@ -1,12 +1,12 @@
-.bookingservices-container {
-    width: 75%;
-    float: left;
-}
+/* .bookingservices-container { */
+/*     width: 75%; */
+/*     float: left; */
+/* } */
 
-.bookingpax-container {
-    width: 20%;
-    float: right;
-}
+/* .bookingpax-container { */
+/*     width: 20%; */
+/*     float: right; */
+/* } */
 
 .field-conf_number .vTextField {
     width: 150px;
@@ -31,4 +31,63 @@
 
 a.build-booking {
     color: white;
+}
+
+/*********** VOUCHERS' STYLES **************/
+
+div.voucher-main{
+    width: 900px;
+    height: 400px;
+    border: 1px solid black;
+    padding: 8px 8px 0 8px;
+}
+
+div.voucher-header{
+    height: 100px;
+    border: 1px solid black;
+}
+
+div.voucher-header-logo, div.voucher-header-center{
+    width: 33%;
+    float: left;
+}
+
+div.voucher-header-center{
+    margin-top: 50px;
+    text-align: center;
+}
+
+div.voucher-header-address{
+    width: 33%;
+    float: left;
+}
+
+div.voucher-title{
+    height: 30px;
+    border: 1px solid black;
+    padding: 8px 0 0 10px;
+}
+
+div.voucher-title-label{
+    float: left;
+    width: 400px;
+}
+
+div.voucher-title-date-in{
+    float: left;
+    width: 300px;
+}
+
+div.voucher-content{
+    padding: 10px 10px 0 10px;
+}
+
+div.voucher-content-client{
+    float: left;
+    width: 500px;
+}
+
+div.voucher-content-adult{
+    float: left;
+    width: 200px;
 }

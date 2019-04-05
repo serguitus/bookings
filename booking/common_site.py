@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 try:
     import cStringIO as StringIO
 except ImportError:
@@ -21,7 +23,7 @@ from django.core.exceptions import (FieldDoesNotExist,
 from django.db import router, transaction
 from django import forms
 from django.forms.models import modelformset_factory
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, reverse
 from django.template.response import SimpleTemplateResponse, TemplateResponse
 from django.template.loader import get_template
@@ -520,7 +522,8 @@ class BookingServicePaxInline(TabularInline):
 class BookingAllotmentInLine(CommonTabularInline):
     model = BookingAllotment
     extra = 0
-    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
+    fields = [('service', 'status', 'conf_number'),
+              ('datetime_from', 'datetime_to'),
               ('room_type', 'board_type'), 'provider']
     ordering = ['datetime_from']
     form = BookingAllotmentInlineForm
@@ -530,7 +533,8 @@ class BookingAllotmentInLine(CommonTabularInline):
 class BookingTransferInLine(CommonTabularInline):
     model = BookingTransfer
     extra = 0
-    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to', 'time'),
+    fields = [('service', 'status', 'conf_number'),
+              ('datetime_from', 'datetime_to', 'time'),
               ('location_from', 'location_to'),
               ('quantity', 'provider')]
     ordering = ['datetime_from']
@@ -541,7 +545,8 @@ class BookingTransferInLine(CommonTabularInline):
 class BookingExtraInLine(CommonTabularInline):
     model = BookingExtra
     extra = 0
-    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to', 'time'),
+    fields = [('service', 'status', 'conf_number'),
+              ('datetime_from', 'datetime_to', 'time'),
               ('quantity', 'parameter'), 'provider']
     ordering = ['datetime_from']
     form = BookingExtraInlineForm
@@ -566,21 +571,26 @@ class BookingSiteModel(SiteModel):
     fieldsets = (
         (None, {
             'fields': (
-        ('name', 'reference', 'status'),
-        ('agency', 'date_from', 'date_to'),
-        ('is_package_price', 'price_amount', 'cost_amount'),
-        ('package_sgl_price_amount', 'package_dbl_price_amount',
-         'package_tpl_price_amount'),)
+                'internal_reference',
+                ('name', 'reference', 'status'),
+                ('agency', 'date_from', 'date_to'),
+                ('is_package_price', 'price_amount', 'cost_amount'),
+                ('package_sgl_price_amount', 'package_dbl_price_amount',
+                 'package_tpl_price_amount'),)
         }),
         ('General Notes', {'fields': ('p_notes',),
-                   'classes': ('collapse', 'wide')})
+                           'classes': ('collapse', 'wide')})
     )
-    list_display = ('name', 'reference', 'agency', 'date_from',
-                    'date_to', 'status', 'currency', 'cost_amount',
+    list_display = ('name', 'internal_reference', 'agency',
+                    'reference', 'date_from',
+                    'date_to', 'status', 'cost_amount',
                     'price_amount',)
-    top_filters = (('name', 'Booking Name'), 'reference', ('date_from', DateTopFilter), 'rooming_list__pax_name')
+    top_filters = (('name', 'Booking Name'), 'reference', 'agency',
+                   ('date_from', DateTopFilter), 'rooming_list__pax_name')
     ordering = ['date_from', 'reference']
-    readonly_fields = ('date_from', 'date_to', 'status', 'cost_amount', 'price_amount')
+    readonly_fields = ('date_from', 'date_to', 'status',
+                       'cost_amount', 'price_amount',
+                       'internal_reference')
     details_template = 'booking/booking_details.html'
     inlines = [BookingPaxInline, BookingAllotmentInLine,
                BookingTransferInLine, BookingExtraInLine, BookingPackageInLine]
@@ -620,9 +630,13 @@ class BookingSiteModel(SiteModel):
             # This is a POST. render vouchers
             ids = request.POST.getlist('pk', [])
             office = request.POST.get('office', None)
-            pdf = self.build_vouchers(id, ids, office)
             # use this two parameters to call methods to build pdf
             # it should return the pisa object to add it to the response object
+            pdf = self.build_vouchers(id, ids, office)
+            if pdf:
+                return HttpResponse(pdf.getvalue(),
+                                    content_type='application/pdf')
+            # there was an error. show an error message
             return redirect(reverse('common:booking_booking_change',
                                     args=[id]))
 
@@ -639,7 +653,7 @@ class BookingSiteModel(SiteModel):
         pdf = pisa.pisaDocument(StringIO.StringIO(html), dest=result)
         if pdf.err:
             return False
-        return pdf
+        return result
 
 
 class BookingAllotmentSiteModel(SiteModel):
@@ -653,7 +667,7 @@ class BookingAllotmentSiteModel(SiteModel):
                 'booking', ('service', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to'),
                 ('room_type', 'board_type'),
-                'cost_amount', 'price_amount', 'provider', 'id')
+                'provider', 'cost_amount', 'price_amount', 'id')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -666,6 +680,7 @@ class BookingAllotmentSiteModel(SiteModel):
                    'booking__reference', 'conf_number',
                    ('datetime_from', DateTopFilter), 'status')
     ordering = ('datetime_from', 'booking__reference', 'service__name',)
+    save_as = True
     form = BookingAllotmentForm
     add_form_template = 'booking/bookingallotment_change_form.html'
     change_form_template = 'booking/bookingallotment_change_form.html'
@@ -692,7 +707,7 @@ class BookingTransferSiteModel(SiteModel):
                 ('place_from'),
                 ('location_to', 'dropoff', 'schedule_to'),
                 ('place_to'),
-                'cost_amount', 'price_amount', 'provider', 'id')
+                 'provider', 'cost_amount', 'price_amount','id')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -728,7 +743,7 @@ class BookingExtraSiteModel(SiteModel):
                 'booking', ('service', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
                 ('addon', 'quantity', 'parameter'),
-                'cost_amount', 'price_amount', 'provider', 'id')
+                'provider', 'cost_amount', 'price_amount', 'id')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})

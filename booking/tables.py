@@ -110,8 +110,9 @@ class BookingServiceTable(tables.Table):
     class Meta:
         model = BookingService
         template_name = 'booking/bookingservice_list.html'
-        fields = ['name', 'datetime_from', 'datetime_to', 'cost_amount',
-                  'price_amount', 'provider', 'service_type', 'status']
+        fields = ['name', 'datetime_from', 'datetime_to', 'description',
+                  'cost_amount', 'price_amount',
+                  'provider', 'service_type', 'status']
 
     def __init__(self, *args, **kwargs):
         # self.base_columns['service_type'].verbose_name='Request emails'
