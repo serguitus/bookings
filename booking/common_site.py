@@ -232,6 +232,7 @@ class QuotePackageAllotmentInLine(CommonStackedInline):
     ordering = ['datetime_from']
     form = QuotePackageAllotmentInlineForm
 
+
 class QuotePackageAllotmentSiteModel(SiteModel):
     model_order = 560
     menu_label = MENU_LABEL_QUOTE
