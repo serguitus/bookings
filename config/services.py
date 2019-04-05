@@ -1,6 +1,7 @@
 """
 config services
 """
+
 from __future__ import unicode_literals
 from datetime import datetime, timedelta, time
 
@@ -442,6 +443,45 @@ class ConfigServices(object):
 
         return cls.build_amounts_result(cost, cost_message, price, price_message)
 
+
+    @classmethod
+    def allotment_costs(
+            cls, service_id, date_from, date_to, cost_groups, provider,
+            board_type, room_type_id, quantity=None):
+
+        if date_from is None:
+            return None, 'Date from Missing'
+        if date_to is None:
+            return None, 'Date to Missing'
+
+        service = Allotment.objects.get(pk=service_id)
+
+        # provider cost
+        # obtain details order by date_from asc, date_to desc
+        if cost_groups is None:
+            cost = None
+            cost_message = 'Paxes Missing'
+        elif provider is None:
+            cost = None
+            cost_message = 'Provider Not Found'
+        else:
+            queryset = cls._get_provider_queryset(
+                ProviderAllotmentDetail.objects,
+                provider.id, service_id, date_from, date_to)
+            detail_list = list(
+                queryset.filter(
+                    board_type=board_type
+                ).filter(
+                    room_type_id=room_type_id
+                )
+            )
+            cost, cost_message = cls.find_groups_amount(
+                True, service, date_from, date_to, cost_groups,
+                quantity, None, detail_list
+            )
+        return cost, cost_message
+
+
     @classmethod
     def transfer_amounts(
             cls, service_id, date_from, date_to, cost_groups, price_groups, provider, agency,
@@ -504,6 +544,47 @@ class ConfigServices(object):
             )
 
         return cls.build_amounts_result(cost, cost_message, price, price_message)
+
+
+    @classmethod
+    def transfer_costs(
+            cls, service_id, date_from, date_to, cost_groups, provider,
+            location_from_id, location_to_id, quantity=None):
+        service = Transfer.objects.get(pk=service_id)
+
+        if date_from is None and date_to is None:
+            return None, 'Both Dates are Missing'
+        if date_from is None:
+            date_from = date_to
+        if date_to is None:
+            date_to = date_from
+
+        # provider cost
+        # obtain details order by date_from asc, date_to desc
+        if cost_groups is None and service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
+            cost = None
+            cost_message = 'Paxes Missing'
+        elif provider is None:
+            cost = None
+            cost_message = 'Provider Not Found'
+        else:
+            queryset = cls._get_provider_queryset(
+                ProviderTransferDetail.objects,
+                provider.id, service_id, date_from, date_to)
+            detail_list = list(
+                queryset.filter(
+                    p_location_from_id=location_from_id
+                ).filter(
+                    p_location_to_id=location_to_id
+                )
+            )
+            cost, cost_message = cls.find_groups_amount(
+                True, service, date_from, date_to, cost_groups,
+                quantity, None, detail_list
+            )
+
+        return cost, cost_message
+
 
     @classmethod
     def extra_amounts(
@@ -647,6 +728,91 @@ class ConfigServices(object):
 
         return cls.build_amounts_result(cost, cost_message, price, price_message)
 
+
+    @classmethod
+    def extra_costs(
+            cls, service_id, date_from, date_to, cost_groups, provider,
+            addon_id, quantity, parameter):
+        service = Extra.objects.get(pk=service_id)
+
+        if date_from is None and date_to is None:
+            return None, 'Both Dates are Missing'
+        if date_from is None:
+            if (service.parameter_type == EXTRA_PARAMETER_TYPE_DAYS
+                    or service.parameter_type == EXTRA_PARAMETER_TYPE_NIGHTS):
+                return None, 'Date from is Missing'
+            date_from = date_to
+        if date_to is None:
+            if (service.parameter_type == EXTRA_PARAMETER_TYPE_DAYS
+                    or service.parameter_type == EXTRA_PARAMETER_TYPE_NIGHTS):
+                return None, 'Date to is Missing'
+            date_to = date_from
+
+        # provider cost
+        # obtain details order by date_from asc, date_to desc
+        if cost_groups is None and service.cost_type == EXTRA_COST_TYPE_BY_PAX:
+            cost = None
+            cost_message = 'Paxes Missing'
+        elif provider is None:
+            cost = None
+            cost_message = 'Provider Not Found'
+        else:
+            if service.has_pax_range:
+                cost = 0
+                cost_message = ''
+                # each group can have different details
+                for group in cost_groups:
+                    paxes = group[0] + group[1]
+                    if paxes == 0:
+                        continue
+                    queryset = cls._get_provider_queryset(
+                        ProviderExtraDetail.objects,
+                        provider.id, service_id, date_from, date_to)
+                    # pax range filtering
+                    queryset = queryset.filter(
+                        (Q(pax_range_min__isnull=True) & Q(pax_range_max__gte=paxes)) |
+                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__gte=paxes)) |
+                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__isnull=True))
+                    )
+                    # addon filtering
+                    if addon_id:
+                        queryset = queryset.filter(addon_id=addon_id)
+                    else:
+                        queryset = queryset.filter(addon_id__isnull=True)
+
+                    detail_list = list(queryset)
+
+                    group_cost, group_cost_message = cls.find_group_amount(
+                        True, service, date_from, date_to, group,
+                        quantity, parameter, detail_list
+                    )
+                    if group_cost:
+                        cost += group_cost
+                        cost_message = group_cost_message
+                    else:
+                        cost = None
+                        cost_message = group_cost_message
+                        break
+            else:
+                queryset = cls._get_provider_queryset(
+                    ProviderExtraDetail.objects,
+                    provider.id, service_id, date_from, date_to)
+                # addon filtering
+                if addon_id:
+                    queryset = queryset.filter(addon_id=addon_id)
+                else:
+                    queryset = queryset.filter(addon_id__isnull=True)
+
+                detail_list = list(queryset)
+
+                cost, cost_message = cls.find_groups_amount(
+                    True, service, date_from, date_to, cost_groups,
+                    quantity, parameter, detail_list
+                )
+
+        return cost, cost_message
+
+
     @classmethod
     def build_amounts_result(cls, cost, cost_message, price, price_message):
         if not cost is None and cost >= 0:
@@ -786,7 +952,7 @@ class ConfigServices(object):
         if quantity is None or (quantity < 1):
             quantity = 1
         if service.grouping:
-            amount = cls._find_detail_amount(detail, adults, children)
+            amount = cls.find_detail_amount(detail, adults, children)
         else:
             adult_amount = 0
             if adults > 0:
@@ -831,7 +997,7 @@ class ConfigServices(object):
                     children_amount = children * detail.ch_1_ad_1_amount
                 amount = adult_amount + children_amount
             else:
-                amount = cls._find_detail_amount(detail, adults, children)
+                amount = cls.find_detail_amount(detail, adults, children)
             if amount and (amount >= 0):
                 return amount * quantity
         return None
@@ -873,13 +1039,13 @@ class ConfigServices(object):
                     children_amount = children * detail.ch_1_ad_1_amount
                 amount = adult_amount + children_amount
             else:
-                amount = cls._find_detail_amount(detail, adults, children)
+                amount = cls.find_detail_amount(detail, adults, children)
             if amount is not None and amount >= 0:
                 return amount * quantity * parameter
         return None
 
     @classmethod
-    def _find_detail_amount(cls, detail, adults, children):
+    def find_detail_amount(cls, detail, adults, children):
         if adults == 0:
             if children == 1 and detail.ch_1_ad_0_amount:
                 return 1 * detail.ch_1_ad_0_amount
