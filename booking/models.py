@@ -828,6 +828,7 @@ class AgencyPackageDetail(AmountDetail):
     class Meta:
         verbose_name = 'Agency Package Detail'
         verbose_name_plural = 'Agencies Package Details'
+        unique_together = ('agency_service','pax_range_min', 'pax_range_max')
     agency_service = models.ForeignKey(AgencyPackageService)
     pax_range_min = models.SmallIntegerField(blank=True, null=True)
     pax_range_max = models.SmallIntegerField(blank=True, null=True)

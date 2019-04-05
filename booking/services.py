@@ -1344,8 +1344,8 @@ class BookingServices(object):
 
     @classmethod
     def package_catalogue_prices(
-            cls, service_id, date_from, date_to, price_groups, agency):
-        service = Package.objects.get(pk=service_id)
+            cls, package_id, date_from, date_to, price_groups, agency):
+        package = Package.objects.get(pk=package_id)
 
         if date_from is None and date_to is None:
             return None, 'Both Dates are Missing'
@@ -1356,37 +1356,43 @@ class BookingServices(object):
 
         # agency price
         # obtain details order by date_from asc, date_to desc
-        if price_groups is None and service.cost_type == PACKAGE_AMOUNTS_BY_PAX:
+        if price_groups is None and package.amounts_type == PACKAGE_AMOUNTS_BY_PAX:
             return None, 'Paxes Missing'
         elif agency is None:
             return None, 'Agency Not Found'
         else:
-            if service.has_pax_range:
+            if package.has_pax_range:
                 price = 0
                 price_message = ''
                 # each group can have different details
                 for group in price_groups:
                     paxes = group[0] + group[1]
-                    queryset = cls._get_agency_queryset(
-                        AgencyExtraDetail.objects,
-                        agency.id, service_id, date_from, date_to)
+                    if date_from is None or date_to is None:
+                        queryset = AgencyPackageDetail.objects.none()
+                    else:
+                        queryset = AgencyPackageDetail.objects.select_related(
+                            'agency_service__service'
+                            ).filter(
+                                agency_service__agency_id=agency_id
+                            ).filter(
+                                agency_service__service_id=package_id
+                            ).filter(
+                                agency_service__date_to__gte=date_from,
+                                agency_service__date_from__lte=date_to
+                            ).order_by(
+                                'agency_service__date_from', '-agency_service__date_to'
+                            )
                     # pax range filtering
                     queryset = queryset.filter(
                         (Q(pax_range_min__isnull=True) & Q(pax_range_max__gte=paxes)) |
                         (Q(pax_range_min__lte=paxes) & Q(pax_range_max__gte=paxes)) |
                         (Q(pax_range_min__lte=paxes) & Q(pax_range_max__isnull=True))
                     )
-                    # addon filtering
-                    if addon_id:
-                        queryset = queryset.filter(addon_id=addon_id)
-                    else:
-                        queryset = queryset.filter(addon_id__isnull=True)
 
                     detail_list = list(queryset)
-                    group_price, group_price_message = cls.find_group_amount(
-                        False, service, date_from, date_to, group,
-                        quantity, parameter, detail_list
-                    )
+
+                    group_price, group_price_message = cls.find_package_group_price(
+                        False, package, date_from, date_to, group, detail_list)
                     if group_price:
                         price += group_price
                         price_message = group_price_message
@@ -1395,21 +1401,146 @@ class BookingServices(object):
                         price_message = group_price_message
                         break
             else:
-                queryset = cls._get_agency_queryset(
-                    AgencyExtraDetail.objects,
-                    agency.id, service_id, date_from, date_to)
-                # addon filtering
-                if addon_id:
-                    queryset = queryset.filter(addon_id=addon_id)
+                if date_from is None or date_to is None:
+                    queryset = AgencyPackageDetail.objects.none()
                 else:
-                    queryset = queryset.filter(addon_id__isnull=True)
+                    queryset = AgencyPackageDetail.objects.select_related(
+                        'agency_service__service'
+                        ).filter(
+                            agency_service__agency_id=agency_id
+                        ).filter(
+                            agency_service__service_id=package_id
+                        ).filter(
+                            agency_service__date_to__gte=date_from,
+                            agency_service__date_from__lte=date_to
+                        ).order_by(
+                            'agency_service__date_from', '-agency_service__date_to'
+                        )
 
                 detail_list = list(queryset)
 
-                price, price_message = cls.find_groups_amount(
-                    False, service, date_from, date_to, price_groups,
-                    quantity, parameter, detail_list
-                )
+                price, price_message = cls.find_package_groups_price(
+                    package, date_from, date_to, price_groups, detail_list)
 
         return cls.build_amounts_result(cost, cost_message, price, price_message)
+
+    @classmethod
+    def find_package_groups_price(
+            cls, package, date_from, date_to, groups, detail_list):
+
+        groups_amount = 0
+        groups_message = ''
+        for group in groups:
+            amount, message = cls.find_package_group_price(
+                package, date_from, date_to, group, detail_list)
+            if amount is None:
+                return None, message
+            groups_amount += amount
+            groups_message = message
+
+        return groups_amount, groups_message
+
+    @classmethod
+    def find_package_group_price(
+            cls, package, date_from, date_to, group, detail_list):
+
+        price, message = cls.find_package_price(
+            package, date_from, date_to, group[0], group[1], detail_list)
+        if amount is not None and amount >= 0:
+            return amount, message
+        else:
+            return None, message
+
+    @classmethod
+    def find_package_price(
+            cls, package, date_from, date_to, adults, children, detail_list):
+        if adults + children == 0:
+            return 0, ''
+        message = ''
+        stop = False
+        solved = False
+        current_date = date_from
+        amount = 0
+        details = list(detail_list)
+        # continue until solved or empty details list
+        while not stop:
+            # verify list not empty
+            if details:
+                # working with first detail
+                detail = details[0]
+
+                detail_date_from = detail.agency_service.date_from
+                detail_date_to = detail.agency_service.date_to
+
+                if current_date >= detail_date_from:
+                    # verify final date included
+                    end_date = detail_date_to + timedelta(days=1)
+                    if end_date >= date_to:
+                        # full date range
+                        result = cls._get_package_price(
+                            package, detail, current_date, date_to,
+                            adults, children)
+                        if result is not None and result >= 0:
+                            amount += result
+                            solved = True
+                            stop = True
+                    else:
+                        result = cls._get_package_price(
+                            package, detail, current_date,
+                            datetime(year=end_date.year, month=end_date.month, day=end_date.day),
+                            adults, children)
+                        if result is not None and result >= 0:
+                            amount += result
+                            current_date = datetime(
+                                year=end_date.year, month=end_date.month, day=end_date.day)
+                # remove detail from list
+                details.remove(detail)
+            else:
+                # empty list, no solved all days
+                stop = True
+                message = 'Amount Not Found for date %s' % current_date
+        if not solved:
+            amount = None
+
+        return amount, message
+
+    @classmethod
+    def _get_package_price(
+            cls, package, detail, date_from, date_to, adults, children):
+        adult_price = 0
+        if adults > 0:
+            if detail.ad_1_amount is None:
+                return None
+            adult_price = adults * detail.ad_1_amount
+        children_price = 0
+        if children > 0:
+            if detail.ch_1_ad_1_amount is None:
+                return None
+            children_price = children * detail.ch_1_ad_1_amount
+        price = adult_price + children_price
+        if price and price >= 0:
+            return price
+        return None
+
+
+    @classmethod
+    def _get_agency_queryset(
+            cls, manager, agency_id, package_id, date_from, date_to):
+        if date_from is None:
+            return manager.none()
+        if date_to is None:
+            return manager.none()
+        return manager.select_related(
+            'agency_service__service'
+            ).filter(
+                agency_service__agency_id=agency_id
+            ).filter(
+                agency_service__service_id=package_id
+            ).filter(
+                agency_service__date_to__gte=date_from,
+                agency_service__date_from__lte=date_to
+            ).order_by(
+                'agency_service__date_from', '-agency_service__date_to'
+            )
+
 

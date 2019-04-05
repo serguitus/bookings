@@ -22,4 +22,8 @@ class Migration(migrations.Migration):
             name='pax_range_min',
             field=models.SmallIntegerField(blank=True, null=True),
         ),
+        migrations.AlterUniqueTogether(
+            name='agencypackagedetail',
+            unique_together=set([('agency_service', 'pax_range_min', 'pax_range_max')]),
+        ),
     ]
