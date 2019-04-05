@@ -410,7 +410,9 @@ class TransferSiteModel(BaseFinantialDocumentSiteModel):
     model_order = 2040
     menu_label = MENU_LABEL_ACCOUNTING
     menu_group = MENU_GROUP_LABEL_FINANCE_BASIC
-    fields = ('name', 'account', 'transfer_account', 'amount', 'operation_cost', 'date', 'status')
+    fields = ('name', 'account', 'transfer_account',
+              'amount', 'operation_cost', 'date', 'status',
+              'details')
     list_display = (
         'name', 'account', 'transfer_account', 'amount', 'operation_cost', 'date', 'status')
     top_filters = ('currency', ('account', AccountTopFilter), 'status', 'date')
