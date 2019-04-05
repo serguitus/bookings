@@ -344,7 +344,7 @@ class QuotePackageInLine(CommonStackedInline):
     extra = 0
     fields = [
         ('service', 'status'), ('datetime_from', 'datetime_to'),
-        ('provider', 'priceByPackageCatalogue'), 'quoteservice_ptr']
+        ('provider', 'price_by_package_catalogue'), 'quoteservice_ptr']
     ordering = ['datetime_from']
     form = QuotePackageInlineForm
     template = 'booking/tabular.html'
@@ -472,7 +472,7 @@ class QuotePackageSiteModel(SiteModel):
         'quote',
         ('service', 'status'),
         ('datetime_from', 'datetime_to'),
-        ('provider', 'priceByPackageCatalogue'), 'id')
+        ('provider', 'price_by_package_catalogue'), 'id')
     list_display = (
         'quote', 'service', 'datetime_from', 'datetime_to', 'status',)
     top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
@@ -558,7 +558,7 @@ class BookingPackageInLine(CommonTabularInline):
     model = BookingPackage
     extra = 0
     fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
-              ('provider', 'priceByPackageCatalogue')]
+              ('provider', 'price_by_package_catalogue')]
     ordering = ['datetime_from']
     form = BookingExtraInlineForm
     classes = ('collapse',)
@@ -893,7 +893,7 @@ class BookingPackageSiteModel(SiteModel):
     fields = [
         'booking', ('service', 'status', 'conf_number'),
         ('datetime_from', 'datetime_to'),
-        'provider', 'cost_amount', 'priceByPackageCatalogue', 'price_amount', 'id']
+        'provider', 'cost_amount', 'price_by_package_catalogue', 'price_amount', 'id']
     list_display = ['booking', 'name', 'datetime_from', 'datetime_to', 'status']
     top_filters = ['booking__name', 'service', 'booking__reference',
                    ('datetime_from', DateTopFilter), 'status']

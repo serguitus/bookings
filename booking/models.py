@@ -11,7 +11,8 @@ from booking.constants import (
     SERVICE_CATEGORY_PACKAGE, SERVICE_CATEGORIES,
     QUOTE_STATUS_LIST, QUOTE_STATUS_DRAFT,
     BOOKING_STATUS_LIST, BOOKING_STATUS_PENDING,
-    SERVICE_STATUS_LIST, SERVICE_STATUS_PENDING)
+    SERVICE_STATUS_LIST, SERVICE_STATUS_PENDING,
+    PACKAGE_AMOUNTS_BY_PAX, PACKAGE_AMOUNTS_TYPES)
 
 from config.constants import (BOARD_TYPES,
                               SERVICE_CATEGORY_TRANSFER,
@@ -101,6 +102,9 @@ class Package(Service):
     class Meta:
         verbose_name = 'Package'
         verbose_name_plural = 'Packages'
+    amounts_type = models.CharField(
+        default=PACKAGE_AMOUNTS_BY_PAX, max_length=5, choices=PACKAGE_AMOUNTS_TYPES)
+    has_pax_range = models.BooleanField(default=False)
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_PACKAGE
@@ -314,7 +318,7 @@ class QuotePackage(QuoteService):
         verbose_name = 'Quote Package'
         verbose_name_plural = 'Quotes Packages'
     service = models.ForeignKey(Package)
-    priceByPackageCatalogue = models.BooleanField(
+    price_by_package_catalogue = models.BooleanField(
         default=False, verbose_name='By Catalogue')
 
     def fill_data(self):
@@ -752,7 +756,7 @@ class BookingPackage(BookingService):
         verbose_name = 'Booking Package'
         verbose_name_plural = 'Bookings Packages'
     service = models.ForeignKey(Package)
-    priceByPackageCatalogue = models.BooleanField(
+    price_by_package_catalogue = models.BooleanField(
         default=False, verbose_name='By Catalogue')
 
     def fill_data(self):
@@ -865,5 +869,7 @@ class AgencyPackageDetail(AmountDetail):
     class Meta:
         verbose_name = 'Agency Package Detail'
         verbose_name_plural = 'Agencies Package Details'
-        unique_together = ('agency_service',)
+        unique_together = ('agency_service','pax_range_min', 'pax_range_max')
     agency_service = models.ForeignKey(AgencyPackageService)
+    pax_range_min = models.SmallIntegerField(blank=True, null=True)
+    pax_range_max = models.SmallIntegerField(blank=True, null=True)

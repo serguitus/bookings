@@ -80,3 +80,10 @@ BOOKINGPACKAGESERVICE_TYPES = {
 ACTIONS = {
     'vouchers': 'BookingSiteModel.config_vouchers',
 }
+
+PACKAGE_AMOUNTS_FIXED = 'F'
+PACKAGE_AMOUNTS_BY_PAX = 'P'
+PACKAGE_AMOUNTS_TYPES = (
+    (PACKAGE_AMOUNTS_FIXED, 'Fixed'),
+    (PACKAGE_AMOUNTS_BY_PAX, 'By Pax'),
+)
