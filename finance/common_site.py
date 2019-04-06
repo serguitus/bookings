@@ -395,9 +395,11 @@ class CurrencyExchangeSiteModel(BaseFinantialDocumentSiteModel):
     model_order = 2030
     menu_label = MENU_LABEL_ACCOUNTING
     menu_group = MENU_GROUP_LABEL_FINANCE_BASIC
-    fields = ('name', 'account', 'amount', 'date', 'status', 'exchange_account', 'exchange_amount')
+    fields = ('name', 'account', 'amount', 'date', 'status',
+              'exchange_account', 'exchange_amount')
     list_display = (
-        'name', 'account', 'amount', 'date', 'status', 'exchange_account', 'exchange_amount')
+        'name', 'account', 'amount', 'date', 'status',
+        'exchange_account', 'exchange_amount')
     top_filters = ('currency', ('account', AccountTopFilter), 'status', 'date')
     form = CurrencyExchangeForm
 
@@ -414,7 +416,8 @@ class TransferSiteModel(BaseFinantialDocumentSiteModel):
               'amount', 'operation_cost', 'date', 'status',
               'details')
     list_display = (
-        'name', 'account', 'transfer_account', 'amount', 'operation_cost', 'date', 'status')
+        'name', 'account', 'transfer_account', 'amount',
+        'operation_cost', 'date', 'status')
     top_filters = ('currency', ('account', AccountTopFilter), 'status', 'date')
     form = TransferForm
 
