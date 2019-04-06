@@ -68,7 +68,7 @@ from booking.models import (
     BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
 )
 from booking.services import BookingServices
-from booking.top_filters import DateTopFilter, PackageTopFilter
+from booking.top_filters import DateTopFilter, PackageTopFilter, CancelledTopFilter
 
 # from common.filters import TextFilter
 from common.sites import CommonStackedInline, CommonTabularInline
@@ -587,7 +587,8 @@ class BookingSiteModel(SiteModel):
                     'date_to', 'status', 'cost_amount',
                     'price_amount',)
     top_filters = (('name', 'Booking Name'), 'reference', 'agency',
-                   ('date_from', DateTopFilter), 'rooming_list__pax_name')
+                   ('date_from', DateTopFilter), 'rooming_list__pax_name',
+                    (CancelledTopFilter))
     ordering = ['date_from', 'reference']
     readonly_fields = ('date_from', 'date_to', 'status',
                        'cost_amount', 'price_amount',

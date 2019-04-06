@@ -195,6 +195,7 @@ class Quote(models.Model):
     class Meta:
         verbose_name = 'Quote'
         verbose_name_plural = 'Quotes'
+        default_permissions = ('add', 'change',)
     description = models.CharField(max_length=1000)
     agency = models.ForeignKey(Agency)
     reference = models.CharField(max_length=250)
@@ -255,6 +256,7 @@ class QuoteService(BaseService, DateInterval):
     class Meta:
         verbose_name = 'Quote Service'
         verbose_name_plural = 'Quote Services'
+        default_permissions = ('add', 'change',)
     quote = models.ForeignKey(Quote, related_name='quote_services')
 
     def save(self, *args, **kwargs):
@@ -270,6 +272,7 @@ class QuoteAllotment(QuoteService, BaseAllotment):
     class Meta:
         verbose_name = 'Quote Accomodation'
         verbose_name_plural = 'Quotes Accomodations'
+        default_permissions = ('add', 'change',)
 
     def fill_data(self):
         self.name = '%s' % (self.service,)
@@ -283,6 +286,7 @@ class QuoteTransfer(QuoteService, BaseTransfer):
     class Meta:
         verbose_name = 'Quote Transfer'
         verbose_name_plural = 'Quotes Transfers'
+        default_permissions = ('add', 'change',)
     location_from = models.ForeignKey(
         Location, related_name='quote_location_from', verbose_name='Location from')
     location_to = models.ForeignKey(
@@ -303,6 +307,7 @@ class QuoteExtra(QuoteService, BaseExtra):
     class Meta:
         verbose_name = 'Quote Extra'
         verbose_name_plural = 'Quotes Extras'
+        default_permissions = ('add', 'change',)
 
     def fill_data(self):
         # setting name for this booking_service
@@ -317,6 +322,7 @@ class QuotePackage(QuoteService):
     class Meta:
         verbose_name = 'Quote Package'
         verbose_name_plural = 'Quotes Packages'
+        default_permissions = ('add', 'change',)
     service = models.ForeignKey(Package)
     price_by_package_catalogue = models.BooleanField(
         default=False, verbose_name='By Catalogue')
@@ -341,6 +347,7 @@ class QuotePackageService(BaseService, DateInterval):
     class Meta:
         verbose_name = 'Quote Package Service'
         verbose_name_plural = 'Quotes Packages Services'
+        default_permissions = ('add', 'change',)
     quote_package = models.ForeignKey(QuotePackage, related_name='quote_package_services')
 
     def fill_data(self):
@@ -359,6 +366,7 @@ class QuotePackageAllotment(QuotePackageService, BaseAllotment):
     class Meta:
         verbose_name = 'Quote Package Accomodation'
         verbose_name_plural = 'Quotes Packages Accomodations'
+        default_permissions = ('add', 'change',)
 
     def fill_data(self):
         self.name = '%s' % (self.service,)
@@ -372,6 +380,7 @@ class QuotePackageTransfer(QuotePackageService, BaseTransfer):
     class Meta:
         verbose_name = 'Quote Package Transfer'
         verbose_name_plural = 'Quotes Packages Transfers'
+        default_permissions = ('add', 'change',)
     location_from = models.ForeignKey(
         Location, related_name='quote_package_location_from', verbose_name='Location from')
     location_to = models.ForeignKey(
@@ -392,6 +401,7 @@ class QuotePackageExtra(QuotePackageService, BaseExtra):
     class Meta:
         verbose_name = 'Quote Package Extra'
         verbose_name_plural = 'Quotes Packages Extras'
+        default_permissions = ('add', 'change',)
 
     def fill_data(self):
         # setting name for this quote_service
@@ -645,6 +655,7 @@ class BookingAllotment(BookingService, BaseAllotment):
     class Meta:
         verbose_name = 'Booking Accomodation'
         verbose_name_plural = 'Bookings Accomodations'
+        default_permissions = ('add', 'change',)
 
     def build_rooms(self):
         """ makes a string detailing room quantity and types"""
@@ -690,6 +701,7 @@ class BookingTransfer(BookingService, BaseTransfer):
     class Meta:
         verbose_name = 'Booking Transfer'
         verbose_name_plural = 'Bookings Transfers'
+        default_permissions = ('add', 'change',)
     location_from = models.ForeignKey(
         Location, related_name='location_from', verbose_name='Location from')
     place_from = models.ForeignKey(
@@ -737,6 +749,7 @@ class BookingExtra(BookingService, BaseExtra):
     class Meta:
         verbose_name = 'Booking Extra'
         verbose_name_plural = 'Bookings Extras'
+        default_permissions = ('add', 'change',)
 
     def build_description(self):
         return '%s pax' % self.rooming_list.count()
@@ -755,6 +768,7 @@ class BookingPackage(BookingService):
     class Meta:
         verbose_name = 'Booking Package'
         verbose_name_plural = 'Bookings Packages'
+        default_permissions = ('add', 'change',)
     service = models.ForeignKey(Package)
     price_by_package_catalogue = models.BooleanField(
         default=False, verbose_name='By Catalogue')
@@ -776,6 +790,7 @@ class BookingPackageService(BaseService, DateInterval):
     class Meta:
         verbose_name = 'Booking Package Service'
         verbose_name_plural = 'Bookingss Packages Services'
+        default_permissions = ('add', 'change',)
     booking_package = models.ForeignKey(BookingPackage, related_name='booking_package_services')
     conf_number = models.CharField(max_length=20, blank=True, null=True)
 
@@ -795,6 +810,7 @@ class BookingPackageAllotment(BookingPackageService, BaseAllotment):
     class Meta:
         verbose_name = 'Booking Package Accomodation'
         verbose_name_plural = 'Bookings Packages Accomodations'
+        default_permissions = ('add', 'change',)
 
     def fill_data(self):
         self.name = '%s' % (self.service,)
@@ -808,6 +824,7 @@ class BookingPackageTransfer(BookingPackageService, BaseTransfer):
     class Meta:
         verbose_name = 'Booking Package Transfer'
         verbose_name_plural = 'Bookingss Packages Transfers'
+        default_permissions = ('add', 'change',)
     location_from = models.ForeignKey(
         Location, related_name='booking_package_location_from', verbose_name='Location from')
     place_from = models.ForeignKey(
@@ -841,6 +858,7 @@ class BookingPackageExtra(BookingPackageService, BaseExtra):
     class Meta:
         verbose_name = 'Booking Package Extra'
         verbose_name_plural = 'Bookings Packages Extras'
+        default_permissions = ('add', 'change',)
 
     def fill_data(self):
         # setting name for this quote_service

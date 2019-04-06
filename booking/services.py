@@ -428,6 +428,7 @@ class BookingServices(object):
                         c2, c2_msg, p2, p2_msg, \
                         c3, c3_msg, p3, p3_msg = cls._find_allotment_amounts(
                             pax_variant=pax_variant, allotment=allotment, agency=agency)
+
                         # service amounts
                         variant_dict.update({key: cls._quote_amounts_dict(
                             c1, c1_msg, p1, p1_msg,
@@ -454,6 +455,7 @@ class BookingServices(object):
                         c2, c2_msg, p2, p2_msg, \
                         c3, c3_msg, p3, p3_msg = cls._find_transfer_amounts(
                             pax_variant=pax_variant, transfer=transfer, agency=agency)
+
                         # service amounts
                         variant_dict.update({key: cls._quote_amounts_dict(
                             c1, c1_msg, p1, p1_msg,
@@ -480,6 +482,7 @@ class BookingServices(object):
                         c2, c2_msg, p2, p2_msg, \
                         c3, c3_msg, p3, p3_msg = cls._find_extra_amounts(
                             pax_variant=pax_variant, extra=extra, agency=agency)
+
                         # service amounts
                         variant_dict.update({key: cls._quote_amounts_dict(
                             c1, c1_msg, p1, p1_msg,
@@ -506,6 +509,7 @@ class BookingServices(object):
                         c2, c2_msg, p2, p2_msg, \
                         c3, c3_msg, p3, p3_msg = cls._find_quotepackage_amounts(
                             pax_variant=pax_variant, package=package, agency=agency)
+
                         # service amounts
                         variant_dict.update({key: cls._quote_amounts_dict(
                             c1, c1_msg, p1, p1_msg,
@@ -1278,9 +1282,9 @@ class BookingServices(object):
             'price_1': price_1,
             'price_1_msg': price_1_msg,
             'cost_2': cost_2,
+            'cost_2_msg': cost_2_msg,
             'price_2': price_2,
             'price_2_msg': price_2_msg,
-            'cost_2_msg': cost_2_msg,
             'cost_3': cost_3,
             'cost_3_msg': cost_3_msg,
             'price_3': price_3,
@@ -1380,10 +1384,12 @@ class BookingServices(object):
                     status = constants.BOOKING_STATUS_CONFIRMED
 
         # verify that have services and all cancelled
-        if services and cancelled:
-            # status cancelled
-            status = constants.BOOKING_STATUS_CANCELLED
-
+        if services:
+            if cancelled:
+                # status cancelled
+                status = constants.BOOKING_STATUS_CANCELLED
+        else:
+            status = constants.BOOKING_STATUS_PENDING
         # verify package prices
         if booking.is_package_price:
             groups = cls.find_booking_groups(booking)
