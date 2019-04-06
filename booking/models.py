@@ -498,6 +498,9 @@ class Booking(models.Model):
         # Call the "real" save() method.
         super(Booking, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return self.__unicode__()
+
     def __unicode__(self):
         return '%s - %s (%s) (%s)' % (
             self.agency.name, self.name,
@@ -522,6 +525,9 @@ class BookingPax(models.Model):
     price_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price')
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
+
+    def __str__(self):
+        return self.__unicode__()
 
     def __unicode__(self):
         if self.pax_age:
@@ -588,6 +594,9 @@ class BookingServicePax(models.Model):
         self.fill_data()
         # Call the "real" save() method.
         super(BookingServicePax, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.__unicode__()
 
     def __unicode__(self):
         if self.booking_pax.pax_age:

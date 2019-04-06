@@ -15,6 +15,7 @@ from booking.models import (
     AgencyPackageDetail,
     Booking, BookingService, BookingPax, BookingServicePax,
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
+    BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
     BookingInvoice, BookingInvoiceLine, BookingInvoicePartial)
 
 from config.services import ConfigServices
@@ -129,31 +130,35 @@ class BookingServices(object):
                         booking_pax.pax_name = pax['pax_name']
                         booking_pax.pax_age = pax['pax_age']
                         booking_pax.pax_group = pax['pax_group']
+
+                        booking_pax.avoid_booking_update = True
                         booking_pax.save()
+
+                        # keep list for services
                         booking_pax_list.append(booking_pax)
+
                 # create bookingallotment list
                 for quote_allotment in QuoteAllotment.objects.filter(quote_id=quote.id).all():
                     booking_allotment = BookingAllotment()
                     booking_allotment.booking = booking
                     booking_allotment.conf_number = '< confirm number >'
-                    # cost_amount
-                    # cost_comment
-                    # price_amount
-                    # price_comment
-                    # provider_invoice
                     booking_allotment.name = quote_allotment.name
-                    # service_type auto
                     cls._copy_service_info(
                         dst_service=booking_allotment, src_service=quote_allotment)
                     booking_allotment.room_type = quote_allotment.room_type
                     booking_allotment.board_type = quote_allotment.board_type
+
+                    booking_allotment.avoid_booking_update = True
                     booking_allotment.save()
+
                     # create bookingservicepax list
                     for booking_pax in booking_pax_list:
                         bookingservice_pax = BookingServicePax()
                         bookingservice_pax.booking_service = booking_allotment
                         bookingservice_pax.booking_pax = booking_pax
                         bookingservice_pax.group = booking_pax.pax_group
+
+                        bookingservice_pax.avoid_booking_update = True
                         bookingservice_pax.save()
 
                 # create bookingtransfer list
@@ -161,13 +166,7 @@ class BookingServices(object):
                     booking_transfer = BookingTransfer()
                     booking_transfer.booking = booking
                     booking_transfer.conf_number = '< confirm number >'
-                    # cost_amount
-                    # cost_comment
-                    # price_amount
-                    # price_comment
-                    # provider_invoice
                     booking_transfer.name = quote_transfer.name
-                    # service_type auto
                     cls._copy_service_info(
                         dst_service=booking_transfer, src_service=quote_transfer)
                     # time
@@ -181,6 +180,8 @@ class BookingServices(object):
                     # place_to
                     # schedule_to
                     # dropoff
+
+                    booking_transfer.avoid_booking_update = True
                     booking_transfer.save()
 
                     # create bookingservicepax list
@@ -189,6 +190,8 @@ class BookingServices(object):
                         bookingservice_pax.booking_service = booking_transfer
                         bookingservice_pax.booking_pax = booking_pax
                         bookingservice_pax.group = booking_pax.pax_group
+
+                        bookingservice_pax.avoid_booking_update = True
                         bookingservice_pax.save()
 
                 # create bookingextra list
@@ -196,19 +199,15 @@ class BookingServices(object):
                     booking_extra = BookingExtra()
                     booking_extra.booking = booking
                     booking_extra.conf_number = '< confirm number >'
-                    # cost_amount
-                    # cost_comment
-                    # price_amount
-                    # price_comment
-                    # provider_invoice
                     booking_extra.name = quote_extra.name
-                    # service_type auto
                     cls._copy_service_info(
                         dst_service=booking_extra, src_service=quote_extra)
                     booking_extra.addon = quote_extra.addon
                     booking_extra.time = quote_extra.time
                     booking_extra.quantity = quote_extra.quantity
                     booking_extra.parameter = quote_extra.parameter
+
+                    booking_extra.avoid_booking_update = True
                     booking_extra.save()
 
                     # create bookingservicepax list
@@ -217,6 +216,8 @@ class BookingServices(object):
                         bookingservice_pax.booking_service = booking_extra
                         bookingservice_pax.booking_pax = booking_pax
                         bookingservice_pax.group = booking_pax.pax_group
+
+                        bookingservice_pax.avoid_booking_update = True
                         bookingservice_pax.save()
 
                 # create bookingpackage list
@@ -224,16 +225,12 @@ class BookingServices(object):
                     booking_package = BookingPackage()
                     booking_package.booking = booking
                     booking_package.conf_number = '< confirm number >'
-                    # cost_amount
-                    # cost_comment
-                    # price_amount
-                    # price_comment
-                    # provider_invoice
                     booking_package.name = quote_package.name
-                    # service_type auto
                     cls._copy_service_info(
                         dst_service=booking_package, src_service=quote_package)
+
                     booking_package.avoid_package_services = True
+                    booking_package.avoid_booking_update = True
                     booking_package.save()
 
                     # create bookingservicepax list
@@ -242,7 +239,65 @@ class BookingServices(object):
                         bookingservice_pax.booking_service = booking_package
                         bookingservice_pax.booking_pax = booking_pax
                         bookingservice_pax.group = booking_pax.pax_group
+
+                        bookingservice_pax.avoid_booking_update = True
                         bookingservice_pax.save()
+
+                    # create bookingpackageallotment list
+                    for quotepackage_allotment in QuotePackageAllotment.objects.filter(
+                            quote_package_id=quote_package.id).all():
+                        bookingpackage_allotment = BookingPackageAllotment()
+                        bookingpackage_allotment.booking_package = booking_package
+                        bookingpackage_allotment.conf_number = '< confirm number >'
+                        bookingpackage_allotment.name = quotepackage_allotment.name
+                        cls._copy_service_info(
+                            dst_service=bookingpackage_allotment, src_service=quotepackage_allotment)
+                        bookingpackage_allotment.room_type = quotepackage_allotment.room_type
+                        bookingpackage_allotment.board_type = quotepackage_allotment.board_type
+
+                        bookingpackage_allotment.avoid_booking_update = True
+                        bookingpackage_allotment.save()
+
+                    # create bookingpackagetransfer list
+                    for quotepackage_transfer in QuotePackageTransfer.objects.filter(
+                            quote_package_id=quote_package.id).all():
+                        bookingpackage_transfer = BookingPackageTransfer()
+                        bookingpackage_transfer.booking_package = booking_package
+                        bookingpackage_transfer.conf_number = '< confirm number >'
+                        bookingpackage_transfer.name = quotepackage_transfer.name
+                        cls._copy_service_info(
+                            dst_service=bookingpackage_transfer, src_service=quotepackage_transfer)
+                        # time
+                        bookingpackage_transfer.quantity = ConfigServices.get_service_quantity(
+                            bookingpackage_transfer.service, len(booking_pax_list))
+                        bookingpackage_transfer.location_from = quotepackage_transfer.location_from
+                        # place_from
+                        # schedule_from
+                        # pickup
+                        bookingpackage_transfer.location_to = quotepackage_transfer.location_to
+                        # place_to
+                        # schedule_to
+                        # dropoff
+
+                        bookingpackage_transfer.avoid_booking_update = True
+                        bookingpackage_transfer.save()
+
+                    # create bookingextra list
+                    for quotepackage_extra in QuotePackageExtra.objects.filter(
+                            quote_package_id=quote_package.id).all():
+                        bookingpackage_extra = BookingPackageExtra()
+                        bookingpackage_extra.booking_package = booking_package
+                        bookingpackage_extra.conf_number = '< confirm number >'
+                        bookingpackage_extra.name = quotepackage_extra.name
+                        cls._copy_service_info(
+                            dst_service=bookingpackage_extra, src_service=quotepackage_extra)
+                        bookingpackage_extra.addon = quotepackage_extra.addon
+                        bookingpackage_extra.time = quotepackage_extra.time
+                        bookingpackage_extra.quantity = quotepackage_extra.quantity
+                        bookingpackage_extra.parameter = quotepackage_extra.parameter
+
+                        bookingpackage_extra.avoid_booking_update = True
+                        bookingpackage_extra.save()
 
                 # update booking
                 cls.update_booking(booking)
@@ -267,7 +322,17 @@ class BookingServices(object):
 
 
     @classmethod
-    def update_quote(cls, quote):
+    def update_quote(cls, quote_or_service):
+
+        if hasattr(quote_or_service, 'avoid_quote_update'):
+            return
+        if hasattr(quote_or_service, 'quote'):
+            quote = quote_or_service.quote
+        elif isinstance(quote_or_service, Quote):
+            quote = quote_or_service
+        else:
+            return
+
         date_from = None
         date_to = None
         for service in quote.quote_services.all():
@@ -1337,7 +1402,17 @@ class BookingServices(object):
             return float(prev_amount) + float(amount), msg
 
     @classmethod
-    def update_booking(cls, booking):
+    def update_booking(cls, booking_or_service):
+
+        if hasattr(booking_or_service, 'avoid_booking_update'):
+            return
+        if hasattr(booking_or_service, 'booking'):
+            booking = booking_or_service.booking
+        elif isinstance(booking_or_service, Booking):
+            booking = booking_or_service
+        else:
+            return
+
         cost = 0
         price = 0
         date_from = None
@@ -1631,7 +1706,10 @@ class BookingServices(object):
 
 
     @classmethod
-    def update_booking_package(cls, booking_package, avoid_package_services):
+    def update_booking_package(cls, booking_package):
+        avoid_package_services = None
+        if hasattr(booking_package, 'avoid_package_services'):
+            avoid_package_services = booking_package.avoid_package_services
         if avoid_package_services:
             return
         package = booking_package.service
