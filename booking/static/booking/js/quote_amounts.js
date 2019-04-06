@@ -41,6 +41,7 @@ $(document).ready(function(){
       if (number) {
         input.val(number);
         compare_amounts(input, span, button);
+        get_computed_amounts();
       }
       return false;
     })
