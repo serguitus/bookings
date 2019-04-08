@@ -91,3 +91,11 @@ div.voucher-content-adult{
     float: left;
     width: 200px;
 }
+div.inline-change-link {
+    width: 50px;
+    margin-top: 20px;
+    background-color: lightgray;
+    border-radius: 3px;
+    padding: 5px;
+    vertical-align: baseline;
+}

@@ -95,7 +95,6 @@ class PackageAllotmentInLine(CommonStackedInline):
         ('days_after', 'days_duration', 'provider')]
     ordering = ['days_after']
     form = PackageAllotmentInlineForm
-    template = 'booking/tabular.html'
 
 
 class PackageTransferInLine(CommonStackedInline):
@@ -110,7 +109,6 @@ class PackageTransferInLine(CommonStackedInline):
         ('days_after', 'days_duration', 'provider')]
     ordering = ['days_after']
     form = PackageTransferInlineForm
-    template = 'booking/tabular.html'
 
 
 class PackageExtraInLine(CommonStackedInline):
@@ -122,7 +120,6 @@ class PackageExtraInLine(CommonStackedInline):
         ('days_after', 'days_duration', 'provider')]
     ordering = ['days_after']
     form = PackageExtraInlineForm
-    template = 'booking/tabular.html'
 
 
 class PackageSiteModel(SiteModel):
@@ -314,7 +311,6 @@ class QuoteAllotmentInLine(CommonStackedInline):
         ('room_type', 'board_type'), 'provider']
     ordering = ['datetime_from']
     form = QuoteAllotmentInlineForm
-    template = 'booking/tabular.html'
 
 
 class QuoteTransferInLine(CommonStackedInline):
@@ -325,7 +321,6 @@ class QuoteTransferInLine(CommonStackedInline):
         ('location_from', 'location_to'), 'provider']
     ordering = ['datetime_from']
     form = QuoteTransferInlineForm
-    template = 'booking/tabular.html'
 
 
 class QuoteExtraInLine(CommonStackedInline):
@@ -337,10 +332,10 @@ class QuoteExtraInLine(CommonStackedInline):
         'provider']
     ordering = ['datetime_from']
     form = QuoteExtraInlineForm
-    template = 'booking/tabular.html'
 
 
 class QuotePackageInLine(CommonStackedInline):
+    show_change_link = True
     model = QuotePackage
     extra = 0
     fields = [
@@ -348,7 +343,6 @@ class QuotePackageInLine(CommonStackedInline):
         ('provider', 'price_by_package_catalogue'), 'quoteservice_ptr']
     ordering = ['datetime_from']
     form = QuotePackageInlineForm
-    template = 'booking/tabular.html'
 
 
 class QuoteSiteModel(SiteModel):
@@ -522,6 +516,7 @@ class BookingServicePaxInline(TabularInline):
 
 
 class BookingAllotmentInLine(CommonTabularInline):
+    show_change_link = True
     model = BookingAllotment
     extra = 0
     fields = [('service', 'status', 'conf_number'),
@@ -533,6 +528,7 @@ class BookingAllotmentInLine(CommonTabularInline):
 
 
 class BookingTransferInLine(CommonTabularInline):
+    show_change_link = True
     model = BookingTransfer
     extra = 0
     fields = [('service', 'status', 'conf_number'),
@@ -545,6 +541,7 @@ class BookingTransferInLine(CommonTabularInline):
 
 
 class BookingExtraInLine(CommonTabularInline):
+    show_change_link = True
     model = BookingExtra
     extra = 0
     fields = [('service', 'status', 'conf_number'),
@@ -556,12 +553,13 @@ class BookingExtraInLine(CommonTabularInline):
 
 
 class BookingPackageInLine(CommonTabularInline):
+    show_change_link = True
     model = BookingPackage
     extra = 0
     fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
               ('provider', 'price_by_package_catalogue')]
     ordering = ['datetime_from']
-    form = BookingExtraInlineForm
+    form = BookingPackageInlineForm
     classes = ('collapse',)
 
 

@@ -440,8 +440,12 @@ class BookingServices(object):
         days_after = src_package.days_after
         if days_after is None:
             days_after = 0
-        dst_package.datetime_from = dst_package.quote_package.datetime_from + timedelta(
-            days=days_after)
+        if hasattr(dst_package, 'quote_package'):
+            dst_package.datetime_from = dst_package.quote_package.datetime_from + timedelta(
+                days=days_after)
+        if hasattr(dst_package, 'booking_package'):
+            dst_package.datetime_from = dst_package.booking_package.datetime_from + timedelta(
+                days=days_after)
         days_duration = src_package.days_duration
         if days_duration is None:
             days_duration = 0
