@@ -12,7 +12,7 @@ from booking.models import (
     QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
     QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
     Package, PackageAllotment, PackageTransfer, PackageExtra,
-    AgencyPackageDetail,
+    AgencyPackageService, AgencyPackageDetail,
     Booking, BookingService, BookingPax, BookingServicePax,
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
     BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
@@ -1984,3 +1984,81 @@ class BookingServices(object):
             )
 
 
+    @classmethod
+    def process_agencies_amounts(cls, agencies, is_update):
+        """
+        process_agencies_amounts
+        """
+        cls.generate_agencies_amounts(agencies, is_update)
+        return
+
+        # from multiprocessing import Process
+        # if __name__ == 'config.services':
+        #    p = Process(target=cls.generate_agencies_amounts, args=(agencies))
+        #    p.start()
+        #    p.join()
+
+
+    @classmethod
+    def generate_agencies_amounts(cls, agencies, is_update):
+        """
+        generate_agencies_amounts
+        """
+        # load source agency
+
+        from reservas.custom_settings import AGENCY_FOR_AMOUNTS
+
+        try:
+            src_agency = Agency.objects.get(id=AGENCY_FOR_AMOUNTS)
+        except Exception as ex:
+            print(ex)
+            # 'Source Agency not Found'
+            return
+        for dst_agency in agencies:
+            cls.copy_agency_amounts(src_agency, dst_agency, is_update)
+
+
+    @classmethod
+    def copy_agency_amounts(cls, src_agency, dst_agency, is_update):
+        """
+        copy_agency_amounts
+        """
+        ConfigServices.copy_agency_amounts(src_agency, dst_agency, is_update)
+        cls._copy_packages(src_agency, dst_agency, is_update)
+
+
+    @classmethod
+    def _copy_packages(cls, src_agency, dst_agency, is_update):
+        # find agencyservice list
+        src_agency_services = list(AgencyPackageService.objects.filter(agency=src_agency.id))
+        # for each agencyservice create agencyservice
+        for src_agency_service in src_agency_services:
+            dst_agency_service, created = AgencyPackageService.objects.get_or_create(
+                agency_id=dst_agency.id,
+                date_from=src_agency_service.date_from,
+                date_to=src_agency_service.date_to,
+                service_id=src_agency_service.service_id
+            )
+            # find details
+            details = list(
+                AgencyPackageDetail.objects.filter(agency_service=src_agency_service))
+            # for each src agency detail create dst agency detail
+            for detail in details:
+                if is_update:
+                    # update - dont modify if exists
+                    agency_detail, created = AgencyPackageDetail.objects.get_or_create(
+                        agency_service_id=dst_agency_service.id,
+                        pax_range_min=detail.pax_range_min,
+                        pax_range_max=detail.pax_range_max,
+                        defaults=ConfigServices.calculate_default_amounts(
+                            detail, src_agency.gain_percent, dst_agency.gain_percent)
+                    )
+                else:
+                    # rewrite - modify if exists
+                    agency_detail, created = AgencyPackageDetail.objects.update_or_create(
+                        agency_service_id=dst_agency_service.id,
+                        pax_range_min=detail.pax_range_min,
+                        pax_range_max=detail.pax_range_max,
+                        defaults=ConfigServices.calculate_default_amounts(
+                            detail, src_agency.gain_percent, dst_agency.gain_percent)
+                    )

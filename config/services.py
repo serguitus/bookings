@@ -34,39 +34,6 @@ class ConfigServices(object):
     ConfigServices
     """
 
-    @classmethod
-    def process_agencies_amounts(cls, agencies, is_update):
-        """
-        process_agencies_amounts
-        """
-        cls.generate_agencies_amounts(agencies, is_update)
-        return
-
-        # from multiprocessing import Process
-        # if __name__ == 'config.services':
-        #    p = Process(target=cls.generate_agencies_amounts, args=(agencies))
-        #    p.start()
-        #    p.join()
-
-
-    @classmethod
-    def generate_agencies_amounts(cls, agencies, is_update):
-        """
-        generate_agencies_amounts
-        """
-        # load source agency
-
-        from reservas.custom_settings import AGENCY_FOR_AMOUNTS
-
-        try:
-            src_agency = Agency.objects.get(id=AGENCY_FOR_AMOUNTS)
-        except Exception as ex:
-            print(ex)
-            # 'Source Agency not Found'
-            return
-        for dst_agency in agencies:
-            cls.copy_agency_amounts(src_agency, dst_agency, is_update)
-
 
     @classmethod
     def copy_agency_amounts(cls, src_agency, dst_agency, is_update):
@@ -101,7 +68,7 @@ class ConfigServices(object):
                         agency_service_id=dst_agency_service.id,
                         room_type_id=detail.room_type_id,
                         board_type=detail.board_type,
-                        defaults=cls._default_amounts(
+                        defaults=cls.calculate_default_amounts(
                             detail, src_agency.gain_percent, dst_agency.gain_percent)
                     )
                 else:
@@ -110,7 +77,7 @@ class ConfigServices(object):
                         agency_service_id=dst_agency_service.id,
                         room_type_id=detail.room_type_id,
                         board_type=detail.board_type,
-                        defaults=cls._default_amounts(
+                        defaults=cls.calculate_default_amounts(
                             detail, src_agency.gain_percent, dst_agency.gain_percent)
                     )
 
@@ -138,7 +105,7 @@ class ConfigServices(object):
                         agency_service_id=dst_agency_service.id,
                         a_location_from_id=detail.a_location_from_id,
                         a_location_to_id=detail.a_location_to_id,
-                        defaults=cls._default_amounts(
+                        defaults=cls.calculate_default_amounts(
                             detail, src_agency.gain_percent, dst_agency.gain_percent)
                     )
                 else:
@@ -147,7 +114,7 @@ class ConfigServices(object):
                         agency_service_id=dst_agency_service.id,
                         a_location_from_id=detail.a_location_from_id,
                         a_location_to_id=detail.a_location_to_id,
-                        defaults=cls._default_amounts(
+                        defaults=cls.calculate_default_amounts(
                             detail, src_agency.gain_percent, dst_agency.gain_percent)
                     )
 
@@ -176,7 +143,7 @@ class ConfigServices(object):
                         addon_id=detail.addon_id,
                         pax_range_min=detail.pax_range_min,
                         pax_range_max=detail.pax_range_max,
-                        defaults=cls._default_amounts(
+                        defaults=cls.calculate_default_amounts(
                             detail, src_agency.gain_percent, dst_agency.gain_percent)
                     )
                 else:
@@ -186,7 +153,7 @@ class ConfigServices(object):
                         addon_id=detail.addon_id,
                         pax_range_min=detail.pax_range_min,
                         pax_range_max=detail.pax_range_max,
-                        defaults=cls._default_amounts(
+                        defaults=cls.calculate_default_amounts(
                             detail, src_agency.gain_percent, dst_agency.gain_percent)
                     )
 
@@ -236,7 +203,7 @@ class ConfigServices(object):
                         room_type=detail.room_type,
                         board_type=detail.board_type,
                         # from provider src gain is 0
-                        defaults=cls._default_amounts(detail, 0, gain_percent)
+                        defaults=cls.calculate_default_amounts(detail, 0, gain_percent)
                     )
                     # if already exists ensure higher amounts
                     if not created:
@@ -244,7 +211,7 @@ class ConfigServices(object):
 
 
     @classmethod
-    def _default_amounts(cls, detail, src_gain_percent, dst_gain_percent):
+    def calculate_default_amounts(cls, detail, src_gain_percent, dst_gain_percent):
         return {
             'ad_1_amount': cls._calculate_price(
                 detail.ad_1_amount, src_gain_percent, dst_gain_percent),

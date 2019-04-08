@@ -411,7 +411,7 @@ class BookingTransferTimeView(ModelChangeFormProcessorView):
         location_to_id = request.POST.get('location_to')
 
         pickup_time, pickup_time_msg = ConfigServices.transfer_time(
-                schedule_from_id, schedule_to_id, location_from_id, location_to_id)
+            schedule_from_id, schedule_to_id, location_from_id, location_to_id)
 
         return JsonResponse({
             'time': pickup_time,

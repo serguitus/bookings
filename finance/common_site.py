@@ -679,9 +679,9 @@ class AgencySiteModel(SiteModel):
 
         agencies = list(queryset.all())
 
-        from config.services import ConfigServices
+        from booking.services import BookingServices
 
-        ConfigServices.process_agencies_amounts(agencies, False)
+        BookingServices.process_agencies_amounts(agencies, False)
 
     rewrite_agency_amounts.short_description = "Copy All Agency Prices"
 
@@ -689,9 +689,9 @@ class AgencySiteModel(SiteModel):
 
         agencies = list(queryset.all())
 
-        from config.services import ConfigServices
+        from booking.services import BookingServices
 
-        ConfigServices.process_agencies_amounts(agencies, True)
+        BookingServices.process_agencies_amounts(agencies, True)
 
     update_agency_amounts.short_description = "Copy New Agency Prices"
 
