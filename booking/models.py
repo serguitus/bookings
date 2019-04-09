@@ -676,6 +676,7 @@ class BookingAllotment(BookingService, BaseAllotment):
             '10': 0,  # SGL counter
             '20': 0,  # DBL counter
             '30': 0,  # TPL counter
+            '11': 0,  # SGL+1Child
             '21': 0,  # DBL+1Child
             '22': 0,  # DBL+2Child
             '31': 0,  # TPL+1Child
@@ -684,6 +685,7 @@ class BookingAllotment(BookingService, BaseAllotment):
             '10': 'SGL',
             '20': 'DBL',
             '30': 'TPL',
+            '11': 'SGL+1Chld',
             '21': 'DBL+1Chld',
             '22': 'DBL+2Chld',
             '31': 'TPL+1Chld',
