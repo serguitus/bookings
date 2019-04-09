@@ -780,7 +780,7 @@ class BookingPackage(BookingService):
         default_permissions = ('add', 'change',)
     service = models.ForeignKey(Package)
     price_by_package_catalogue = models.BooleanField(
-        default=False, verbose_name='By Catalogue')
+        default=True, verbose_name='Use Catalogue Price')
 
     def fill_data(self):
         # setting name for this booking_service

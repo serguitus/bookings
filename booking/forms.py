@@ -566,7 +566,7 @@ class BookingPackageForm(forms.ModelForm):
         model = BookingPackage
         fields = '__all__'
         widgets = {
-            'service': autocomplete.ModelSelect2(url='allotment-autocomplete'),
+            'service': autocomplete.ModelSelect2(url='package-autocomplete'),
             'provider': autocomplete.ModelSelect2(
                 url='providerpackage-autocomplete',
                 forward=['service'],

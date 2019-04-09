@@ -35,15 +35,17 @@ from django.utils.functional import curry
 from finance.top_filters import AgencyTopFilter
 
 from booking.forms import (
-    PackageAllotmentInlineForm, PackageTransferInlineForm, PackageExtraInlineForm,
-    PackageAllotmentForm, PackageTransferForm, PackageExtraForm, AgencyPackageServiceForm,
-    QuoteForm, QuoteAllotmentForm, QuoteTransferForm, QuoteExtraForm, QuotePackageForm,
+    PackageAllotmentInlineForm, PackageTransferInlineForm,
+    PackageExtraInlineForm, PackageAllotmentForm,
+    PackageTransferForm, PackageExtraForm, AgencyPackageServiceForm,
+    QuoteForm, QuoteAllotmentForm, QuoteTransferForm,
+    QuoteExtraForm, QuotePackageForm,
     QuoteAllotmentInlineForm, QuoteTransferInlineForm,
     QuoteExtraInlineForm, QuotePackageInlineForm,
-    QuotePackageAllotmentInlineForm, QuotePackageTransferInlineForm, QuotePackageExtraInlineForm,
-    QuotePackageAllotmentForm, QuotePackageTransferForm, QuotePackageExtraForm,
-    BookingForm,
-    BookingServicePaxInlineForm,
+    QuotePackageAllotmentInlineForm, QuotePackageTransferInlineForm,
+    QuotePackageExtraInlineForm, QuotePackageAllotmentForm,
+    QuotePackageTransferForm, QuotePackageExtraForm,
+    BookingForm, BookingServicePaxInlineForm,
     BookingAllotmentInlineForm, BookingAllotmentForm,
     BookingTransferInlineForm, BookingTransferForm,
     BookingExtraInlineForm, BookingExtraForm,
@@ -470,12 +472,15 @@ class QuotePackageSiteModel(SiteModel):
         ('provider', 'price_by_package_catalogue'), 'id')
     list_display = (
         'quote', 'service', 'datetime_from', 'datetime_to', 'status',)
-    top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
+    top_filters = ('service', 'quote__reference',
+                   ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote__reference', 'service__name',)
     readonly_fields = ['datetime_to']
     details_template = 'booking/quotepackage_details.html'
     inlines = [
-        QuotePackageAllotmentInLine, QuotePackageTransferInLine, QuotePackageExtraInLine]
+        QuotePackageAllotmentInLine,
+        QuotePackageTransferInLine,
+        QuotePackageExtraInLine]
     form = QuotePackageForm
 
 
