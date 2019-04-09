@@ -1,5 +1,4 @@
 from __future__ import unicode_literals
-from common.sites import SiteModel
 
 from django.conf.urls import url
 from django.contrib import admin, messages
@@ -17,6 +16,7 @@ from django.template.response import SimpleTemplateResponse, TemplateResponse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext as _, ungettext
 from django.utils import six
+from functools import partial
 
 from finance.forms import (
     AccountingForm, CurrencyExchangeForm, TransferForm,
@@ -36,14 +36,10 @@ from finance.services import FinanceService
 from finance.top_filters import LoanEntityTopFilter, LoanAccountTopFilter
 
 from accounting.top_filters import AccountTopFilter
-
-from functools import update_wrapper, partial
-
-from reservas.admin import reservas_admin, ExtendedModelAdmin
-from reservas.admin import bookings_site
-
 from accounting.common_site import MENU_LABEL_ACCOUNTING
-
+from booking.services import BookingServices
+from common.sites import SiteModel
+from reservas.admin import bookings_site
 
 MENU_LABEL_FINANCE_BASIC = 'Finance Basic'
 MENU_LABEL_FINANCE_LOAN = 'Finance Loan'
@@ -688,8 +684,6 @@ class AgencySiteModel(SiteModel):
     def update_agency_amounts(self, request, queryset):
 
         agencies = list(queryset.all())
-
-        from booking.services import BookingServices
 
         BookingServices.process_agencies_amounts(agencies, True)
 

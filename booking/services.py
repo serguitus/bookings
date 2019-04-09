@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 """
 Booking Service
 """
-
-from datetime import date, timedelta
+from datetime import timedelta
 
 from django.db import transaction
 
@@ -22,6 +24,7 @@ from config.services import ConfigServices
 
 from finance.constants import STATUS_CANCELLED, STATUS_READY
 from finance.services import FinanceService
+from finance.models import Agency
 
 
 class BookingServices(object):
@@ -1962,7 +1965,6 @@ class BookingServices(object):
             return price
         return None
 
-
     @classmethod
     def _get_agency_queryset(
             cls, manager, agency_id, package_id, date_from, date_to):
@@ -1983,7 +1985,6 @@ class BookingServices(object):
                 'agency_service__date_from', '-agency_service__date_to'
             )
 
-
     @classmethod
     def process_agencies_amounts(cls, agencies, is_update):
         """
@@ -1998,7 +1999,6 @@ class BookingServices(object):
         #    p.start()
         #    p.join()
 
-
     @classmethod
     def generate_agencies_amounts(cls, agencies, is_update):
         """
@@ -2010,13 +2010,12 @@ class BookingServices(object):
 
         try:
             src_agency = Agency.objects.get(id=AGENCY_FOR_AMOUNTS)
-        except Exception as ex:
+        except Agency.DoesNotExist as ex:
             print(ex)
             # 'Source Agency not Found'
             return
         for dst_agency in agencies:
             cls.copy_agency_amounts(src_agency, dst_agency, is_update)
-
 
     @classmethod
     def copy_agency_amounts(cls, src_agency, dst_agency, is_update):
@@ -2025,7 +2024,6 @@ class BookingServices(object):
         """
         ConfigServices.copy_agency_amounts(src_agency, dst_agency, is_update)
         cls._copy_packages(src_agency, dst_agency, is_update)
-
 
     @classmethod
     def _copy_packages(cls, src_agency, dst_agency, is_update):
