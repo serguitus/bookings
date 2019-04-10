@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 """
 Accounting Service
 """
@@ -9,7 +12,7 @@ from django.utils import timezone
 from accounting.constants import (
     MOVEMENT_TYPE_INPUT, MOVEMENT_TYPE_OUTPUT,
     ERROR_UNKNOWN_MOVEMENT_TYPE, ERROR_ACCOUNT_REQUIRED, ERROR_DISABLED,
-    ERROR_AMOUNT_REQUIRED, ERROR_NOT_BALANCE, ERROR_SAME_CURRENCY, ERROR_DIFFERENT_CURRENCY)
+    ERROR_AMOUNT_REQUIRED, ERROR_NOT_BALANCE, ERROR_DIFFERENT_CURRENCY)
 from accounting.models import Account, Operation, OperationMovement
 
 
