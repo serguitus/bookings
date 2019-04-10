@@ -12,12 +12,12 @@ from booking import constants
 from booking.models import (
     Quote, QuotePaxVariant,
     QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
-    QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
+    QuotePackageService, QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
     Package, PackageAllotment, PackageTransfer, PackageExtra,
     AgencyPackageService, AgencyPackageDetail,
     Booking, BookingService, BookingPax, BookingServicePax,
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
-    BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
+    BookingPackageService, BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
     BookingInvoice, BookingInvoiceLine, BookingInvoicePartial)
 
 from config.services import ConfigServices
@@ -359,6 +359,12 @@ class BookingServices(object):
 
     @classmethod
     def update_quote_package(cls, quote_package):
+
+        services = list(
+            QuotePackageService.objects.filter(quote_package_id=quote_package.id).all())
+        if services:
+            return
+
         package = quote_package.service
         # create bookingallotment list
         for package_allotment in PackageAllotment.objects.filter(package_id=package.id).all():
@@ -1719,6 +1725,12 @@ class BookingServices(object):
             avoid_package_services = booking_package.avoid_package_services
         if avoid_package_services:
             return
+
+        services = list(
+            BookingPackageService.objects.filter(booking_package_id=booking_package.id).all())
+        if services:
+            return
+
         package = booking_package.service
         # create bookingallotment list
         for package_allotment in PackageAllotment.objects.filter(package_id=package.id).all():
