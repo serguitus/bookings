@@ -13,17 +13,10 @@ class Migration(migrations.Migration):
     dependencies = [
         ('finance', '0013_auto_20190219_1436'),
         ('finance', '0002_finantialdocument_details'),
-        ('config', '0019_auto_20190219_1026'),
-        ('config', '0013_auto_20190205_1258'),
         ('finance', '0011_transfer_operation_cost'),
-        ('config', '0007_auto_20181120_1510'),
-        ('config', '0017_auto_20190215_1416'),
-        ('config', '0005_auto_20181030_0937'),
         ('finance', '0001_initial'),
         ('config', '0001_initial'),
-        ('config', '0018_auto_20190215_1522'),
         ('finance', '0015_auto_20190402_0637'),
-        ('config', '0021_service_infant_age'),
     ]
 
     operations = [
