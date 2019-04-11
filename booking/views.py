@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.contrib import messages
 from django.db.models import Q
@@ -377,17 +378,9 @@ class BookingPackageAmountsView(ModelChangeFormProcessorView):
         allotment_list = inlines[1]
         transfer_list = inlines[2]
         extra_list = inlines[3]
-        service = bookingpackage.service
-        cost_groups = BookingServices.find_paxes_groups(pax_list, service, True)
-        price_groups = BookingServices.find_paxes_groups(pax_list, service, False)
-        date_from = bookingpackage.datetime_from
-        date_to = bookingpackage.datetime_to
 
         code, message, cost, cost_msg, price, price_msg = BookingServices.bookingpackage_amounts(
-            bookingpackage.service_id, date_from, date_to, cost_groups, price_groups,
-            bookingpackage.provider, bookingpackage.booking.agency,
-            allotment_list, transfer_list, extra_list,
-        )
+            bookingpackage, pax_list, allotment_list, transfer_list, extra_list)
 
         return JsonResponse({
             'code': code,
@@ -446,7 +439,7 @@ def build_voucher(request, id):
     context = {'pagesize': 'Letter',
                'booking': booking,
                'office': Office.objects.get(id=1),
-               'services': [2, 1],}
+               'services': [2, 1]}
     # html = template.render(context)
     # result = StringIO.StringIO()
     # pdf = pisa.pisaDocument(StringIO.StringIO(html), dest=result)
