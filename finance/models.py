@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 from django.db import connection, models
 from django.core.exceptions import ValidationError
 from django.conf import settings
@@ -32,9 +34,13 @@ class Office(models.Model):
     address = models.CharField(max_length=100)
     detail1 = models.CharField(max_length=100, blank=True, null=True)
     detail2 = models.CharField(max_length=100, blank=True, null=True)
+    default_office = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        return self.name
 
     def __str__(self):
-        return self.name
+        return self.__unicode__()
 
 
 class SummaryModel(models.Model):
