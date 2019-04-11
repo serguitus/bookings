@@ -8,8 +8,6 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    replaces = [(b'config', '0001_initial'), (b'config', '0002_location_short_name'), (b'config', '0003_auto_20181019_1757'), (b'config', '0004_auto_20181029_1025'), (b'config', '0005_auto_20181030_0937'), (b'config', '0006_auto_20181114_1443'), (b'config', '0007_auto_20181120_1510'), (b'config', '0008_auto_20181213_0848'), (b'config', '0009_auto_20190128_2036'), (b'config', '0010_auto_20190201_1157'), (b'config', '0011_auto_20190201_1205'), (b'config', '0012_extra_location'), (b'config', '0013_auto_20190205_1258'), (b'config', '0014_auto_20190205_1410'), (b'config', '0015_auto_20190205_1429'), (b'config', '0016_auto_20190211_1039'), (b'config', '0017_auto_20190215_1416'), (b'config', '0018_auto_20190215_1522'), (b'config', '0019_auto_20190219_1026'), (b'config', '0020_auto_20190313_1105'), (b'config', '0021_service_infant_age')]
-
     initial = True
 
     dependencies = [
