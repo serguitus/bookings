@@ -377,17 +377,9 @@ class BookingPackageAmountsView(ModelChangeFormProcessorView):
         allotment_list = inlines[1]
         transfer_list = inlines[2]
         extra_list = inlines[3]
-        service = bookingpackage.service
-        cost_groups = BookingServices.find_paxes_groups(pax_list, service, True)
-        price_groups = BookingServices.find_paxes_groups(pax_list, service, False)
-        date_from = bookingpackage.datetime_from
-        date_to = bookingpackage.datetime_to
 
         code, message, cost, cost_msg, price, price_msg = BookingServices.bookingpackage_amounts(
-            bookingpackage.service_id, date_from, date_to, cost_groups, price_groups,
-            bookingpackage.provider, bookingpackage.booking.agency,
-            allotment_list, transfer_list, extra_list,
-        )
+            bookingpackage, pax_list, allotment_list, transfer_list, extra_list)
 
         return JsonResponse({
             'code': code,
