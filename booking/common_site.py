@@ -903,7 +903,7 @@ class BookingPackageSiteModel(SiteModel):
     top_filters = ['booking__name', 'service', 'booking__reference',
                    ('datetime_from', DateTopFilter), 'status']
     ordering = ['datetime_from', 'booking__reference', 'service__name']
-    readonly_fields = ['datetime_from', 'datetime_to', 'status']
+    readonly_fields = ['status']
     details_template = 'booking/bookingpackage_details.html'
     inlines = [BookingServicePaxInline, BookingPackageAllotmentInLine,
                BookingPackageTransferInLine, BookingPackageExtraInLine]
