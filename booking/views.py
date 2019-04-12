@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.contrib import messages
 from django.db.models import Q
@@ -438,7 +439,7 @@ def build_voucher(request, id):
     context = {'pagesize': 'Letter',
                'booking': booking,
                'office': Office.objects.get(id=1),
-               'services': [2, 1],}
+               'services': [2, 1]}
     # html = template.render(context)
     # result = StringIO.StringIO()
     # pdf = pisa.pisaDocument(StringIO.StringIO(html), dest=result)

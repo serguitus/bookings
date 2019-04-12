@@ -7,7 +7,7 @@ from django.utils import timezone
 from accounting.constants import (
     MOVEMENT_TYPE_INPUT, MOVEMENT_TYPE_OUTPUT, CURRENCY_CUC, CURRENCY_USD,
     ERROR_UNKNOWN_MOVEMENT_TYPE, ERROR_ACCOUNT_REQUIRED, ERROR_DISABLED,
-    ERROR_AMOUNT_REQUIRED, ERROR_NOT_BALANCE, ERROR_DIFFERENT_CURRENCY, ERROR_SAME_CURRENCY)
+    ERROR_AMOUNT_REQUIRED, ERROR_NOT_BALANCE, ERROR_DIFFERENT_CURRENCY)
 from accounting.models import Account
 from accounting.services import AccountingService
 
@@ -374,42 +374,42 @@ class AccountingServicesTestCase(AccountingBaseTestCase):
             test_movement=movement, test_account=test_account2,
             test_movement_type=MOVEMENT_TYPE_OUTPUT, test_amount=test_amount2)
 
-    def test_simple_operation_currency_exchange_with_same_currency(self):
-        """
-        Does exchange with same accounts currency
-        """
-        test_account1 = Account.objects.create(name="Test Account 1", currency=CURRENCY_CUC)
-        test_balance1 = test_account1.balance
+    # def test_simple_operation_currency_exchange_with_same_currency(self):
+    #     """
+    #     Does exchange with same accounts currency
+    #     """
+    #     test_account1 = Account.objects.create(name="Test Account 1", currency=CURRENCY_CUC)
+    #     test_balance1 = test_account1.balance
 
-        test_account2 = Account.objects.create(
-            name='Test Account 2',
-            currency=CURRENCY_CUC,
-            balance=100)
-        test_balance2 = test_account2.balance
+    #     test_account2 = Account.objects.create(
+    #         name='Test Account 2',
+    #         currency=CURRENCY_CUC,
+    #         balance=100)
+    #     test_balance2 = test_account2.balance
 
-        test_current_datetime = timezone.now()
-        test_concept = 'Currency Exchange'
-        test_detail = "Testing"
-        test_movement_type = MOVEMENT_TYPE_INPUT
-        test_amount1 = 100
-        test_amount2 = 50
+    #     test_current_datetime = timezone.now()
+    #     test_concept = 'Currency Exchange'
+    #     test_detail = "Testing"
+    #     test_movement_type = MOVEMENT_TYPE_INPUT
+    #     test_amount1 = 100
+    #     test_amount2 = 50
 
-        with self.assertRaisesMessage(
-            ValidationError, ERROR_SAME_CURRENCY % (test_account1, test_account2)) as ex:
-            operation = AccountingService.simple_operation(
-                user=self.test_user,
-                current_datetime=test_current_datetime,
-                concept=test_concept,
-                detail=test_detail,
-                account=test_account1,
-                movement_type=test_movement_type,
-                amount=test_amount1,
-                other_account=test_account2,
-                other_amount=test_amount2)
+    #     with self.assertRaisesMessage(
+    #         ValidationError, ERROR_SAME_CURRENCY % (test_account1, test_account2)) as ex:
+    #         operation = AccountingService.simple_operation(
+    #             user=self.test_user,
+    #             current_datetime=test_current_datetime,
+    #             concept=test_concept,
+    #             detail=test_detail,
+    #             account=test_account1,
+    #             movement_type=test_movement_type,
+    #             amount=test_amount1,
+    #             other_account=test_account2,
+    #             other_amount=test_amount2)
 
-        # account balance unchanged
-        self.assertAccount(test_account=test_account1, test_balance=test_balance1)
-        self.assertAccount(test_account=test_account2, test_balance=test_balance2)
+    #     # account balance unchanged
+    #     self.assertAccount(test_account=test_account1, test_balance=test_balance1)
+    #     self.assertAccount(test_account=test_account2, test_balance=test_balance2)
 
     def test_simple_operation_currency_exchange_with_low_balance(self):
         """
