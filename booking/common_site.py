@@ -532,6 +532,17 @@ class BookingAllotmentInLine(CommonTabularInline):
     classes = ['collapse']
 
 
+class BookingPackageAllotmentInLine(CommonStackedInline):
+    show_change_link = True
+    model = BookingPackageAllotment
+    extra = 0
+    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
+              ('room_type', 'board_type'), 'provider']
+    ordering = ['datetime_from']
+    form = BookingPackageAllotmentInlineForm
+    classes = ['collapse']
+
+
 class BookingTransferInLine(CommonTabularInline):
     show_change_link = True
     model = BookingTransfer
@@ -545,15 +556,42 @@ class BookingTransferInLine(CommonTabularInline):
     classes = ['collapse']
 
 
+class BookingPackageTransferInLine(CommonStackedInline):
+    show_change_link = True
+    model = BookingPackageTransfer
+    extra = 0
+    fields = [
+        ('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to', 'time'),
+        ('location_from', 'pickup', 'schedule_from'),
+        ('place_from'),
+        ('location_to', 'dropoff', 'schedule_to'),
+        ('place_to'),
+        ('quantity', 'provider')]
+    ordering = ['datetime_from']
+    form = BookingPackageTransferInlineForm
+    classes = ['collapse']
+
+
 class BookingExtraInLine(CommonTabularInline):
     show_change_link = True
     model = BookingExtra
     extra = 0
     fields = [('service', 'status', 'conf_number'),
               ('datetime_from', 'datetime_to', 'time'),
-              ('quantity', 'parameter'), 'provider']
+              ('addon', 'quantity', 'parameter'), 'provider']
     ordering = ['datetime_from']
     form = BookingExtraInlineForm
+    classes = ('collapse',)
+
+
+class BookingPackageExtraInLine(CommonStackedInline):
+    show_change_link = True
+    model = BookingPackageExtra
+    extra = 0
+    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to', 'time'),
+              ('addon', 'quantity', 'parameter'), 'provider']
+    ordering = ['datetime_from']
+    form = BookingPackageExtraInlineForm
     classes = ('collapse',)
 
 
@@ -662,7 +700,18 @@ class BookingSiteModel(SiteModel):
         return result
 
 
-class BookingAllotmentSiteModel(SiteModel):
+class BookingChangeAmountsSiteModel(SiteModel):
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super().get_readonly_fields(request, obj) or []
+
+        if not request.user.has_perm("%s.%s" % ('booking', 'change_amounts_booking')):
+            return readonly_fields + ['manual_cost', 'cost_amount', 'manual_price', 'price_amount']
+
+        return readonly_fields
+
+
+class BookingAllotmentSiteModel(BookingChangeAmountsSiteModel):
     model_order = 1210
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
@@ -673,7 +722,7 @@ class BookingAllotmentSiteModel(SiteModel):
                 'booking', ('service', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to'),
                 ('room_type', 'board_type'),
-                'provider', 'cost_amount', 'price_amount', 'id')
+                ('manual_cost', 'provider'), 'cost_amount', 'manual_price', 'price_amount', 'id')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -699,7 +748,43 @@ class BookingAllotmentSiteModel(SiteModel):
         return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
 
 
-class BookingTransferSiteModel(SiteModel):
+class BookingPackageAllotmentSiteModel(BookingChangeAmountsSiteModel):
+    model_order = 1310
+    menu_label = MENU_LABEL_BOOKING
+    menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                'booking_package', ('service', 'status', 'conf_number'),
+                ('datetime_from', 'datetime_to'),
+                ('room_type', 'board_type'),
+                ('manual_cost', 'provider'), 'cost_amount', 'manual_price', 'price_amount', 'id')
+        }),
+        ('Notes', {'fields': ('p_notes', 'provider_notes'),
+                   'classes': ('collapse', 'wide')})
+    )
+    list_display = ('booking_package', 'name', 'datetime_from',
+                    'datetime_to', 'status',)
+    top_filters = (('booking_package__booking__name', 'booking_package__Booking'),
+                   ('name', 'Service'),
+                   'booking_package__booking__reference', 'conf_number',
+                   ('datetime_from', DateTopFilter), 'status')
+    ordering = ('datetime_from', 'booking_package', 'service__name',)
+    form = BookingPackageAllotmentForm
+    add_form_template = 'booking/bookingpackageallotment_change_form.html'
+    change_form_template = 'booking/bookingpackageallotment_change_form.html'
+
+    def response_post_save_add(self, request, obj):
+        return redirect(
+            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
+
+    def response_post_save_change(self, request, obj):
+        return redirect(
+            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
+
+
+class BookingTransferSiteModel(BookingChangeAmountsSiteModel):
     model_order = 1220
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
@@ -713,7 +798,7 @@ class BookingTransferSiteModel(SiteModel):
                 ('place_from'),
                 ('location_to', 'dropoff', 'schedule_to'),
                 ('place_to'),
-                 'provider', 'cost_amount', 'price_amount','id')
+                ('manual_cost', 'provider'), 'cost_amount', 'manual_price', 'price_amount', 'id')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -738,7 +823,46 @@ class BookingTransferSiteModel(SiteModel):
         return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
 
 
-class BookingExtraSiteModel(SiteModel):
+class BookingPackageTransferSiteModel(BookingChangeAmountsSiteModel):
+    model_order = 1320
+    menu_label = MENU_LABEL_BOOKING
+    menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                'booking_package', ('service', 'status', 'conf_number'),
+                ('datetime_from', 'datetime_to', 'time'),
+                ('location_from', 'pickup', 'schedule_from'),
+                ('place_from'),
+                ('location_to', 'dropoff', 'schedule_to'),
+                ('place_to'),
+                ('manual_cost', 'provider'), 'cost_amount', 'manual_price', 'price_amount', 'id')
+        }),
+        ('Notes', {'fields': ('p_notes', 'provider_notes'),
+                   'classes': ('collapse', 'wide')})
+    )
+    list_display = ('booking_package', 'name', 'datetime_from', 'time', 'status')
+    top_filters = (
+        ('booking_package__booking__name', 'Booking_package'),
+        ('name', 'Service'),
+        'booking_package__booking__reference', 'conf_number',
+        ('datetime_from', DateTopFilter), 'status',)
+    ordering = ('datetime_from', 'booking_package', 'service__name',)
+    form = BookingPackageTransferForm
+    add_form_template = 'booking/bookingpackagetransfer_change_form.html'
+    change_form_template = 'booking/bookingpackagetransfer_change_form.html'
+
+    def response_post_save_add(self, request, obj):
+        return redirect(
+            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
+
+    def response_post_save_change(self, request, obj):
+        return redirect(
+            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
+
+
+class BookingExtraSiteModel(BookingChangeAmountsSiteModel):
     model_order = 1230
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
@@ -749,7 +873,7 @@ class BookingExtraSiteModel(SiteModel):
                 'booking', ('service', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
                 ('addon', 'quantity', 'parameter'),
-                'provider', 'cost_amount', 'price_amount', 'id')
+                ('manual_cost', 'provider'), 'cost_amount', 'manual_price', 'price_amount', 'id')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -771,108 +895,22 @@ class BookingExtraSiteModel(SiteModel):
         return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
 
 
-class BookingPackageAllotmentInLine(CommonStackedInline):
-    model = BookingPackageAllotment
-    extra = 0
-    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
-              ('room_type', 'board_type'), 'provider']
-    ordering = ['datetime_from']
-    form = BookingPackageAllotmentInlineForm
-    classes = ['collapse']
-
-
-class BookingPackageAllotmentSiteModel(SiteModel):
-    model_order = 1310
-    menu_label = MENU_LABEL_BOOKING
-    menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
-
-    fields = ['booking_package', ('service', 'status', 'conf_number'),
-                ('datetime_from', 'datetime_to'),
-                ('room_type', 'board_type'),
-                'provider', 'id']
-    list_display = ('booking_package', 'name', 'datetime_from',
-                    'datetime_to', 'status',)
-    top_filters = (('booking_package__booking__name', 'booking_package__Booking'),
-                   ('name', 'Service'),
-                   'booking_package__booking__reference', 'conf_number',
-                   ('datetime_from', DateTopFilter), 'status')
-    ordering = ('datetime_from', 'booking_package', 'service__name',)
-    form = BookingPackageAllotmentForm
-
-    def response_post_save_add(self, request, obj):
-        return redirect(
-            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
-
-    def response_post_save_change(self, request, obj):
-        return redirect(
-            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
-
-
-class BookingPackageTransferInLine(CommonStackedInline):
-    model = BookingPackageTransfer
-    extra = 0
-    fields = [
-        ('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to', 'time'),
-        ('location_from', 'pickup', 'schedule_from'),
-        ('place_from'),
-        ('location_to', 'dropoff', 'schedule_to'),
-        ('place_to'),
-        ('quantity', 'provider')]
-    ordering = ['datetime_from']
-    form = BookingPackageTransferInlineForm
-    classes = ['collapse']
-
-
-class BookingPackageTransferSiteModel(SiteModel):
-    model_order = 1320
-    menu_label = MENU_LABEL_BOOKING
-    menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
-
-    fields = [
-        'booking_package', ('service', 'status', 'conf_number'),
-        ('datetime_from', 'datetime_to', 'time'),
-        ('location_from', 'pickup', 'schedule_from'),
-        ('place_from'),
-        ('location_to', 'dropoff', 'schedule_to'),
-        ('place_to'),
-        'provider', 'id']
-    list_display = ('booking_package', 'name', 'datetime_from', 'time', 'status')
-    top_filters = (
-        ('booking_package__booking__name', 'Booking_package'),
-        ('name', 'Service'),
-        'booking_package__booking__reference', 'conf_number',
-        ('datetime_from', DateTopFilter), 'status',)
-    ordering = ('datetime_from', 'booking_package', 'service__name',)
-    form = BookingPackageTransferForm
-
-    def response_post_save_add(self, request, obj):
-        return redirect(
-            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
-
-    def response_post_save_change(self, request, obj):
-        return redirect(
-            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
-
-
-class BookingPackageExtraInLine(CommonStackedInline):
-    model = BookingPackageExtra
-    extra = 0
-    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to', 'time'),
-              ('addon', 'quantity', 'parameter'), 'provider']
-    ordering = ['datetime_from']
-    form = BookingPackageExtraInlineForm
-    classes = ('collapse',)
-
-
-class BookingPackageExtraSiteModel(SiteModel):
+class BookingPackageExtraSiteModel(BookingChangeAmountsSiteModel):
     model_order = 1330
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
 
-    fields = ['booking_package', ('service', 'status', 'conf_number'),
-              ('datetime_from', 'datetime_to', 'time'),
-              ('addon', 'quantity', 'parameter'),
-              'provider', 'id']
+    fieldsets = (
+        (None, {
+            'fields': (
+                'booking_package', ('service', 'status', 'conf_number'),
+                ('datetime_from', 'datetime_to', 'time'),
+                ('addon', 'quantity', 'parameter'),
+                ('manual_cost', 'provider'), 'cost_amount', 'manual_price', 'price_amount', 'id')
+        }),
+        ('Notes', {'fields': ('p_notes', 'provider_notes'),
+                   'classes': ('collapse', 'wide')})
+    )
     list_display = ('booking_package', 'name', 'addon', 'quantity', 'parameter',
                     'datetime_from', 'datetime_to', 'time', 'status',)
     top_filters = (
@@ -880,6 +918,8 @@ class BookingPackageExtraSiteModel(SiteModel):
         ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'booking_package', 'service__name',)
     form = BookingPackageExtraForm
+    add_form_template = 'booking/bookingpackageextra_change_form.html'
+    change_form_template = 'booking/bookingpackageextra_change_form.html'
 
     def response_post_save_add(self, request, obj):
         return redirect(
@@ -889,16 +929,22 @@ class BookingPackageExtraSiteModel(SiteModel):
         return redirect(
             reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
 
-
-class BookingPackageSiteModel(SiteModel):
+class BookingPackageSiteModel(BookingChangeAmountsSiteModel):
     model_order = 1240
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
 
-    fields = [
-        'booking', ('service', 'status', 'conf_number'),
-        ('datetime_from', 'datetime_to'),
-        'provider', 'cost_amount', 'price_by_package_catalogue', 'price_amount', 'id']
+    fieldsets = (
+        (None, {
+            'fields': (
+                'booking', ('service', 'status', 'conf_number'),
+                ('datetime_from', 'datetime_to'),
+                ('manual_cost', 'provider'), 'cost_amount',
+                ('manual_price', 'price_by_package_catalogue'), 'price_amount', 'id')
+        }),
+        ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
+                   'classes': ('collapse', 'wide')})
+    )
     list_display = ['booking', 'name', 'datetime_from', 'datetime_to', 'status']
     top_filters = ['booking__name', 'service', 'booking__reference',
                    ('datetime_from', DateTopFilter), 'status']

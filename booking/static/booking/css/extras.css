@@ -134,3 +134,7 @@ div.inline-change-link {
     padding: 5px;
     vertical-align: baseline;
 }
+
+div.readonly {
+    max-width: 160px;
+}

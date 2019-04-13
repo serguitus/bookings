@@ -2,27 +2,41 @@
 var bookingtransfer_amounts_url = base_url + 'booking/bookingtransfer-amounts/';
 //Entry Points to get time for booking transfer
 var bookingtransfer_time_url = base_url + 'booking/bookingtransfer-time/';
+
 var time_autofilled = false;
 
 $(document).ready(function(){
-  $('#bookingtransfer_form #id_cost_amount').after("<button class='btn btn-success btn-copy btn-copy-cost'><<</button><span class='computed-value'>Calculated: <b data-computed=cost>N/A</b></span>");
-  $('#bookingtransfer_form #id_price_amount').after("<button class='btn btn-success btn-copy btn-copy-price'><<</button><span class='computed-value'>Calculated: <b data-computed=price>N/A</b></span>");
 
   $('#bookingtransfer_form #id_time').after("<button class='btn btn-success btn-copy btn-copy-time'><<</button><span class='computed-value'>Calculated: <b data-computed=time>N/A</b></span>");
 
-  var computedCost = $('b[data-computed=cost]');
-  var computedPrice = $('b[data-computed=price]');
   var computedTime = $('b[data-computed=time]');
+ 
+  var timeInput = $('#id_time')[0];
+
+
+  var computedCost = $('#bookingtransfer_form div.field-cost_amount div.readonly');
+  if (computedCost.length == 0) {
+    $('#bookingtransfer_form #id_cost_amount').after("<button class='btn btn-success btn-copy btn-copy-cost'><<</button><span class='computed-value'>Calculated: <b data-computed=cost>N/A</b></span>");
+    computedCost = $('b[data-computed=cost]');
+  } else {
+    $('div.field-manual_cost').hide();
+  }
+
+  var computedPrice = $('#bookingtransfer_form div.field-price_amount div.readonly');
+  if (computedPrice.length == 0) {
+    $('#bookingtransfer_form #id_price_amount').after("<button class='btn btn-success btn-copy btn-copy-price'><<</button><span class='computed-value'>Calculated: <b data-computed=price>N/A</b></span>");
+    computedPrice = $('b[data-computed=price]');
+  } else {
+    $('div.field-manual_price').hide();
+  }
+
+  var manualCost = $('#id_manual_cost')[0];
+  var manualPrice = $('#id_manual_price')[0];
 
   var costInput = $('#id_cost_amount')[0];
   var priceInput = $('#id_price_amount')[0];
-  var timeInput = $('#id_time')[0];
 
-  var calcCost = $('div.field-box.field-calculated_cost').children()[1];
-  var calcPrice = $('div.field-box.field-calculated_price').children()[1];
-  var calcTime = $('div.field-box.field-calculated_time').children()[1];
-
-  function compare_numbers() {
+   function compare_numbers() {
     // a function to check if computed prices differ from set prices
     // it highlights different numbers
     if(costInput.value != Number(computedCost.html())){
@@ -168,15 +182,25 @@ $(document).ready(function(){
     }).done(function(data){
       if(data['cost_message']){
         computedCost.html(data['cost_message']);
-      }
-      else{
+        if (manualCost && !manualCost.checked) {
+          costInput.value = '';
+        }
+      }else{
         computedCost.html(data['cost']);
+        if (manualCost && !manualCost.checked) {
+          costInput.value = Number(data['cost']);
+        }
       }
       if(data['price_message']){
         computedPrice.html(data['price_message']);
-      }
-      else{
+        if (manualPrice && !manualPrice.checked) {
+          priceInput.value = '';
+        }
+      }else{
         computedPrice.html(data['price']);
+        if (manualPrice && !manualPrice.checked) {
+          priceInput.value = Number(data['price']);
+        }
       }
       compare_numbers();
     }).fail(function(){
@@ -216,6 +240,44 @@ $(document).ready(function(){
     get_computed_amounts(bookingtransfer_amounts_url, data);
     get_computed_time(bookingtransfer_time_url, data, evt);
   });
+
+  function changed_manual_cost(){
+    if(manualCost.checked){
+      $('.btn-copy-cost').show()
+      costInput.readOnly = false;
+    } else {
+      $('.btn-copy-cost').hide()
+      costInput.readOnly = true;
+      data = $('#bookingtransfer_form').serialize();
+      get_computed_amounts(bookingtransfer_amounts_url, data);
+    }
+    compare_numbers()
+  }
+
+  $('#id_manual_cost').on('change', function(e){
+    e.preventDefault();
+    changed_manual_cost();
+  })
+  changed_manual_cost();
+
+  function changed_manual_price(){
+    if(manualPrice.checked){
+      $('.btn-copy-price').show()
+      priceInput.readOnly = false;
+    } else {
+      $('.btn-copy-price').hide()
+      priceInput.readOnly = true;
+      data = $('#bookingtransfer_form').serialize();
+      get_computed_amounts(bookingtransfer_amounts_url, data);
+    }
+    compare_numbers()
+  }
+
+  $('#id_manual_price').on('change', function(e){
+    e.preventDefault();
+    changed_manual_price();
+  })
+  changed_manual_price();
 
   $('.btn-copy-cost').on('click', function(e){
     e.preventDefault();

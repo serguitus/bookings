@@ -358,7 +358,7 @@ class ConfigServices(object):
 
         # provider cost
         # obtain details order by date_from asc, date_to desc
-        if cost_groups is None:
+        if cost_groups is None or not cost_groups:
             cost = None
             cost_message = 'Paxes Missing'
         elif provider is None:
@@ -382,7 +382,7 @@ class ConfigServices(object):
 
         # agency price
         # obtain details order by date_from asc, date_to desc
-        if price_groups is None:
+        if price_groups is None or not price_groups:
             price = None
             price_message = 'Paxes Missing'
         elif agency is None:
@@ -425,7 +425,7 @@ class ConfigServices(object):
 
         # provider cost
         # obtain details order by date_from asc, date_to desc
-        if cost_groups is None:
+        if cost_groups is None or not cost_groups:
             cost = None
             cost_message = 'Paxes Missing'
         elif provider is None:
@@ -464,7 +464,7 @@ class ConfigServices(object):
 
         # provider cost
         # obtain details order by date_from asc, date_to desc
-        if cost_groups is None and service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
+        if (cost_groups is None or not cost_groups) and service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
             cost = None
             cost_message = 'Paxes Missing'
         elif provider is None:
@@ -488,7 +488,7 @@ class ConfigServices(object):
 
         # agency price
         # obtain details order by date_from asc, date_to desc
-        if price_groups is None and service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
+        if (price_groups is None or not price_groups) and service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
             price = None
             price_message = 'Paxes Missing'
         elif agency is None:
@@ -528,7 +528,7 @@ class ConfigServices(object):
 
         # provider cost
         # obtain details order by date_from asc, date_to desc
-        if cost_groups is None and service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
+        if (cost_groups is None or not cost_groups) and service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
             cost = None
             cost_message = 'Paxes Missing'
         elif provider is None:
@@ -574,7 +574,7 @@ class ConfigServices(object):
 
         # provider cost
         # obtain details order by date_from asc, date_to desc
-        if cost_groups is None and service.cost_type == EXTRA_COST_TYPE_BY_PAX:
+        if (cost_groups is None or not cost_groups) and service.cost_type == EXTRA_COST_TYPE_BY_PAX:
             cost = None
             cost_message = 'Paxes Missing'
         elif provider is None:
@@ -636,7 +636,7 @@ class ConfigServices(object):
 
         # agency price
         # obtain details order by date_from asc, date_to desc
-        if price_groups is None and service.cost_type == EXTRA_COST_TYPE_BY_PAX:
+        if (price_groups is None or not price_groups) and service.cost_type == EXTRA_COST_TYPE_BY_PAX:
             price = None
             price_message = 'Paxes Missing'
         elif agency is None:
@@ -717,7 +717,7 @@ class ConfigServices(object):
 
         # provider cost
         # obtain details order by date_from asc, date_to desc
-        if cost_groups is None and service.cost_type == EXTRA_COST_TYPE_BY_PAX:
+        if (cost_groups is None or not cost_groups) and service.cost_type == EXTRA_COST_TYPE_BY_PAX:
             cost = None
             cost_message = 'Paxes Missing'
         elif provider is None:

@@ -1574,14 +1574,14 @@ class BookingServices(object):
             groups = dict()
             for pax in pax_list:
                 if not pax.booking_pax_id is None and not pax.group is None:
-                    if for_cost and pax.is_cost_free:
-                        continue
-                    if not for_cost and pax.is_price_free:
-                        continue
                     if not groups.__contains__(pax.group):
                         groups[pax.group] = dict()
                         groups[pax.group][0] = 0 # adults count
                         groups[pax.group][1] = 0 # child count
+                    if for_cost and pax.is_cost_free:
+                        continue
+                    if not for_cost and pax.is_price_free:
+                        continue
                     if pax.booking_pax.pax_age is None:
                         groups[pax.group][0] += 1
                     else:

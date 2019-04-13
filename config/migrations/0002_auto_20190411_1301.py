@@ -15,11 +15,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='extra',
             name='cost_type',
-            field=models.CharField(choices=[(b'F', b'Fixed'), (b'P', b'By Pax')], max_length=5),
+            field=models.CharField(choices=[('F', 'Fixed'), ('P', 'By Pax')], max_length=5),
         ),
         migrations.AlterField(
             model_name='transfer',
             name='cost_type',
-            field=models.CharField(choices=[(b'F', b'Fixed'), (b'P', b'By Pax')], max_length=5),
+            field=models.CharField(choices=[('F', 'Fixed'), ('P', 'By Pax')], max_length=5),
         ),
     ]

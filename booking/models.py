@@ -457,6 +457,9 @@ class Booking(models.Model):
         verbose_name = 'Booking'
         verbose_name_plural = 'Bookings'
         default_permissions = ('add', 'change',)
+        permissions = (
+            ("change_amounts", "Can change amounts of Booking"),
+        )
     name = models.CharField(max_length=100)
     agency = models.ForeignKey(Agency)
     reference = models.CharField(max_length=25, blank=True, null=True, verbose_name='TTOO Ref')
@@ -536,15 +539,12 @@ class BookingPax(models.Model):
             return '%s' % (self.pax_name)
 
 
-class BookingService(BaseService, DateInterval):
+class BookService(models.Model):
     """
-    Booking Service
+    Booking Pax
     """
     class Meta:
-        verbose_name = 'Booking Service'
-        verbose_name_plural = 'Booking Services'
-        default_permissions = ('add', 'change',)
-    booking = models.ForeignKey(Booking, related_name='booking_services')
+        abstract = True
     # This holds the confirmation number when it exists
     conf_number = models.CharField(max_length=20, blank=True, null=True)
     cost_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
@@ -554,10 +554,23 @@ class BookingService(BaseService, DateInterval):
     provider_invoice = models.ForeignKey(ProviderInvoice, blank=True, null=True)
     p_notes = models.CharField(
         max_length=1000, blank=True, null=True, verbose_name='Private Notes')
-    v_notes = models.CharField(
-        max_length=1000, blank=True, null=True, verbose_name='Voucher Notes')
     provider_notes = models.CharField(
         max_length=1000, blank=True, null=True, verbose_name='Provider Notes')
+    manual_cost = models.BooleanField(default=False)
+    manual_price = models.BooleanField(default=False)
+
+
+class BookingService(BaseService, BookService, DateInterval):
+    """
+    Booking Service
+    """
+    class Meta:
+        verbose_name = 'Booking Service'
+        verbose_name_plural = 'Booking Services'
+        default_permissions = ('add', 'change',)
+    booking = models.ForeignKey(Booking, related_name='booking_services')
+    v_notes = models.CharField(
+        max_length=1000, blank=True, null=True, verbose_name='Voucher Notes')
 
     def fill_data(self):
         pass
@@ -794,7 +807,7 @@ class BookingPackage(BookingService):
             super(BookingPackage, self).save(*args, **kwargs)
 
 
-class BookingPackageService(BaseService, DateInterval):
+class BookingPackageService(BaseService, BookService, DateInterval):
     """
     Booking Package Service
     """
@@ -803,7 +816,6 @@ class BookingPackageService(BaseService, DateInterval):
         verbose_name_plural = 'Bookingss Packages Services'
         default_permissions = ('add', 'change',)
     booking_package = models.ForeignKey(BookingPackage, related_name='booking_package_services')
-    conf_number = models.CharField(max_length=20, blank=True, null=True)
 
     def fill_data(self):
         pass

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 """
 Config Models
 """
@@ -336,8 +338,8 @@ class AgencyExtraDetail(AmountDetail):
                            'pax_range_max')
     agency_service = models.ForeignKey(AgencyExtraService)
     addon = models.ForeignKey(Addon, blank=True, null=True)
-    pax_range_min = models.SmallIntegerField(blank=True, null=True)
-    pax_range_max = models.SmallIntegerField(blank=True, null=True)
+    pax_range_min = models.SmallIntegerField(default=0)
+    pax_range_max = models.SmallIntegerField(default=0)
 
 
 #===============================================================================
