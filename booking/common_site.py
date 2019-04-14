@@ -741,6 +741,10 @@ class BookingAllotmentSiteModel(BookingChangeAmountsSiteModel):
     change_form_template = 'booking/bookingallotment_change_form.html'
     inlines = [BookingServicePaxInline]
 
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        return BookingServices.save_bookingallotment(request, obj, form, change)
+
     def response_post_save_add(self, request, obj):
         return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
 

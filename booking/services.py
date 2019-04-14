@@ -2110,3 +2110,8 @@ class BookingServices(object):
                         defaults=ConfigServices.calculate_default_amounts(
                             detail, src_agency.gain_percent, dst_agency.gain_percent)
                     )
+
+    @classmethod
+    def save_bookingallotment(cls, request, obj, form, change):
+        
+        obj.save();

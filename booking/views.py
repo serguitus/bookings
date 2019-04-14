@@ -127,13 +127,11 @@ class QuoteAmountsView(ModelChangeFormProcessorView):
         })
 
 
-class BookingAllotmentAmountsView(ModelChangeFormProcessorView):
-    model = BookingAllotment
-    common_sitemodel = BookingAllotmentSiteModel
+class BookingServiceAmountsView(ModelChangeFormProcessorView):
     common_site = bookings_site
 
-    def process_data(self, bookingallotment, inlines):
-        if not bookingallotment.booking:
+    def verify(self, bookingservice, inlines):
+        if not bookingservice.booking:
             return JsonResponse({
                 'code': 3,
                 'message': 'Booking Id Missing',
@@ -141,8 +139,8 @@ class BookingAllotmentAmountsView(ModelChangeFormProcessorView):
                 'cost_message': 'Booking Id Missing',
                 'price': None,
                 'price_message': 'Booking Id Missing',
-            })
-        if not bookingallotment.service:
+            }), None
+        if not bookingservice.service:
             return JsonResponse({
                 'code': 3,
                 'message': 'Service Id Missing',
@@ -150,7 +148,7 @@ class BookingAllotmentAmountsView(ModelChangeFormProcessorView):
                 'cost_message': 'Service Id Missing',
                 'price': None,
                 'price_message': 'Service Id Missing',
-            })
+            }), None
         pax_list = inlines[0]
         if not pax_list:
             return JsonResponse({
@@ -160,7 +158,19 @@ class BookingAllotmentAmountsView(ModelChangeFormProcessorView):
                 'cost_message': 'Paxes Missing',
                 'price': None,
                 'price_message': 'Paxes Missing',
-            })
+            }), pax_list
+        return None, pax_list
+
+
+class BookingAllotmentAmountsView(BookingServiceAmountsView):
+    model = BookingAllotment
+    common_sitemodel = BookingAllotmentSiteModel
+
+    def process_data(self, bookingallotment, inlines):
+
+        response, pax_list = self.verify(bookingallotment, inlines)
+        if response:
+            return response
         service = bookingallotment.service
         cost_groups = BookingServices.find_paxes_groups(pax_list, service, True)
         price_groups = BookingServices.find_paxes_groups(pax_list, service, False)
@@ -203,40 +213,15 @@ class BookingAllotmentAmountsView(ModelChangeFormProcessorView):
         })
 
 
-class BookingTransferAmountsView(ModelChangeFormProcessorView):
+class BookingTransferAmountsView(BookingServiceAmountsView):
     model = BookingTransfer
     common_sitemodel = BookingTransferSiteModel
-    common_site = bookings_site
 
     def process_data(self, bookingtransfer, inlines):
-        if not bookingtransfer.booking:
-            return JsonResponse({
-                'code': 3,
-                'message': 'Booking Id Missing',
-                'cost': None,
-                'cost_message': 'Booking Id Missing',
-                'price': None,
-                'price_message': 'Booking Id Missing',
-            })
-        if not bookingtransfer.service:
-            return JsonResponse({
-                'code': 3,
-                'message': 'Service Id Missing',
-                'cost': None,
-                'cost_message': 'Service Id Missing',
-                'price': None,
-                'price_message': 'Service Id Missing',
-            })
-        pax_list = inlines[0]
-        if not pax_list:
-            return JsonResponse({
-                'code': 3,
-                'message': 'Paxes Missing',
-                'cost': None,
-                'cost_message': 'Paxes Missing',
-                'price': None,
-                'price_message': 'Paxes Missing',
-            })
+
+        response, pax_list = self.verify(bookingtransfer, inlines)
+        if response:
+            return response
         service = bookingtransfer.service
         cost_groups = BookingServices.find_paxes_groups(pax_list, service, True)
         price_groups = BookingServices.find_paxes_groups(pax_list, service, False)
@@ -279,40 +264,15 @@ class BookingTransferAmountsView(ModelChangeFormProcessorView):
         })
 
 
-class BookingExtraAmountsView(ModelChangeFormProcessorView):
+class BookingExtraAmountsView(BookingServiceAmountsView):
     model = BookingExtra
     common_sitemodel = BookingExtraSiteModel
-    common_site = bookings_site
 
     def process_data(self, bookingextra, inlines):
-        if not bookingextra.booking:
-            return JsonResponse({
-                'code': 3,
-                'message': 'Booking Id Missing',
-                'cost': None,
-                'cost_message': 'Booking Id Missing',
-                'price': None,
-                'price_message': 'Booking Id Missing',
-            })
-        if not bookingextra.service:
-            return JsonResponse({
-                'code': 3,
-                'message': 'Service Id Missing',
-                'cost': None,
-                'cost_message': 'Service Id Missing',
-                'price': None,
-                'price_message': 'Service Id Missing',
-            })
-        pax_list = inlines[0]
-        if not pax_list:
-            return JsonResponse({
-                'code': 3,
-                'message': 'Paxes Missing',
-                'cost': None,
-                'cost_message': 'Paxes Missing',
-                'price': None,
-                'price_message': 'Paxes Missing',
-            })
+
+        response, pax_list = self.verify(bookingextra, inlines)
+        if response:
+            return response
         service = bookingextra.service
         cost_groups = BookingServices.find_paxes_groups(pax_list, service, True)
         price_groups = BookingServices.find_paxes_groups(pax_list, service, False)
@@ -341,40 +301,15 @@ class BookingExtraAmountsView(ModelChangeFormProcessorView):
         })
 
 
-class BookingPackageAmountsView(ModelChangeFormProcessorView):
+class BookingPackageAmountsView(BookingServiceAmountsView):
     model = BookingPackage
     common_sitemodel = BookingPackageSiteModel
-    common_site = bookings_site
 
     def process_data(self, bookingpackage, inlines):
-        if not bookingpackage.booking:
-            return JsonResponse({
-                'code': 3,
-                'message': 'Booking Id Missing',
-                'cost': None,
-                'cost_message': 'Booking Id Missing',
-                'price': None,
-                'price_message': 'Booking Id Missing',
-            })
-        if not bookingpackage.service:
-            return JsonResponse({
-                'code': 3,
-                'message': 'Service Id Missing',
-                'cost': None,
-                'cost_message': 'Service Id Missing',
-                'price': None,
-                'price_message': 'Service Id Missing',
-            })
-        pax_list = inlines[0]
-        if not pax_list:
-            return JsonResponse({
-                'code': 3,
-                'message': 'Paxes Missing',
-                'cost': None,
-                'cost_message': 'Paxes Missing',
-                'price': None,
-                'price_message': 'Paxes Missing',
-            })
+
+        response, pax_list = self.verify(bookingpackage, inlines)
+        if response:
+            return response
         allotment_list = inlines[1]
         transfer_list = inlines[2]
         extra_list = inlines[3]
