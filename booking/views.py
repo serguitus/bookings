@@ -434,12 +434,22 @@ def get_invoice(request, id):
 
 
 def build_voucher(request, id):
-    template = get_template("booking/pdf/voucher.html")
+    # template = get_template("booking/pdf/voucher.html")
     booking = Booking.objects.get(id=id)
+    services = BookingService.objects.filter(id__in=[2, 1])
+    type_map = {
+        'E': BookingExtra,
+        'A': BookingAllotment,
+        'T': BookingTransfer,
+    }
+    objs = []
+    for service in services:
+        obj = type_map[service.service_type].objects.get(id=service.id)
+        objs.append(obj)
     context = {'pagesize': 'Letter',
                'booking': booking,
                'office': Office.objects.get(id=1),
-               'services': [2, 1]}
+               'services': objs}
     # html = template.render(context)
     # result = StringIO.StringIO()
     # pdf = pisa.pisaDocument(StringIO.StringIO(html), dest=result)
