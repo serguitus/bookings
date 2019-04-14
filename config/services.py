@@ -348,7 +348,10 @@ class ConfigServices(object):
     def allotment_amounts(
             cls, service_id, date_from, date_to, cost_groups, price_groups, provider, agency,
             board_type, room_type_id, quantity=None):
-
+        if room_type_id is None or room_type_id == '':
+            return 3, 'Room Missing', None, 'Room Missing', None, 'Room Missing'
+        if board_type is None or board_type == '':
+            return 3, 'Board Missing', None, 'Board Missing', None, 'Board Missing'
         if date_from is None:
             return 3, 'Date from Missing', None, 'Date from Missing', None, 'Date from Missing'
         if date_to is None:

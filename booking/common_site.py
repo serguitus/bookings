@@ -72,9 +72,9 @@ from booking.models import (
 from booking.services import BookingServices
 from booking.top_filters import DateTopFilter, PackageTopFilter, CancelledTopFilter
 
-# from common.filters import TextFilter
 from common.sites import CommonStackedInline, CommonTabularInline
-# from functools import update_wrapper, partial
+
+from config.services import ConfigServices
 
 from reservas.admin import bookings_site
 
@@ -520,92 +520,6 @@ class BookingServicePaxInline(TabularInline):
         return formset
 
 
-class BookingAllotmentInLine(CommonTabularInline):
-    show_change_link = True
-    model = BookingAllotment
-    extra = 0
-    fields = [('service', 'status', 'conf_number'),
-              ('datetime_from', 'datetime_to'),
-              ('room_type', 'board_type'), 'provider']
-    ordering = ['datetime_from']
-    form = BookingAllotmentInlineForm
-    classes = ['collapse']
-
-
-class BookingPackageAllotmentInLine(CommonStackedInline):
-    show_change_link = True
-    model = BookingPackageAllotment
-    extra = 0
-    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
-              ('room_type', 'board_type'), 'provider']
-    ordering = ['datetime_from']
-    form = BookingPackageAllotmentInlineForm
-    classes = ['collapse']
-
-
-class BookingTransferInLine(CommonTabularInline):
-    show_change_link = True
-    model = BookingTransfer
-    extra = 0
-    fields = [('service', 'status', 'conf_number'),
-              ('datetime_from', 'datetime_to', 'time'),
-              ('location_from', 'location_to'),
-              ('quantity', 'provider')]
-    ordering = ['datetime_from']
-    form = BookingTransferInlineForm
-    classes = ['collapse']
-
-
-class BookingPackageTransferInLine(CommonStackedInline):
-    show_change_link = True
-    model = BookingPackageTransfer
-    extra = 0
-    fields = [
-        ('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to', 'time'),
-        ('location_from', 'pickup', 'schedule_from'),
-        ('place_from'),
-        ('location_to', 'dropoff', 'schedule_to'),
-        ('place_to'),
-        ('quantity', 'provider')]
-    ordering = ['datetime_from']
-    form = BookingPackageTransferInlineForm
-    classes = ['collapse']
-
-
-class BookingExtraInLine(CommonTabularInline):
-    show_change_link = True
-    model = BookingExtra
-    extra = 0
-    fields = [('service', 'status', 'conf_number'),
-              ('datetime_from', 'datetime_to', 'time'),
-              ('addon', 'quantity', 'parameter'), 'provider']
-    ordering = ['datetime_from']
-    form = BookingExtraInlineForm
-    classes = ('collapse',)
-
-
-class BookingPackageExtraInLine(CommonStackedInline):
-    show_change_link = True
-    model = BookingPackageExtra
-    extra = 0
-    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to', 'time'),
-              ('addon', 'quantity', 'parameter'), 'provider']
-    ordering = ['datetime_from']
-    form = BookingPackageExtraInlineForm
-    classes = ('collapse',)
-
-
-class BookingPackageInLine(CommonTabularInline):
-    show_change_link = True
-    model = BookingPackage
-    extra = 0
-    fields = [('service', 'status', 'conf_number'), ('datetime_from', 'datetime_to'),
-              ('provider', 'price_by_package_catalogue')]
-    ordering = ['datetime_from']
-    form = BookingPackageInlineForm
-    classes = ('collapse',)
-
-
 class BookingSiteModel(SiteModel):
     model_order = 1110
     menu_label = MENU_LABEL_BOOKING
@@ -636,8 +550,7 @@ class BookingSiteModel(SiteModel):
                        'cost_amount', 'price_amount',
                        'internal_reference')
     details_template = 'booking/booking_details.html'
-    inlines = [BookingPaxInline, BookingAllotmentInLine,
-               BookingTransferInLine, BookingExtraInLine, BookingPackageInLine]
+    inlines = [BookingPaxInline]
     form = BookingForm
     add_form_template = 'booking/booking_change_form.html'
     change_form_template = 'booking/booking_change_form.html'
@@ -705,7 +618,7 @@ class BookingChangeAmountsSiteModel(SiteModel):
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super().get_readonly_fields(request, obj) or []
 
-        if not request.user.has_perm("%s.%s" % ('booking', 'change_amounts_booking')):
+        if not request.user.has_perm("booking.change_amounts_booking"):
             return readonly_fields + ['manual_cost', 'cost_amount', 'manual_price', 'price_amount']
 
         return readonly_fields
@@ -743,7 +656,14 @@ class BookingAllotmentSiteModel(BookingChangeAmountsSiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        return BookingServices.save_bookingallotment(request, obj, form, change)
+        if not request.user.has_perm("booking.change_amounts_booking"):
+            pax_list = self.build_inlines(request, obj)[0]
+            cost, price = BookingServices.bookingallotment_amounts(obj, pax_list)
+            if not obj.manual_cost:
+                obj.cost_amount = cost
+            if not obj.manual_price:
+                obj.price_amount = price
+        obj.save()
 
     def response_post_save_add(self, request, obj):
         return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
@@ -820,6 +740,17 @@ class BookingTransferSiteModel(BookingChangeAmountsSiteModel):
     change_form_template = 'booking/bookingtransfer_change_form.html'
     inlines = [BookingServicePaxInline]
 
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        if not request.user.has_perm("booking.change_amounts_booking"):
+            pax_list = self.build_inlines(request, obj)[0]
+            cost, price = BookingServices.bookingtransfer_amounts(obj, pax_list)
+            if not obj.manual_cost:
+                obj.cost_amount = cost
+            if not obj.manual_price:
+                obj.price_amount = price
+        obj.save()
+
     def response_post_save_add(self, request, obj):
         return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
 
@@ -892,6 +823,17 @@ class BookingExtraSiteModel(BookingChangeAmountsSiteModel):
     change_form_template = 'booking/bookingextra_change_form.html'
     inlines = [BookingServicePaxInline]
 
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        if not request.user.has_perm("booking.change_amounts_booking"):
+            pax_list = self.build_inlines(request, obj)[0]
+            cost, price = BookingServices.bookingextra_amounts(obj, pax_list)
+            if not obj.manual_cost:
+                obj.cost_amount = cost
+            if not obj.manual_price:
+                obj.price_amount = price
+        obj.save()
+
     def response_post_save_add(self, request, obj):
         return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
 
@@ -955,11 +897,21 @@ class BookingPackageSiteModel(BookingChangeAmountsSiteModel):
     ordering = ['datetime_from', 'booking__reference', 'service__name']
     readonly_fields = ['status']
     details_template = 'booking/bookingpackage_details.html'
-    inlines = [BookingServicePaxInline, BookingPackageAllotmentInLine,
-               BookingPackageTransferInLine, BookingPackageExtraInLine]
+    inlines = [BookingServicePaxInline]
     form = BookingPackageForm
     add_form_template = 'booking/bookingpackage_change_form.html'
     change_form_template = 'booking/bookingpackage_change_form.html'
+
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        if not request.user.has_perm("booking.change_amounts_booking"):
+            pax_list = self.build_inlines(request, obj)[0]
+            cost, price = BookingServices.bookingpackage_amounts(obj, pax_list)
+            if not obj.manual_cost:
+                obj.cost_amount = cost
+            if not obj.manual_price:
+                obj.price_amount = price
+        obj.save()
 
     def response_post_save_add(self, request, obj):
         return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))

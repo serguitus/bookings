@@ -176,27 +176,8 @@ class BookingAllotmentAmountsView(BookingServiceAmountsView):
         price_groups = BookingServices.find_paxes_groups(pax_list, service, False)
         date_from = bookingallotment.datetime_from
         date_to = bookingallotment.datetime_to
-
         board_type = bookingallotment.board_type
-        if board_type is None or board_type == '':
-            return JsonResponse({
-                'code': 3,
-                'message': 'Board Missing',
-                'cost': None,
-                'cost_message': 'Board Missing',
-                'price': None,
-                'price_message': 'Board Missing',
-            })
         room_type_id = bookingallotment.room_type_id
-        if room_type_id is None or room_type_id == '':
-            return JsonResponse({
-                'code': 3,
-                'message': 'Room Missing',
-                'cost': None,
-                'cost_message': 'Room Missing',
-                'price': None,
-                'price_message': 'Room Missing',
-            })
 
         code, message, cost, cost_msg, price, price_msg = ConfigServices.allotment_amounts(
             bookingallotment.service_id, date_from, date_to, cost_groups, price_groups,
@@ -310,12 +291,9 @@ class BookingPackageAmountsView(BookingServiceAmountsView):
         response, pax_list = self.verify(bookingpackage, inlines)
         if response:
             return response
-        allotment_list = inlines[1]
-        transfer_list = inlines[2]
-        extra_list = inlines[3]
 
-        code, message, cost, cost_msg, price, price_msg = BookingServices.bookingpackage_amounts(
-            bookingpackage, pax_list, allotment_list, transfer_list, extra_list)
+        code, message, cost, cost_msg, price, price_msg = BookingServices.package_amounts(
+            bookingpackage, pax_list)
 
         return JsonResponse({
             'code': code,

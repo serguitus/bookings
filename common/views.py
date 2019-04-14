@@ -18,7 +18,7 @@ class ModelChangeFormProcessorView(View):
         return self.process_data(new_object, inlines)
 
     def build_inlines(self, request, obj):
-        formsets, inline_instances = self._create_formsets(request, obj)
+        formsets = self._create_formsets(request, obj)
         inlines = []
         for formset in formsets:
             items = []
@@ -44,7 +44,6 @@ class ModelChangeFormProcessorView(View):
     def _create_formsets(self, request, obj):
         "Helper function to generate formsets for add/change_view."
         formsets = []
-        inline_instances = []
         prefixes = {}
         get_formsets_args = [request]
         for FormSet, inline in self.get_formsets_with_inlines(*get_formsets_args):
@@ -64,8 +63,7 @@ class ModelChangeFormProcessorView(View):
                     'save_as_new': '_saveasnew' in request.POST
                 })
             formsets.append(FormSet(**formset_params))
-            inline_instances.append(inline)
-        return formsets, inline_instances
+        return formsets
 
     def get_formsets_with_inlines(self, request, obj=None):
         """

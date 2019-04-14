@@ -24,11 +24,13 @@ from django.contrib.admin.utils import (
 from django.contrib.admin.views.main import SEARCH_VAR, IGNORED_PARAMS, ChangeList
 from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
 from django.contrib.auth import get_permission_codename, logout as auth_logout
-from django.core.exceptions import ValidationError, PermissionDenied, ObjectDoesNotExist
+from django.core.exceptions import (
+    ValidationError, PermissionDenied, ObjectDoesNotExist,
+    SuspiciousOperation, ImproperlyConfigured, FieldDoesNotExist)
 from django.db import router, transaction, models
-from django.core.exceptions import SuspiciousOperation, ImproperlyConfigured, FieldDoesNotExist
+from django.db.utils import IntegrityError
 from django.forms import fields_for_model
-from django.forms.formsets import all_valid
+from django.forms.formsets import all_valid, DELETION_FIELD_NAME
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.template.response import TemplateResponse, SimpleTemplateResponse
@@ -906,7 +908,7 @@ class SiteModel(TotalsumAdmin):
             post_url = reverse(self.admin_site.index_url(), current_app=self.admin_site.name)
         return HttpResponseRedirect(post_url)
 
-    def changeform_do_saving(self, request, new_object, form, formsets, add):
+    def changeform_do_saving(self, request, new_object, form, formsets, add, inlines):
         """
         Hook for custom saving actions.
         """
@@ -925,6 +927,9 @@ class SiteModel(TotalsumAdmin):
         except ValidationError as ex:
             for message in ex.messages:
                 self.message_user(request, message, messages.ERROR)
+            return False
+        except IntegrityError as ex:
+            self.message_user(request, ex, messages.ERROR)
             return False
 
     @csrf_protect_m
@@ -978,7 +983,7 @@ class SiteModel(TotalsumAdmin):
                 if all_valid(formsets) and form_validated:
                     response = self.changeform_do_saving(
                         request=request, new_object=new_object, form=form, formsets=formsets,
-                        add=add)
+                        add=add, inlines=inline_instances)
                     if response:
                         return response
                     else:
@@ -1347,6 +1352,51 @@ class SiteModel(TotalsumAdmin):
             'common/%s/change_list.html' % app_label,
             'common/change_list.html'
         ], context)
+
+    def build_inlines(self, request, obj):
+        formsets = self._build_formsets(request, obj)
+        inlines = []
+        for formset in formsets:
+            items = []
+            forms_to_delete = formset.deleted_forms
+            for form in formset.initial_forms:
+                if form in forms_to_delete:
+                    continue
+                if form.cleaned_data.get(DELETION_FIELD_NAME, False):
+                    continue
+                item = form.instance
+                items.append(item)
+            for form in formset.extra_forms:
+                if form.cleaned_data.get(DELETION_FIELD_NAME, False):
+                    continue
+                item = form.instance
+                items.append(item)
+            inlines.append(items)
+        return inlines
+
+    def _build_formsets(self, request, obj):
+        "Helper function to generate formsets for add/change_view."
+        formsets = []
+        prefixes = {}
+        get_formsets_args = [request]
+        for FormSet, inline in self.get_formsets_with_inlines(*get_formsets_args):
+            prefix = FormSet.get_default_prefix()
+            prefixes[prefix] = prefixes.get(prefix, 0) + 1
+            if prefixes[prefix] != 1 or not prefix:
+                prefix = "%s-%s" % (prefix, prefixes[prefix])
+            formset_params = {
+                'instance': obj,
+                'prefix': prefix,
+                'queryset': inline.get_queryset(request),
+            }
+            if request.method == 'POST':
+                formset_params.update({
+                    'data': request.POST.copy(),
+                    'files': request.FILES,
+                    'save_as_new': '_saveasnew' in request.POST
+                })
+            formsets.append(FormSet(**formset_params))
+        return formsets
 
 
 class CommonChangeList(ChangeList):

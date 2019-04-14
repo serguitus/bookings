@@ -686,6 +686,7 @@ class BookingAllotment(BookingService, BaseAllotment):
             booking_service=self, service=self.service, for_cost=True)
         dist = ''
         room_count = {
+            '00': 0,  # NONE counter
             '10': 0,  # SGL counter
             '20': 0,  # DBL counter
             '30': 0,  # TPL counter
@@ -695,6 +696,7 @@ class BookingAllotment(BookingService, BaseAllotment):
             '31': 0,  # TPL+1Child
         }
         room_types = {
+            '00': 'NONE',
             '10': 'SGL',
             '20': 'DBL',
             '30': 'TPL',
