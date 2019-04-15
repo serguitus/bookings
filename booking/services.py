@@ -1715,7 +1715,7 @@ class BookingServices(object):
             booking_package_transfer.place_to = package_transfer.place_to
             booking_package_transfer.schedule_to = package_transfer.schedule_to
             booking_package_transfer.dropoff = package_transfer.dropoff
-            quote_package_transfer.save()
+            booking_package_transfer.save()
 
         # create bookingextra list
         for package_extra in PackageExtra.objects.filter(package_id=package.id).all():
@@ -1726,7 +1726,6 @@ class BookingServices(object):
             # cost_comment
             # price_amount
             # price_comment
-            # provider_invoice
             # name auto
             # service_type auto
             cls._copy_package_info(
@@ -2013,11 +2012,6 @@ class BookingServices(object):
                             detail, src_agency.gain_percent, dst_agency.gain_percent)
                     )
 
-    @classmethod
-    def save_bookingallotment(cls, request, obj, form, change):
-        
-        obj.save();
-
 
     @classmethod
     def bookingallotment_amounts(cls, obj, pax_list):
@@ -2070,7 +2064,9 @@ class BookingServices(object):
                 agency=bookingpackage.booking.agency)
 
         allotment_list = list(
-            BookingPackageAllotment.objects.filter(booking_package=bookingpackage.id).exclude(status=constants.SERVICE_STATUS_CANCELLED).all())
+            BookingPackageAllotment.objects.filter(
+                booking_package=bookingpackage.id).exclude(
+                    status=constants.SERVICE_STATUS_CANCELLED).all())
         if allotment_list:
             for allotment in allotment_list:
                 allotment_provider = bookingpackage.provider
@@ -2094,7 +2090,9 @@ class BookingServices(object):
                             price, price_msg, pck_price, pck_price_msg)
 
         transfer_list = list(
-            BookingPackageTransfer.objects.filter(booking_package=bookingpackage.id).exclude(status=constants.SERVICE_STATUS_CANCELLED).all())
+            BookingPackageTransfer.objects.filter(
+                booking_package=bookingpackage.id).exclude(
+                    status=constants.SERVICE_STATUS_CANCELLED).all())
         if transfer_list:
             for transfer in transfer_list:
                 transfer_provider = bookingpackage.provider
@@ -2118,7 +2116,9 @@ class BookingServices(object):
                             price, price_msg, pck_price, pck_price_msg)
 
         extra_list = list(
-            BookingPackageExtra.objects.filter(booking_package=bookingpackage.id).exclude(status=constants.SERVICE_STATUS_CANCELLED).all())
+            BookingPackageExtra.objects.filter(
+                booking_package=bookingpackage.id).exclude(
+                    status=constants.SERVICE_STATUS_CANCELLED).all())
         if extra_list:
             for extra in extra_list:
                 extra_provider = bookingpackage.provider
@@ -2148,6 +2148,7 @@ class BookingServices(object):
     @classmethod
     def bookingpackage_amounts(
             cls, bookingpackage, pax_list):
-        code, msg, pck_cost, pck_cost_msg, pck_price, pck_price_msg = cls.package_amounts(bookingpackage, pax_list)
+        code, msg, pck_cost, pck_cost_msg, pck_price, pck_price_msg = cls.package_amounts(
+            bookingpackage, pax_list)
 
         return pck_cost, pck_price

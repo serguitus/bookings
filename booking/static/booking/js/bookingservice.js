@@ -135,7 +135,7 @@ $(document).ready(function(){
 
   manualCost.on('change', function(e){
     e.preventDefault();
-    changed_manual_cost(manualCost.checked);
+    changed_manual_cost(manualCost[0].checked);
   })
 
   function changed_manual_price(manual){
@@ -153,7 +153,7 @@ $(document).ready(function(){
 
   $('#id_manual_price').on('change', function(e){
     e.preventDefault();
-    changed_manual_price(manualPrice.checked);
+    changed_manual_price(manualPrice[0].checked);
   })
 
   $('.btn-copy-cost').on('click', function(e){

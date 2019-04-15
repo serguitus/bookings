@@ -419,6 +419,10 @@ class ConfigServices(object):
             cls, service_id, date_from, date_to, cost_groups, provider,
             board_type, room_type_id, quantity=None):
 
+        if room_type_id is None or room_type_id == '':
+            return None, 'Room Missing'
+        if board_type is None or board_type == '':
+            return None, 'Board Missing'
         if date_from is None:
             return None, 'Date from Missing'
         if date_to is None:
@@ -456,14 +460,18 @@ class ConfigServices(object):
     def transfer_amounts(
             cls, service_id, date_from, date_to, cost_groups, price_groups, provider, agency,
             location_from_id, location_to_id, quantity=None):
-        service = Transfer.objects.get(pk=service_id)
-
+        if location_from_id is None or location_from_id == '':
+            return 3, 'Location From Missing', None, 'Location From Missing', None, 'Location From Missing'
+        if location_to_id is None or location_to_id == '':
+            return 3, 'Location To Missing', None, 'Location To Missing', None, 'Location To Missing'
         if date_from is None and date_to is None:
             return 3, 'Both Dates are Missing', None, 'Both Dates are Missing', None, 'Both Dates are Missing'
         if date_from is None:
             date_from = date_to
         if date_to is None:
             date_to = date_from
+
+        service = Transfer.objects.get(pk=service_id)
 
         # provider cost
         # obtain details order by date_from asc, date_to desc
@@ -520,14 +528,18 @@ class ConfigServices(object):
     def transfer_costs(
             cls, service_id, date_from, date_to, cost_groups, provider,
             location_from_id, location_to_id, quantity=None):
-        service = Transfer.objects.get(pk=service_id)
-
+        if location_from_id is None or location_from_id == '':
+            return None, 'Location From Missing'
+        if location_to_id is None or location_to_id == '':
+            return None, 'Location To Missing'
         if date_from is None and date_to is None:
             return None, 'Both Dates are Missing'
         if date_from is None:
             date_from = date_to
         if date_to is None:
             date_to = date_from
+
+        service = Transfer.objects.get(pk=service_id)
 
         # provider cost
         # obtain details order by date_from asc, date_to desc
