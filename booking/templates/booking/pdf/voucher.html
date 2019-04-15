@@ -2,102 +2,10 @@
 <html>
     <head>
         <link rel="stylesheet" type="text/css" href="{% static 'booking/css/extras.css' %}" />
-        <style type="text/css">
-         div.voucher-main{
-             width: 900px;
-             height: 400px;
-             border: 1px solid black;
-             padding: 8px 8px 0 8px;
-         }
-         
-         div.voucher-header{
-             height: 100px;
-             border: 1px solid black;
-         }
-         
-         div.voucher-header-logo, div.voucher-header-center{
-             width: 32%;
-             float: left;
-             padding-top: 10px;
-         }
-         
-         div.voucher-header-logo{
-             padding-left: 10px;
-         }
-         
-         div.voucher-header-center{
-             margin-top: 50px;
-             text-align: center;
-         }
-         
-         div.voucher-header-address{
-             width: 33%;
-             float: left;
-             text-align: right;
-             font-size: 12px;
-             padding-top: 10px;
-         }
-         
-         div.voucher-title{
-             margin-top: 5px;
-             height: 30px;
-             border: 1px solid black;
-             padding: 8px 0 0 10px;
-         }
-         
-         div.voucher-title-label{
-             float: left;
-             width: 400px;
-         }
-         
-         div.voucher-title-date-in{
-             float: left;
-             width: 300px;
-         }
-         
-         div.voucher-content{
-             margin-top: 5px;
-             padding: 10px 10px 0 10px;
-             height: 120px;
-             border: 1px solid black;
-         }
-         
-         div.voucher-content-client{
-             float: left;
-             width: 500px;
-         }
-         
-         div.voucher-content-adult{
-             float: left;
-             width: 200px;
-         }
-         
-         div.voucher-notes{
-             margin-top: 5px;
-             padding: 5px 0 0 5px;
-             border: 1px solid black;
-             height: 80px
-         }
-         
-         span.voucher-label{
-             font-weight: bold;
-         }
-         
-         span.voucher-footer-1, span.voucher-footer-2, span.voucher-footer-3,
-         span.voucher-footer-4{
-             display: inline-block;
-             width: 24%;
-             font-size: 12px;
-         }
-         
-         span.voucher-footer-4{
-             text-align: right;
-         }
-         
-        </style>
     </head>
     <body>
         <div class="vouchers-content">
+            {% for service in services %}
             <div class="voucher-main">
                 <div class="voucher-header">
                     <div class="voucher-header-logo">
@@ -117,21 +25,21 @@
                 </div>
                 <div class="voucher-title">
                     <div class="voucher-title-label">
-                        <span class="voucher-label">Service</span>
+                        <span class="voucher-label">Reference {{ service.booking.internal_reference }}</span>
                     </div>
                     <div class="voucher-title-date-in">
-                        <span class="voucher-label">From:</span>
+                        <span class="voucher-label">From: {{ service.datetime_from }}</span>
                     </div>
                     <div class="voucher-title-date-out">
-                        <span class="voucher-label">To:</span>
+                        <span class="voucher-label">{% if service.datetime_to %}To: {{ service.datetime_to }}{% endif %}</span>
                     </div>
                 </div>
                 <div class="voucher-content">
                     <div class="voucher-content-client">
-                        <span class="voucher-label">Client:</span>
+                        <span class="voucher-label">Client: {{ service.booking.name }}</span>
                     </div>
                     <div class="voucher-content-adult">
-                        <span class="voucher-label">Adults:</span>
+                        <span class="voucher-label">Adults:{{ service.rooming.count }}</span>
                     </div>
                     <div class="voucher-content-child">
                         <span class="voucher-label">Children:</span>
@@ -147,6 +55,7 @@
                     <span class="voucher-footer-4">No.</span>
                 </div>
             </div>
+            {% endfor %}
         </div>
     </body>
 </html>

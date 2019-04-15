@@ -580,6 +580,9 @@ class BookingService(BaseService, BookService, DateInterval):
         # Call the "real" save() method.
         super(BookingService, self).save(*args, **kwargs)
 
+    def pax_qantities(self):
+        return self.rooming_list.count()
+
 
 class BookingServicePax(models.Model):
     """
