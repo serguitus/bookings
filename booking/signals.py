@@ -4,10 +4,12 @@ from django.db.models.signals import post_save, post_delete
 
 from django.dispatch import receiver
 
+from booking.constants import SERVICE_CATEGORY_PACKAGE
 from booking.models import (
     Quote, QuotePaxVariant, QuoteAllotment, QuoteTransfer, QuoteExtra,
     QuotePackage, QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
-    Booking, BookingPax, BookingAllotment, BookingTransfer, BookingExtra,
+    Booking, BookingPax,
+    BookingServicePax, BookingAllotment, BookingTransfer, BookingExtra,
     BookingPackage, BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra)
 from booking.services import BookingServices
 
@@ -85,3 +87,9 @@ def post_save_update_package_booking(sender, instance, **kwargs):
 def post_delete_update_package_booking(sender, instance, **kwargs):
     with transaction.atomic(savepoint=False):
         BookingServices.update_booking(instance)
+
+
+@receiver((post_save, post_delete), sender=BookingServicePax)
+def post_save_update_booking_service(sender, instance, **kwargs):
+    if instance.booking_service.service_type == SERVICE_CATEGORY_PACKAGE:
+        BookingServices.update_bookingpackage_amounts(instance.booking_service)
