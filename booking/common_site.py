@@ -658,11 +658,7 @@ class BookingAllotmentSiteModel(BookingChangeAmountsSiteModel):
         # overrides base class method
         if not request.user.has_perm("booking.change_amounts_booking"):
             pax_list = self.build_inlines(request, obj)[0]
-            cost, price = BookingServices.bookingallotment_amounts(obj, pax_list)
-            if not obj.manual_cost:
-                obj.cost_amount = cost
-            if not obj.manual_price:
-                obj.price_amount = price
+            BookingServices.set_bookingservice_amounts(obj, pax_list)
         obj.save()
 
     def response_post_save_add(self, request, obj):
@@ -698,6 +694,12 @@ class BookingPackageAllotmentSiteModel(BookingChangeAmountsSiteModel):
     form = BookingPackageAllotmentForm
     add_form_template = 'booking/bookingpackageallotment_change_form.html'
     change_form_template = 'booking/bookingpackageallotment_change_form.html'
+
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        if not request.user.has_perm("booking.change_amounts_booking"):
+            BookingServices.set_bookingservice_amounts(obj)
+        obj.save()
 
     def response_post_save_add(self, request, obj):
         return redirect(
@@ -744,11 +746,7 @@ class BookingTransferSiteModel(BookingChangeAmountsSiteModel):
         # overrides base class method
         if not request.user.has_perm("booking.change_amounts_booking"):
             pax_list = self.build_inlines(request, obj)[0]
-            cost, price = BookingServices.bookingtransfer_amounts(obj, pax_list)
-            if not obj.manual_cost:
-                obj.cost_amount = cost
-            if not obj.manual_price:
-                obj.price_amount = price
+            BookingServices.set_bookingservice_amounts(obj, pax_list)
         obj.save()
 
     def response_post_save_add(self, request, obj):
@@ -787,6 +785,12 @@ class BookingPackageTransferSiteModel(BookingChangeAmountsSiteModel):
     form = BookingPackageTransferForm
     add_form_template = 'booking/bookingpackagetransfer_change_form.html'
     change_form_template = 'booking/bookingpackagetransfer_change_form.html'
+
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        if not request.user.has_perm("booking.change_amounts_booking"):
+            BookingServices.set_bookingservice_amounts(obj)
+        obj.save()
 
     def response_post_save_add(self, request, obj):
         return redirect(
@@ -827,11 +831,7 @@ class BookingExtraSiteModel(BookingChangeAmountsSiteModel):
         # overrides base class method
         if not request.user.has_perm("booking.change_amounts_booking"):
             pax_list = self.build_inlines(request, obj)[0]
-            cost, price = BookingServices.bookingextra_amounts(obj, pax_list)
-            if not obj.manual_cost:
-                obj.cost_amount = cost
-            if not obj.manual_price:
-                obj.price_amount = price
+            BookingServices.set_bookingservice_amounts(obj, pax_list)
         obj.save()
 
     def response_post_save_add(self, request, obj):
@@ -866,6 +866,12 @@ class BookingPackageExtraSiteModel(BookingChangeAmountsSiteModel):
     form = BookingPackageExtraForm
     add_form_template = 'booking/bookingpackageextra_change_form.html'
     change_form_template = 'booking/bookingpackageextra_change_form.html'
+
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        if not request.user.has_perm("booking.change_amounts_booking"):
+            BookingServices.set_bookingservice_amounts(obj)
+        obj.save()
 
     def response_post_save_add(self, request, obj):
         return redirect(
@@ -906,11 +912,7 @@ class BookingPackageSiteModel(BookingChangeAmountsSiteModel):
         # overrides base class method
         if not request.user.has_perm("booking.change_amounts_booking"):
             pax_list = self.build_inlines(request, obj)[0]
-            cost, price = BookingServices.bookingpackage_amounts(obj, pax_list)
-            if not obj.manual_cost:
-                obj.cost_amount = cost
-            if not obj.manual_price:
-                obj.price_amount = price
+            BookingServices.set_bookingservice_amounts(obj, pax_list)
         obj.save()
 
     def response_post_save_add(self, request, obj):

@@ -811,6 +811,12 @@ class BookingPackage(BookingService):
         with transaction.atomic(savepoint=False):
             super(BookingPackage, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return self.__unicode__()
+
+    def __unicode__(self):
+        return '%s : %s' % (self.name, self.booking)
+
 
 class BookingPackageService(BaseService, BookService, DateInterval):
     """
