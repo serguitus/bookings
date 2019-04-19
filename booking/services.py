@@ -186,7 +186,7 @@ class BookingServices(object):
                         dst_service=booking_transfer, src_service=quote_transfer)
                     # time
                     booking_transfer.quantity = ConfigServices.get_service_quantity(
-                        booking_transfer.service, len(booking_pax_list))
+                        booking_transfer.service, len(pax_list))
                     booking_transfer.location_from = quote_transfer.location_from
                     # place_from
                     # schedule_from
@@ -251,7 +251,8 @@ class BookingServices(object):
                         bookingpackage_allotment.conf_number = '< confirm number >'
                         bookingpackage_allotment.name = quotepackage_allotment.name
                         cls._copy_service_info(
-                            dst_service=bookingpackage_allotment, src_service=quotepackage_allotment)
+                            dst_service=bookingpackage_allotment,
+                            src_service=quotepackage_allotment)
                         bookingpackage_allotment.room_type = quotepackage_allotment.room_type
                         bookingpackage_allotment.board_type = quotepackage_allotment.board_type
 
@@ -269,7 +270,7 @@ class BookingServices(object):
                             dst_service=bookingpackage_transfer, src_service=quotepackage_transfer)
                         # time
                         bookingpackage_transfer.quantity = ConfigServices.get_service_quantity(
-                            bookingpackage_transfer.service, len(booking_pax_list))
+                            bookingpackage_transfer.service, len(pax_list))
                         bookingpackage_transfer.location_from = quotepackage_transfer.location_from
                         # place_from
                         # schedule_from
@@ -2011,79 +2012,7 @@ class BookingServices(object):
 
 
     @classmethod
-    def bookingallotment_amounts(cls, obj, pax_list):
-        cost_groups = BookingServices.find_paxes_groups(pax_list, obj.service, True)
-        price_groups = BookingServices.find_paxes_groups(pax_list, obj.service, False)
-        code, message, cost, cost_msg, price, price_msg = ConfigServices.allotment_amounts(
-            obj.service_id, obj.datetime_from, obj.datetime_to, cost_groups, price_groups,
-            obj.provider, obj.booking.agency,
-            obj.board_type, obj.room_type_id)
-        return cost, price 
-
-
-    @classmethod
-    def bookingtransfer_amounts(cls, obj, pax_list):
-        cost_groups = BookingServices.find_paxes_groups(pax_list, obj.service, True)
-        price_groups = BookingServices.find_paxes_groups(pax_list, obj.service, False)
-        code, message, cost, cost_msg, price, price_msg = ConfigServices.transfer_amounts(
-            obj.service_id, obj.datetime_from, obj.datetime_to, cost_groups, price_groups,
-            obj.provider, obj.booking.agency,
-            obj.location_from_id, obj.location_to_id, obj.quantity)
-        return cost, price 
-
-    @classmethod
-    def bookingextra_amounts(cls, obj, pax_list):
-        cost_groups = BookingServices.find_paxes_groups(pax_list, obj.service, True)
-        price_groups = BookingServices.find_paxes_groups(pax_list, obj.service, False)
-        code, message, cost, cost_msg, price, price_msg = ConfigServices.extra_amounts(
-            obj.service_id, obj.datetime_from, obj.datetime_to, cost_groups, price_groups,
-            obj.provider, obj.booking.agency,
-            obj.addon_id, obj.quantity, obj.parameter)
-        return cost, price 
-
-    @classmethod
-    def bookingpackageservice_amounts(cls, bookingpackage_service):
-
-        pax_list = list(BookingServicePax.objects.filter(booking_service=bookingpackage_service.booking_package).all())
-        cost_groups = BookingServices.find_paxes_groups(
-            pax_list, bookingpackage_service.booking_package.service, True)
-        price_groups = BookingServices.find_paxes_groups(
-            pax_list, bookingpackage_service.booking_package.service, False)
-
-        service_provider = bookingpackage_service.booking_package.provider
-        if service_provider is None:
-            service_provider = bookingpackage_service.provider
-
-        cost, price = None, None
-        if isinstance(bookingpackage_service, BookingPackageAllotment):
-            code, msg, cost, cost_msg, price, price_msg = ConfigServices.allotment_amounts(
-                bookingpackage_service.service,
-                bookingpackage_service.datetime_from, bookingpackage_service.datetime_to,
-                cost_groups, price_groups, service_provider,
-                bookingpackage_service.booking_package.booking.agency,
-                bookingpackage_service.board_type, bookingpackage_service.room_type_id)
-        if isinstance(bookingpackage_service, BookingPackageTransfer):
-            code, msg, cost, cost_msg, price, price_msg = ConfigServices.transfer_amounts(
-                bookingpackage_service.service,
-                bookingpackage_service.datetime_from, bookingpackage_service.datetime_to,
-                cost_groups, price_groups, service_provider,
-                bookingpackage_service.booking_package.booking.agency,
-                bookingpackage_service.location_from_id, bookingpackage_service.location_to_id,
-                bookingpackage_service.quantity)
-        if isinstance(bookingpackage_service, BookingPackageExtra):
-            code, msg, cost, cost_msg, price, price_msg = ConfigServices.extra_amounts(
-                bookingpackage_service.service,
-                bookingpackage_service.datetime_from, bookingpackage_service.datetime_to,
-                cost_groups, price_groups, service_provider,
-                bookingpackage_service.booking_package.booking.agency,
-                bookingpackage_service.addon_id,
-                bookingpackage_service.quantity, bookingpackage_service.parameter)
-    
-        return cost, price
-
-
-    @classmethod
-    def package_amounts(
+    def bookingpackage_amounts(
             cls, bookingpackage, pax_list):
         cost_groups = BookingServices.find_paxes_groups(pax_list, bookingpackage.service, True)
         price_groups = BookingServices.find_paxes_groups(pax_list, bookingpackage.service, False)
@@ -2121,15 +2050,6 @@ class BookingServices(object):
 
 
     @classmethod
-    def bookingpackage_amounts(
-            cls, bookingpackage, pax_list):
-        code, msg, pck_cost, pck_cost_msg, pck_price, pck_price_msg = cls.package_amounts(
-            bookingpackage, pax_list)
-
-        return pck_cost, pck_price
-
-
-    @classmethod
     def set_bookingservice_amounts(cls, bookingservice, pax_list=None):
         if bookingservice.manual_cost is None:
             bookingservice.manual_cost = False
@@ -2139,18 +2059,100 @@ class BookingServices(object):
             cost, price = None, None
 
             if isinstance(bookingservice, BookingAllotment):
-                cost, price = BookingServices.bookingallotment_amounts(bookingservice, pax_list)
+                cost, price = cls._bookingallotment_amounts(bookingservice, pax_list)
             if isinstance(bookingservice, BookingTransfer):
-                cost, price = BookingServices.bookingtransfer_amounts(bookingservice, pax_list)
+                cost, price = cls._bookingtransfer_amounts(bookingservice, pax_list)
             if isinstance(bookingservice, BookingExtra):
-                cost, price = BookingServices.bookingextra_amounts(bookingservice, pax_list)
+                cost, price = cls._bookingextra_amounts(bookingservice, pax_list)
             if isinstance(bookingservice, BookingPackage):
-                cost, price = BookingServices.bookingpackage_amounts(bookingservice, pax_list)
+                cost, price = cls._bookingpackage_amounts(bookingservice, pax_list)
             if isinstance(bookingservice, (
                     BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra)):
-                cost, price = BookingServices.bookingpackageservice_amounts(bookingservice)
+                cost, price = cls._bookingpackageservice_amounts(bookingservice)
 
             if not bookingservice.manual_cost:
                 bookingservice.cost_amount = cost
             if not bookingservice.manual_price:
                 bookingservice.price_amount = price
+
+    @classmethod
+    def _bookingallotment_amounts(cls, obj, pax_list):
+        cost_groups = BookingServices.find_paxes_groups(pax_list, obj.service, True)
+        price_groups = BookingServices.find_paxes_groups(pax_list, obj.service, False)
+        code, message, cost, cost_msg, price, price_msg = ConfigServices.allotment_amounts(
+            obj.service_id, obj.datetime_from, obj.datetime_to, cost_groups, price_groups,
+            obj.provider, obj.booking.agency,
+            obj.board_type, obj.room_type_id)
+        return cost, price 
+
+
+    @classmethod
+    def _bookingtransfer_amounts(cls, obj, pax_list):
+        cost_groups = BookingServices.find_paxes_groups(pax_list, obj.service, True)
+        price_groups = BookingServices.find_paxes_groups(pax_list, obj.service, False)
+        code, message, cost, cost_msg, price, price_msg = ConfigServices.transfer_amounts(
+            obj.service_id, obj.datetime_from, obj.datetime_to, cost_groups, price_groups,
+            obj.provider, obj.booking.agency,
+            obj.location_from_id, obj.location_to_id, obj.quantity)
+        return cost, price 
+
+
+    @classmethod
+    def _bookingextra_amounts(cls, obj, pax_list):
+        cost_groups = BookingServices.find_paxes_groups(pax_list, obj.service, True)
+        price_groups = BookingServices.find_paxes_groups(pax_list, obj.service, False)
+        code, message, cost, cost_msg, price, price_msg = ConfigServices.extra_amounts(
+            obj.service_id, obj.datetime_from, obj.datetime_to, cost_groups, price_groups,
+            obj.provider, obj.booking.agency,
+            obj.addon_id, obj.quantity, obj.parameter)
+        return cost, price 
+
+
+    @classmethod
+    def _bookingpackage_amounts(
+            cls, bookingpackage, pax_list):
+        code, msg, pck_cost, pck_cost_msg, pck_price, pck_price_msg = cls.bookingpackage_amounts(
+            bookingpackage, pax_list)
+
+        return pck_cost, pck_price
+
+
+    @classmethod
+    def _bookingpackageservice_amounts(cls, bookingpackage_service):
+
+        pax_list = list(BookingServicePax.objects.filter(booking_service=bookingpackage_service.booking_package).all())
+        cost_groups = BookingServices.find_paxes_groups(
+            pax_list, bookingpackage_service.booking_package.service, True)
+        price_groups = BookingServices.find_paxes_groups(
+            pax_list, bookingpackage_service.booking_package.service, False)
+
+        service_provider = bookingpackage_service.booking_package.provider
+        if service_provider is None:
+            service_provider = bookingpackage_service.provider
+
+        cost, price = None, None
+        if isinstance(bookingpackage_service, BookingPackageAllotment):
+            code, msg, cost, cost_msg, price, price_msg = ConfigServices.allotment_amounts(
+                bookingpackage_service.service,
+                bookingpackage_service.datetime_from, bookingpackage_service.datetime_to,
+                cost_groups, price_groups, service_provider,
+                bookingpackage_service.booking_package.booking.agency,
+                bookingpackage_service.board_type, bookingpackage_service.room_type_id)
+        if isinstance(bookingpackage_service, BookingPackageTransfer):
+            code, msg, cost, cost_msg, price, price_msg = ConfigServices.transfer_amounts(
+                bookingpackage_service.service,
+                bookingpackage_service.datetime_from, bookingpackage_service.datetime_to,
+                cost_groups, price_groups, service_provider,
+                bookingpackage_service.booking_package.booking.agency,
+                bookingpackage_service.location_from_id, bookingpackage_service.location_to_id,
+                bookingpackage_service.quantity)
+        if isinstance(bookingpackage_service, BookingPackageExtra):
+            code, msg, cost, cost_msg, price, price_msg = ConfigServices.extra_amounts(
+                bookingpackage_service.service,
+                bookingpackage_service.datetime_from, bookingpackage_service.datetime_to,
+                cost_groups, price_groups, service_provider,
+                bookingpackage_service.booking_package.booking.agency,
+                bookingpackage_service.addon_id,
+                bookingpackage_service.quantity, bookingpackage_service.parameter)
+    
+        return cost, price

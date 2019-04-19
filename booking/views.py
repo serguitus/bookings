@@ -304,7 +304,7 @@ class BookingPackageAmountsView(BookingServiceAmountsView):
         if response:
             return response
 
-        code, message, cost, cost_msg, price, price_msg = BookingServices.package_amounts(
+        code, message, cost, cost_msg, price, price_msg = BookingServices.bookingpackage_amounts(
             bookingpackage, pax_list)
 
         return JsonResponse({
