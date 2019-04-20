@@ -90,6 +90,5 @@ def post_delete_update_package_booking(sender, instance, **kwargs):
 
 
 @receiver((post_save, post_delete), sender=BookingServicePax)
-def post_save_update_booking_service(sender, instance, **kwargs):
-    if instance.booking_service.service_type == SERVICE_CATEGORY_PACKAGE:
-        BookingServices.update_bookingpackage_amounts(instance.booking_service)
+def update_booking_service(sender, instance, **kwargs):
+    BookingServices.update_bookingservice_amounts(instance.booking_service)

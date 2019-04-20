@@ -602,7 +602,7 @@ class BookingServices(object):
                         (Q(pax_range_min__lte=paxes) & Q(pax_range_max__isnull=True))
                     )
                     detail_list = list(queryset)
-                    group_price, group_price_message = cls.find_package_group_price(
+                    group_price, group_price_message = cls._find_package_group_price(
                         service, date_from, date_to, group, detail_list
                     )
                     if group_price:
@@ -619,7 +619,7 @@ class BookingServices(object):
 
                 detail_list = list(queryset)
 
-                price, price_message = cls.find_package_groups_price(
+                price, price_message = cls._find_package_groups_price(
                     service, date_from, date_to, price_groups, detail_list
                 )
 
@@ -627,7 +627,437 @@ class BookingServices(object):
 
 
     @classmethod
-    def find_package_groups_price(
+    def update_booking(cls, booking_or_bookingservice):
+
+        if hasattr(booking_or_bookingservice, 'avoid_booking_update'):
+            return
+        if hasattr(booking_or_bookingservice, 'booking'):
+            booking = booking_or_bookingservice.booking
+        elif isinstance(booking_or_bookingservice, Booking):
+            booking = booking_or_bookingservice
+        else:
+            return
+
+        cost = 0
+        price = 0
+        date_from = None
+        date_to = None
+        status = constants.BOOKING_STATUS_COORDINATED
+        services = False
+        cancelled = True
+        for service in booking.booking_services.all():
+            services = True
+            # process only non cancelled services
+            if service.status != constants.SERVICE_STATUS_CANCELLED:
+                # set not all cancelled
+                cancelled = False
+                # date_from
+                if (service.datetime_from is not None
+                        and (date_from is None or date_from > service.datetime_from)):
+                    date_from = service.datetime_from
+                # date_to
+                if service.datetime_to is None:
+                    service.datetime_to = service.datetime_from
+                if (service.datetime_to is not None
+                        and (date_to is None or date_to < service.datetime_to)):
+                    date_to = service.datetime_to
+                # cost
+                cost += service.cost_amount
+                # price
+                price += service.price_amount
+                # status
+                # pending sets always pending
+                if service.status == constants.SERVICE_STATUS_PENDING:
+                    status = constants.BOOKING_STATUS_PENDING
+                # requested sets requested when not pending
+                elif (service.status == constants.SERVICE_STATUS_REQUEST) and (
+                        status != constants.BOOKING_STATUS_PENDING):
+                    status = constants.BOOKING_STATUS_REQUEST
+                # phone confirmed sets requested when not pending
+                elif (service.status == constants.SERVICE_STATUS_PHONE_CONFIRMED) and (
+                        status != constants.BOOKING_STATUS_PENDING):
+                    status = constants.BOOKING_STATUS_REQUEST
+                # confirmed sets confirmed when not requested and not pending
+                elif (service.status == constants.SERVICE_STATUS_CONFIRMED) and (
+                        status != constants.BOOKING_STATUS_PENDING) and (
+                            status != constants.BOOKING_STATUS_REQUEST):
+                    status = constants.BOOKING_STATUS_CONFIRMED
+
+        # verify that have services and all cancelled
+        if services:
+            if cancelled:
+                # status cancelled
+                status = constants.BOOKING_STATUS_CANCELLED
+        else:
+            status = constants.BOOKING_STATUS_PENDING
+        # verify package prices
+        if booking.is_package_price:
+            groups = cls.find_booking_groups(booking)
+            price = 0
+            for pax_qtty in groups:
+                if pax_qtty == 1:
+                    price += booking.package_sgl_price_amount
+                elif pax_qtty == 2:
+                    price += 2 * booking.package_dbl_price_amount
+                elif pax_qtty == 3:
+                    price += 3 * booking.package_tpl_price_amount
+
+        fields = []
+        if booking.date_from != date_from:
+            fields.append('date_from')
+            booking.date_from = date_from
+        if booking.date_to != date_to:
+            fields.append('date_to')
+            booking.date_to = date_to
+        if booking.status != status:
+            fields.append('status')
+            booking.status = status
+        if booking.cost_amount != cost:
+            fields.append('cost_amount')
+            booking.cost_amount = cost
+        if booking.price_amount != price:
+            fields.append('price_amount')
+            booking.price_amount = price
+
+        if fields:
+            booking.save(update_fields=fields)
+
+
+    @classmethod
+    def find_booking_groups(cls, booking):
+        pax_list = list(BookingPax.objects.filter(booking=booking.id))
+        groups = dict()
+        for pax in pax_list:
+            if not groups.__contains__(pax.pax_group):
+                groups[pax.pax_group] = 0
+            groups[pax.pax_group] += 1
+        return groups.values()
+
+
+    @classmethod
+    def find_groups(cls, booking_service, service, for_cost):
+        if booking_service is None:
+            return None, None
+        pax_list = list(
+            BookingServicePax.objects.filter(booking_service=booking_service.id))
+        return cls.find_paxes_groups(pax_list, service, for_cost)
+
+
+    @classmethod
+    def find_paxes_groups(cls, pax_list, service, for_cost):
+        if service.grouping:
+            groups = dict()
+            for pax in pax_list:
+                if not pax.booking_pax_id is None and not pax.group is None:
+                    if not groups.__contains__(pax.group):
+                        groups[pax.group] = dict()
+                        groups[pax.group][0] = 0 # adults count
+                        groups[pax.group][1] = 0 # child count
+                    if for_cost and pax.is_cost_free:
+                        continue
+                    if not for_cost and pax.is_price_free:
+                        continue
+                    if pax.booking_pax.pax_age is None:
+                        groups[pax.group][0] += 1
+                    else:
+                        if service.child_age is None:
+                            if service.infant_age is None:
+                                groups[pax.group][0] += 1
+                            else:
+                                if pax.booking_pax.pax_age > service.infant_age:
+                                    groups[pax.group][0] += 1
+                        else:
+                            if pax.booking_pax.pax_age > service.child_age:
+                                groups[pax.group][0] += 1
+                            else:
+                                if service.infant_age is None:
+                                    groups[pax.group][1] += 1
+                                else:
+                                    if pax.booking_pax.pax_age > service.infant_age:
+                                        groups[pax.group][1] += 1
+            return groups.values()
+        else:
+            adults = 0
+            children = 0
+            for pax in pax_list:
+                if not pax.booking_pax_id is None:
+                    if for_cost and pax.is_cost_free:
+                        continue
+                    if not for_cost and pax.is_price_free:
+                        continue
+                    if pax.booking_pax.pax_age is None:
+                        adults += 1
+                    else:
+                        if service.child_age is None:
+                            if service.infant_age is None:
+                                adults += 1
+                            else:
+                                if pax.booking_pax.pax_age > service.infant_age:
+                                    adults += 1
+                        else:
+                            if pax.booking_pax.pax_age > service.child_age:
+                                adults += 1
+                            else:
+                                if service.infant_age is None:
+                                    children += 1
+                                else:
+                                    if pax.booking_pax.pax_age > service.infant_age:
+                                        children += 1
+            return ({0: adults, 1: children},)
+
+
+    @classmethod
+    def update_booking_package(cls, booking_package):
+        if not isinstance(booking_package, BookingPackage):
+            return
+
+        avoid_package_services = None
+        if hasattr(booking_package, 'avoid_package_services'):
+            avoid_package_services = booking_package.avoid_package_services
+        if avoid_package_services:
+            return
+
+        services = list(
+            BookingPackageService.objects.filter(booking_package_id=booking_package.id).all())
+        if services:
+            return
+
+        package = booking_package.service
+        # create bookingallotment list
+        for package_allotment in PackageAllotment.objects.filter(package_id=package.id).all():
+            booking_package_allotment = BookingPackageAllotment()
+            booking_package_allotment.booking_package = booking_package
+            booking_package_allotment.conf_number = '< confirm number >'
+            # cost_amount
+            # cost_comment
+            # price_amount
+            # price_comment
+            # provider_invoice
+
+            # name auto
+            # service_type auto
+            cls._copy_package_info(
+                dst_package=booking_package_allotment, src_package=package_allotment)
+            booking_package_allotment.room_type = package_allotment.room_type
+            booking_package_allotment.board_type = package_allotment.board_type
+
+            cls.set_bookingservice_amounts(booking_package_allotment)
+            booking_package_allotment.save()
+
+        # create bookingtransfer list
+        for package_transfer in PackageTransfer.objects.filter(package_id=package.id).all():
+            booking_package_transfer = BookingPackageTransfer()
+            booking_package_transfer.booking_package = booking_package
+            booking_package_transfer.conf_number = '< confirm number >'
+            # cost_amount
+            # cost_comment
+            # price_amount
+            # price_comment
+            # provider_invoice
+            # name auto
+            # service_type auto
+            cls._copy_package_info(
+                dst_package=booking_package_transfer, src_package=package_transfer)
+            # time
+            # quantity auto
+            booking_package_transfer.location_from = package_transfer.location_from
+            booking_package_transfer.place_from = package_transfer.place_from
+            booking_package_transfer.schedule_from = package_transfer.schedule_from
+            booking_package_transfer.pickup = package_transfer.pickup
+            booking_package_transfer.location_to = package_transfer.location_to
+            booking_package_transfer.place_to = package_transfer.place_to
+            booking_package_transfer.schedule_to = package_transfer.schedule_to
+            booking_package_transfer.dropoff = package_transfer.dropoff
+
+            cls.set_bookingservice_amounts(booking_package_transfer)
+            booking_package_transfer.save()
+
+        # create bookingextra list
+        for package_extra in PackageExtra.objects.filter(package_id=package.id).all():
+            booking_package_extra = BookingPackageExtra()
+            booking_package_extra.booking_package = booking_package
+            booking_package_extra.conf_number = '< confirm number >'
+            # cost_amount
+            # cost_comment
+            # price_amount
+            # price_comment
+            # name auto
+            # service_type auto
+            cls._copy_package_info(
+                dst_package=booking_package_extra, src_package=package_extra)
+            booking_package_extra.addon = package_extra.addon
+            booking_package_extra.time = package_extra.time
+            booking_package_extra.quantity = package_extra.quantity
+            booking_package_extra.parameter = package_extra.parameter
+
+            cls.set_bookingservice_amounts(booking_package_extra)
+            booking_package_extra.save()
+
+
+    @classmethod
+    def update_bookingservice_amounts(cls, booking_service):
+        if booking_service.service_type == constants.SERVICE_CATEGORY_ALLOTMENT:
+            bookingallotment = cls._find_bookingservice(booking_service, BookingAllotment.objects)
+            if not bookingallotment:
+                return
+            cost, price = cls._bookingallotment_amounts(bookingallotment)
+            cls._save_booking_service_amounts(bookingallotment, cost, price)
+
+        if booking_service.service_type == constants.SERVICE_CATEGORY_TRANSFER:
+            bookingtransfer = cls._find_bookingservice(booking_service, BookingTransfer.objects)
+            if not bookingtransfer:
+                return
+            cost, price = cls._bookingtransfer_amounts(bookingtransfer)
+            cls._save_booking_service_amounts(bookingtransfer, cost, price)
+
+        if booking_service.service_type == constants.SERVICE_CATEGORY_EXTRA:
+            bookingextra = cls._find_bookingservice(booking_service, BookingExtra.objects)
+            if not bookingextra:
+                return
+            cost, price = cls._bookingextra_amounts(bookingextra)
+            cls._save_booking_service_amounts(bookingextra, cost, price)
+    
+        if booking_service.service_type == constants.SERVICE_CATEGORY_PACKAGE:
+            bookingpackage = cls._find_bookingservice(booking_service, BookingPackage.objects)
+            if not bookingpackage:
+                return
+
+            # update package services
+            pax_list = cls._find_pax_list(bookingpackage)
+
+            for bookingpackage_allotment in BookingPackageAllotment.objects.filter(
+                    booking_package=bookingpackage.id).all():
+                cost, price = cls._bookingpackageservice_amounts(
+                    bookingpackage_allotment, pax_list)
+                cls._save_booking_service_amounts(bookingpackage_allotment, cost, price)
+                
+
+            for bookingpackage_transfer in BookingPackageTransfer.objects.filter(
+                    booking_package=bookingpackage.id).all():
+                cost, price = cls._bookingpackageservice_amounts(
+                    bookingpackage_transfer, pax_list)
+                cls._save_booking_service_amounts(bookingpackage_transfer, cost, price)
+
+            for bookingpackage_extra in BookingPackageExtra.objects.filter(
+                    booking_package=bookingpackage.id).all():
+                cost, price = cls._bookingpackageservice_amounts(
+                    bookingpackage_extra, pax_list)
+                cls._save_booking_service_amounts(bookingpackage_extra, cost, price)
+
+            cost, price = cls._bookingpackage_amounts(bookingpackage, pax_list)
+            cls._save_booking_service_amounts(bookingpackage, cost, price)
+
+
+    @classmethod
+    def process_agencies_amounts(cls, agencies, is_update):
+        """
+        process_agencies_amounts
+        """
+        cls.generate_agencies_amounts(agencies, is_update)
+        return
+
+        # from multiprocessing import Process
+        # if __name__ == 'config.services':
+        #    p = Process(target=cls.generate_agencies_amounts, args=(agencies))
+        #    p.start()
+        #    p.join()
+
+
+    @classmethod
+    def generate_agencies_amounts(cls, agencies, is_update):
+        """
+        generate_agencies_amounts
+        """
+        # load source agency
+
+        from reservas.custom_settings import AGENCY_FOR_AMOUNTS
+
+        try:
+            src_agency = Agency.objects.get(id=AGENCY_FOR_AMOUNTS)
+        except Agency.DoesNotExist as ex:
+            print(ex)
+            # 'Source Agency not Found'
+            return
+        for dst_agency in agencies:
+            cls.copy_agency_amounts(src_agency, dst_agency, is_update)
+
+
+    @classmethod
+    def copy_agency_amounts(cls, src_agency, dst_agency, is_update):
+        """
+        copy_agency_amounts
+        """
+        ConfigServices.copy_agency_amounts(src_agency, dst_agency, is_update)
+        cls._copy_packages(src_agency, dst_agency, is_update)
+
+
+    @classmethod
+    def bookingpackage_amounts(
+            cls, bookingpackage, pax_list):
+        cost_groups = BookingServices.find_paxes_groups(pax_list, bookingpackage.service, True)
+        price_groups = BookingServices.find_paxes_groups(pax_list, bookingpackage.service, False)
+
+        pck_cost = 0
+        pck_cost_msg = ''
+        pck_price = 0
+        pck_price_msg = ''
+
+        new_package = False
+
+        if bookingpackage.price_by_package_catalogue:
+            pck_price, pck_price_msg = cls.package_price(
+                service_id=bookingpackage.service_id,
+                date_from=bookingpackage.datetime_from,
+                date_to=bookingpackage.datetime_to,
+                price_groups=price_groups,
+                agency=bookingpackage.booking.agency)
+
+        bookingpackage_service_list = list(
+            BookingPackageService.objects.filter(
+                booking_package=bookingpackage.id).exclude(
+                    status=constants.SERVICE_STATUS_CANCELLED).all())
+        if bookingpackage_service_list:
+            for bookingpackage_service in bookingpackage_service_list:
+                cost, cost_msg = bookingpackage_service.cost, bookingpackage_service.cost_message
+                pck_cost, pck_cost_msg = cls._merge_amounts(cost, cost_msg, pck_cost, pck_cost_msg)
+                if not bookingpackage.price_by_package_catalogue:
+                    price, price_msg = bookingpackage_service.price, bookingpackage_service.price_message
+                    pck_price, pck_price_msg = cls._merge_amounts(
+                        price, price_msg, pck_price, pck_price_msg)
+
+        return ConfigServices.build_amounts_result(
+            pck_cost, pck_cost_msg, pck_price, pck_price_msg)
+
+
+    @classmethod
+    def set_bookingservice_amounts(cls, bookingservice, pax_list=None):
+        if bookingservice.manual_cost is None:
+            bookingservice.manual_cost = False
+        if bookingservice.manual_price is None:
+            bookingservice.manual_price = False
+        if not bookingservice.manual_cost or not bookingservice.manual_price:
+            cost, price = None, None
+
+            if isinstance(bookingservice, BookingAllotment):
+                cost, price = cls._bookingallotment_amounts(bookingservice, pax_list)
+            if isinstance(bookingservice, BookingTransfer):
+                cost, price = cls._bookingtransfer_amounts(bookingservice, pax_list)
+            if isinstance(bookingservice, BookingExtra):
+                cost, price = cls._bookingextra_amounts(bookingservice, pax_list)
+            if isinstance(bookingservice, BookingPackage):
+                cost, price = cls._bookingpackage_amounts(bookingservice, pax_list)
+            if isinstance(bookingservice, (
+                    BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra)):
+                cost, price = cls._bookingpackageservice_amounts(bookingservice, pax_list)
+
+            if not bookingservice.manual_cost:
+                bookingservice.cost_amount = cost
+            if not bookingservice.manual_price:
+                bookingservice.price_amount = price
+
+
+    @classmethod
+    def _find_package_groups_price(
             cls, service, date_from, date_to, groups, detail_list):
 
         groups_amount = 0
@@ -645,7 +1075,7 @@ class BookingServices(object):
 
 
     @classmethod
-    def find_package_group_price(
+    def _find_package_group_price(
             cls, service, date_from, date_to, group, detail_list):
 
         amount, message = ConfigServices.find_amount(
@@ -655,60 +1085,6 @@ class BookingServices(object):
             return amount, message
         else:
             return None, message
-
-
-    @classmethod
-    def find_package_price(
-            cls, service, date_from, date_to, adults, children, detail_list):
-        if adults + children == 0:
-            return 0, ''
-        message = ''
-        stop = False
-        solved = False
-        current_date = date_from
-        price = 0
-        details = list(detail_list)
-        # continue until solved or empty details list
-        while not stop:
-            # verify list not empty
-            if details:
-                # working with first detail
-                detail = details[0]
-
-                # verify current dat included
-                detail_date_from = detail.agency_service.date_from
-                detail_date_to = detail.agency_service.date_to
-
-                if current_date >= detail_date_from:
-                    # verify final date included
-                    end_date = detail_date_to + timedelta(days=1)
-                    if end_date >= date_to:
-                        # full date range
-                        result = cls._get_package_price(
-                            service, detail, current_date, date_to, adults, children)
-                        if result is not None and result >= 0:
-                            price += result
-                            solved = True
-                            stop = True
-                    else:
-                        result = cls._get_package_price(
-                            service, detail, current_date,
-                            datetime(year=end_date.year, month=end_date.month, day=end_date.day),
-                            adults, children)
-                        if result is not None and result >= 0:
-                            price += result
-                            current_date = datetime(
-                                year=end_date.year, month=end_date.month, day=end_date.day)
-                # remove detail from list
-                details.remove(detail)
-            else:
-                # empty list, no solved all days
-                stop = True
-                message = 'Amount Not Found for date %s' % current_date
-        if not solved:
-            price = None
-
-        return price, message
 
 
     @classmethod
@@ -986,12 +1362,14 @@ class BookingServices(object):
             'price_3_msg': price_3_msg,
         }
 
+
     @classmethod
     def _no_service_dict(cls):
         return cls._quote_amounts_dict(
             None, 'No Service', None, 'No Service', None, 'No Service',
             None, 'No Service', None, 'No Service', None, 'No Service'
         )
+
 
     @classmethod
     def _variant_cost_totals(
@@ -1004,6 +1382,7 @@ class BookingServices(object):
         rc3, rc3_msg = cls._merge_amounts(cost_3, cost_3_msg, c3, c3_msg)
 
         return rc1, rc1_msg, rc2, rc2_msg, rc3, rc3_msg
+
 
     @classmethod
     def _variant_totals(
@@ -1020,6 +1399,7 @@ class BookingServices(object):
 
         return rc1, rc1_msg, rp1, rp1_msg, rc2, rc2_msg, rp2, rp2_msg, rc3, rc3_msg, rp3, rp3_msg
 
+
     @classmethod
     def _merge_amounts(
             cls,
@@ -1031,183 +1411,6 @@ class BookingServices(object):
         else:
             return float(prev_amount) + float(amount), msg
 
-    @classmethod
-    def update_booking(cls, booking_or_bookingservice):
-
-        if hasattr(booking_or_bookingservice, 'avoid_booking_update'):
-            return
-        if hasattr(booking_or_bookingservice, 'booking'):
-            booking = booking_or_bookingservice.booking
-        elif isinstance(booking_or_bookingservice, Booking):
-            booking = booking_or_bookingservice
-        else:
-            return
-
-        cost = 0
-        price = 0
-        date_from = None
-        date_to = None
-        status = constants.BOOKING_STATUS_COORDINATED
-        services = False
-        cancelled = True
-        for service in booking.booking_services.all():
-            services = True
-            # process only non cancelled services
-            if service.status != constants.SERVICE_STATUS_CANCELLED:
-                # set not all cancelled
-                cancelled = False
-                # date_from
-                if (service.datetime_from is not None
-                        and (date_from is None or date_from > service.datetime_from)):
-                    date_from = service.datetime_from
-                # date_to
-                if service.datetime_to is None:
-                    service.datetime_to = service.datetime_from
-                if (service.datetime_to is not None
-                        and (date_to is None or date_to < service.datetime_to)):
-                    date_to = service.datetime_to
-                # cost
-                cost += service.cost_amount
-                # price
-                price += service.price_amount
-                # status
-                # pending sets always pending
-                if service.status == constants.SERVICE_STATUS_PENDING:
-                    status = constants.BOOKING_STATUS_PENDING
-                # requested sets requested when not pending
-                elif (service.status == constants.SERVICE_STATUS_REQUEST) and (
-                        status != constants.BOOKING_STATUS_PENDING):
-                    status = constants.BOOKING_STATUS_REQUEST
-                # phone confirmed sets requested when not pending
-                elif (service.status == constants.SERVICE_STATUS_PHONE_CONFIRMED) and (
-                        status != constants.BOOKING_STATUS_PENDING):
-                    status = constants.BOOKING_STATUS_REQUEST
-                # confirmed sets confirmed when not requested and not pending
-                elif (service.status == constants.SERVICE_STATUS_CONFIRMED) and (
-                        status != constants.BOOKING_STATUS_PENDING) and (
-                            status != constants.BOOKING_STATUS_REQUEST):
-                    status = constants.BOOKING_STATUS_CONFIRMED
-
-        # verify that have services and all cancelled
-        if services:
-            if cancelled:
-                # status cancelled
-                status = constants.BOOKING_STATUS_CANCELLED
-        else:
-            status = constants.BOOKING_STATUS_PENDING
-        # verify package prices
-        if booking.is_package_price:
-            groups = cls.find_booking_groups(booking)
-            price = 0
-            for pax_qtty in groups:
-                if pax_qtty == 1:
-                    price += booking.package_sgl_price_amount
-                elif pax_qtty == 2:
-                    price += 2 * booking.package_dbl_price_amount
-                elif pax_qtty == 3:
-                    price += 3 * booking.package_tpl_price_amount
-
-        fields = []
-        if booking.date_from != date_from:
-            fields.append('date_from')
-            booking.date_from = date_from
-        if booking.date_to != date_to:
-            fields.append('date_to')
-            booking.date_to = date_to
-        if booking.status != status:
-            fields.append('status')
-            booking.status = status
-        if booking.cost_amount != cost:
-            fields.append('cost_amount')
-            booking.cost_amount = cost
-        if booking.price_amount != price:
-            fields.append('price_amount')
-            booking.price_amount = price
-
-        if fields:
-            booking.save(update_fields=fields)
-
-
-    @classmethod
-    def find_booking_groups(cls, booking):
-        pax_list = list(BookingPax.objects.filter(booking=booking.id))
-        groups = dict()
-        for pax in pax_list:
-            if not groups.__contains__(pax.pax_group):
-                groups[pax.pax_group] = 0
-            groups[pax.pax_group] += 1
-        return groups.values()
-
-
-    @classmethod
-    def find_groups(cls, booking_service, service, for_cost):
-        if booking_service is None:
-            return None, None
-        pax_list = list(
-            BookingServicePax.objects.filter(booking_service=booking_service.id))
-        return cls.find_paxes_groups(pax_list, service, for_cost)
-
-    @classmethod
-    def find_paxes_groups(cls, pax_list, service, for_cost):
-        if service.grouping:
-            groups = dict()
-            for pax in pax_list:
-                if not pax.booking_pax_id is None and not pax.group is None:
-                    if not groups.__contains__(pax.group):
-                        groups[pax.group] = dict()
-                        groups[pax.group][0] = 0 # adults count
-                        groups[pax.group][1] = 0 # child count
-                    if for_cost and pax.is_cost_free:
-                        continue
-                    if not for_cost and pax.is_price_free:
-                        continue
-                    if pax.booking_pax.pax_age is None:
-                        groups[pax.group][0] += 1
-                    else:
-                        if service.child_age is None:
-                            if service.infant_age is None:
-                                groups[pax.group][0] += 1
-                            else:
-                                if pax.booking_pax.pax_age > service.infant_age:
-                                    groups[pax.group][0] += 1
-                        else:
-                            if pax.booking_pax.pax_age > service.child_age:
-                                groups[pax.group][0] += 1
-                            else:
-                                if service.infant_age is None:
-                                    groups[pax.group][1] += 1
-                                else:
-                                    if pax.booking_pax.pax_age > service.infant_age:
-                                        groups[pax.group][1] += 1
-            return groups.values()
-        else:
-            adults = 0
-            children = 0
-            for pax in pax_list:
-                if not pax.booking_pax_id is None:
-                    if for_cost and pax.is_cost_free:
-                        continue
-                    if not for_cost and pax.is_price_free:
-                        continue
-                    if pax.booking_pax.pax_age is None:
-                        adults += 1
-                    else:
-                        if service.child_age is None:
-                            if service.infant_age is None:
-                                adults += 1
-                            else:
-                                if pax.booking_pax.pax_age > service.infant_age:
-                                    adults += 1
-                        else:
-                            if pax.booking_pax.pax_age > service.child_age:
-                                adults += 1
-                            else:
-                                if service.infant_age is None:
-                                    children += 1
-                                else:
-                                    if pax.booking_pax.pax_age > service.infant_age:
-                                        children += 1
-            return ({0: adults, 1: children},)
 
     @classmethod
     def _quote_allotment_amounts(
@@ -1293,17 +1496,6 @@ class BookingServices(object):
                     addon_id, quantity, parameter)
             return cls._quote_results(adults, cost, cost_msg, price, price_msg, c, c_msg, p, p_msg)
 
-    @classmethod
-    def _quote_package_catalogue_prices(
-            cls, price, price_msg,
-            service, date_from, date_to, adults, agency):
-        groups = ({0:adults, 1:0},)
-        if price is None:
-            return None, price_msg
-        else:
-            code, p, p_msg = package_catalogue_prices(
-                service, date_from, date_to, groups, agency)
-            return cls._quote_results(adults, cost, cost_msg, price, price_msg, c, c_msg, p, p_msg)
 
     @classmethod
     def _quote_results(cls, adults, cost, cost_msg, price, price_msg, c, c_msg, p, p_msg):
@@ -1336,434 +1528,138 @@ class BookingServices(object):
 
 
     @classmethod
-    def update_booking_package(cls, booking_package):
-        if not isinstance(booking_package, BookingPackage):
+    def _update_bookingpackageservice_amounts(cls, bookingpackage_service):
+        if not bookingpackage_service:
             return
-
-        avoid_package_services = None
-        if hasattr(booking_package, 'avoid_package_services'):
-            avoid_package_services = booking_package.avoid_package_services
-        if avoid_package_services:
-            return
-
-        services = list(
-            BookingPackageService.objects.filter(booking_package_id=booking_package.id).all())
-        if services:
-            return
-
-        package = booking_package.service
-        # create bookingallotment list
-        for package_allotment in PackageAllotment.objects.filter(package_id=package.id).all():
-            booking_package_allotment = BookingPackageAllotment()
-            booking_package_allotment.booking_package = booking_package
-            booking_package_allotment.conf_number = '< confirm number >'
-            # cost_amount
-            # cost_comment
-            # price_amount
-            # price_comment
-            # provider_invoice
-
-            # name auto
-            # service_type auto
-            cls._copy_package_info(
-                dst_package=booking_package_allotment, src_package=package_allotment)
-            booking_package_allotment.room_type = package_allotment.room_type
-            booking_package_allotment.board_type = package_allotment.board_type
-
-            cls.set_bookingservice_amounts(booking_package_allotment)
-            booking_package_allotment.save()
-
-        # create bookingtransfer list
-        for package_transfer in PackageTransfer.objects.filter(package_id=package.id).all():
-            booking_package_transfer = BookingPackageTransfer()
-            booking_package_transfer.booking_package = booking_package
-            booking_package_transfer.conf_number = '< confirm number >'
-            # cost_amount
-            # cost_comment
-            # price_amount
-            # price_comment
-            # provider_invoice
-            # name auto
-            # service_type auto
-            cls._copy_package_info(
-                dst_package=booking_package_transfer, src_package=package_transfer)
-            # time
-            # quantity auto
-            booking_package_transfer.location_from = package_transfer.location_from
-            booking_package_transfer.place_from = package_transfer.place_from
-            booking_package_transfer.schedule_from = package_transfer.schedule_from
-            booking_package_transfer.pickup = package_transfer.pickup
-            booking_package_transfer.location_to = package_transfer.location_to
-            booking_package_transfer.place_to = package_transfer.place_to
-            booking_package_transfer.schedule_to = package_transfer.schedule_to
-            booking_package_transfer.dropoff = package_transfer.dropoff
-
-            cls.set_bookingservice_amounts(booking_package_transfer)
-            booking_package_transfer.save()
-
-        # create bookingextra list
-        for package_extra in PackageExtra.objects.filter(package_id=package.id).all():
-            booking_package_extra = BookingPackageExtra()
-            booking_package_extra.booking_package = booking_package
-            booking_package_extra.conf_number = '< confirm number >'
-            # cost_amount
-            # cost_comment
-            # price_amount
-            # price_comment
-            # name auto
-            # service_type auto
-            cls._copy_package_info(
-                dst_package=booking_package_extra, src_package=package_extra)
-            booking_package_extra.addon = package_extra.addon
-            booking_package_extra.time = package_extra.time
-            booking_package_extra.quantity = package_extra.quantity
-            booking_package_extra.parameter = package_extra.parameter
-
-            cls.set_bookingservice_amounts(booking_package_extra)
-            booking_package_extra.save()
-
-    @classmethod
-    def package_catalogue_prices(
-            cls, package_id, date_from, date_to, price_groups, agency):
-        package = Package.objects.get(pk=package_id)
-
-        if date_from is None and date_to is None:
-            return None, 'Both Dates are Missing'
-        if date_from is None:
-            date_from = date_to
-        if date_to is None:
-            date_to = date_from
-
-        # agency price
-        # obtain details order by date_from asc, date_to desc
-        if price_groups is None and package.amounts_type == PACKAGE_AMOUNTS_BY_PAX:
-            return None, 'Paxes Missing'
-        elif agency is None:
-            return None, 'Agency Not Found'
-        else:
-            if package.has_pax_range:
-                price = 0
-                price_message = ''
-                # each group can have different details
-                for group in price_groups:
-                    paxes = group[0] + group[1]
-                    if date_from is None or date_to is None:
-                        queryset = AgencyPackageDetail.objects.none()
-                    else:
-                        queryset = AgencyPackageDetail.objects.select_related(
-                            'agency_service__service'
-                            ).filter(
-                                agency_service__agency_id=agency_id
-                            ).filter(
-                                agency_service__service_id=package_id
-                            ).filter(
-                                agency_service__date_to__gte=date_from,
-                                agency_service__date_from__lte=date_to
-                            ).order_by(
-                                'agency_service__date_from', '-agency_service__date_to'
-                            )
-                    # pax range filtering
-                    queryset = queryset.filter(
-                        (Q(pax_range_min__isnull=True) & Q(pax_range_max__gte=paxes)) |
-                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__gte=paxes)) |
-                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__isnull=True))
-                    )
-
-                    detail_list = list(queryset)
-
-                    group_price, group_price_message = cls.find_package_group_price(
-                        False, package, date_from, date_to, group, detail_list)
-                    if group_price:
-                        price += group_price
-                        price_message = group_price_message
-                    else:
-                        price = None
-                        price_message = group_price_message
-                        break
-            else:
-                if date_from is None or date_to is None:
-                    queryset = AgencyPackageDetail.objects.none()
-                else:
-                    queryset = AgencyPackageDetail.objects.select_related(
-                        'agency_service__service'
-                        ).filter(
-                            agency_service__agency_id=agency_id
-                        ).filter(
-                            agency_service__service_id=package_id
-                        ).filter(
-                            agency_service__date_to__gte=date_from,
-                            agency_service__date_from__lte=date_to
-                        ).order_by(
-                            'agency_service__date_from', '-agency_service__date_to'
-                        )
-
-                detail_list = list(queryset)
-
-                price, price_message = cls.find_package_groups_price(
-                    package, date_from, date_to, price_groups, detail_list)
-
-        return cls.build_amounts_result(cost, cost_message, price, price_message)
-
-    @classmethod
-    def find_package_groups_price(
-            cls, package, date_from, date_to, groups, detail_list):
-
-        groups_amount = 0
-        groups_message = ''
-        for group in groups:
-            amount, message = cls.find_package_group_price(
-                package, date_from, date_to, group, detail_list)
-            if amount is None:
-                return None, message
-            groups_amount += amount
-            groups_message = message
-
-        return groups_amount, groups_message
-
-    @classmethod
-    def find_package_group_price(
-            cls, package, date_from, date_to, group, detail_list):
-
-        price, message = cls.find_package_price(
-            package, date_from, date_to, group[0], group[1], detail_list)
-        if price is not None and price >= 0:
-            return price, message
-        else:
-            return None, message
-
-    @classmethod
-    def find_package_price(
-            cls, package, date_from, date_to, adults, children, detail_list):
-        if adults + children == 0:
-            return 0, ''
-        message = ''
-        stop = False
-        solved = False
-        current_date = date_from
-        price = 0
-        details = list(detail_list)
-        # continue until solved or empty details list
-        while not stop:
-            # verify list not empty
-            if details:
-                # working with first detail
-                detail = details[0]
-
-                detail_date_from = detail.agency_service.date_from
-                detail_date_to = detail.agency_service.date_to
-
-                if current_date >= detail_date_from:
-                    # verify final date included
-                    end_date = detail_date_to + timedelta(days=1)
-                    if end_date >= date_to:
-                        # full date range
-                        result = cls._get_package_price(
-                            package, detail, current_date, date_to,
-                            adults, children)
-                        if result is not None and result >= 0:
-                            price += result
-                            solved = True
-                            stop = True
-                    else:
-                        result = cls._get_package_price(
-                            package, detail, current_date,
-                            datetime(year=end_date.year, month=end_date.month, day=end_date.day),
-                            adults, children)
-                        if result is not None and result >= 0:
-                            price += result
-                            current_date = datetime(
-                                year=end_date.year, month=end_date.month, day=end_date.day)
-                # remove detail from list
-                details.remove(detail)
-            else:
-                # empty list, no solved all days
-                stop = True
-                message = 'Amount Not Found for date %s' % current_date
-        if not solved:
-            price = None
-
-        return price, message
+        cost, price = cls._bookingpackageservice_amounts(bookingpackage_service)
+        cls._save_booking_service_amounts(bookingpackage_service, cost, price)
 
 
     @classmethod
-    def update_bookingpackage_amounts(cls, booking_service):
-
-        booking_package = list(BookingPackage.objects.filter(pk=booking_service.pk))
-        if not booking_package:
-            return
-        booking_package = booking_package[0]
-        # TODO
-
+    def _find_bookingservice(cls, booking_service, manager):
+        bookingservice = list(manager.filter(pk=booking_service.pk))
+        if not bookingservice:
+            return None
+        return bookingservice[0]
 
 
     @classmethod
-    def update_bookingpackageservice_amounts(cls, bookingpackage_service):
+    def _save_booking_service_amounts(cls, booking_service, cost, price):
+        fields = []
+        if booking_service.cost_amount != cost:
+            fields.append('cost_amount')
+            booking_service.cost_amount = cost
+        if booking_service.price_amount != price:
+            fields.append('price_amount')
+            booking_service.price_amount = price
 
-        bookingpackage_service = list(BookingPackage.objects.filter(pk=booking_service.pk))
-        if not booking_package:
-            return
-        booking_package = booking_package[0]
-
-
-
-
-    @classmethod
-    def process_agencies_amounts(cls, agencies, is_update):
-        """
-        process_agencies_amounts
-        """
-        cls.generate_agencies_amounts(agencies, is_update)
-        return
-
-        # from multiprocessing import Process
-        # if __name__ == 'config.services':
-        #    p = Process(target=cls.generate_agencies_amounts, args=(agencies))
-        #    p.start()
-        #    p.join()
+        if fields:
+            booking_service.save(update_fields=fields)
 
 
     @classmethod
-    def generate_agencies_amounts(cls, agencies, is_update):
-        """
-        generate_agencies_amounts
-        """
-        # load source agency
-
-        from reservas.custom_settings import AGENCY_FOR_AMOUNTS
-
-        try:
-            src_agency = Agency.objects.get(id=AGENCY_FOR_AMOUNTS)
-        except Agency.DoesNotExist as ex:
-            print(ex)
-            # 'Source Agency not Found'
-            return
-        for dst_agency in agencies:
-            cls.copy_agency_amounts(src_agency, dst_agency, is_update)
+    def _find_pax_list(cls, booking_service):
+        return list(BookingServicePax.objects.filter(booking_service=booking_service.id).all())
 
 
     @classmethod
-    def copy_agency_amounts(cls, src_agency, dst_agency, is_update):
-        """
-        copy_agency_amounts
-        """
-        ConfigServices.copy_agency_amounts(src_agency, dst_agency, is_update)
-        cls._copy_packages(src_agency, dst_agency, is_update)
+    def _bookingservice_manual_amounts(cls, booking_service, cost, price):
+        cost_result, price_result = cost, price
+        if booking_service.manual_cost:
+            cost_result = booking_service.cost_amount
+        if booking_service.manual_price:
+            price_result = booking_service.price_amount
+
+        return cost_result, price_result 
 
 
     @classmethod
-    def bookingpackage_amounts(
-            cls, bookingpackage, pax_list):
-        cost_groups = BookingServices.find_paxes_groups(pax_list, bookingpackage.service, True)
-        price_groups = BookingServices.find_paxes_groups(pax_list, bookingpackage.service, False)
-
-        pck_cost = 0
-        pck_cost_msg = ''
-        pck_price = 0
-        pck_price_msg = ''
-
-        new_package = False
-
-        if bookingpackage.price_by_package_catalogue:
-            pck_price, pck_price_msg = cls.package_price(
-                service_id=bookingpackage.service_id,
-                date_from=bookingpackage.datetime_from,
-                date_to=bookingpackage.datetime_to,
-                price_groups=price_groups,
-                agency=bookingpackage.booking.agency)
-
-        bookingpackage_service_list = list(
-            BookingPackageService.objects.filter(
-                booking_package=bookingpackage.id).exclude(
-                    status=constants.SERVICE_STATUS_CANCELLED).all())
-        if bookingpackage_service_list:
-            for bookingpackage_service in bookingpackage_service_list:
-                cost, cost_msg = bookingpackage_service.cost, bookingpackage_service.cost_message
-                pck_cost, pck_cost_msg = cls._merge_amounts(cost, cost_msg, pck_cost, pck_cost_msg)
-                if not bookingpackage.price_by_package_catalogue:
-                    price, price_msg = bookingpackage_service.price, bookingpackage_service.price_message
-                    pck_price, pck_price_msg = cls._merge_amounts(
-                        price, price_msg, pck_price, pck_price_msg)
-
-        return ConfigServices.build_amounts_result(
-            pck_cost, pck_cost_msg, pck_price, pck_price_msg)
+    def _verify_booking_service_manuals(cls, booking_service):
+        if booking_service.manual_cost is None:
+            booking_service.manual_cost = False
+        if booking_service.manual_price is None:
+            booking_service.manual_price = False
+        return booking_service.manual_cost and booking_service.manual_price
 
 
     @classmethod
-    def set_bookingservice_amounts(cls, bookingservice, pax_list=None):
-        if bookingservice.manual_cost is None:
-            bookingservice.manual_cost = False
-        if bookingservice.manual_price is None:
-            bookingservice.manual_price = False
-        if not bookingservice.manual_cost or not bookingservice.manual_price:
-            cost, price = None, None
+    def _bookingallotment_amounts(cls, bookingallotment, pax_list=None):
+        if cls._verify_booking_service_manuals(bookingallotment):
+            return bookingallotment.cost_amount, bookingallotment.price_amount
 
-            if isinstance(bookingservice, BookingAllotment):
-                cost, price = cls._bookingallotment_amounts(bookingservice, pax_list)
-            if isinstance(bookingservice, BookingTransfer):
-                cost, price = cls._bookingtransfer_amounts(bookingservice, pax_list)
-            if isinstance(bookingservice, BookingExtra):
-                cost, price = cls._bookingextra_amounts(bookingservice, pax_list)
-            if isinstance(bookingservice, BookingPackage):
-                cost, price = cls._bookingpackage_amounts(bookingservice, pax_list)
-            if isinstance(bookingservice, (
-                    BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra)):
-                cost, price = cls._bookingpackageservice_amounts(bookingservice, pax_list)
+        if not pax_list:
+            pax_list = cls._find_pax_list(bookingallotment)
 
-            if not bookingservice.manual_cost:
-                bookingservice.cost_amount = cost
-            if not bookingservice.manual_price:
-                bookingservice.price_amount = price
+        cost_groups = BookingServices.find_paxes_groups(pax_list, bookingallotment.service, True)
+        price_groups = BookingServices.find_paxes_groups(pax_list, bookingallotment.service, False)
 
-
-    @classmethod
-    def _bookingallotment_amounts(cls, obj, pax_list):
-        cost_groups = BookingServices.find_paxes_groups(pax_list, obj.service, True)
-        price_groups = BookingServices.find_paxes_groups(pax_list, obj.service, False)
         code, message, cost, cost_msg, price, price_msg = ConfigServices.allotment_amounts(
-            obj.service_id, obj.datetime_from, obj.datetime_to, cost_groups, price_groups,
-            obj.provider, obj.booking.agency,
-            obj.board_type, obj.room_type_id)
-        return cost, price 
+            bookingallotment.service_id,
+            bookingallotment.datetime_from, bookingallotment.datetime_to,
+            cost_groups, price_groups,
+            bookingallotment.provider, bookingallotment.booking.agency,
+            bookingallotment.board_type, bookingallotment.room_type_id)
+
+        return cls._bookingservice_manual_amounts(bookingallotment, cost, price)
 
 
     @classmethod
-    def _bookingtransfer_amounts(cls, obj, pax_list):
-        cost_groups = BookingServices.find_paxes_groups(pax_list, obj.service, True)
-        price_groups = BookingServices.find_paxes_groups(pax_list, obj.service, False)
+    def _bookingtransfer_amounts(cls, bookingtransfer, pax_list=None):
+        if cls._verify_booking_service_manuals(bookingtransfer):
+            return bookingtransfer.cost_amount, bookingtransfer.price_amount
+
+        if not pax_list:
+            pax_list = cls._find_pax_list(bookingtransfer)
+
+        cost_groups = BookingServices.find_paxes_groups(pax_list, bookingtransfer.service, True)
+        price_groups = BookingServices.find_paxes_groups(pax_list, bookingtransfer.service, False)
+
         code, message, cost, cost_msg, price, price_msg = ConfigServices.transfer_amounts(
-            obj.service_id, obj.datetime_from, obj.datetime_to, cost_groups, price_groups,
-            obj.provider, obj.booking.agency,
-            obj.location_from_id, obj.location_to_id, obj.quantity)
-        return cost, price 
+            bookingtransfer.service_id, bookingtransfer.datetime_from, bookingtransfer.datetime_to, cost_groups, price_groups,
+            bookingtransfer.provider, bookingtransfer.booking.agency,
+            bookingtransfer.location_from_id, bookingtransfer.location_to_id, bookingtransfer.quantity)
+
+        return cls._bookingservice_manual_amounts(bookingtransfer, cost, price)
 
 
     @classmethod
-    def _bookingextra_amounts(cls, obj, pax_list):
-        cost_groups = BookingServices.find_paxes_groups(pax_list, obj.service, True)
-        price_groups = BookingServices.find_paxes_groups(pax_list, obj.service, False)
+    def _bookingextra_amounts(cls, bookingextra, pax_list=None):
+        if cls._verify_booking_service_manuals(bookingextra):
+            return bookingextra.cost_amount, bookingextra.price_amount
+
+        if not pax_list:
+            pax_list = cls._find_pax_list(bookingextra)
+
+        cost_groups = BookingServices.find_paxes_groups(pax_list, bookingextra.service, True)
+        price_groups = BookingServices.find_paxes_groups(pax_list, bookingextra.service, False)
+
         code, message, cost, cost_msg, price, price_msg = ConfigServices.extra_amounts(
-            obj.service_id, obj.datetime_from, obj.datetime_to, cost_groups, price_groups,
-            obj.provider, obj.booking.agency,
-            obj.addon_id, obj.quantity, obj.parameter)
-        return cost, price 
+            bookingextra.service_id, bookingextra.datetime_from, bookingextra.datetime_to, cost_groups, price_groups,
+            bookingextra.provider, bookingextra.booking.agency,
+            bookingextra.addon_id, bookingextra.quantity, bookingextra.parameter)
+
+        return cls._bookingservice_manual_amounts(bookingextra, cost, price)
 
 
     @classmethod
-    def _bookingpackage_amounts(
-            cls, bookingpackage, pax_list):
+    def _bookingpackage_amounts(cls, bookingpackage, pax_list=None):
+        if cls._verify_booking_service_manuals(bookingpackage):
+            return bookingpackage.cost_amount, bookingpackage.price_amount
+
+        if not pax_list:
+            pax_list = cls._find_pax_list(bookingpackage)
+
         code, msg, pck_cost, pck_cost_msg, pck_price, pck_price_msg = cls.bookingpackage_amounts(
             bookingpackage, pax_list)
 
-        return pck_cost, pck_price
+        return cls._bookingservice_manual_amounts(bookingpackage, pck_cost, pck_price)
 
 
     @classmethod
     def _bookingpackageservice_amounts(cls, bookingpackage_service, pax_list=None):
-
         if not pax_list:
-            pax_list = list(
-                BookingServicePax.objects.filter(
-                    booking_service=bookingpackage_service.booking_package).all())
+            pax_list = cls._find_pax_list(bookingpackage_service.booking_package)
+
         cost_groups = BookingServices.find_paxes_groups(
             pax_list, bookingpackage_service.booking_package.service, True)
         price_groups = BookingServices.find_paxes_groups(

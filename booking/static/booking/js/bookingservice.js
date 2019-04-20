@@ -159,7 +159,7 @@ $(document).ready(function(){
   $('.btn-copy-cost').on('click', function(e){
     e.preventDefault();
     if(Number(computedCost.html())){
-      costInput.value = Number(computedCost.html());
+      costInput[0].value = Number(computedCost.html());
     }
     compare_numbers()
   })
@@ -167,7 +167,7 @@ $(document).ready(function(){
   $('.btn-copy-price').on('click', function(e){
     e.preventDefault();
     if(Number(computedPrice.html())){
-      priceInput.value = Number(computedPrice.html());
+      priceInput[0].value = Number(computedPrice.html());
     }
     compare_numbers()
   })
