@@ -831,6 +831,15 @@ class SiteModel(TotalsumAdmin):
             self.message_user(request, msg, messages.SUCCESS)
             return self.response_post_save_change(request, obj)
 
+    def response_cancel(self, request, obj, add):
+        """
+        Figure out where to redirect after the 'Cancel' button has been pressed.
+        """
+        if add:
+            return self.response_post_save_add(request, obj)
+        else:
+            return self.response_post_save_change(request, obj)
+
     def response_post_save_add(self, request, obj):
         """
         Figure out where to redirect after the 'Save' button has been pressed
@@ -972,24 +981,31 @@ class SiteModel(TotalsumAdmin):
             ModelForm = self.get_form(request, obj)
             if request.method == 'POST':
                 form = ModelForm(request.POST, request.FILES, instance=obj)
-                if form.is_valid():
-                    form_validated = True
-                    new_object = self.save_form(request, form, change=not add)
-                else:
+                if '_cancel' in request.POST:
                     form_validated = False
                     new_object = form.instance
-                formsets, inline_instances = self._create_formsets(
-                    request, new_object, change=not add)
-                if all_valid(formsets) and form_validated:
-                    response = self.changeform_do_saving(
-                        request=request, new_object=new_object, form=form, formsets=formsets,
-                        add=add, inlines=inline_instances)
-                    if response:
-                        return response
+                    formsets, inline_instances = self._create_formsets(
+                        request, new_object, change=not add)
+                    return self.response_cancel(request, new_object, add)
+                else:
+                    if form.is_valid():
+                        form_validated = True
+                        new_object = self.save_form(request, form, change=not add)
                     else:
                         form_validated = False
-                else:
-                    form_validated = False
+                        new_object = form.instance
+                    formsets, inline_instances = self._create_formsets(
+                        request, new_object, change=not add)
+                    if all_valid(formsets) and form_validated:
+                        response = self.changeform_do_saving(
+                            request=request, new_object=new_object, form=form, formsets=formsets,
+                            add=add, inlines=inline_instances)
+                        if response:
+                            return response
+                        else:
+                            form_validated = False
+                    else:
+                        form_validated = False
             else:
                 if add:
                     initial = self.get_changeform_initial_data(request)

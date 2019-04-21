@@ -212,6 +212,7 @@ def common_submit_row(context):
     save_as = context['save_as']
     show_save = context.get('show_save', True)
     show_save_and_continue = context.get('show_save_and_continue', True)
+    show_cancel = context.get('show_cancel', True)
     ctx = Context(context)
     ctx.update({
         'change_actions': context['change_actions'],
@@ -225,6 +226,7 @@ def common_submit_row(context):
         ),
         'show_save_and_continue': not is_popup and context['has_change_permission'] and show_save_and_continue,
         'show_save': show_save,
+        'show_cancel': show_cancel,
     })
     return ctx
 
