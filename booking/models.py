@@ -24,7 +24,7 @@ from config.models import (
     RoomType, Allotment,
     Transfer, Location, Place, Schedule,
     Extra, Addon,
-    AmountDetail, AgencyCatalogue,
+    AmountDetail, AgencyCatalogue, ProviderCatalogue,
 )
 
 from finance.models import Agency, AgencyInvoice, Provider, ProviderInvoice
@@ -898,6 +898,20 @@ class BookingPackageExtra(BookingPackageService, BaseExtra):
         # setting name for this quote_service
         self.name = self.service.name
         self.service_type = SERVICE_CATEGORY_EXTRA
+
+
+class ProviderPackageService(ProviderCatalogue):
+    """
+    ProviderPackageService
+    """
+    class Meta:
+        verbose_name = 'Provider Package Service'
+        verbose_name_plural = 'Providers Packages Services'
+        unique_together = (('provider', 'service', 'date_from', 'date_to'),)
+    service = models.ForeignKey(Package)
+
+    def __str__(self):
+        return 'Pvdr.Package - %s : %s' % (self.provider, self.service)
 
 
 class AgencyPackageService(AgencyCatalogue):
