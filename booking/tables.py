@@ -173,7 +173,7 @@ class BookingPackageServiceTable(tables.Table):
     class Meta:
         model = BookingPackageService
         template_name = 'booking/bookingpackageservice_list.html'
-        fields = ['name', 'service_type', 'datetime_from', 'datetime_to']
+        fields = ['name', 'service_type', 'datetime_from', 'datetime_to', 'cost_amount', 'price_amount', 'provider']
 
     def render_name(self, value, record):
         obj_url = reverse(
