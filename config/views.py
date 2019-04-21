@@ -9,6 +9,8 @@ from config.models import (
     Allotment, Transfer, Extra
 )
 
+from django.db.models import Q
+
 from finance.models import (
     Provider
 )
@@ -159,19 +161,39 @@ class ProviderTransferAutocompleteView(autocomplete.Select2QuerySetView):
             if location_from:
                 if location_to:
                     qs = qs.filter(
-                        providertransferservice__service=service,
-                        providertransferservice__providertransferdetail__p_location_from=location_from,
-                        providertransferservice__providertransferdetail__p_location_to=location_to,
+                        Q(providertransferservice__service=service)
+                        &
+                        (
+                            (
+                                Q(providertransferservice__providertransferdetail__p_location_from=location_from)
+                                & Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                            )
+                            |
+                            (
+                                Q(providertransferservice__providertransferdetail__p_location_from=location_to)
+                                & Q(providertransferservice__providertransferdetail__p_location_to=location_from)
+                            )
+                        )
                     )
                 else:
                     qs = qs.filter(
-                        providertransferservice__service=service,
-                        providertransferservice__providertransferdetail__p_location_from=location_from,
+                        Q(providertransferservice__service=service)
+                        &
+                        (
+                            Q(providertransferservice__providertransferdetail__p_location_from=location_from)
+                            |
+                            Q(providertransferservice__providertransferdetail__p_location_to=location_from)
+                        )
                     )
             elif location_to:
                 qs = qs.filter(
-                    providertransferservice__service=service,
-                    providertransferservice__providertransferdetail__p_location_to=location_to,
+                    Q(providertransferservice__service=service)
+                    &
+                    (
+                        Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                        |
+                        Q(providertransferservice__providertransferdetail__p_location_from=location_to)
+                    )
                 )
             else:
                 qs = qs.filter(
@@ -180,16 +202,27 @@ class ProviderTransferAutocompleteView(autocomplete.Select2QuerySetView):
         elif location_from:
             if location_to:
                 qs = qs.filter(
-                    providertransferservice__providertransferdetail__p_location_from=location_from,
-                    providertransferservice__providertransferdetail__p_location_to=location_to
+                    (
+                        Q(providertransferservice__providertransferdetail__p_location_from=location_from)
+                        & Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                    )
+                    |
+                    (
+                        Q(providertransferservice__providertransferdetail__p_location_from=location_to)
+                        & Q(providertransferservice__providertransferdetail__p_location_to=location_from)
+                    )
                 )
             else:
                 qs = qs.filter(
-                    providertransferservice__providertransferdetail__p_location_from=location_from,
+                    Q(providertransferservice__providertransferdetail__p_location_from=location_from)
+                    |
+                    Q(providertransferservice__providertransferdetail__p_location_to=location_from)
                 )
         elif location_to:
             qs = qs.filter(
-                providertransferservice__providertransferdetail__p_location_to=location_to,
+                Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                |
+                Q(providertransferservice__providertransferdetail__p_location_from=location_to)
             )
 
         if self.q:

@@ -487,9 +487,15 @@ class ConfigServices(object):
                 provider.id, service_id, date_from, date_to)
             detail_list = list(
                 queryset.filter(
-                    p_location_from_id=location_from_id
-                ).filter(
-                    p_location_to_id=location_to_id
+                    (
+                        Q(p_location_from_id=location_from_id)
+                        & Q(p_location_to_id=location_to_id)
+                    )
+                    |
+                    (
+                        Q(p_location_to_id=location_from_id)
+                        & Q(p_location_from_id=location_to_id)
+                    )
                 )
             )
             cost, cost_message = cls.find_groups_amount(
@@ -511,9 +517,15 @@ class ConfigServices(object):
                 agency.id, service_id, date_from, date_to)
             detail_list = list(
                 queryset.filter(
-                    a_location_from_id=location_from_id
-                ).filter(
-                    a_location_to_id=location_to_id
+                    (
+                        Q(a_location_from_id=location_from_id)
+                        & Q(a_location_to_id=location_to_id)
+                    )
+                    |
+                    (
+                        Q(a_location_to_id=location_from_id)
+                        & Q(a_location_from_id=location_to_id)
+                    )
                 )
             )
             price, price_message = cls.find_groups_amount(
