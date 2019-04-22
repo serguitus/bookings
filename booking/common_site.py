@@ -618,7 +618,7 @@ class BookingChangeAmountsSiteModel(SiteModel):
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super(BookingChangeAmountsSiteModel, self).get_readonly_fields(request, obj) or []
 
-        if not request.user.has_perm("booking.change_amounts_booking"):
+        if not request.user.has_perm("booking.change_amounts"):
             return readonly_fields + ['manual_cost', 'cost_amount', 'manual_price', 'price_amount']
 
         return readonly_fields
@@ -656,7 +656,7 @@ class BookingAllotmentSiteModel(BookingChangeAmountsSiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        if not request.user.has_perm("booking.change_amounts_booking"):
+        if not request.user.has_perm("booking.change_amounts"):
             pax_list = self.build_inlines(request, obj)[0]
             BookingServices.set_bookingservice_amounts(obj, pax_list)
         obj.save()
@@ -697,7 +697,7 @@ class BookingPackageAllotmentSiteModel(BookingChangeAmountsSiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        if not request.user.has_perm("booking.change_amounts_booking"):
+        if not request.user.has_perm("booking.change_amounts"):
             BookingServices.set_bookingservice_amounts(obj)
         obj.save()
 
@@ -744,7 +744,7 @@ class BookingTransferSiteModel(BookingChangeAmountsSiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        if not request.user.has_perm("booking.change_amounts_booking"):
+        if not request.user.has_perm("booking.change_amounts"):
             pax_list = self.build_inlines(request, obj)[0]
             BookingServices.set_bookingservice_amounts(obj, pax_list)
         obj.save()
@@ -788,7 +788,7 @@ class BookingPackageTransferSiteModel(BookingChangeAmountsSiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        if not request.user.has_perm("booking.change_amounts_booking"):
+        if not request.user.has_perm("booking.change_amounts"):
             BookingServices.set_bookingservice_amounts(obj)
         obj.save()
 
@@ -829,7 +829,7 @@ class BookingExtraSiteModel(BookingChangeAmountsSiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        if not request.user.has_perm("booking.change_amounts_booking"):
+        if not request.user.has_perm("booking.change_amounts"):
             pax_list = self.build_inlines(request, obj)[0]
             BookingServices.set_bookingservice_amounts(obj, pax_list)
         obj.save()
@@ -869,7 +869,7 @@ class BookingPackageExtraSiteModel(BookingChangeAmountsSiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        if not request.user.has_perm("booking.change_amounts_booking"):
+        if not request.user.has_perm("booking.change_amounts"):
             BookingServices.set_bookingservice_amounts(obj)
         obj.save()
 
@@ -910,7 +910,7 @@ class BookingPackageSiteModel(BookingChangeAmountsSiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        if not request.user.has_perm("booking.change_amounts_booking"):
+        if not request.user.has_perm("booking.change_amounts"):
             pax_list = self.build_inlines(request, obj)[0]
             BookingServices.set_bookingservice_amounts(obj, pax_list)
         obj.save()
