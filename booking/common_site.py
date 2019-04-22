@@ -616,7 +616,7 @@ class BookingSiteModel(SiteModel):
 class BookingChangeAmountsSiteModel(SiteModel):
 
     def get_readonly_fields(self, request, obj=None):
-        readonly_fields = super().get_readonly_fields(request, obj) or []
+        readonly_fields = super(BookingChangeAmountsSiteModel, self).get_readonly_fields(request, obj) or []
 
         if not request.user.has_perm("booking.change_amounts_booking"):
             return readonly_fields + ['manual_cost', 'cost_amount', 'manual_price', 'price_amount']
