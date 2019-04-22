@@ -662,9 +662,17 @@ class BookingServices(object):
                         and (date_to is None or date_to < service.datetime_to)):
                     date_to = service.datetime_to
                 # cost
-                cost += service.cost_amount
+                if not cost is None:
+                    if service.cost_amount is None:
+                        cost = None
+                    else:
+                        cost += service.cost_amount
                 # price
-                price += service.price_amount
+                if not price is None:
+                    if service.price_amount is None:
+                        price = None
+                    else:
+                        price += service.price_amount
                 # status
                 # pending sets always pending
                 if service.status == constants.SERVICE_STATUS_PENDING:
@@ -1018,10 +1026,10 @@ class BookingServices(object):
                     status=constants.SERVICE_STATUS_CANCELLED).all())
         if bookingpackage_service_list:
             for bookingpackage_service in bookingpackage_service_list:
-                cost, cost_msg = bookingpackage_service.cost, bookingpackage_service.cost_message
+                cost, cost_msg = bookingpackage_service.cost_amount, bookingpackage_service.cost_comments
                 pck_cost, pck_cost_msg = cls._merge_amounts(cost, cost_msg, pck_cost, pck_cost_msg)
                 if not bookingpackage.price_by_package_catalogue:
-                    price, price_msg = bookingpackage_service.price, bookingpackage_service.price_message
+                    price, price_msg = bookingpackage_service.price_amount, bookingpackage_service.price_comments
                     pck_price, pck_price_msg = cls._merge_amounts(
                         price, price_msg, pck_price, pck_price_msg)
 
