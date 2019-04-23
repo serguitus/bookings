@@ -223,7 +223,7 @@ $(document).ready(function(){
     for(var service in data){
       if(service != 'total' && service != 'paxes'){
         // just iterate over subtotals
-        $('.details-quote_services-'+ service + '-pax-' + data.paxes).remove();
+        $('.subtotal-quote_services-'+ service + '-pax-' + data.paxes).remove();
         $('.details-quote_services-'+ service).append(
           sub_total_line(service, data.paxes, data[service].cost_1,
                          data[service].cost_2, data[service].cost_3,
