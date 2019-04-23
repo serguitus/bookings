@@ -506,7 +506,7 @@ class EmailProviderView(View):
             provider=bs.provider)
         provider_name = ''
         if bs.provider:
-            provider_name = bs.provider.name
+            provider_name = bs.provider.alias or bs.provider.name
         rooming = bs.rooming_list.all()
         initial = {
             'services': services,
