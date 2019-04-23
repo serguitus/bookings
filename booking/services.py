@@ -1010,8 +1010,6 @@ class BookingServices(object):
         pck_price = 0
         pck_price_msg = ''
 
-        new_package = False
-
         if bookingpackage.price_by_package_catalogue:
             pck_price, pck_price_msg = cls.package_price(
                 service_id=bookingpackage.service_id,
@@ -1020,18 +1018,97 @@ class BookingServices(object):
                 price_groups=price_groups,
                 agency=bookingpackage.booking.agency)
 
-        bookingpackage_service_list = list(
-            BookingPackageService.objects.filter(
+        bookingpackageallotment_list = list(BookingPackageAllotment.objects.filter(
                 booking_package=bookingpackage.id).exclude(
                     status=constants.SERVICE_STATUS_CANCELLED).all())
-        if bookingpackage_service_list:
-            for bookingpackage_service in bookingpackage_service_list:
-                cost, cost_msg = bookingpackage_service.cost_amount, bookingpackage_service.cost_comments
-                pck_cost, pck_cost_msg = cls._merge_amounts(cost, cost_msg, pck_cost, pck_cost_msg)
+        if bookingpackageallotment_list:
+            for bookingpackageallotment in bookingpackageallotment_list:
+                provider = bookingpackage.provider
+                if provider is None:
+                    provider = bookingpackageallotment.provider
+                cost_groups = BookingServices.find_paxes_groups(pax_list, bookingpackageallotment.service, True)
                 if not bookingpackage.price_by_package_catalogue:
-                    price, price_msg = bookingpackage_service.price_amount, bookingpackage_service.price_comments
+                    price_groups = BookingServices.find_paxes_groups(pax_list, bookingpackageallotment.service, False)
+                    code, message, cost, cost_msg, price, price_msg = ConfigServices.allotment_amounts(
+                        bookingpackageallotment.service_id,
+                        bookingpackageallotment.datetime_from, bookingpackageallotment.datetime_to,
+                        cost_groups, price_groups,
+                        provider, bookingpackage.booking.agency,
+                        bookingpackageallotment.board_type, bookingpackageallotment.room_type_id,
+                    )
                     pck_price, pck_price_msg = cls._merge_amounts(
                         price, price_msg, pck_price, pck_price_msg)
+                else:
+                    cost, cost_msg = ConfigServices.allotment_costs(
+                        bookingpackageallotment.service_id,
+                        bookingpackageallotment.datetime_from, bookingpackageallotment.datetime_to,
+                        cost_groups,
+                        provider,
+                        bookingpackageallotment.board_type, bookingpackageallotment.room_type_id,
+                    )
+                pck_cost, pck_cost_msg = cls._merge_amounts(cost, cost_msg, pck_cost, pck_cost_msg)
+
+        bookingpackagetransfer_list = list(BookingPackageTransfer.objects.filter(
+                booking_package=bookingpackage.id).exclude(
+                    status=constants.SERVICE_STATUS_CANCELLED).all())
+        if bookingpackagetransfer_list:
+            for bookingpackagetransfer in bookingpackagetransfer_list:
+                provider = bookingpackage.provider
+                if provider is None:
+                    provider = bookingpackagetransfer.provider
+                cost_groups = BookingServices.find_paxes_groups(pax_list, bookingpackagetransfer.service, True)
+                if not bookingpackage.price_by_package_catalogue:
+                    price_groups = BookingServices.find_paxes_groups(pax_list, bookingpackagetransfer.service, False)
+                    code, message, cost, cost_msg, price, price_msg = ConfigServices.transfer_amounts(
+                        bookingpackagetransfer.service_id,
+                        bookingpackagetransfer.datetime_from, bookingpackagetransfer.datetime_to,
+                        cost_groups, price_groups,
+                        provider, bookingpackage.booking.agency,
+                        bookingpackagetransfer.location_from_id, bookingpackagetransfer.location_to_id,
+                        bookingpackagetransfer.quantity,
+                    )
+                    pck_price, pck_price_msg = cls._merge_amounts(
+                        price, price_msg, pck_price, pck_price_msg)
+                else:
+                    cost, cost_msg = ConfigServices.transfer_costs(
+                        bookingpackagetransfer.service_id,
+                        bookingpackagetransfer.datetime_from, bookingpackagetransfer.datetime_to,
+                        cost_groups,
+                        provider,
+                        bookingpackagetransfer.location_from_id, bookingpackagetransfer.location_to_id,
+                        bookingpackagetransfer.quantity,
+                    )
+                pck_cost, pck_cost_msg = cls._merge_amounts(cost, cost_msg, pck_cost, pck_cost_msg)
+
+        bookingpackageextra_list = list(BookingPackageExtra.objects.filter(
+                booking_package=bookingpackage.id).exclude(
+                    status=constants.SERVICE_STATUS_CANCELLED).all())
+        if bookingpackageextra_list:
+            for bookingpackageextra in bookingpackageextra_list:
+                provider = bookingpackage.provider
+                if provider is None:
+                    provider = bookingpackageextra.provider
+                cost_groups = BookingServices.find_paxes_groups(pax_list, bookingpackageextra.service, True)
+                if not bookingpackage.price_by_package_catalogue:
+                    price_groups = BookingServices.find_paxes_groups(pax_list, bookingpackageextra.service, False)
+                    code, message, cost, cost_msg, price, price_msg = ConfigServices.extra_amounts(
+                        bookingpackageextra.service_id,
+                        bookingpackageextra.datetime_from, bookingpackageextra.datetime_to,
+                        cost_groups, price_groups,
+                        provider, bookingpackage.booking.agency,
+                        bookingpackageextra.addon_id, bookingpackageextra.quantity, bookingpackageextra.parameter,
+                    )
+                    pck_price, pck_price_msg = cls._merge_amounts(
+                        price, price_msg, pck_price, pck_price_msg)
+                else:
+                    cost, cost_msg = ConfigServices.extra_costs(
+                        bookingpackageextra.service_id,
+                        bookingpackageextra.datetime_from, bookingpackageextra.datetime_to,
+                        cost_groups,
+                        provider,
+                        bookingpackageextra.addon_id, bookingpackageextra.quantity, bookingpackageextra.parameter,
+                    )
+                pck_cost, pck_cost_msg = cls._merge_amounts(cost, cost_msg, pck_cost, pck_cost_msg)
 
         return ConfigServices.build_amounts_result(
             pck_cost, pck_cost_msg, pck_price, pck_price_msg)
