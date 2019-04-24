@@ -46,6 +46,30 @@ class DateInterval(models.Model):
     datetime_to = models.DateField(blank=True, null=True, verbose_name='Date To')
 
 
+class PaxVariantAmounts(models.Model):
+    class Meta:
+        abstract = True
+    manual_cost_single = models.BooleanField(default=False)
+    cost_single_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost SGL')
+    manual_cost_double = models.BooleanField(default=False)
+    cost_double_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost DBL')
+    manual_cost_triple = models.BooleanField(default=False)
+    cost_triple_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost TPL')
+    manual_price_single = models.BooleanField(default=False)
+    price_single_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price SGL')
+    manual_price_double = models.BooleanField(default=False)
+    price_double_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price DBL')
+    manual_price_triple = models.BooleanField(default=False)
+    price_triple_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price TPL')
+    price_percent = models.SmallIntegerField(blank=True, null=True, verbose_name='Price %')
+
+
 class BaseService(models.Model):
     class Meta:
         abstract = True
@@ -221,7 +245,7 @@ class Quote(models.Model):
             self.date_from, self.date_to, self.get_status_display())
 
 
-class QuotePaxVariant(models.Model):
+class QuotePaxVariant(PaxVariantAmounts):
     """
     Quote Pax
     """
@@ -231,19 +255,6 @@ class QuotePaxVariant(models.Model):
         unique_together = (('quote', 'pax_quantity'),)
     quote = models.ForeignKey(Quote, related_name='quote_paxvariants')
     pax_quantity = models.SmallIntegerField()
-    cost_single_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost SGL')
-    cost_double_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost DBL')
-    cost_triple_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost TPL')
-    price_single_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price SGL')
-    price_double_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price DBL')
-    price_triple_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price TPL')
-    price_percent = models.SmallIntegerField(blank=True, null=True, verbose_name='Price %')
 
     def __str__(self):
         return '%s' % self.pax_quantity
@@ -263,6 +274,18 @@ class QuoteService(BaseService, DateInterval):
         self.fill_data()
         # Call the "real" save() method.
         super(QuoteService, self).save(*args, **kwargs)
+
+
+class QuoteServicePaxVariant(PaxVariantAmounts):
+    """
+    Quote Service Pax Variant
+    """
+    class Meta:
+        verbose_name = 'Quote Service Pax Variant'
+        verbose_name_plural = 'Quotes Services Paxes Variants'
+        unique_together = (('quote_pax_variant', 'quote_service'),)
+    quote_pax_variant = models.ForeignKey(QuotePaxVariant)
+    quote_service = models.ForeignKey(QuoteService, related_name='quoteservice_paxvariants')
 
 
 class QuoteAllotment(QuoteService, BaseAllotment):
