@@ -38,8 +38,8 @@ from booking.forms import (
     PackageAllotmentInlineForm, PackageTransferInlineForm,
     PackageExtraInlineForm, PackageAllotmentForm,
     PackageTransferForm, PackageExtraForm, AgencyPackageServiceForm,
-    QuoteForm, QuoteAllotmentForm, QuoteTransferForm,
-    QuoteExtraForm, QuotePackageForm,
+    QuoteForm, QuoteServicePaxVariantInlineForm,
+    QuoteAllotmentForm, QuoteTransferForm, QuoteExtraForm, QuotePackageForm,
     QuoteAllotmentInlineForm, QuoteTransferInlineForm,
     QuoteExtraInlineForm, QuotePackageInlineForm,
     QuotePackageAllotmentInlineForm, QuotePackageTransferInlineForm,
@@ -233,6 +233,7 @@ class QuoteServicePaxVariantInline(CommonStackedInline):
         ('manual_price_double', 'price_double_amount'),
         ('manual_price_triple', 'price_triple_amount')]
     verbose_name_plural = 'Paxes Variants'
+    form = QuoteServicePaxVariantInlineForm
 
 
 # Quote Package

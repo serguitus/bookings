@@ -36,7 +36,7 @@ from booking.common_site import (
 from booking.constants import ACTIONS
 from booking.models import (
     Package,
-    Quote,
+    Quote, QuotePaxVariant, QuoteService,
     Booking, BookingService,
     BookingPax, BookingServicePax,
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
@@ -779,6 +779,29 @@ class ProviderPackageAutocompleteView(autocomplete.Select2QuerySetView):
             qs = qs.filter(
                 providerpackageservice__service=service,
             )
+
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs[:20]
+
+
+class QuotePaxVariantAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return QuotePaxVariant.objects.none()
+        qs = QuotePaxVariant.objects.all()
+
+        quote_service_id = self.forwarded.get('quote_service', None)
+
+        if quote_service_id:
+            quote_service = QuoteService.objects.get(id=quote_service_id)
+
+            quote_id = quote_service.quote_id
+            if quote_id:
+                qs = qs.filter(
+                    quote=quote_id,
+                )
 
         if self.q:
             qs = qs.filter(name__icontains=self.q)
