@@ -357,7 +357,31 @@ class ConfigServices(object):
         if date_to is None:
             return 3, 'Date to Missing', None, 'Date to Missing', None, 'Date to Missing'
 
-        service = Allotment.objects.get(pk=service_id)
+        # provider cost
+        cost, cost_message = cls.allotment_costs(
+            service_id, date_from, date_to, cost_groups,
+            provider, board_type, room_type_id, quantity)
+
+        # agency price
+        price, price_message = cls.allotment_prices(
+            service_id, date_from, date_to, price_groups,
+            agency, board_type, room_type_id, quantity)
+
+        return cls.build_amounts_result(cost, cost_message, price, price_message)
+
+
+    @classmethod
+    def allotment_costs(
+            cls, service_id, date_from, date_to, cost_groups, provider,
+            board_type, room_type_id, quantity=None):
+        if room_type_id is None or room_type_id == '':
+            return None, 'Room Missing'
+        if board_type is None or board_type == '':
+            return None, 'Board Missing'
+        if date_from is None:
+            return None, 'Date from Missing'
+        if date_to is None:
+            return None, 'Date to Missing'
 
         # provider cost
         # obtain details order by date_from asc, date_to desc
@@ -378,10 +402,27 @@ class ConfigServices(object):
                     room_type_id=room_type_id
                 )
             )
+            service = Allotment.objects.get(pk=service_id)
+
             cost, cost_message = cls.find_groups_amount(
                 True, service, date_from, date_to, cost_groups,
                 quantity, None, detail_list
             )
+        return cost, cost_message
+
+
+    @classmethod
+    def allotment_prices(
+            cls, service_id, date_from, date_to, price_groups, agency,
+            board_type, room_type_id, quantity=None):
+        if room_type_id is None or room_type_id == '':
+            return None, 'Room Missing'
+        if board_type is None or board_type == '':
+            return None, 'Board Missing'
+        if date_from is None:
+            return None, 'Date from Missing'
+        if date_to is None:
+            return None, 'Date to Missing'
 
         # agency price
         # obtain details order by date_from asc, date_to desc
@@ -392,56 +433,9 @@ class ConfigServices(object):
             price = None
             price_message = 'Agency Not Found'
         else:
-            if room_type_id is None:
-                price = None
-                price_message = 'Room Type Not Found'
-            else:
-                queryset = cls._get_agency_queryset(
-                    AgencyAllotmentDetail.objects,
-                    agency.id, service_id, date_from, date_to)
-                detail_list = list(
-                    queryset.filter(
-                        board_type=board_type
-                    ).filter(
-                        room_type_id=room_type_id
-                    )
-                )
-                price, price_message = cls.find_groups_amount(
-                    False, service, date_from, date_to, price_groups,
-                    quantity, None, detail_list
-                )
-
-        return cls.build_amounts_result(cost, cost_message, price, price_message)
-
-
-    @classmethod
-    def allotment_costs(
-            cls, service_id, date_from, date_to, cost_groups, provider,
-            board_type, room_type_id, quantity=None):
-
-        if room_type_id is None or room_type_id == '':
-            return None, 'Room Missing'
-        if board_type is None or board_type == '':
-            return None, 'Board Missing'
-        if date_from is None:
-            return None, 'Date from Missing'
-        if date_to is None:
-            return None, 'Date to Missing'
-
-        service = Allotment.objects.get(pk=service_id)
-
-        # provider cost
-        # obtain details order by date_from asc, date_to desc
-        if cost_groups is None or not cost_groups:
-            cost = None
-            cost_message = 'Paxes Missing'
-        elif provider is None:
-            cost = None
-            cost_message = 'Provider Not Found'
-        else:
-            queryset = cls._get_provider_queryset(
-                ProviderAllotmentDetail.objects,
-                provider.id, service_id, date_from, date_to)
+            queryset = cls._get_agency_queryset(
+                AgencyAllotmentDetail.objects,
+                agency.id, service_id, date_from, date_to)
             detail_list = list(
                 queryset.filter(
                     board_type=board_type
@@ -449,11 +443,13 @@ class ConfigServices(object):
                     room_type_id=room_type_id
                 )
             )
-            cost, cost_message = cls.find_groups_amount(
-                True, service, date_from, date_to, cost_groups,
+            service = Allotment.objects.get(pk=service_id)
+
+            price, price_message = cls.find_groups_amount(
+                False, service, date_from, date_to, price_groups,
                 quantity, None, detail_list
             )
-        return cost, cost_message
+        return price, price_message
 
 
     @classmethod
@@ -471,67 +467,15 @@ class ConfigServices(object):
         if date_to is None:
             date_to = date_from
 
-        service = Transfer.objects.get(pk=service_id)
-
         # provider cost
-        # obtain details order by date_from asc, date_to desc
-        if (cost_groups is None or not cost_groups) and service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
-            cost = None
-            cost_message = 'Paxes Missing'
-        elif provider is None:
-            cost = None
-            cost_message = 'Provider Not Found'
-        else:
-            queryset = cls._get_provider_queryset(
-                ProviderTransferDetail.objects,
-                provider.id, service_id, date_from, date_to)
-            detail_list = list(
-                queryset.filter(
-                    (
-                        Q(p_location_from_id=location_from_id)
-                        & Q(p_location_to_id=location_to_id)
-                    )
-                    |
-                    (
-                        Q(p_location_to_id=location_from_id)
-                        & Q(p_location_from_id=location_to_id)
-                    )
-                )
-            )
-            cost, cost_message = cls.find_groups_amount(
-                True, service, date_from, date_to, cost_groups,
-                quantity, None, detail_list
-            )
+        cost, cost_message = cls.transfer_costs(
+            service_id, date_from, date_to, cost_groups,
+            provider, location_from_id, location_to_id, quantity)
 
         # agency price
-        # obtain details order by date_from asc, date_to desc
-        if (price_groups is None or not price_groups) and service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
-            price = None
-            price_message = 'Paxes Missing'
-        elif agency is None:
-            price = None
-            price_message = 'Agency Not Found'
-        else:
-            queryset = cls._get_agency_queryset(
-                AgencyTransferDetail.objects,
-                agency.id, service_id, date_from, date_to)
-            detail_list = list(
-                queryset.filter(
-                    (
-                        Q(a_location_from_id=location_from_id)
-                        & Q(a_location_to_id=location_to_id)
-                    )
-                    |
-                    (
-                        Q(a_location_to_id=location_from_id)
-                        & Q(a_location_from_id=location_to_id)
-                    )
-                )
-            )
-            price, price_message = cls.find_groups_amount(
-                False, service, date_from, date_to, price_groups,
-                quantity, None, detail_list
-            )
+        price, price_message = cls.transfer_prices(
+            service_id, date_from, date_to, price_groups,
+            agency, location_from_id, location_to_id, quantity)
 
         return cls.build_amounts_result(cost, cost_message, price, price_message)
 
@@ -576,8 +520,56 @@ class ConfigServices(object):
                 True, service, date_from, date_to, cost_groups,
                 quantity, None, detail_list
             )
-
         return cost, cost_message
+
+
+    @classmethod
+    def transfer_prices(
+            cls, service_id, date_from, date_to, price_groups, agency,
+            location_from_id, location_to_id, quantity=None):
+        if location_from_id is None or location_from_id == '':
+            return None, 'Location From Missing'
+        if location_to_id is None or location_to_id == '':
+            return None, 'Location To Missing'
+        if date_from is None and date_to is None:
+            return None, 'Both Dates are Missing'
+        if date_from is None:
+            date_from = date_to
+        if date_to is None:
+            date_to = date_from
+
+        service = Transfer.objects.get(pk=service_id)
+
+        # agency price
+        # obtain details order by date_from asc, date_to desc
+        if (price_groups is None or not price_groups) and service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
+            price = None
+            price_message = 'Paxes Missing'
+        elif agency is None:
+            price = None
+            price_message = 'Agency Not Found'
+        else:
+            queryset = cls._get_agency_queryset(
+                AgencyTransferDetail.objects,
+                agency.id, service_id, date_from, date_to)
+            detail_list = list(
+                queryset.filter(
+                    (
+                        Q(a_location_from_id=location_from_id)
+                        & Q(a_location_to_id=location_to_id)
+                    )
+                    |
+                    (
+                        Q(a_location_to_id=location_from_id)
+                        & Q(a_location_from_id=location_to_id)
+                    )
+                )
+            )
+            price, price_message = cls.find_groups_amount(
+                False, service, date_from, date_to, price_groups,
+                quantity, None, detail_list
+            )
+        return price, price_message
 
 
     @classmethod
@@ -600,125 +592,12 @@ class ConfigServices(object):
             date_to = date_from
 
         # provider cost
-        # obtain details order by date_from asc, date_to desc
-        if (cost_groups is None or not cost_groups) and service.cost_type == EXTRA_COST_TYPE_BY_PAX:
-            cost = None
-            cost_message = 'Paxes Missing'
-        elif provider is None:
-            cost = None
-            cost_message = 'Provider Not Found'
-        else:
-            if service.has_pax_range:
-                cost = 0
-                cost_message = ''
-                # each group can have different details
-                for group in cost_groups:
-                    paxes = group[0] + group[1]
-                    if paxes == 0:
-                        continue
-                    queryset = cls._get_provider_queryset(
-                        ProviderExtraDetail.objects,
-                        provider.id, service_id, date_from, date_to)
-                    # pax range filtering
-                    queryset = queryset.filter(
-                        (Q(pax_range_min__isnull=True) & Q(pax_range_max__gte=paxes)) |
-                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__gte=paxes)) |
-                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__isnull=True))
-                    )
-                    # addon filtering
-                    if addon_id:
-                        queryset = queryset.filter(addon_id=addon_id)
-                    else:
-                        queryset = queryset.filter(addon_id__isnull=True)
-
-                    detail_list = list(queryset)
-
-                    group_cost, group_cost_message = cls.find_group_amount(
-                        True, service, date_from, date_to, group,
-                        quantity, parameter, detail_list
-                    )
-                    if group_cost:
-                        cost += group_cost
-                        cost_message = group_cost_message
-                    else:
-                        cost = None
-                        cost_message = group_cost_message
-                        break
-            else:
-                queryset = cls._get_provider_queryset(
-                    ProviderExtraDetail.objects,
-                    provider.id, service_id, date_from, date_to)
-                # addon filtering
-                if addon_id:
-                    queryset = queryset.filter(addon_id=addon_id)
-                else:
-                    queryset = queryset.filter(addon_id__isnull=True)
-
-                detail_list = list(queryset)
-
-                cost, cost_message = cls.find_groups_amount(
-                    True, service, date_from, date_to, cost_groups,
-                    quantity, parameter, detail_list
-                )
+        cost, cost_message = cls.extra_costs(service_id, date_from, date_to, cost_groups,
+            provider, addon_id, quantity, parameter)
 
         # agency price
-        # obtain details order by date_from asc, date_to desc
-        if (price_groups is None or not price_groups) and service.cost_type == EXTRA_COST_TYPE_BY_PAX:
-            price = None
-            price_message = 'Paxes Missing'
-        elif agency is None:
-            price = None
-            price_message = 'Agency Not Found'
-        else:
-            if service.has_pax_range:
-                price = 0
-                price_message = ''
-                # each group can have different details
-                for group in price_groups:
-                    paxes = group[0] + group[1]
-                    queryset = cls._get_agency_queryset(
-                        AgencyExtraDetail.objects,
-                        agency.id, service_id, date_from, date_to)
-                    # pax range filtering
-                    queryset = queryset.filter(
-                        (Q(pax_range_min__isnull=True) & Q(pax_range_max__gte=paxes)) |
-                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__gte=paxes)) |
-                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__isnull=True))
-                    )
-                    # addon filtering
-                    if addon_id:
-                        queryset = queryset.filter(addon_id=addon_id)
-                    else:
-                        queryset = queryset.filter(addon_id__isnull=True)
-
-                    detail_list = list(queryset)
-                    group_price, group_price_message = cls.find_group_amount(
-                        False, service, date_from, date_to, group,
-                        quantity, parameter, detail_list
-                    )
-                    if group_price:
-                        price += group_price
-                        price_message = group_price_message
-                    else:
-                        price = None
-                        price_message = group_price_message
-                        break
-            else:
-                queryset = cls._get_agency_queryset(
-                    AgencyExtraDetail.objects,
-                    agency.id, service_id, date_from, date_to)
-                # addon filtering
-                if addon_id:
-                    queryset = queryset.filter(addon_id=addon_id)
-                else:
-                    queryset = queryset.filter(addon_id__isnull=True)
-
-                detail_list = list(queryset)
-
-                price, price_message = cls.find_groups_amount(
-                    False, service, date_from, date_to, price_groups,
-                    quantity, parameter, detail_list
-                )
+        price, price_message = cls.extra_prices(service_id, date_from, date_to, price_groups,
+            agency, addon_id, quantity, parameter)
 
         return cls.build_amounts_result(cost, cost_message, price, price_message)
 
@@ -803,8 +682,87 @@ class ConfigServices(object):
                     True, service, date_from, date_to, cost_groups,
                     quantity, parameter, detail_list
                 )
-
         return cost, cost_message
+
+
+    @classmethod
+    def extra_prices(
+            cls, service_id, date_from, date_to, price_groups, agency,
+            addon_id, quantity, parameter):
+        service = Extra.objects.get(pk=service_id)
+
+        if date_from is None and date_to is None:
+            return None, 'Both Dates are Missing'
+        if date_from is None:
+            if (service.parameter_type == EXTRA_PARAMETER_TYPE_DAYS
+                    or service.parameter_type == EXTRA_PARAMETER_TYPE_NIGHTS):
+                return None, 'Date from is Missing'
+            date_from = date_to
+        if date_to is None:
+            if (service.parameter_type == EXTRA_PARAMETER_TYPE_DAYS
+                    or service.parameter_type == EXTRA_PARAMETER_TYPE_NIGHTS):
+                return None, 'Date to is Missing'
+            date_to = date_from
+
+        # agency price
+        # obtain details order by date_from asc, date_to desc
+        if (price_groups is None or not price_groups) and service.cost_type == EXTRA_COST_TYPE_BY_PAX:
+            price = None
+            price_message = 'Paxes Missing'
+        elif agency is None:
+            price = None
+            price_message = 'Agency Not Found'
+        else:
+            if service.has_pax_range:
+                price = 0
+                price_message = ''
+                # each group can have different details
+                for group in price_groups:
+                    paxes = group[0] + group[1]
+                    queryset = cls._get_agency_queryset(
+                        AgencyExtraDetail.objects,
+                        agency.id, service_id, date_from, date_to)
+                    # pax range filtering
+                    queryset = queryset.filter(
+                        (Q(pax_range_min__isnull=True) & Q(pax_range_max__gte=paxes)) |
+                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__gte=paxes)) |
+                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__isnull=True))
+                    )
+                    # addon filtering
+                    if addon_id:
+                        queryset = queryset.filter(addon_id=addon_id)
+                    else:
+                        queryset = queryset.filter(addon_id__isnull=True)
+
+                    detail_list = list(queryset)
+                    group_price, group_price_message = cls.find_group_amount(
+                        False, service, date_from, date_to, group,
+                        quantity, parameter, detail_list
+                    )
+                    if group_price:
+                        price += group_price
+                        price_message = group_price_message
+                    else:
+                        price = None
+                        price_message = group_price_message
+                        break
+            else:
+                queryset = cls._get_agency_queryset(
+                    AgencyExtraDetail.objects,
+                    agency.id, service_id, date_from, date_to)
+                # addon filtering
+                if addon_id:
+                    queryset = queryset.filter(addon_id=addon_id)
+                else:
+                    queryset = queryset.filter(addon_id__isnull=True)
+
+                detail_list = list(queryset)
+
+                price, price_message = cls.find_groups_amount(
+                    False, service, date_from, date_to, price_groups,
+                    quantity, parameter, detail_list
+                )
+        return price, price_message
 
 
     @classmethod
