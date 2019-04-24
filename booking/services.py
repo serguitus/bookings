@@ -1590,13 +1590,13 @@ class BookingServices(object):
     @classmethod
     def _merge_amounts(
             cls,
-            prev_amount, prev_msg, amount, msg):
+            prev_amount, prev_msg, amount, msg, round_digits=2):
         if prev_amount is None:
             return None, prev_msg
         elif amount is None:
             return None, msg
         else:
-            return float(prev_amount) + float(amount), msg
+            return round(float(prev_amount) + float(amount), round_digits), msg
 
 
     @classmethod
