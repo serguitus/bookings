@@ -545,6 +545,64 @@ class EmailProviderView(View):
             reverse('common:booking_booking_change', args=(booking_service.booking.id,)))
 
 
+class EmailConfirmationView(View):
+    """
+    A view to handle the email that will be sent to Clients
+    It allows to customice the default email
+    """
+
+    def get(self, request, id, *args, **kwargs):
+        """
+        This will render the default confirmation email for certain
+        booking allowing it to be customiced
+        """
+        bk = Booking.objects.get(id=id)
+        # pick all non-cancelled services
+        services = BookingService.objects.filter(
+            booking=bk.pk).exclude(status='CN')
+        # this is for the agency seller name (add also variable for email)
+        client_name = ''
+        if bk.agency:
+            client_name = bk.agency.name
+        rooming = bk.rooming_list.all()
+        initial = {
+            'booking': bk,
+            'services': services,
+            'client': client_name,
+            'rooming': rooming,
+            'user': request.user,
+        }
+        t = get_template('booking/emails/confirmation_email.html')
+        form = EmailProviderForm(request.user,
+                                 initial={
+                                     'subject': 'Solicitud de Confirmacion',
+                                     'body': t.render(initial)
+                                 })
+        context = dict()
+        context.update(bookings_site.get_site_extra_context(request))
+        request.current_app = bookings_site.name
+        context.update({'form': form})
+        return render(request, 'booking/email_provider_form.html', context)
+
+    def post(self, request, id, *args, **kwargs):
+        booking_service = BookingService.objects.get(id=id)
+        from_address = request.POST.get('from_address')
+        to_address = request.POST.get('to_address')
+        cc_address = request.POST.get('cc_address')
+        bcc_address = request.POST.get('bcc_address')
+        subject = request.POST.get('subject')
+        body = request.POST.get('body')
+
+        _send_service_request(
+            subject, body, from_address, to_address, cc_address, bcc_address, from_address)
+        messages.add_message(
+            request=request, level=messages.SUCCESS,
+            message='Email  sent successfully.',
+            extra_tags='', fail_silently=False)
+        return HttpResponseRedirect(
+            reverse('common:booking_booking_change', args=(booking_service.booking.id,)))
+
+
 def _send_service_request(
         subject, body, from_address, to_address,
         cc_address, bcc_address, reply_address):
