@@ -1,0 +1,7 @@
+{% load booking_tags %}Dear {{ client }}:
+
+Bellow, confirmation details:
+
+Booking: {{ booking.name }} [Reference: {{ booking.internal_reference }}]
+{% if booking.reference %}Client Reference. {{ booking.reference }}{% endif %}
+Confirmed Services:
