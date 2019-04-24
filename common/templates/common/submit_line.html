@@ -1,9 +1,6 @@
 {% load i18n admin_urls common_utils %}
 
 <div class="submit-row">
-    {% if show_cancel %}
-        <input type="submit" value="{% trans 'Cancel' %}" class="btn-save btn-cancel" name="_cancel" />
-    {% endif %}
     {% if show_save %}
         <input type="submit" value="{% trans 'Save' %}" class="default" name="_save" />
     {% endif %}
@@ -19,6 +16,9 @@
     {% endif %}
     {% if show_save_and_continue %}
         <input class="btn-save" type="submit" value="{% trans 'Save and continue editing' %}" name="_continue" />
+    {% endif %}
+    {% if show_cancel %}
+        <input type="submit" value="{% trans 'Back' %}" class="btn-save btn-cancel" name="_cancel" />
     {% endif %}
     {% if change_actions %}
         {% for action in change_actions %}
