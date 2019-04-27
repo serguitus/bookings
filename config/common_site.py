@@ -38,6 +38,7 @@ from config.models import (
     ProviderTransferService, ProviderTransferDetail,
     ProviderExtraService, ProviderExtraDetail,
 )
+from config.services import ConfigServices
 from config.top_filters import (
     RoomTypeTopFilter, LocationTopFilter,
     AddonTopFilter,
@@ -246,6 +247,18 @@ class ProviderAllotmentServiceSiteModel(SiteModel):
     add_form_template = 'config/provider_allotment_change_form.html'
     save_as = True
 
+    actions = ['rewrite_agency_amounts', 'update_agency_amounts']
+
+    def rewrite_agency_amounts(self, request, queryset):
+        ConfigServices.generate_agency_allotments_amounts_from_providers_allotments(
+            list(queryset.all()), False)
+    rewrite_agency_amounts.short_description = "Generate All Agency Prices"
+
+    def update_agency_amounts(self, request, queryset):
+        ConfigServices.generate_agency_allotments_amounts_from_providers_allotments(
+            list(queryset.all()), True)
+    update_agency_amounts.short_description = "Generate New Agency Prices"
+
 
 class ProviderTransferDetailInline(CommonStackedInline):
     model = ProviderTransferDetail
@@ -273,6 +286,18 @@ class ProviderTransferServiceSiteModel(SiteModel):
     form = ProviderTransferServiceForm
     save_as = True
 
+    actions = ['rewrite_agency_amounts', 'update_agency_amounts']
+
+    def rewrite_agency_amounts(self, request, queryset):
+        ConfigServices.generate_agency_transfers_amounts_from_providers_transfers(
+            list(queryset.all()), False)
+    rewrite_agency_amounts.short_description = "Generate All Agency Prices"
+
+    def update_agency_amounts(self, request, queryset):
+        ConfigServices.generate_agency_transfers_amounts_from_providers_transfers(
+            list(queryset.all()), True)
+    update_agency_amounts.short_description = "Generate New Agency Prices"
+
 
 class ProviderExtraDetailInline(CommonStackedInline):
     model = ProviderExtraDetail
@@ -297,6 +322,18 @@ class ProviderExtraServiceSiteModel(SiteModel):
     ordering = ['service', 'provider', '-date_from']
     form = ProviderExtraServiceForm
     save_as = True
+
+    actions = ['rewrite_agency_amounts', 'update_agency_amounts']
+
+    def rewrite_agency_amounts(self, request, queryset):
+        ConfigServices.generate_agency_extras_amounts_from_providers_extras(
+            list(queryset.all()), False)
+    rewrite_agency_amounts.short_description = "Generate All Agency Prices"
+
+    def update_agency_amounts(self, request, queryset):
+        ConfigServices.generate_agency_extras_amounts_from_providers_extras(
+            list(queryset.all()), True)
+    update_agency_amounts.short_description = "Generate New Agency Prices"
 
 
 class AgencyAllotmentDetailInline(CommonStackedInline):

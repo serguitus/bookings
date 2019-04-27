@@ -1113,3 +1113,170 @@ class ConfigServices(object):
         else:
             # no schedule
             return None, 'Non-Scheduled Time - Set Manually'
+
+
+    @classmethod
+    def generate_agency_allotments_amounts_from_providers_allotments(cls, providers_allotments, is_update):
+        """
+        generate_agency_allotments_amounts_from_providers_allotments
+        """
+        from reservas.custom_settings import AGENCY_FOR_AMOUNTS
+
+        try:
+            dst_agency = Agency.objects.get(id=AGENCY_FOR_AMOUNTS)
+            for provider_allotment in providers_allotments:
+                try:
+                    cls.generate_agency_allotment_amounts_from_provider_allotment(
+                        provider_allotment, dst_agency, is_update)
+                except Exception as ex:
+                    print(ex)
+
+        except Agency.DoesNotExist as ex:
+            # 'Destination Agency not Found'
+            print(ex)
+            return
+
+
+    @classmethod
+    def generate_agency_transfers_amounts_from_providers_transfers(cls, providers_transfers, is_update):
+        """
+        generate_agency_transfers_amounts_from_providers_transfers
+        """
+        from reservas.custom_settings import AGENCY_FOR_AMOUNTS
+
+        try:
+            dst_agency = Agency.objects.get(id=AGENCY_FOR_AMOUNTS)
+            for provider_transfer in providers_transfers:
+                try:
+                    cls.generate_agency_transfer_amounts_from_provider_transfer(
+                        provider_transfer, dst_agency, is_update)
+                except Exception as ex:
+                    print(ex)
+
+        except Agency.DoesNotExist as ex:
+            # 'Destination Agency not Found'
+            print(ex)
+            return
+
+
+    @classmethod
+    def generate_agency_extras_amounts_from_providers_extras(cls, providers_extras, is_update):
+        """
+        generate_agency_extras_amounts_from_providers_extras
+        """
+        from reservas.custom_settings import AGENCY_FOR_AMOUNTS
+
+        try:
+            dst_agency = Agency.objects.get(id=AGENCY_FOR_AMOUNTS)
+            for provider_extra in providers_extras:
+                try:
+                    cls.generate_agency_extra_amounts_from_provider_extra(
+                        provider_extra, dst_agency, is_update)
+                except Exception as ex:
+                    print(ex)
+
+        except Agency.DoesNotExist as ex:
+            # 'Destination Agency not Found'
+            print(ex)
+            return
+
+
+    @classmethod
+    def generate_agency_allotment_amounts_from_provider_allotment(cls, src_provider_service, dst_agency, is_update):
+        dst_agency_service, created = AgencyAllotmentService.objects.get_or_create(
+            agency_id=dst_agency.id,
+            date_from=src_provider_service.date_from,
+            date_to=src_provider_service.date_to,
+            service_id=src_provider_service.service_id
+        )
+        # find details
+        details = list(
+            ProviderAllotmentDetail.objects.filter(provider_service=src_provider_service))
+        # for each src provider detail create dst agency detail
+        for detail in details:
+            if is_update:
+                # update - dont modify if exists
+                agency_detail, created = AgencyAllotmentDetail.objects.get_or_create(
+                    agency_service_id=dst_agency_service.id,
+                    room_type_id=detail.room_type_id,
+                    board_type=detail.board_type,
+                    defaults=cls.calculate_default_amounts(
+                        detail, 0, dst_agency.gain_percent)
+                )
+            else:
+                # rewrite - modify if exists
+                agency_detail, created = AgencyAllotmentDetail.objects.update_or_create(
+                    agency_service_id=dst_agency_service.id,
+                    room_type_id=detail.room_type_id,
+                    board_type=detail.board_type,
+                    defaults=cls.calculate_default_amounts(
+                        detail, 0, dst_agency.gain_percent)
+                )
+
+
+    @classmethod
+    def generate_agency_transfer_amounts_from_provider_transfer(cls, src_provider_service, dst_agency, is_update):
+        dst_agency_service, created = AgencyTransferService.objects.get_or_create(
+            agency_id=dst_agency.id,
+            date_from=src_provider_service.date_from,
+            date_to=src_provider_service.date_to,
+            service_id=src_provider_service.service_id
+        )
+        # find details
+        details = list(
+            ProviderTransferDetail.objects.filter(provider_service=src_provider_service))
+        # for each src provider detail create dst agency detail
+        for detail in details:
+            if is_update:
+                # update - dont modify if exists
+                agency_detail, created = AgencyTransferDetail.objects.get_or_create(
+                    agency_service_id=dst_agency_service.id,
+                    a_location_from_id=detail.p_location_from_id,
+                    a_location_to_id=detail.p_location_to_id,
+                    defaults=cls.calculate_default_amounts(
+                        detail, 0, dst_agency.gain_percent)
+                )
+            else:
+                # rewrite - modify if exists
+                agency_detail, created = AgencyTransferDetail.objects.update_or_create(
+                    agency_service_id=dst_agency_service.id,
+                    a_location_from_id=detail.p_location_from_id,
+                    a_location_to_id=detail.p_location_to_id,
+                    defaults=cls.calculate_default_amounts(
+                        detail, 0, dst_agency.gain_percent)
+                )
+
+
+    @classmethod
+    def generate_agency_extra_amounts_from_provider_extra(cls, src_provider_service, dst_agency, is_update):
+        dst_agency_service, created = AgencyExtraService.objects.get_or_create(
+            agency_id=dst_agency.id,
+            date_from=src_provider_service.date_from,
+            date_to=src_provider_service.date_to,
+            service_id=src_provider_service.service_id
+        )
+        # find details
+        details = list(
+            ProviderExtraDetail.objects.filter(provider_service=src_provider_service))
+        # for each src provider detail create dst agency detail
+        for detail in details:
+            if is_update:
+                # update - dont modify if exists
+                agency_detail, created = AgencyExtraDetail.objects.get_or_create(
+                    agency_service_id=dst_agency_service.id,
+                    addon_id=detail.addon_id,
+                    pax_range_min=detail.pax_range_min,
+                    pax_range_max=detail.pax_range_max,
+                    defaults=cls.calculate_default_amounts(
+                        detail, 0, dst_agency.gain_percent)
+                )
+            else:
+                # rewrite - modify if exists
+                agency_detail, created = AgencyExtraDetail.objects.update_or_create(
+                    agency_service_id=dst_agency_service.id,
+                    addon_id=detail.addon_id,
+                    pax_range_min=detail.pax_range_min,
+                    pax_range_max=detail.pax_range_max,
+                    defaults=cls.calculate_default_amounts(
+                        detail, 0, dst_agency.gain_percent)
+                )
