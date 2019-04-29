@@ -49,22 +49,16 @@ class DateInterval(models.Model):
 class PaxVariantAmounts(models.Model):
     class Meta:
         abstract = True
-    manual_cost_single = models.BooleanField(default=False, verbose_name='Manual SGL')
     cost_single_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost SGL')
-    manual_cost_double = models.BooleanField(default=False, verbose_name='Manual DBL')
     cost_double_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost DBL')
-    manual_cost_triple = models.BooleanField(default=False, verbose_name='Manual TPL')
     cost_triple_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost TPL')
-    manual_price_single = models.BooleanField(default=False, verbose_name='Manual SGL')
     price_single_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price SGL')
-    manual_price_double = models.BooleanField(default=False, verbose_name='Manual DBL')
     price_double_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price DBL')
-    manual_price_triple = models.BooleanField(default=False, verbose_name='Manual TPL')
     price_triple_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price TPL')
     price_percent = models.SmallIntegerField(blank=True, null=True, verbose_name='Price %')
@@ -255,9 +249,13 @@ class QuotePaxVariant(PaxVariantAmounts):
         unique_together = (('quote', 'pax_quantity'),)
     quote = models.ForeignKey(Quote, related_name='quote_paxvariants')
     pax_quantity = models.SmallIntegerField()
+    free_quantity = models.SmallIntegerField(default=0)
 
     def __str__(self):
-        return '%s' % self.pax_quantity
+        if self.free_quantity:
+            return '%s + %s free' % (self.pax_quantity, self.free_quantity)
+        else:
+            return '%s' % (self.pax_quantity)
 
 
 class QuoteService(BaseService, DateInterval):
@@ -284,8 +282,10 @@ class QuoteServicePaxVariant(PaxVariantAmounts):
         verbose_name = 'Quote Service Pax Variant'
         verbose_name_plural = 'Quotes Services Paxes Variants'
         unique_together = (('quote_pax_variant', 'quote_service'),)
-    quote_pax_variant = models.ForeignKey(QuotePaxVariant)
+    quote_pax_variant = models.ForeignKey(QuotePaxVariant, verbose_name='Pax Variant')
     quote_service = models.ForeignKey(QuoteService, related_name='quoteservice_paxvariants')
+    manual_costs = models.BooleanField(default=False, verbose_name='Manual Costs')
+    manual_prices = models.BooleanField(default=False, verbose_name='Manual Prices')
 
 
 class QuoteAllotment(QuoteService, BaseAllotment):

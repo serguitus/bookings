@@ -11,7 +11,7 @@ from django.db.models import Q
 
 from booking import constants
 from booking.models import (
-    Quote, QuotePaxVariant,
+    Quote, QuoteService, QuotePaxVariant, QuoteServicePaxVariant,
     QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
     QuotePackageService, QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
     Package, PackageAllotment, PackageTransfer, PackageExtra,
@@ -559,6 +559,61 @@ class BookingServices(object):
                 cost_1, cost_1_msg, price_1, price_1_msg,
                 cost_2, cost_2_msg, price_2, price_2_msg,
                 cost_3, cost_3_msg, price_3, price_3_msg)})
+
+            result.append(variant_dict)
+
+        return 0, '', result
+
+
+    @classmethod
+    def find_quoteallotment_amounts(
+            cls, quoteallotment, variant_list):
+        result = list()
+
+        if not variant_list:
+            return 3, 'Pax Variants Missing', None
+
+        counter = 0
+        for pax_variant in variant_list:
+            variant_dict = dict()
+            variant_dict.update({'quote_pax_variant': pax_variant.quote_pax_variant.id})
+
+            cost_1 = 0
+            cost_2 = 0
+            cost_3 = 0
+            price_1 = 0
+            price_2 = 0
+            price_3 = 0
+            cost_1_msg = ''
+            cost_2_msg = ''
+            cost_3_msg = ''
+            price_1_msg = ''
+            price_2_msg = ''
+            price_3_msg = ''
+
+            key = '%s' % counter
+            if not hasattr(quoteallotment, 'service'):
+                variant_dict.update({'total': cls._no_service_dict()})
+            else:
+                c1, c1_msg, p1, p1_msg, \
+                c2, c2_msg, p2, p2_msg, \
+                c3, c3_msg, p3, p3_msg = cls._find_quoteallotment_amounts(
+                    pax_variant=pax_variant, allotment=quoteallotment, agency=quoteallotment.quote.agency)
+
+                # variants totals
+                cost_1, cost_1_msg, price_1, price_1_msg, \
+                cost_2, cost_2_msg, price_2, price_2_msg, \
+                cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
+                    cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
+                    cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
+                    cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
+
+                variant_dict.update({'total': cls._quote_amounts_dict(
+                    cost_1, cost_1_msg, price_1, price_1_msg,
+                    cost_2, cost_2_msg, price_2, price_2_msg,
+                    cost_3, cost_3_msg, price_3, price_3_msg)})
+
+            counter = counter + 1
 
             result.append(variant_dict)
 
@@ -2282,3 +2337,18 @@ class BookingServices(object):
         if price and price >= 0:
             return price
         return None
+
+    @classmethod
+    def sync_pax_variants(cls, quote_pax_variant):
+        # verify on all services if pax variant exists
+        quote_services = list(QuoteService.objects.all().filter(quote=quote_pax_variant.quote))
+
+        for quote_service in quote_services:
+            quote_service_pax_variant, created = QuoteServicePaxVariant.objects.get_or_create(
+                quote_pax_variant_id=quote_pax_variant.id,
+                quote_service_id=quote_service.id,
+                defaults={}
+            )
+
+        return
+

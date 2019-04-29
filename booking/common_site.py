@@ -226,14 +226,30 @@ class QuoteServicePaxVariantInline(CommonStackedInline):
     extra = 0
     fields = [
         ('quote_pax_variant', 'price_percent'),
-        ('manual_cost_single', 'cost_single_amount'),
-        ('manual_cost_double', 'cost_double_amount'),
-        ('manual_cost_triple', 'cost_triple_amount'),
-        ('manual_price_single', 'price_single_amount'),
-        ('manual_price_double', 'price_double_amount'),
-        ('manual_price_triple', 'price_triple_amount')]
+        ('manual_costs', 'manual_prices'),
+        ('cost_single_amount', 'price_single_amount'),
+        ('cost_double_amount', 'price_double_amount'),
+        ('cost_triple_amount', 'price_triple_amount')]
     verbose_name_plural = 'Paxes Variants'
     form = QuoteServicePaxVariantInlineForm
+    can_delete = False
+    readonly_fields = ('quote_pax_variant',)
+
+    def has_add_permission(self,request):
+        return False
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super(QuoteServicePaxVariantInline, self).get_readonly_fields(request, obj) or []
+
+        if not request.user.has_perm("booking.change_amounts"):
+            return readonly_fields + [
+                'price_percent',
+                'manual_costs', 'manual_prices',
+                'cost_single_amount', 'price_single_amount',
+                'cost_double_amount', 'price_double_amount',
+                'cost_triple_amount', 'price_triple_amount']
+
+        return readonly_fields
 
 
 # Quote Package
@@ -439,6 +455,8 @@ class QuoteAllotmentSiteModel(SiteModel):
     top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote__reference', 'service__name',)
     form = QuoteAllotmentForm
+    add_form_template = 'booking/quoteallotment_change_form.html'
+    change_form_template = 'booking/quoteallotment_change_form.html'
     inlines = [QuoteServicePaxVariantInline]
 
 

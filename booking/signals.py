@@ -23,6 +23,9 @@ def update_quote(sender, instance, **kwargs):
 def update_variant_quote(sender, instance, **kwargs):
     BookingServices.update_quote(instance)
 
+@receiver((post_save), sender=QuotePaxVariant)
+def sync_variant_quote(sender, instance, **kwargs):
+    BookingServices.sync_pax_variants(instance)
 
 @receiver((post_save, post_delete), sender=QuoteAllotment)
 def update_allotment_quote(sender, instance, **kwargs):

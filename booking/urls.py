@@ -4,6 +4,7 @@ from booking import views
 
 urlpatterns = [
     url(r'^quote-amounts/?', views.QuoteAmountsView.as_view(), name='quote_amounts'),
+    url(r'^quoteallotment-amounts/?', views.QuoteAllotmentAmountsView.as_view(), name='quoteallotment_amounts'),
 
     url(r'^bookingallotment-amounts/?', views.BookingAllotmentAmountsView.as_view(), name='bookingallotment_amounts'),
     url(r'^bookingtransfer-amounts/?', views.BookingTransferAmountsView.as_view(), name='bookingtransfer_amounts'),

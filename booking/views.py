@@ -25,6 +25,7 @@ from django.views import View
 
 from booking.common_site import (
     QuoteSiteModel,
+    QuoteAllotmentSiteModel, QuoteTransferSiteModel, QuoteExtraSiteModel,
     BookingAllotmentSiteModel,
     BookingTransferSiteModel,
     BookingExtraSiteModel,
@@ -37,6 +38,7 @@ from booking.constants import ACTIONS
 from booking.models import (
     Package,
     Quote, QuotePaxVariant, QuoteService,
+    QuoteAllotment, QuoteTransfer, QuoteExtra,
     Booking, BookingService,
     BookingPax, BookingServicePax,
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
@@ -123,6 +125,32 @@ class QuoteAmountsView(ModelChangeFormProcessorView):
 
         code, message, results = BookingServices.find_quote_amounts(
             quote.agency, variant_list, allotment_list, transfer_list, extra_list, package_list)
+
+        return JsonResponse({
+            'code': code,
+            'message': message,
+            'results': results,
+        })
+
+
+class QuoteAllotmentAmountsView(ModelChangeFormProcessorView):
+    
+    model = QuoteAllotment
+    common_sitemodel = QuoteAllotmentSiteModel
+    common_site = bookings_site
+
+    def process_data(self, quoteallotment, inlines):
+
+        variant_list = inlines[0]
+        if not variant_list:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Pax Variants Missing',
+                'results': None,
+            })
+
+        code, message, results = BookingServices.find_quoteallotment_amounts(
+            quoteallotment, variant_list)
 
         return JsonResponse({
             'code': code,
