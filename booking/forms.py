@@ -254,6 +254,17 @@ class QuotePackageExtraForm(forms.ModelForm):
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
+class QuoteServicePaxVariantInlineForm(forms.ModelForm):
+    class Meta:
+        fields = ('__all__')
+        widgets = {
+            'quote_pax_variant': autocomplete.ModelSelect2(
+                url='quotepaxvariant-autocomplete',
+                forward=['quote_service'],
+                ),
+        }
+
+
 class QuoteAllotmentInlineForm(forms.ModelForm):
     class Meta:
         fields = ('__all__')

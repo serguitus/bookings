@@ -8,7 +8,10 @@
     {% get_distribution bs %}
     Check In: {{ bs.datetime_from|date:"d-b-Y" }}
     Check Out {{ bs.datetime_to|date:"d-b-Y" }}
-{% else %}{# This is an Extra #}
+{% elif bs.service_type == 'E' %}{# This is an Extra #}
+    {{ bs.service }}
+    Fecha: {{ bs.datetime_from|date:"d-b-Y" }}   Hora: {{ bs.time|time:"H:i" }} hrs
+{% elif bs.service_type == 'P' %}{# This is a Package #}
     {{ bs.service }}
     Fecha: {{ bs.datetime_from|date:"d-b-Y" }}   Hora: {{ bs.time|time:"H:i" }} hrs
 {% endif %}----------------------------------{% endlanguage %}

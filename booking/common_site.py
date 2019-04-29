@@ -38,8 +38,8 @@ from booking.forms import (
     PackageAllotmentInlineForm, PackageTransferInlineForm,
     PackageExtraInlineForm, PackageAllotmentForm,
     PackageTransferForm, PackageExtraForm, AgencyPackageServiceForm,
-    QuoteForm, QuoteAllotmentForm, QuoteTransferForm,
-    QuoteExtraForm, QuotePackageForm,
+    QuoteForm, QuoteServicePaxVariantInlineForm,
+    QuoteAllotmentForm, QuoteTransferForm, QuoteExtraForm, QuotePackageForm,
     QuoteAllotmentInlineForm, QuoteTransferInlineForm,
     QuoteExtraInlineForm, QuotePackageInlineForm,
     QuotePackageAllotmentInlineForm, QuotePackageTransferInlineForm,
@@ -59,7 +59,7 @@ from booking.models import (
     Package, PackageAllotment, PackageTransfer, PackageExtra,
     AgencyPackageService, AgencyPackageDetail,
     Quote,
-    QuotePaxVariant,
+    QuotePaxVariant, QuoteServicePaxVariant,
     QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
     QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
     Booking,
@@ -219,6 +219,21 @@ class QuotePaxVariantInline(CommonStackedInline):
         ('cost_double_amount', 'price_double_amount'),
         ('cost_triple_amount', 'price_triple_amount')]
     verbose_name_plural = 'Paxes Variants'
+
+
+class QuoteServicePaxVariantInline(CommonStackedInline):
+    model = QuoteServicePaxVariant
+    extra = 0
+    fields = [
+        ('quote_pax_variant', 'price_percent'),
+        ('manual_cost_single', 'cost_single_amount'),
+        ('manual_cost_double', 'cost_double_amount'),
+        ('manual_cost_triple', 'cost_triple_amount'),
+        ('manual_price_single', 'price_single_amount'),
+        ('manual_price_double', 'price_double_amount'),
+        ('manual_price_triple', 'price_triple_amount')]
+    verbose_name_plural = 'Paxes Variants'
+    form = QuoteServicePaxVariantInlineForm
 
 
 # Quote Package
@@ -424,6 +439,7 @@ class QuoteAllotmentSiteModel(SiteModel):
     top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote__reference', 'service__name',)
     form = QuoteAllotmentForm
+    inlines = [QuoteServicePaxVariantInline]
 
 
 class QuoteTransferSiteModel(SiteModel):
@@ -439,6 +455,7 @@ class QuoteTransferSiteModel(SiteModel):
     top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote__reference', 'service__name',)
     form = QuoteTransferForm
+    inlines = [QuoteServicePaxVariantInline]
 
 
 class QuoteExtraSiteModel(SiteModel):
@@ -458,6 +475,7 @@ class QuoteExtraSiteModel(SiteModel):
     top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote__reference', 'service__name',)
     form = QuoteExtraForm
+    inlines = [QuoteServicePaxVariantInline]
 
 
 class QuotePackageSiteModel(SiteModel):
@@ -480,7 +498,8 @@ class QuotePackageSiteModel(SiteModel):
     inlines = [
         QuotePackageAllotmentInLine,
         QuotePackageTransferInLine,
-        QuotePackageExtraInLine]
+        QuotePackageExtraInLine,
+        QuoteServicePaxVariantInline,]
     form = QuotePackageForm
 
 

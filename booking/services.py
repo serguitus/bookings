@@ -1207,9 +1207,8 @@ class BookingServices(object):
         groups_amount = 0
         groups_message = ''
         for group in groups:
-            amount, message = ConfigServices.find_group_amount(
-                False, service, date_from, date_to, group,
-                None, None, detail_list)
+            amount, message = cls._find_package_group_price(
+                service, date_from, date_to, group, detail_list)
             if amount is None:
                 return None, message
             groups_amount += amount
@@ -1219,12 +1218,56 @@ class BookingServices(object):
 
 
     @classmethod
-    def _find_package_group_price(
-            cls, service, date_from, date_to, group, detail_list):
+    def _find_package_group_price(cls, service, date_from, date_to, group, detail_list):
+        adults, children = group[0], group[1]
+        if adults + children == 0:
+            return 0, ''
+        message = ''
+        stop = False
+        solved = False
+        current_date = date_from
+        amount = 0
+        details = list(detail_list)
+        # continue until solved or empty details list
+        while not stop:
+            # verify list not empty
+            if details:
+                # working with first detail
+                detail = details[0]
 
-        amount, message = ConfigServices.find_amount(
-            False, service, date_from, date_to, group[0], group[1],
-            None, None, detail_list)
+                detail_date_from = detail.agency_service.date_from
+                detail_date_to = detail.agency_service.date_to
+
+                if current_date >= detail_date_from:
+                    # verify final date included
+                    end_date = detail_date_to + timedelta(days=1)
+                    if end_date >= date_to:
+                        # full date range
+                        result = cls._get_package_price(
+                            service, detail, current_date, date_to,
+                            adults, children)
+                        if result is not None and result >= 0:
+                            amount += result
+                            solved = True
+                            stop = True
+                    else:
+                        result = cls._get_package_price(
+                            service, detail, current_date,
+                            datetime(year=end_date.year, month=end_date.month, day=end_date.day),
+                            adults, children)
+                        if result is not None and result >= 0:
+                            amount += result
+                            current_date = datetime(
+                                year=end_date.year, month=end_date.month, day=end_date.day)
+                # remove detail from list
+                details.remove(detail)
+            else:
+                # empty list, no solved all days
+                stop = True
+                message = 'Amount Not Found for date %s' % current_date
+        if not solved:
+            amount = None
+
         if amount is not None and amount >= 0:
             return amount, message
         else:
@@ -1547,13 +1590,13 @@ class BookingServices(object):
     @classmethod
     def _merge_amounts(
             cls,
-            prev_amount, prev_msg, amount, msg):
+            prev_amount, prev_msg, amount, msg, round_digits=2):
         if prev_amount is None:
             return None, prev_msg
         elif amount is None:
             return None, msg
         else:
-            return float(prev_amount) + float(amount), msg
+            return round(float(prev_amount) + float(amount), round_digits), msg
 
 
     @classmethod

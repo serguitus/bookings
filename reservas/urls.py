@@ -37,7 +37,8 @@ from booking import urls as booking_urls
 from booking.views import (
     PackageAutocompleteView, ProviderPackageAutocompleteView,
     PickUpAutocompleteView, DropOffAutocompleteView, PlaceAutocompleteView,
-    ScheduleArrivalAutocompleteView, ScheduleDepartureAutocompleteView,)
+    ScheduleArrivalAutocompleteView, ScheduleDepartureAutocompleteView,
+    QuotePaxVariantAutocompleteView)
 
 
 urlpatterns = [
@@ -140,5 +141,9 @@ urlpatterns = [
     url(r'^departure-autocomplete/$',
         ScheduleDepartureAutocompleteView.as_view(),
         name='departure-autocomplete',
+    ),
+    url(r'^quotepaxvariant-autocomplete/$',
+        QuotePaxVariantAutocompleteView.as_view(),
+        name='quotepaxvariant-autocomplete',
     ),
 ]
