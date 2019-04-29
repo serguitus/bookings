@@ -4,7 +4,8 @@ from django import template
 from booking.models import (
     BookingTransfer,
     BookingAllotment,
-    BookingExtra)
+    BookingExtra,
+    BookingPackage)
 from booking.tables import (
     PackageServiceTable,
     QuoteServiceTable, QuotePaxVariantTable,
@@ -93,13 +94,41 @@ def render_service(booking_service):
     elif booking_service.service_type == 'A':
         # Accomodation service
         bs = BookingAllotment.objects.get(id=booking_service.id)
-    else:
+    elif booking_service.service_type == 'E':
         # Extra Service
         bs = BookingExtra.objects.get(id=booking_service.id)
+    elif booking_service.service_type == 'P':
+        # Package Service
+        bs = BookingPackage.objects.get(id=booking_service.id)
 
     return {
         'bs': bs,
     }
+
+
+@register.inclusion_tag('booking/emails/confirmation_service.html')
+def render_confirmed_service(booking_service):
+    """
+    Renders some html into Confirmation emails depending on
+    booking_service type
+    """
+    if booking_service.service_type == 'T':
+        # Transfer service
+        bs = BookingTransfer.objects.get(id=booking_service.id)
+    elif booking_service.service_type == 'A':
+        # Accomodation service
+        bs = BookingAllotment.objects.get(id=booking_service.id)
+    elif booking_service.service_type == 'E':
+        # Extra Service
+        bs = BookingExtra.objects.get(id=booking_service.id)
+    elif booking_service.service_type == 'P':
+        # Package Service
+        bs = BookingPackage.objects.get(id=booking_service.id)
+
+    return {
+        'bs': bs,
+    }
+
 
 @register.simple_tag
 def get_distribution(booking_service):

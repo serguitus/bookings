@@ -5,3 +5,4 @@ Bellow, confirmation details:
 Booking: {{ booking.name }} [Reference: {{ booking.internal_reference }}]
 {% if booking.reference %}Client Reference. {{ booking.reference }}{% endif %}
 Confirmed Services:
+{% for booking_service in services %}{% render_confirmed_service booking_service %}{% endfor %}
