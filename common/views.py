@@ -10,7 +10,7 @@ class ModelChangeFormProcessorView(View):
     def post(self, request, *args, **kwargs):
         ModelForm = self.common_sitemodel.form
         form = ModelForm(request.POST, request.FILES, instance=None)
-        if 'id' in request.POST and not request.POST['id'] is None:
+        if 'id' in request.POST and request.POST['id']:
             form.instance.id = request.POST['id']
         if form.is_valid():
             new_object = form.save(commit=False)
