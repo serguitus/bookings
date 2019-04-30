@@ -453,6 +453,12 @@ class QuoteServiceSiteModel(SiteModel):
     def response_post_save_change(self, request, obj):
         return redirect(reverse('common:booking_quote_change', args=[obj.quote.pk]))
 
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        if not request.user.has_perm("booking.change_amounts"):
+            obj.update_service_pax_variants = True
+        obj.save()
+
 
 class QuoteAllotmentSiteModel(QuoteServiceSiteModel):
     model_order = 520

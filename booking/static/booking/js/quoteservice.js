@@ -25,113 +25,14 @@ $(document).ready(function(){
             quote_pax_variant_value = Number(quote_pax_variant_input.val());
             if (quote_pax_variant_value && quote_pax_variant_value == quote_pax_variant_id) {
               checkboxManualCosts = $('#id_quoteservice_paxvariants-' + idx + '-manual_costs');
-              sc1 = $('#' + idx + '-span-c1');
-              if (checkboxManualCosts[0] != undefined) {
-                isManualCost = checkboxManualCosts[0].checked;
-                ic1 = $('#id_quoteservice_paxvariants-' + idx + '-cost_single_amount');
-                if (pax_data.total.cost_1) {
-                  sc1.html(pax_data.total.cost_1);
-                  if (!isManualCost) {
-                    ic1[0].value = Number(pax_data.total.cost_1);
-                  }
-                } else {
-                  sc1.html(pax_data.total.cost_1_msg);
-                  if (!isManualCost) {
-                    ic1[0].value = '';
-                  }
-                }
-              } else {
-                isManualCost = $('#quoteservice_paxvariants-' + idx + ' div.field-manual_costs div.readonly img').attr('src').includes('icon-yes');
-                if (pax_data.total.cost_1) {
-                  sc1.html(pax_data.total.cost_1);
-                  if (!isManualCost) {
-                    $('div.field-cost_single_amount div.readonly').html(Number(pax_data.total.cost_1));
-                  }
-                } else {
-                  sc1.html(pax_data.total.cost_1_msg);
-                  if (!isManualCost) {
-                    $('div.field-cost_single_amount div.readonly').html('');
-                  }
-                }
-              }
-
-              ic2 = $('#id_quoteservice_paxvariants-' + idx + '-cost_double_amount');
-              sc2 = $('#' + idx + '-span-c2');
-              if (pax_data.total.cost_2) {
-                sc2.html(pax_data.total.cost_2);
-                if (!isManualCost) {
-                  ic2[0].value = Number(pax_data.total.cost_2);
-                  $('div.field-cost_double_amount div.readonly').html(Number(pax_data.total.cost_1));
-                }
-              } else {
-                sc2.html(pax_data.total.cost_2_msg);
-                if (!isManualCost) {
-                  ic2[0].value = '';
-                  $('div.field-cost_double_amount div.readonly').html('');
-                }
-              }
-
-              ic3 = $('#id_quoteservice_paxvariants-' + idx + '-cost_triple_amount');
-              sc3 = $('#' + idx + '-span-c3');
-              if (pax_data.total.cost_3) {
-                sc3.html(pax_data.total.cost_3);
-                if (!isManualCost) {
-                  ic3[0].value = Number(pax_data.total.cost_3);
-                }
-              } else {
-                sc3.html(pax_data.total.cost_3_msg);
-                if (!isManualCost) {
-                  ic3[0].value = '';
-                }
-              }
+              update_amounts(false, checkboxManualCosts, idx, 1, pax_data.total.cost_1, pax_data.total.cost_1_msg);
+              update_amounts(false, checkboxManualCosts, idx, 2, pax_data.total.cost_2, pax_data.total.cost_2_msg);
+              update_amounts(false, checkboxManualCosts, idx, 3, pax_data.total.cost_3, pax_data.total.cost_3_msg);
 
               checkboxManualPrices = $('#id_quoteservice_paxvariants-' + idx + '-manual_prices');
-              if (checkboxManualPrices[0] != undefined) {
-                isManualPrice = checkboxManualPrices[0].checked;
-              } else {
-                isManualPrice = $('#quoteservice_paxvariants-' + idx + ' div.field-manual_prices div.readonly img').attr('src').includes('icon-yes');
-              }
-              ip1 = $('#id_quoteservice_paxvariants-' + idx + '-price_single_amount');
-              sp1 = $('#' + idx + '-span-p1');
-              if (pax_data.total.price_1) {
-                sp1.html(pax_data.total.price_1);
-                if (!isManualPrice) {
-                  ip1[0].value = Number(pax_data.total.price_1);
-                }
-              } else {
-                sp1.html(pax_data.total.price_1_msg);
-                if (!isManualCost) {
-                  ip1[0].value = '';
-                }
-              }
-
-              ip2 = $('#id_quoteservice_paxvariants-' + idx + '-price_double_amount');
-              sp2 = $('#' + idx + '-span-p2');
-              if (pax_data.total.price_2) {
-                sp2.html(pax_data.total.price_2);
-                if (!isManualPrice) {
-                  ip2[0].value = Number(pax_data.total.price_2);
-                }
-              } else {
-                sp2.html(pax_data.total.price_2_msg);
-                if (!isManualCost) {
-                  ip2[0].value = '';
-                }
-              }
-
-              ip3 = $('#id_quoteservice_paxvariants-' + idx + '-price_triple_amount');
-              sp3 = $('#' + idx + '-span-p3');
-              if (pax_data.total.price_3) {
-                sp3.html(pax_data.total.price_3);
-                if (!isManualPrice) {
-                  ip3[0].value = Number(pax_data.total.price_3);
-                }
-              } else {
-                sp3.html(pax_data.total.price_3_msg);
-                if (!isManualCost) {
-                  ip3[0].value = '';
-                }
-              }
+              update_amounts(true, checkboxManualPrices, idx, 1, pax_data.total.price_1, pax_data.total.price_1_msg);
+              update_amounts(true, checkboxManualPrices, idx, 2, pax_data.total.price_2, pax_data.total.price_2_msg);
+              update_amounts(true, checkboxManualPrices, idx, 3, pax_data.total.price_3, pax_data.total.price_3_msg);
             }
           }
         });
@@ -144,34 +45,53 @@ $(document).ready(function(){
     })
   }
 
-  function update_costs(idx, cost_idx){
-    checkboxManualCosts = $('#id_quoteservice_paxvariants-' + idx + '-manual_costs');
-    sc = $('#' + idx + '-span-c' + cost_idx);
-    if (checkboxManualCosts[0] != undefined) {
-      isManualCost = checkboxManualCosts[0].checked;
-      ic = $('#id_quoteservice_paxvariants-' + idx + '-cost_single_amount');
-      if (pax_data.total.cost_1) {
-        sc1.html(pax_data.total.cost_1);
-        if (!isManualCost) {
-          ic1[0].value = Number(pax_data.total.cost_1);
+  function update_amounts(for_price, checkboxManual, idx, amount_idx, data_amount, data_amount_msg){
+    if (for_price) {
+      amount_letter = 'p';
+      amount_text = 'price';
+    } else {
+      amount_letter = 'c';
+      amount_text = 'cost';
+    }
+    sa = $('#' + idx + '-span-' + amount_letter + amount_idx);
+    if (checkboxManual[0] != undefined) {
+      isManual = checkboxManual[0].checked;
+      if (amount_idx == 1) {
+        ia = $('#id_quoteservice_paxvariants-' + idx + '-' + amount_text + '_single_amount');
+      } else if (amount_idx == 2) {
+        ia = $('#id_quoteservice_paxvariants-' + idx + '-' + amount_text + '_double_amount');
+      } else {
+        ia = $('#id_quoteservice_paxvariants-' + idx + '-' + amount_text + '_triple_amount');
+      }
+      if (data_amount) {
+        sa.html(data_amount);
+        if (!isManual) {
+          ia[0].value = Number(data_amount);
         }
       } else {
-        sc1.html(pax_data.total.cost_1_msg);
-        if (!isManualCost) {
-          ic1[0].value = '';
+        sa.html(data_amount_msg);
+        if (!isManual) {
+          ia[0].value = '';
         }
       }
     } else {
-      isManualCost = $('#quoteservice_paxvariants-' + idx + ' div.field-manual_costs div.readonly img').attr('src').includes('icon-yes');
-      if (pax_data.total.cost_1) {
-        sc1.html(pax_data.total.cost_1);
-        if (!isManualCost) {
-          $('div.field-cost_single_amount div.readonly').html(Number(pax_data.total.cost_1));
+      isManual = $('#quoteservice_paxvariants-' + idx + ' div.field-manual_' + amount_text + 's div.readonly img').attr('src').includes('icon-yes');
+      if (amount_idx == 1) {
+        ia = $('#quoteservice_paxvariants-' + idx + ' div.field-' + amount_text + '_single_amount div.field-' + amount_text + '_single_amount div.readonly');
+      } else if (amount_idx == 2) {
+        ia = $('#quoteservice_paxvariants-' + idx + ' div.field-' + amount_text + '_double_amount div.field-' + amount_text + '_double_amount div.readonly');
+      } else {
+        ia = $('#quoteservice_paxvariants-' + idx + ' div.field-' + amount_text + '_triple_amount div.field-' + amount_text + '_triple_amount div.readonly');
+      }
+      if (data_amount) {
+        sa.html(data_amount);
+        if (!isManual) {
+          ia.html(Number(data_amount));
         }
       } else {
-        sc1.html(pax_data.total.cost_1_msg);
-        if (!isManualCost) {
-          $('div.field-cost_single_amount div.readonly').html('');
+        sa.html(data_amount_msg);
+        if (!isManual) {
+          ia.html('');
         }
       }
     }
