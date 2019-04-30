@@ -455,7 +455,7 @@ class QuoteServiceSiteModel(SiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        if not request.user.has_perm("booking.change_amounts"):
+        if not hasattr(obj, 'id') or not obj.id or not request.user.has_perm("booking.change_amounts"):
             obj.update_service_pax_variants = True
         obj.save()
 

@@ -598,7 +598,172 @@ class BookingServices(object):
                 c1, c1_msg, p1, p1_msg, \
                 c2, c2_msg, p2, p2_msg, \
                 c3, c3_msg, p3, p3_msg = cls._find_quoteallotment_amounts(
-                    pax_variant=pax_variant, allotment=quoteallotment, agency=quoteallotment.quote.agency)
+                    pax_variant=pax_variant.quote_pax_variant, allotment=quoteallotment, agency=quoteallotment.quote.agency)
+
+                # variants totals
+                cost_1, cost_1_msg, price_1, price_1_msg, \
+                cost_2, cost_2_msg, price_2, price_2_msg, \
+                cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
+                    cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
+                    cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
+                    cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
+
+                variant_dict.update({'total': cls._quote_amounts_dict(
+                    cost_1, cost_1_msg, price_1, price_1_msg,
+                    cost_2, cost_2_msg, price_2, price_2_msg,
+                    cost_3, cost_3_msg, price_3, price_3_msg)})
+
+            counter = counter + 1
+
+            result.append(variant_dict)
+
+        return 0, '', result
+
+
+    @classmethod
+    def find_quotetransfer_amounts(
+            cls, quotetransfer, variant_list):
+        result = list()
+
+        if not variant_list:
+            return 3, 'Pax Variants Missing', None
+
+        counter = 0
+        for pax_variant in variant_list:
+            variant_dict = dict()
+            variant_dict.update({'quote_pax_variant': pax_variant.quote_pax_variant.id})
+
+            cost_1 = 0
+            cost_2 = 0
+            cost_3 = 0
+            price_1 = 0
+            price_2 = 0
+            price_3 = 0
+            cost_1_msg = ''
+            cost_2_msg = ''
+            cost_3_msg = ''
+            price_1_msg = ''
+            price_2_msg = ''
+            price_3_msg = ''
+
+            key = '%s' % counter
+            if not hasattr(quotetransfer, 'service'):
+                variant_dict.update({'total': cls._no_service_dict()})
+            else:
+                c1, c1_msg, p1, p1_msg, \
+                c2, c2_msg, p2, p2_msg, \
+                c3, c3_msg, p3, p3_msg = cls._find_quotetransfer_amounts(
+                    pax_variant=pax_variant.quote_pax_variant, transfer=quotetransfer, agency=quotetransfer.quote.agency)
+
+                # variants totals
+                cost_1, cost_1_msg, price_1, price_1_msg, \
+                cost_2, cost_2_msg, price_2, price_2_msg, \
+                cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
+                    cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
+                    cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
+                    cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
+
+                variant_dict.update({'total': cls._quote_amounts_dict(
+                    cost_1, cost_1_msg, price_1, price_1_msg,
+                    cost_2, cost_2_msg, price_2, price_2_msg,
+                    cost_3, cost_3_msg, price_3, price_3_msg)})
+
+            counter = counter + 1
+
+            result.append(variant_dict)
+
+        return 0, '', result
+
+
+    @classmethod
+    def find_quoteextra_amounts(
+            cls, quoteextra, variant_list):
+        result = list()
+
+        if not variant_list:
+            return 3, 'Pax Variants Missing', None
+
+        counter = 0
+        for pax_variant in variant_list:
+            variant_dict = dict()
+            variant_dict.update({'quote_pax_variant': pax_variant.quote_pax_variant.id})
+
+            cost_1 = 0
+            cost_2 = 0
+            cost_3 = 0
+            price_1 = 0
+            price_2 = 0
+            price_3 = 0
+            cost_1_msg = ''
+            cost_2_msg = ''
+            cost_3_msg = ''
+            price_1_msg = ''
+            price_2_msg = ''
+            price_3_msg = ''
+
+            key = '%s' % counter
+            if not hasattr(quoteextra, 'service'):
+                variant_dict.update({'total': cls._no_service_dict()})
+            else:
+                c1, c1_msg, p1, p1_msg, \
+                c2, c2_msg, p2, p2_msg, \
+                c3, c3_msg, p3, p3_msg = cls._find_quoteextra_amounts(
+                    pax_variant=pax_variant.quote_pax_variant, extra=quoteextra, agency=quoteextra.quote.agency)
+
+                # variants totals
+                cost_1, cost_1_msg, price_1, price_1_msg, \
+                cost_2, cost_2_msg, price_2, price_2_msg, \
+                cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
+                    cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
+                    cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
+                    cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
+
+                variant_dict.update({'total': cls._quote_amounts_dict(
+                    cost_1, cost_1_msg, price_1, price_1_msg,
+                    cost_2, cost_2_msg, price_2, price_2_msg,
+                    cost_3, cost_3_msg, price_3, price_3_msg)})
+
+            counter = counter + 1
+
+            result.append(variant_dict)
+
+        return 0, '', result
+
+
+    @classmethod
+    def find_quotepackage_amounts(
+            cls, quotepackage, variant_list):
+        result = list()
+
+        if not variant_list:
+            return 3, 'Pax Variants Missing', None
+
+        counter = 0
+        for pax_variant in variant_list:
+            variant_dict = dict()
+            variant_dict.update({'quote_pax_variant': pax_variant.quote_pax_variant.id})
+
+            cost_1 = 0
+            cost_2 = 0
+            cost_3 = 0
+            price_1 = 0
+            price_2 = 0
+            price_3 = 0
+            cost_1_msg = ''
+            cost_2_msg = ''
+            cost_3_msg = ''
+            price_1_msg = ''
+            price_2_msg = ''
+            price_3_msg = ''
+
+            key = '%s' % counter
+            if not hasattr(quotepackage, 'service'):
+                variant_dict.update({'total': cls._no_service_dict()})
+            else:
+                c1, c1_msg, p1, p1_msg, \
+                c2, c2_msg, p2, p2_msg, \
+                c3, c3_msg, p3, p3_msg = cls._find_quotepackage_amounts(
+                    pax_variant=pax_variant.quote_pax_variant, package=quotepackage, agency=quotepackage.quote.agency)
 
                 # variants totals
                 cost_1, cost_1_msg, price_1, price_1_msg, \
@@ -2246,13 +2411,31 @@ class BookingServices(object):
         quote_pax_variants = list(QuotePaxVariant.objects.all().filter(quote=quote.id))
         # for each quote pax variant get or create
         for quote_pax_variant in quote_pax_variants:
-            quote_service_pax_variant, created = QuoteServicePaxVariant.objects.update_or_create(
-                quote_service_id=quote_service.id,
-                quote_pax_variant_id=quote_pax_variant.id,
-                defaults=cls.calculate_default_service_pax_variant_amounts(
-                    quote_service,
-                    quote_pax_variant)
-            )
+            defaults = cls.calculate_default_service_pax_variant_amounts(
+                quote_service,
+                quote_pax_variant)
+            try:
+                obj = QuoteServicePaxVariant.objects.get(
+                    quote_service_id=quote_service.id,
+                    quote_pax_variant_id=quote_pax_variant.id)
+                if obj.manual_costs and obj.manual_prices:
+                    continue
+                if not obj.manual_costs:
+                    setattr(obj, 'cost_single_amount', defaults['cost_single_amount'])
+                    setattr(obj, 'cost_double_amount', defaults['cost_double_amount'])
+                    setattr(obj, 'cost_triple_amount', defaults['cost_triple_amount'])
+                if not obj.manual_prices:
+                    setattr(obj, 'price_single_amount', defaults['price_single_amount'])
+                    setattr(obj, 'price_double_amount', defaults['price_double_amount'])
+                    setattr(obj, 'price_triple_amount', defaults['price_triple_amount'])
+                obj.save()
+            except QuoteServicePaxVariant.DoesNotExist:
+                new_values = {
+                    'quote_service_id': quote_service.id,
+                    'quote_pax_variant_id': quote_pax_variant.id}
+                new_values.update(defaults)
+                obj = QuoteServicePaxVariant(**new_values)
+                obj.save()
 
 
     @classmethod

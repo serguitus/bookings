@@ -75,7 +75,7 @@ $(document).ready(function(){
         }
       }
     } else {
-      isManual = $('#quoteservice_paxvariants-' + idx + ' div.field-manual_' + amount_text + 's div.readonly img').attr('src').includes('icon-yes');
+      isManual = $('#quoteservice_paxvariants-' + idx + ' div.field-manual_' + amount_text + 's div.field-manual_' + amount_text + 's div.readonly img').attr('src').includes('icon-yes');
       if (amount_idx == 1) {
         ia = $('#quoteservice_paxvariants-' + idx + ' div.field-' + amount_text + '_single_amount div.field-' + amount_text + '_single_amount div.readonly');
       } else if (amount_idx == 2) {
