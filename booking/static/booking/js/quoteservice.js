@@ -24,18 +24,34 @@ $(document).ready(function(){
             quote_pax_variant_input = $('#id_quoteservice_paxvariants-' + idx + '-quote_pax_variant');
             quote_pax_variant_value = Number(quote_pax_variant_input.val());
             if (quote_pax_variant_value && quote_pax_variant_value == quote_pax_variant_id) {
-              isManualCost = $('#id_quoteservice_paxvariants-' + idx + '-manual_costs')[0].checked;
-              ic1 = $('#id_quoteservice_paxvariants-' + idx + '-cost_single_amount');
+              checkboxManualCosts = $('#id_quoteservice_paxvariants-' + idx + '-manual_costs');
               sc1 = $('#' + idx + '-span-c1');
-              if (pax_data.total.cost_1) {
-                sc1.html(pax_data.total.cost_1);
-                if (!isManualCost) {
-                  ic1[0].value = Number(pax_data.total.cost_1);
+              if (checkboxManualCosts[0] != undefined) {
+                isManualCost = checkboxManualCosts[0].checked;
+                ic1 = $('#id_quoteservice_paxvariants-' + idx + '-cost_single_amount');
+                if (pax_data.total.cost_1) {
+                  sc1.html(pax_data.total.cost_1);
+                  if (!isManualCost) {
+                    ic1[0].value = Number(pax_data.total.cost_1);
+                  }
+                } else {
+                  sc1.html(pax_data.total.cost_1_msg);
+                  if (!isManualCost) {
+                    ic1[0].value = '';
+                  }
                 }
               } else {
-                sc1.html(pax_data.total.cost_1_msg);
-                if (!isManualCost) {
-                  ic1[0].value = '';
+                isManualCost = $('#quoteservice_paxvariants-' + idx + ' div.field-manual_costs div.readonly img').attr('src').includes('icon-yes');
+                if (pax_data.total.cost_1) {
+                  sc1.html(pax_data.total.cost_1);
+                  if (!isManualCost) {
+                    $('div.field-cost_single_amount div.readonly').html(Number(pax_data.total.cost_1));
+                  }
+                } else {
+                  sc1.html(pax_data.total.cost_1_msg);
+                  if (!isManualCost) {
+                    $('div.field-cost_single_amount div.readonly').html('');
+                  }
                 }
               }
 
@@ -45,11 +61,13 @@ $(document).ready(function(){
                 sc2.html(pax_data.total.cost_2);
                 if (!isManualCost) {
                   ic2[0].value = Number(pax_data.total.cost_2);
+                  $('div.field-cost_double_amount div.readonly').html(Number(pax_data.total.cost_1));
                 }
               } else {
                 sc2.html(pax_data.total.cost_2_msg);
                 if (!isManualCost) {
                   ic2[0].value = '';
+                  $('div.field-cost_double_amount div.readonly').html('');
                 }
               }
 
@@ -67,7 +85,12 @@ $(document).ready(function(){
                 }
               }
 
-              isManualPrice = $('#id_quoteservice_paxvariants-' + idx + '-manual_prices')[0].checked;
+              checkboxManualPrices = $('#id_quoteservice_paxvariants-' + idx + '-manual_prices');
+              if (checkboxManualPrices[0] != undefined) {
+                isManualPrice = checkboxManualPrices[0].checked;
+              } else {
+                isManualPrice = $('#quoteservice_paxvariants-' + idx + ' div.field-manual_prices div.readonly img').attr('src').includes('icon-yes');
+              }
               ip1 = $('#id_quoteservice_paxvariants-' + idx + '-price_single_amount');
               sp1 = $('#' + idx + '-span-p1');
               if (pax_data.total.price_1) {
@@ -119,6 +142,39 @@ $(document).ready(function(){
     }).fail(function(){
       clear_values('N/A');
     })
+  }
+
+  function update_costs(idx, cost_idx){
+    checkboxManualCosts = $('#id_quoteservice_paxvariants-' + idx + '-manual_costs');
+    sc = $('#' + idx + '-span-c' + cost_idx);
+    if (checkboxManualCosts[0] != undefined) {
+      isManualCost = checkboxManualCosts[0].checked;
+      ic = $('#id_quoteservice_paxvariants-' + idx + '-cost_single_amount');
+      if (pax_data.total.cost_1) {
+        sc1.html(pax_data.total.cost_1);
+        if (!isManualCost) {
+          ic1[0].value = Number(pax_data.total.cost_1);
+        }
+      } else {
+        sc1.html(pax_data.total.cost_1_msg);
+        if (!isManualCost) {
+          ic1[0].value = '';
+        }
+      }
+    } else {
+      isManualCost = $('#quoteservice_paxvariants-' + idx + ' div.field-manual_costs div.readonly img').attr('src').includes('icon-yes');
+      if (pax_data.total.cost_1) {
+        sc1.html(pax_data.total.cost_1);
+        if (!isManualCost) {
+          $('div.field-cost_single_amount div.readonly').html(Number(pax_data.total.cost_1));
+        }
+      } else {
+        sc1.html(pax_data.total.cost_1_msg);
+        if (!isManualCost) {
+          $('div.field-cost_single_amount div.readonly').html('');
+        }
+      }
+    }
   }
 
   function changed_manual_costs(target){

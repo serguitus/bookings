@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 config services
 """
 
-from datetime import datetime, timedelta, time
+from datetime import date, datetime, timedelta, time
 
 from django.db.models import Q
 
@@ -865,12 +865,12 @@ class ConfigServices(object):
                     else:
                         result = cls._get_service_amount(
                             service, detail, current_date,
-                            datetime(year=end_date.year, month=end_date.month, day=end_date.day),
+                            date(year=end_date.year, month=end_date.month, day=end_date.day),
                             adults, children,
                             quantity, parameter)
                         if result is not None and result >= 0:
                             amount += result
-                            current_date = datetime(
+                            current_date = date(
                                 year=end_date.year, month=end_date.month, day=end_date.day)
                 # remove detail from list
                 details.remove(detail)
