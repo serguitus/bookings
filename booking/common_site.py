@@ -38,7 +38,7 @@ from booking.forms import (
     PackageAllotmentInlineForm, PackageTransferInlineForm,
     PackageExtraInlineForm, PackageAllotmentForm,
     PackageTransferForm, PackageExtraForm, AgencyPackageServiceForm,
-    QuoteForm, QuoteServicePaxVariantInlineForm,
+    QuoteForm,
     QuoteAllotmentForm, QuoteTransferForm, QuoteExtraForm, QuotePackageForm,
     QuoteAllotmentInlineForm, QuoteTransferInlineForm,
     QuoteExtraInlineForm, QuotePackageInlineForm,
@@ -225,15 +225,13 @@ class QuoteServicePaxVariantInline(CommonStackedInline):
     model = QuoteServicePaxVariant
     extra = 0
     fields = [
-        ('quote_pax_variant', 'price_percent'),
+        ('quote_pax_variant'),
         ('manual_costs', 'manual_prices'),
         ('cost_single_amount', 'price_single_amount'),
         ('cost_double_amount', 'price_double_amount'),
         ('cost_triple_amount', 'price_triple_amount')]
     verbose_name_plural = 'Paxes Variants'
-    form = QuoteServicePaxVariantInlineForm
     can_delete = False
-    readonly_fields = ('quote_pax_variant',)
 
     def has_add_permission(self,request):
         return False
@@ -243,7 +241,6 @@ class QuoteServicePaxVariantInline(CommonStackedInline):
 
         if not request.user.has_perm("booking.change_amounts"):
             return readonly_fields + [
-                'price_percent',
                 'manual_costs', 'manual_prices',
                 'cost_single_amount', 'price_single_amount',
                 'cost_double_amount', 'price_double_amount',
@@ -458,6 +455,12 @@ class QuoteAllotmentSiteModel(SiteModel):
     add_form_template = 'booking/quoteallotment_change_form.html'
     change_form_template = 'booking/quoteallotment_change_form.html'
     inlines = [QuoteServicePaxVariantInline]
+
+    def response_post_save_add(self, request, obj):
+        return redirect(reverse('common:booking_quote_change', args=[obj.quote.pk]))
+
+    def response_post_save_change(self, request, obj):
+        return redirect(reverse('common:booking_quote_change', args=[obj.quote.pk]))
 
 
 class QuoteTransferSiteModel(SiteModel):

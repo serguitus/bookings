@@ -61,7 +61,6 @@ class PaxVariantAmounts(models.Model):
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price DBL')
     price_triple_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price TPL')
-    price_percent = models.SmallIntegerField(blank=True, null=True, verbose_name='Price %')
 
 
 class BaseService(models.Model):
@@ -224,6 +223,10 @@ class Quote(models.Model):
     currency = models.CharField(
         max_length=5, choices=CURRENCIES, default=CURRENCY_CUC)
     currency_factor = models.DecimalField(max_digits=12, decimal_places=6, default=1.0)
+    program = models.CharField(
+        max_length=2000, blank=True, null=True, verbose_name='Program')
+    history = models.CharField(
+        max_length=2000, blank=True, null=True, verbose_name='History')
 
     def fill_data(self):
         pass
@@ -250,6 +253,7 @@ class QuotePaxVariant(PaxVariantAmounts):
     quote = models.ForeignKey(Quote, related_name='quote_paxvariants')
     pax_quantity = models.SmallIntegerField()
     free_quantity = models.SmallIntegerField(default=0)
+    price_percent = models.SmallIntegerField(blank=True, null=True, verbose_name='Price %')
 
     def __str__(self):
         if self.free_quantity:

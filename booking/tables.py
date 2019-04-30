@@ -23,8 +23,7 @@ class PackageServiceTable(tables.Table):
             'common:booking_%s_change' % (PACKAGESERVICE_TYPES[record.service_type]),
             args=(quote(record.pk),)
         )
-        return format_html(
-            '<a class="related-widget-wrapper-link" href="%s?_popup=1">%s</a>' % (obj_url, value))
+        return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
     def before_render(self, request):
         self.columns.hide('service_type')
@@ -55,8 +54,7 @@ class QuoteServiceTable(tables.Table):
             'common:booking_%s_change' % (QUOTESERVICE_TYPES[record.service_type]),
             args=(quote(record.pk),)
         )
-        return format_html(
-            '<a class="related-widget-wrapper-link" href="%s?_popup=1">%s</a>' % (obj_url, value))
+        return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
     def before_render(self, request):
         self.columns.hide('service_type')
@@ -73,8 +71,7 @@ class QuotePackageServiceTable(tables.Table):
             'common:booking_%s_change' % (QUOTEPACKAGESERVICE_TYPES[record.service_type]),
             args=(quote(record.pk),)
         )
-        return format_html(
-            '<a class="related-widget-wrapper-link" href="%s?_popup=1">%s</a>' % (obj_url, value))
+        return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
     def before_render(self, request):
         self.columns.hide('service_type')
@@ -180,8 +177,7 @@ class BookingPackageServiceTable(tables.Table):
             'common:booking_%s_change' % (BOOKINGPACKAGESERVICE_TYPES[record.service_type]),
             args=(quote(record.pk),)
         )
-        return format_html(
-            '<a class="related-widget-wrapper-link" href="%s?_popup=1">%s</a>' % (obj_url, value))
+        return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
     def before_render(self, request):
         self.columns.hide('service_type')

@@ -1,9 +1,12 @@
 $(document).ready(function(){
 
+  $('select[name^="quoteservice_paxvariants-"][name$="-quote_pax_variant"]').attr('disabled', true);
+
   function get_computed_amounts() {
-    show_buttons();
     if($(quoteservice_form_selector).length){
+      $('select[name^="quoteservice_paxvariants-"][name$="-quote_pax_variant"]').attr('disabled', false);
       data = $(quoteservice_form_selector).serialize();
+      $('select[name^="quoteservice_paxvariants-"][name$="-quote_pax_variant"]').attr('disabled', true);
     }
     $.ajax({
       'url': quoteservice_amounts_url,
@@ -21,91 +24,90 @@ $(document).ready(function(){
             quote_pax_variant_input = $('#id_quoteservice_paxvariants-' + idx + '-quote_pax_variant');
             quote_pax_variant_value = Number(quote_pax_variant_input.val());
             if (quote_pax_variant_value && quote_pax_variant_value == quote_pax_variant_id) {
+              isManualCost = $('#id_quoteservice_paxvariants-' + idx + '-manual_costs')[0].checked;
               ic1 = $('#id_quoteservice_paxvariants-' + idx + '-cost_single_amount');
               sc1 = $('#' + idx + '-span-c1');
               if (pax_data.total.cost_1) {
                 sc1.html(pax_data.total.cost_1);
+                if (!isManualCost) {
+                  ic1[0].value = Number(pax_data.total.cost_1);
+                }
               } else {
                 sc1.html(pax_data.total.cost_1_msg);
+                if (!isManualCost) {
+                  ic1[0].value = '';
+                }
               }
 
               ic2 = $('#id_quoteservice_paxvariants-' + idx + '-cost_double_amount');
               sc2 = $('#' + idx + '-span-c2');
               if (pax_data.total.cost_2) {
                 sc2.html(pax_data.total.cost_2);
+                if (!isManualCost) {
+                  ic2[0].value = Number(pax_data.total.cost_2);
+                }
               } else {
                 sc2.html(pax_data.total.cost_2_msg);
+                if (!isManualCost) {
+                  ic2[0].value = '';
+                }
               }
 
               ic3 = $('#id_quoteservice_paxvariants-' + idx + '-cost_triple_amount');
               sc3 = $('#' + idx + '-span-c3');
               if (pax_data.total.cost_3) {
                 sc3.html(pax_data.total.cost_3);
+                if (!isManualCost) {
+                  ic3[0].value = Number(pax_data.total.cost_3);
+                }
               } else {
                 sc3.html(pax_data.total.cost_3_msg);
+                if (!isManualCost) {
+                  ic3[0].value = '';
+                }
               }
 
-              ipp = $('#id_quoteservice_paxvariants-' + idx + '-price_percent');
-              if (ipp.val() != '' && !isNaN(ipp.val())) {
-                var percent = Number(ipp.val());
-                ip1 = $('#id_quoteservice_paxvariants-' + idx + '-price_single_amount');
-                sp1 = $('#' + idx + '-span-p1');
-                if (isNaN(ic1.val())) {
-                  sp1.html('Cost for % is empty');
-                } else {
-                  price = Math.round(0.499999 + Number(ic1.val()) * (1.0 + percent / 100.0));
-                  sp1.html(price);
-                  if (ip1.val() == '') {
-                    ip1.val(price);
-                  }
-                }
-                ip2 = $('#id_quoteservice_paxvariants-' + idx + '-price_double_amount');
-                sp2 = $('#' + idx + '-span-p2');
-                if (isNaN(ic2.val())) {
-                  sp2.html('Cost for % is empty');
-                } else {
-                  price = Math.round(0.499999 + Number(ic2.val()) * (1.0 + percent / 100.0));
-                  sp2.html(price);
-                  if (ip2.val() == '') {
-                    ip2.val(price);
-                  }
-                }
-                ip3 = $('#id_quoteservice_paxvariants-' + idx + '-price_triple_amount');
-                sp3 = $('#' + idx + '-span-p3');
-                if (isNaN(ic3.val())) {
-                  sp3.html('Cost for % is empty');
-                } else {
-                  price = Math.round(0.499999 + Number(ic3.val()) * (1.0 + percent / 100.0));
-                  sp3.html(price);
-                  if (ip3.val() == '') {
-                    ip3.val(price);
-                  }
+              isManualPrice = $('#id_quoteservice_paxvariants-' + idx + '-manual_prices')[0].checked;
+              ip1 = $('#id_quoteservice_paxvariants-' + idx + '-price_single_amount');
+              sp1 = $('#' + idx + '-span-p1');
+              if (pax_data.total.price_1) {
+                sp1.html(pax_data.total.price_1);
+                if (!isManualPrice) {
+                  ip1[0].value = Number(pax_data.total.price_1);
                 }
               } else {
-                ip1 = $('#id_quoteservice_paxvariants-' + idx + '-price_single_amount');
-                sp1 = $('#' + idx + '-span-p1');
-                if (pax_data.total.price_1) {
-                  sp1.html(pax_data.total.price_1);
-                } else {
-                  sp1.html(pax_data.total.price_1_msg);
+                sp1.html(pax_data.total.price_1_msg);
+                if (!isManualCost) {
+                  ip1[0].value = '';
                 }
-  
-                ip2 = $('#id_quoteservice_paxvariants-' + idx + '-price_double_amount');
-                sp2 = $('#' + idx + '-span-p2');
-                if (pax_data.total.price_2) {
-                  sp2.html(pax_data.total.price_2);
-                } else {
-                  sp2.html(pax_data.total.price_2_msg);
+              }
+
+              ip2 = $('#id_quoteservice_paxvariants-' + idx + '-price_double_amount');
+              sp2 = $('#' + idx + '-span-p2');
+              if (pax_data.total.price_2) {
+                sp2.html(pax_data.total.price_2);
+                if (!isManualPrice) {
+                  ip2[0].value = Number(pax_data.total.price_2);
                 }
-  
-                ip3 = $('#id_quoteservice_paxvariants-' + idx + '-price_triple_amount');
-                sp3 = $('#' + idx + '-span-p3');
-                if (pax_data.total.price_3) {
-                  sp3.html(pax_data.total.price_3);
-                } else {
-                  sp3.html(pax_data.total.price_3_msg);
+              } else {
+                sp2.html(pax_data.total.price_2_msg);
+                if (!isManualCost) {
+                  ip2[0].value = '';
                 }
-  
+              }
+
+              ip3 = $('#id_quoteservice_paxvariants-' + idx + '-price_triple_amount');
+              sp3 = $('#' + idx + '-span-p3');
+              if (pax_data.total.price_3) {
+                sp3.html(pax_data.total.price_3);
+                if (!isManualPrice) {
+                  ip3[0].value = Number(pax_data.total.price_3);
+                }
+              } else {
+                sp3.html(pax_data.total.price_3_msg);
+                if (!isManualCost) {
+                  ip3[0].value = '';
+                }
               }
             }
           }
@@ -119,62 +121,42 @@ $(document).ready(function(){
     })
   }
 
-  get_computed_amounts();
-
-  $(quoteservice_form_selector).change(function () {
-    get_computed_amounts();
-  });
-
-  function changed_manual_cost(checkbox, target){
-    isManualCost = target,checked;
+  function changed_manual_costs(target){
+    isManualCost = target.checked;
+    // find index
+    idx = target.name.substring(25, target.name.length - 13);
     if(isManualCost){
-      checkbox.  $('.btn-copy-cost').show()
+      $('#' + idx + '-btn-c1').show();
+      $('#' + idx + '-btn-c2').show();
+      $('#' + idx + '-btn-c3').show();
     } else {
-      $('.btn-copy-cost').hide()
+      $('#' + idx + '-btn-c1').hide();
+      $('#' + idx + '-btn-c2').hide();
+      $('#' + idx + '-btn-c3').hide();
     }
-    if (readonlyCost.length == 0) {
-      costInput[0].readOnly = !manual;
-    }
+    $('#id_quoteservice_paxvariants-' + idx + '-cost_single_amount')[0].readOnly = !isManualCost;
+    $('#id_quoteservice_paxvariants-' + idx + '-cost_double_amount')[0].readOnly = !isManualCost;
+    $('#id_quoteservice_paxvariants-' + idx + '-cost_triple_amount')[0].readOnly = !isManualCost;
     get_computed_amounts();
   }
 
-  $('input[name^="quoteservice_paxvariants-"][name*="-manual_cost_"][type="checkbox"]').on('change', function(e){
-    e.preventDefault();
-    changed_manual_cost($(this), e.target);
-  })
-
-  function changed_manual_price(checkbox, target){
+  function changed_manual_prices(target){
     isManualPrice = target.checked;
+    idx = target.name.substring(25, target.name.length - 14);
     if(isManualPrice){
-      button = 
-      $('.btn-copy-price').show()
+      $('#' + idx + '-btn-p1').show();
+      $('#' + idx + '-btn-p2').show();
+      $('#' + idx + '-btn-p3').show();
     } else {
-      $('.btn-copy-price').hide()
+      $('#' + idx + '-btn-p1').hide();
+      $('#' + idx + '-btn-p2').hide();
+      $('#' + idx + '-btn-p3').hide();
     }
-    if (readonlyPrice.length == 0) {
-      priceInput[0].readOnly = !manual;
-    }
+    $('#id_quoteservice_paxvariants-' + idx + '-price_single_amount')[0].readOnly = !isManualPrice;
+    $('#id_quoteservice_paxvariants-' + idx + '-price_double_amount')[0].readOnly = !isManualPrice;
+    $('#id_quoteservice_paxvariants-' + idx + '-price_triple_amount')[0].readOnly = !isManualPrice;
     get_computed_amounts();
   }
-
-  $('input[name^="quoteservice_paxvariants-"][name*="-manual_price_"][type="checkbox"]').on('change', function(e){
-    e.preventDefault();
-    changed_manual_price($(this), e.target);
-  })
-
-  $('.btn-copy').on('click', function(e){
-    e.preventDefault();
-    button = $(this); 
-    input = button.prev();
-    span = button.next();
-    number = Number(span.html());
-    if (number) {
-      input.val(number);
-      compare_amounts(input, span, button);
-      get_computed_amounts();
-    }
-    return false;
-  })
 
   function clear_values(msg) {
     $('span.computed-value').each(function(index) {
@@ -230,7 +212,7 @@ $(document).ready(function(){
   function show_buttons() {
     for (idx = 0; idx < 50; idx++) {
       field = $('#id_quoteservice_paxvariants-' + idx + '-cost_single_amount');
-      if (field != undefined) {
+      if (field[0] != undefined) {
         $('#' + idx + '-btn-c1').detach();
         $('#' + idx + '-span-c1').detach();
         $('#' + idx + '-btn-c2').detach();
@@ -244,16 +226,67 @@ $(document).ready(function(){
         $('#' + idx + '-btn-p3').detach();
         $('#' + idx + '-span-p3').detach();
         
-        $('#id_quoteservice_paxvariants-' + idx + '-cost_single_amount').after('<button id="' + idx + '-btn-c1" class="btn btn-copy"><<</button><span id="' + idx + '-span-c1" class="computed-value">N/A</span>');
-        $('#id_quoteservice_paxvariants-' + idx + '-cost_double_amount').after('<button id="' + idx + '-btn-c2" class="btn btn-copy"><<</button><span id="' + idx + '-span-c2" class="computed-value">N/A</span>');
-        $('#id_quoteservice_paxvariants-' + idx + '-cost_triple_amount').after('<button id="' + idx + '-btn-c3" class="btn btn-copy"><<</button><span id="' + idx + '-span-c3" class="computed-value">N/A</span>');
-        $('#id_quoteservice_paxvariants-' + idx + '-price_single_amount').after('<button id="' + idx + '-btn-p1" class="btn btn-copy"><<</button><span id="' + idx + '-span-p1" class="computed-value">N/A</span>');
-        $('#id_quoteservice_paxvariants-' + idx + '-price_double_amount').after('<button id="' + idx + '-btn-p2" class="btn btn-copy"><<</button><span id="' + idx + '-span-p2" class="computed-value">N/A</span>');
-        $('#id_quoteservice_paxvariants-' + idx + '-price_triple_amount').after('<button id="' + idx + '-btn-p3" class="btn btn-copy"><<</button><span id="' + idx + '-span-p3" class="computed-value">N/A</span>');
+        $('#id_quoteservice_paxvariants-' + idx + '-cost_single_amount').after('<button id="' + idx + '-btn-c1" class="btn btn-copy-cost"><<</button><span id="' + idx + '-span-c1" class="computed-value">N/A</span>');
+        $('#id_quoteservice_paxvariants-' + idx + '-cost_double_amount').after('<button id="' + idx + '-btn-c2" class="btn btn-copy-cost"><<</button><span id="' + idx + '-span-c2" class="computed-value">N/A</span>');
+        $('#id_quoteservice_paxvariants-' + idx + '-cost_triple_amount').after('<button id="' + idx + '-btn-c3" class="btn btn-copy-cost"><<</button><span id="' + idx + '-span-c3" class="computed-value">N/A</span>');
+        $('#id_quoteservice_paxvariants-' + idx + '-price_single_amount').after('<button id="' + idx + '-btn-p1" class="btn btn-copy-price"><<</button><span id="' + idx + '-span-p1" class="computed-value">N/A</span>');
+        $('#id_quoteservice_paxvariants-' + idx + '-price_double_amount').after('<button id="' + idx + '-btn-p2" class="btn btn-copy-price"><<</button><span id="' + idx + '-span-p2" class="computed-value">N/A</span>');
+        $('#id_quoteservice_paxvariants-' + idx + '-price_triple_amount').after('<button id="' + idx + '-btn-p3" class="btn btn-copy-price"><<</button><span id="' + idx + '-span-p3" class="computed-value">N/A</span>');
+        changed_manual_costs($('#id_quoteservice_paxvariants-' + idx + '-manual_costs')[0]);
+        changed_manual_prices($('#id_quoteservice_paxvariants-' + idx + '-manual_prices')[0]);
       } else {
         break;
       }
     }
+
+    $('.btn-copy-cost').on('click', function(e){
+      e.preventDefault();
+      button = $(this); 
+      input = button.prev();
+      span = button.next();
+      number = Number(span.html());
+      if (number) {
+        input.val(number);
+        compare_amounts(input, span, button);
+        get_computed_amounts();
+      }
+      return false;
+    });
+  
+    $('.btn-copy-price').on('click', function(e){
+      e.preventDefault();
+      button = $(this); 
+      input = button.prev();
+      span = button.next();
+      number = Number(span.html());
+      if (number) {
+        input.val(number);
+        compare_amounts(input, span, button);
+        get_computed_amounts();
+      }
+      return false;
+    });
   }
+
+  show_buttons();
+  get_computed_amounts();
+
+  $(quoteservice_form_selector).submit(function () {
+    $('select[name^="quoteservice_paxvariants-"][name$="-quote_pax_variant"]').attr('disabled', false);
+  });
+
+  $(quoteservice_form_selector).change(function () {
+    get_computed_amounts();
+  });
+
+  $('input[name^="quoteservice_paxvariants-"][name$="-manual_costs"][type="checkbox"]').on('change', function(e){
+    e.preventDefault();
+    changed_manual_costs(e.target);
+  });
+
+  $('input[name^="quoteservice_paxvariants-"][name$="-manual_prices"][type="checkbox"]').on('change', function(e){
+    e.preventDefault();
+    changed_manual_prices(e.target);
+  });
 
 });
