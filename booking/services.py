@@ -2420,15 +2420,36 @@ class BookingServices(object):
                     quote_pax_variant_id=quote_pax_variant.id)
                 if obj.manual_costs and obj.manual_prices:
                     continue
+                fields = []
                 if not obj.manual_costs:
-                    setattr(obj, 'cost_single_amount', defaults['cost_single_amount'])
-                    setattr(obj, 'cost_double_amount', defaults['cost_double_amount'])
-                    setattr(obj, 'cost_triple_amount', defaults['cost_triple_amount'])
+                    if obj.cost_single_amount != defaults['cost_single_amount']:
+                        fields.append('cost_single_amount')
+                        obj.cost_single_amount = defaults['cost_single_amount']
+
+                    if obj.cost_double_amount != defaults['cost_double_amount']:
+                        fields.append('cost_double_amount')
+                        obj.cost_double_amount = defaults['cost_double_amount']
+
+                    if obj.cost_triple_amount != defaults['cost_triple_amount']:
+                        fields.append('cost_triple_amount')
+                        obj.cost_triple_amount = defaults['cost_triple_amount']
+
                 if not obj.manual_prices:
-                    setattr(obj, 'price_single_amount', defaults['price_single_amount'])
-                    setattr(obj, 'price_double_amount', defaults['price_double_amount'])
-                    setattr(obj, 'price_triple_amount', defaults['price_triple_amount'])
-                obj.save()
+                    if obj.price_single_amount != defaults['price_single_amount']:
+                        fields.append('price_single_amount')
+                        obj.price_single_amount = defaults['price_single_amount']
+
+                    if obj.price_double_amount != defaults['price_double_amount']:
+                        fields.append('price_double_amount')
+                        obj.price_double_amount = defaults['price_double_amount']
+
+                    if obj.price_triple_amount != defaults['price_triple_amount']:
+                        fields.append('price_triple_amount')
+                        obj.price_triple_amount = defaults['price_triple_amount']
+
+                if fields:
+                    obj.save(update_fields=fields)
+
             except QuoteServicePaxVariant.DoesNotExist:
                 new_values = {
                     'quote_service_id': quote_service.id,

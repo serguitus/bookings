@@ -29,9 +29,8 @@ def sync_variant_quote(sender, instance, **kwargs):
 
 @receiver((post_save), sender=QuoteAllotment)
 def update_allotment_pax_variants(sender, instance, **kwargs):
-    if hasattr(instance, 'update_service_pax_variants'):
-        with transaction.atomic(savepoint=False):
-            BookingServices.update_service_pax_variants(instance)
+    with transaction.atomic(savepoint=False):
+        BookingServices.update_service_pax_variants(instance)
 
 
 @receiver((post_save, post_delete), sender=QuoteAllotment)
@@ -41,9 +40,8 @@ def update_allotment_quote(sender, instance, **kwargs):
 
 @receiver((post_save), sender=QuoteTransfer)
 def update_transfer_pax_variants(sender, instance, **kwargs):
-    if hasattr(instance, 'update_service_pax_variants'):
-        with transaction.atomic(savepoint=False):
-            BookingServices.update_service_pax_variants(instance)
+    with transaction.atomic(savepoint=False):
+        BookingServices.update_service_pax_variants(instance)
 
 
 @receiver((post_save, post_delete), sender=QuoteTransfer)
@@ -53,9 +51,8 @@ def update_transfer_quote(sender, instance, **kwargs):
 
 @receiver((post_save), sender=QuoteExtra)
 def update_extra_pax_variants(sender, instance, **kwargs):
-    if hasattr(instance, 'update_service_pax_variants'):
-        with transaction.atomic(savepoint=False):
-            BookingServices.update_service_pax_variants(instance)
+    with transaction.atomic(savepoint=False):
+        BookingServices.update_service_pax_variants(instance)
 
 
 @receiver((post_save, post_delete), sender=QuoteExtra)
@@ -66,8 +63,7 @@ def update_extra_quote(sender, instance, **kwargs):
 @receiver(post_save, sender=QuotePackage)
 def post_save_update_package_quote(sender, instance, **kwargs):
     with transaction.atomic(savepoint=False):
-        if hasattr(instance, 'update_service_pax_variants'):
-            BookingServices.update_service_pax_variants(instance)
+        BookingServices.update_service_pax_variants(instance)
         BookingServices.update_quote_package(instance)
         BookingServices.update_quote(instance)
 
