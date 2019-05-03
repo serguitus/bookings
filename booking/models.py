@@ -386,6 +386,20 @@ class QuotePackageService(BaseService, DateInterval):
         super(QuotePackageService, self).save(*args, **kwargs)
 
 
+class QuotePackageServicePaxVariant(PaxVariantAmounts):
+    """
+    Quote Package Service Pax Variant
+    """
+    class Meta:
+        verbose_name = 'Quote Package Service Pax Variant'
+        verbose_name_plural = 'Quotes Packages Services Paxes Variants'
+        unique_together = (('quote_pax_variant', 'quote_package_service'),)
+    quote_pax_variant = models.ForeignKey(QuotePaxVariant, verbose_name='Pax Variant')
+    quote_package_service = models.ForeignKey(QuotePackageService, related_name='quotepackageservice_paxvariants')
+    manual_costs = models.BooleanField(default=False, verbose_name='Manual Costs')
+    manual_prices = models.BooleanField(default=False, verbose_name='Manual Prices')
+
+
 class QuotePackageAllotment(QuotePackageService, BaseAllotment):
     """
     Quote Package Service Allotment
