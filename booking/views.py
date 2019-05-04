@@ -26,6 +26,7 @@ from django.views import View
 from booking.common_site import (
     QuoteSiteModel,
     QuoteAllotmentSiteModel, QuoteTransferSiteModel, QuoteExtraSiteModel, QuotePackageSiteModel,
+    QuotePackageAllotmentSiteModel, QuotePackageTransferSiteModel, QuotePackageExtraSiteModel,
     BookingAllotmentSiteModel,
     BookingTransferSiteModel,
     BookingExtraSiteModel,
@@ -39,6 +40,7 @@ from booking.models import (
     Package,
     Quote, QuotePaxVariant, QuoteService,
     QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
+    QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
     Booking, BookingService,
     BookingPax, BookingServicePax,
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
@@ -217,7 +219,7 @@ class QuotePackageAmountsView(ModelChangeFormProcessorView):
     common_sitemodel = QuotePackageSiteModel
     common_site = bookings_site
 
-    def process_data(self, quoteextra, inlines):
+    def process_data(self, quotepackage, inlines):
 
         variant_list = inlines[0]
         if not variant_list:
@@ -229,6 +231,84 @@ class QuotePackageAmountsView(ModelChangeFormProcessorView):
 
         code, message, results = BookingServices.find_quotepackage_amounts(
             quotepackage, variant_list)
+
+        return JsonResponse({
+            'code': code,
+            'message': message,
+            'results': results,
+        })
+
+
+class QuotePackageAllotmentAmountsView(ModelChangeFormProcessorView):
+    
+    model = QuotePackageAllotment
+    common_sitemodel = QuotePackageAllotmentSiteModel
+    common_site = bookings_site
+
+    def process_data(self, quotepackageallotment, inlines):
+
+        variant_list = inlines[0]
+        if not variant_list:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Pax Variants Missing',
+                'results': None,
+            })
+
+        code, message, results = BookingServices.find_quotepackageallotment_amounts(
+            quotepackageallotment, variant_list)
+
+        return JsonResponse({
+            'code': code,
+            'message': message,
+            'results': results,
+        })
+
+
+class QuotePackageTransferAmountsView(ModelChangeFormProcessorView):
+    
+    model = QuotePackageTransfer
+    common_sitemodel = QuotePackageTransferSiteModel
+    common_site = bookings_site
+
+    def process_data(self, quotepackagetransfer, inlines):
+
+        variant_list = inlines[0]
+        if not variant_list:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Pax Variants Missing',
+                'results': None,
+            })
+
+        code, message, results = BookingServices.find_quotepackagetransfer_amounts(
+            quotepackagetransfer, variant_list)
+
+        return JsonResponse({
+            'code': code,
+            'message': message,
+            'results': results,
+        })
+
+
+class QuotePackageExtraAmountsView(ModelChangeFormProcessorView):
+    
+    model = QuotePackageExtra
+    common_sitemodel = QuotePackageExtraSiteModel
+    common_site = bookings_site
+
+    def process_data(self, quotepackageextra, inlines):
+
+        variant_list = inlines[0]
+        if not variant_list:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Pax Variants Missing',
+                'results': None,
+            })
+
+        code, message, results = BookingServices.find_quotepackageextra_amounts(
+            quotepackageextra, variant_list)
 
         return JsonResponse({
             'code': code,

@@ -291,6 +291,9 @@ class QuoteServicePaxVariant(PaxVariantAmounts):
     manual_costs = models.BooleanField(default=False, verbose_name='Manual Costs')
     manual_prices = models.BooleanField(default=False, verbose_name='Manual Prices')
 
+    def __str__(self):
+        return self.quote_pax_variant.__str__()
+
 
 class QuoteAllotment(QuoteService, BaseAllotment):
     """
@@ -375,7 +378,7 @@ class QuotePackageService(BaseService, DateInterval):
         verbose_name = 'Quote Package Service'
         verbose_name_plural = 'Quotes Packages Services'
         default_permissions = ('add', 'change',)
-    quote_package = models.ForeignKey(QuotePackage, related_name='quote_package_services')
+    quote_package = models.ForeignKey(QuotePackage, related_name='quotepackage_services')
 
     def fill_data(self):
         pass
@@ -393,9 +396,9 @@ class QuotePackageServicePaxVariant(PaxVariantAmounts):
     class Meta:
         verbose_name = 'Quote Package Service Pax Variant'
         verbose_name_plural = 'Quotes Packages Services Paxes Variants'
-        unique_together = (('quote_pax_variant', 'quote_package_service'),)
-    quote_pax_variant = models.ForeignKey(QuotePaxVariant, verbose_name='Pax Variant')
-    quote_package_service = models.ForeignKey(QuotePackageService, related_name='quotepackageservice_paxvariants')
+        unique_together = (('quotepackage_pax_variant', 'quotepackage_service'),)
+    quotepackage_pax_variant = models.ForeignKey(QuoteServicePaxVariant, verbose_name='Pax Variant')
+    quotepackage_service = models.ForeignKey(QuotePackageService, related_name='quotepackageservice_paxvariants')
     manual_costs = models.BooleanField(default=False, verbose_name='Manual Costs')
     manual_prices = models.BooleanField(default=False, verbose_name='Manual Prices')
 

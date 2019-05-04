@@ -29,7 +29,7 @@ def packageservice_table(package):
 @register.simple_tag
 def quotepackage_table(quotepackage):
     table = QuotePackageServiceTable(
-        quotepackage.quote_package_services.all(),
+        quotepackage.quotepackage_services.all(),
         order_by=('datetime_from', 'datetime_to'))
     return table
 
