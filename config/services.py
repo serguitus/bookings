@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 config services
 """
 
-from datetime import datetime, timedelta, time, date
+from datetime import date, timedelta, time
 
 from django.db.models import Q
 

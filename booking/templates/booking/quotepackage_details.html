@@ -1,7 +1,10 @@
 {% load booking_tags %}
 {% load render_table from django_tables2 %}
 
-{% quotepackage_table current as table %}
 <div class="quotepackage-container">
+    {# buttons to add new services to the current quote #}
+    {% include 'booking/quotepackage_details_buttons.html' %}
+    {% quotepackage_table current as table %}
     {% render_table table %}
+    {% include 'booking/quotepackage_details_buttons.html' %}
 </div>

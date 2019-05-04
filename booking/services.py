@@ -11,7 +11,7 @@ from django.db.models import Q
 
 from booking import constants
 from booking.models import (
-    Quote, QuotePaxVariant,
+    Quote, QuoteService, QuotePaxVariant, QuoteServicePaxVariant,
     QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
     QuotePackageService, QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
     Package, PackageAllotment, PackageTransfer, PackageExtra,
@@ -559,6 +559,226 @@ class BookingServices(object):
                 cost_1, cost_1_msg, price_1, price_1_msg,
                 cost_2, cost_2_msg, price_2, price_2_msg,
                 cost_3, cost_3_msg, price_3, price_3_msg)})
+
+            result.append(variant_dict)
+
+        return 0, '', result
+
+
+    @classmethod
+    def find_quoteallotment_amounts(
+            cls, quoteallotment, variant_list):
+        result = list()
+
+        if not variant_list:
+            return 3, 'Pax Variants Missing', None
+
+        counter = 0
+        for pax_variant in variant_list:
+            variant_dict = dict()
+            variant_dict.update({'quote_pax_variant': pax_variant.quote_pax_variant.id})
+
+            cost_1 = 0
+            cost_2 = 0
+            cost_3 = 0
+            price_1 = 0
+            price_2 = 0
+            price_3 = 0
+            cost_1_msg = ''
+            cost_2_msg = ''
+            cost_3_msg = ''
+            price_1_msg = ''
+            price_2_msg = ''
+            price_3_msg = ''
+
+            key = '%s' % counter
+            if not hasattr(quoteallotment, 'service'):
+                variant_dict.update({'total': cls._no_service_dict()})
+            else:
+                c1, c1_msg, p1, p1_msg, \
+                c2, c2_msg, p2, p2_msg, \
+                c3, c3_msg, p3, p3_msg = cls._find_quoteallotment_amounts(
+                    pax_variant=pax_variant.quote_pax_variant, allotment=quoteallotment, agency=quoteallotment.quote.agency)
+
+                # variants totals
+                cost_1, cost_1_msg, price_1, price_1_msg, \
+                cost_2, cost_2_msg, price_2, price_2_msg, \
+                cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
+                    cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
+                    cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
+                    cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
+
+                variant_dict.update({'total': cls._quote_amounts_dict(
+                    cost_1, cost_1_msg, price_1, price_1_msg,
+                    cost_2, cost_2_msg, price_2, price_2_msg,
+                    cost_3, cost_3_msg, price_3, price_3_msg)})
+
+            counter = counter + 1
+
+            result.append(variant_dict)
+
+        return 0, '', result
+
+
+    @classmethod
+    def find_quotetransfer_amounts(
+            cls, quotetransfer, variant_list):
+        result = list()
+
+        if not variant_list:
+            return 3, 'Pax Variants Missing', None
+
+        counter = 0
+        for pax_variant in variant_list:
+            variant_dict = dict()
+            variant_dict.update({'quote_pax_variant': pax_variant.quote_pax_variant.id})
+
+            cost_1 = 0
+            cost_2 = 0
+            cost_3 = 0
+            price_1 = 0
+            price_2 = 0
+            price_3 = 0
+            cost_1_msg = ''
+            cost_2_msg = ''
+            cost_3_msg = ''
+            price_1_msg = ''
+            price_2_msg = ''
+            price_3_msg = ''
+
+            key = '%s' % counter
+            if not hasattr(quotetransfer, 'service'):
+                variant_dict.update({'total': cls._no_service_dict()})
+            else:
+                c1, c1_msg, p1, p1_msg, \
+                c2, c2_msg, p2, p2_msg, \
+                c3, c3_msg, p3, p3_msg = cls._find_quotetransfer_amounts(
+                    pax_variant=pax_variant.quote_pax_variant, transfer=quotetransfer, agency=quotetransfer.quote.agency)
+
+                # variants totals
+                cost_1, cost_1_msg, price_1, price_1_msg, \
+                cost_2, cost_2_msg, price_2, price_2_msg, \
+                cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
+                    cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
+                    cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
+                    cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
+
+                variant_dict.update({'total': cls._quote_amounts_dict(
+                    cost_1, cost_1_msg, price_1, price_1_msg,
+                    cost_2, cost_2_msg, price_2, price_2_msg,
+                    cost_3, cost_3_msg, price_3, price_3_msg)})
+
+            counter = counter + 1
+
+            result.append(variant_dict)
+
+        return 0, '', result
+
+
+    @classmethod
+    def find_quoteextra_amounts(
+            cls, quoteextra, variant_list):
+        result = list()
+
+        if not variant_list:
+            return 3, 'Pax Variants Missing', None
+
+        counter = 0
+        for pax_variant in variant_list:
+            variant_dict = dict()
+            variant_dict.update({'quote_pax_variant': pax_variant.quote_pax_variant.id})
+
+            cost_1 = 0
+            cost_2 = 0
+            cost_3 = 0
+            price_1 = 0
+            price_2 = 0
+            price_3 = 0
+            cost_1_msg = ''
+            cost_2_msg = ''
+            cost_3_msg = ''
+            price_1_msg = ''
+            price_2_msg = ''
+            price_3_msg = ''
+
+            key = '%s' % counter
+            if not hasattr(quoteextra, 'service'):
+                variant_dict.update({'total': cls._no_service_dict()})
+            else:
+                c1, c1_msg, p1, p1_msg, \
+                c2, c2_msg, p2, p2_msg, \
+                c3, c3_msg, p3, p3_msg = cls._find_quoteextra_amounts(
+                    pax_variant=pax_variant.quote_pax_variant, extra=quoteextra, agency=quoteextra.quote.agency)
+
+                # variants totals
+                cost_1, cost_1_msg, price_1, price_1_msg, \
+                cost_2, cost_2_msg, price_2, price_2_msg, \
+                cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
+                    cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
+                    cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
+                    cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
+
+                variant_dict.update({'total': cls._quote_amounts_dict(
+                    cost_1, cost_1_msg, price_1, price_1_msg,
+                    cost_2, cost_2_msg, price_2, price_2_msg,
+                    cost_3, cost_3_msg, price_3, price_3_msg)})
+
+            counter = counter + 1
+
+            result.append(variant_dict)
+
+        return 0, '', result
+
+
+    @classmethod
+    def find_quotepackage_amounts(
+            cls, quotepackage, variant_list):
+        result = list()
+
+        if not variant_list:
+            return 3, 'Pax Variants Missing', None
+
+        counter = 0
+        for pax_variant in variant_list:
+            variant_dict = dict()
+            variant_dict.update({'quote_pax_variant': pax_variant.quote_pax_variant.id})
+
+            cost_1 = 0
+            cost_2 = 0
+            cost_3 = 0
+            price_1 = 0
+            price_2 = 0
+            price_3 = 0
+            cost_1_msg = ''
+            cost_2_msg = ''
+            cost_3_msg = ''
+            price_1_msg = ''
+            price_2_msg = ''
+            price_3_msg = ''
+
+            key = '%s' % counter
+            if not hasattr(quotepackage, 'service'):
+                variant_dict.update({'total': cls._no_service_dict()})
+            else:
+                c1, c1_msg, p1, p1_msg, \
+                c2, c2_msg, p2, p2_msg, \
+                c3, c3_msg, p3, p3_msg = cls._find_quotepackage_amounts(
+                    pax_variant=pax_variant.quote_pax_variant, package=quotepackage, agency=quotepackage.quote.agency)
+
+                # variants totals
+                cost_1, cost_1_msg, price_1, price_1_msg, \
+                cost_2, cost_2_msg, price_2, price_2_msg, \
+                cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
+                    cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
+                    cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
+                    cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
+
+                variant_dict.update({'total': cls._quote_amounts_dict(
+                    cost_1, cost_1_msg, price_1, price_1_msg,
+                    cost_2, cost_2_msg, price_2, price_2_msg,
+                    cost_3, cost_3_msg, price_3, price_3_msg)})
+
+            counter = counter + 1
 
             result.append(variant_dict)
 
@@ -1600,121 +1820,6 @@ class BookingServices(object):
 
 
     @classmethod
-    def _quote_allotment_amounts(
-            cls,
-            cost, cost_msg, price, price_msg,
-            service, date_from, date_to, adults, board_type, room_type_id, quantity,
-            provider, agency):
-        groups = ({0:adults, 1:0},)
-        if cost is None:
-            if price is None:
-                return None, cost_msg, None, price_msg
-            else:
-                code, msg, c, c_msg, p, p_msg = ConfigServices.allotment_amounts(
-                    service, date_from, date_to, groups, groups,
-                    None, agency,
-                    board_type, room_type_id, quantity)
-        else:
-            if price is None:
-                code, msg, c, c_msg, p, p_msg = ConfigServices.allotment_amounts(
-                    service, date_from, date_to, groups, groups,
-                    provider, None,
-                    board_type, room_type_id, quantity)
-            else:
-                code, msg, c, c_msg, p, p_msg = ConfigServices.allotment_amounts(
-                    service, date_from, date_to, groups, groups,
-                    provider, agency,
-                    board_type, room_type_id, quantity)
-        return cls._quote_results(adults, cost, cost_msg, price, price_msg, c, c_msg, p, p_msg)
-
-    @classmethod
-    def _quote_transfer_amounts(
-            cls,
-            cost, cost_msg, price, price_msg,
-            service, date_from, date_to, adults, location_from_id, location_to_id, quantity,
-            provider, agency):
-        groups = ({0:adults, 1:0},)
-        if cost is None:
-            if price is None:
-                return None, cost_msg, None, price_msg
-            else:
-                code, msg, c, c_msg, p, p_msg = ConfigServices.transfer_amounts(
-                    service, date_from, date_to, groups, groups,
-                    None, agency,
-                    location_from_id, location_to_id, quantity)
-        else:
-            if price is None:
-                code, msg, c, c_msg, p, p_msg = ConfigServices.transfer_amounts(
-                    service, date_from, date_to, groups, groups,
-                    provider, None,
-                    location_from_id, location_to_id, quantity)
-            else:
-                code, msg, c, c_msg, p, p_msg = ConfigServices.transfer_amounts(
-                    service, date_from, date_to, groups, groups,
-                    provider, agency,
-                    location_from_id, location_to_id, quantity)
-            return cls._quote_results(adults, cost, cost_msg, price, price_msg, c, c_msg, p, p_msg)
-
-    @classmethod
-    def _quote_extra_amounts(
-            cls,
-            cost, cost_msg, price, price_msg,
-            service, date_from, date_to, adults, addon_id, quantity, parameter,
-            provider, agency):
-        groups = ({0:adults, 1:0},)
-        if cost is None:
-            if price is None:
-                return None, cost_msg, None, price_msg
-            else:
-                code, msg, c, c_msg, p, p_msg = ConfigServices.extra_amounts(
-                    service, date_from, date_to, groups, groups,
-                    None, agency,
-                    addon_id, quantity, parameter)
-        else:
-            if price is None:
-                code, msg, c, c_msg, p, p_msg = ConfigServices.extra_amounts(
-                    service, date_from, date_to, groups, groups,
-                    provider, None,
-                    addon_id, quantity, parameter)
-            else:
-                code, msg, c, c_msg, p, p_msg = ConfigServices.extra_amounts(
-                    service, date_from, date_to, groups, groups,
-                    provider, agency,
-                    addon_id, quantity, parameter)
-            return cls._quote_results(adults, cost, cost_msg, price, price_msg, c, c_msg, p, p_msg)
-
-
-    @classmethod
-    def _quote_results(cls, adults, cost, cost_msg, price, price_msg, c, c_msg, p, p_msg):
-        if cost is None:
-            if price is None:
-                return None, cost_msg, None, price_msg
-            else:
-                if p is None:
-                    return None, cost_msg, None, p_msg
-                else:
-                    return None, cost_msg, price + round(0.499999 + float(p / adults)), p_msg
-        else:
-            if price is None:
-                if c is None:
-                    return None, c_msg, None, price_msg
-                else:
-                    return cost + round(float(c / adults), 2), c_msg, None, price_msg
-            else:
-                if c is None:
-                    if p is None:
-                        return None, c_msg, None, p_msg
-                    else:
-                        return None, c_msg, price + round(0.499999 + float(p / adults)), p_msg
-                else:
-                    if p is None:
-                        return cost + round(float(c / adults), 2), c_msg, None, p_msg
-                    else:
-                        return cost + round(float(c / adults), 2), c_msg, \
-                            price + round(0.499999 + float(p / adults)), p_msg
-
-
-    @classmethod
     def _update_bookingpackageservice_amounts(cls, bookingpackage_service):
         if not bookingpackage_service:
             return
@@ -2282,3 +2387,110 @@ class BookingServices(object):
         if price and price >= 0:
             return price
         return None
+
+
+    @classmethod
+    def sync_pax_variants(cls, quote_pax_variant):
+        # verify on all services if pax variant exists
+        quote_services = list(QuoteService.objects.all().filter(quote=quote_pax_variant.quote))
+
+        for quote_service in quote_services:
+            quote_service_pax_variant, created = QuoteServicePaxVariant.objects.get_or_create(
+                quote_pax_variant_id=quote_pax_variant.id,
+                quote_service_id=quote_service.id,
+                defaults={}
+            )
+
+        return
+
+
+    @classmethod
+    def update_service_pax_variants(cls, quote_service):
+        quote = quote_service.quote
+        # find quote pax variants
+        quote_pax_variants = list(QuotePaxVariant.objects.all().filter(quote=quote.id))
+        # for each quote pax variant get or create
+        for quote_pax_variant in quote_pax_variants:
+            defaults = cls.calculate_default_service_pax_variant_amounts(
+                quote_service,
+                quote_pax_variant)
+            try:
+                obj = QuoteServicePaxVariant.objects.get(
+                    quote_service_id=quote_service.id,
+                    quote_pax_variant_id=quote_pax_variant.id)
+                if obj.manual_costs and obj.manual_prices:
+                    continue
+                fields = []
+                if not obj.manual_costs:
+                    if obj.cost_single_amount != defaults['cost_single_amount']:
+                        fields.append('cost_single_amount')
+                        obj.cost_single_amount = defaults['cost_single_amount']
+
+                    if obj.cost_double_amount != defaults['cost_double_amount']:
+                        fields.append('cost_double_amount')
+                        obj.cost_double_amount = defaults['cost_double_amount']
+
+                    if obj.cost_triple_amount != defaults['cost_triple_amount']:
+                        fields.append('cost_triple_amount')
+                        obj.cost_triple_amount = defaults['cost_triple_amount']
+
+                if not obj.manual_prices:
+                    if obj.price_single_amount != defaults['price_single_amount']:
+                        fields.append('price_single_amount')
+                        obj.price_single_amount = defaults['price_single_amount']
+
+                    if obj.price_double_amount != defaults['price_double_amount']:
+                        fields.append('price_double_amount')
+                        obj.price_double_amount = defaults['price_double_amount']
+
+                    if obj.price_triple_amount != defaults['price_triple_amount']:
+                        fields.append('price_triple_amount')
+                        obj.price_triple_amount = defaults['price_triple_amount']
+
+                if fields:
+                    obj.save(update_fields=fields)
+
+            except QuoteServicePaxVariant.DoesNotExist:
+                new_values = {
+                    'quote_service_id': quote_service.id,
+                    'quote_pax_variant_id': quote_pax_variant.id}
+                new_values.update(defaults)
+                obj = QuoteServicePaxVariant(**new_values)
+                obj.save()
+
+
+    @classmethod
+    def calculate_default_service_pax_variant_amounts(cls, quote_service, quote_pax_variant):
+
+        if isinstance(quote_service, QuoteAllotment):
+            c1, c1_msg, p1, p1_msg, \
+            c2, c2_msg, p2, p2_msg, \
+            c3, c3_msg, p3, p3_msg = cls._find_quoteallotment_amounts(
+                pax_variant=quote_pax_variant, allotment=quote_service, agency=quote_service.quote.agency)
+        elif isinstance(quote_service, QuoteTransfer):
+            c1, c1_msg, p1, p1_msg, \
+            c2, c2_msg, p2, p2_msg, \
+            c3, c3_msg, p3, p3_msg = cls._find_quotetransfer_amounts(
+                pax_variant=quote_pax_variant, transfer=quote_service, agency=quote_service.quote.agency)
+        elif isinstance(quote_service, QuoteExtra):
+            c1, c1_msg, p1, p1_msg, \
+            c2, c2_msg, p2, p2_msg, \
+            c3, c3_msg, p3, p3_msg = cls._find_quoteextra_amounts(
+                pax_variant=quote_pax_variant, extra=quote_service, agency=quote_service.quote.agency)
+        elif isinstance(quote_service, QuotePackage):
+            c1, c1_msg, p1, p1_msg, \
+            c2, c2_msg, p2, p2_msg, \
+            c3, c3_msg, p3, p3_msg = cls._find_quotepackage_amounts(
+                pax_variant=quote_pax_variant, package=quote_service, agency=quote_service.quote.agency)
+        else:
+            c1, c2, c3, p1, p2, p3 = None, None, None, None, None, None
+
+        return {
+            'cost_single_amount': c1,
+            'cost_double_amount': c2,
+            'cost_triple_amount': c3,
+            'price_single_amount': p1,
+            'price_double_amount': p2,
+            'price_triple_amount': p3,
+        }
+

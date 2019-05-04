@@ -138,3 +138,13 @@ div.inline-change-link {
 div.readonly {
     max-width: 160px;
 }
+
+.inline-group .aligned div.form-row label, .inline-group .aligned div.field-box label {
+    width: 100px;
+}
+
+.inline-group .aligned label.vCheckboxLabel {
+    width: 120px;
+    text-align: left;
+}
+

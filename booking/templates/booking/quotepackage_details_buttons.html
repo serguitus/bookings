@@ -1,0 +1,7 @@
+<div id="detail-buttons">
+    <span class="detail-buttons">
+        <a class="btn btn-success" href="{% url 'common:booking_quotepackageallotment_add' %}?quote_package={{ current.id }}">+ Accomodation</a>
+        <a class="btn btn-success" href="{% url 'common:booking_quotepackagetransfer_add' %}?quote_package={{ current.id }}">+ Transfer</a>
+        <a class="btn btn-success" href="{% url 'common:booking_quotepackageextra_add' %}?quote_package={{ current.id }}">+ Extra</a>
+    </span>
+</div>

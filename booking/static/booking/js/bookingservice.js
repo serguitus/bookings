@@ -151,23 +151,25 @@ $(document).ready(function(){
     get_computed_amounts();
   }
 
-  $('#id_manual_price').on('change', function(e){
+  manualPrice.on('change', function(e){
     e.preventDefault();
     changed_manual_price(manualPrice[0].checked);
   })
 
   $('.btn-copy-cost').on('click', function(e){
     e.preventDefault();
-    if(Number(computedCost.html())){
-      costInput[0].value = Number(computedCost.html());
+    number = Number(computedCost.html());
+    if(number){
+      costInput[0].value = number;
     }
     compare_numbers()
   })
 
   $('.btn-copy-price').on('click', function(e){
     e.preventDefault();
-    if(Number(computedPrice.html())){
-      priceInput[0].value = Number(computedPrice.html());
+    number = Number(computedPrice.html());
+    if(number){
+      priceInput[0].value = number;
     }
     compare_numbers()
   })
