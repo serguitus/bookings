@@ -391,10 +391,13 @@ class QuoteSiteModel(SiteModel):
 
 class QuoteServiceSiteModel(SiteModel):
     def response_post_save_add(self, request, obj):
-        return redirect(reverse('common:booking_quote_change', args=[obj.quote.pk]))
+        if hasattr(obj, 'quote') and obj.quote:
+            return redirect(reverse('common:booking_quote_change', args=[obj.quote.pk]))
+        else:
+            return super(QuoteServiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
-        return redirect(reverse('common:booking_quote_change', args=[obj.quote.pk]))
+        self.response_post_save_add(request, obj)
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
@@ -459,6 +462,25 @@ class QuoteExtraSiteModel(QuoteServiceSiteModel):
     inlines = [QuoteServicePaxVariantInline]
 
 
+class QuotePackagePaxVariantInline(CommonStackedInline):
+    model = QuoteServicePaxVariant
+    extra = 0
+    fields = [
+        ('quote_pax_variant'),
+        ('cost_single_amount', 'price_single_amount'),
+        ('cost_double_amount', 'price_double_amount'),
+        ('cost_triple_amount', 'price_triple_amount')]
+    readonly_fields = [
+        'cost_single_amount', 'price_single_amount',
+        'cost_double_amount', 'price_double_amount',
+        'cost_triple_amount', 'price_triple_amount']
+    verbose_name_plural = 'Paxes Variants'
+    can_delete = False
+
+    def has_add_permission(self,request):
+        return False
+
+
 class QuotePackageSiteModel(QuoteServiceSiteModel):
     model_order = 550
     menu_label = MENU_LABEL_QUOTE
@@ -477,11 +499,9 @@ class QuotePackageSiteModel(QuoteServiceSiteModel):
     form = QuotePackageForm
     add_form_template = 'booking/quotepackage_change_form.html'
     change_form_template = 'booking/quotepackage_change_form.html'
-    readonly_fields = ['datetime_to']
+    readonly_fields = ['datetime_to', 'status']
     details_template = 'booking/quotepackage_details.html'
-    inlines = [
-        QuoteServicePaxVariantInline,
-    ]
+    inlines = [QuotePackagePaxVariantInline]
 
 
 class QuotePackageServiceSiteModel(SiteModel):

@@ -916,7 +916,7 @@ class BookingServices(object):
         counter = 0
         for pax_variant in variant_list:
             variant_dict = dict()
-            variant_dict.update({'quote_pax_variant': pax_variant.quote_pax_variant.id})
+            variant_dict.update({'quote_pax_variant': pax_variant.quote_pax_variant_id})
 
             cost_1 = 0
             cost_2 = 0
@@ -1712,23 +1712,26 @@ class BookingServices(object):
 
         # for saved ones use saved quote package services
 
-        if package.quoteservice_ptr_id is None:
+        if hasattr(package, 'id') and package.id:
+            allotment_list = list(
+                QuotePackageAllotment.objects.filter(
+                    quote_package=package.id).exclude(
+                        status=constants.SERVICE_STATUS_CANCELLED).all())
+            transfer_list = list(
+                QuotePackageTransfer.objects.filter(
+                    quote_package=package.id).exclude(
+                        status=constants.SERVICE_STATUS_CANCELLED).all())
+            extra_list = list(
+                QuotePackageExtra.objects.filter(
+                    quote_package=package.id).exclude(
+                        status=constants.SERVICE_STATUS_CANCELLED).all())
+        else:
             allotment_list = list(
                 PackageAllotment.objects.filter(package=package.service_id).all())
             transfer_list = list(
                 PackageTransfer.objects.filter(package=package.service_id).all())
             extra_list = list(
                 PackageExtra.objects.filter(package=package.service_id).all())
-        else:
-            allotment_list = list(
-                QuotePackageAllotment.objects.filter(
-                    quote_package=package.quoteservice_ptr_id).all())
-            transfer_list = list(
-                QuotePackageTransfer.objects.filter(
-                    quote_package=package.quoteservice_ptr_id).all())
-            extra_list = list(
-                QuotePackageExtra.objects.filter(
-                    quote_package=package.quoteservice_ptr_id).all())
 
         if package.price_by_package_catalogue:
 
@@ -2434,7 +2437,7 @@ class BookingServices(object):
                 c3 = round(float(c3) / 3, 2)
         else:
             # no grouping means passing total pax quantity
-            c1, c1_msg = ConfigServices.transfer_amounts(
+            c1, c1_msg = ConfigServices.transfer_costs(
                 service, date_from, date_to,
                 ({0:pax_variant.pax_quantity, 1:0},), provider,
                 location_from_id, location_to_id, quantity)
@@ -2732,6 +2735,7 @@ class BookingServices(object):
 
                 if fields:
                     obj.save(update_fields=fields)
+                    cls.update_quotepackage_pax_variant_amounts(obj)
 
             except QuotePackageServicePaxVariant.DoesNotExist:
                 new_values = {
@@ -2740,6 +2744,7 @@ class BookingServices(object):
                 new_values.update(defaults)
                 obj = QuotePackageServicePaxVariant(**new_values)
                 obj.save()
+                cls.update_quotepackage_pax_variant_amounts(obj)
 
 
     @classmethod
@@ -2803,19 +2808,20 @@ class BookingServices(object):
 
     @classmethod
     def update_quotepackage_pax_variant_amounts(cls, quotepackageservice_pax_variant):
-        quoteservice_pax_variant = QuoteServicePaxVariant.objects.get(
-            quote_service=quotepackageservice_pax_variant.quotepackage_service.quote_package.id,
-            quote_pax_variant=quotepackageservice_pax_variant.quotepackage_pax_variant.quote_pax_variant.id)
+        if isinstance(quotepackageservice_pax_variant, QuoteServicePaxVariant):
+            quotepackage_pax_variant = quotepackageservice_pax_variant
+        else:
+            quotepackage_pax_variant = quotepackageservice_pax_variant.quotepackage_pax_variant
 
-        quoteservice_pax_variants = list(
-            QuoteServicePaxVariant.objects.all().filter(
-                quote_pax_variant=quote_pax_variant.id).exclude(
-                    quote_service__status=constants.SERVICE_STATUS_CANCELLED))
+        quotepackageservices_pax_variants = list(
+            QuotePackageServicePaxVariant.objects.all().filter(
+                quotepackage_pax_variant=quotepackage_pax_variant.id).exclude(
+                    quotepackage_service__status=constants.SERVICE_STATUS_CANCELLED))
 
-        if quoteservice_pax_variants:
+        if quotepackageservices_pax_variants:
             cost_single_amount, cost_double_amount, cost_triple_amount = 0, 0, 0
             price_single_amount, price_double_amount, price_triple_amount = 0, 0, 0
-            for quotepackageservice_pax_variant in quotepackageservice_pax_variants:
+            for quotepackageservice_pax_variant in quotepackageservices_pax_variants:
                 cost_single_amount = cls.totalize(
                     cost_single_amount, quotepackageservice_pax_variant.cost_single_amount)
                 cost_double_amount = cls.totalize(

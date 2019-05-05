@@ -355,7 +355,7 @@ class QuotePackage(QuoteService):
         default_permissions = ('add', 'change',)
     service = models.ForeignKey(Package)
     price_by_package_catalogue = models.BooleanField(
-        default=False, verbose_name='By Catalogue')
+        default=False, verbose_name='Prices By Catalogue')
 
     def fill_data(self):
         # setting name for this quote_service
