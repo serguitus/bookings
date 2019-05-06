@@ -418,13 +418,40 @@ class BookingServices(object):
 
     @classmethod
     def find_quote_amounts(
-            cls, agency, variant_list, allotment_list, transfer_list, extra_list, package_list):
+            cls, quote, variant_list, inline_allotment_list=None, inline_transfer_list=None, inline_extra_list=None, inline_package_list=None):
+        agency = quote.agency
         result = list()
 
         if not variant_list:
             return 3, 'Pax Variants Missing', None
+
+        allotment_list = inline_allotment_list
+        if not allotment_list:
+            allotment_list = list(QuoteAllotment.objects.filter(
+                quote=quote.id).exclude(
+                    status=constants.SERVICE_STATUS_CANCELLED
+                ).all())
+        transfer_list = inline_transfer_list
+        if not transfer_list:
+            transfer_list = list(QuoteTransfer.objects.filter(
+                quote=quote.id).exclude(
+                    status=constants.SERVICE_STATUS_CANCELLED
+                ).all())
+        extra_list = inline_extra_list
+        if not extra_list:
+            extra_list = list(QuoteExtra.objects.filter(
+                quote=quote.id).exclude(
+                    status=constants.SERVICE_STATUS_CANCELLED
+                ).all())
+        package_list = inline_package_list
+        if not package_list:
+            package_list = list(QuotePackage.objects.filter(
+                quote=quote.id).exclude(
+                    status=constants.SERVICE_STATUS_CANCELLED
+                ).all())
+
         if (
-                (not allotment_list)and
+                (not allotment_list) and
                 (not transfer_list) and
                 (not extra_list) and
                 (not package_list)):
@@ -450,6 +477,8 @@ class BookingServices(object):
             if allotment_list:
                 counter = 0
                 for allotment in allotment_list:
+                    if allotment.status == constants.SERVICE_STATUS_CANCELLED:
+                        continue
                     key = '%s' % counter
                     if not hasattr(allotment, 'service'):
                         variant_dict.update({key: cls._no_service_dict()})
@@ -477,6 +506,8 @@ class BookingServices(object):
             if transfer_list:
                 counter = 0
                 for transfer in transfer_list:
+                    if transfer.status == constants.SERVICE_STATUS_CANCELLED:
+                        continue
                     key = '2-%s' % counter
                     if not hasattr(transfer, 'service'):
                         variant_dict.update({key: cls._no_service_dict()})
@@ -504,6 +535,8 @@ class BookingServices(object):
             if extra_list:
                 counter = 0
                 for extra in extra_list:
+                    if extra.status == constants.SERVICE_STATUS_CANCELLED:
+                        continue
                     key = '3-%s' % counter
                     if not hasattr(extra, 'service'):
                         variant_dict.update({key: cls._no_service_dict()})
@@ -531,6 +564,8 @@ class BookingServices(object):
             if package_list:
                 counter = 0
                 for package in package_list:
+                    if package.status == constants.SERVICE_STATUS_CANCELLED:
+                        continue
                     key = '4-%s' % counter
                     if not hasattr(package, 'service'):
                         variant_dict.update({key: cls._no_service_dict()})
@@ -2865,6 +2900,7 @@ class BookingServices(object):
 
         if fields:
             quotepackage_pax_variant.save(update_fields=fields)
+            cls.update_quote_pax_variant_amounts(quotepackage_pax_variant)
 
 
     @classmethod

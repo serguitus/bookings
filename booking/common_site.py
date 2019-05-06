@@ -334,18 +334,17 @@ class QuoteSiteModel(SiteModel):
     fields = (
         ('reference', 'agency'),
         ('status', 'currency'),
-        ('date_from', 'date_to'),
+        ('date_from', 'date_to'), 'id'
     )
     list_display = ('reference', 'agency', 'date_from',
                     'date_to', 'status', 'currency',)
     top_filters = ('reference', ('date_from', DateTopFilter), 'status')
     ordering = ('date_from', 'reference',)
-    readonly_fields = ('date_from', 'date_to',)
+    readonly_fields = ('date_from', 'date_to', 'status')
     details_template = 'booking/quote_details.html'
-    inlines = [
-        QuotePaxVariantInline, QuoteAllotmentInLine,
-        QuoteTransferInLine, QuoteExtraInLine, QuotePackageInLine]
+    inlines = [QuotePaxVariantInline]
     form = QuoteForm
+    add_form_template = 'booking/quote_change_form.html'
     change_form_template = 'booking/quote_change_form.html'
 
     def get_urls(self):
@@ -397,7 +396,10 @@ class QuoteServiceSiteModel(SiteModel):
             return super(QuoteServiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
-        self.response_post_save_add(request, obj)
+        if hasattr(obj, 'quote') and obj.quote:
+            return redirect(reverse('common:booking_quote_change', args=[obj.quote.pk]))
+        else:
+            return super(QuoteServiceSiteModel, self).response_post_save_add(request, obj)
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
