@@ -59,7 +59,7 @@ from booking.models import (
     Package, PackageAllotment, PackageTransfer, PackageExtra,
     AgencyPackageService, AgencyPackageDetail,
     Quote,
-    QuotePaxVariant, QuoteServicePaxVariant,
+    QuotePaxVariant, QuoteServicePaxVariant, QuotePackageServicePaxVariant,
     QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
     QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
     Booking,
@@ -251,14 +251,6 @@ class QuoteServicePaxVariantInline(CommonStackedInline):
 
 # Quote Package
 
-class QuotePackageServiceSiteModel(SiteModel):
-    def response_post_save_add(self, request, obj):
-        return redirect(reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
-
-    def response_post_save_change(self, request, obj):
-        return redirect(reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
-
-
 class QuotePackageAllotmentInLine(CommonStackedInline):
     model = QuotePackageAllotment
     extra = 0
@@ -267,21 +259,6 @@ class QuotePackageAllotmentInLine(CommonStackedInline):
         ('room_type', 'board_type'), 'provider']
     ordering = ['datetime_from']
     form = QuotePackageAllotmentInlineForm
-
-
-class QuotePackageAllotmentSiteModel(QuotePackageServiceSiteModel):
-    model_order = 560
-    menu_label = MENU_LABEL_QUOTE
-    menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
-
-    fields = ('quote_package', 'service', 'datetime_from', 'datetime_to', 'status',
-              'room_type', 'board_type',
-              'provider', 'id')
-    list_display = ('quote_package', 'service', 'datetime_from', 'datetime_to',
-                    'status',)
-    top_filters = ('service', 'quote_package__quote__reference', ('datetime_from', DateTopFilter), 'status',)
-    ordering = ('datetime_from', 'quote_package__quote__reference', 'service__name',)
-    form = QuotePackageAllotmentForm
 
 
 class QuotePackageTransferInLine(CommonStackedInline):
@@ -294,21 +271,6 @@ class QuotePackageTransferInLine(CommonStackedInline):
     form = QuotePackageTransferInlineForm
 
 
-class QuotePackageTransferSiteModel(QuotePackageServiceSiteModel):
-    model_order = 570
-    menu_label = MENU_LABEL_QUOTE
-    menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
-
-    fields = ('quote_package', 'service',
-              'location_from', 'location_to',
-              'datetime_from', 'datetime_to', 'status',
-              'provider', 'id')
-    list_display = ('quote_package', 'name', 'datetime_from', 'status',)
-    top_filters = ('service', 'quote_package__quote__reference', ('datetime_from', DateTopFilter), 'status',)
-    ordering = ('datetime_from', 'quote_package__quote__reference', 'service__name',)
-    form = QuotePackageTransferForm
-
-
 class QuotePackageExtraInLine(CommonStackedInline):
     model = QuotePackageExtra
     extra = 0
@@ -318,25 +280,6 @@ class QuotePackageExtraInLine(CommonStackedInline):
         'provider']
     ordering = ['datetime_from']
     form = QuotePackageExtraInlineForm
-
-
-class QuotePackageExtraSiteModel(QuotePackageServiceSiteModel):
-    model_order = 580
-    menu_label = MENU_LABEL_QUOTE
-    menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
-
-    fields = (
-        'quote_package',
-        ('service', 'status'),
-        ('datetime_from', 'datetime_to', 'time'),
-        ('addon', 'quantity', 'parameter'),
-        'provider', 'id')
-    list_display = (
-        'quote_package', 'service', 'addon', 'quantity', 'parameter',
-        'datetime_from', 'datetime_to', 'time', 'status',)
-    top_filters = ('service', 'quote_package__quote__reference', ('datetime_from', DateTopFilter), 'status',)
-    ordering = ('datetime_from', 'quote_package__quote__reference', 'service__name',)
-    form = QuotePackageExtraForm
 
 
 # Quote
@@ -531,14 +474,112 @@ class QuotePackageSiteModel(QuoteServiceSiteModel):
     top_filters = ('service', 'quote__reference',
                    ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote__reference', 'service__name',)
+    form = QuotePackageForm
+    add_form_template = 'booking/quotepackage_change_form.html'
+    change_form_template = 'booking/quotepackage_change_form.html'
     readonly_fields = ['datetime_to']
     details_template = 'booking/quotepackage_details.html'
     inlines = [
-        QuotePackageAllotmentInLine,
-        QuotePackageTransferInLine,
-        QuotePackageExtraInLine,
-        QuoteServicePaxVariantInline,]
-    form = QuotePackageForm
+        QuoteServicePaxVariantInline,
+    ]
+
+
+class QuotePackageServiceSiteModel(SiteModel):
+    def response_post_save_add(self, request, obj):
+        return redirect(reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
+
+    def response_post_save_change(self, request, obj):
+        return redirect(reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
+
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        if not hasattr(obj, 'id') or not obj.id or not request.user.has_perm("booking.change_amounts"):
+            obj.update_package_service_pax_variants = True
+        obj.save()
+
+
+class QuotePackageServicePaxVariantInline(CommonStackedInline):
+    model = QuotePackageServicePaxVariant
+    extra = 0
+    fields = [
+        ('quotepackage_pax_variant'),
+        ('manual_costs', 'manual_prices'),
+        ('cost_single_amount', 'price_single_amount'),
+        ('cost_double_amount', 'price_double_amount'),
+        ('cost_triple_amount', 'price_triple_amount')]
+    verbose_name_plural = 'Paxes Variants'
+    can_delete = False
+
+    def has_add_permission(self,request):
+        return False
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super(QuotePackageServicePaxVariantInline, self).get_readonly_fields(request, obj) or []
+
+        if not request.user.has_perm("booking.change_amounts"):
+            return readonly_fields + [
+                'manual_costs', 'manual_prices',
+                'cost_single_amount', 'price_single_amount',
+                'cost_double_amount', 'price_double_amount',
+                'cost_triple_amount', 'price_triple_amount']
+
+        return readonly_fields
+
+
+class QuotePackageAllotmentSiteModel(QuotePackageServiceSiteModel):
+    model_order = 560
+    menu_label = MENU_LABEL_QUOTE
+    menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
+
+    fields = (
+        'quote_package', ('service', 'status'), ('datetime_from', 'datetime_to'),
+        'room_type', 'board_type', 'provider', 'id')
+    list_display = ('quote_package', 'service', 'datetime_from', 'datetime_to', 'status',)
+    top_filters = ('service', 'quote_package__quote__reference', ('datetime_from', DateTopFilter), 'status',)
+    ordering = ('datetime_from', 'quote_package__quote__reference', 'service__name',)
+    form = QuotePackageAllotmentForm
+    add_form_template = 'booking/quotepackageallotment_change_form.html'
+    change_form_template = 'booking/quotepackageallotment_change_form.html'
+    inlines = [QuotePackageServicePaxVariantInline]
+
+
+class QuotePackageTransferSiteModel(QuotePackageServiceSiteModel):
+    model_order = 570
+    menu_label = MENU_LABEL_QUOTE
+    menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
+
+    fields = (
+        'quote_package', ('service', 'status'), ('datetime_from', 'datetime_to'),
+        ('location_from', 'location_to'),
+        'provider', 'id')
+    list_display = ('quote_package', 'name', 'datetime_from', 'status',)
+    top_filters = ('service', 'quote_package__quote__reference', ('datetime_from', DateTopFilter), 'status',)
+    ordering = ('datetime_from', 'quote_package__quote__reference', 'service__name',)
+    form = QuotePackageTransferForm
+    add_form_template = 'booking/quotepackagetransfer_change_form.html'
+    change_form_template = 'booking/quotepackagetransfer_change_form.html'
+    inlines = [QuotePackageServicePaxVariantInline]
+
+
+class QuotePackageExtraSiteModel(QuotePackageServiceSiteModel):
+    model_order = 580
+    menu_label = MENU_LABEL_QUOTE
+    menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
+
+    fields = (
+        'quote_package',
+        ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
+        ('addon', 'quantity', 'parameter'),
+        'provider', 'id')
+    list_display = (
+        'quote_package', 'service', 'addon', 'quantity', 'parameter',
+        'datetime_from', 'datetime_to', 'time', 'status',)
+    top_filters = ('service', 'quote_package__quote__reference', ('datetime_from', DateTopFilter), 'status',)
+    ordering = ('datetime_from', 'quote_package__quote__reference', 'service__name',)
+    form = QuotePackageExtraForm
+    add_form_template = 'booking/quotepackageextra_change_form.html'
+    change_form_template = 'booking/quotepackageextra_change_form.html'
+    inlines = [QuotePackageServicePaxVariantInline]
 
 
 # Starts Booking Section

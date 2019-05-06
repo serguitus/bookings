@@ -11,7 +11,7 @@ from django.db.models import Q
 
 from booking import constants
 from booking.models import (
-    Quote, QuoteService, QuotePaxVariant, QuoteServicePaxVariant,
+    Quote, QuoteService, QuotePaxVariant, QuoteServicePaxVariant, QuotePackageServicePaxVariant,
     QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
     QuotePackageService, QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
     Package, PackageAllotment, PackageTransfer, PackageExtra,
@@ -598,7 +598,66 @@ class BookingServices(object):
                 c1, c1_msg, p1, p1_msg, \
                 c2, c2_msg, p2, p2_msg, \
                 c3, c3_msg, p3, p3_msg = cls._find_quoteallotment_amounts(
-                    pax_variant=pax_variant.quote_pax_variant, allotment=quoteallotment, agency=quoteallotment.quote.agency)
+                    pax_variant=pax_variant.quote_pax_variant,
+                    allotment=quoteallotment,
+                    agency=quoteallotment.quote.agency)
+
+                # variants totals
+                cost_1, cost_1_msg, price_1, price_1_msg, \
+                cost_2, cost_2_msg, price_2, price_2_msg, \
+                cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
+                    cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
+                    cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
+                    cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
+
+                variant_dict.update({'total': cls._quote_amounts_dict(
+                    cost_1, cost_1_msg, price_1, price_1_msg,
+                    cost_2, cost_2_msg, price_2, price_2_msg,
+                    cost_3, cost_3_msg, price_3, price_3_msg)})
+
+            counter = counter + 1
+
+            result.append(variant_dict)
+
+        return 0, '', result
+
+
+    @classmethod
+    def find_quotepackageallotment_amounts(
+            cls, quotepackageallotment, packagevariant_list):
+        result = list()
+
+        if not packagevariant_list:
+            return 3, 'Pax Variants Missing', None
+
+        counter = 0
+        for pax_variant in packagevariant_list:
+            variant_dict = dict()
+            variant_dict.update({'quotepackage_pax_variant': pax_variant.quotepackage_pax_variant.id})
+
+            cost_1 = 0
+            cost_2 = 0
+            cost_3 = 0
+            price_1 = 0
+            price_2 = 0
+            price_3 = 0
+            cost_1_msg = ''
+            cost_2_msg = ''
+            cost_3_msg = ''
+            price_1_msg = ''
+            price_2_msg = ''
+            price_3_msg = ''
+
+            key = '%s' % counter
+            if not hasattr(quotepackageallotment, 'service'):
+                variant_dict.update({'total': cls._no_service_dict()})
+            else:
+                c1, c1_msg, p1, p1_msg, \
+                c2, c2_msg, p2, p2_msg, \
+                c3, c3_msg, p3, p3_msg = cls._find_quoteallotment_amounts(
+                    pax_variant=pax_variant.quotepackage_pax_variant.quote_pax_variant,
+                    allotment=quotepackageallotment,
+                    agency=quotepackageallotment.quote_package.quote.agency)
 
                 # variants totals
                 cost_1, cost_1_msg, price_1, price_1_msg, \
@@ -653,7 +712,66 @@ class BookingServices(object):
                 c1, c1_msg, p1, p1_msg, \
                 c2, c2_msg, p2, p2_msg, \
                 c3, c3_msg, p3, p3_msg = cls._find_quotetransfer_amounts(
-                    pax_variant=pax_variant.quote_pax_variant, transfer=quotetransfer, agency=quotetransfer.quote.agency)
+                    pax_variant=pax_variant.quote_pax_variant,
+                    transfer=quotetransfer,
+                    agency=quotetransfer.quote.agency)
+
+                # variants totals
+                cost_1, cost_1_msg, price_1, price_1_msg, \
+                cost_2, cost_2_msg, price_2, price_2_msg, \
+                cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
+                    cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
+                    cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
+                    cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
+
+                variant_dict.update({'total': cls._quote_amounts_dict(
+                    cost_1, cost_1_msg, price_1, price_1_msg,
+                    cost_2, cost_2_msg, price_2, price_2_msg,
+                    cost_3, cost_3_msg, price_3, price_3_msg)})
+
+            counter = counter + 1
+
+            result.append(variant_dict)
+
+        return 0, '', result
+
+
+    @classmethod
+    def find_quotepackagetransfer_amounts(
+            cls, quotepackagetransfer, packagevariant_list):
+        result = list()
+
+        if not packagevariant_list:
+            return 3, 'Pax Variants Missing', None
+
+        counter = 0
+        for pax_variant in packagevariant_list:
+            variant_dict = dict()
+            variant_dict.update({'quotepackage_pax_variant': pax_variant.quotepackage_pax_variant.id})
+
+            cost_1 = 0
+            cost_2 = 0
+            cost_3 = 0
+            price_1 = 0
+            price_2 = 0
+            price_3 = 0
+            cost_1_msg = ''
+            cost_2_msg = ''
+            cost_3_msg = ''
+            price_1_msg = ''
+            price_2_msg = ''
+            price_3_msg = ''
+
+            key = '%s' % counter
+            if not hasattr(quotepackagetransfer, 'service'):
+                variant_dict.update({'total': cls._no_service_dict()})
+            else:
+                c1, c1_msg, p1, p1_msg, \
+                c2, c2_msg, p2, p2_msg, \
+                c3, c3_msg, p3, p3_msg = cls._find_quotetransfer_amounts(
+                    pax_variant=pax_variant.quotepackage_pax_variant.quote_pax_variant,
+                    transfer=quotepackagetransfer,
+                    agency=quotepackagetransfer.quote_package.quote.agency)
 
                 # variants totals
                 cost_1, cost_1_msg, price_1, price_1_msg, \
@@ -709,6 +827,63 @@ class BookingServices(object):
                 c2, c2_msg, p2, p2_msg, \
                 c3, c3_msg, p3, p3_msg = cls._find_quoteextra_amounts(
                     pax_variant=pax_variant.quote_pax_variant, extra=quoteextra, agency=quoteextra.quote.agency)
+
+                # variants totals
+                cost_1, cost_1_msg, price_1, price_1_msg, \
+                cost_2, cost_2_msg, price_2, price_2_msg, \
+                cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
+                    cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
+                    cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
+                    cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
+
+                variant_dict.update({'total': cls._quote_amounts_dict(
+                    cost_1, cost_1_msg, price_1, price_1_msg,
+                    cost_2, cost_2_msg, price_2, price_2_msg,
+                    cost_3, cost_3_msg, price_3, price_3_msg)})
+
+            counter = counter + 1
+
+            result.append(variant_dict)
+
+        return 0, '', result
+
+
+    @classmethod
+    def find_quotepackageextra_amounts(
+            cls, quotepackageextra, packagevariant_list):
+        result = list()
+
+        if not packagevariant_list:
+            return 3, 'Pax Variants Missing', None
+
+        counter = 0
+        for pax_variant in packagevariant_list:
+            variant_dict = dict()
+            variant_dict.update({'quotepackage_pax_variant': pax_variant.quotepackage_pax_variant.id})
+
+            cost_1 = 0
+            cost_2 = 0
+            cost_3 = 0
+            price_1 = 0
+            price_2 = 0
+            price_3 = 0
+            cost_1_msg = ''
+            cost_2_msg = ''
+            cost_3_msg = ''
+            price_1_msg = ''
+            price_2_msg = ''
+            price_3_msg = ''
+
+            key = '%s' % counter
+            if not hasattr(quotepackageextra, 'service'):
+                variant_dict.update({'total': cls._no_service_dict()})
+            else:
+                c1, c1_msg, p1, p1_msg, \
+                c2, c2_msg, p2, p2_msg, \
+                c3, c3_msg, p3, p3_msg = cls._find_quoteextra_amounts(
+                    pax_variant=pax_variant.quotepackage_pax_variant.quote_pax_variant,
+                    extra=quotepackageextra,
+                    agency=quotepackageextra.quote_package.quote.agency)
 
                 # variants totals
                 cost_1, cost_1_msg, price_1, price_1_msg, \
@@ -2390,22 +2565,39 @@ class BookingServices(object):
 
 
     @classmethod
-    def sync_pax_variants(cls, quote_pax_variant):
+    def sync_pax_variants(cls, view_quote_pax_variant):
         # verify on all services if pax variant exists
-        quote_services = list(QuoteService.objects.all().filter(quote=quote_pax_variant.quote))
+        quote_services = list(QuoteService.objects.all().filter(
+            quote=view_quote_pax_variant.quote))
+        quote_pax_variants = list(QuotePaxVariant.objects.all().filter(
+            quote=view_quote_pax_variant.quote))
 
         for quote_service in quote_services:
-            quote_service_pax_variant, created = QuoteServicePaxVariant.objects.get_or_create(
-                quote_pax_variant_id=quote_pax_variant.id,
-                quote_service_id=quote_service.id,
-                defaults={}
-            )
+            for quote_pax_variant in quote_pax_variants:
+                try:
+                    quote_service_pax_variant, created = QuoteServicePaxVariant.objects.get_or_create(
+                        quote_pax_variant_id=quote_pax_variant.id,
+                        quote_service_id=quote_service.id,
+                        defaults={}
+                    )
+                    if quote_service.service_type == constants.SERVICE_CATEGORY_PACKAGE:
+                        # verify on all services if pax variant exists
+                        quotepackage_services = list(QuotePackageService.objects.all().filter(
+                            quote_package=quote_service.id))
 
+                        for quotepackage_service in quotepackage_services:
+                            quotepackage_service_pax_variant, created = QuotePackageServicePaxVariant.objects.get_or_create(
+                                quotepackage_pax_variant_id=quote_service_pax_variant.id,
+                                quotepackage_service_id=quotepackage_service.id,
+                                defaults={}
+                            )
+                except Exception as ex:
+                    print(ex)
         return
 
 
     @classmethod
-    def update_service_pax_variants(cls, quote_service):
+    def update_service_pax_variants_amounts(cls, quote_service):
         quote = quote_service.quote
         # find quote pax variants
         quote_pax_variants = list(QuotePaxVariant.objects.all().filter(quote=quote.id))
@@ -2494,3 +2686,218 @@ class BookingServices(object):
             'price_triple_amount': p3,
         }
 
+
+    @classmethod
+    def update_quotepackage_service_pax_variants_amounts(cls, quotepackage_service):
+        quote_package = quotepackage_service.quote_package
+        # find quote package pax variants
+        quotepackage_pax_variants = list(QuoteServicePaxVariant.objects.all().filter(quote_service=quote_package.id))
+        # for each quotepackage pax variant get or create
+        for quotepackage_pax_variant in quotepackage_pax_variants:
+            defaults = cls.calculate_default_service_pax_variant_amounts(
+                quotepackage_service,
+                quotepackage_pax_variant)
+            try:
+                obj = QuotePackageServicePaxVariant.objects.get(
+                    quotepackage_service_id=quotepackage_service.id,
+                    quotepackage_pax_variant_id=quotepackage_pax_variant.id)
+                if obj.manual_costs and obj.manual_prices:
+                    continue
+                fields = []
+                if not obj.manual_costs:
+                    if obj.cost_single_amount != defaults['cost_single_amount']:
+                        fields.append('cost_single_amount')
+                        obj.cost_single_amount = defaults['cost_single_amount']
+
+                    if obj.cost_double_amount != defaults['cost_double_amount']:
+                        fields.append('cost_double_amount')
+                        obj.cost_double_amount = defaults['cost_double_amount']
+
+                    if obj.cost_triple_amount != defaults['cost_triple_amount']:
+                        fields.append('cost_triple_amount')
+                        obj.cost_triple_amount = defaults['cost_triple_amount']
+
+                if not obj.manual_prices:
+                    if obj.price_single_amount != defaults['price_single_amount']:
+                        fields.append('price_single_amount')
+                        obj.price_single_amount = defaults['price_single_amount']
+
+                    if obj.price_double_amount != defaults['price_double_amount']:
+                        fields.append('price_double_amount')
+                        obj.price_double_amount = defaults['price_double_amount']
+
+                    if obj.price_triple_amount != defaults['price_triple_amount']:
+                        fields.append('price_triple_amount')
+                        obj.price_triple_amount = defaults['price_triple_amount']
+
+                if fields:
+                    obj.save(update_fields=fields)
+
+            except QuotePackageServicePaxVariant.DoesNotExist:
+                new_values = {
+                    'quotepackage_service_id': quotepackage_service.id,
+                    'quotepackage_pax_variant_id': quotepackage_pax_variant.id}
+                new_values.update(defaults)
+                obj = QuotePackageServicePaxVariant(**new_values)
+                obj.save()
+
+
+    @classmethod
+    def update_quote_pax_variant_amounts(cls, quoteservice_pax_variant):
+        quote_pax_variant = QuotePaxVariant.objects.get(
+            pk=quoteservice_pax_variant.quote_pax_variant.id)
+
+        quoteservice_pax_variants = list(
+            QuoteServicePaxVariant.objects.all().filter(
+                quote_pax_variant=quote_pax_variant.id).exclude(
+                    quote_service__status=constants.SERVICE_STATUS_CANCELLED))
+
+        if quoteservice_pax_variants:
+            cost_single_amount, cost_double_amount, cost_triple_amount = 0, 0, 0
+            price_single_amount, price_double_amount, price_triple_amount = 0, 0, 0
+            for quoteservice_pax_variant in quoteservice_pax_variants:
+                cost_single_amount = cls.totalize(
+                    cost_single_amount, quoteservice_pax_variant.cost_single_amount)
+                cost_double_amount = cls.totalize(
+                    cost_double_amount, quoteservice_pax_variant.cost_double_amount)
+                cost_triple_amount = cls.totalize(
+                    cost_triple_amount, quoteservice_pax_variant.cost_triple_amount)
+                price_single_amount = cls.totalize(
+                    price_single_amount, quoteservice_pax_variant.price_single_amount)
+                price_double_amount = cls.totalize(
+                    price_double_amount, quoteservice_pax_variant.price_double_amount)
+                price_triple_amount = cls.totalize(
+                    price_triple_amount, quoteservice_pax_variant.price_triple_amount)
+        else:
+            cost_single_amount, cost_double_amount, cost_triple_amount = None, None, None
+            price_single_amount, price_double_amount, price_triple_amount = None, None, None
+
+        fields = []
+        if quote_pax_variant.cost_single_amount != cost_single_amount:
+            fields.append('cost_single_amount')
+            quote_pax_variant.cost_single_amount = cost_single_amount
+
+        if quote_pax_variant.cost_double_amount != cost_double_amount:
+            fields.append('cost_double_amount')
+            quote_pax_variant.cost_double_amount = cost_double_amount
+
+        if quote_pax_variant.cost_triple_amount != cost_triple_amount:
+            fields.append('cost_triple_amount')
+            quote_pax_variant.cost_triple_amount = cost_triple_amount
+
+        if quote_pax_variant.price_single_amount != price_single_amount:
+            fields.append('price_single_amount')
+            quote_pax_variant.price_single_amount = price_single_amount
+
+        if quote_pax_variant.price_double_amount != price_double_amount:
+            fields.append('price_double_amount')
+            quote_pax_variant.price_double_amount = price_double_amount
+
+        if quote_pax_variant.price_triple_amount != price_triple_amount:
+            fields.append('price_triple_amount')
+            quote_pax_variant.price_triple_amount = price_triple_amount
+
+        if fields:
+            quote_pax_variant.save(update_fields=fields)
+
+
+    @classmethod
+    def update_quotepackage_pax_variant_amounts(cls, quotepackageservice_pax_variant):
+        quoteservice_pax_variant = QuoteServicePaxVariant.objects.get(
+            quote_service=quotepackageservice_pax_variant.quotepackage_service.quote_package.id,
+            quote_pax_variant=quotepackageservice_pax_variant.quotepackage_pax_variant.quote_pax_variant.id)
+
+        quoteservice_pax_variants = list(
+            QuoteServicePaxVariant.objects.all().filter(
+                quote_pax_variant=quote_pax_variant.id).exclude(
+                    quote_service__status=constants.SERVICE_STATUS_CANCELLED))
+
+        if quoteservice_pax_variants:
+            cost_single_amount, cost_double_amount, cost_triple_amount = 0, 0, 0
+            price_single_amount, price_double_amount, price_triple_amount = 0, 0, 0
+            for quotepackageservice_pax_variant in quotepackageservice_pax_variants:
+                cost_single_amount = cls.totalize(
+                    cost_single_amount, quotepackageservice_pax_variant.cost_single_amount)
+                cost_double_amount = cls.totalize(
+                    cost_double_amount, quotepackageservice_pax_variant.cost_double_amount)
+                cost_triple_amount = cls.totalize(
+                    cost_triple_amount, quotepackageservice_pax_variant.cost_triple_amount)
+                price_single_amount = cls.totalize(
+                    price_single_amount, quotepackageservice_pax_variant.price_single_amount)
+                price_double_amount = cls.totalize(
+                    price_double_amount, quotepackageservice_pax_variant.price_double_amount)
+                price_triple_amount = cls.totalize(
+                    price_triple_amount, quotepackageservice_pax_variant.price_triple_amount)
+        else:
+            cost_single_amount, cost_double_amount, cost_triple_amount = None, None, None
+            price_single_amount, price_double_amount, price_triple_amount = None, None, None
+
+        fields = []
+        if quotepackage_pax_variant.cost_single_amount != cost_single_amount:
+            fields.append('cost_single_amount')
+            quotepackage_pax_variant.cost_single_amount = cost_single_amount
+
+        if quotepackage_pax_variant.cost_double_amount != cost_double_amount:
+            fields.append('cost_double_amount')
+            quotepackage_pax_variant.cost_double_amount = cost_double_amount
+
+        if quotepackage_pax_variant.cost_triple_amount != cost_triple_amount:
+            fields.append('cost_triple_amount')
+            quotepackage_pax_variant.cost_triple_amount = cost_triple_amount
+
+        if quotepackage_pax_variant.price_single_amount != price_single_amount:
+            fields.append('price_single_amount')
+            quotepackage_pax_variant.price_single_amount = price_single_amount
+
+        if quotepackage_pax_variant.price_double_amount != price_double_amount:
+            fields.append('price_double_amount')
+            quotepackage_pax_variant.price_double_amount = price_double_amount
+
+        if quotepackage_pax_variant.price_triple_amount != price_triple_amount:
+            fields.append('price_triple_amount')
+            quotepackage_pax_variant.price_triple_amount = price_triple_amount
+
+        if fields:
+            quotepackage_pax_variant.save(update_fields=fields)
+
+
+    @classmethod
+    def totalize(cls, total, increment):
+        if total is None or increment is None:
+            return None
+        return total + increment
+
+
+    @classmethod
+    def update_quotepackage(cls, quotepackage_or_service):
+
+        if hasattr(quotepackage_or_service, 'avoid_quotepackage_update'):
+            return
+        if hasattr(quotepackage_or_service, 'quote_package'):
+            quote_package = quotepackage_or_service.quote_package
+        elif isinstance(quotepackage_or_service, QuotePackage):
+            quote_package = quotepackage_or_service
+        else:
+            return
+
+        date_from = None
+        date_to = None
+        for service in quote_package.quotepackage_services.all():
+            if not service.status is constants.SERVICE_STATUS_CANCELLED:
+                # date_from
+                if service.datetime_from is not None:
+                    if date_from is None or (date_from > service.datetime_from):
+                        date_from = service.datetime_from
+                # date_to
+                if service.datetime_to is not None:
+                    if date_to is None or (date_to < service.datetime_to):
+                        date_to = service.datetime_to
+        fields = []
+        if quote_package.datetime_from != date_from:
+            fields.append('datetime_from')
+            quote_package.datetime_from = date_from
+        if quote_package.datetime_to != date_to:
+            fields.append('datetime_to')
+            quote_package.datetime_to = date_to
+        if fields:
+            quote_package.save(update_fields=fields)

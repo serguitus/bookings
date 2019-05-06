@@ -5,9 +5,12 @@ from booking import views
 urlpatterns = [
     url(r'^quote-amounts/?', views.QuoteAmountsView.as_view(), name='quote_amounts'),
     url(r'^quoteallotment-amounts/?', views.QuoteAllotmentAmountsView.as_view(), name='quoteallotment_amounts'),
-    url(r'^quotetransfer-amounts/?', views.QuoteTransferAmountsView.as_view(), name='quoteallotment_amounts'),
-    url(r'^quoteextra-amounts/?', views.QuoteExtraAmountsView.as_view(), name='quoteallotment_amounts'),
-    url(r'^quotepackage-amounts/?', views.QuotePackageAmountsView.as_view(), name='quoteallotment_amounts'),
+    url(r'^quotetransfer-amounts/?', views.QuoteTransferAmountsView.as_view(), name='quotetransfer_amounts'),
+    url(r'^quoteextra-amounts/?', views.QuoteExtraAmountsView.as_view(), name='quoteextra_amounts'),
+    url(r'^quotepackage-amounts/?', views.QuotePackageAmountsView.as_view(), name='quotepackage_amounts'),
+    url(r'^quotepackageallotment-amounts/?', views.QuotePackageAllotmentAmountsView.as_view(), name='quotepackageallotment_amounts'),
+    url(r'^quotepackagetransfer-amounts/?', views.QuotePackageTransferAmountsView.as_view(), name='quotepackagetransfer_amounts'),
+    url(r'^quotepackageextra-amounts/?', views.QuotePackageExtraAmountsView.as_view(), name='quotepackageextra_amounts'),
 
     url(r'^bookingallotment-amounts/?', views.BookingAllotmentAmountsView.as_view(), name='bookingallotment_amounts'),
     url(r'^bookingtransfer-amounts/?', views.BookingTransferAmountsView.as_view(), name='bookingtransfer_amounts'),
