@@ -69,7 +69,7 @@ $(document).ready(function(){
       ia.html('');
     }
   }
-  
+
   function clear_values(msg) {
     $('span.computed-value').each(function(index) {
       $( this ).html(msg);
