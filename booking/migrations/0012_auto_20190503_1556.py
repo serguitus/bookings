@@ -24,12 +24,13 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='booking.QuoteServicePaxVariant', verbose_name='Pax Variant'),
             preserve_default=False,
         ),
-        migrations.RemoveField(
-            model_name='quotepackageservicepaxvariant',
-            name='quote_pax_variant',
-        ),
         migrations.AlterUniqueTogether(
             name='quotepackageservicepaxvariant',
             unique_together=set([('quotepackage_pax_variant', 'quotepackage_service')]),
         ),
+        migrations.RemoveField(
+            model_name='quotepackageservicepaxvariant',
+            name='quote_pax_variant',
+        ),
+
     ]
