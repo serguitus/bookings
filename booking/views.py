@@ -106,27 +106,26 @@ class QuoteAmountsView(ModelChangeFormProcessorView):
                 'results': None,
             })
 
-        allotment_list = inlines[1]
+        # allotment_list = inlines[1]
+        # transfer_list = inlines[2]
+        # extra_list = inlines[3]
+        # package_list = inlines[4]
+        # if (
+        #        (not allotment_list) and
+        #        (not transfer_list) and
+        #        (not extra_list) and
+        #        (not package_list)):
+        #    return JsonResponse({
+        #        'code': 3,
+        #        'message': 'Services Missing',
+        #        'results': None,
+        #    })
+        # code, message, results = BookingServices.find_quote_amounts(
+        #    quote.agency, variant_list, allotment_list, transfer_list, extra_list, package_list)
 
-        transfer_list = inlines[2]
-
-        extra_list = inlines[3]
-
-        package_list = inlines[4]
-
-        if (
-                (not allotment_list) and
-                (not transfer_list) and
-                (not extra_list) and
-                (not package_list)):
-            return JsonResponse({
-                'code': 3,
-                'message': 'Services Missing',
-                'results': None,
-            })
 
         code, message, results = BookingServices.find_quote_amounts(
-            quote.agency, variant_list, allotment_list, transfer_list, extra_list, package_list)
+            quote, variant_list)
 
         return JsonResponse({
             'code': code,

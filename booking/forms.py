@@ -20,6 +20,7 @@ class QuoteForm(forms.ModelForm):
         widgets = {
             'agency': autocomplete.ModelSelect2(url='agency-autocomplete'),
         }
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
 class PackageAllotmentInlineForm(forms.ModelForm):
