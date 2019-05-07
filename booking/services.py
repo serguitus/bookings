@@ -590,6 +590,20 @@ class BookingServices(object):
                             cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
                     counter = counter + 1
 
+            if not pax_variant.price_percent is None:
+                if cost_1 is None:
+                    price_1, price_1_msg = None, 'Cost for % is empty'
+                else:
+                    price_1, price_1_msg = round(0.499999 + float(cost_1) * (1.0 + float(pax_variant.price_percent) / 100.0)), None
+                if cost_2 is None:
+                    price_2, price_2_msg = None, 'Cost for % is empty'
+                else:
+                    price_2, price_2_msg = round(0.499999 + float(cost_2) * (1.0 + float(pax_variant.price_percent) / 100.0)), None
+                if cost_3 is None:
+                    price_3, price_3_msg = None, 'Cost for % is empty'
+                else:
+                    price_3, price_3_msg = round(0.499999 + float(cost_3) * (1.0 + float(pax_variant.price_percent) / 100.0)), None
+
             variant_dict.update({'total': cls._quote_amounts_dict(
                 cost_1, cost_1_msg, price_1, price_1_msg,
                 cost_2, cost_2_msg, price_2, price_2_msg,
@@ -2604,11 +2618,15 @@ class BookingServices(object):
 
     @classmethod
     def sync_pax_variants(cls, view_quote_pax_variant):
+        if isinstance(view_quote_pax_variant, Quote):
+            quote = view_quote_pax_variant
+        else:
+            quote = view_quote_pax_variant.quote
         # verify on all services if pax variant exists
         quote_services = list(QuoteService.objects.all().filter(
-            quote=view_quote_pax_variant.quote))
+            quote=quote))
         quote_pax_variants = list(QuotePaxVariant.objects.all().filter(
-            quote=view_quote_pax_variant.quote))
+            quote=quote))
 
         for quote_service in quote_services:
             for quote_pax_variant in quote_pax_variants:
@@ -2679,6 +2697,7 @@ class BookingServices(object):
 
                 if fields:
                     obj.save(update_fields=fields)
+                    cls.update_quote_pax_variant_amounts(quote_pax_variant)
 
             except QuoteServicePaxVariant.DoesNotExist:
                 new_values = {
@@ -2687,6 +2706,7 @@ class BookingServices(object):
                 new_values.update(defaults)
                 obj = QuoteServicePaxVariant(**new_values)
                 obj.save()
+                cls.update_quote_pax_variant_amounts(quote_pax_variant)
 
 
     @classmethod
@@ -2784,8 +2804,11 @@ class BookingServices(object):
 
     @classmethod
     def update_quote_pax_variant_amounts(cls, quoteservice_pax_variant):
-        quote_pax_variant = QuotePaxVariant.objects.get(
-            pk=quoteservice_pax_variant.quote_pax_variant.id)
+        if isinstance(quoteservice_pax_variant, QuotePaxVariant):
+            quote_pax_variant = quoteservice_pax_variant
+        else:
+            quote_pax_variant = QuotePaxVariant.objects.get(
+                pk=quoteservice_pax_variant.quote_pax_variant.id)
 
         quoteservice_pax_variants = list(
             QuoteServicePaxVariant.objects.all().filter(

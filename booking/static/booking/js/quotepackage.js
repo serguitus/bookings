@@ -63,10 +63,8 @@ $(document).ready(function(){
     }
     if (data_amount) {
       sa.html(data_amount);
-      ia.html(Number(data_amount));
     } else {
       sa.html(data_amount_msg);
-      ia.html('');
     }
   }
 
@@ -78,7 +76,7 @@ $(document).ready(function(){
 
   function show_buttons() {
     for (idx = 0; idx < 50; idx++) {
-      field = $('#id_quoteservice_paxvariants-' + idx + '-cost_single_amount');
+      field = $('#quoteservice_paxvariants-' + idx + ' div.field-cost_single_amount div.field-cost_single_amount div.readonly');
       if (field[0] != undefined) {
         $('#' + idx + '-span-c1').detach();
         $('#' + idx + '-span-c2').detach();
@@ -86,13 +84,13 @@ $(document).ready(function(){
         $('#' + idx + '-span-p1').detach();
         $('#' + idx + '-span-p2').detach();
         $('#' + idx + '-span-p3').detach();
-        
-        $('#id_quoteservice_paxvariants-' + idx + '-cost_single_amount').after('<span id="' + idx + '-span-c1" class="computed-value">N/A</span>');
-        $('#id_quoteservice_paxvariants-' + idx + '-cost_double_amount').after('<span id="' + idx + '-span-c2" class="computed-value">N/A</span>');
-        $('#id_quoteservice_paxvariants-' + idx + '-cost_triple_amount').after('<span id="' + idx + '-span-c3" class="computed-value">N/A</span>');
-        $('#id_quoteservice_paxvariants-' + idx + '-price_single_amount').after('<span id="' + idx + '-span-p1" class="computed-value">N/A</span>');
-        $('#id_quoteservice_paxvariants-' + idx + '-price_double_amount').after('<span id="' + idx + '-span-p2" class="computed-value">N/A</span>');
-        $('#id_quoteservice_paxvariants-' + idx + '-price_triple_amount').after('<span id="' + idx + '-span-p3" class="computed-value">N/A</span>');
+
+        $('#quoteservice_paxvariants-' + idx + ' div.field-cost_single_amount div.field-cost_single_amount div.readonly').after('<span id="' + idx + '-span-c1" class="computed-value">N/A</span>');
+        $('#quoteservice_paxvariants-' + idx + ' div.field-cost_double_amount div.field-cost_double_amount div.readonly').after('<span id="' + idx + '-span-c2" class="computed-value">N/A</span>');
+        $('#quoteservice_paxvariants-' + idx + ' div.field-cost_triple_amount div.field-cost_triple_amount div.readonly').after('<span id="' + idx + '-span-c3" class="computed-value">N/A</span>');
+        $('#quoteservice_paxvariants-' + idx + ' div.field-price_single_amount div.field-price_single_amount div.readonly').after('<span id="' + idx + '-span-p1" class="computed-value">N/A</span>');
+        $('#quoteservice_paxvariants-' + idx + ' div.field-price_double_amount div.field-price_double_amount div.readonly').after('<span id="' + idx + '-span-p2" class="computed-value">N/A</span>');
+        $('#quoteservice_paxvariants-' + idx + ' div.field-price_triple_amount div.field-price_triple_amount div.readonly').after('<span id="' + idx + '-span-p3" class="computed-value">N/A</span>');
       } else {
         break;
       }

@@ -21,7 +21,9 @@ from booking.services import BookingServices
 
 @receiver(post_save, sender=Quote)
 def update_quote(sender, instance, **kwargs):
-    BookingServices.update_quote(instance)
+    with transaction.atomic(savepoint=False):
+        BookingServices.sync_pax_variants(instance)
+        BookingServices.update_quote(instance)
 
 
 @receiver((post_save), sender=QuotePaxVariant)

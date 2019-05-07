@@ -218,6 +218,10 @@ class QuotePaxVariantInline(CommonStackedInline):
         ('cost_single_amount', 'price_single_amount'),
         ('cost_double_amount', 'price_double_amount'),
         ('cost_triple_amount', 'price_triple_amount')]
+    readonly_fields = [
+        'cost_single_amount', 'price_single_amount',
+        'cost_double_amount', 'price_double_amount',
+        'cost_triple_amount', 'price_triple_amount']
     verbose_name_plural = 'Paxes Variants'
 
 
