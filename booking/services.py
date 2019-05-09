@@ -2370,24 +2370,20 @@ class BookingServices(object):
             code, msg, c1, c1_msg, p1, p1_msg = ConfigServices.allotment_amounts(
                 service, date_from, date_to, ({0:1, 1:0},), ({0:1, 1:0},), provider, agency,
                 board_type, room_type_id)
-            if c1:
-                c1 = round(float(c1), 2)
-            if p1:
-                p1 = round(0.499999 + float(p1))
+            c1 = cls._charge_amount(c1, pax_variant.pax_quantity, pax_variant.free_quantity, True)
+            p1 = cls._charge_amount(p1, pax_variant.pax_quantity, pax_variant.free_quantity, False)
+
             code, msg, c2, c2_msg, p2, p2_msg = ConfigServices.allotment_amounts(
                 service, date_from, date_to, ({0:2, 1:0},), ({0:2, 1:0},), provider, agency,
                 board_type, room_type_id)
-            if c2:
-                c2 = round(float(c2) / 2, 2)
-            if p2:
-                p2 = round(0.499999 + float(p2) / 2)
+            c2 = cls._charge_amount(c2, pax_variant.pax_quantity, pax_variant.free_quantity, True)
+            p2 = cls._charge_amount(p2, pax_variant.pax_quantity, pax_variant.free_quantity, False)
+
             code, msg, c3, c3_msg, p3, p3_msg = ConfigServices.allotment_amounts(
                 service, date_from, date_to, ({0:3, 1:0},), ({0:3, 1:0},), provider, agency,
                 board_type, room_type_id)
-            if c3:
-                c3 = round(float(c3) / 3, 2)
-            if p3:
-                p3 = round(0.499999 + float(p3) / 3)
+            c3 = cls._charge_amount(c3, pax_variant.pax_quantity, pax_variant.free_quantity, True)
+            p3 = cls._charge_amount(p3, pax_variant.pax_quantity, pax_variant.free_quantity, False)
         else:
             # no grouping means passing total pax quantity
             code, msg, c1, c1_msg, p1, p1_msg = ConfigServices.allotment_amounts(
@@ -2412,16 +2408,15 @@ class BookingServices(object):
             # grouping means passing 1,2,3 as pax quantity
             c1, c1_msg = ConfigServices.allotment_costs(
                 service, date_from, date_to, ({0:1, 1:0},), provider, board_type, room_type_id)
-            if c1:
-                c1 = round(float(c1), 2)
+            c1 = cls._charge_amount(c1, pax_variant.pax_quantity, pax_variant.free_quantity, True)
+
             c2, c2_msg = ConfigServices.allotment_costs(
                 service, date_from, date_to, ({0:2, 1:0},), provider, board_type, room_type_id)
-            if c2:
-                c2 = round(float(c2) / 2, 2)
+            c2 = cls._charge_amount(c2, pax_variant.pax_quantity, pax_variant.free_quantity, True)
+
             c3, c3_msg = ConfigServices.allotment_costs(
                 service, date_from, date_to, ({0:3, 1:0},),provider, board_type, room_type_id)
-            if c3:
-                c3 = round(float(c3) / 3, 2)
+            c3 = cls._charge_amount(c3, pax_variant.pax_quantity, pax_variant.free_quantity, True)
         else:
             # no grouping means passing total pax quantity
             c1, c1_msg = ConfigServices.allotment_costs(
@@ -2456,24 +2451,20 @@ class BookingServices(object):
             code, msg, c1, c1_msg, p1, p1_msg = ConfigServices.transfer_amounts(
                 service, date_from, date_to, ({0:1, 1:0},), ({0:1, 1:0},), provider, agency,
                 location_from_id, location_to_id, quantity)
-            if c1:
-                c1 = round(float(c1), 2)
-            if p1:
-                p1 = round(0.499999 + float(p1))
+            c1 = cls._charge_amount(c1, pax_variant.pax_quantity, pax_variant.free_quantity, True)
+            p1 = cls._charge_amount(p1, pax_variant.pax_quantity, pax_variant.free_quantity, False)
+
             code, msg, c2, c2_msg, p2, p2_msg = ConfigServices.transfer_amounts(
                 service, date_from, date_to, ({0:2, 1:0},), ({0:2, 1:0},), provider, agency,
                 location_from_id, location_to_id, quantity)
-            if c2:
-                c2 = round(float(c2) / 2, 2)
-            if p2:
-                p2 = round(0.499999 + float(p2) / 2)
+            c2 = cls._charge_amount(c2, pax_variant.pax_quantity, pax_variant.free_quantity, True)
+            p2 = cls._charge_amount(p2, pax_variant.pax_quantity, pax_variant.free_quantity, False)
+
             code, msg, c3, c3_msg, p3, p3_msg = ConfigServices.transfer_amounts(
                 service, date_from, date_to, ({0:3, 1:0},), ({0:3, 1:0},), provider, agency,
                 location_from_id, location_to_id, quantity)
-            if c3:
-                c3 = round(float(c3) / 3, 2)
-            if p3:
-                p3 = round(0.499999 + float(p3) / 3)
+            c3 = cls._charge_amount(c3, pax_variant.pax_quantity, pax_variant.free_quantity, True)
+            p3 = cls._charge_amount(p3, pax_variant.pax_quantity, pax_variant.free_quantity, False)
         else:
             # no grouping means passing total pax quantity
             code, msg, c1, c1_msg, p1, p1_msg = ConfigServices.transfer_amounts(
@@ -2499,18 +2490,17 @@ class BookingServices(object):
             c1, c1_msg = ConfigServices.transfer_costs(
                 service, date_from, date_to, ({0:1, 1:0},), provider,
                 location_from_id, location_to_id, quantity)
-            if c1:
-                c1 = round(float(c1), 2)
+            c1 = cls._charge_amount(c1, pax_variant.pax_quantity, pax_variant.free_quantity, True)
+
             c2, c2_msg = ConfigServices.transfer_costs(
                 service, date_from, date_to, ({0:2, 1:0},), provider,
                 location_from_id, location_to_id, quantity)
-            if c2:
-                c2 = round(float(c2) / 2, 2)
+            c2 = cls._charge_amount(c2, pax_variant.pax_quantity, pax_variant.free_quantity, True)
+
             c3, c3_msg = ConfigServices.transfer_costs(
                 service, date_from, date_to, ({0:3, 1:0},), provider,
                 location_from_id, location_to_id, quantity)
-            if c3:
-                c3 = round(float(c3) / 3, 2)
+            c3 = cls._charge_amount(c3, pax_variant.pax_quantity, pax_variant.free_quantity, True)
         else:
             # no grouping means passing total pax quantity
             c1, c1_msg = ConfigServices.transfer_costs(
@@ -2546,24 +2536,20 @@ class BookingServices(object):
             code, msg, c1, c1_msg, p1, p1_msg = ConfigServices.extra_amounts(
                 service, date_from, date_to, ({0:1, 1:0},), ({0:1, 1:0},), provider, agency,
                 addon_id, quantity, parameter)
-            if c1:
-                c1 = round(float(c1), 2)
-            if p1:
-                p1 = round(0.499999 + float(p1))
+            c1 = cls._charge_amount(c1, pax_variant.pax_quantity, pax_variant.free_quantity, True)
+            p1 = cls._charge_amount(p1, pax_variant.pax_quantity, pax_variant.free_quantity, False)
+
             code, msg, c2, c2_msg, p2, p2_msg = ConfigServices.extra_amounts(
                 service, date_from, date_to, ({0:2, 1:0},), ({0:2, 1:0},), provider, agency,
                 addon_id, quantity, parameter)
-            if c2:
-                c2 = round(float(c2) / 2, 2)
-            if p2:
-                p2 = round(0.499999 + float(p2))
+            c2 = cls._charge_amount(c2, pax_variant.pax_quantity, pax_variant.free_quantity, True)
+            p2 = cls._charge_amount(p2, pax_variant.pax_quantity, pax_variant.free_quantity, False)
+
             code, msg, c3, c3_msg, p3, p3_msg = ConfigServices.extra_amounts(
                 service, date_from, date_to, ({0:3, 1:0},), ({0:3, 1:0},), provider, agency,
                 addon_id, quantity, parameter)
-            if c3:
-                c3 = round(float(c3) / 2, 2)
-            if p3:
-                p3 = round(0.499999 + float(p3))
+            c3 = cls._charge_amount(c3, pax_variant.pax_quantity, pax_variant.free_quantity, True)
+            p3 = cls._charge_amount(p3, pax_variant.pax_quantity, pax_variant.free_quantity, False)
         else:
             # no grouping means passing total pax quantity
             code, msg, c1, c1_msg, p1, p1_msg = ConfigServices.extra_amounts(
@@ -2589,18 +2575,17 @@ class BookingServices(object):
             c1, c1_msg = ConfigServices.extra_costs(
                 service, date_from, date_to, ({0:1, 1:0},), provider,
                 addon_id, quantity, parameter)
-            if c1:
-                c1 = round(float(c1), 2)
+            c1 = cls._charge_amount(c1, pax_variant.pax_quantity, pax_variant.free_quantity, True)
+
             c2, c2_msg = ConfigServices.extra_costs(
                 service, date_from, date_to, ({0:2, 1:0},), provider,
                 addon_id, quantity, parameter)
-            if c2:
-                c2 = round(float(c2) / 2, 2)
+            c2 = cls._charge_amount(c2, pax_variant.pax_quantity, pax_variant.free_quantity, True)
+
             c3, c3_msg = ConfigServices.extra_costs(
                 service, date_from, date_to, ({0:3, 1:0},), provider,
                 addon_id, quantity, parameter)
-            if c3:
-                c3 = round(float(c3) / 2, 2)
+            c3 = cls._charge_amount(c3, pax_variant.pax_quantity, pax_variant.free_quantity, True)
         else:
             # no grouping means passing total pax quantity
             c1, c1_msg = ConfigServices.extra_costs(
@@ -3048,3 +3033,19 @@ class BookingServices(object):
             quote_package.datetime_to = date_to
         if fields:
             quote_package.save(update_fields=fields)
+
+
+    @classmethod
+    def _charge_amount(cls, amount, paying, free, for_cost=False):
+        if amount:
+            if paying and free:
+                if for_cost:
+                    return round(float(amount) * (1.0 + free / paying), 2)
+                else:
+                    return round(0.499999 + float(amount) * (1.0 + free / paying))
+            else:
+                if for_cost:
+                    return round(float(amount), 2)
+                else:
+                    return round(0.499999 + float(amount))
+        return amount

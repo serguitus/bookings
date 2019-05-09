@@ -47,7 +47,7 @@ class QuoteServiceTable(tables.Table):
     class Meta:
         model = QuoteService
         template_name = 'booking/quoteservice_list.html'
-        fields = ['name', 'service_type', 'datetime_from', 'datetime_to']
+        fields = ['name', 'service_type', 'status', 'datetime_from', 'datetime_to']
 
     def render_name(self, value, record):
         obj_url = reverse(

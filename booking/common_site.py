@@ -214,7 +214,7 @@ class QuotePaxVariantInline(CommonStackedInline):
     model = QuotePaxVariant
     extra = 0
     fields = [
-        ('pax_quantity', 'price_percent'),
+        ('pax_quantity', 'free_quantity', 'price_percent'),
         ('cost_single_amount', 'price_single_amount'),
         ('cost_double_amount', 'price_double_amount'),
         ('cost_triple_amount', 'price_triple_amount')]
