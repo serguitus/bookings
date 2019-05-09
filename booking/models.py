@@ -726,7 +726,7 @@ class BookingAllotment(BookingService, BaseAllotment):
         verbose_name_plural = 'Bookings Accomodations'
         default_permissions = ('add', 'change',)
 
-    def build_rooms(self):
+    def build_description(self):
         """ makes a string detailing room quantity and types"""
         from booking.services import BookingServices
         rooms = BookingServices.find_groups(
@@ -764,7 +764,7 @@ class BookingAllotment(BookingService, BaseAllotment):
     def fill_data(self):
         self.name = '%s' % (self.service,)
         self.service_type = SERVICE_CATEGORY_ALLOTMENT
-        self.description = self.build_rooms()
+        self.description = self.build_description()
 
 
 class BookingTransfer(BookingService, BaseTransfer):

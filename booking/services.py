@@ -1359,6 +1359,19 @@ class BookingServices(object):
             cls.set_bookingservice_amounts(booking_package_extra)
             booking_package_extra.save()
 
+    @classmethod
+    def update_bookingservice_description(cls, booking_service):
+        CLASSES = {
+            'T': BookingTransfer,
+            'E': BookingExtra,
+            'A': BookingAllotment,
+            'P': BookingPackage,
+        }
+        service = CLASSES[booking_service.service_type].objects.get(id=booking_service.id)
+        #service = getattr(CLASSES, booking_service.service_type).objects.get(
+        #    id=booking_service.id)
+        service.description = service.build_description()
+        service.save()
 
     @classmethod
     def update_bookingservice_amounts(cls, booking_service):
@@ -1382,7 +1395,7 @@ class BookingServices(object):
                 return
             cost, price = cls._bookingextra_amounts(bookingextra)
             cls._save_booking_service_amounts(bookingextra, cost, price)
-    
+
         if booking_service.service_type == constants.SERVICE_CATEGORY_PACKAGE:
             bookingpackage = cls._find_bookingservice(booking_service, BookingPackage.objects)
             if not bookingpackage:

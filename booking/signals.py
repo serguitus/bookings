@@ -163,3 +163,8 @@ def post_delete_update_package_booking(sender, instance, **kwargs):
 @receiver((post_save, post_delete), sender=BookingServicePax)
 def update_booking_service(sender, instance, **kwargs):
     BookingServices.update_bookingservice_amounts(instance.booking_service)
+
+
+@receiver(post_save, sender=BookingServicePax)
+def update_booking_service_description(sender, instance, **kwargs):
+    BookingServices.update_bookingservice_description(instance.booking_service)
