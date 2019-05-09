@@ -461,148 +461,10 @@ class BookingServices(object):
             variant_dict = dict()
             variant_dict.update({'paxes': pax_variant.pax_quantity})
 
-            cost_1 = 0
-            cost_2 = 0
-            cost_3 = 0
-            price_1 = 0
-            price_2 = 0
-            price_3 = 0
-            cost_1_msg = ''
-            cost_2_msg = ''
-            cost_3_msg = ''
-            price_1_msg = ''
-            price_2_msg = ''
-            price_3_msg = ''
-
-            if allotment_list:
-                counter = 0
-                for allotment in allotment_list:
-                    if allotment.status == constants.SERVICE_STATUS_CANCELLED:
-                        continue
-                    key = '%s' % counter
-                    if not hasattr(allotment, 'service'):
-                        variant_dict.update({key: cls._no_service_dict()})
-                    else:
-                        c1, c1_msg, p1, p1_msg, \
-                        c2, c2_msg, p2, p2_msg, \
-                        c3, c3_msg, p3, p3_msg = cls._find_quoteallotment_amounts(
-                            pax_variant=pax_variant, allotment=allotment, agency=agency)
-
-                        # service amounts
-                        variant_dict.update({key: cls._quote_amounts_dict(
-                            c1, c1_msg, p1, p1_msg,
-                            c2, c2_msg, p2, p2_msg,
-                            c3, c3_msg, p3, p3_msg
-                        )})
-                        # variants totals
-                        cost_1, cost_1_msg, price_1, price_1_msg, \
-                        cost_2, cost_2_msg, price_2, price_2_msg, \
-                        cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
-                            cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
-                            cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
-                            cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
-                    counter = counter + 1
-
-            if transfer_list:
-                counter = 0
-                for transfer in transfer_list:
-                    if transfer.status == constants.SERVICE_STATUS_CANCELLED:
-                        continue
-                    key = '2-%s' % counter
-                    if not hasattr(transfer, 'service'):
-                        variant_dict.update({key: cls._no_service_dict()})
-                    else:
-                        c1, c1_msg, p1, p1_msg, \
-                        c2, c2_msg, p2, p2_msg, \
-                        c3, c3_msg, p3, p3_msg = cls._find_quotetransfer_amounts(
-                            pax_variant=pax_variant, transfer=transfer, agency=agency)
-
-                        # service amounts
-                        variant_dict.update({key: cls._quote_amounts_dict(
-                            c1, c1_msg, p1, p1_msg,
-                            c2, c2_msg, p2, p2_msg,
-                            c3, c3_msg, p3, p3_msg
-                        )})
-                        # variants totals
-                        cost_1, cost_1_msg, price_1, price_1_msg, \
-                        cost_2, cost_2_msg, price_2, price_2_msg, \
-                        cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
-                            cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
-                            cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
-                            cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
-                    counter = counter + 1
-
-            if extra_list:
-                counter = 0
-                for extra in extra_list:
-                    if extra.status == constants.SERVICE_STATUS_CANCELLED:
-                        continue
-                    key = '3-%s' % counter
-                    if not hasattr(extra, 'service'):
-                        variant_dict.update({key: cls._no_service_dict()})
-                    else:
-                        c1, c1_msg, p1, p1_msg, \
-                        c2, c2_msg, p2, p2_msg, \
-                        c3, c3_msg, p3, p3_msg = cls._find_quoteextra_amounts(
-                            pax_variant=pax_variant, extra=extra, agency=agency)
-
-                        # service amounts
-                        variant_dict.update({key: cls._quote_amounts_dict(
-                            c1, c1_msg, p1, p1_msg,
-                            c2, c2_msg, p2, p2_msg,
-                            c3, c3_msg, p3, p3_msg
-                        )})
-                        # variants totals
-                        cost_1, cost_1_msg, price_1, price_1_msg, \
-                        cost_2, cost_2_msg, price_2, price_2_msg, \
-                        cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
-                            cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
-                            cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
-                            cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
-                    counter = counter + 1
-
-            if package_list:
-                counter = 0
-                for package in package_list:
-                    if package.status == constants.SERVICE_STATUS_CANCELLED:
-                        continue
-                    key = '4-%s' % counter
-                    if not hasattr(package, 'service'):
-                        variant_dict.update({key: cls._no_service_dict()})
-                    else:
-                        c1, c1_msg, p1, p1_msg, \
-                        c2, c2_msg, p2, p2_msg, \
-                        c3, c3_msg, p3, p3_msg = cls._find_quotepackage_amounts(
-                            pax_variant=pax_variant, package=package, agency=agency)
-
-                        # service amounts
-                        variant_dict.update({key: cls._quote_amounts_dict(
-                            c1, c1_msg, p1, p1_msg,
-                            c2, c2_msg, p2, p2_msg,
-                            c3, c3_msg, p3, p3_msg
-                        )})
-                        # variants totals
-                        cost_1, cost_1_msg, price_1, price_1_msg, \
-                        cost_2, cost_2_msg, price_2, price_2_msg, \
-                        cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
-                            cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
-                            cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
-                            cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
-                    counter = counter + 1
-
-            if not pax_variant.price_percent is None:
-                if cost_1 is None:
-                    price_1, price_1_msg = None, 'Cost for % is empty'
-                else:
-                    price_1, price_1_msg = round(0.499999 + float(cost_1) * (1.0 + float(pax_variant.price_percent) / 100.0)), None
-                if cost_2 is None:
-                    price_2, price_2_msg = None, 'Cost for % is empty'
-                else:
-                    price_2, price_2_msg = round(0.499999 + float(cost_2) * (1.0 + float(pax_variant.price_percent) / 100.0)), None
-                if cost_3 is None:
-                    price_3, price_3_msg = None, 'Cost for % is empty'
-                else:
-                    price_3, price_3_msg = round(0.499999 + float(cost_3) * (1.0 + float(pax_variant.price_percent) / 100.0)), None
+            cost_1, cost_1_msg, price_1, price_1_msg, \
+            cost_2, cost_2_msg, price_2, price_2_msg, \
+            cost_3, cost_3_msg, price_3, price_3_msg = cls._find_quote_pax_variant_amounts(
+                pax_variant, allotment_list, transfer_list, extra_list, package_list, agency)
 
             variant_dict.update({'total': cls._quote_amounts_dict(
                 cost_1, cost_1_msg, price_1, price_1_msg,
@@ -612,6 +474,157 @@ class BookingServices(object):
             result.append(variant_dict)
 
         return 0, '', result
+
+
+    @classmethod
+    def _find_quote_pax_variant_amounts(
+            cls, pax_variant, allotment_list=None, transfer_list=None, extra_list=None, package_list=None,
+            agency=None, variant_dict=None):
+        cost_1, cost_1_msg, price_1, price_1_msg = 0, '', 0, ''
+        cost_2, cost_2_msg, price_2, price_2_msg = 0, '', 0, ''
+        cost_3, cost_3_msg, price_3, price_3_msg = 0, '', 0, ''
+
+        if allotment_list:
+            counter = 0
+            for allotment in allotment_list:
+                if allotment.status == constants.SERVICE_STATUS_CANCELLED:
+                    continue
+                key = '%s' % counter
+                if not hasattr(allotment, 'service'):
+                    if variant_dict:
+                        variant_dict.update({key: cls._no_service_dict()})
+                else:
+                    c1, c1_msg, p1, p1_msg, \
+                    c2, c2_msg, p2, p2_msg, \
+                    c3, c3_msg, p3, p3_msg = cls._find_quoteallotment_amounts(
+                        pax_variant=pax_variant, allotment=allotment, agency=agency)
+
+                    # service amounts
+                    if variant_dict:
+                        variant_dict.update({key: cls._quote_amounts_dict(
+                            c1, c1_msg, p1, p1_msg,
+                            c2, c2_msg, p2, p2_msg,
+                            c3, c3_msg, p3, p3_msg
+                        )})
+                    # variants totals
+                    cost_1, cost_1_msg, price_1, price_1_msg, \
+                    cost_2, cost_2_msg, price_2, price_2_msg, \
+                    cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
+                        cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
+                        cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
+                        cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
+                counter = counter + 1
+
+        if transfer_list:
+            counter = 0
+            for transfer in transfer_list:
+                if transfer.status == constants.SERVICE_STATUS_CANCELLED:
+                    continue
+                key = '2-%s' % counter
+                if not hasattr(transfer, 'service'):
+                    if variant_dict:
+                        variant_dict.update({key: cls._no_service_dict()})
+                else:
+                    c1, c1_msg, p1, p1_msg, \
+                    c2, c2_msg, p2, p2_msg, \
+                    c3, c3_msg, p3, p3_msg = cls._find_quotetransfer_amounts(
+                        pax_variant=pax_variant, transfer=transfer, agency=agency)
+
+                    # service amounts
+                    if variant_dict:
+                        variant_dict.update({key: cls._quote_amounts_dict(
+                            c1, c1_msg, p1, p1_msg,
+                            c2, c2_msg, p2, p2_msg,
+                            c3, c3_msg, p3, p3_msg
+                        )})
+                    # variants totals
+                    cost_1, cost_1_msg, price_1, price_1_msg, \
+                    cost_2, cost_2_msg, price_2, price_2_msg, \
+                    cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
+                        cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
+                        cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
+                        cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
+                counter = counter + 1
+
+        if extra_list:
+            counter = 0
+            for extra in extra_list:
+                if extra.status == constants.SERVICE_STATUS_CANCELLED:
+                    continue
+                key = '3-%s' % counter
+                if not hasattr(extra, 'service'):
+                    if variant_dict:
+                        variant_dict.update({key: cls._no_service_dict()})
+                else:
+                    c1, c1_msg, p1, p1_msg, \
+                    c2, c2_msg, p2, p2_msg, \
+                    c3, c3_msg, p3, p3_msg = cls._find_quoteextra_amounts(
+                        pax_variant=pax_variant, extra=extra, agency=agency)
+
+                    # service amounts
+                    if variant_dict:
+                        variant_dict.update({key: cls._quote_amounts_dict(
+                            c1, c1_msg, p1, p1_msg,
+                            c2, c2_msg, p2, p2_msg,
+                            c3, c3_msg, p3, p3_msg
+                        )})
+                    # variants totals
+                    cost_1, cost_1_msg, price_1, price_1_msg, \
+                    cost_2, cost_2_msg, price_2, price_2_msg, \
+                    cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
+                        cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
+                        cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
+                        cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
+                counter = counter + 1
+
+        if package_list:
+            counter = 0
+            for package in package_list:
+                if package.status == constants.SERVICE_STATUS_CANCELLED:
+                    continue
+                key = '4-%s' % counter
+                if not hasattr(package, 'service'):
+                    if variant_dict:
+                        variant_dict.update({key: cls._no_service_dict()})
+                else:
+                    c1, c1_msg, p1, p1_msg, \
+                    c2, c2_msg, p2, p2_msg, \
+                    c3, c3_msg, p3, p3_msg = cls._find_quotepackage_amounts(
+                        pax_variant=pax_variant, package=package, agency=agency)
+
+                    # service amounts
+                    if variant_dict:
+                        variant_dict.update({key: cls._quote_amounts_dict(
+                            c1, c1_msg, p1, p1_msg,
+                            c2, c2_msg, p2, p2_msg,
+                            c3, c3_msg, p3, p3_msg
+                        )})
+                    # variants totals
+                    cost_1, cost_1_msg, price_1, price_1_msg, \
+                    cost_2, cost_2_msg, price_2, price_2_msg, \
+                    cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
+                        cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
+                        cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
+                        cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
+                counter = counter + 1
+
+        if not pax_variant.price_percent is None:
+            if cost_1 is None:
+                price_1, price_1_msg = None, 'Cost for % is empty'
+            else:
+                price_1, price_1_msg = round(0.499999 + float(cost_1) * (1.0 + float(pax_variant.price_percent) / 100.0)), None
+            if cost_2 is None:
+                price_2, price_2_msg = None, 'Cost for % is empty'
+            else:
+                price_2, price_2_msg = round(0.499999 + float(cost_2) * (1.0 + float(pax_variant.price_percent) / 100.0)), None
+            if cost_3 is None:
+                price_3, price_3_msg = None, 'Cost for % is empty'
+            else:
+                price_3, price_3_msg = round(0.499999 + float(cost_3) * (1.0 + float(pax_variant.price_percent) / 100.0)), None
+
+        return cost_1, cost_1_msg, price_1, price_1_msg, \
+            cost_2, cost_2_msg, price_2, price_2_msg, \
+            cost_3, cost_3_msg, price_3, price_3_msg
 
 
     @classmethod
@@ -2631,10 +2644,11 @@ class BookingServices(object):
         for quote_service in quote_services:
             for quote_pax_variant in quote_pax_variants:
                 try:
-                    quote_service_pax_variant, created = QuoteServicePaxVariant.objects.get_or_create(
+                    quote_service_pax_variant, created = QuoteServicePaxVariant.objects.update_or_create(
                         quote_pax_variant_id=quote_pax_variant.id,
                         quote_service_id=quote_service.id,
-                        defaults={}
+                        defaults=cls._calculate_default_service_pax_variant_amounts(
+                            quote_service, quote_pax_variant, True)
                     )
                     if quote_service.service_type == constants.SERVICE_CATEGORY_PACKAGE:
                         # verify on all services if pax variant exists
@@ -2642,11 +2656,12 @@ class BookingServices(object):
                             quote_package=quote_service.id))
 
                         for quotepackage_service in quotepackage_services:
-                            quotepackage_service_pax_variant, created = QuotePackageServicePaxVariant.objects.get_or_create(
+                            quotepackage_service_pax_variant, created = QuotePackageServicePaxVariant.objects.update_or_create(
                                 quotepackage_pax_variant_id=quote_service_pax_variant.id,
                                 quotepackage_service_id=quotepackage_service.id,
-                                defaults={}
-                            )
+                                defaults=cls._calculate_default_service_pax_variant_amounts(
+                                    quotepackage_service, quote_service_pax_variant, True)
+                                )
                 except Exception as ex:
                     print(ex)
         return
@@ -2659,7 +2674,7 @@ class BookingServices(object):
         quote_pax_variants = list(QuotePaxVariant.objects.all().filter(quote=quote.id))
         # for each quote pax variant get or create
         for quote_pax_variant in quote_pax_variants:
-            defaults = cls.calculate_default_service_pax_variant_amounts(
+            defaults = cls._calculate_default_service_pax_variant_amounts(
                 quote_service,
                 quote_pax_variant)
             try:
@@ -2710,7 +2725,20 @@ class BookingServices(object):
 
 
     @classmethod
-    def calculate_default_service_pax_variant_amounts(cls, quote_service, quote_pax_variant):
+    def _find_quoteservice_pax_variant_amounts(cls, in_quote_service, quote_pax_variant, for_update=False):
+        if isinstance(in_quote_service, QuoteService):
+            if in_quote_service.service_type == constants.SERVICE_CATEGORY_ALLOTMENT:
+                quote_service = QuoteAllotment.objects.get(pk=in_quote_service.id)
+            elif in_quote_service.service_type == constants.SERVICE_CATEGORY_TRANSFER:
+                quote_service = QuoteTransfer.objects.get(pk=in_quote_service.id)
+            elif in_quote_service.service_type == constants.SERVICE_CATEGORY_EXTRA:
+                quote_service = QuoteExtra.objects.get(pk=in_quote_service.id)
+            elif in_quote_service.service_type == constants.SERVICE_CATEGORY_PACKAGE:
+                quote_service = QuotePackage.objects.get(pk=in_quote_service.id)
+            else:
+                return None, "Unknow Service", None, "Unknow Service", None, "Unknow Service", None, "Unknow Service", None, "Unknow Service", None, "Unknow Service"
+        else:
+            quote_service = in_quote_service
 
         if isinstance(quote_service, QuoteAllotment):
             c1, c1_msg, p1, p1_msg, \
@@ -2728,12 +2756,36 @@ class BookingServices(object):
             c3, c3_msg, p3, p3_msg = cls._find_quoteextra_amounts(
                 pax_variant=quote_pax_variant, extra=quote_service, agency=quote_service.quote.agency)
         elif isinstance(quote_service, QuotePackage):
-            c1, c1_msg, p1, p1_msg, \
-            c2, c2_msg, p2, p2_msg, \
-            c3, c3_msg, p3, p3_msg = cls._find_quotepackage_amounts(
+            return cls._find_quotepackage_amounts(
                 pax_variant=quote_pax_variant, package=quote_service, agency=quote_service.quote.agency)
         else:
-            c1, c2, c3, p1, p2, p3 = None, None, None, None, None, None
+            return None, "Unknow Service", None, "Unknow Service", None, "Unknow Service", None, "Unknow Service", None, "Unknow Service", None, "Unknow Service"
+        if for_update:
+            try:
+                quoteservice_pax_variant = QuoteServicePaxVariant.objects.get(
+                    quote_service_id=quote_service.id,
+                    quote_pax_variant_id=quote_pax_variant.id)
+                if quoteservice_pax_variant.manual_costs:
+                    c1, c1_msg = quoteservice_pax_variant.cost_single_amount, None
+                    c2, c2_msg = quoteservice_pax_variant.cost_double_amount, None
+                    c3, c3_msg = quoteservice_pax_variant.cost_triple_amount, None
+                if quoteservice_pax_variant.manual_prices:
+                    p1, p1_msg = quoteservice_pax_variant.price_single_amount, None
+                    p2, p2_msg = quoteservice_pax_variant.price_double_amount, None
+                    p3, p3_msg = quoteservice_pax_variant.price_triple_amount, None
+
+            except QuoteServicePaxVariant.DoesNotExist:
+                pass
+
+        return c1, c1_msg, p1, p1_msg, c2, c2_msg, p2, p2_msg, c3, c3_msg, p3, p3_msg
+
+    @classmethod
+    def _calculate_default_service_pax_variant_amounts(cls, quote_service, quote_pax_variant, for_update=True):
+
+        c1, c1_msg, p1, p1_msg, \
+        c2, c2_msg, p2, p2_msg, \
+        c3, c3_msg, p3, p3_msg = cls._find_quoteservice_pax_variant_amounts(
+                quote_service, quote_pax_variant, for_update)
 
         return {
             'cost_single_amount': c1,
@@ -2752,7 +2804,7 @@ class BookingServices(object):
         quotepackage_pax_variants = list(QuoteServicePaxVariant.objects.all().filter(quote_service=quote_package.id))
         # for each quotepackage pax variant get or create
         for quotepackage_pax_variant in quotepackage_pax_variants:
-            defaults = cls.calculate_default_service_pax_variant_amounts(
+            defaults = cls._calculate_default_service_pax_variant_amounts(
                 quotepackage_service,
                 quotepackage_pax_variant)
             try:

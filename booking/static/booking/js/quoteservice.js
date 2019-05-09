@@ -54,46 +54,10 @@ $(document).ready(function(){
       amount_text = 'cost';
     }
     sa = $('#' + idx + '-span-' + amount_letter + amount_idx);
-    if (checkboxManual[0] != undefined) {
-      isManual = checkboxManual[0].checked;
-      if (amount_idx == 1) {
-        ia = $('#id_quoteservice_paxvariants-' + idx + '-' + amount_text + '_single_amount');
-      } else if (amount_idx == 2) {
-        ia = $('#id_quoteservice_paxvariants-' + idx + '-' + amount_text + '_double_amount');
-      } else {
-        ia = $('#id_quoteservice_paxvariants-' + idx + '-' + amount_text + '_triple_amount');
-      }
-      if (data_amount) {
-        sa.html(data_amount);
-        if (!isManual) {
-          ia[0].value = Number(data_amount);
-        }
-      } else {
-        sa.html(data_amount_msg);
-        if (!isManual) {
-          ia[0].value = '';
-        }
-      }
+    if (data_amount) {
+      sa.html(data_amount);
     } else {
-      isManual = $('#quoteservice_paxvariants-' + idx + ' div.field-manual_' + amount_text + 's div.field-manual_' + amount_text + 's div.readonly img').attr('src').includes('icon-yes');
-      if (amount_idx == 1) {
-        ia = $('#quoteservice_paxvariants-' + idx + ' div.field-' + amount_text + '_single_amount div.field-' + amount_text + '_single_amount div.readonly');
-      } else if (amount_idx == 2) {
-        ia = $('#quoteservice_paxvariants-' + idx + ' div.field-' + amount_text + '_double_amount div.field-' + amount_text + '_double_amount div.readonly');
-      } else {
-        ia = $('#quoteservice_paxvariants-' + idx + ' div.field-' + amount_text + '_triple_amount div.field-' + amount_text + '_triple_amount div.readonly');
-      }
-      if (data_amount) {
-        sa.html(data_amount);
-        if (!isManual) {
-          ia.html(Number(data_amount));
-        }
-      } else {
-        sa.html(data_amount_msg);
-        if (!isManual) {
-          ia.html('');
-        }
-      }
+      sa.html(data_amount_msg);
     }
   }
 
