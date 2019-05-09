@@ -151,21 +151,20 @@ $(document).ready(function(){
 
   function show_buttons() {
     for (idx = 0; idx < 50; idx++) {
+      $('#' + idx + '-btn-c1').detach();
+      $('#' + idx + '-span-c1').detach();
+      $('#' + idx + '-btn-c2').detach();
+      $('#' + idx + '-span-c2').detach();
+      $('#' + idx + '-btn-c3').detach();
+      $('#' + idx + '-span-c3').detach();
+      $('#' + idx + '-btn-p1').detach();
+      $('#' + idx + '-span-p1').detach();
+      $('#' + idx + '-btn-p2').detach();
+      $('#' + idx + '-span-p2').detach();
+      $('#' + idx + '-btn-p3').detach();
+      $('#' + idx + '-span-p3').detach();
       field = $('#id_quoteservice_paxvariants-' + idx + '-cost_single_amount');
       if (field[0] != undefined) {
-        $('#' + idx + '-btn-c1').detach();
-        $('#' + idx + '-span-c1').detach();
-        $('#' + idx + '-btn-c2').detach();
-        $('#' + idx + '-span-c2').detach();
-        $('#' + idx + '-btn-c3').detach();
-        $('#' + idx + '-span-c3').detach();
-        $('#' + idx + '-btn-p1').detach();
-        $('#' + idx + '-span-p1').detach();
-        $('#' + idx + '-btn-p2').detach();
-        $('#' + idx + '-span-p2').detach();
-        $('#' + idx + '-btn-p3').detach();
-        $('#' + idx + '-span-p3').detach();
-        
         $('#id_quoteservice_paxvariants-' + idx + '-cost_single_amount').after('<button id="' + idx + '-btn-c1" class="btn btn-copy-cost"><<</button><span id="' + idx + '-span-c1" class="computed-value">N/A</span>');
         $('#id_quoteservice_paxvariants-' + idx + '-cost_double_amount').after('<button id="' + idx + '-btn-c2" class="btn btn-copy-cost"><<</button><span id="' + idx + '-span-c2" class="computed-value">N/A</span>');
         $('#id_quoteservice_paxvariants-' + idx + '-cost_triple_amount').after('<button id="' + idx + '-btn-c3" class="btn btn-copy-cost"><<</button><span id="' + idx + '-span-c3" class="computed-value">N/A</span>');
@@ -175,7 +174,17 @@ $(document).ready(function(){
         changed_manual_costs($('#id_quoteservice_paxvariants-' + idx + '-manual_costs')[0]);
         changed_manual_prices($('#id_quoteservice_paxvariants-' + idx + '-manual_prices')[0]);
       } else {
-        break;
+        field = $('#quoteservice_paxvariants-' + idx + ' div.field-cost_single_amount div.field-cost_single_amount div.readonly');
+        if (field[0] != undefined) {
+          $('#quoteservice_paxvariants-' + idx + ' div.field-cost_single_amount div.field-cost_single_amount div.readonly').after('<span id="' + idx + '-span-c1" class="computed-value">N/A</span>');
+          $('#quoteservice_paxvariants-' + idx + ' div.field-cost_double_amount div.field-cost_double_amount div.readonly').after('<span id="' + idx + '-span-c2" class="computed-value">N/A</span>');
+          $('#quoteservice_paxvariants-' + idx + ' div.field-cost_triple_amount div.field-cost_triple_amount div.readonly').after('<span id="' + idx + '-span-c3" class="computed-value">N/A</span>');
+          $('#quoteservice_paxvariants-' + idx + ' div.field-price_single_amount div.field-price_single_amount div.readonly').after('<span id="' + idx + '-span-p1" class="computed-value">N/A</span>');
+          $('#quoteservice_paxvariants-' + idx + ' div.field-price_double_amount div.field-price_double_amount div.readonly').after('<span id="' + idx + '-span-p2" class="computed-value">N/A</span>');
+          $('#quoteservice_paxvariants-' + idx + ' div.field-price_triple_amount div.field-price_triple_amount div.readonly').after('<span id="' + idx + '-span-p3" class="computed-value">N/A</span>');
+        } else {
+          break;
+        }
       }
     }
 

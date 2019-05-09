@@ -51,13 +51,6 @@ $(document).ready(function(){
       amount_text = 'cost';
     }
     sa = $('#' + idx + '-span-' + amount_letter + amount_idx);
-    if (amount_idx == 1) {
-      ia = $('#quote_paxvariants-' + idx + ' div.field-' + amount_text + '_single_amount div.field-' + amount_text + '_single_amount div.readonly');
-    } else if (amount_idx == 2) {
-      ia = $('#quote_paxvariants-' + idx + ' div.field-' + amount_text + '_double_amount div.field-' + amount_text + '_double_amount div.readonly');
-    } else {
-      ia = $('#quote_paxvariants-' + idx + ' div.field-' + amount_text + '_triple_amount div.field-' + amount_text + '_triple_amount div.readonly');
-    }
     if (data_amount) {
       sa.html(data_amount);
     } else {
