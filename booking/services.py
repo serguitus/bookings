@@ -464,7 +464,8 @@ class BookingServices(object):
             cost_1, cost_1_msg, price_1, price_1_msg, \
             cost_2, cost_2_msg, price_2, price_2_msg, \
             cost_3, cost_3_msg, price_3, price_3_msg = cls._find_quote_pax_variant_amounts(
-                pax_variant, allotment_list, transfer_list, extra_list, package_list, agency)
+                pax_variant, allotment_list, transfer_list, extra_list, package_list,
+                agency, variant_dict)
 
             variant_dict.update({'total': cls._quote_amounts_dict(
                 cost_1, cost_1_msg, price_1, price_1_msg,
@@ -478,8 +479,8 @@ class BookingServices(object):
 
     @classmethod
     def _find_quote_pax_variant_amounts(
-            cls, pax_variant, allotment_list=None, transfer_list=None, extra_list=None, package_list=None,
-            agency=None, variant_dict=None):
+            cls, pax_variant, allotment_list, transfer_list, extra_list, package_list,
+            agency, variant_dict=None):
         cost_1, cost_1_msg, price_1, price_1_msg = 0, '', 0, ''
         cost_2, cost_2_msg, price_2, price_2_msg = 0, '', 0, ''
         cost_3, cost_3_msg, price_3, price_3_msg = 0, '', 0, ''
@@ -2644,12 +2645,6 @@ class BookingServices(object):
         for quote_service in quote_services:
             for quote_pax_variant in quote_pax_variants:
                 try:
-                    quote_service_pax_variant, created = QuoteServicePaxVariant.objects.update_or_create(
-                        quote_pax_variant_id=quote_pax_variant.id,
-                        quote_service_id=quote_service.id,
-                        defaults=cls._calculate_default_service_pax_variant_amounts(
-                            quote_service, quote_pax_variant, True)
-                    )
                     if quote_service.service_type == constants.SERVICE_CATEGORY_PACKAGE:
                         # verify on all services if pax variant exists
                         quotepackage_services = list(QuotePackageService.objects.all().filter(
@@ -2662,6 +2657,13 @@ class BookingServices(object):
                                 defaults=cls._calculate_default_service_pax_variant_amounts(
                                     quotepackage_service, quote_service_pax_variant, True)
                                 )
+                    else:
+                        quote_service_pax_variant, created = QuoteServicePaxVariant.objects.update_or_create(
+                            quote_pax_variant_id=quote_pax_variant.id,
+                            quote_service_id=quote_service.id,
+                            defaults=cls._calculate_default_service_pax_variant_amounts(
+                                quote_service, quote_pax_variant, True)
+                        )
                 except Exception as ex:
                     print(ex)
         return
@@ -2886,6 +2888,21 @@ class BookingServices(object):
         else:
             cost_single_amount, cost_double_amount, cost_triple_amount = None, None, None
             price_single_amount, price_double_amount, price_triple_amount = None, None, None
+
+        if not quote_pax_variant.price_percent is None:
+            if cost_single_amount is None:
+                price_single_amount = None
+            else:
+                price_single_amount = round(0.499999 + float(cost_single_amount) * (1.0 + float(quote_pax_variant.price_percent) / 100.0))
+            if cost_double_amount is None:
+                price_double_amount = None
+            else:
+                price_double_amount = round(0.499999 + float(cost_double_amount) * (1.0 + float(quote_pax_variant.price_percent) / 100.0))
+            if cost_triple_amount is None:
+                price_triple_amount = None
+            else:
+                price_triple_amount = round(0.499999 + float(cost_triple_amount) * (1.0 + float(quote_pax_variant.price_percent) / 100.0))
+
 
         fields = []
         if quote_pax_variant.cost_single_amount != cost_single_amount:
