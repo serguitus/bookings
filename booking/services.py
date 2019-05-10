@@ -2643,6 +2643,12 @@ class BookingServices(object):
         for quote_service in quote_services:
             for quote_pax_variant in quote_pax_variants:
                 try:
+                    quote_service_pax_variant, created = QuoteServicePaxVariant.objects.update_or_create(
+                        quote_pax_variant_id=quote_pax_variant.id,
+                        quote_service_id=quote_service.id,
+                        defaults=cls._calculate_default_service_pax_variant_amounts(
+                            quote_service, quote_pax_variant, True)
+                    )
                     if quote_service.service_type == constants.SERVICE_CATEGORY_PACKAGE:
                         # verify on all services if pax variant exists
                         quotepackage_services = list(QuotePackageService.objects.all().filter(
@@ -2655,13 +2661,6 @@ class BookingServices(object):
                                 defaults=cls._calculate_default_service_pax_variant_amounts(
                                     quotepackage_service, quote_service_pax_variant, True)
                                 )
-                    else:
-                        quote_service_pax_variant, created = QuoteServicePaxVariant.objects.update_or_create(
-                            quote_pax_variant_id=quote_pax_variant.id,
-                            quote_service_id=quote_service.id,
-                            defaults=cls._calculate_default_service_pax_variant_amounts(
-                                quote_service, quote_pax_variant, True)
-                        )
                 except Exception as ex:
                     print(ex)
         return
@@ -2725,41 +2724,113 @@ class BookingServices(object):
 
 
     @classmethod
-    def _find_quoteservice_pax_variant_amounts(cls, in_quote_service, quote_pax_variant, for_update=False):
-        if isinstance(in_quote_service, QuoteService):
-            if in_quote_service.service_type == constants.SERVICE_CATEGORY_ALLOTMENT:
-                quote_service = QuoteAllotment.objects.get(pk=in_quote_service.id)
-            elif in_quote_service.service_type == constants.SERVICE_CATEGORY_TRANSFER:
-                quote_service = QuoteTransfer.objects.get(pk=in_quote_service.id)
-            elif in_quote_service.service_type == constants.SERVICE_CATEGORY_EXTRA:
-                quote_service = QuoteExtra.objects.get(pk=in_quote_service.id)
-            elif in_quote_service.service_type == constants.SERVICE_CATEGORY_PACKAGE:
-                quote_service = QuotePackage.objects.get(pk=in_quote_service.id)
-            else:
-                return None, "Unknow Service", None, "Unknow Service", None, "Unknow Service", None, "Unknow Service", None, "Unknow Service", None, "Unknow Service"
+    def _find_quoteservice_pax_variant_amounts(cls, in_quote_service, in_quote_pax_variant, for_update=False):
+        if isinstance(in_quote_pax_variant, QuotePaxVariant):
+            quote_pax_variant = in_quote_pax_variant
+        elif isinstance(in_quote_pax_variant, QuoteServicePaxVariant):
+            quote_pax_variant = in_quote_pax_variant.quote_pax_variant
+        elif isinstance(in_quote_pax_variant, QuotePackageServicePaxVariant):
+            quote_pax_variant = in_quote_pax_variant.quotepackage_pax_variant.quote_pax_variant
         else:
-            quote_service = in_quote_service
+            return None, "Unknow Pax Variant", None, "Unknow Pax Variant", None, "Unknow Pax Variant", None, "Unknow Pax Variant", None, "Unknow Pax Variant", None, "Unknow Pax Variant"
 
+        quote_service = in_quote_service
         if isinstance(quote_service, QuoteAllotment):
             c1, c1_msg, p1, p1_msg, \
             c2, c2_msg, p2, p2_msg, \
             c3, c3_msg, p3, p3_msg = cls._find_quoteallotment_amounts(
-                pax_variant=quote_pax_variant, allotment=quote_service, agency=quote_service.quote.agency)
+                pax_variant=quote_pax_variant, allotment=quote_service,
+                agency=quote_service.quote.agency)
         elif isinstance(quote_service, QuoteTransfer):
             c1, c1_msg, p1, p1_msg, \
             c2, c2_msg, p2, p2_msg, \
             c3, c3_msg, p3, p3_msg = cls._find_quotetransfer_amounts(
-                pax_variant=quote_pax_variant, transfer=quote_service, agency=quote_service.quote.agency)
+                pax_variant=quote_pax_variant, transfer=quote_service,
+                agency=quote_service.quote.agency)
         elif isinstance(quote_service, QuoteExtra):
             c1, c1_msg, p1, p1_msg, \
             c2, c2_msg, p2, p2_msg, \
             c3, c3_msg, p3, p3_msg = cls._find_quoteextra_amounts(
-                pax_variant=quote_pax_variant, extra=quote_service, agency=quote_service.quote.agency)
+                pax_variant=quote_pax_variant, extra=quote_service,
+                agency=quote_service.quote.agency)
         elif isinstance(quote_service, QuotePackage):
             return cls._find_quotepackage_amounts(
-                pax_variant=quote_pax_variant, package=quote_service, agency=quote_service.quote.agency)
+                pax_variant=quote_pax_variant, package=quote_service,
+                agency=quote_service.quote.agency)
+        if isinstance(quote_service, QuotePackageAllotment):
+            c1, c1_msg, p1, p1_msg, \
+            c2, c2_msg, p2, p2_msg, \
+            c3, c3_msg, p3, p3_msg = cls._find_quoteallotment_amounts(
+                pax_variant=quote_pax_variant, allotment=quote_service,
+                agency=quote_service.quote_package.quote.agency)
+        elif isinstance(quote_service, QuotePackageTransfer):
+            c1, c1_msg, p1, p1_msg, \
+            c2, c2_msg, p2, p2_msg, \
+            c3, c3_msg, p3, p3_msg = cls._find_quotetransfer_amounts(
+                pax_variant=quote_pax_variant, transfer=quote_service,
+                agency=quote_service.quote_package.quote.agency)
+        elif isinstance(quote_service, QuotePackageExtra):
+            c1, c1_msg, p1, p1_msg, \
+            c2, c2_msg, p2, p2_msg, \
+            c3, c3_msg, p3, p3_msg = cls._find_quoteextra_amounts(
+                pax_variant=quote_pax_variant, extra=quote_service,
+                agency=quote_service.quote_package.quote.agency)
+        elif isinstance(quote_service, QuoteService):
+            if quote_service.service_type == constants.SERVICE_CATEGORY_ALLOTMENT:
+                quote_service = QuoteAllotment.objects.get(pk=quote_service.id)
+                c1, c1_msg, p1, p1_msg, \
+                c2, c2_msg, p2, p2_msg, \
+                c3, c3_msg, p3, p3_msg = cls._find_quoteallotment_amounts(
+                    pax_variant=quote_pax_variant, allotment=quote_service,
+                    agency=quote_service.quote.agency)
+            elif quote_service.service_type == constants.SERVICE_CATEGORY_TRANSFER:
+                quote_service = QuoteTransfer.objects.get(pk=quote_service.id)
+                c1, c1_msg, p1, p1_msg, \
+                c2, c2_msg, p2, p2_msg, \
+                c3, c3_msg, p3, p3_msg = cls._find_quotetransfer_amounts(
+                    pax_variant=quote_pax_variant, transfer=quote_service,
+                    agency=quote_service.quote.agency)
+            elif quote_service.service_type == constants.SERVICE_CATEGORY_EXTRA:
+                quote_service = QuoteExtra.objects.get(pk=quote_service.id)
+                c1, c1_msg, p1, p1_msg, \
+                c2, c2_msg, p2, p2_msg, \
+                c3, c3_msg, p3, p3_msg = cls._find_quoteextra_amounts(
+                    pax_variant=quote_pax_variant, extra=quote_service,
+                    agency=quote_service.quote.agency)
+            elif in_quote_service.service_type == constants.SERVICE_CATEGORY_PACKAGE:
+                quote_service = QuotePackage.objects.get(pk=in_quote_service.id)
+                return cls._find_quotepackage_amounts(
+                    pax_variant=quote_pax_variant, package=quote_service,
+                    agency=quote_service.quote.agency)
+            else:
+                return None, "Unknow Service", None, "Unknow Service", None, "Unknow Service", None, "Unknow Service", None, "Unknow Service", None, "Unknow Service"
+        elif isinstance(quote_service, QuotePackageService):
+            if quote_service.service_type == constants.SERVICE_CATEGORY_ALLOTMENT:
+                quote_service = QuotePackageAllotment.objects.get(pk=quote_service.id)
+                c1, c1_msg, p1, p1_msg, \
+                c2, c2_msg, p2, p2_msg, \
+                c3, c3_msg, p3, p3_msg = cls._find_quoteallotment_amounts(
+                    pax_variant=quote_pax_variant, allotment=quote_service,
+                    agency=quote_service.quote_package.quote.agency)
+            elif quote_service.service_type == constants.SERVICE_CATEGORY_TRANSFER:
+                quote_service = QuotePackageTransfer.objects.get(pk=quote_service.id)
+                c1, c1_msg, p1, p1_msg, \
+                c2, c2_msg, p2, p2_msg, \
+                c3, c3_msg, p3, p3_msg = cls._find_quotetransfer_amounts(
+                    pax_variant=quote_pax_variant, transfer=quote_service,
+                    agency=quote_service.quote_package.quote.agency)
+            elif quote_service.service_type == constants.SERVICE_CATEGORY_EXTRA:
+                quote_service = QuotePackageExtra.objects.get(pk=quote_service.id)
+                c1, c1_msg, p1, p1_msg, \
+                c2, c2_msg, p2, p2_msg, \
+                c3, c3_msg, p3, p3_msg = cls._find_quoteextra_amounts(
+                    pax_variant=quote_pax_variant, extra=quote_service,
+                    agency=quote_service.quote_package.quote.agency)
+            else:
+                return None, "Unknow Service", None, "Unknow Service", None, "Unknow Service", None, "Unknow Service", None, "Unknow Service", None, "Unknow Service"
         else:
             return None, "Unknow Service", None, "Unknow Service", None, "Unknow Service", None, "Unknow Service", None, "Unknow Service", None, "Unknow Service"
+
         if for_update:
             try:
                 quoteservice_pax_variant = QuoteServicePaxVariant.objects.get(
@@ -3049,3 +3120,29 @@ class BookingServices(object):
                 else:
                     return round(0.499999 + float(amount))
         return amount
+
+
+    @classmethod
+    def setup_quotepackageservice_pax_variant_amounts(cls, quotepackageservice_pax_variant):
+        if quotepackageservice_pax_variant.manual_costs is None:
+            quotepackageservice_pax_variant.manual_costs = False
+        if quotepackageservice_pax_variant.manual_prices is None:
+            quotepackageservice_pax_variant.manual_prices = False
+
+        if not quotepackageservice_pax_variant.manual_costs or not quotepackageservice_pax_variant.manual_prices:
+
+            c1, c1_msg, p1, p1_msg, \
+            c2, c2_msg, p2, p2_msg, \
+            c3, c3_msg, p3, p3_msg = cls._find_quoteservice_pax_variant_amounts(
+                quotepackageservice_pax_variant.quotepackage_service,
+                quotepackageservice_pax_variant.quotepackage_pax_variant.quote_pax_variant,
+                True)
+
+            if not quotepackageservice_pax_variant.manual_costs:
+                quotepackageservice_pax_variant.cost_single_amount = c1
+                quotepackageservice_pax_variant.cost_double_amount = c2
+                quotepackageservice_pax_variant.cost_triple_amount = c3
+            if not quotepackageservice_pax_variant.manual_prices:
+                quotepackageservice_pax_variant.price_single_amount = p1
+                quotepackageservice_pax_variant.price_double_amount = p2
+                quotepackageservice_pax_variant.price_triple_amount = p3

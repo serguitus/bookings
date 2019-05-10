@@ -140,7 +140,19 @@ class PackageSiteModel(SiteModel):
         PackageAllotmentInLine, PackageTransferInLine, PackageExtraInLine]
 
 
-class PackageAllotmentSiteModel(SiteModel):
+class PackageServiceSiteModel(SiteModel):
+    def response_post_save_add(self, request, obj):
+        if hasattr(obj, 'package') and obj.package:
+            return redirect(reverse('common:booking_package_change', args=[obj.package.pk]))
+        return super(PackageServiceSiteModel, self).response_post_save_add(request, obj)
+
+    def response_post_save_change(self, request, obj):
+        if hasattr(obj, 'package') and obj.package:
+            return redirect(reverse('common:booking_package_change', args=[obj.package.pk]))
+        return super(PackageServiceSiteModel, self).response_post_save_change(request, obj)
+
+
+class PackageAllotmentSiteModel(PackageServiceSiteModel):
     model_order = 1020
     menu_label = MENU_LABEL_PACKAGE
     menu_group = MENU_GROUP_LABEL_SERVICES
@@ -154,14 +166,8 @@ class PackageAllotmentSiteModel(SiteModel):
     ordering = ('package__name', 'days_after', 'service__name',)
     form = PackageAllotmentForm
 
-    def response_post_save_add(self, request, obj):
-        return redirect(reverse('common:booking_package_change', args=[obj.package.pk]))
 
-    def response_post_save_change(self, request, obj):
-        return redirect(reverse('common:booking_package_change', args=[obj.package.pk]))
-
-
-class PackageTransferSiteModel(SiteModel):
+class PackageTransferSiteModel(PackageServiceSiteModel):
     model_order = 1030
     menu_label = MENU_LABEL_PACKAGE
     menu_group = MENU_GROUP_LABEL_SERVICES
@@ -179,14 +185,8 @@ class PackageTransferSiteModel(SiteModel):
     ordering = ('package__name', 'days_after', 'service__name',)
     form = PackageTransferForm
 
-    def response_post_save_add(self, request, obj):
-        return redirect(reverse('common:booking_package_change', args=[obj.package.pk]))
 
-    def response_post_save_change(self, request, obj):
-        return redirect(reverse('common:booking_package_change', args=[obj.package.pk]))
-
-
-class PackageExtraSiteModel(SiteModel):
+class PackageExtraSiteModel(PackageServiceSiteModel):
     model_order = 1040
     menu_label = MENU_LABEL_PACKAGE
     menu_group = MENU_GROUP_LABEL_SERVICES
@@ -200,12 +200,6 @@ class PackageExtraSiteModel(SiteModel):
     top_filters = ('package__name', 'service',)
     ordering = ('package__name', 'days_after', 'service__name',)
     form = PackageExtraForm
-
-    def response_post_save_add(self, request, obj):
-        return redirect(reverse('common:booking_package_change', args=[obj.package.pk]))
-
-    def response_post_save_change(self, request, obj):
-        return redirect(reverse('common:booking_package_change', args=[obj.package.pk]))
 
 
 # Starts Quote Section
@@ -396,20 +390,12 @@ class QuoteServiceSiteModel(SiteModel):
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'quote') and obj.quote:
             return redirect(reverse('common:booking_quote_change', args=[obj.quote.pk]))
-        else:
-            return super(QuoteServiceSiteModel, self).response_post_save_add(request, obj)
+        return super(QuoteServiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
         if hasattr(obj, 'quote') and obj.quote:
             return redirect(reverse('common:booking_quote_change', args=[obj.quote.pk]))
-        else:
-            return super(QuoteServiceSiteModel, self).response_post_save_add(request, obj)
-
-    def save_model(self, request, obj, form, change):
-        # overrides base class method
-        if not hasattr(obj, 'id') or not obj.id or not request.user.has_perm("booking.change_amounts"):
-            obj.update_service_pax_variants = True
-        obj.save()
+        return super(QuoteServiceSiteModel, self).response_post_save_change(request, obj)
 
 
 class QuoteAllotmentSiteModel(QuoteServiceSiteModel):
@@ -512,16 +498,14 @@ class QuotePackageSiteModel(QuoteServiceSiteModel):
 
 class QuotePackageServiceSiteModel(SiteModel):
     def response_post_save_add(self, request, obj):
-        return redirect(reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
+        if hasattr(obj, 'quote_package') and obj.quote_package:
+            return redirect(reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
+        return super(QuotePackageServiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
-        return redirect(reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
-
-    def save_model(self, request, obj, form, change):
-        # overrides base class method
-        if not hasattr(obj, 'id') or not obj.id or not request.user.has_perm("booking.change_amounts"):
-            obj.update_package_service_pax_variants = True
-        obj.save()
+        if hasattr(obj, 'quote_package') and obj.quote_package:
+            return redirect(reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
+        return super(QuotePackageServiceSiteModel, self).response_post_save_change(request, obj)
 
 
 class QuotePackageServicePaxVariantInline(CommonStackedInline):

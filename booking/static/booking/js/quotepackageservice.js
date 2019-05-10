@@ -54,46 +54,10 @@ $(document).ready(function(){
       amount_text = 'cost';
     }
     sa = $('#' + idx + '-span-' + amount_letter + amount_idx);
-    if (checkboxManual[0] != undefined) {
-      isManual = checkboxManual[0].checked;
-      if (amount_idx == 1) {
-        ia = $('#id_quotepackageservice_paxvariants-' + idx + '-' + amount_text + '_single_amount');
-      } else if (amount_idx == 2) {
-        ia = $('#id_quotepackageservice_paxvariants-' + idx + '-' + amount_text + '_double_amount');
-      } else {
-        ia = $('#id_quotepackageservice_paxvariants-' + idx + '-' + amount_text + '_triple_amount');
-      }
-      if (data_amount) {
-        sa.html(data_amount);
-        if (!isManual) {
-          ia[0].value = Number(data_amount);
-        }
-      } else {
-        sa.html(data_amount_msg);
-        if (!isManual) {
-          ia[0].value = '';
-        }
-      }
+    if (data_amount) {
+      sa.html(data_amount);
     } else {
-      isManual = $('#quotepackageservice_paxvariants-' + idx + ' div.field-manual_' + amount_text + 's div.field-manual_' + amount_text + 's div.readonly img').attr('src').includes('icon-yes');
-      if (amount_idx == 1) {
-        ia = $('#quotepackageservice_paxvariants-' + idx + ' div.field-' + amount_text + '_single_amount div.field-' + amount_text + '_single_amount div.readonly');
-      } else if (amount_idx == 2) {
-        ia = $('#quotepackageservice_paxvariants-' + idx + ' div.field-' + amount_text + '_double_amount div.field-' + amount_text + '_double_amount div.readonly');
-      } else {
-        ia = $('#quotepackageservice_paxvariants-' + idx + ' div.field-' + amount_text + '_triple_amount div.field-' + amount_text + '_triple_amount div.readonly');
-      }
-      if (data_amount) {
-        sa.html(data_amount);
-        if (!isManual) {
-          ia.html(Number(data_amount));
-        }
-      } else {
-        sa.html(data_amount_msg);
-        if (!isManual) {
-          ia.html('');
-        }
-      }
+      sa.html(data_amount_msg);
     }
   }
 
@@ -187,21 +151,20 @@ $(document).ready(function(){
 
   function show_buttons() {
     for (idx = 0; idx < 50; idx++) {
+      $('#' + idx + '-btn-c1').detach();
+      $('#' + idx + '-span-c1').detach();
+      $('#' + idx + '-btn-c2').detach();
+      $('#' + idx + '-span-c2').detach();
+      $('#' + idx + '-btn-c3').detach();
+      $('#' + idx + '-span-c3').detach();
+      $('#' + idx + '-btn-p1').detach();
+      $('#' + idx + '-span-p1').detach();
+      $('#' + idx + '-btn-p2').detach();
+      $('#' + idx + '-span-p2').detach();
+      $('#' + idx + '-btn-p3').detach();
+      $('#' + idx + '-span-p3').detach();
       field = $('#id_quotepackageservice_paxvariants-' + idx + '-cost_single_amount');
       if (field[0] != undefined) {
-        $('#' + idx + '-btn-c1').detach();
-        $('#' + idx + '-span-c1').detach();
-        $('#' + idx + '-btn-c2').detach();
-        $('#' + idx + '-span-c2').detach();
-        $('#' + idx + '-btn-c3').detach();
-        $('#' + idx + '-span-c3').detach();
-        $('#' + idx + '-btn-p1').detach();
-        $('#' + idx + '-span-p1').detach();
-        $('#' + idx + '-btn-p2').detach();
-        $('#' + idx + '-span-p2').detach();
-        $('#' + idx + '-btn-p3').detach();
-        $('#' + idx + '-span-p3').detach();
-        
         $('#id_quotepackageservice_paxvariants-' + idx + '-cost_single_amount').after('<button id="' + idx + '-btn-c1" class="btn btn-copy-cost"><<</button><span id="' + idx + '-span-c1" class="computed-value">N/A</span>');
         $('#id_quotepackageservice_paxvariants-' + idx + '-cost_double_amount').after('<button id="' + idx + '-btn-c2" class="btn btn-copy-cost"><<</button><span id="' + idx + '-span-c2" class="computed-value">N/A</span>');
         $('#id_quotepackageservice_paxvariants-' + idx + '-cost_triple_amount').after('<button id="' + idx + '-btn-c3" class="btn btn-copy-cost"><<</button><span id="' + idx + '-span-c3" class="computed-value">N/A</span>');
@@ -211,7 +174,17 @@ $(document).ready(function(){
         changed_manual_costs($('#id_quotepackageservice_paxvariants-' + idx + '-manual_costs')[0]);
         changed_manual_prices($('#id_quotepackageservice_paxvariants-' + idx + '-manual_prices')[0]);
       } else {
-        break;
+        field = $('#quotepackageservice_paxvariants-' + idx + ' div.field-cost_single_amount div.field-cost_single_amount div.readonly');
+        if (field[0] != undefined) {
+          $('#quotepackageservice_paxvariants-' + idx + ' div.field-cost_single_amount div.field-cost_single_amount div.readonly').after('<span id="' + idx + '-span-c1" class="computed-value">N/A</span>');
+          $('#quotepackageservice_paxvariants-' + idx + ' div.field-cost_double_amount div.field-cost_double_amount div.readonly').after('<span id="' + idx + '-span-c2" class="computed-value">N/A</span>');
+          $('#quotepackageservice_paxvariants-' + idx + ' div.field-cost_triple_amount div.field-cost_triple_amount div.readonly').after('<span id="' + idx + '-span-c3" class="computed-value">N/A</span>');
+          $('#quotepackageservice_paxvariants-' + idx + ' div.field-price_single_amount div.field-price_single_amount div.readonly').after('<span id="' + idx + '-span-p1" class="computed-value">N/A</span>');
+          $('#quotepackageservice_paxvariants-' + idx + ' div.field-price_double_amount div.field-price_double_amount div.readonly').after('<span id="' + idx + '-span-p2" class="computed-value">N/A</span>');
+          $('#quotepackageservice_paxvariants-' + idx + ' div.field-price_triple_amount div.field-price_triple_amount div.readonly').after('<span id="' + idx + '-span-p3" class="computed-value">N/A</span>');
+        } else {
+          break;
+        }
       }
     }
 

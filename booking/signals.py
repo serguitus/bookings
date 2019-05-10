@@ -1,6 +1,6 @@
 
 from django.db import transaction
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import pre_save, post_save, post_delete
 
 from django.dispatch import receiver
 
@@ -74,9 +74,16 @@ def update_extra_quote(sender, instance, **kwargs):
     BookingServices.update_quote(instance)
 
 
+@receiver(pre_save, sender=QuotePackageServicePaxVariant)
+def pre_save_setup_amounts(sender, instance, **kwargs):
+    with transaction.atomic(savepoint=False):
+        BookingServices.setup_quotepackageservice_pax_variant_amounts(instance)
+
+
 @receiver(post_save, sender=QuotePackage)
 def post_save_update_package_quote(sender, instance, **kwargs):
     with transaction.atomic(savepoint=False):
+        BookingServices.sync_pax_variants(instance)
         BookingServices.update_service_pax_variants_amounts(instance)
         BookingServices.update_quote_package(instance)
         BookingServices.update_quote(instance)
