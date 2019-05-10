@@ -499,12 +499,14 @@ class QuotePackageSiteModel(QuoteServiceSiteModel):
 class QuotePackageServiceSiteModel(SiteModel):
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'quote_package') and obj.quote_package:
-            return redirect(reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
+            return redirect(
+                reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
         return super(QuotePackageServiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
         if hasattr(obj, 'quote_package') and obj.quote_package:
-            return redirect(reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
+            return redirect(
+                reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
         return super(QuotePackageServiceSiteModel, self).response_post_save_change(request, obj)
 
 

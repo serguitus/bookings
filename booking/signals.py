@@ -44,7 +44,7 @@ def update_quotepackage_pax_variant(sender, instance, **kwargs):
 @receiver((post_save), sender=QuoteAllotment)
 def update_allotment_pax_variants(sender, instance, **kwargs):
     with transaction.atomic(savepoint=False):
-        BookingServices.update_service_pax_variants_amounts(instance)
+        BookingServices.update_quoteservice_pax_variants_amounts(instance)
 
 
 @receiver((post_save, post_delete), sender=QuoteAllotment)
@@ -55,7 +55,7 @@ def update_allotment_quote(sender, instance, **kwargs):
 @receiver((post_save), sender=QuoteTransfer)
 def update_transfer_pax_variants(sender, instance, **kwargs):
     with transaction.atomic(savepoint=False):
-        BookingServices.update_service_pax_variants_amounts(instance)
+        BookingServices.update_quoteservice_pax_variants_amounts(instance)
 
 
 @receiver((post_save, post_delete), sender=QuoteTransfer)
@@ -66,7 +66,7 @@ def update_transfer_quote(sender, instance, **kwargs):
 @receiver((post_save), sender=QuoteExtra)
 def update_extra_pax_variants(sender, instance, **kwargs):
     with transaction.atomic(savepoint=False):
-        BookingServices.update_service_pax_variants_amounts(instance)
+        BookingServices.update_quoteservice_pax_variants_amounts(instance)
 
 
 @receiver((post_save, post_delete), sender=QuoteExtra)
@@ -77,14 +77,14 @@ def update_extra_quote(sender, instance, **kwargs):
 @receiver(pre_save, sender=QuotePackageServicePaxVariant)
 def pre_save_setup_amounts(sender, instance, **kwargs):
     with transaction.atomic(savepoint=False):
-        BookingServices.setup_quotepackageservice_pax_variant_amounts(instance)
+        BookingServices.setup_quote_xxx_pax_variant_amounts(instance)
 
 
 @receiver(post_save, sender=QuotePackage)
 def post_save_update_package_quote(sender, instance, **kwargs):
     with transaction.atomic(savepoint=False):
         BookingServices.sync_pax_variants(instance)
-        BookingServices.update_service_pax_variants_amounts(instance)
+        BookingServices.update_quoteservice_pax_variants_amounts(instance)
         BookingServices.update_quote_package(instance)
         BookingServices.update_quote(instance)
 
@@ -95,10 +95,10 @@ def post_delete_update_package_quote(sender, instance, **kwargs):
         BookingServices.update_quote(instance)
 
 
-@receiver((post_save), sender=QuotePackageAllotment)
-def update_package_allotment_pax_variants(sender, instance, **kwargs):
-    with transaction.atomic(savepoint=False):
-        BookingServices.update_quotepackage_service_pax_variants_amounts(instance)
+#@receiver((post_save), sender=QuotePackageAllotment)
+#def update_package_allotment_pax_variants(sender, instance, **kwargs):
+#    with transaction.atomic(savepoint=False):
+#        BookingServices.update_quotepackage_service_pax_variants_amounts(instance)
 
 
 @receiver((post_save, post_delete), sender=QuotePackageAllotment)
