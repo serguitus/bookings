@@ -397,6 +397,12 @@ class QuoteServiceSiteModel(SiteModel):
             return redirect(reverse('common:booking_quote_change', args=[obj.quote.pk]))
         return super(QuoteServiceSiteModel, self).response_post_save_change(request, obj)
 
+    def delete_model(self, request, obj):
+        with transaction.atomic(savepoint=False):
+            super(QuoteServiceSiteModel, self).delete_model(request, obj)
+            BookingServices.update_quote_paxvariants_amounts(obj)
+            BookingServices.update_quote(obj)
+
 
 class QuoteAllotmentSiteModel(QuoteServiceSiteModel):
     model_order = 520
@@ -508,6 +514,12 @@ class QuotePackageServiceSiteModel(SiteModel):
             return redirect(
                 reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
         return super(QuotePackageServiceSiteModel, self).response_post_save_change(request, obj)
+
+    def delete_model(self, request, obj):
+        with transaction.atomic(savepoint=False):
+            super(QuotePackageServiceSiteModel, self).delete_model(request, obj)
+            BookingServices.update_quotepackage_paxvariants_amounts(obj)
+            BookingServices.update_quotepackage(obj)
 
 
 class QuotePackageServicePaxVariantInline(CommonStackedInline):
