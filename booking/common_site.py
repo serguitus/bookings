@@ -533,6 +533,12 @@ class QuotePackageServiceSiteModel(SiteModel):
             BookingServices.update_quotepackage_paxvariants_amounts(obj)
             BookingServices.update_quotepackage(obj)
 
+    def save_related(self, request, form, formsets, change):
+        with transaction.atomic(savepoint=False):
+            super(QuotePackageServiceSiteModel, self).save_related(request, form, formsets, change)
+            obj = self.save_form(request, form, change)
+            BookingServices.update_quotepackage_paxvariants_amounts(obj)
+
 
 class QuotePackageServicePaxVariantInline(CommonStackedInline):
     model = QuotePackageServicePaxVariant
