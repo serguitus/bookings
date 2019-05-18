@@ -208,7 +208,10 @@ class QuotePaxVariantInline(CommonStackedInline):
     model = QuotePaxVariant
     extra = 0
     fields = [
-        ('pax_quantity', 'free_quantity', 'price_percent'),
+        ('pax_quantity', 'price_percent'),
+        ('free_cost_single', 'free_price_single'),
+        ('free_cost_double', 'free_price_double'),
+        ('free_cost_triple', 'free_price_triple'),
         ('cost_single_amount', 'price_single_amount'),
         ('cost_double_amount', 'price_double_amount'),
         ('cost_triple_amount', 'price_triple_amount')]
@@ -224,6 +227,9 @@ class QuoteServicePaxVariantInline(CommonStackedInline):
     extra = 0
     fields = [
         ('quote_pax_variant'),
+        ('free_cost_single', 'free_price_single'),
+        ('free_cost_double', 'free_price_double'),
+        ('free_cost_triple', 'free_price_triple'),
         ('manual_costs', 'manual_prices'),
         ('cost_single_amount', 'price_single_amount'),
         ('cost_double_amount', 'price_double_amount'),
@@ -402,6 +408,12 @@ class QuoteServiceSiteModel(SiteModel):
             super(QuoteServiceSiteModel, self).delete_model(request, obj)
             BookingServices.update_quote_paxvariants_amounts(obj)
             BookingServices.update_quote(obj)
+
+    def save_related(self, request, form, formsets, change):
+        with transaction.atomic(savepoint=False):
+            super(QuoteServiceSiteModel, self).save_related(request, form, formsets, change)
+            obj = self.save_form(request, form, change)
+            BookingServices.update_quote_paxvariants_amounts(obj)
 
 
 class QuoteAllotmentSiteModel(QuoteServiceSiteModel):

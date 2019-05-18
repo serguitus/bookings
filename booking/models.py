@@ -61,6 +61,12 @@ class PaxVariantAmounts(models.Model):
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price DBL')
     price_triple_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price TPL')
+    free_cost_single = models.SmallIntegerField(default=0)
+    free_cost_double = models.SmallIntegerField(default=0)
+    free_cost_triple = models.SmallIntegerField(default=0)
+    free_price_single = models.SmallIntegerField(default=0)
+    free_price_double = models.SmallIntegerField(default=0)
+    free_price_triple = models.SmallIntegerField(default=0)
 
 
 class BaseService(models.Model):
@@ -252,14 +258,10 @@ class QuotePaxVariant(PaxVariantAmounts):
         unique_together = (('quote', 'pax_quantity'),)
     quote = models.ForeignKey(Quote, related_name='quote_paxvariants')
     pax_quantity = models.SmallIntegerField()
-    free_quantity = models.SmallIntegerField(default=0)
     price_percent = models.SmallIntegerField(blank=True, null=True, verbose_name='Price %')
 
     def __str__(self):
-        if self.free_quantity:
-            return '%s + %s free' % (self.pax_quantity, self.free_quantity)
-        else:
-            return '%s' % (self.pax_quantity)
+        return '%s paxes' % (self.pax_quantity)
 
 
 class QuoteService(BaseService, DateInterval):
