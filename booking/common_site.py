@@ -477,6 +477,9 @@ class QuotePackagePaxVariantInline(CommonStackedInline):
     extra = 0
     fields = [
         ('quote_pax_variant'),
+        ('free_cost_single', 'free_price_single'),
+        ('free_cost_double', 'free_price_double'),
+        ('free_cost_triple', 'free_price_triple'),
         ('cost_single_amount', 'price_single_amount'),
         ('cost_double_amount', 'price_double_amount'),
         ('cost_triple_amount', 'price_triple_amount')]

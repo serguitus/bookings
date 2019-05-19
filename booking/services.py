@@ -497,8 +497,8 @@ class BookingServices(object):
                 else:
                     c1, c1_msg, p1, p1_msg, \
                     c2, c2_msg, p2, p2_msg, \
-                    c3, c3_msg, p3, p3_msg = cls._find_quoteallotment_amounts(
-                        quote_pax_variant=pax_variant, allotment=allotment, agency=agency)
+                    c3, c3_msg, p3, p3_msg = cls._find_amounts_for_quoteservice(
+                        quote_pax_variant=pax_variant, quoteservice=allotment, agency=agency)
 
                     # service amounts
                     if variant_dict:
@@ -528,8 +528,8 @@ class BookingServices(object):
                 else:
                     c1, c1_msg, p1, p1_msg, \
                     c2, c2_msg, p2, p2_msg, \
-                    c3, c3_msg, p3, p3_msg = cls._find_quotetransfer_amounts(
-                        quote_pax_variant=pax_variant, transfer=transfer, agency=agency)
+                    c3, c3_msg, p3, p3_msg = cls._find_amounts_for_quoteservice(
+                        quote_pax_variant=pax_variant, quoteservice=transfer, agency=agency)
 
                     # service amounts
                     if variant_dict:
@@ -559,8 +559,8 @@ class BookingServices(object):
                 else:
                     c1, c1_msg, p1, p1_msg, \
                     c2, c2_msg, p2, p2_msg, \
-                    c3, c3_msg, p3, p3_msg = cls._find_quoteextra_amounts(
-                        quote_pax_variant=pax_variant, extra=extra, agency=agency)
+                    c3, c3_msg, p3, p3_msg = cls._find_amounts_for_quoteservice(
+                        quote_pax_variant=pax_variant, quoteservice=extra, agency=agency)
 
                     # service amounts
                     if variant_dict:
@@ -660,9 +660,9 @@ class BookingServices(object):
             else:
                 c1, c1_msg, p1, p1_msg, \
                 c2, c2_msg, p2, p2_msg, \
-                c3, c3_msg, p3, p3_msg = cls._find_quoteallotment_amounts(
+                c3, c3_msg, p3, p3_msg = cls._find_amounts_for_quoteservice(
                     quote_pax_variant=pax_variant.quote_pax_variant,
-                    allotment=quoteallotment,
+                    quoteservice=quoteallotment,
                     agency=quoteallotment.quote.agency,
                     service_pax_variant=pax_variant)
 
@@ -718,9 +718,9 @@ class BookingServices(object):
             else:
                 c1, c1_msg, p1, p1_msg, \
                 c2, c2_msg, p2, p2_msg, \
-                c3, c3_msg, p3, p3_msg = cls._find_quoteallotment_amounts(
+                c3, c3_msg, p3, p3_msg = cls._find_amounts_for_quoteservice(
                     quote_pax_variant=pax_variant.quotepackage_pax_variant.quote_pax_variant,
-                    allotment=quotepackageallotment,
+                    quoteservice=quotepackageallotment,
                     agency=quotepackageallotment.quote_package.quote.agency,
                     service_pax_variant=pax_variant.quotepackage_pax_variant)
 
@@ -776,9 +776,9 @@ class BookingServices(object):
             else:
                 c1, c1_msg, p1, p1_msg, \
                 c2, c2_msg, p2, p2_msg, \
-                c3, c3_msg, p3, p3_msg = cls._find_quotetransfer_amounts(
+                c3, c3_msg, p3, p3_msg = cls._find_amounts_for_quoteservice(
                     quote_pax_variant=pax_variant.quote_pax_variant,
-                    transfer=quotetransfer,
+                    quoteservice=quotetransfer,
                     agency=quotetransfer.quote.agency,
                     service_pax_variant=pax_variant)
 
@@ -834,9 +834,9 @@ class BookingServices(object):
             else:
                 c1, c1_msg, p1, p1_msg, \
                 c2, c2_msg, p2, p2_msg, \
-                c3, c3_msg, p3, p3_msg = cls._find_quotetransfer_amounts(
+                c3, c3_msg, p3, p3_msg = cls._find_amounts_for_quoteservice(
                     quote_pax_variant=pax_variant.quotepackage_pax_variant.quote_pax_variant,
-                    transfer=quotepackagetransfer,
+                    quoteservice=quotepackagetransfer,
                     agency=quotepackagetransfer.quote_package.quote.agency,
                     service_pax_variant=pax_variant.quotepackage_pax_variant)
 
@@ -892,9 +892,9 @@ class BookingServices(object):
             else:
                 c1, c1_msg, p1, p1_msg, \
                 c2, c2_msg, p2, p2_msg, \
-                c3, c3_msg, p3, p3_msg = cls._find_quoteextra_amounts(
+                c3, c3_msg, p3, p3_msg = cls._find_amounts_for_quoteservice(
                     quote_pax_variant=pax_variant.quote_pax_variant,
-                    extra=quoteextra,
+                    quoteservice=quoteextra,
                     agency=quoteextra.quote.agency,
                     service_pax_variant=pax_variant)
 
@@ -950,9 +950,9 @@ class BookingServices(object):
             else:
                 c1, c1_msg, p1, p1_msg, \
                 c2, c2_msg, p2, p2_msg, \
-                c3, c3_msg, p3, p3_msg = cls._find_quoteextra_amounts(
+                c3, c3_msg, p3, p3_msg = cls._find_amounts_for_quoteservice(
                     quote_pax_variant=pax_variant.quotepackage_pax_variant.quote_pax_variant,
-                    extra=quotepackageextra,
+                    quoteservice=quotepackageextra,
                     agency=quotepackageextra.quote_package.quote.agency,
                     service_pax_variant=pax_variant.quotepackage_pax_variant)
 
@@ -1863,7 +1863,7 @@ class BookingServices(object):
             price_1, price_1_msg, \
             price_2, price_2_msg, \
             price_3, price_3_msg = cls._find_quote_package_prices(
-                quote_pax_variant=pax_variant,
+                quote_pax_variant=quote_pax_variant,
                 service=package.service,
                 date_from=date_from,
                 date_to=date_to,
@@ -1892,13 +1892,11 @@ class BookingServices(object):
                                 days_duration = 0
                             date_to = date_from + timedelta(days=days_duration)
                     if package.price_by_package_catalogue:
-                        c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._find_quote_service_allotment_costs(
-                            quote_pax_variant=pax_variant,
-                            service=allotment.service,
+                        c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._find_quoteservice_costs(
+                            pax_quanity=quote_pax_variant.pax_quanity,
+                            quoteservice=allotment,
                             date_from=date_from,
                             date_to=date_to,
-                            room_type_id=allotment.room_type_id,
-                            board_type=allotment.board_type,
                             provider=provider,
                             service_pax_variant=service_pax_variant)
                         # service amounts
@@ -1911,13 +1909,11 @@ class BookingServices(object):
                     else:
                         c1, c1_msg, p1, p1_msg, \
                         c2, c2_msg, p2, p2_msg, \
-                        c3, c3_msg, p3, p3_msg = cls._find_quote_service_allotment_amounts(
-                            quote_pax_variant=pax_variant,
-                            service=allotment.service,
+                        c3, c3_msg, p3, p3_msg = cls._find_quoteservice_amounts(
+                            pax_quantity=quote_pax_variant.pax_quantity,
+                            quoteservice=allotment,
                             date_from=date_from,
                             date_to=date_to,
-                            room_type_id=allotment.room_type_id,
-                            board_type=allotment.board_type,
                             provider=provider,
                             agency=agency,
                             service_pax_variant=service_pax_variant)
@@ -1951,14 +1947,11 @@ class BookingServices(object):
                                 days_duration = 0
                             date_to = date_from + timedelta(days=days_duration)
                     if package.price_by_package_catalogue:
-                        c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._find_quote_service_transfer_costs(
-                            quote_pax_variant=pax_variant,
-                            service=transfer.service,
+                        c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._find_quoteservice_costs(
+                            pax_quantity=quote_pax_variant.pax_quantity,
+                            quoteservice=transfer,
                             date_from=date_from,
                             date_to=date_to,
-                            location_from_id=transfer.location_from_id,
-                            location_to_id=transfer.location_to_id,
-                            quantity=transfer.quantity,
                             provider=provider,
                             service_pax_variant=service_pax_variant)
                         # service amounts
@@ -1971,14 +1964,11 @@ class BookingServices(object):
                     else:
                         c1, c1_msg, p1, p1_msg, \
                         c2, c2_msg, p2, p2_msg, \
-                        c3, c3_msg, p3, p3_msg = cls._find_quote_service_transfer_amounts(
-                            quote_pax_variant=pax_variant,
-                            service=transfer.service,
+                        c3, c3_msg, p3, p3_msg = cls._find_quoteservice_amounts(
+                            pax_quantity=quote_pax_variant.pax_quantity,
+                            quoteservice=transfer,
                             date_from=date_from,
                             date_to=date_to,
-                            location_from_id=transfer.location_from_id,
-                            location_to_id=transfer.location_to_id,
-                            quantity=transfer.quantity,
                             provider=provider,
                             agency=agency,
                             service_pax_variant=service_pax_variant)
@@ -2011,14 +2001,11 @@ class BookingServices(object):
                                 days_duration = 0
                             date_to = date_from + timedelta(days=days_duration)
                     if package.price_by_package_catalogue:
-                        c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._find_quote_service_extra_costs(
-                            quote_pax_variant=pax_variant,
-                            service=extra.service,
+                        c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._find_quoteservice_costs(
+                            pax_quantity=quote_pax_variant.pax_quantity,
+                            quoteservice=extra,
                             date_from=date_from,
                             date_to=date_to,
-                            addon_id=extra.addon_id,
-                            quantity=extra.quantity,
-                            parameter=extra.parameter,
                             provider=provider,
                             service_pax_variant=service_pax_variant)
                         # service amounts
@@ -2031,14 +2018,11 @@ class BookingServices(object):
                     else:
                         c1, c1_msg, p1, p1_msg, \
                         c2, c2_msg, p2, p2_msg, \
-                        c3, c3_msg, p3, p3_msg = cls._find_quote_service_extra_amounts(
-                            quote_pax_variant=pax_variant,
-                            service=extra.service,
+                        c3, c3_msg, p3, p3_msg = cls._find_quoteservice_amounts(
+                            pax_quantity=quote_pax_variant.pax_quantity,
+                            quoteservice=extra,
                             date_from=date_from,
                             date_to=date_to,
-                            addon_id=extra.addon_id,
-                            quantity=extra.quantity,
-                            parameter=extra.parameter,
                             provider=provider,
                             agency=agency,
                             service_pax_variant=service_pax_variant)
@@ -2456,28 +2440,68 @@ class BookingServices(object):
 
 
     @classmethod
-    def _find_quoteallotment_amounts(
-            cls, quote_pax_variant, allotment, agency, service_pax_variant=None):
-
+    def _find_amounts_for_quoteservice(
+            cls, quote_pax_variant, quoteservice, agency, service_pax_variant=None):
         service_pax_variant = cls._find_service_pax_variant(
-            allotment, quote_pax_variant, service_pax_variant)
+            quoteservice, quote_pax_variant, service_pax_variant)
 
-        return cls._find_quote_service_allotment_amounts(
-            quote_pax_variant=quote_pax_variant,
-            service=allotment.service,
-            date_from=allotment.datetime_from,
-            date_to=allotment.datetime_to,
-            room_type_id=allotment.room_type_id,
-            board_type=allotment.board_type,
-            provider=allotment.provider,
+        return cls._find_quoteservice_amounts(
+            pax_quantity=quote_pax_variant.pax_quantity,
+            quoteservice=quoteservice,
+            date_from=quoteservice.datetime_from,
+            date_to=quoteservice.datetime_to,
+            provider=quoteservice.provider,
             agency=agency,
             service_pax_variant=service_pax_variant)
 
 
     @classmethod
-    def _find_quote_service_allotment_amounts(
-            cls, quote_pax_variant, service, date_from, date_to,
-            room_type_id, board_type, provider, agency, service_pax_variant):
+    def _quoteservice_amounts(
+            cls, quoteservice, date_from, date_to, cost_groups, price_groups, provider, agency):
+        if isinstance(quoteservice, QuoteAllotment):
+            code, msg, c, c_msg, p, p_msg = ConfigServices.allotment_amounts(
+                quoteservice.service, date_from, date_to, cost_groups, price_groups,
+                provider, agency,
+                quoteservice.board_type, quoteservice.room_type_id)
+            return c, c_msg, p, p_msg
+        if isinstance(quoteservice, QuoteTransfer):
+            code, msg, c, c_msg, p, p_msg = ConfigServices.transfer_amounts(
+                quoteservice.service, date_from, date_to, cost_groups, price_groups,
+                provider, agency,
+                quoteservice.location_from_id, quoteservice.location_to_id,
+                quoteservice.quantity)
+            return c, c_msg, p, p_msg
+        if isinstance(quoteservice, QuoteExtra):
+            code, msg, c, c_msg, p, p_msg = ConfigServices.extra_amounts(
+                quoteservice.service, date_from, date_to, cost_groups, price_groups,
+                provider, agency,
+                quoteservice.addon_id, quoteservice.quantity, quoteservice.parameter)
+            return c, c_msg, p, p_msg
+        return None, "Unknown Service", None, "Unknown Service"
+
+
+    @classmethod
+    def _quoteservice_costs(
+            cls, quoteservice, date_from, date_to, cost_groups, provider):
+        if isinstance(quoteservice, QuoteAllotment):
+            return ConfigServices.allotment_costs(
+                quoteservice.service, date_from, date_to, cost_groups, provider,
+                quoteservice.board_type, quoteservice.room_type_id)
+        if isinstance(quoteservice, QuoteTransfer):
+            return ConfigServices.transfer_costs(
+                quoteservice.service, date_from, date_to, cost_groups, provider,
+                quoteservice.location_from_id, quoteservice.location_to_id,
+                quoteservice.quantity)
+        if isinstance(quoteservice, QuoteExtra):
+            return ConfigServices.extra_costs(
+                quoteservice.service, date_from, date_to, cost_groups, provider,
+                quoteservice.addon_id, quoteservice.quantity, quoteservice.parameter)
+        return None, "Unknown Service"
+
+
+    @classmethod
+    def _find_quoteservice_amounts(
+            cls, pax_quantity, quoteservice, date_from, date_to, provider, agency, service_pax_variant):
         if service_pax_variant is None:
             return None, "Service Pax Variant Not Found", \
                 None, "Service Pax Variant Not Found", \
@@ -2486,17 +2510,14 @@ class BookingServices(object):
                 None, "Service Pax Variant Not Found", \
                 None, "Service Pax Variant Not Found"
 
-        if service.grouping:
+        if quoteservice.service.grouping:
             # grouping means passing 1,2,3 as pax quantity
-            code, msg, c1, c1_msg, p1, p1_msg = ConfigServices.allotment_amounts(
-                service, date_from, date_to, ({0:1, 1:0},), ({0:1, 1:0},), provider, agency,
-                board_type, room_type_id)
-            code, msg, c2, c2_msg, p2, p2_msg = ConfigServices.allotment_amounts(
-                service, date_from, date_to, ({0:2, 1:0},), ({0:2, 1:0},), provider, agency,
-                board_type, room_type_id)
-            code, msg, c3, c3_msg, p3, p3_msg = ConfigServices.allotment_amounts(
-                service, date_from, date_to, ({0:3, 1:0},), ({0:3, 1:0},), provider, agency,
-                board_type, room_type_id)
+            c1, c1_msg, p1, p1_msg = cls._quoteservice_amounts(
+                quoteservice, date_from, date_to, ({0:1, 1:0},), ({0:1, 1:0},), provider, agency)
+            c2, c2_msg, p2, p2_msg = cls._quoteservice_amounts(
+                quoteservice, date_from, date_to, ({0:2, 1:0},), ({0:2, 1:0},), provider, agency)
+            c3, c3_msg, p3, p3_msg = cls._quoteservice_amounts(
+                quoteservice, date_from, date_to, ({0:3, 1:0},), ({0:3, 1:0},), provider, agency)
 
             c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._verify_group_free_amounts(
                 c1, c2, c3, service_pax_variant, True)
@@ -2504,286 +2525,58 @@ class BookingServices(object):
                 p1, p2, p3, service_pax_variant, False)
 
             c1, c2, c3 = cls._charge_group_amounts(
-                c1, c2, c3, quote_pax_variant.pax_quantity, service_pax_variant, True)
+                c1, c2, c3, pax_quantity, service_pax_variant, True)
             p1, p2, p3 = cls._charge_group_amounts(
-                p1, p2, p3, quote_pax_variant.pax_quantity, service_pax_variant, False)
-
+                p1, p2, p3, pax_quantity, service_pax_variant, False)
         else:
             # no grouping means passing total pax quantity
             total_free_cost, total_free_price = cls._find_free_paxes(service_pax_variant)
-            code, msg, c1, c1_msg, p1, p1_msg = ConfigServices.allotment_amounts(
-                service, date_from, date_to,
-                ({0:quote_pax_variant.pax_quantity + total_free_cost, 1:0},),
-                ({0:quote_pax_variant.pax_quantity + total_free_price, 1:0},),
-                provider, agency,
-                board_type, room_type_id)
+            c1, c1_msg, p1, p1_msg = cls._quoteservice_amounts(
+                quoteservice, date_from, date_to,
+                ({0:pax_quantity + total_free_cost, 1:0},),
+                ({0:pax_quantity + total_free_price, 1:0},),
+                provider, agency)
             if c1:
-                c1 = round(float(c1) / quote_pax_variant.pax_quantity, 2)
+                c1 = round(float(c1) / pax_quantity, 2)
             if p1:
-                p1 = round(0.499999 + float(p1) / quote_pax_variant.pax_quantity)
+                p1 = round(0.499999 + float(p1) / pax_quantity)
             c2, c2_msg, p2, p2_msg = c1, c1_msg, p1, p1_msg
             c3, c3_msg, p3, p3_msg = c1, c1_msg, p1, p1_msg
         return c1, c1_msg, p1, p1_msg, c2, c2_msg, p2, p2_msg, c3, c3_msg, p3, p3_msg
 
 
     @classmethod
-    def _find_quote_service_allotment_costs(
-            cls, quote_pax_variant, service, date_from, date_to,
-            room_type_id, board_type, provider, service_pax_variant):
+    def _find_quoteservice_costs(
+            cls, pax_quantity, quoteservice, date_from, date_to, provider, service_pax_variant):
         if service_pax_variant is None:
             return None, "Service Pax Variant Not Found", \
                 None, "Service Pax Variant Not Found", \
                 None, "Service Pax Variant Not Found"
 
-        if service.grouping:
+        if quoteservice.service.grouping:
             # grouping means passing 1,2,3 as pax quantity
-            c1, c1_msg = ConfigServices.allotment_costs(
-                service, date_from, date_to, ({0:1, 1:0},), provider, board_type, room_type_id)
-            c2, c2_msg = ConfigServices.allotment_costs(
-                service, date_from, date_to, ({0:2, 1:0},), provider, board_type, room_type_id)
-            c3, c3_msg = ConfigServices.allotment_costs(
-                service, date_from, date_to, ({0:3, 1:0},),provider, board_type, room_type_id)
+            c1, c1_msg = cls._quoteservice_costs(
+                quoteservice, date_from, date_to, ({0:1, 1:0},), provider)
+            c2, c2_msg = cls._quoteservice_costs(
+                quoteservice, date_from, date_to, ({0:2, 1:0},), provider)
+            c3, c3_msg = cls._quoteservice_costs(
+                quoteservice, date_from, date_to, ({0:3, 1:0},), provider)
 
             c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._verify_group_free_amounts(
                 c1, c2, c3, service_pax_variant, True)
 
             c1, c2, c3 = cls._charge_group_amounts(
-                c1, c2, c3, quote_pax_variant.pax_quantity, service_pax_variant, True)
+                c1, c2, c3, pax_quantity, service_pax_variant, True)
 
         else:
             # no grouping means passing total pax quantity
             total_free_cost, total_free_price = cls._find_free_paxes(service_pax_variant)
-            c1, c1_msg = ConfigServices.allotment_costs(
-                service, date_from, date_to,
-                ({0:quote_pax_variant.pax_quantity + total_free_cost, 1:0},),
-                provider, board_type, room_type_id)
+            c1, c1_msg = cls._quoteservice_costs(
+                quoteservice, date_from, date_to,
+                ({0:pax_quantity + total_free_cost, 1:0},),
+                provider)
             if c1:
-                c1 = round(float(c1) / quote_pax_variant.pax_quantity, 2)
-            c2, c2_msg, c3, c3_msg = c1, c1_msg, c1, c1_msg
-        return c1, c1_msg, c2, c2_msg, c3, c3_msg
-
-
-    @classmethod
-    def _find_quotetransfer_amounts(
-            cls, quote_pax_variant, transfer, agency, service_pax_variant=None):
-        service_pax_variant = cls._find_service_pax_variant(
-            transfer, quote_pax_variant, service_pax_variant)
-
-        return cls._find_quote_service_transfer_amounts(
-            quote_pax_variant=quote_pax_variant,
-            service=transfer.service,
-            date_from=transfer.datetime_from,
-            date_to=transfer.datetime_to,
-            location_from_id=transfer.location_from_id,
-            location_to_id=transfer.location_to_id,
-            quantity=transfer.quantity,
-            provider=transfer.provider,
-            agency=agency,
-            service_pax_variant=service_pax_variant)
-
-
-    @classmethod
-    def _find_quote_service_transfer_amounts(
-            cls, quote_pax_variant, service, date_from, date_to,
-            location_from_id, location_to_id, quantity, provider, agency, service_pax_variant):
-        if service_pax_variant is None:
-            return None, "Service Pax Variant Not Found", \
-                None, "Service Pax Variant Not Found", \
-                None, "Service Pax Variant Not Found", \
-                None, "Service Pax Variant Not Found", \
-                None, "Service Pax Variant Not Found", \
-                None, "Service Pax Variant Not Found"
-
-        if service.grouping:
-            # grouping means passing 1,2,3 as pax quantity
-            code, msg, c1, c1_msg, p1, p1_msg = ConfigServices.transfer_amounts(
-                service, date_from, date_to, ({0:1, 1:0},), ({0:1, 1:0},), provider, agency,
-                location_from_id, location_to_id, quantity)
-            code, msg, c2, c2_msg, p2, p2_msg = ConfigServices.transfer_amounts(
-                service, date_from, date_to, ({0:2, 1:0},), ({0:2, 1:0},), provider, agency,
-                location_from_id, location_to_id, quantity)
-            code, msg, c3, c3_msg, p3, p3_msg = ConfigServices.transfer_amounts(
-                service, date_from, date_to, ({0:3, 1:0},), ({0:3, 1:0},), provider, agency,
-                location_from_id, location_to_id, quantity)
-
-            c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._verify_group_free_amounts(
-                c1, c2, c3, service_pax_variant, True)
-            p1, p1_msg, p2, p2_msg, p3, p3_msg = cls._verify_group_free_amounts(
-                p1, p2, p3, service_pax_variant, False)
-
-            c1, c2, c3 = cls._charge_group_amounts(
-                c1, c2, c3, quote_pax_variant.pax_quantity, service_pax_variant, True)
-            p1, p2, p3 = cls._charge_group_amounts(
-                p1, p2, p3, quote_pax_variant.pax_quantity, service_pax_variant, False)
-
-        else:
-            # no grouping means passing total pax quantity
-            total_free_cost, total_free_price = cls._find_free_paxes(service_pax_variant)
-            code, msg, c1, c1_msg, p1, p1_msg = ConfigServices.transfer_amounts(
-                service, date_from, date_to,
-                ({0:quote_pax_variant.pax_quantity + total_free_cost, 1:0},),
-                ({0:quote_pax_variant.pax_quantity + total_free_price, 1:0},),
-                provider, agency,
-                location_from_id, location_to_id, quantity)
-            if c1:
-                c1 = round(float(c1) / quote_pax_variant.pax_quantity, 2)
-            if p1:
-                p1 = round(0.499999 + float(p1) / quote_pax_variant.pax_quantity)
-            c2, c2_msg, p2, p2_msg = c1, c1_msg, p1, p1_msg
-            c3, c3_msg, p3, p3_msg = c1, c1_msg, p1, p1_msg
-        return c1, c1_msg, p1, p1_msg, c2, c2_msg, p2, p2_msg, c3, c3_msg, p3, p3_msg
-
-
-    @classmethod
-    def _find_quote_service_transfer_costs(
-            cls, quote_pax_variant, service, date_from, date_to,
-            location_from_id, location_to_id, quantity, provider, service_pax_variant):
-        if service_pax_variant is None:
-            return None, "Service Pax Variant Not Found", \
-                None, "Service Pax Variant Not Found", \
-                None, "Service Pax Variant Not Found"
-
-        if service.grouping:
-            # grouping means passing 1,2,3 as pax quantity
-            c1, c1_msg = ConfigServices.transfer_costs(
-                service, date_from, date_to, ({0:1, 1:0},), provider,
-                location_from_id, location_to_id, quantity)
-            c2, c2_msg = ConfigServices.transfer_costs(
-                service, date_from, date_to, ({0:2, 1:0},), provider,
-                location_from_id, location_to_id, quantity)
-            c3, c3_msg = ConfigServices.transfer_costs(
-                service, date_from, date_to, ({0:3, 1:0},), provider,
-                location_from_id, location_to_id, quantity)
-
-            c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._verify_group_free_amounts(
-                c1, c2, c3, service_pax_variant, True)
-
-            c1, c2, c3 = cls._charge_group_amounts(
-                c1, c2, c3, quote_pax_variant.pax_quantity, service_pax_variant, True)
-
-        else:
-            # no grouping means passing total pax quantity
-            total_free_cost, total_free_price = cls._find_free_paxes(service_pax_variant)
-            c1, c1_msg = ConfigServices.transfer_costs(
-                service, date_from, date_to,
-                ({0:quote_pax_variant.pax_quantity + total_free_cost, 1:0},),
-                provider,
-                location_from_id, location_to_id, quantity)
-            if c1:
-                c1 = round(float(c1) / quote_pax_variant.pax_quantity, 2)
-            c2, c2_msg, c3, c3_msg = c1, c1_msg, c1, c1_msg
-        return c1, c1_msg, c2, c2_msg, c3, c3_msg
-
-
-    @classmethod
-    def _find_quoteextra_amounts(
-            cls, quote_pax_variant, extra, agency, service_pax_variant=None):
-
-        service_pax_variant = cls._find_service_pax_variant(
-            extra, quote_pax_variant, service_pax_variant)
-
-        return cls._find_quote_service_extra_amounts(
-            quote_pax_variant=quote_pax_variant,
-            service=extra.service,
-            date_from=extra.datetime_from,
-            date_to=extra.datetime_to,
-            addon_id=extra.addon_id,
-            quantity=extra.quantity,
-            parameter=extra.parameter,
-            provider=extra.provider,
-            agency=agency,
-            service_pax_variant=service_pax_variant)
-
-
-    @classmethod
-    def _find_quote_service_extra_amounts(
-            cls, quote_pax_variant, service, date_from, date_to,
-            addon_id, quantity, parameter, provider, agency, service_pax_variant):
-        if service_pax_variant is None:
-            return None, "Service Pax Variant Not Found", \
-                None, "Service Pax Variant Not Found", \
-                None, "Service Pax Variant Not Found", \
-                None, "Service Pax Variant Not Found", \
-                None, "Service Pax Variant Not Found", \
-                None, "Service Pax Variant Not Found"
-
-        if service.grouping:
-            # grouping means passing 1,2,3 as pax quantity
-            code, msg, c1, c1_msg, p1, p1_msg = ConfigServices.extra_amounts(
-                service, date_from, date_to, ({0:1, 1:0},), ({0:1, 1:0},), provider, agency,
-                addon_id, quantity, parameter)
-            code, msg, c2, c2_msg, p2, p2_msg = ConfigServices.extra_amounts(
-                service, date_from, date_to, ({0:2, 1:0},), ({0:2, 1:0},), provider, agency,
-                addon_id, quantity, parameter)
-            code, msg, c3, c3_msg, p3, p3_msg = ConfigServices.extra_amounts(
-                service, date_from, date_to, ({0:3, 1:0},), ({0:3, 1:0},), provider, agency,
-                addon_id, quantity, parameter)
-
-            c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._verify_group_free_amounts(
-                c1, c2, c3, service_pax_variant, True)
-            p1, p1_msg, p2, p2_msg, p3, p3_msg = cls._verify_group_free_amounts(
-                p1, p2, p3, service_pax_variant, False)
-
-            c1, c2, c3 = cls._charge_group_amounts(
-                c1, c2, c3, quote_pax_variant.pax_quantity, service_pax_variant, True)
-            p1, p2, p3 = cls._charge_group_amounts(
-                p1, p2, p3, quote_pax_variant.pax_quantity, service_pax_variant, False)
-
-        else:
-            # no grouping means passing total pax quantity
-            total_free_cost, total_free_price = cls._find_free_paxes(service_pax_variant)
-            code, msg, c1, c1_msg, p1, p1_msg = ConfigServices.extra_amounts(
-                service, date_from, date_to,
-                ({0:quote_pax_variant.pax_quantity + total_free_cost, 1:0},),
-                ({0:quote_pax_variant.pax_quantity + total_free_price, 1:0},),
-                provider, agency,
-                addon_id, quantity, parameter)
-            if c1:
-                c1 = round(float(c1) / quote_pax_variant.pax_quantity, 2)
-            if p1:
-                p1 = round(0.499999 + float(p1) / quote_pax_variant.pax_quantity)
-            c2, c2_msg, p2, p2_msg = c1, c1_msg, p1, p1_msg
-            c3, c3_msg, p3, p3_msg = c1, c1_msg, p1, p1_msg
-        return c1, c1_msg, p1, p1_msg, c2, c2_msg, p2, p2_msg, c3, c3_msg, p3, p3_msg
-
-
-    @classmethod
-    def _find_quote_service_extra_costs(
-            cls, quote_pax_variant, service, date_from, date_to,
-            addon_id, quantity, parameter, provider, service_pax_variant):
-        if service_pax_variant is None:
-            return None, "Service Pax Variant Not Found", \
-                None, "Service Pax Variant Not Found", \
-                None, "Service Pax Variant Not Found"
-
-        if service.grouping:
-            # grouping means passing 1,2,3 as pax quantity
-            c1, c1_msg = ConfigServices.extra_costs(
-                service, date_from, date_to, ({0:1, 1:0},), provider,
-                addon_id, quantity, parameter)
-            c2, c2_msg = ConfigServices.extra_costs(
-                service, date_from, date_to, ({0:2, 1:0},), provider,
-                addon_id, quantity, parameter)
-            c3, c3_msg = ConfigServices.extra_costs(
-                service, date_from, date_to, ({0:3, 1:0},), provider,
-                addon_id, quantity, parameter)
-
-            c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._verify_group_free_amounts(
-                c1, c2, c3, service_pax_variant, True)
-
-            c1, c2, c3 = cls._charge_group_amounts(
-                c1, c2, c3, quote_pax_variant.pax_quantity, service_pax_variant, True)
-
-        else:
-            # no grouping means passing total pax quantity
-            total_free_cost, total_free_price = cls._find_free_paxes(service_pax_variant)
-            c1, c1_msg = ConfigServices.extra_costs(
-                service, date_from, date_to,
-                ({0:quote_pax_variant.pax_quantity + total_free_cost, 1:0},),
-                provider,
-                addon_id, quantity, parameter)
-            if c1:
-                c1 = round(float(c1) / quote_pax_variant.pax_quantity, 2)
+                c1 = round(float(c1) / pax_quantity, 2)
             c2, c2_msg, c3, c3_msg = c1, c1_msg, c1, c1_msg
         return c1, c1_msg, c2, c2_msg, c3, c3_msg
 
@@ -2987,9 +2780,9 @@ class BookingServices(object):
                 quotepackage_service,
                 quotepackage_pax_variant)
             try:
-                obj = QuoteServicePaxVariant.objects.get(
-                    quote_service_id=quote_service.id,
-                    quote_pax_variant_id=quote_pax_variant.id)
+                obj = QuotePackageServicePaxVariant.objects.get(
+                    quotepackage_service_id=quote_package.id,
+                    quotepackage_pax_variant_id=quotepackage_pax_variant.id)
                 if obj.manual_costs and obj.manual_prices:
                     continue
                 fields = []
@@ -3023,14 +2816,15 @@ class BookingServices(object):
                     obj.save(update_fields=fields)
                     cls.update_quote_paxvariant_amounts(quote_pax_variant)
 
-            except QuoteServicePaxVariant.DoesNotExist:
+            except QuotePackageServicePaxVariant.DoesNotExist:
                 new_values = {
-                    'quote_service_id': quote_service.id,
-                    'quote_pax_variant_id': quote_pax_variant.id}
+                    'quotepackage_service_id': quotepackage_service.id,
+                    'quotepackage_pax_variant_id': quotepackage_pax_variant.id}
                 new_values.update(defaults)
-                obj = QuoteServicePaxVariant(**new_values)
+                obj = QuotePackageServicePaxVariant(**new_values)
                 obj.save()
-                cls.update_quote_paxvariant_amounts(quote_pax_variant)
+                cls.update_quotepackage_paxvariant_amounts(quotepackage_pax_variant)
+                cls.update_quote_paxvariant_amounts(quotepackage_pax_variant.quote_pax_variant)
 
 
     @classmethod
@@ -3047,28 +2841,12 @@ class BookingServices(object):
         else:
             return None, "Unknow Pax Variant", None, "Unknow Pax Variant", None, "Unknow Pax Variant", None, "Unknow Pax Variant", None, "Unknow Pax Variant", None, "Unknow Pax Variant"
 
-        if isinstance(service, QuoteAllotment):
+        if isinstance(service, (QuoteAllotment, QuoteTransfer, QuoteExtra)):
             c1, c1_msg, p1, p1_msg, \
             c2, c2_msg, p2, p2_msg, \
-            c3, c3_msg, p3, p3_msg = cls._find_quoteallotment_amounts(
+            c3, c3_msg, p3, p3_msg = cls._find_amounts_for_quoteservice(
                 quote_pax_variant=quote_pax_variant,
-                allotment=service,
-                agency=service.quote.agency,
-                service_pax_variant=service_pax_variant)
-        elif isinstance(service, QuoteTransfer):
-            c1, c1_msg, p1, p1_msg, \
-            c2, c2_msg, p2, p2_msg, \
-            c3, c3_msg, p3, p3_msg = cls._find_quotetransfer_amounts(
-                quote_pax_variant=quote_pax_variant,
-                transfer=service,
-                agency=service.quote.agency,
-                service_pax_variant=service_pax_variant)
-        elif isinstance(service, QuoteExtra):
-            c1, c1_msg, p1, p1_msg, \
-            c2, c2_msg, p2, p2_msg, \
-            c3, c3_msg, p3, p3_msg = cls._find_quoteextra_amounts(
-                quote_pax_variant=quote_pax_variant,
-                extra=service,
+                quoteservice=service,
                 agency=service.quote.agency,
                 service_pax_variant=service_pax_variant)
         elif isinstance(service, QuotePackage):
@@ -3077,58 +2855,21 @@ class BookingServices(object):
                 package=service,
                 agency=service.quote.agency,
                 service_pax_variant=service_pax_variant)
-        if isinstance(service, QuotePackageAllotment):
+        if isinstance(service, (QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra)):
             c1, c1_msg, p1, p1_msg, \
             c2, c2_msg, p2, p2_msg, \
-            c3, c3_msg, p3, p3_msg = cls._find_quoteallotment_amounts(
+            c3, c3_msg, p3, p3_msg = cls._find_amounts_for_quoteservice(
                 quote_pax_variant=quote_pax_variant,
-                allotment=service,
-                agency=service.quote_package.quote.agency,
-                service_pax_variant=service_pax_variant)
-        elif isinstance(service, QuotePackageTransfer):
-            c1, c1_msg, p1, p1_msg, \
-            c2, c2_msg, p2, p2_msg, \
-            c3, c3_msg, p3, p3_msg = cls._find_quotetransfer_amounts(
-                quote_pax_variant=quote_pax_variant,
-                transfer=service,
-                agency=service.quote_package.quote.agency,
-                service_pax_variant=service_pax_variant)
-        elif isinstance(service, QuotePackageExtra):
-            c1, c1_msg, p1, p1_msg, \
-            c2, c2_msg, p2, p2_msg, \
-            c3, c3_msg, p3, p3_msg = cls._find_quoteextra_amounts(
-                quote_pax_variant=quote_pax_variant,
-                extra=service,
+                quoteservice=service,
                 agency=service.quote_package.quote.agency,
                 service_pax_variant=service_pax_variant)
         elif isinstance(service, QuoteService):
             if service.service_type == constants.SERVICE_CATEGORY_ALLOTMENT:
                 service = QuoteAllotment.objects.get(pk=service.id)
-                c1, c1_msg, p1, p1_msg, \
-                c2, c2_msg, p2, p2_msg, \
-                c3, c3_msg, p3, p3_msg = cls._find_quoteallotment_amounts(
-                    quote_pax_variant=quote_pax_variant,
-                    allotment=service,
-                    agency=service.quote.agency,
-                    service_pax_variant=service_pax_variant)
             elif service.service_type == constants.SERVICE_CATEGORY_TRANSFER:
                 service = QuoteTransfer.objects.get(pk=service.id)
-                c1, c1_msg, p1, p1_msg, \
-                c2, c2_msg, p2, p2_msg, \
-                c3, c3_msg, p3, p3_msg = cls._find_quotetransfer_amounts(
-                    quote_pax_variant=quote_pax_variant,
-                    transfer=service,
-                    agency=service.quote.agency,
-                    service_pax_variant=service_pax_variant)
             elif service.service_type == constants.SERVICE_CATEGORY_EXTRA:
                 service = QuoteExtra.objects.get(pk=service.id)
-                c1, c1_msg, p1, p1_msg, \
-                c2, c2_msg, p2, p2_msg, \
-                c3, c3_msg, p3, p3_msg = cls._find_quoteextra_amounts(
-                    quote_pax_variant=quote_pax_variant,
-                    extra=service,
-                    agency=service.quote.agency,
-                    service_pax_variant=service_pax_variant)
             elif service.service_type == constants.SERVICE_CATEGORY_PACKAGE:
                 service = QuotePackage.objects.get(pk=service.id)
                 return cls._find_quotepackage_amounts(
@@ -3137,39 +2878,34 @@ class BookingServices(object):
                     agency=service.quote.agency,
                     service_pax_variant=service_pax_variant)
             else:
-                return None, "Unknow Service", None, "Unknow Service", None, "Unknow Service", None, "Unknow Service", None, "Unknow Service", None, "Unknow Service"
+                return None, "Unknow Service", None, "Unknow Service", \
+                    None, "Unknow Service", None, "Unknow Service", \
+                    None, "Unknow Service", None, "Unknow Service"
+            c1, c1_msg, p1, p1_msg, \
+            c2, c2_msg, p2, p2_msg, \
+            c3, c3_msg, p3, p3_msg = cls._find_amounts_for_quoteservice(
+                quote_pax_variant=quote_pax_variant,
+                quoteservice=service,
+                agency=service.quote.agency,
+                service_pax_variant=service_pax_variant)
         elif isinstance(service, QuotePackageService):
             if service.service_type == constants.SERVICE_CATEGORY_ALLOTMENT:
                 service = QuotePackageAllotment.objects.get(pk=service.id)
-                c1, c1_msg, p1, p1_msg, \
-                c2, c2_msg, p2, p2_msg, \
-                c3, c3_msg, p3, p3_msg = cls._find_quoteallotment_amounts(
-                    quote_pax_variant=quote_pax_variant,
-                    allotment=service,
-                    agency=service.quote_package.quote.agency,
-                    service_pax_variant=service_pax_variant)
             elif service.service_type == constants.SERVICE_CATEGORY_TRANSFER:
                 service = QuotePackageTransfer.objects.get(pk=service.id)
-                c1, c1_msg, p1, p1_msg, \
-                c2, c2_msg, p2, p2_msg, \
-                c3, c3_msg, p3, p3_msg = cls._find_quotetransfer_amounts(
-                    quote_pax_variant=quote_pax_variant,
-                    transfer=service,
-                    agency=service.quote_package.quote.agency,
-                    service_pax_variant=service_pax_variant)
             elif service.service_type == constants.SERVICE_CATEGORY_EXTRA:
                 service = QuotePackageExtra.objects.get(pk=service.id)
-                c1, c1_msg, p1, p1_msg, \
-                c2, c2_msg, p2, p2_msg, \
-                c3, c3_msg, p3, p3_msg = cls._find_quoteextra_amounts(
-                    quote_pax_variant=quote_pax_variant,
-                    extra=service,
-                    agency=service.quote_package.quote.agency,
-                    service_pax_variant=service_pax_variant)
             else:
                 return None, "Unknow Service", None, "Unknow Service", \
                     None, "Unknow Service", None, "Unknow Service", \
                     None, "Unknow Service", None, "Unknow Service"
+            c1, c1_msg, p1, p1_msg, \
+            c2, c2_msg, p2, p2_msg, \
+            c3, c3_msg, p3, p3_msg = cls._find_amounts_for_quoteservice(
+                quote_pax_variant=quote_pax_variant,
+                quoteservice=service,
+                agency=service.quote_package.quote.agency,
+                service_pax_variant=service_pax_variant)
         else:
             return None, "Unknow Service", None, "Unknow Service", \
                 None, "Unknow Service", None, "Unknow Service", \
@@ -3322,7 +3058,7 @@ class BookingServices(object):
         else:
             quotepackage_pax_variant = pax_variant
         quotepackageservice_pax_variants = list(
-            QuotePackaheServicePaxVariant.objects.all().filter(
+            QuotePackageServicePaxVariant.objects.all().filter(
                 quotepackage_pax_variant=quotepackage_pax_variant.id).exclude(
                     quotepackage_service__status=constants.SERVICE_STATUS_CANCELLED))
 
