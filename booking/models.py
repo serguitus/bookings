@@ -614,6 +614,7 @@ class BookingService(BaseService, BookService, DateInterval):
         verbose_name = 'Booking Service'
         verbose_name_plural = 'Booking Services'
         default_permissions = ('add', 'change',)
+        ordering = ['datetime_from']
     booking = models.ForeignKey(Booking, related_name='booking_services')
     v_notes = models.CharField(
         max_length=1000, blank=True, null=True, verbose_name='Voucher Notes')
