@@ -3216,6 +3216,8 @@ class BookingServices(object):
     @classmethod
     def _calculate_group_free_amount(
             cls, amount1, amount2, amount3, service_pax_variant, for_cost):
+        if amount1 is None or amount2 is None or amount3 is None:
+            return None
         amount = 0.0
         if for_cost:
             if service_pax_variant.free_cost_single:

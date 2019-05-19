@@ -227,6 +227,16 @@ $(document).ready(function(){
   $(quotepackageservice_form_selector).change(function () {
     get_computed_amounts();
   });
+  // for dates changed by calendar
+  $(quotepackageservice_form_selector + ' input[name*="date"]').focusout(function (e) {
+    e.preventDefault();
+    get_computed_amounts();
+  });
+  // for times changed by calendar
+  $(quotepackageservice_form_selector + ' input[name*="time"]').focusout(function (e) {
+    e.preventDefault();
+    get_computed_amounts();
+  });
 
   $('input[name^="quotepackageservice_paxvariants-"][name$="-manual_costs"][type="checkbox"]').on('change', function(e){
     e.preventDefault();
