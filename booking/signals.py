@@ -30,7 +30,7 @@ def post_save_quote(sender, instance, **kwargs):
 def post_save_quote_paxvariant(sender, instance, **kwargs):
     if not hasattr(instance, 'code_updated'):
         with transaction.atomic(savepoint=False):
-            BookingServices.sync_children_paxvariants(instance)
+            BookingServices.sync_quote_children_paxvariants(instance)
 
 
 @receiver(pre_save, sender=QuoteServicePaxVariant)
@@ -41,6 +41,7 @@ def pre_save_quoteservice_paxvariant_setup_amounts(sender, instance, **kwargs):
 receiver(post_save, sender=QuoteServicePaxVariant)
 def post_save_quoteservice_paxvariant(sender, instance, **kwargs):
     with transaction.atomic(savepoint=False):
+        BookingServices.sync_quotepackage_children_paxvariants(instance)
         BookingServices.update_quote_paxvariant_amounts(instance)
 
 
@@ -75,8 +76,6 @@ def post_save_quoteextra(sender, instance, **kwargs):
 def post_save_quotepackage(sender, instance, **kwargs):
     with transaction.atomic(savepoint=False):
         BookingServices.sync_quotepackage_services(instance)
-        if not hasattr(instance, 'code_updated'):
-            BookingServices.sync_quotepackage_paxvariants(instance)
         BookingServices.update_quote(instance)
 
 
