@@ -100,6 +100,16 @@ $(document).ready(function(){
   $(quoteservice_form_selector).change(function () {
     get_computed_amounts();
   });
+  // for dates changed by calendar
+  $(quoteservice_form_selector + ' input[name*="date"]').focusout(function (e) {
+    e.preventDefault();
+    get_computed_amounts();
+  });
+  // for times changed by calendar
+  $(quoteservice_form_selector + ' input[name*="time"]').focusout(function (e) {
+    e.preventDefault();
+    get_computed_amounts();
+  });
 
 });
   

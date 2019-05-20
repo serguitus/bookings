@@ -224,7 +224,18 @@ $(document).ready(function(){
     $('select[name^="quoteservice_paxvariants-"][name$="-quote_pax_variant"]').attr('disabled', false);
   });
 
-  $(quoteservice_form_selector).change(function () {
+  $(quoteservice_form_selector).change(function (e) {
+    e.preventDefault();
+    get_computed_amounts();
+  });
+  // for dates changed by calendar
+  $(quoteservice_form_selector + ' input[name*="date"]').focusout(function (e) {
+    e.preventDefault();
+    get_computed_amounts();
+  });
+  // for times changed by calendar
+  $(quoteservice_form_selector + ' input[name*="time"]').focusout(function (e) {
+    e.preventDefault();
     get_computed_amounts();
   });
 

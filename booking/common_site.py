@@ -391,6 +391,12 @@ class QuoteSiteModel(SiteModel):
         context.update({'formset': formset})
         return render(request, 'booking/quote_booking_build.html', context)
 
+    def save_related(self, request, form, formsets, change):
+        with transaction.atomic(savepoint=False):
+            super(QuoteSiteModel, self).save_related(request, form, formsets, change)
+            obj = self.save_form(request, form, change)
+            BookingServices.sync_quote_paxvariants(obj)
+
 
 class QuoteServiceSiteModel(SiteModel):
     def response_post_save_add(self, request, obj):
@@ -477,6 +483,9 @@ class QuotePackagePaxVariantInline(CommonStackedInline):
     extra = 0
     fields = [
         ('quote_pax_variant'),
+        ('free_cost_single', 'free_price_single'),
+        ('free_cost_double', 'free_price_double'),
+        ('free_cost_triple', 'free_price_triple'),
         ('cost_single_amount', 'price_single_amount'),
         ('cost_double_amount', 'price_double_amount'),
         ('cost_triple_amount', 'price_triple_amount')]
@@ -512,6 +521,12 @@ class QuotePackageSiteModel(QuoteServiceSiteModel):
     readonly_fields = ['datetime_to', 'status']
     details_template = 'booking/quotepackage_details.html'
     inlines = [QuotePackagePaxVariantInline]
+
+    def save_related(self, request, form, formsets, change):
+        with transaction.atomic(savepoint=False):
+            super(QuotePackageSiteModel, self).save_related(request, form, formsets, change)
+            obj = self.save_form(request, form, change)
+            BookingServices.sync_quotepackage_paxvariants(obj)
 
 
 class QuotePackageServiceSiteModel(SiteModel):
