@@ -2414,6 +2414,8 @@ class BookingServices(object):
         a1, a2, a3 = amount_single, amount_double, amount_triple
         a1_msg, a2_msg, a3_msg = None, None, None
         if for_cost:
+            if a1:
+                a1 = round(float(a1), 2)
             if a2:
                 a2 = round(float(a2) / 2.0, 2)
             if a3:
@@ -2422,6 +2424,8 @@ class BookingServices(object):
             free2 = service_pax_variant.free_cost_double
             free3 = service_pax_variant.free_cost_triple
         else:
+            if a1:
+                a1 = round(0.499999 + float(a1))
             if a2:
                 a2 = round(0.499999 + float(a2) / 2.0)
             if a3:
