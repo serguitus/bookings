@@ -2409,8 +2409,9 @@ class BookingServices(object):
 
 
     @classmethod
-    def _verify_group_free_amounts(
-            cls, amount_single, amount_double, amount_triple, service_pax_variant, for_cost):
+    def _adjust_group_free_amounts(
+            cls, amount_single, amount_double, amount_triple,
+            pax_quantity, service_pax_variant, for_cost):
         a1, a2, a3 = amount_single, amount_double, amount_triple
         a1_msg, a2_msg, a3_msg = None, None, None
         if for_cost:
@@ -2423,6 +2424,21 @@ class BookingServices(object):
             free1 = service_pax_variant.free_cost_single
             free2 = service_pax_variant.free_cost_double
             free3 = service_pax_variant.free_cost_triple
+            if not free1:
+                free1 = 0
+            if not free2:
+                free2 = 0
+            if not free3:
+                free3 = 0
+            paxes_paying = pax_quantity - free1 - free2 - free3
+            if paxes_paying < 1:
+                return None, "No Paxes to Split", None, "No Paxes to Split", None, "No Paxes to Split"
+            if a1:
+                a1 = round(paxes_paying * float(a1) / pax_quantity, 2)
+            if a2:
+                a2 = round(paxes_paying * float(a2) / pax_quantity, 2)
+            if a3:
+                a3 = round(paxes_paying * float(a3) / pax_quantity, 2)
         else:
             if a1:
                 a1 = round(0.499999 + float(a1))
@@ -2433,22 +2449,72 @@ class BookingServices(object):
             free1 = service_pax_variant.free_price_single
             free2 = service_pax_variant.free_price_double
             free3 = service_pax_variant.free_price_triple
-        if a1 is None and free1:
-            if a2:
-                a2, a2_msg = None, "Need Single Amount for Free Pax in Single"
-            if a3:
-                a3, a3_msg = None, "Need Single Amount for Free Pax in Single"
-        elif a2 is None and free2:
+            if not free1:
+                free1 = 0
+            if not free2:
+                free2 = 0
+            if not free3:
+                free3 = 0
+            if a1 is None and free1:
+                if a2:
+                    a2, a2_msg = None, "Need Single Amount for Free Pax in Single"
+                if a3:
+                    a3, a3_msg = None, "Need Single Amount for Free Pax in Single"
+            elif a2 is None and free2:
+                if a1:
+                    a1, a1_msg = None, "Need Double Amount for Free Pax in Double"
+                if a3:
+                    a3, a3_msg = None, "Need Double Amount for Free Pax in Double"
+            elif a3 is None and free3:
+                if a1:
+                    a1, a1_msg = None, "Need Triple Amount for Free Pax in Triple"
+                if a2:
+                    a2, a2_msg = None, "Need Triple Amount for Free Pax in Triple"
+
+            free_amount = cls._calculate_group_free_amount(
+                a1, a2, a3, service_pax_variant, for_cost)
+
+            paxes_paying = pax_quantity - free1 - free2 - free3
+            if paxes_paying < 1:
+                return None, "No Paxes to Split", None, "No Paxes to Split", None, "No Paxes to Split"
+
+            if free_amount:
+                extra_amount = free_amount
+            else:
+                extra_amount = 0.0
+
             if a1:
-                a1, a1_msg = None, "Need Double Amount for Free Pax in Double"
-            if a3:
-                a3, a3_msg = None, "Need Double Amount for Free Pax in Double"
-        elif a3 is None and free3:
-            if a1:
-                a1, a1_msg = None, "Need Triple Amount for Free Pax in Triple"
+                a1 = round(0.499999 + float(a1) + extra_amount / pax_quantity)
             if a2:
-                a2, a2_msg = None, "Need Triple Amount for Free Pax in Triple"
+                a2 = round(0.499999 + float(a2) + extra_amount / pax_quantity)
+            if a3:
+                a3 = round(0.499999 + float(a3) + extra_amount / pax_quantity)
+
         return a1, a1_msg, a2, a2_msg, a3, a3_msg
+
+
+    @classmethod
+    def _calculate_group_free_amount(
+            cls, amount1, amount2, amount3, service_pax_variant, for_cost):
+        if amount1 is None or amount2 is None or amount3 is None:
+            return None
+        amount = 0.0
+        if for_cost:
+            if service_pax_variant.free_cost_single:
+                amount += float(amount1) * float(service_pax_variant.free_cost_single)
+            if service_pax_variant.free_cost_double:
+                amount += float(amount2) * float(service_pax_variant.free_cost_double)
+            if service_pax_variant.free_cost_triple:
+                amount += float(amount3) * float(service_pax_variant.free_cost_triple)
+        else:
+            if service_pax_variant.free_price_single:
+                amount += float(amount1) * float(service_pax_variant.free_price_single)
+            if service_pax_variant.free_price_double:
+                amount += float(amount2) * float(service_pax_variant.free_price_double)
+            if service_pax_variant.free_price_triple:
+                amount += float(amount3) * float(service_pax_variant.free_price_triple)
+
+        return amount
 
 
     @classmethod
@@ -2531,14 +2597,9 @@ class BookingServices(object):
             c3, c3_msg, p3, p3_msg = cls._quoteservice_amounts(
                 quoteservice, date_from, date_to, ({0:3, 1:0},), ({0:3, 1:0},), provider, agency)
 
-            c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._verify_group_free_amounts(
-                c1, c2, c3, service_pax_variant, True)
-            p1, p1_msg, p2, p2_msg, p3, p3_msg = cls._verify_group_free_amounts(
-                p1, p2, p3, service_pax_variant, False)
-
-            c1, c2, c3 = cls._charge_group_amounts(
+            c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._adjust_group_free_amounts(
                 c1, c2, c3, pax_quantity, service_pax_variant, True)
-            p1, p2, p3 = cls._charge_group_amounts(
+            p1, p1_msg, p2, p2_msg, p3, p3_msg = cls._adjust_group_free_amounts(
                 p1, p2, p3, pax_quantity, service_pax_variant, False)
         else:
             # no grouping means passing total pax quantity
@@ -2574,12 +2635,8 @@ class BookingServices(object):
             c3, c3_msg = cls._quoteservice_costs(
                 quoteservice, date_from, date_to, ({0:3, 1:0},), provider)
 
-            c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._verify_group_free_amounts(
-                c1, c2, c3, service_pax_variant, True)
-
-            c1, c2, c3 = cls._charge_group_amounts(
+            c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._adjust_group_free_amounts(
                 c1, c2, c3, pax_quantity, service_pax_variant, True)
-
         else:
             # no grouping means passing total pax quantity
             total_free_cost, total_free_price = cls._find_free_paxes(service_pax_variant)
@@ -3184,58 +3241,6 @@ class BookingServices(object):
         if fields:
             quote_package.code_updated = True
             quote_package.save(update_fields=fields)
-
-
-    @classmethod
-    def _calculate_group_free_amount(
-            cls, amount1, amount2, amount3, service_pax_variant, for_cost):
-        if amount1 is None or amount2 is None or amount3 is None:
-            return None
-        amount = 0.0
-        if for_cost:
-            if service_pax_variant.free_cost_single:
-                amount += float(amount1) * float(service_pax_variant.free_cost_single)
-            if service_pax_variant.free_cost_double:
-                amount += float(amount2) * float(service_pax_variant.free_cost_double)
-            if service_pax_variant.free_cost_triple:
-                amount += float(amount3) * float(service_pax_variant.free_cost_triple)
-        else:
-            if service_pax_variant.free_price_single:
-                amount += float(amount1) * float(service_pax_variant.free_price_single)
-            if service_pax_variant.free_price_double:
-                amount += float(amount2) * float(service_pax_variant.free_price_double)
-            if service_pax_variant.free_price_triple:
-                amount += float(amount3) * float(service_pax_variant.free_price_triple)
-
-        return amount
-
-    @classmethod
-    def _charge_group_amounts(
-            cls, amount1, amount2, amount3, paxes_paying, service_pax_variant, for_cost=False):
-        a1, a2, a3 = amount1, amount2, amount3
-        free_amount = cls._calculate_group_free_amount(
-            amount1, amount2, amount3, service_pax_variant, for_cost)
-
-        if paxes_paying and free_amount:
-            extra_amount = free_amount / paxes_paying
-        else:
-            extra_amount = 0.0
-
-        if for_cost:
-            if a1:
-                a1 = round(float(a1) + extra_amount, 2)
-            if a2:
-                a2 = round(float(a2) + extra_amount, 2)
-            if a3:
-                a3 = round(float(a3) + extra_amount, 2)
-        else:
-            if a1:
-                a1 = round(0.499999 + float(a1) + extra_amount)
-            if a2:
-                a2 = round(0.499999 + float(a2) + extra_amount)
-            if a3:
-                a3 = round(0.499999 + float(a3) + extra_amount)
-        return a1, a2, a3
 
 
     @classmethod
