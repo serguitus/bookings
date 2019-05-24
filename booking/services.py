@@ -2606,13 +2606,13 @@ class BookingServices(object):
             total_free_cost, total_free_price = cls._find_free_paxes(service_pax_variant)
             c1, c1_msg, p1, p1_msg = cls._quoteservice_amounts(
                 quoteservice, date_from, date_to,
-                ({0:pax_quantity + total_free_cost, 1:0},),
-                ({0:pax_quantity + total_free_price, 1:0},),
+                ({0:pax_quantity, 1:0},),
+                ({0:pax_quantity, 1:0},),
                 provider, agency)
             if c1:
-                c1 = round(float(c1) / pax_quantity, 2)
+                c1 = round((1.0 - total_free_cost / pax_quantity) * float(c1) / pax_quantity, 2)
             if p1:
-                p1 = round(0.499999 + float(p1) / pax_quantity)
+                p1 = round(0.499999 + (1.0 + total_free_price / pax_quantity) * float(p1) / pax_quantity)
             c2, c2_msg, p2, p2_msg = c1, c1_msg, p1, p1_msg
             c3, c3_msg, p3, p3_msg = c1, c1_msg, p1, p1_msg
         return c1, c1_msg, p1, p1_msg, c2, c2_msg, p2, p2_msg, c3, c3_msg, p3, p3_msg
@@ -2640,12 +2640,13 @@ class BookingServices(object):
         else:
             # no grouping means passing total pax quantity
             total_free_cost, total_free_price = cls._find_free_paxes(service_pax_variant)
+                
             c1, c1_msg = cls._quoteservice_costs(
                 quoteservice, date_from, date_to,
-                ({0:pax_quantity + total_free_cost, 1:0},),
+                ({0:pax_quantity, 1:0},),
                 provider)
             if c1:
-                c1 = round(float(c1) / pax_quantity, 2)
+                c1 = round((1.0 - total_free_cost / pax_quantity) * float(c1) / pax_quantity, 2)
             c2, c2_msg, c3, c3_msg = c1, c1_msg, c1, c1_msg
         return c1, c1_msg, c2, c2_msg, c3, c3_msg
 
