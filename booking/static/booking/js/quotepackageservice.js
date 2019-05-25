@@ -248,4 +248,20 @@ $(document).ready(function(){
     changed_manual_prices(e.target);
   });
 
+  // for service changed
+  $('#id_service').change(function (e) {
+    e.preventDefault();
+    // clear data
+    $('#id_room_type').select();
+    $('#id_board_type').select();
+
+    $('#id_location_from').select();
+    $('#id_location_to').select();
+
+    $('#id_addon').select();
+
+    $('#id_provider').select();
+    get_computed_amounts();
+  });
+
 });

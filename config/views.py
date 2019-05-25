@@ -91,44 +91,32 @@ class ProviderAllotmentAutocompleteView(autocomplete.Select2QuerySetView):
         qs = Provider.objects.filter(enabled=True).all().distinct()
 
         service = self.forwarded.get('service', None)
+        if not service:
+            return Provider.objects.none()
+
         room_type = self.forwarded.get('room_type', None)
         board_type = self.forwarded.get('board_type', None)
 
-        if service:
-            if room_type:
-                if board_type:
-                    qs = qs.filter(
-                        providerallotmentservice__service=service,
-                        providerallotmentservice__providerallotmentdetail__room_type=room_type,
-                        providerallotmentservice__providerallotmentdetail__board_type=board_type,
-                    )
-                else:
-                    qs = qs.filter(
-                        providerallotmentservice__service=service,
-                        providerallotmentservice__providerallotmentdetail__room_type=room_type,
-                    )
-            elif board_type:
-                qs = qs.filter(
-                    providerallotmentservice__service=service,
-                    providerallotmentservice__providerallotmentdetail__board_type=board_type,
-                )
-            else:
-                qs = qs.filter(
-                    providerallotmentservice__service=service,
-                )
-        elif room_type:
+        if room_type:
             if board_type:
                 qs = qs.filter(
+                    providerallotmentservice__service=service,
                     providerallotmentservice__providerallotmentdetail__room_type=room_type,
                     providerallotmentservice__providerallotmentdetail__board_type=board_type,
                 )
             else:
                 qs = qs.filter(
+                    providerallotmentservice__service=service,
                     providerallotmentservice__providerallotmentdetail__room_type=room_type,
                 )
         elif board_type:
             qs = qs.filter(
+                providerallotmentservice__service=service,
                 providerallotmentservice__providerallotmentdetail__board_type=board_type,
+            )
+        else:
+            qs = qs.filter(
+                providerallotmentservice__service=service,
             )
 
         if self.q:
@@ -154,75 +142,52 @@ class ProviderTransferAutocompleteView(autocomplete.Select2QuerySetView):
         qs = Provider.objects.filter(enabled=True).all().distinct()
 
         service = self.forwarded.get('service', None)
+        if not service:
+            return Provider.objects.none()
+
         location_from = self.forwarded.get('location_from', None)
         location_to = self.forwarded.get('location_to', None)
 
-        if service:
-            if location_from:
-                if location_to:
-                    qs = qs.filter(
-                        Q(providertransferservice__service=service)
-                        &
-                        (
-                            (
-                                Q(providertransferservice__providertransferdetail__p_location_from=location_from)
-                                & Q(providertransferservice__providertransferdetail__p_location_to=location_to)
-                            )
-                            |
-                            (
-                                Q(providertransferservice__providertransferdetail__p_location_from=location_to)
-                                & Q(providertransferservice__providertransferdetail__p_location_to=location_from)
-                            )
-                        )
-                    )
-                else:
-                    qs = qs.filter(
-                        Q(providertransferservice__service=service)
-                        &
-                        (
-                            Q(providertransferservice__providertransferdetail__p_location_from=location_from)
-                            |
-                            Q(providertransferservice__providertransferdetail__p_location_to=location_from)
-                        )
-                    )
-            elif location_to:
+        if location_from:
+            if location_to:
                 qs = qs.filter(
                     Q(providertransferservice__service=service)
                     &
                     (
-                        Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                        (
+                            Q(providertransferservice__providertransferdetail__p_location_from=location_from)
+                            & Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                        )
                         |
-                        Q(providertransferservice__providertransferdetail__p_location_from=location_to)
+                        (
+                            Q(providertransferservice__providertransferdetail__p_location_from=location_to)
+                            & Q(providertransferservice__providertransferdetail__p_location_to=location_from)
+                        )
                     )
                 )
             else:
                 qs = qs.filter(
-                    providertransferservice__service=service,
-                )
-        elif location_from:
-            if location_to:
-                qs = qs.filter(
+                    Q(providertransferservice__service=service)
+                    &
                     (
                         Q(providertransferservice__providertransferdetail__p_location_from=location_from)
-                        & Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                        |
+                        Q(providertransferservice__providertransferdetail__p_location_to=location_from)
                     )
-                    |
-                    (
-                        Q(providertransferservice__providertransferdetail__p_location_from=location_to)
-                        & Q(providertransferservice__providertransferdetail__p_location_to=location_from)
-                    )
-                )
-            else:
-                qs = qs.filter(
-                    Q(providertransferservice__providertransferdetail__p_location_from=location_from)
-                    |
-                    Q(providertransferservice__providertransferdetail__p_location_to=location_from)
                 )
         elif location_to:
             qs = qs.filter(
-                Q(providertransferservice__providertransferdetail__p_location_to=location_to)
-                |
-                Q(providertransferservice__providertransferdetail__p_location_from=location_to)
+                Q(providertransferservice__service=service)
+                &
+                (
+                    Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                    |
+                    Q(providertransferservice__providertransferdetail__p_location_from=location_to)
+                )
+            )
+        else:
+            qs = qs.filter(
+                providertransferservice__service=service,
             )
 
         if self.q:
@@ -248,28 +213,21 @@ class ProviderExtraAutocompleteView(autocomplete.Select2QuerySetView):
         qs = Provider.objects.filter(enabled=True).all().distinct()
 
         service = self.forwarded.get('service', None)
+        if not service:
+            return Provider.objects.none()
+
         addon = self.forwarded.get('addon', None)
 
-        if service:
-            if addon:
-                qs = qs.filter(
-                    providerextraservice__service=service,
-                    providerextraservice__providerextradetail__addon=addon,
-                )
-            else:
-                qs = qs.filter(
-                    providerextraservice__service=service,
-                    providerextraservice__providerextradetail__addon__isnull=True,
-                )
+        if addon:
+            qs = qs.filter(
+                providerextraservice__service=service,
+                providerextraservice__providerextradetail__addon=addon,
+            )
         else:
-            if addon:
-                qs = qs.filter(
-                    providerextraservice__providerextradetail__addon=addon,
-                )
-            else:
-                qs = qs.filter(
-                    providerextraservice__providerextradetail__addon__isnull=True,
-                )
+            qs = qs.filter(
+                providerextraservice__service=service,
+                providerextraservice__providerextradetail__addon__isnull=True,
+            )
 
         if self.q:
             qs = qs.filter(name__icontains=self.q)

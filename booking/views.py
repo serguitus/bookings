@@ -959,11 +959,12 @@ class ProviderPackageAutocompleteView(autocomplete.Select2QuerySetView):
         qs = Provider.objects.filter(enabled=True).all().distinct()
 
         service = self.forwarded.get('service', None)
+        if not service:
+            return Provider.objects.none()
 
-        if service:
-            qs = qs.filter(
-                providerpackageservice__service=service,
-            )
+        qs = qs.filter(
+            providerpackageservice__service=service,
+        )
 
         if self.q:
             qs = qs.filter(name__icontains=self.q)
