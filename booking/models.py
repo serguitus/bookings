@@ -614,6 +614,7 @@ class BookingService(BaseService, BookService, DateInterval):
         verbose_name = 'Booking Service'
         verbose_name_plural = 'Booking Services'
         default_permissions = ('add', 'change',)
+        ordering = ['datetime_from']
     booking = models.ForeignKey(Booking, related_name='booking_services')
     v_notes = models.CharField(
         max_length=1000, blank=True, null=True, verbose_name='Voucher Notes')
@@ -743,16 +744,18 @@ class BookingAllotment(BookingService, BaseAllotment):
             '21': 0,  # DBL+1Child
             '22': 0,  # DBL+2Child
             '31': 0,  # TPL+1Child
+            '40': 0,
         }
         room_types = {
             '00': 'NONE',
             '10': 'SGL',
             '20': 'DBL',
             '30': 'TPL',
-            '11': 'SGL+1Chld',
-            '21': 'DBL+1Chld',
-            '22': 'DBL+2Chld',
-            '31': 'TPL+1Chld',
+            '11': 'SGL&1Chld',
+            '21': 'DBL&1Chld',
+            '22': 'DBL&2Chld',
+            '31': 'TPL&1Chld',
+            '40': 'QUAD'
         }
         for room in rooms:
             room_count['%d%d' % (room[0], room[1])] += 1
@@ -775,7 +778,7 @@ class BookingTransfer(BookingService, BaseTransfer):
     """
     class Meta:
         verbose_name = 'Booking Transfer'
-        verbose_name_plural = 'Bookings Transfers'
+        verbose_name_plural = 'Booking Transfers'
         default_permissions = ('add', 'change',)
     location_from = models.ForeignKey(
         Location, related_name='location_from', verbose_name='Location from')
@@ -823,7 +826,7 @@ class BookingExtra(BookingService, BaseExtra):
     """
     class Meta:
         verbose_name = 'Booking Extra'
-        verbose_name_plural = 'Bookings Extras'
+        verbose_name_plural = 'Booking Extras'
         default_permissions = ('add', 'change',)
 
     def build_description(self):
@@ -848,10 +851,14 @@ class BookingPackage(BookingService):
     price_by_package_catalogue = models.BooleanField(
         default=True, verbose_name='Use Catalogue Price')
 
+    def build_description(self):
+        return '%s pax' % self.rooming_list.count()
+
     def fill_data(self):
         # setting name for this booking_service
         self.name = self.service.name
         self.service_type = SERVICE_CATEGORY_PACKAGE
+        self.description = self.build_description()
 
     def save(self, *args, **kwargs):
         with transaction.atomic(savepoint=False):

@@ -63,6 +63,22 @@ from finance.models import Provider, Office
 from reservas.admin import bookings_site
 
 
+# Utility method to get a list of
+# BookingService child objects from a BookingService list
+def _get_child_objects(services):
+    TYPE_MODELS = {
+        'T': BookingTransfer,
+        'E': BookingExtra,
+        'A': BookingAllotment,
+        'P': BookingPackage,
+    }
+    objs = []
+    for service in services:
+        obj = TYPE_MODELS[service.service_type].objects.get(id=service.id)
+        objs.append(obj)
+    return objs
+
+
 class BookingPaxAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         if not self.request.user.is_authenticated():
@@ -651,15 +667,7 @@ def build_voucher(request, id):
     # template = get_template("booking/pdf/voucher.html")
     booking = Booking.objects.get(id=id)
     services = BookingService.objects.filter(id__in=[2, 1])
-    type_map = {
-        'E': BookingExtra,
-        'A': BookingAllotment,
-        'T': BookingTransfer,
-    }
-    objs = []
-    for service in services:
-        obj = type_map[service.service_type].objects.get(id=service.id)
-        objs.append(obj)
+    objs = _get_child_objects(services)
     context = {'pagesize': 'Letter',
                'booking': booking,
                'office': Office.objects.get(id=1),
@@ -750,9 +758,10 @@ class EmailConfirmationView(View):
         if bk.agency:
             client_name = bk.agency.name
         rooming = bk.rooming_list.all()
+        objs = _get_child_objects(services)
         initial = {
             'booking': bk,
-            'services': services,
+            'services': objs,
             'client': client_name,
             'rooming': rooming,
             'user': request.user,
