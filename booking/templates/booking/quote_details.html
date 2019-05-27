@@ -1,15 +1,12 @@
 {% load booking_tags %}
 {% load render_table from django_tables2 %}
 
-<div id="detail-buttons">
-    <span class="detail-buttons">
-        <a class="btn btn-primary" href="{% url 'common:booking_quote_booking_build' current.id %}">Build Booking</a>
-    </span>
-</div>
-
 <div class="quoteservices-container">
+    {# buttons to add new services to the current quote #}
+    {% include 'booking/quote_details_buttons.html' %}
     {% quoteservice_table current as table %}
     {% render_table table %}
+    {% include 'booking/quote_details_buttons.html' %}
 </div>
 <div class="quotepaxvariant-container">
     {% quotepaxvariant_table current as variant_table %}

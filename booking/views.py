@@ -25,6 +25,8 @@ from django.views import View
 
 from booking.common_site import (
     QuoteSiteModel,
+    QuoteAllotmentSiteModel, QuoteTransferSiteModel, QuoteExtraSiteModel, QuotePackageSiteModel,
+    QuotePackageAllotmentSiteModel, QuotePackageTransferSiteModel, QuotePackageExtraSiteModel,
     BookingAllotmentSiteModel,
     BookingTransferSiteModel,
     BookingExtraSiteModel,
@@ -37,6 +39,8 @@ from booking.constants import ACTIONS
 from booking.models import (
     Package,
     Quote, QuotePaxVariant, QuoteService,
+    QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
+    QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
     Booking, BookingService,
     BookingPax, BookingServicePax,
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
@@ -57,6 +61,22 @@ from config.services import ConfigServices
 from finance.models import Provider, Office
 
 from reservas.admin import bookings_site
+
+
+# Utility method to get a list of
+# BookingService child objects from a BookingService list
+def _get_child_objects(services):
+    TYPE_MODELS = {
+        'T': BookingTransfer,
+        'E': BookingExtra,
+        'A': BookingAllotment,
+        'P': BookingPackage,
+    }
+    objs = []
+    for service in services:
+        obj = TYPE_MODELS[service.service_type].objects.get(id=service.id)
+        objs.append(obj)
+    return objs
 
 
 class BookingPaxAutocompleteView(autocomplete.Select2QuerySetView):
@@ -102,27 +122,208 @@ class QuoteAmountsView(ModelChangeFormProcessorView):
                 'results': None,
             })
 
-        allotment_list = inlines[1]
+        # allotment_list = inlines[1]
+        # transfer_list = inlines[2]
+        # extra_list = inlines[3]
+        # package_list = inlines[4]
+        # if (
+        #        (not allotment_list) and
+        #        (not transfer_list) and
+        #        (not extra_list) and
+        #        (not package_list)):
+        #    return JsonResponse({
+        #        'code': 3,
+        #        'message': 'Services Missing',
+        #        'results': None,
+        #    })
+        # code, message, results = BookingServices.find_quote_amounts(
+        #    quote.agency, variant_list, allotment_list, transfer_list, extra_list, package_list)
 
-        transfer_list = inlines[2]
 
-        extra_list = inlines[3]
+        code, message, results = BookingServices.find_quote_amounts(
+            quote, variant_list)
 
-        package_list = inlines[4]
+        return JsonResponse({
+            'code': code,
+            'message': message,
+            'results': results,
+        })
 
-        if (
-                (not allotment_list) and
-                (not transfer_list) and
-                (not extra_list) and
-                (not package_list)):
+
+class QuoteAllotmentAmountsView(ModelChangeFormProcessorView):
+    
+    model = QuoteAllotment
+    common_sitemodel = QuoteAllotmentSiteModel
+    common_site = bookings_site
+
+    def process_data(self, quoteallotment, inlines):
+
+        variant_list = inlines[0]
+        if not variant_list:
             return JsonResponse({
                 'code': 3,
-                'message': 'Services Missing',
+                'message': 'Pax Variants Missing',
                 'results': None,
             })
 
-        code, message, results = BookingServices.find_quote_amounts(
-            quote.agency, variant_list, allotment_list, transfer_list, extra_list, package_list)
+        code, message, results = BookingServices.find_quoteallotment_amounts(
+            quoteallotment, variant_list)
+
+        return JsonResponse({
+            'code': code,
+            'message': message,
+            'results': results,
+        })
+
+
+class QuoteTransferAmountsView(ModelChangeFormProcessorView):
+    
+    model = QuoteTransfer
+    common_sitemodel = QuoteTransferSiteModel
+    common_site = bookings_site
+
+    def process_data(self, quotetransfer, inlines):
+
+        variant_list = inlines[0]
+        if not variant_list:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Pax Variants Missing',
+                'results': None,
+            })
+
+        code, message, results = BookingServices.find_quotetransfer_amounts(
+            quotetransfer, variant_list)
+
+        return JsonResponse({
+            'code': code,
+            'message': message,
+            'results': results,
+        })
+
+
+class QuoteExtraAmountsView(ModelChangeFormProcessorView):
+    
+    model = QuoteExtra
+    common_sitemodel = QuoteExtraSiteModel
+    common_site = bookings_site
+
+    def process_data(self, quoteextra, inlines):
+
+        variant_list = inlines[0]
+        if not variant_list:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Pax Variants Missing',
+                'results': None,
+            })
+
+        code, message, results = BookingServices.find_quoteextra_amounts(
+            quoteextra, variant_list)
+
+        return JsonResponse({
+            'code': code,
+            'message': message,
+            'results': results,
+        })
+
+
+class QuotePackageAmountsView(ModelChangeFormProcessorView):
+    
+    model = QuotePackage
+    common_sitemodel = QuotePackageSiteModel
+    common_site = bookings_site
+
+    def process_data(self, quotepackage, inlines):
+
+        variant_list = inlines[0]
+        if not variant_list:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Pax Variants Missing',
+                'results': None,
+            })
+
+        code, message, results = BookingServices.find_quotepackage_amounts(
+            quotepackage, variant_list)
+
+        return JsonResponse({
+            'code': code,
+            'message': message,
+            'results': results,
+        })
+
+
+class QuotePackageAllotmentAmountsView(ModelChangeFormProcessorView):
+    
+    model = QuotePackageAllotment
+    common_sitemodel = QuotePackageAllotmentSiteModel
+    common_site = bookings_site
+
+    def process_data(self, quotepackageallotment, inlines):
+
+        variant_list = inlines[0]
+        if not variant_list:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Pax Variants Missing',
+                'results': None,
+            })
+
+        code, message, results = BookingServices.find_quotepackageallotment_amounts(
+            quotepackageallotment, variant_list)
+
+        return JsonResponse({
+            'code': code,
+            'message': message,
+            'results': results,
+        })
+
+
+class QuotePackageTransferAmountsView(ModelChangeFormProcessorView):
+    
+    model = QuotePackageTransfer
+    common_sitemodel = QuotePackageTransferSiteModel
+    common_site = bookings_site
+
+    def process_data(self, quotepackagetransfer, inlines):
+
+        variant_list = inlines[0]
+        if not variant_list:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Pax Variants Missing',
+                'results': None,
+            })
+
+        code, message, results = BookingServices.find_quotepackagetransfer_amounts(
+            quotepackagetransfer, variant_list)
+
+        return JsonResponse({
+            'code': code,
+            'message': message,
+            'results': results,
+        })
+
+
+class QuotePackageExtraAmountsView(ModelChangeFormProcessorView):
+    
+    model = QuotePackageExtra
+    common_sitemodel = QuotePackageExtraSiteModel
+    common_site = bookings_site
+
+    def process_data(self, quotepackageextra, inlines):
+
+        variant_list = inlines[0]
+        if not variant_list:
+            return JsonResponse({
+                'code': 3,
+                'message': 'Pax Variants Missing',
+                'results': None,
+            })
+
+        code, message, results = BookingServices.find_quotepackageextra_amounts(
+            quotepackageextra, variant_list)
 
         return JsonResponse({
             'code': code,
@@ -466,15 +667,7 @@ def build_voucher(request, id):
     # template = get_template("booking/pdf/voucher.html")
     booking = Booking.objects.get(id=id)
     services = BookingService.objects.filter(id__in=[2, 1])
-    type_map = {
-        'E': BookingExtra,
-        'A': BookingAllotment,
-        'T': BookingTransfer,
-    }
-    objs = []
-    for service in services:
-        obj = type_map[service.service_type].objects.get(id=service.id)
-        objs.append(obj)
+    objs = _get_child_objects(services)
     context = {'pagesize': 'Letter',
                'booking': booking,
                'office': Office.objects.get(id=1),
@@ -565,9 +758,10 @@ class EmailConfirmationView(View):
         if bk.agency:
             client_name = bk.agency.name
         rooming = bk.rooming_list.all()
+        objs = _get_child_objects(services)
         initial = {
             'booking': bk,
-            'services': services,
+            'services': objs,
             'client': client_name,
             'rooming': rooming,
             'user': request.user,
@@ -774,11 +968,12 @@ class ProviderPackageAutocompleteView(autocomplete.Select2QuerySetView):
         qs = Provider.objects.filter(enabled=True).all().distinct()
 
         service = self.forwarded.get('service', None)
+        if not service:
+            return Provider.objects.none()
 
-        if service:
-            qs = qs.filter(
-                providerpackageservice__service=service,
-            )
+        qs = qs.filter(
+            providerpackageservice__service=service,
+        )
 
         if self.q:
             qs = qs.filter(name__icontains=self.q)

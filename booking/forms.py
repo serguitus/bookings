@@ -20,6 +20,7 @@ class QuoteForm(forms.ModelForm):
         widgets = {
             'agency': autocomplete.ModelSelect2(url='agency-autocomplete'),
         }
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
 class PackageAllotmentInlineForm(forms.ModelForm):
@@ -254,17 +255,6 @@ class QuotePackageExtraForm(forms.ModelForm):
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
-class QuoteServicePaxVariantInlineForm(forms.ModelForm):
-    class Meta:
-        fields = ('__all__')
-        widgets = {
-            'quote_pax_variant': autocomplete.ModelSelect2(
-                url='quotepaxvariant-autocomplete',
-                forward=['quote_service'],
-                ),
-        }
-
-
 class QuoteAllotmentInlineForm(forms.ModelForm):
     class Meta:
         fields = ('__all__')
@@ -365,6 +355,7 @@ class QuoteExtraForm(forms.ModelForm):
                 url='providerextra-autocomplete',
                 forward=['service', 'addon'],
                 ),
+            'description': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 

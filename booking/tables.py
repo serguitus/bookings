@@ -23,8 +23,7 @@ class PackageServiceTable(tables.Table):
             'common:booking_%s_change' % (PACKAGESERVICE_TYPES[record.service_type]),
             args=(quote(record.pk),)
         )
-        return format_html(
-            '<a class="related-widget-wrapper-link" href="%s?_popup=1">%s</a>' % (obj_url, value))
+        return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
     def before_render(self, request):
         self.columns.hide('service_type')
@@ -48,15 +47,14 @@ class QuoteServiceTable(tables.Table):
     class Meta:
         model = QuoteService
         template_name = 'booking/quoteservice_list.html'
-        fields = ['name', 'service_type', 'datetime_from', 'datetime_to']
+        fields = ['name', 'service_type', 'status', 'datetime_from', 'datetime_to']
 
     def render_name(self, value, record):
         obj_url = reverse(
             'common:booking_%s_change' % (QUOTESERVICE_TYPES[record.service_type]),
             args=(quote(record.pk),)
         )
-        return format_html(
-            '<a class="related-widget-wrapper-link" href="%s?_popup=1">%s</a>' % (obj_url, value))
+        return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
     def before_render(self, request):
         self.columns.hide('service_type')
@@ -66,15 +64,14 @@ class QuotePackageServiceTable(tables.Table):
     class Meta:
         model = QuotePackageService
         template_name = 'booking/quotepackageservice_list.html'
-        fields = ['name', 'service_type', 'datetime_from', 'datetime_to']
+        fields = ['name', 'service_type', 'status', 'datetime_from', 'datetime_to']
 
     def render_name(self, value, record):
         obj_url = reverse(
             'common:booking_%s_change' % (QUOTEPACKAGESERVICE_TYPES[record.service_type]),
             args=(quote(record.pk),)
         )
-        return format_html(
-            '<a class="related-widget-wrapper-link" href="%s?_popup=1">%s</a>' % (obj_url, value))
+        return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
     def before_render(self, request):
         self.columns.hide('service_type')
@@ -180,8 +177,7 @@ class BookingPackageServiceTable(tables.Table):
             'common:booking_%s_change' % (BOOKINGPACKAGESERVICE_TYPES[record.service_type]),
             args=(quote(record.pk),)
         )
-        return format_html(
-            '<a class="related-widget-wrapper-link" href="%s?_popup=1">%s</a>' % (obj_url, value))
+        return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
     def before_render(self, request):
         self.columns.hide('service_type')

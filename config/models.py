@@ -307,8 +307,8 @@ class ProviderExtraDetail(AmountDetail):
                            'pax_range_max')
     provider_service = models.ForeignKey(ProviderExtraService)
     addon = models.ForeignKey(Addon, blank=True, null=True)
-    pax_range_min = models.SmallIntegerField(blank=True, null=True)
-    pax_range_max = models.SmallIntegerField(blank=True, null=True)
+    pax_range_min = models.SmallIntegerField(default=0)
+    pax_range_max = models.SmallIntegerField(default=0)
 
 
 class AgencyExtraService(AgencyCatalogue):

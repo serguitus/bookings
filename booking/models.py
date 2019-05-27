@@ -61,6 +61,12 @@ class PaxVariantAmounts(models.Model):
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price DBL')
     price_triple_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price TPL')
+    free_cost_single = models.SmallIntegerField(default=0)
+    free_cost_double = models.SmallIntegerField(default=0)
+    free_cost_triple = models.SmallIntegerField(default=0)
+    free_price_single = models.SmallIntegerField(default=0)
+    free_price_double = models.SmallIntegerField(default=0)
+    free_price_triple = models.SmallIntegerField(default=0)
 
 
 class BaseService(models.Model):
@@ -223,6 +229,10 @@ class Quote(models.Model):
     currency = models.CharField(
         max_length=5, choices=CURRENCIES, default=CURRENCY_CUC)
     currency_factor = models.DecimalField(max_digits=12, decimal_places=6, default=1.0)
+    program = models.CharField(
+        max_length=2000, blank=True, null=True, verbose_name='Program')
+    history = models.CharField(
+        max_length=2000, blank=True, null=True, verbose_name='History')
 
     def fill_data(self):
         pass
@@ -251,7 +261,7 @@ class QuotePaxVariant(PaxVariantAmounts):
     price_percent = models.SmallIntegerField(blank=True, null=True, verbose_name='Price %')
 
     def __str__(self):
-        return '%s' % self.pax_quantity
+        return '%s paxes' % (self.pax_quantity)
 
 
 class QuoteService(BaseService, DateInterval):
@@ -278,8 +288,13 @@ class QuoteServicePaxVariant(PaxVariantAmounts):
         verbose_name = 'Quote Service Pax Variant'
         verbose_name_plural = 'Quotes Services Paxes Variants'
         unique_together = (('quote_pax_variant', 'quote_service'),)
-    quote_pax_variant = models.ForeignKey(QuotePaxVariant)
+    quote_pax_variant = models.ForeignKey(QuotePaxVariant, verbose_name='Pax Variant')
     quote_service = models.ForeignKey(QuoteService, related_name='quoteservice_paxvariants')
+    manual_costs = models.BooleanField(default=False, verbose_name='Manual Costs')
+    manual_prices = models.BooleanField(default=False, verbose_name='Manual Prices')
+
+    def __str__(self):
+        return self.quote_pax_variant.__str__()
 
 
 class QuoteAllotment(QuoteService, BaseAllotment):
@@ -342,7 +357,7 @@ class QuotePackage(QuoteService):
         default_permissions = ('add', 'change',)
     service = models.ForeignKey(Package)
     price_by_package_catalogue = models.BooleanField(
-        default=False, verbose_name='By Catalogue')
+        default=False, verbose_name='Prices By Catalogue')
 
     def fill_data(self):
         # setting name for this quote_service
@@ -365,7 +380,7 @@ class QuotePackageService(BaseService, DateInterval):
         verbose_name = 'Quote Package Service'
         verbose_name_plural = 'Quotes Packages Services'
         default_permissions = ('add', 'change',)
-    quote_package = models.ForeignKey(QuotePackage, related_name='quote_package_services')
+    quote_package = models.ForeignKey(QuotePackage, related_name='quotepackage_services')
 
     def fill_data(self):
         pass
@@ -374,6 +389,20 @@ class QuotePackageService(BaseService, DateInterval):
         self.fill_data()
         # Call the "real" save() method.
         super(QuotePackageService, self).save(*args, **kwargs)
+
+
+class QuotePackageServicePaxVariant(PaxVariantAmounts):
+    """
+    Quote Package Service Pax Variant
+    """
+    class Meta:
+        verbose_name = 'Quote Package Service Pax Variant'
+        verbose_name_plural = 'Quotes Packages Services Paxes Variants'
+        unique_together = (('quotepackage_pax_variant', 'quotepackage_service'),)
+    quotepackage_pax_variant = models.ForeignKey(QuoteServicePaxVariant, verbose_name='Pax Variant')
+    quotepackage_service = models.ForeignKey(QuotePackageService, related_name='quotepackageservice_paxvariants')
+    manual_costs = models.BooleanField(default=False, verbose_name='Manual Costs')
+    manual_prices = models.BooleanField(default=False, verbose_name='Manual Prices')
 
 
 class QuotePackageAllotment(QuotePackageService, BaseAllotment):
@@ -585,6 +614,7 @@ class BookingService(BaseService, BookService, DateInterval):
         verbose_name = 'Booking Service'
         verbose_name_plural = 'Booking Services'
         default_permissions = ('add', 'change',)
+        ordering = ['datetime_from']
     booking = models.ForeignKey(Booking, related_name='booking_services')
     v_notes = models.CharField(
         max_length=1000, blank=True, null=True, verbose_name='Voucher Notes')
@@ -699,7 +729,7 @@ class BookingAllotment(BookingService, BaseAllotment):
         verbose_name_plural = 'Bookings Accomodations'
         default_permissions = ('add', 'change',)
 
-    def build_rooms(self):
+    def build_description(self):
         """ makes a string detailing room quantity and types"""
         from booking.services import BookingServices
         rooms = BookingServices.find_groups(
@@ -714,16 +744,18 @@ class BookingAllotment(BookingService, BaseAllotment):
             '21': 0,  # DBL+1Child
             '22': 0,  # DBL+2Child
             '31': 0,  # TPL+1Child
+            '40': 0,
         }
         room_types = {
             '00': 'NONE',
             '10': 'SGL',
             '20': 'DBL',
             '30': 'TPL',
-            '11': 'SGL+1Chld',
-            '21': 'DBL+1Chld',
-            '22': 'DBL+2Chld',
-            '31': 'TPL+1Chld',
+            '11': 'SGL&1Chld',
+            '21': 'DBL&1Chld',
+            '22': 'DBL&2Chld',
+            '31': 'TPL&1Chld',
+            '40': 'QUAD'
         }
         for room in rooms:
             room_count['%d%d' % (room[0], room[1])] += 1
@@ -737,7 +769,7 @@ class BookingAllotment(BookingService, BaseAllotment):
     def fill_data(self):
         self.name = '%s' % (self.service,)
         self.service_type = SERVICE_CATEGORY_ALLOTMENT
-        self.description = self.build_rooms()
+        self.description = self.build_description()
 
 
 class BookingTransfer(BookingService, BaseTransfer):
@@ -746,7 +778,7 @@ class BookingTransfer(BookingService, BaseTransfer):
     """
     class Meta:
         verbose_name = 'Booking Transfer'
-        verbose_name_plural = 'Bookings Transfers'
+        verbose_name_plural = 'Booking Transfers'
         default_permissions = ('add', 'change',)
     location_from = models.ForeignKey(
         Location, related_name='location_from', verbose_name='Location from')
@@ -794,7 +826,7 @@ class BookingExtra(BookingService, BaseExtra):
     """
     class Meta:
         verbose_name = 'Booking Extra'
-        verbose_name_plural = 'Bookings Extras'
+        verbose_name_plural = 'Booking Extras'
         default_permissions = ('add', 'change',)
 
     def build_description(self):
@@ -819,10 +851,14 @@ class BookingPackage(BookingService):
     price_by_package_catalogue = models.BooleanField(
         default=True, verbose_name='Use Catalogue Price')
 
+    def build_description(self):
+        return '%s pax' % self.rooming_list.count()
+
     def fill_data(self):
         # setting name for this booking_service
         self.name = self.service.name
         self.service_type = SERVICE_CATEGORY_PACKAGE
+        self.description = self.build_description()
 
     def save(self, *args, **kwargs):
         with transaction.atomic(savepoint=False):
