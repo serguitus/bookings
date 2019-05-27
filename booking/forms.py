@@ -355,6 +355,7 @@ class QuoteExtraForm(forms.ModelForm):
                 url='providerextra-autocomplete',
                 forward=['service', 'addon'],
                 ),
+            'description': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 

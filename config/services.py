@@ -512,13 +512,13 @@ class ConfigServices(object):
             detail_list = list(
                 queryset.filter(
                     (
-                        Q(a_location_from_id=location_from_id)
-                        & Q(a_location_to_id=location_to_id)
+                        Q(p_location_from_id=location_from_id)
+                        & Q(p_location_to_id=location_to_id)
                     )
                     |
                     (
-                        Q(a_location_to_id=location_from_id)
-                        & Q(a_location_from_id=location_to_id)
+                        Q(p_location_to_id=location_from_id)
+                        & Q(p_location_from_id=location_to_id)
                     )
                 )
             )

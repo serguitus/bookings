@@ -466,7 +466,7 @@ class QuoteExtraSiteModel(QuoteServiceSiteModel):
         'quote',
         ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
         ('addon', 'quantity', 'parameter'),
-        'provider', 'id')
+        'provider', 'description', 'id')
     list_display = (
         'quote', 'service', 'addon', 'quantity', 'parameter',
         'datetime_from', 'datetime_to', 'time', 'status',)
