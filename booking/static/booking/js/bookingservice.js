@@ -1,65 +1,6 @@
 $(document).ready(function(){
 
-  // find readonly cost
-  var readonlyCost = $('div.field-cost_amount div.readonly');
-  var costInput = $('#id_cost_amount');
-  var manualCost = $('#id_manual_cost');
-  var isManualCost;
-  // verify readonly not found
-  if (readonlyCost.length == 0) {
-    // add button and text
-    costInput.after("<button class='btn btn-success btn-copy btn-copy-cost'><<</button><span class='computed-value'>Calculated: <b data-computed=cost>N/A</b></span>");
-    isManualCost = manualCost[0].checked;
-  } else {
-    // add text
-    readonlyCost.after("<span class='computed-value'>Calculated: <b data-computed=cost>N/A</b></span>");
-    costInput = readonlyCost;
-    isManualCost = $('div.field-manual_cost div.readonly img').attr('src').includes('icon-yes');
-  }
-  computedCost = $('b[data-computed=cost]');
-
-  var readonlyPrice = $('div.field-price_amount div.readonly');
-  var priceInput = $('#id_price_amount');
-  var manualPrice = $('#id_manual_price');
-  var isManualPrice;
-  if (readonlyPrice.length == 0) {
-    priceInput.after("<button class='btn btn-success btn-copy btn-copy-price'><<</button><span class='computed-value'>Calculated: <b data-computed=price>N/A</b></span>");
-    isManualPrice = manualPrice[0].checked;
-  } else {
-    readonlyPrice.after("<span class='computed-value'>Calculated: <b data-computed=price>N/A</b></span>");
-    priceInput = readonlyPrice;
-    isManualPrice = $('div.field-manual_price div.readonly img').attr('src').includes('icon-yes');
-  }
-  computedPrice = $('b[data-computed=price]');
-
-  // define manual value
-  changed_manual_cost(isManualCost);
-  // define manual value
-  changed_manual_price(isManualPrice);
-
-  function compare_numbers() {
-    // a function to check if computed prices differ from set prices
-    // it highlights different numbers
-    if(costInput[0].value != Number(computedCost.html())){
-      $('.btn-copy-cost').removeClass('btn-success');
-      $('.btn-copy-cost').addClass('btn-danger');
-    } else{
-      $('.btn-copy-cost').removeClass('btn-danger');
-      $('.btn-copy-cost').addClass('btn-success');
-    }
-    if(priceInput[0].value != Number(computedPrice.html())){
-      $('.btn-copy-price').removeClass('btn-success');
-      $('.btn-copy-price').addClass('btn-danger');
-    } else{
-      $('.btn-copy-price').removeClass('btn-danger');
-      $('.btn-copy-price').addClass('btn-success');
-    }
-    return 0
-  }
-
   function get_computed_amounts(){
-    computedCost.html('Loading...');
-    computedPrice.html('Loading...');
     // sending a request to get computed numbers
     $.ajax({
       'url': bookingservice_amounts_url,
@@ -68,110 +9,172 @@ $(document).ready(function(){
       'type': 'POST',
       'data': $(bookingservice_form_selector).serialize(),
     }).done(function(data){
-      if(data['cost_message']){
-        computedCost.html(data['cost_message']);
-        if (!isManualCost) {
-          if (readonlyCost.length == 0) {
-            costInput[0].value = '';
-          } else {
-            costInput.html('');
-          }
-        }
-      }else{
-        computedCost.html(data['cost']);
-        if (!isManualCost) {
-          if (readonlyCost.length == 0) {
-            costInput[0].value = Number(data['cost']);
-          } else {
-            costInput.html(data['cost']);
-          }
-        }
-      }
-      if(data['price_message']){
-        computedPrice.html(data['price_message']);
-        if (!isManualPrice) {
-          if (readonlyPrice.length == 0) {
-            priceInput[0].value = '';
-          } else {
-            priceInput.html('');
-          }
-        }
-      }else{
-        computedPrice.html(data['price']);
-        if (!isManualPrice) {
-          if (readonlyPrice.length == 0) {
-            priceInput[0].value = Number(data['price']);
-          } else {
-            priceInput.html(data['price']);
-          }
-        }
-      }
-      compare_numbers();
+      update_amounts(false, data['cost'], data['cost_message']);
+      update_amounts(true, data['price'], data['price_message']);
+      compare_all_amounts();
     }).fail(function(){
-      computedCost.html('N/A');
-      computedPrice.html('N/A');
-      compare_numbers();
+      clear_values('N/A');
     })
   }
 
+  function update_amounts(for_price, data_amount, data_amount_msg){
+    if (for_price) {
+      amount_text = 'price';
+    } else {
+      amount_text = 'cost';
+    }
+    sa = $('#span-' + amount_text);
+    if (data_amount) {
+      sa.html(data_amount);
+    } else {
+      sa.html(data_amount_msg);
+    }
+  }
+
+  function changed_manual_cost(target){
+    isManualCost = target.checked;
+    if(isManualCost){
+      $('.btn-copy-cost').show()
+    } else {
+      $('.btn-copy-cost').hide()
+    }
+    $('#id_cost_amount')[0].readOnly = !isManualCost;
+    get_computed_amounts();
+  }
+
+  function changed_manual_price(target){
+    isManualPrice = target.checked;
+    if (isManualPrice){
+      $('.btn-copy-price').show()
+    } else {
+      $('.btn-copy-price').hide()
+    }
+    $('#id_price_amount')[0].readOnly = !isManualPrice;
+    get_computed_amounts();
+  }
+
+  function clear_values(msg) {
+    $('span.computed-value').each(function(index) {
+      $( this ).html(msg);
+    });
+    $('button.btn-copy').each(function(index) {
+      $( this ).removeClass('btn-success');
+      $( this ).addClass('btn-danger');
+    });
+  }
+
+  function compare_all_amounts() {
+    ic = $('#id_cost_amount');
+    sc = $('#span-cost');
+    bc = $('#btn-cost');
+    compare_amounts(ic, sc, bc);
+    ip = $('#id_price_amount');
+    sp = $('#span-price');
+    bp = $('#btn-price');
+    compare_amounts(ip, sp, bp);
+  }
+
+  function compare_amounts(input, span, btn) {
+    iv = Number(input.val());
+    sv = Number(span.html());
+    if(sv && iv && sv == iv){
+      btn.removeClass('btn-danger');
+      btn.addClass('btn-success');
+    } else{
+      btn.removeClass('btn-success');
+      btn.addClass('btn-danger');
+    }
+  }
+
+  function show_buttons() {
+    $('.btn-copy-cost').detach();
+    $('.btn-copy-price').detach();
+    field = $('#id_cost_amount');
+    if (field[0] != undefined) {
+      $('#id_cost_amount').after('<button id="btn-cost" class="btn btn-copy-cost"><<</button><span id="span-cost" class="computed-value">N/A</span>');
+      $('#id_price_amount').after('<button id="btn-price" class="btn btn-copy-price"><<</button><span id="span-price" class="computed-value">N/A</span>');
+      changed_manual_cost($('#id_manual_cost')[0]);
+      changed_manual_price($('#id_manual_price')[0]);
+    } else {
+      field = $('div.field-cost_amount div.readonly');
+      if (field[0] != undefined) {
+        $('div.field-cost_amount div.readonly').after('<span id="span-cost" class="computed-value">N/A</span>');
+        $('div.field-price_amount div.readonly').after('<span id="span-price" class="computed-value">N/A</span>');
+      }
+    }
+
+    $('.btn-copy-cost').on('click', function(e){
+      e.preventDefault();
+      button = $(this);
+      input = button.prev();
+      span = button.next();
+      number = Number(span.html());
+      if (number) {
+        input.val(number);
+        compare_amounts(input, span, button);
+        get_computed_amounts();
+      }
+      return false;
+    });
+
+    $('.btn-copy-price').on('click', function(e){
+      e.preventDefault();
+      button = $(this);
+      input = button.prev();
+      span = button.next();
+      number = Number(span.html());
+      if (number) {
+        input.val(number);
+        compare_amounts(input, span, button);
+        get_computed_amounts();
+      }
+      return false;
+    });
+  }
+
+  show_buttons();
   get_computed_amounts();
 
   $(bookingservice_form_selector + ' input, ' + bookingservice_form_selector + ' select').on('change', function(){
     get_computed_amounts();
   });
 
-  function changed_manual_cost(manual){
-    isManualCost = manual;
-    if(isManualCost){
-      $('.btn-copy-cost').show()
-    } else {
-      $('.btn-copy-cost').hide()
-    }
-    if (readonlyCost.length == 0) {
-      costInput[0].readOnly = !manual;
-    }
+  // for dates changed by calendar
+  $(bookingservice_form_selector + ' input[name*="date"]').focusout(function (e) {
+    e.preventDefault();
     get_computed_amounts();
-  }
-
-  manualCost.on('change', function(e){
+  });
+  // for times changed by calendar
+  $(bookingservice_form_selector + ' input[name*="time"]').focusout(function (e) {
     e.preventDefault();
-    changed_manual_cost(manualCost[0].checked);
-  })
-
-  function changed_manual_price(manual){
-    isManualPrice = manual;
-    if(isManualPrice){
-      $('.btn-copy-price').show()
-    } else {
-      $('.btn-copy-price').hide()
-    }
-    if (readonlyPrice.length == 0) {
-      priceInput[0].readOnly = !manual;
-    }
     get_computed_amounts();
-  }
+  });
 
-  manualPrice.on('change', function(e){
+  $('#id_manual_cost').on('change', function(e){
     e.preventDefault();
-    changed_manual_price(manualPrice[0].checked);
+    changed_manual_cost(e.target);
   })
 
-  $('.btn-copy-cost').on('click', function(e){
+  $('#id_manual_price').on('change', function(e){
     e.preventDefault();
-    number = Number(computedCost.html());
-    if(number){
-      costInput[0].value = number;
-    }
-    compare_numbers()
+    changed_manual_price(e.target);
   })
 
-  $('.btn-copy-price').on('click', function(e){
+  // for service changed
+  $('#id_service').change(function (e) {
     e.preventDefault();
-    number = Number(computedPrice.html());
-    if(number){
-      priceInput[0].value = number;
-    }
-    compare_numbers()
-  })
+    // clear data
+    $('#id_room_type').autocomplete().empty().trigger('change');
+    $('#id_board option').prop("selected", false);
+    $('#id_board_type').select();
+
+    $('#id_location_from').select();
+    $('#id_location_to').select();
+
+    $('#id_addon').select();
+
+    $('#id_provider').select();
+    get_computed_amounts();
+  });
 
 });

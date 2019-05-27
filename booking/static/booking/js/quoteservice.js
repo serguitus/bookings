@@ -24,15 +24,12 @@ $(document).ready(function(){
             quote_pax_variant_input = $('#id_quoteservice_paxvariants-' + idx + '-quote_pax_variant');
             quote_pax_variant_value = Number(quote_pax_variant_input.val());
             if (quote_pax_variant_value && quote_pax_variant_value == quote_pax_variant_id) {
-              checkboxManualCosts = $('#id_quoteservice_paxvariants-' + idx + '-manual_costs');
-              update_amounts(false, checkboxManualCosts, idx, 1, pax_data.total.cost_1, pax_data.total.cost_1_msg);
-              update_amounts(false, checkboxManualCosts, idx, 2, pax_data.total.cost_2, pax_data.total.cost_2_msg);
-              update_amounts(false, checkboxManualCosts, idx, 3, pax_data.total.cost_3, pax_data.total.cost_3_msg);
-
-              checkboxManualPrices = $('#id_quoteservice_paxvariants-' + idx + '-manual_prices');
-              update_amounts(true, checkboxManualPrices, idx, 1, pax_data.total.price_1, pax_data.total.price_1_msg);
-              update_amounts(true, checkboxManualPrices, idx, 2, pax_data.total.price_2, pax_data.total.price_2_msg);
-              update_amounts(true, checkboxManualPrices, idx, 3, pax_data.total.price_3, pax_data.total.price_3_msg);
+              update_amounts(false, idx, 1, pax_data.total.cost_1, pax_data.total.cost_1_msg);
+              update_amounts(false, idx, 2, pax_data.total.cost_2, pax_data.total.cost_2_msg);
+              update_amounts(false, idx, 3, pax_data.total.cost_3, pax_data.total.cost_3_msg);
+              update_amounts(true, idx, 1, pax_data.total.price_1, pax_data.total.price_1_msg);
+              update_amounts(true, idx, 2, pax_data.total.price_2, pax_data.total.price_2_msg);
+              update_amounts(true, idx, 3, pax_data.total.price_3, pax_data.total.price_3_msg);
             }
           }
         });
@@ -45,7 +42,7 @@ $(document).ready(function(){
     })
   }
 
-  function update_amounts(for_price, checkboxManual, idx, amount_idx, data_amount, data_amount_msg){
+  function update_amounts(for_price, idx, amount_idx, data_amount, data_amount_msg){
     if (for_price) {
       amount_letter = 'p';
       amount_text = 'price';

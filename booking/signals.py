@@ -130,6 +130,21 @@ def update_pax_booking(sender, instance, **kwargs):
     BookingServices.update_booking(instance)
 
 
+@receiver(pre_save, sender=BookingAllotment)
+def pre_save_bookingallotment(sender, instance, **kwargs):
+    BookingServices.setup_bookingservice_amounts(instance)
+
+
+@receiver(pre_save, sender=BookingTransfer)
+def pre_save_bookingtransfer(sender, instance, **kwargs):
+    BookingServices.setup_bookingservice_amounts(instance)
+
+
+@receiver(pre_save, sender=BookingExtra)
+def pre_save_bookingextra(sender, instance, **kwargs):
+    BookingServices.setup_bookingservice_amounts(instance)
+
+
 @receiver((post_save, post_delete), sender=BookingAllotment)
 def update_allotment_booking(sender, instance, **kwargs):
     BookingServices.update_booking(instance)

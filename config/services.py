@@ -367,7 +367,7 @@ class ConfigServices(object):
             service_id, date_from, date_to, price_groups,
             agency, board_type, room_type_id, quantity)
 
-        return cls.build_amounts_result(cost, cost_message, price, price_message)
+        return cost, cost_message, price, price_message
 
 
     @classmethod
@@ -477,7 +477,7 @@ class ConfigServices(object):
             service_id, date_from, date_to, price_groups,
             agency, location_from_id, location_to_id, quantity)
 
-        return cls.build_amounts_result(cost, cost_message, price, price_message)
+        return cost, cost_message, price, price_message
 
 
     @classmethod
@@ -511,9 +511,15 @@ class ConfigServices(object):
                 provider.id, service_id, date_from, date_to)
             detail_list = list(
                 queryset.filter(
-                    p_location_from_id=location_from_id
-                ).filter(
-                    p_location_to_id=location_to_id
+                    (
+                        Q(a_location_from_id=location_from_id)
+                        & Q(a_location_to_id=location_to_id)
+                    )
+                    |
+                    (
+                        Q(a_location_to_id=location_from_id)
+                        & Q(a_location_from_id=location_to_id)
+                    )
                 )
             )
             cost, cost_message = cls.find_groups_amount(
@@ -599,7 +605,7 @@ class ConfigServices(object):
         price, price_message = cls.extra_prices(service_id, date_from, date_to, price_groups,
             agency, addon_id, quantity, parameter)
 
-        return cls.build_amounts_result(cost, cost_message, price, price_message)
+        return cost, cost_message, price, price_message
 
 
     @classmethod
@@ -764,32 +770,6 @@ class ConfigServices(object):
                 )
         return price, price_message
 
-
-    @classmethod
-    def build_amounts_result(cls, cost, cost_message, price, price_message):
-        if not cost is None and cost >= 0:
-            if not price is None and price >= 0:
-                code = "0"
-                message = "Provider Cost and Agency Price Found: %s - %s" % (
-                    cost_message, price_message
-                )
-            else:
-                code = "2"
-                message = "Only Provider Cost Found: %s - %s" % (
-                    cost_message, price_message
-                )
-        else:
-            if not price is None and price >= 0:
-                code = "1"
-                message = "Only Agency Price Found: %s - %s" % (
-                    cost_message, price_message
-                )
-            else:
-                code = "3"
-                message = "Provider Cost and Agency Amounts NOT Found: %s - %s" % (
-                    cost_message, price_message
-                )
-        return code, message, cost, cost_message, price, price_message
 
     @classmethod
     def find_groups_amount(
