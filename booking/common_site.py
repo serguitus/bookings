@@ -144,11 +144,15 @@ class PackageServiceSiteModel(SiteModel):
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'package') and obj.package:
             return redirect(reverse('common:booking_package_change', args=[obj.package.pk]))
+        if 'package' in request.POST:
+            return redirect(reverse('common:booking_package_change', args=[request.POST['package']]))
         return super(PackageServiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
         if hasattr(obj, 'package') and obj.package:
             return redirect(reverse('common:booking_package_change', args=[obj.package.pk]))
+        if 'package' in request.POST:
+            return redirect(reverse('common:booking_package_change', args=[request.POST['package']]))
         return super(PackageServiceSiteModel, self).response_post_save_change(request, obj)
 
 
@@ -402,11 +406,15 @@ class QuoteServiceSiteModel(SiteModel):
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'quote') and obj.quote:
             return redirect(reverse('common:booking_quote_change', args=[obj.quote.pk]))
+        if 'quote' in request.POST:
+            return redirect(reverse('common:booking_quote_change', args=[request.POST['quote']]))
         return super(QuoteServiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
         if hasattr(obj, 'quote') and obj.quote:
             return redirect(reverse('common:booking_quote_change', args=[obj.quote.pk]))
+        if 'quote' in request.POST:
+            return redirect(reverse('common:booking_quote_change', args=[request.POST['quote']]))
         return super(QuoteServiceSiteModel, self).response_post_save_change(request, obj)
 
     def delete_model(self, request, obj):
@@ -534,12 +542,18 @@ class QuotePackageServiceSiteModel(SiteModel):
         if hasattr(obj, 'quote_package') and obj.quote_package:
             return redirect(
                 reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
+        if 'quote_package' in request.POST:
+            return redirect(
+                reverse('common:booking_quotepackage_change', args=[request.POST['quote_package']]))
         return super(QuotePackageServiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
         if hasattr(obj, 'quote_package') and obj.quote_package:
             return redirect(
                 reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
+        if 'quote_package' in request.POST:
+            return redirect(
+                reverse('common:booking_quotepackage_change', args=[request.POST['quote_package']]))
         return super(QuotePackageServiceSiteModel, self).response_post_save_change(request, obj)
 
     def delete_model(self, request, obj):
@@ -768,18 +782,57 @@ class BookingSiteModel(SiteModel):
         return result
 
 
-class BookingChangeAmountsSiteModel(SiteModel):
-
+class BookingServiceSiteModel(SiteModel):
+    
     def get_readonly_fields(self, request, obj=None):
-        readonly_fields = super(BookingChangeAmountsSiteModel, self).get_readonly_fields(request, obj) or []
+        readonly_fields = super(BookingServiceSiteModel, self).get_readonly_fields(request, obj) or []
 
         if not request.user.has_perm("booking.change_amounts"):
             return readonly_fields + ['manual_cost', 'cost_amount', 'manual_price', 'price_amount']
 
         return readonly_fields
 
+    def response_post_save_add(self, request, obj):
+        if hasattr(obj, 'booking') and obj.booking:
+            return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
+        if 'booking' in request.POST:
+            return redirect(reverse('common:booking_booking_change', args=[request.POST['booking']]))
+        return super(BookingServiceSiteModel, self).response_post_save_add(request, obj)
 
-class BookingAllotmentSiteModel(BookingChangeAmountsSiteModel):
+    def response_post_save_change(self, request, obj):
+        if hasattr(obj, 'booking') and obj.booking:
+            return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
+        if 'booking' in request.POST:
+            return redirect(reverse('common:booking_booking_change', args=[request.POST['booking']]))
+        return super(BookingServiceSiteModel, self).response_post_save_add(request, obj)
+
+
+class BookingPackageServiceSiteModel(SiteModel):
+    
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super(BookingPackageServiceSiteModel, self).get_readonly_fields(request, obj) or []
+
+        if not request.user.has_perm("booking.change_amounts"):
+            return readonly_fields + ['manual_cost', 'cost_amount', 'manual_price', 'price_amount']
+
+        return readonly_fields
+
+    def response_post_save_add(self, request, obj):
+        if hasattr(obj, 'booking_package') and obj.booking:
+            return redirect(reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
+        if 'booking_package' in request.POST:
+            return redirect(reverse('common:booking_bookingpackage_change', args=[request.POST['booking_package']]))
+        return super(BookingPackageServiceSiteModel, self).response_post_save_add(request, obj)
+
+    def response_post_save_change(self, request, obj):
+        if hasattr(obj, 'booking_package') and obj.booking:
+            return redirect(reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
+        if 'booking_package' in request.POST:
+            return redirect(reverse('common:booking_bookingpackage_change', args=[request.POST['booking_package']]))
+        return super(BookingPackageServiceSiteModel, self).response_post_save_add(request, obj)
+
+
+class BookingAllotmentSiteModel(BookingServiceSiteModel):
     model_order = 1210
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
@@ -816,14 +869,8 @@ class BookingAllotmentSiteModel(BookingChangeAmountsSiteModel):
             BookingServices.set_bookingservice_amounts(obj, pax_list)
         obj.save()
 
-    def response_post_save_add(self, request, obj):
-        return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
 
-    def response_post_save_change(self, request, obj):
-        return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
-
-
-class BookingPackageAllotmentSiteModel(BookingChangeAmountsSiteModel):
+class BookingPackageAllotmentSiteModel(BookingPackageServiceSiteModel):
     model_order = 1310
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
@@ -856,16 +903,8 @@ class BookingPackageAllotmentSiteModel(BookingChangeAmountsSiteModel):
             BookingServices.set_bookingservice_amounts(obj)
         obj.save()
 
-    def response_post_save_add(self, request, obj):
-        return redirect(
-            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
 
-    def response_post_save_change(self, request, obj):
-        return redirect(
-            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
-
-
-class BookingTransferSiteModel(BookingChangeAmountsSiteModel):
+class BookingTransferSiteModel(BookingServiceSiteModel):
     model_order = 1220
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
@@ -904,14 +943,8 @@ class BookingTransferSiteModel(BookingChangeAmountsSiteModel):
             BookingServices.set_bookingservice_amounts(obj, pax_list)
         obj.save()
 
-    def response_post_save_add(self, request, obj):
-        return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
 
-    def response_post_save_change(self, request, obj):
-        return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
-
-
-class BookingPackageTransferSiteModel(BookingChangeAmountsSiteModel):
+class BookingPackageTransferSiteModel(BookingPackageServiceSiteModel):
     model_order = 1320
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
@@ -947,16 +980,8 @@ class BookingPackageTransferSiteModel(BookingChangeAmountsSiteModel):
             BookingServices.set_bookingservice_amounts(obj)
         obj.save()
 
-    def response_post_save_add(self, request, obj):
-        return redirect(
-            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
 
-    def response_post_save_change(self, request, obj):
-        return redirect(
-            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
-
-
-class BookingExtraSiteModel(BookingChangeAmountsSiteModel):
+class BookingExtraSiteModel(BookingServiceSiteModel):
     model_order = 1230
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
@@ -989,14 +1014,8 @@ class BookingExtraSiteModel(BookingChangeAmountsSiteModel):
             BookingServices.set_bookingservice_amounts(obj, pax_list)
         obj.save()
 
-    def response_post_save_add(self, request, obj):
-        return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
 
-    def response_post_save_change(self, request, obj):
-        return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
-
-
-class BookingPackageExtraSiteModel(BookingChangeAmountsSiteModel):
+class BookingPackageExtraSiteModel(BookingPackageServiceSiteModel):
     model_order = 1330
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
@@ -1028,15 +1047,8 @@ class BookingPackageExtraSiteModel(BookingChangeAmountsSiteModel):
             BookingServices.set_bookingservice_amounts(obj)
         obj.save()
 
-    def response_post_save_add(self, request, obj):
-        return redirect(
-            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
 
-    def response_post_save_change(self, request, obj):
-        return redirect(
-            reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
-
-class BookingPackageSiteModel(BookingChangeAmountsSiteModel):
+class BookingPackageSiteModel(BookingServiceSiteModel):
     model_order = 1240
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
@@ -1069,12 +1081,6 @@ class BookingPackageSiteModel(BookingChangeAmountsSiteModel):
             pax_list = self.build_inlines(request, obj)[0]
             BookingServices.set_bookingservice_amounts(obj, pax_list)
         obj.save()
-
-    def response_post_save_add(self, request, obj):
-        return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
-
-    def response_post_save_change(self, request, obj):
-        return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
 
 
 class AgencyPackageDetailInline(CommonStackedInline):
