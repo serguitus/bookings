@@ -511,21 +511,21 @@ class ConfigServices(object):
                 provider.id, service_id, date_from, date_to)
             detail_list = list(
                 queryset.filter(
-                    (
-                        Q(p_location_from_id=location_from_id)
-                        & Q(p_location_to_id=location_to_id)
-                    )
-                    |
-                    (
-                        Q(p_location_to_id=location_from_id)
-                        & Q(p_location_from_id=location_to_id)
-                    )
-                )
-            )
+                    p_location_from_id=location_from_id,
+                    p_location_to_id=location_to_id))
             cost, cost_message = cls.find_groups_amount(
                 True, service, date_from, date_to, cost_groups,
                 quantity, None, detail_list
             )
+            if cost is None:
+                detail_list = list(
+                    queryset.filter(
+                        p_location_to_id=location_from_id,
+                        p_location_from_id=location_to_id))
+                cost, cost_message = cls.find_groups_amount(
+                    True, service, date_from, date_to, cost_groups,
+                    quantity, None, detail_list
+                )
         return cost, cost_message
 
 
@@ -560,21 +560,22 @@ class ConfigServices(object):
                 agency.id, service_id, date_from, date_to)
             detail_list = list(
                 queryset.filter(
-                    (
-                        Q(a_location_from_id=location_from_id)
-                        & Q(a_location_to_id=location_to_id)
-                    )
-                    |
-                    (
-                        Q(a_location_to_id=location_from_id)
-                        & Q(a_location_from_id=location_to_id)
-                    )
-                )
-            )
+                    a_location_from_id=location_from_id,
+                    a_location_to_id=location_to_id))
             price, price_message = cls.find_groups_amount(
                 False, service, date_from, date_to, price_groups,
                 quantity, None, detail_list
             )
+            if price is None:
+                detail_list = list(
+                    queryset.filter(
+                        a_location_to_id=location_from_id,
+                        a_location_from_id=location_to_id))
+                price, price_message = cls.find_groups_amount(
+                    False, service, date_from, date_to, price_groups,
+                    quantity, None, detail_list
+                )
+
         return price, price_message
 
 
