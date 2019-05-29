@@ -349,13 +349,13 @@ class ConfigServices(object):
             cls, service_id, date_from, date_to, cost_groups, price_groups, provider, agency,
             board_type, room_type_id, quantity=None):
         if room_type_id is None or room_type_id == '':
-            return 3, 'Room Missing', None, 'Room Missing', None, 'Room Missing'
+            return None, 'Room Missing', None, 'Room Missing'
         if board_type is None or board_type == '':
-            return 3, 'Board Missing', None, 'Board Missing', None, 'Board Missing'
+            return None, 'Board Missing', None, 'Board Missing'
         if date_from is None:
-            return 3, 'Date from Missing', None, 'Date from Missing', None, 'Date from Missing'
+            return None, 'Date from Missing', None, 'Date from Missing'
         if date_to is None:
-            return 3, 'Date to Missing', None, 'Date to Missing', None, 'Date to Missing'
+            return None, 'Date to Missing', None, 'Date to Missing'
 
         # provider cost
         cost, cost_message = cls.allotment_costs(
@@ -457,11 +457,11 @@ class ConfigServices(object):
             cls, service_id, date_from, date_to, cost_groups, price_groups, provider, agency,
             location_from_id, location_to_id, quantity=None):
         if location_from_id is None or location_from_id == '':
-            return 3, 'Location From Missing', None, 'Location From Missing', None, 'Location From Missing'
+            return None, 'Location From Missing', None, 'Location From Missing'
         if location_to_id is None or location_to_id == '':
-            return 3, 'Location To Missing', None, 'Location To Missing', None, 'Location To Missing'
+            return None, 'Location To Missing', None, 'Location To Missing'
         if date_from is None and date_to is None:
-            return 3, 'Both Dates are Missing', None, 'Both Dates are Missing', None, 'Both Dates are Missing'
+            return None, 'Both Dates are Missing', None, 'Both Dates are Missing'
         if date_from is None:
             date_from = date_to
         if date_to is None:
@@ -586,16 +586,16 @@ class ConfigServices(object):
         service = Extra.objects.get(pk=service_id)
 
         if date_from is None and date_to is None:
-            return 3, 'Both Dates are Missing', None, 'Both Dates are Missing', None, 'Both Dates are Missing'
+            return None, 'Both Dates are Missing', None, 'Both Dates are Missing'
         if date_from is None:
             if (service.parameter_type == EXTRA_PARAMETER_TYPE_DAYS
                     or service.parameter_type == EXTRA_PARAMETER_TYPE_NIGHTS):
-                return 3, 'Date from is Missing', None, 'Date from is Missing', None, 'Date from is Missing'
+                return None, 'Date from is Missing', None, 'Date from is Missing'
             date_from = date_to
         if date_to is None:
             if (service.parameter_type == EXTRA_PARAMETER_TYPE_DAYS
                     or service.parameter_type == EXTRA_PARAMETER_TYPE_NIGHTS):
-                return 3, 'Date to is Missing', None, 'Date to is Missing', None, 'Date to is Missing'
+                return None, 'Date to is Missing', None, 'Date to is Missing'
             date_to = date_from
 
         # provider cost
