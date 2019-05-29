@@ -1542,19 +1542,6 @@ class BookingServices(object):
 
 
     @classmethod
-    def _bookingextra_amounts(cls, bookingextra, pax_list=None):
-        cost_groups = BookingServices.find_bookingservice_paxes_groups(pax_list, bookingextra.service, True)
-        price_groups = BookingServices.find_bookingservice_paxes_groups(pax_list, bookingextra.service, False)
-
-        code, message, cost, cost_msg, price, price_msg = ConfigServices.extra_amounts(
-            bookingextra.service_id, bookingextra.datetime_from, bookingextra.datetime_to, cost_groups, price_groups,
-            bookingextra.provider, bookingextra.booking.agency,
-            bookingextra.addon_id, bookingextra.quantity, bookingextra.parameter)
-
-        return cls._bookingservice_manual_amounts(bookingextra, cost, price)
-
-
-    @classmethod
     def _bookingpackageservice_amounts(cls, bookingpackage_service, pax_list=None):
         if not pax_list:
             pax_list = cls._find_bookingservice_pax_list(bookingpackage_service.booking_package)
