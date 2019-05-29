@@ -842,14 +842,14 @@ class BookingPackageServiceSiteModel(SiteModel):
         return readonly_fields
 
     def response_post_save_add(self, request, obj):
-        if hasattr(obj, 'booking_package') and obj.booking:
+        if hasattr(obj, 'booking_package') and obj.booking_package:
             return redirect(reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
         if 'booking_package' in request.POST:
             return redirect(reverse('common:booking_bookingpackage_change', args=[request.POST['booking_package']]))
         return super(BookingPackageServiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
-        if hasattr(obj, 'booking_package') and obj.booking:
+        if hasattr(obj, 'booking_package') and obj.booking_package:
             return redirect(reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
         if 'booking_package' in request.POST:
             return redirect(reverse('common:booking_bookingpackage_change', args=[request.POST['booking_package']]))
@@ -863,8 +863,7 @@ class BookingPackageServiceSiteModel(SiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        pax_list = self.build_inlines(request, obj)[0]
-        BookingServices.setup_bookingservice_amounts(obj, pax_list)
+        BookingServices.setup_bookingservice_amounts(obj)
         obj.save()
 
     def save_related(self, request, form, formsets, change):
