@@ -1114,9 +1114,10 @@ class BookingPackageSiteModel(BookingServiceSiteModel):
     add_form_template = 'booking/bookingpackage_change_form.html'
     change_form_template = 'booking/bookingpackage_change_form.html'
 
-    def save_model(self, request, obj, form, change):
+    def save_related(self, request, form, formsets, change):
         with transaction.atomic(savepoint=False):
-            super(BookingPackageSiteModel, self).save_model(request, obj, form, change)
+            super(BookingPackageSiteModel, self).save_related(request, form, formsets, change)
+            obj = self.save_form(request, form, change)
             BookingServices.update_bookingpackageservices_amounts(obj)
 
 

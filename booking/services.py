@@ -1515,7 +1515,10 @@ class BookingServices(object):
 
         if fields:
             booking_service.save(update_fields=fields)
-            cls.update_booking_amounts(booking_service)
+            if isinstance(booking_service, (BookingAllotment, BookingTransfer, BookingExtra)):
+                cls.update_booking_amounts(booking_service)
+            else:
+                cls.update_bookingpackage_amounts(booking_service)
 
 
     @classmethod
@@ -3094,13 +3097,9 @@ class BookingServices(object):
 
     @classmethod
     def update_bookingservice_amounts(cls, booking_service):
-        if isinstance(booking_service, BookingAllotment):
-            cost, cost_msg, price, price_msg = cls._find_bookingservice_amounts(booking_service)
-            cls._save_booking_service_amounts(booking_service, cost, price)
-        elif isinstance(booking_service, BookingTransfer):
-            cost, cost_msg, price, price_msg = cls._find_bookingservice_amounts(booking_service)
-            cls._save_booking_service_amounts(booking_service, cost, price)
-        elif isinstance(booking_service, BookingExtra):
+        if isinstance(booking_service, (
+                BookingAllotment, BookingTransfer, BookingExtra,
+                BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra)):
             cost, cost_msg, price, price_msg = cls._find_bookingservice_amounts(booking_service)
             cls._save_booking_service_amounts(booking_service, cost, price)
         elif isinstance(booking_service, BookingPackage):
