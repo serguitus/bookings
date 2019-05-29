@@ -2134,11 +2134,15 @@ class BookingServices(object):
 
     @classmethod
     def _round_cost(cls, cost):
+        if cost is None:
+            return None
         return round(float(cost), 2)
 
 
     @classmethod
     def _round_price(cls, price):
+        if price is None:
+            return None
         return round(0.499999 + float(price))
 
 
