@@ -141,6 +141,13 @@ class PackageSiteModel(SiteModel):
 
 
 class PackageServiceSiteModel(SiteModel):
+    def response_post_delete(self, request, obj):
+        if hasattr(obj, 'package') and obj.package:
+            return redirect(reverse('common:booking_package_change', args=[obj.package.pk]))
+        if 'package' in request.POST:
+            return redirect(reverse('common:booking_package_change', args=[request.POST['package']]))
+        return super(PackageServiceSiteModel, self).response_post_delete(request, obj)
+
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'package') and obj.package:
             return redirect(reverse('common:booking_package_change', args=[obj.package.pk]))
@@ -403,6 +410,13 @@ class QuoteSiteModel(SiteModel):
 
 
 class QuoteServiceSiteModel(SiteModel):
+    def response_post_delete(self, request, obj):
+        if hasattr(obj, 'quote') and obj.quote:
+            return redirect(reverse('common:booking_quote_change', args=[obj.quote.pk]))
+        if 'quote' in request.POST:
+            return redirect(reverse('common:booking_quote_change', args=[request.POST['quote']]))
+        return super(QuoteServiceSiteModel, self).response_post_delete(request, obj)
+
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'quote') and obj.quote:
             return redirect(reverse('common:booking_quote_change', args=[obj.quote.pk]))
@@ -538,6 +552,15 @@ class QuotePackageSiteModel(QuoteServiceSiteModel):
 
 
 class QuotePackageServiceSiteModel(SiteModel):
+    def response_post_delete(self, request, obj):
+        if hasattr(obj, 'quote_package') and obj.quote_package:
+            return redirect(
+                reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
+        if 'quote_package' in request.POST:
+            return redirect(
+                reverse('common:booking_quotepackage_change', args=[request.POST['quote_package']]))
+        return super(QuotePackageServiceSiteModel, self).response_post_delete(request, obj)
+
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'quote_package') and obj.quote_package:
             return redirect(
@@ -781,9 +804,9 @@ class BookingSiteModel(SiteModel):
             return False
         return result
 
-    def save(self, request, obj, form, change):
+    def save_model(self, request, obj, form, change):
         with transaction.atomic(savepoint=False):
-            super(BookingSiteModel, self).save(request, obj, form, change)
+            super(BookingSiteModel, self).save_model(request, obj, form, change)
             BookingServices.update_bookingservices_amounts(obj)
 
 
@@ -797,6 +820,13 @@ class BookingServiceSiteModel(SiteModel):
 
         return readonly_fields
 
+    def response_post_delete(self, request, obj):
+        if hasattr(obj, 'booking') and obj.booking:
+            return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
+        if 'booking' in request.POST:
+            return redirect(reverse('common:booking_booking_change', args=[request.POST['booking']]))
+        return super(BookingServiceSiteModel, self).response_post_delete(request, obj)
+
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'booking') and obj.booking:
             return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
@@ -809,13 +839,13 @@ class BookingServiceSiteModel(SiteModel):
             return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
         if 'booking' in request.POST:
             return redirect(reverse('common:booking_booking_change', args=[request.POST['booking']]))
-        return super(BookingServiceSiteModel, self).response_post_save_add(request, obj)
+        return super(BookingServiceSiteModel, self).response_post_save_change(request, obj)
 
     def delete_model(self, request, obj):
         with transaction.atomic(savepoint=False):
             super(BookingServiceSiteModel, self).delete_model(request, obj)
-            BookingServices.update_quote_paxvariants_amounts(obj)
-            BookingServices.update_quote(obj)
+            BookingServices.update_booking_amounts(obj)
+            BookingServices.update_booking(obj)
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
@@ -841,6 +871,13 @@ class BookingPackageServiceSiteModel(SiteModel):
 
         return readonly_fields
 
+    def response_post_delete(self, request, obj):
+        if hasattr(obj, 'booking_package') and obj.booking_package:
+            return redirect(reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
+        if 'booking_package' in request.POST:
+            return redirect(reverse('common:booking_bookingpackage_change', args=[request.POST['booking_package']]))
+        return super(BookingPackageServiceSiteModel, self).response_post_delete(request, obj)
+
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'booking_package') and obj.booking_package:
             return redirect(reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
@@ -853,13 +890,13 @@ class BookingPackageServiceSiteModel(SiteModel):
             return redirect(reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
         if 'booking_package' in request.POST:
             return redirect(reverse('common:booking_bookingpackage_change', args=[request.POST['booking_package']]))
-        return super(BookingPackageServiceSiteModel, self).response_post_save_add(request, obj)
+        return super(BookingPackageServiceSiteModel, self).response_post_save_change(request, obj)
 
     def delete_model(self, request, obj):
         with transaction.atomic(savepoint=False):
             super(BookingPackageServiceSiteModel, self).delete_model(request, obj)
-            BookingServices.update_quote_paxvariants_amounts(obj)
-            BookingServices.update_quote(obj)
+            BookingServices.update_bookingpackage_amounts(obj)
+            BookingServices.update_bookingpackage(obj)
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
@@ -1076,6 +1113,11 @@ class BookingPackageSiteModel(BookingServiceSiteModel):
     form = BookingPackageForm
     add_form_template = 'booking/bookingpackage_change_form.html'
     change_form_template = 'booking/bookingpackage_change_form.html'
+
+    def save_model(self, request, obj, form, change):
+        with transaction.atomic(savepoint=False):
+            super(BookingPackageSiteModel, self).save_model(request, obj, form, change)
+            BookingServices.update_bookingpackageservices_amounts(obj)
 
 
 class AgencyPackageDetailInline(CommonStackedInline):

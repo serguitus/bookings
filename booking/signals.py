@@ -174,10 +174,16 @@ def post_save_post_delete_bookingextra(sender, instance, **kwargs):
         BookingServices.update_booking(instance)
 
 
-@receiver((post_save, post_delete), sender=BookingPackage)
-def post_save_post_delete_bookingpackage(sender, instance, **kwargs):
+@receiver(post_save, sender=BookingPackage)
+def post_save_bookingpackage(sender, instance, **kwargs):
     with transaction.atomic(savepoint=False):
         BookingServices.update_bookingpackageservices_amounts(instance)
+        BookingServices.update_booking(instance)
+
+
+@receiver(post_delete, sender=BookingPackage)
+def post_delete_bookingpackage(sender, instance, **kwargs):
+    with transaction.atomic(savepoint=False):
         BookingServices.update_booking(instance)
 
 

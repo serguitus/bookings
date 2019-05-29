@@ -840,6 +840,25 @@ class SiteModel(TotalsumAdmin):
         else:
             return self.response_post_save_change(request, obj)
 
+    def response_post_delete(self, request, obj):
+        """
+        Figure out where to redirect after the 'Delete'.
+        """
+        opts = self.model._meta
+
+        if self.has_change_permission(request, None):
+            post_url = reverse(
+                self.changelist_url_format() % (opts.app_label, opts.model_name),
+                current_app=self.admin_site.name,
+            )
+            preserved_filters = self.get_preserved_filters(request)
+            post_url = common_add_preserved_filters(
+                {'preserved_filters': preserved_filters, 'opts': opts}, post_url
+            )
+        else:
+            post_url = reverse(self.admin_site.index_url(), current_app=self.admin_site.name)
+        return HttpResponseRedirect(post_url)
+
     def response_post_save_add(self, request, obj):
         """
         Figure out where to redirect after the 'Save' button has been pressed
@@ -875,7 +894,7 @@ class SiteModel(TotalsumAdmin):
                                current_app=self.admin_site.name)
         return HttpResponseRedirect(post_url)
 
-    def response_delete(self, request, obj_display, obj_id):
+    def response_delete(self, request, obj, obj_display, obj_id):
         """
         Determines the HttpResponse for the delete_view stage.
         """
@@ -904,18 +923,7 @@ class SiteModel(TotalsumAdmin):
             messages.SUCCESS,
         )
 
-        if self.has_change_permission(request, None):
-            post_url = reverse(
-                self.changelist_url_format() % (opts.app_label, opts.model_name),
-                current_app=self.admin_site.name,
-            )
-            preserved_filters = self.get_preserved_filters(request)
-            post_url = common_add_preserved_filters(
-                {'preserved_filters': preserved_filters, 'opts': opts}, post_url
-            )
-        else:
-            post_url = reverse(self.admin_site.index_url(), current_app=self.admin_site.name)
-        return HttpResponseRedirect(post_url)
+        return self.response_post_delete(request, obj)
 
     def changeform_do_saving(self, request, new_object, form, formsets, add, inlines):
         """
@@ -1042,7 +1050,7 @@ class SiteModel(TotalsumAdmin):
                 self.delete_model(request, obj)
                 self.delete_recent(request, obj_id)
 
-                return self.response_delete(request, obj_display, obj_id)
+                return self.response_delete(request, obj, obj_display, obj_id)
         except ValidationError as ex:
             for message in ex.messages:
                 self.message_user(request, message, messages.ERROR)
