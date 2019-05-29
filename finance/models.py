@@ -950,8 +950,11 @@ class Provider(models.Model):
     phone = models.CharField(max_length=30, blank=True, null=True)
     alias = models.CharField(max_length=30, blank=True, null=True)
 
-    def __str__(self):
+    def __unicode__(self):
         return self.name
+
+    def __str__(self):
+        return self.__unicode__()
 
 
 class ProviderCurrency(SummaryModel):

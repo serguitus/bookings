@@ -121,13 +121,21 @@ def post_save_quotepackage_extra(sender, instance, **kwargs):
 # Booking
 
 @receiver(post_save, sender=Booking)
-def update_booking(sender, instance, **kwargs):
-    BookingServices.update_booking(instance)
+def post_save_booking(sender, instance, **kwargs):
+    with transaction.atomic(savepoint=False):
+        BookingServices.update_bookingservices_amounts(instance)
 
 
-@receiver((post_save, post_delete), sender=BookingPax)
-def update_pax_booking(sender, instance, **kwargs):
-    BookingServices.update_booking(instance)
+@receiver((post_delete), sender=BookingPax)
+def post_delete_bookingpax(sender, instance, **kwargs):
+    with transaction.atomic(savepoint=False):
+        BookingServices.update_bookingservices_amounts(instance)
+
+
+@receiver((post_save, post_delete), sender=BookingServicePax)
+def post_save_post_delete_bookingservicepax(sender, instance, **kwargs):
+    with transaction.atomic(savepoint=False):
+        BookingServices.update_bookingservice_amounts(instance.booking_service)
 
 
 @receiver(pre_save, sender=BookingAllotment)
@@ -146,37 +154,64 @@ def pre_save_bookingextra(sender, instance, **kwargs):
 
 
 @receiver((post_save, post_delete), sender=BookingAllotment)
-def update_allotment_booking(sender, instance, **kwargs):
-    BookingServices.update_booking(instance)
+def post_save_post_delete_bookingallotment(sender, instance, **kwargs):
+    with transaction.atomic(savepoint=False):
+        BookingServices.update_booking_amounts(instance)
+        BookingServices.update_booking(instance)
 
 
 @receiver((post_save, post_delete), sender=BookingTransfer)
-def update_transfer_booking(sender, instance, **kwargs):
-    BookingServices.update_booking(instance)
+def post_save_post_delete_bookingtransfer(sender, instance, **kwargs):
+    with transaction.atomic(savepoint=False):
+        BookingServices.update_booking_amounts(instance)
+        BookingServices.update_booking(instance)
+
 
 @receiver((post_save, post_delete), sender=BookingExtra)
-def update_extra_booking(sender, instance, **kwargs):
-    BookingServices.update_booking(instance)
-
-
-@receiver(post_save, sender=BookingPackage)
-def post_save_update_package_booking(sender, instance, **kwargs):
+def post_save_post_delete_bookingextra(sender, instance, **kwargs):
     with transaction.atomic(savepoint=False):
-        BookingServices.update_booking_package(instance)
+        BookingServices.update_booking_amounts(instance)
         BookingServices.update_booking(instance)
 
 
-@receiver(post_delete, sender=BookingPackage)
-def post_delete_update_package_booking(sender, instance, **kwargs):
+@receiver((post_save, post_delete), sender=BookingPackage)
+def post_save_post_delete_bookingpackage(sender, instance, **kwargs):
     with transaction.atomic(savepoint=False):
+        BookingServices.update_bookingpackageservices_amounts(instance)
         BookingServices.update_booking(instance)
 
 
-@receiver((post_save, post_delete), sender=BookingServicePax)
-def update_booking_service(sender, instance, **kwargs):
-    BookingServices.update_bookingservice_amounts(instance.booking_service)
+@receiver(pre_save, sender=BookingPackageAllotment)
+def pre_save_bookingpackageallotment(sender, instance, **kwargs):
+    BookingServices.setup_bookingservice_amounts(instance)
 
 
-@receiver(post_save, sender=BookingServicePax)
-def update_booking_service_description(sender, instance, **kwargs):
-    BookingServices.update_bookingservice_description(instance.booking_service)
+@receiver(pre_save, sender=BookingPackageTransfer)
+def pre_save_bookingpackagetransfer(sender, instance, **kwargs):
+    BookingServices.setup_bookingservice_amounts(instance)
+
+
+@receiver(pre_save, sender=BookingPackageExtra)
+def pre_save_bookingpackageextra(sender, instance, **kwargs):
+    BookingServices.setup_bookingservice_amounts(instance)
+
+
+@receiver((post_save, post_delete), sender=BookingPackageAllotment)
+def post_save_post_delete_bookingpackageallotment(sender, instance, **kwargs):
+    with transaction.atomic(savepoint=False):
+        BookingServices.update_bookingpackage_amounts(instance)
+        BookingServices.update_bookingpackage(instance)
+
+
+@receiver((post_save, post_delete), sender=BookingPackageTransfer)
+def post_save_post_delete_bookingpackagetransfer(sender, instance, **kwargs):
+    with transaction.atomic(savepoint=False):
+        BookingServices.update_bookingpackage_amounts(instance)
+        BookingServices.update_bookingpackage(instance)
+
+@receiver((post_save, post_delete), sender=BookingPackageExtra)
+def post_save_post_delete_bookingpackageextra(sender, instance, **kwargs):
+    with transaction.atomic(savepoint=False):
+        BookingServices.update_bookingpackage_amounts(instance)
+        BookingServices.update_bookingpackage(instance)
+

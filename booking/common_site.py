@@ -767,6 +767,11 @@ class BookingSiteModel(SiteModel):
             return False
         return result
 
+    def save(self, request, obj, form, change):
+        with transaction.atomic(savepoint=False):
+            super(BookingSiteModel, self).save(request, obj, form, change)
+            BookingServices.update_bookingservices_amounts(obj)
+
 
 class BookingServiceSiteModel(SiteModel):
 
@@ -792,16 +797,16 @@ class BookingServiceSiteModel(SiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        if not request.user.has_perm("booking.change_amounts"):
-            pax_list = self.build_inlines(request, obj)[0]
-            BookingServices.setup_bookingservice_amounts(obj, pax_list)
+        pax_list = self.build_inlines(request, obj)[0]
+        BookingServices.setup_bookingservice_amounts(obj, pax_list)
         obj.save()
 
     def save_related(self, request, form, formsets, change):
         with transaction.atomic(savepoint=False):
             super(BookingServiceSiteModel, self).save_related(request, form, formsets, change)
             obj = self.save_form(request, form, change)
-            BookingServices.update_booking_amounts(obj)
+            BookingServices.update_bookingservice_amounts(obj)
+            BookingServices.update_bookingservice_description(obj)
 
 
 class BookingPackageServiceSiteModel(SiteModel):
