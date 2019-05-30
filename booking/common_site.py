@@ -919,7 +919,7 @@ class BookingAllotmentSiteModel(BookingServiceSiteModel):
         (None, {
             'fields': (
                 'booking', ('service', 'status', 'conf_number'),
-                ('datetime_from', 'datetime_to'),
+                ('datetime_from', 'nights', 'datetime_to'),
                 ('room_type', 'board_type'),
                 ('manual_cost', 'provider'), 'cost_amount', 'manual_price', 'price_amount', 'id')
         }),
