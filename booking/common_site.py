@@ -1050,7 +1050,8 @@ class BookingExtraSiteModel(BookingServiceSiteModel):
                    'classes': ('collapse', 'wide')})
     )
     list_display = ('booking', 'name', 'addon', 'quantity', 'parameter',
-                    'datetime_from', 'datetime_to', 'time', 'status',)
+                    'datetime_from', 'datetime_to', 'time',
+                    'cost_amount', 'manual_cost', 'price_amount', 'manual_price', 'status',)
     top_filters = ('booking__name', 'service', 'booking__reference',
                    ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'booking__reference', 'service__name',)
