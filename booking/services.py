@@ -1464,10 +1464,10 @@ class BookingServices(object):
             cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
             cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg):
         rc1, rc1_msg = cls._merge_costs(cost_1, cost_1_msg, c1, c1_msg)
-        rp1, rp1_msg = cls._merge_costs(price_1, price_1_msg, p1, p1_msg)
+        rp1, rp1_msg = cls._merge_prices(price_1, price_1_msg, p1, p1_msg)
         rc2, rc2_msg = cls._merge_costs(cost_2, cost_2_msg, c2, c2_msg)
         rp2, rp2_msg = cls._merge_prices(price_2, price_2_msg, p2, p2_msg)
-        rc3, rc3_msg = cls._merge_prices(cost_3, cost_3_msg, c3, c3_msg)
+        rc3, rc3_msg = cls._merge_costs(cost_3, cost_3_msg, c3, c3_msg)
         rp3, rp3_msg = cls._merge_prices(price_3, price_3_msg, p3, p3_msg)
 
         return rc1, rc1_msg, rp1, rp1_msg, rc2, rc2_msg, rp2, rp2_msg, rc3, rc3_msg, rp3, rp3_msg
