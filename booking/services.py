@@ -1926,29 +1926,47 @@ class BookingServices(object):
         auto_cost, auto_price = True, True
         if manuals:
             if service_pax_variant.manual_costs:
+                auto_cost = False
                 if service_pax_variant.cost_single_amount:
                     c1, c1_msg = service_pax_variant.cost_single_amount, None
+                else:
+                    c1, c1_msg = None, "Missing Manual Cost for Single"
                 if service_pax_variant.cost_double_amount:
                     c2, c2_msg = service_pax_variant.cost_double_amount, None
+                else:
+                    c2, c2_msg = None, "Missing Manual Cost for Double"
                 if service_pax_variant.cost_triple_amount:
                     c3, c3_msg = service_pax_variant.cost_triple_amount, None
-                auto_cost = False
+                else:
+                    c3, c3_msg = None, "Missing Manual Cost for Triple"
                 if service_pax_variant.manual_prices:
                     if service_pax_variant.price_single_amount:
                         p1, p1_msg = service_pax_variant.price_single_amount, None
+                    else:
+                        p1, p1_msg = None, "Missing Manual Price for Single"
                     if service_pax_variant.price_double_amount:
                         p2, p2_msg = service_pax_variant.price_double_amount, None
+                    else:
+                        p2, p2_msg = None, "Missing Manual Price for Double"
                     if service_pax_variant.price_triple_amount:
                         p3, p3_msg = service_pax_variant.price_triple_amount, None
+                    else:
+                        p3, p3_msg = None, "Missing Manual Price for Triple"
                     return c1, c1_msg, p1, p1_msg, c2, c2_msg, p2, p2_msg, c3, c3_msg, p3, p3_msg
             elif service_pax_variant.manual_prices:
+                auto_price = False
                 if service_pax_variant.price_single_amount:
                     p1, p1_msg = service_pax_variant.price_single_amount, None
+                else:
+                    p1, p1_msg = None, "Missing Manual Price for Single"
                 if service_pax_variant.price_double_amount:
                     p2, p2_msg = service_pax_variant.price_double_amount, None
+                else:
+                    p2, p2_msg = None, "Missing Manual Price for Double"
                 if service_pax_variant.price_triple_amount:
                     p3, p3_msg = service_pax_variant.price_triple_amount, None
-                auto_price = False
+                else:
+                    p3, p3_msg = None, "Missing Manual Price for Triple"
         if auto_cost and auto_price:
             if quoteservice.service.grouping:
                 # grouping means passing 1,2,3 as pax quantity
