@@ -3051,6 +3051,7 @@ class BookingServices(object):
         if manual_price is None:
             manual_price = False
 
+        cost_msg, price_msg = None, None
         if manual_cost and manual_price:
             cost = bookingservice.cost_amount
             price = bookingservice.price_amount
