@@ -2899,7 +2899,7 @@ class BookingServices(object):
                 cost_groups,
                 service_provider,
                 bookingservice.board_type, bookingservice.room_type_id)
-        elif isinstance(bookingpackage_service, BookingPackageTransfer):
+        elif isinstance(bookingservice, BookingPackageTransfer):
             service_provider = cls._find_bookingpackageservice_provider(bookingservice)
             cost, cost_msg = ConfigServices.transfer_costs(
                 bookingservice.service,
@@ -2908,7 +2908,7 @@ class BookingServices(object):
                 service_provider,
                 bookingservice.location_from_id, bookingservice.location_to_id,
                 bookingservice.quantity)
-        elif isinstance(bookingpackage_service, BookingPackageExtra):
+        elif isinstance(bookingservice, BookingPackageExtra):
             service_provider = cls._find_bookingpackageservice_provider(bookingservice)
             cost, cost_msg = ConfigServices.extra_costs(
                 bookingservice.service,
