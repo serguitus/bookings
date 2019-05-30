@@ -1907,7 +1907,7 @@ class BookingServices(object):
                 quoteservice.quantity)
         if isinstance(quoteservice, (QuoteExtra, QuotePackageExtra)):
             return ConfigServices.extra_prices(
-                quoteservice.service, date_from, date_to, price_groups, provider,
+                quoteservice.service, date_from, date_to, price_groups, agency,
                 quoteservice.addon_id, quoteservice.quantity, quoteservice.parameter)
         return None, "Unknown Service"
 
