@@ -164,7 +164,7 @@ $(document).ready(function(){
   $('#id_service').change(function (e) {
     e.preventDefault();
     // clear data
-    $('#id_room_type').autocomplete().empty().trigger('change');
+    //$('#id_room_type').autocomplete().empty().trigger('change');
     $('#id_board option').prop("selected", false);
     $('#id_board_type').select();
 
