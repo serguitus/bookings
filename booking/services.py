@@ -2183,12 +2183,10 @@ class BookingServices(object):
                     quote_pax_variant_id=quote_pax_variant.id,
                     quote_service_id=quote_service.id,
                 )
-                if created:
-                    cls.update_quote_paxvariant_amounts(quote_service_pax_variant)
-                elif cls.setup_paxvariant_amounts(quote_service_pax_variant):
+                if not created and cls.setup_paxvariant_amounts(quote_service_pax_variant):
                     quote_service_pax_variant.code_updated = True
                     quote_service_pax_variant.save()
-                    cls.update_quote_paxvariant_amounts(quote_service_pax_variant)
+                cls.update_quote_paxvariant_amounts(quote_service_pax_variant)
 
                 if quote_service.service_type == constants.SERVICE_CATEGORY_PACKAGE:
                     # verify on all services if pax variant exists

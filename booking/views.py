@@ -336,14 +336,14 @@ class BookingServiceAmountsView(ModelChangeFormProcessorView):
     common_site = bookings_site
 
     def verify(self, bookingservice, inlines):
-        if not bookingservice.booking:
+        if not hasattr(bookingservice, 'booking') or not bookingservice.booking:
             return JsonResponse({
                 'cost': None,
                 'cost_message': 'Booking Id Missing',
                 'price': None,
                 'price_message': 'Booking Id Missing',
             }), None
-        if not bookingservice.service:
+        if not hasattr(bookingservice, 'service') or not bookingservice.service:
             return JsonResponse({
                 'cost': None,
                 'cost_message': 'Service Id Missing',
@@ -380,14 +380,14 @@ class BookingPackageServiceAmountsView(ModelChangeFormProcessorView):
     common_site = bookings_site
 
     def verify(self, bookingpackageservice):
-        if not bookingpackageservice.booking_package:
+        if not hasattr(bookingpackageservice, 'booking_package') or not bookingpackageservice.booking_package:
             return JsonResponse({
                 'cost': None,
                 'cost_message': 'BookingPackage Id Missing',
                 'price': None,
                 'price_message': 'BookingPackage Id Missing',
             }), None
-        if not bookingpackageservice.service:
+        if not hasattr(bookingpackageservice, 'service') or not bookingpackageservice.service:
             return JsonResponse({
                 'cost': None,
                 'cost_message': 'Service Id Missing',
