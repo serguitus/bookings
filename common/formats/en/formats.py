@@ -7,7 +7,7 @@ Initially used to define spanish date formats
 DATE_FORMAT = 'j N Y'
 
 DATE_INPUT_FORMATS = [
-    '%d-%m-%Y', '%d-%m-%y', '%m/%d/%y', # '25-10-2016', '25-10-16', '10/25/06'
+    '%d-%m-%y', '%d-%m-%Y', '%m/%d/%y', # '25-10-2016', '25-10-16', '10/25/06'
     '%d%m%y', '%d%m%Y',                 # '25102006', '251006'
     '%b %d %Y', '%b %d, %Y',            # 'Oct 25 2006', 'Oct 25, 2006'
     '%d %b %Y', '%d %b, %Y',            # '25 Oct 2006', '25 Oct, 2006'

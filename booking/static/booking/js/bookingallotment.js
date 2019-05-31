@@ -6,12 +6,12 @@ $(document).ready(function(){
   var cleave_start = new Cleave('#id_datetime_from', {
     date: true,
     delimiter: '-',
-    datePattern: ['d', 'm', 'Y']
+    datePattern: ['d', 'm', 'y']
   });
   var cleave_end = new Cleave('#id_datetime_to', {
     date: true,
     delimiter: '-',
-    datePattern: ['d', 'm', 'Y']
+    datePattern: ['d', 'm', 'y']
   });
   var nights_selector = $('#id_nights');
   var start_selector = $('#id_datetime_from');
