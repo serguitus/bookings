@@ -76,7 +76,7 @@ class BaseService(models.Model):
     # this will store the child object type
     service_type = models.CharField(max_length=5, choices=SERVICE_CATEGORIES,
                                     blank=True, null=True)
-    description = models.CharField(max_length=1000, default='')
+    description = models.CharField(max_length=1000, blank=True, null=True)
     status = models.CharField(
         max_length=5, choices=SERVICE_STATUS_LIST,
         default=SERVICE_STATUS_PENDING)
