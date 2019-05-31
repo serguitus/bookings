@@ -808,6 +808,7 @@ class BookingSiteModel(SiteModel):
         with transaction.atomic(savepoint=False):
             super(BookingSiteModel, self).save_model(request, obj, form, change)
             BookingServices.update_bookingservices_amounts(obj)
+            BookingServices.update_booking(obj)
 
 
 class BookingServiceSiteModel(SiteModel):
