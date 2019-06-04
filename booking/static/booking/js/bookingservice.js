@@ -171,7 +171,6 @@ $(document).ready(function(){
     $('#id_location_to').val(null).trigger('change');
     $('#id_addon').val(null).trigger('change');
     $('#id_provider').val(null).trigger('change');
-    get_computed_amounts();
   });
 
   // for location from changed
