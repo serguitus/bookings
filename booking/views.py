@@ -498,7 +498,7 @@ def get_invoice(request, id):
 
 
 def build_voucher(request, id):
-    # template = get_template("booking/pdf/voucher.html")
+    template = get_template("booking/pdf/voucher.html")
     booking = Booking.objects.get(id=id)
     services = BookingService.objects.filter(id__in=[2, 1])
     objs = _get_child_objects(services)
@@ -506,14 +506,14 @@ def build_voucher(request, id):
                'booking': booking,
                'office': Office.objects.get(id=1),
                'services': objs}
-    # html = template.render(context)
-    # result = StringIO.StringIO()
-    # pdf = pisa.pisaDocument(StringIO.StringIO(html), dest=result)
-    # if not pdf.err:
-    #     return HttpResponse(result.getvalue(), content_type='application/pdf')
-    # else:
-    #     return HttpResponse('Errors')
-    return render(request, 'booking/pdf/voucher.html', context)
+    html = template.render(context)
+    result = StringIO.StringIO()
+    pdf = pisa.pisaDocument(StringIO.StringIO(html), dest=result)
+    if not pdf.err:
+        return HttpResponse(result.getvalue(), content_type='application/pdf')
+    else:
+        return HttpResponse('Errors')
+    # return render(request, 'booking/pdf/voucher.html', context)
 
 
 class EmailProviderView(View):

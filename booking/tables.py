@@ -107,7 +107,8 @@ class BookingServiceTable(tables.Table):
     class Meta:
         model = BookingService
         template_name = 'booking/bookingservice_list.html'
-        fields = ['name', 'datetime_from', 'datetime_to', 'description',
+        fields = ['name', 'service_location', 'datetime_from',
+                  'datetime_to', 'description',
                   'cost_amount', 'price_amount',
                   'provider', 'service_type', 'status']
 
