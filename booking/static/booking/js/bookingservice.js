@@ -167,16 +167,28 @@ $(document).ready(function(){
     $('#id_room_type').val(null).trigger('change');
     $('#id_board_type').val(null).trigger('change');
     $('#id_provider').val(null).trigger('change');
-    //$('#id_board option').prop("selected", false);
-    //$('#id_board_type').select();
+    $('#id_location_from').val(null).trigger('change');
+    $('#id_location_to').val(null).trigger('change');
+    $('#id_addon').val(null).trigger('change');
+    $('#id_provider').val(null).trigger('change');
+  });
 
-    $('#id_location_from').select();
-    $('#id_location_to').select();
+  // for location from changed
+  $('#id_location_from').change(function (e) {
+    e.preventDefault();
+    // clear data
+    $('#id_pickup').val(null).trigger('change');
+    $('#id_place_from').val(null).trigger('change');
+    $('#id_schedule_from').val(null).trigger('change');
+  });
 
-    $('#id_addon').select();
-
-    //$('#id_provider').select();
-    get_computed_amounts();
+  // for location to changed
+  $('#id_location_to').change(function (e) {
+    e.preventDefault();
+    // clear data
+    $('#id_dropoff').val(null).trigger('change');
+    $('#id_place_to').val(null).trigger('change');
+    $('#id_schedule_to').val(null).trigger('change');
   });
 
 });
