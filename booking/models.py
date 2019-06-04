@@ -780,7 +780,8 @@ class BookingAllotment(BookingService, BaseAllotment):
         self.name = '%s' % (self.service,)
         self.service_type = SERVICE_CATEGORY_ALLOTMENT
         self.description = self.build_description()
-        self.service_location = self.service.location.name
+        if self.service.location:
+            self.service_location = self.service.location.name
 
 
 class BookingTransfer(BookingService, BaseTransfer):
@@ -855,7 +856,8 @@ class BookingExtra(BookingService, BaseExtra):
         self.name = self.service.name
         self.service_type = SERVICE_CATEGORY_EXTRA
         self.description = self.build_description()
-        self.service_location = self.service.location.name
+        if self.service.location:
+            self.service_location = self.service.location.name
 
     def __unicode__(self):
         return self.name
