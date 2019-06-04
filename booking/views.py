@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
+import os
+from django.conf import settings
 from django.contrib import messages
 from django.db.models import Q
 from django.forms.formsets import all_valid, DELETION_FIELD_NAME
@@ -508,12 +511,19 @@ def build_voucher(request, id):
                'services': objs}
     html = template.render(context)
     result = StringIO.StringIO()
-    pdf = pisa.pisaDocument(StringIO.StringIO(html), dest=result)
+    pdf = pisa.pisaDocument(StringIO.StringIO(html), dest=result,
+                            link_callback=_fetch_resources)
     if not pdf.err:
         return HttpResponse(result.getvalue(), content_type='application/pdf')
     else:
         return HttpResponse('Errors')
     # return render(request, 'booking/pdf/voucher.html', context)
+
+
+def _fetch_resources(uri, rel):
+    path = os.path.join(settings.MEDIA_ROOT,
+                        uri.replace(settings.MEDIA_URL, ""))
+    return path
 
 
 class EmailProviderView(View):
