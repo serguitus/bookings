@@ -732,6 +732,13 @@ class BookingAllotment(BookingService, BaseAllotment):
         verbose_name_plural = 'Bookings Accomodations'
         default_permissions = ('add', 'change',)
 
+    def __unicode__(self):
+        return '%s (%s - %s)' % (self.name,
+                                 self.datetime_from, self.datetime_to)
+
+    def __str__(self):
+        return self.__unicode__()
+
     def build_description(self):
         """ makes a string detailing room quantity and types"""
         from booking.services import BookingServices
@@ -814,6 +821,12 @@ class BookingTransfer(BookingService, BaseTransfer):
         self.description = self.build_description()
         self.service_location = self.location_from.name
 
+    def __unicode__(self):
+        return self.name
+
+    def __str__(self):
+        return self.__unicode__()
+
 
 class BookingTransferSupplement(BookingServiceSupplement):
     """
@@ -843,6 +856,12 @@ class BookingExtra(BookingService, BaseExtra):
         self.service_type = SERVICE_CATEGORY_EXTRA
         self.description = self.build_description()
         self.service_location = self.service.location.name
+
+    def __unicode__(self):
+        return self.name
+
+    def __str__(self):
+        return self.__unicode__()
 
 
 class BookingPackage(BookingService):
