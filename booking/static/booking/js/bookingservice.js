@@ -164,16 +164,18 @@ $(document).ready(function(){
   $('#id_service').change(function (e) {
     e.preventDefault();
     // clear data
-    $('#id_room_type').autocomplete().empty().trigger('change');
-    $('#id_board option').prop("selected", false);
-    $('#id_board_type').select();
+    $('#id_room_type').val(null).trigger('change');
+    $('#id_board_type').val(null).trigger('change');
+    $('#id_provider').val(null).trigger('change');
+    //$('#id_board option').prop("selected", false);
+    //$('#id_board_type').select();
 
     $('#id_location_from').select();
     $('#id_location_to').select();
 
     $('#id_addon').select();
 
-    $('#id_provider').select();
+    //$('#id_provider').select();
     get_computed_amounts();
   });
 
