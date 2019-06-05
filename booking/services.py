@@ -3140,7 +3140,7 @@ class BookingServices(object):
                 cost_msg = "Missing Manual Cost"
             price, price_msg = cls.find_bookingservice_price(bookingservice, pax_list, agency)
         elif bookingservice.manual_price:
-            cost, cost_msg = cls.find_bookingservice_cost(bookingservice, pax_list, agency)
+            cost, cost_msg = cls.find_bookingservice_cost(bookingservice, pax_list)
             price_msg = None
             price = bookingservice.price_amount
             if price is None:
