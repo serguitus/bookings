@@ -4,17 +4,43 @@
         <link rel="stylesheet" type="text/css" href="{% static 'booking/css/extras.css' %}" />
         <style>
          .voucher-header{
-             border: 1px solid black;
+             border-top: 1px solid black;
+         }
+         .voucher-head-1{
+             border-left: 1px solid black;
+         }
+         .voucher-head-3{
+             border-right: 1px solid black;
          }
          .voucher-header td{
              padding: 5px;
              text-align: center;
          }
-         .voucher-title-1{
-             width: '200px';
+         .voucher-title, .voucher-content, .voucher-notes-label{
+             padding-top: 5px;
+             padding-left: 5px;
+             border-left: 1px solid black;
+             border-right: 1px solid black;
          }
-         .voucher-title-2{
-             width: '200px';
+         .voucher-content, .voucher-notes-label{
+             border-top: 1px solid black;
+         }
+         .voucher-notes{
+             padding-left: 5px;
+             height: 50px;
+             border-left: 1px solid black;
+             border-right: 1px solid black;
+             border-bottom: 1px solid black;
+         }
+         .voucher-footer{
+             padding-top: 2px;
+             border-left: 1px solid black;
+             border-right: 1px solid black;
+             border-bottom: 1px solid black;
+         }
+         .voucher-delimiter{
+             border-top: 1px dashed black;
+             margin: 2px 0 2px 0;
          }
         </style>
     </head>
@@ -23,79 +49,64 @@
             {% for service in services %}
                 <table class="voucher">
                     <tr class="voucher-header" height="100px">
-                        <td class="voucher-header-1" width="40%">
+                        <td class="voucher-head-1" width="40%">
                             <img width=213 height=70
+                             {# TODO here specify logo according to office #}
                              src="{% static "/media/booking/img/logo_ergos.png" %}"
                              alt="ERGOS LOGO">
                         </td>
-                        <td class="voucher-header-2" width="20%">VOUCHER</td>
-                        <td class="voucher-header-3" width="40%">Ergos Continental SA<br>
+                        <td class="voucher-head-2" width="20%">VOUCHER</td>
+                        <td class="voucher-head-3" width="40%">Ergos Continental SA<br>
                         Building Gomez Vila, Office 107, <br>Plaza Vieja, Habana Vieja
                         La Habana, Cuba<br>
                         (+53) 5 551 1234, (+53) 5 242 5699
 </td>
                     </tr>
                     <tr class="voucher-title">
-                        <td cellpadding="3">
-                            <table>
+                        <td colspan="3">
+                            <table width="100%">
                                 <tr>
-                                    <td class="voucher-title-1" width="200px">Servicio</td>
-                                    <td class="voucher-title-2">From:</td>
-                                    <td class="voucher-title-3">To:</td>
+                                    <td class="voucher-title-1" width="600px">Ref. {{ service.booking.internal_reference }}</td>
+                                    <td class="voucher-title-2" width="400px">From: {{ service.datetime_from }}</td>
+                                    <td class="voucher-title-3">{% if service.datetime_to %}To: {{ service.datetime_to }}{% endif %}</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr class="voucher-content">
+                        <td colspan="3">
+                            <table width="100%">
+                                <tr>
+                                    <td width="400px"><b>Client:</b> {{ service.booking.name }}</td>
+                                    <td>Adults:{{ service.rooming.count }}</td>
+                                    <td>Children:</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3">
+                                        <b>Service:</b> {{ service.name }} [{{ service.description }}]
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr class="voucher-notes-label">
+                        <td colspan="3"><b>Notes:</b></td>
+                    </tr>
+                    <tr class="voucher-notes" height="400px">
+                        <td colspan="3">Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas  </td>
+                    </tr>
+                    <tr class="voucher-footer">
+                        <td colspan="3">
+                            <table class="t-voucher-footer">
+                                <tr>
+                                    <td>Emision:</td>
+                                    <td>By</td>
+                                    <td>UID</td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
                 </table>
-            <div class="voucher-main">
-                <div class="voucher-header">
-                    <div class="voucher-header-logo">
-                        <img width=213 height=70
-                             src="{% static "booking/img/logo_ergos.png" %}"
-                             alt="ERGOS LOGO">
-                    </div>
-                    <div class="voucher-header-center">
-                        <span class="voucher-label">VOUCHER</span>
-                    </div>
-                    <div class="voucher-header-address">
-                        Ergos Continental SA
-                        Building Gomez Vila, Office 107, Plaza Vieja, Habana Vieja
-                        La Habana, Cuba
-                        (+53) 5 551 1234, (+53) 5 242 5699
-                    </div>
-                </div>
-                <div class="voucher-title">
-                    <div class="voucher-title-label">
-                        <span class="voucher-label">Reference {{ service.booking.internal_reference }}</span>
-                    </div>
-                    <div class="voucher-title-date-in">
-                        <span class="voucher-label">From: {{ service.datetime_from }}</span>
-                    </div>
-                    <div class="voucher-title-date-out">
-                        <span class="voucher-label">{% if service.datetime_to %}To: {{ service.datetime_to }}{% endif %}</span>
-                    </div>
-                </div>
-                <div class="voucher-content">
-                    <div class="voucher-content-client">
-                        <span class="voucher-label">Client: {{ service.booking.name }}</span>
-                    </div>
-                    <div class="voucher-content-adult">
-                        <span class="voucher-label">Adults:{{ service.rooming.count }}</span>
-                    </div>
-                    <div class="voucher-content-child">
-                        <span class="voucher-label">Children:</span>
-                    </div>
-                </div>
-                <div class="voucher-notes">
-                    <span class="voucher-label">Notes:</span>
-                </div>
-                <div class="voucher-footer"">
-                    <span class="voucher-footer-1">Emision:</span>
-                    <span class="voucher-footer-2">By:</span>
-                    <span class="voucher-footer-3">Printed by:</span>
-                    <span class="voucher-footer-4">No.</span>
-                </div>
-            </div>
             {% endfor %}
         </div>
     </body>
