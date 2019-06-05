@@ -76,6 +76,9 @@ class BaseService(models.Model):
     # this will store the child object type
     service_type = models.CharField(max_length=5, choices=SERVICE_CATEGORIES,
                                     blank=True, null=True)
+    # this will store related serice's location
+    service_location = models.CharField(max_length=50, blank=True, null=True,
+                                        verbose_name='Location')
     description = models.CharField(max_length=1000, blank=True, null=True)
     status = models.CharField(
         max_length=5, choices=SERVICE_STATUS_LIST,
@@ -729,6 +732,13 @@ class BookingAllotment(BookingService, BaseAllotment):
         verbose_name_plural = 'Bookings Accomodations'
         default_permissions = ('add', 'change',)
 
+    def __unicode__(self):
+        return '%s (%s - %s)' % (self.name,
+                                 self.datetime_from, self.datetime_to)
+
+    def __str__(self):
+        return self.__unicode__()
+
     def build_description(self):
         """ makes a string detailing room quantity and types"""
         from booking.services import BookingServices
@@ -770,6 +780,8 @@ class BookingAllotment(BookingService, BaseAllotment):
         self.name = '%s' % (self.service,)
         self.service_type = SERVICE_CATEGORY_ALLOTMENT
         self.description = self.build_description()
+        if self.service.location:
+            self.service_location = self.service.location.name
 
 
 class BookingTransfer(BookingService, BaseTransfer):
@@ -808,6 +820,13 @@ class BookingTransfer(BookingService, BaseTransfer):
             self.location_to.short_name or self.location_to)
         self.service_type = SERVICE_CATEGORY_TRANSFER
         self.description = self.build_description()
+        self.service_location = self.location_from.name
+
+    def __unicode__(self):
+        return self.name
+
+    def __str__(self):
+        return self.__unicode__()
 
 
 class BookingTransferSupplement(BookingServiceSupplement):
@@ -837,6 +856,14 @@ class BookingExtra(BookingService, BaseExtra):
         self.name = self.service.name
         self.service_type = SERVICE_CATEGORY_EXTRA
         self.description = self.build_description()
+        if self.service.location:
+            self.service_location = self.service.location.name
+
+    def __unicode__(self):
+        return self.name
+
+    def __str__(self):
+        return self.__unicode__()
 
 
 class BookingPackage(BookingService):
@@ -859,6 +886,9 @@ class BookingPackage(BookingService):
         self.name = self.service.name
         self.service_type = SERVICE_CATEGORY_PACKAGE
         self.description = self.build_description()
+        # TODO define a location for packages to show
+        # maybe first packageservice location
+        self.service_location = ''
 
     def save(self, *args, **kwargs):
         with transaction.atomic(savepoint=False):

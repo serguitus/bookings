@@ -10,10 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
-from .custom_settings import (ALLOWED_HOSTS, DATABASES,
-                              DEBUG, STATIC_URL, STATIC_ROOT,
-                              EMAIL_BACKEND)
-
+# from .custom_settings import (ALLOWED_HOSTS, DATABASES,
+#                               DEBUG, STATIC_URL, STATIC_ROOT,
+#                               MEDIA_ROOT, MEDIA_URL,
+#                               EMAIL_BACKEND)
+from .custom_settings import *
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
