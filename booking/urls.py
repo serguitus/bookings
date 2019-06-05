@@ -12,6 +12,7 @@ urlpatterns = [
     url(r'^quotepackagetransfer-amounts/?', views.QuotePackageTransferAmountsView.as_view(), name='quotepackagetransfer_amounts'),
     url(r'^quotepackageextra-amounts/?', views.QuotePackageExtraAmountsView.as_view(), name='quotepackageextra_amounts'),
 
+    url(r'^booking-amounts/?', views.BookingAmountsView.as_view(), name='booking_amounts'),
     url(r'^bookingallotment-amounts/?', views.BookingAllotmentAmountsView.as_view(), name='bookingallotment_amounts'),
     url(r'^bookingtransfer-amounts/?', views.BookingTransferAmountsView.as_view(), name='bookingtransfer_amounts'),
     url(r'^bookingextra-amounts/?', views.BookingExtraAmountsView.as_view(), name='bookingextra_amounts'),

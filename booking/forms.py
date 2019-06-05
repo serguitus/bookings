@@ -394,6 +394,7 @@ class BookingForm(forms.ModelForm):
             'agency': autocomplete.ModelSelect2(url='agency-autocomplete'),
             'p_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
         }
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
 class BookingServicePaxInlineForm(forms.ModelForm):

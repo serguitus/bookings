@@ -384,7 +384,8 @@ class QuoteSiteModel(SiteModel):
             if quote_id:
                 formset = PaxFormSet(request.POST)
                 formset.is_valid()
-                booking, msg = BookingServices.build_booking(quote_id, formset.cleaned_data)
+                booking, msg = BookingServices.build_booking_from_quote(
+                    quote_id, formset.cleaned_data)
                 if booking:
                     return redirect(reverse('common:booking_booking_change', args=[booking.id]))
                 else:
@@ -725,7 +726,7 @@ class BookingSiteModel(SiteModel):
                 ('agency', 'date_from', 'date_to'),
                 ('is_package_price', 'price_amount', 'cost_amount'),
                 ('package_sgl_price_amount', 'package_dbl_price_amount',
-                 'package_tpl_price_amount'),)
+                 'package_tpl_price_amount'), 'id')
         }),
         ('General Notes', {'fields': ('p_notes',),
                            'classes': ('collapse', 'wide')})
@@ -809,6 +810,12 @@ class BookingSiteModel(SiteModel):
             super(BookingSiteModel, self).save_model(request, obj, form, change)
             BookingServices.update_bookingservices_amounts(obj)
             BookingServices.update_booking(obj)
+
+    def save_related(self, request, form, formsets, change):
+        with transaction.atomic(savepoint=False):
+            super(BookingSiteModel, self).save_related(request, form, formsets, change)
+            obj = self.save_form(request, form, change)
+            BookingServices.update_booking_amounts(obj)
 
 
 class BookingServiceSiteModel(SiteModel):

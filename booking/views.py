@@ -30,13 +30,10 @@ from booking.common_site import (
     QuoteSiteModel,
     QuoteAllotmentSiteModel, QuoteTransferSiteModel, QuoteExtraSiteModel, QuotePackageSiteModel,
     QuotePackageAllotmentSiteModel, QuotePackageTransferSiteModel, QuotePackageExtraSiteModel,
-    BookingAllotmentSiteModel,
-    BookingTransferSiteModel,
-    BookingExtraSiteModel,
+    BookingSiteModel,
+    BookingAllotmentSiteModel, BookingTransferSiteModel, BookingExtraSiteModel,
     BookingPackageSiteModel,
-    BookingPackageAllotmentSiteModel,
-    BookingPackageTransferSiteModel,
-    BookingPackageExtraSiteModel,
+    BookingPackageAllotmentSiteModel, BookingPackageTransferSiteModel, BookingPackageExtraSiteModel,
 )
 from booking.constants import ACTIONS
 from booking.models import (
@@ -124,24 +121,6 @@ class QuoteAmountsView(ModelChangeFormProcessorView):
                 'message': 'Pax Variants Missing',
                 'results': None,
             })
-
-        # allotment_list = inlines[1]
-        # transfer_list = inlines[2]
-        # extra_list = inlines[3]
-        # package_list = inlines[4]
-        # if (
-        #        (not allotment_list) and
-        #        (not transfer_list) and
-        #        (not extra_list) and
-        #        (not package_list)):
-        #    return JsonResponse({
-        #        'code': 3,
-        #        'message': 'Services Missing',
-        #        'results': None,
-        #    })
-        # code, message, results = BookingServices.find_quote_amounts(
-        #    quote.agency, variant_list, allotment_list, transfer_list, extra_list, package_list)
-
 
         code, message, results = BookingServices.find_quote_amounts(
             quote, variant_list)
@@ -335,6 +314,24 @@ class QuotePackageExtraAmountsView(ModelChangeFormProcessorView):
         })
 
 
+class BookingAmountsView(ModelChangeFormProcessorView):
+    
+    model = Booking
+    common_sitemodel = BookingSiteModel
+    common_site = bookings_site
+
+    def process_data(self, booking, inlines):
+
+        pax_list = inlines[0]
+        cost, cost_msg, price, price_msg = BookingServices.find_booking_amounts(booking, pax_list)
+        return JsonResponse({
+            'cost': cost,
+            'cost_message': cost_msg,
+            'price': price,
+            'price_message': price_msg,
+        })
+
+
 class BookingServiceAmountsView(ModelChangeFormProcessorView):
     common_site = bookings_site
 
@@ -369,7 +366,7 @@ class BookingServiceAmountsView(ModelChangeFormProcessorView):
         if response:
             return response
 
-        cost, cost_msg, price, price_msg = BookingServices.find_bookingservice_catalogue_amounts(
+        cost, cost_msg, price, price_msg = BookingServices.find_bookingservice_amounts(
             bookingservice, pax_list)
         return JsonResponse({
             'cost': cost,
@@ -414,7 +411,7 @@ class BookingPackageServiceAmountsView(ModelChangeFormProcessorView):
         if response:
             return response
 
-        cost, cost_msg, price, price_msg = BookingServices.find_bookingservice_catalogue_amounts(
+        cost, cost_msg, price, price_msg = BookingServices.find_bookingservice_amounts(
             bookingpackageservice, pax_list)
         return JsonResponse({
             'cost': cost,
