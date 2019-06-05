@@ -520,7 +520,6 @@ def build_voucher(request, id):
 def _fetch_resources(uri, rel):
     path = os.path.join(settings.MEDIA_ROOT,
                         uri.replace(settings.MEDIA_URL, ""))
-    print path
     return path
 
 
