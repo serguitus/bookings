@@ -199,8 +199,18 @@ class BookingServices(object):
                     # schedule_to
                     # dropoff
 
-                    cls.setup_bookingservice_amounts(booking_transfer, pax_list)
+                    # find service variant
+                    service_pax_variant = cls._find_quoteservice_paxvariant_for_bookingservice(
+                        quote_transfer, pax_variant)
 
+                    if service_pax_variant:
+                        cls.setup_bookingservice_amounts_from_quote(
+                            bookingservice=booking_transfer,
+                            service_paxvariant=service_pax_variant,
+                            pax_list=pax_list)
+                    else:
+                        cls.setup_bookingservice_amounts(booking_transfer, pax_list)
+                    booking_transfer.avoid_update = True
                     booking_transfer.avoid_booking_update = True
                     booking_transfer.save()
 
@@ -220,8 +230,18 @@ class BookingServices(object):
                     booking_extra.quantity = quote_extra.quantity
                     booking_extra.parameter = quote_extra.parameter
 
-                    cls.setup_bookingservice_amounts(booking_extra, pax_list)
+                    # find service variant
+                    service_pax_variant = cls._find_quoteservice_paxvariant_for_bookingservice(
+                        quote_extra, pax_variant)
 
+                    if service_pax_variant:
+                        cls.setup_bookingservice_amounts_from_quote(
+                            bookingservice=booking_extra,
+                            service_paxvariant=service_pax_variant,
+                            pax_list=pax_list)
+                    else:
+                        cls.setup_bookingservice_amounts(booking_extra, pax_list)
+                    booking_extra.avoid_update = True
                     booking_extra.avoid_booking_update = True
                     booking_extra.save()
 
@@ -237,10 +257,20 @@ class BookingServices(object):
                     cls._copy_service_info(
                         dst_service=booking_package, src_service=quote_package)
 
-                    cls.setup_bookingservice_amounts(booking_package, pax_list)
+                    # find service variant
+                    service_pax_variant = cls._find_quoteservice_paxvariant_for_bookingservice(
+                        quote_package, pax_variant)
 
-                    booking_package.avoid_package_services = True
+                    if service_pax_variant:
+                        cls.setup_bookingservice_amounts_from_quote(
+                            bookingservice=booking_package,
+                            service_paxvariant=service_pax_variant,
+                            pax_list=pax_list)
+                    else:
+                        cls.setup_bookingservice_amounts(booking_package, pax_list)
+                    booking_package.avoid_update = True
                     booking_package.avoid_booking_update = True
+                    booking_package.avoid_package_services = True
                     booking_package.save()
 
                     # create bookingservicepax list
@@ -259,7 +289,15 @@ class BookingServices(object):
                         bookingpackage_allotment.room_type = quotepackage_allotment.room_type
                         bookingpackage_allotment.board_type = quotepackage_allotment.board_type
 
-                        bookingpackage_allotment.avoid_booking_update = True
+                        if service_pax_variant:
+                            cls.setup_bookingservice_amounts_from_quote(
+                                bookingservice=bookingpackage_allotment,
+                                service_paxvariant=service_pax_variant,
+                                pax_list=pax_list)
+                        else:
+                            cls.setup_bookingservice_amounts(bookingpackage_allotment, pax_list)
+                        bookingpackage_allotment.avoid_bookingpackage_update = True
+                        bookingpackage_allotment.avoid_bookingpackageservice_update = True
                         bookingpackage_allotment.save()
 
                     # create bookingpackagetransfer list
@@ -283,7 +321,15 @@ class BookingServices(object):
                         # schedule_to
                         # dropoff
 
-                        bookingpackage_transfer.avoid_booking_update = True
+                        if service_pax_variant:
+                            cls.setup_bookingservice_amounts_from_quote(
+                                bookingservice=bookingpackage_transfer,
+                                service_paxvariant=service_pax_variant,
+                                pax_list=pax_list)
+                        else:
+                            cls.setup_bookingservice_amounts(bookingpackage_transfer, pax_list)
+                        bookingpackage_transfer.avoid_bookingpackage_update = True
+                        bookingpackage_transfer.avoid_bookingpackageservice_update = True
                         bookingpackage_transfer.save()
 
                     # create bookingextra list
@@ -300,7 +346,15 @@ class BookingServices(object):
                         bookingpackage_extra.quantity = quotepackage_extra.quantity
                         bookingpackage_extra.parameter = quotepackage_extra.parameter
 
-                        bookingpackage_extra.avoid_booking_update = True
+                        if service_pax_variant:
+                            cls.setup_bookingservice_amounts_from_quote(
+                                bookingservice=bookingpackage_extra,
+                                service_paxvariant=service_pax_variant,
+                                pax_list=pax_list)
+                        else:
+                            cls.setup_bookingservice_amounts(bookingpackage_extra, pax_list)
+                        bookingpackage_extra.avoid_bookingpackage_update = True
+                        bookingpackage_extra.avoid_bookingpackageservice_update = True
                         bookingpackage_extra.save()
 
                 # update booking
