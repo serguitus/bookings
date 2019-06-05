@@ -40,7 +40,7 @@ class ModelChangeFormProcessorView(View):
             inlines.append(items)
         return inlines
 
-    def process_data(self, object, inlines):
+    def process_data(self, obj, inlines):
         pass
 
     def _create_formsets(self, request, obj):
