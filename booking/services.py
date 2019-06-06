@@ -131,6 +131,7 @@ class BookingServices(object):
                 booking.package_dbl_price_amount = pax_variant.price_double_amount
                 booking.package_tpl_price_amount = pax_variant.price_triple_amount
 
+                booking.avoid_bookingservices_update = True
                 booking.save()
 
                 # create pax list
@@ -3328,6 +3329,8 @@ class BookingServices(object):
 
     @classmethod
     def setup_bookingservice_amounts(cls, bookingservice, pax_list=None, agency=None):
+        if hasattr(bookingservice, 'avoid_update'):
+            return
         if bookingservice.manual_cost is None:
             bookingservice.manual_cost = False
         if bookingservice.manual_price is None:
@@ -3398,6 +3401,8 @@ class BookingServices(object):
 
     @classmethod
     def update_bookingservice_amounts(cls, booking_service):
+        if hasattr(booking_service, 'avoid_update'):
+            return
         if isinstance(booking_service, (
                 BookingAllotment, BookingTransfer, BookingExtra,
                 BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra)):
