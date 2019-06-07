@@ -936,7 +936,8 @@ class BookingAllotmentSiteModel(BookingServiceSiteModel):
     )
 
     list_display = ('booking', 'name', 'datetime_from',
-                    'datetime_to', 'status',)
+                    'datetime_to', 'cost_amount', 'manual_cost',
+                    'price_amount', 'manual_price', 'status',)
     top_filters = (('booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking__reference', 'conf_number',
@@ -997,7 +998,8 @@ class BookingTransferSiteModel(BookingServiceSiteModel):
                    'classes': ('collapse', 'wide')})
     )
     list_display = ('booking', 'name',
-                    'datetime_from', 'time', 'status')
+                    'datetime_from', 'time', 'cost_amount', 'manual_cost',
+                    'price_amount', 'manual_price', 'status')
     top_filters = (
         ('booking__name', 'Booking'),
         ('name', 'Service'),
