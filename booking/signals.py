@@ -124,13 +124,14 @@ def post_save_quotepackage_extra(sender, instance, **kwargs):
 def post_save_booking(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_bookingservices_update'):
         with transaction.atomic(savepoint=False):
-                BookingServices.update_bookingservices_amounts(instance)
+            BookingServices.update_bookingservices_amounts(instance)
 
 
 @receiver((post_delete), sender=BookingPax)
 def post_delete_bookingpax(sender, instance, **kwargs):
-    with transaction.atomic(savepoint=False):
-        BookingServices.update_bookingservices_amounts(instance)
+    if not hasattr(instance, 'avoid_bookingservices_update'):
+        with transaction.atomic(savepoint=False):
+            BookingServices.update_bookingservices_amounts(instance)
 
 
 @receiver((post_save, post_delete), sender=BookingServicePax)

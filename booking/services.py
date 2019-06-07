@@ -1857,11 +1857,11 @@ class BookingServices(object):
                 extra_amount = 0.0
 
             if a1:
-                a1 = cls._round_price(float(a1) + extra_amount / pax_quantity)
+                a1 = cls._round_price(float(a1) + float(extra_amount) / pax_quantity)
             if a2:
-                a2 = cls._round_price(float(a2) + extra_amount / pax_quantity)
+                a2 = cls._round_price(float(a2) + float(extra_amount) / pax_quantity)
             if a3:
-                a3 = cls._round_price(float(a3) + extra_amount / pax_quantity)
+                a3 = cls._round_price(float(a3) + float(extra_amount) / pax_quantity)
 
         return a1, a1_msg, a2, a2_msg, a3, a3_msg
 
@@ -2172,12 +2172,12 @@ class BookingServices(object):
 
     @classmethod
     def _adjust_cost(cls, cost, total_paxes, free_paxes):
-        return (1.0 - free_paxes / total_paxes) * float(cost) / total_paxes
+        return (1.0 - float(free_paxes) / total_paxes) * float(cost) / total_paxes
 
 
     @classmethod
     def _adjust_price(cls, price, total_paxes, free_paxes):
-        return (1.0 + free_paxes / total_paxes) * float(price) / total_paxes
+        return (1.0 + float(free_paxes) / total_paxes) * float(price) / total_paxes
 
 
     @classmethod

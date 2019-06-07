@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 try:
-    import cStringIO as StringIO
+    from cStringIO import StringIO
 except ImportError:
     from _io import StringIO
 from xhtml2pdf import pisa

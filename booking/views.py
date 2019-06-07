@@ -9,9 +9,9 @@ from django.forms.formsets import all_valid, DELETION_FIELD_NAME
 from django.http import JsonResponse, HttpResponse
 
 try:
-    import cStringIO as StringIO
+    from cStringIO import StringIO
 except ImportError:
-    from io import StringIO
+    from _io import StringIO
 
 from xhtml2pdf import pisa
 
@@ -489,8 +489,8 @@ def get_invoice(request, id):
     context = {'pagesize': 'Letter',
                'booking': booking,}
     html = template.render(context)
-    result = StringIO.StringIO()
-    pdf = pisa.pisaDocument(StringIO.StringIO(html), dest=result)
+    result = StringIO()
+    pdf = pisa.pisaDocument(StringIO(html), dest=result)
     if not pdf.err:
         return HttpResponse(result.getvalue(), content_type='application/pdf')
     else:
@@ -507,8 +507,8 @@ def build_voucher(request, id):
                'office': Office.objects.get(id=1),
                'services': objs}
     html = template.render(context)
-    result = StringIO.StringIO()
-    pdf = pisa.pisaDocument(StringIO.StringIO(html), dest=result,
+    result = StringIO()
+    pdf = pisa.pisaDocument(StringIO(html), dest=result,
                             link_callback=_fetch_resources)
     if not pdf.err:
         return HttpResponse(result.getvalue(), content_type='application/pdf')
