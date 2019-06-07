@@ -2172,12 +2172,12 @@ class BookingServices(object):
 
     @classmethod
     def _adjust_cost(cls, cost, total_paxes, free_paxes):
-        return (1.0 - free_paxes / total_paxes) * float(cost) / total_paxes
+        return (1.0 - float(free_paxes) / total_paxes) * float(cost) / total_paxes
 
 
     @classmethod
     def _adjust_price(cls, price, total_paxes, free_paxes):
-        return (1.0 + free_paxes / total_paxes) * float(price) / total_paxes
+        return (1.0 + float(free_paxes) / total_paxes) * float(price) / total_paxes
 
 
     @classmethod

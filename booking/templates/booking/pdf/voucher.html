@@ -46,6 +46,9 @@
          .voucher{
              margin-bottom: 15px;
          }
+         .page-break{
+             page-break-after: always;
+         }
         </style>
     </head>
     <body>
@@ -106,13 +109,13 @@
                                 <tr>
                                     <td>Emision:</td>
                                     <td>By</td>
-                                    <td>UID</td>
+                                    <td>UID: {% cycle counter %}</td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
                     {% if not forloop.last and not counter == 3%}
-                    <tr class="voucher-delimiter">
+                    <tr class="voucher-delimiter page-break">
                         <td colspan="3"></td>
                     </tr>
                     {% endif %}
