@@ -155,8 +155,12 @@ class CurrencyExchange(FinantialDocument, AccountingDocument):
     class Meta:
         verbose_name = 'Currency Exchange'
         verbose_name_plural = 'Currencies Exchanges'
-    exchange_account = models.ForeignKey(Account, related_name='exchange_account')
-    exchange_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    exchange_account = models.ForeignKey(Account,
+                                         related_name='exchange_account',
+                                         verbose_name='Origin Account')
+    exchange_amount = models.DecimalField(max_digits=10, decimal_places=2,
+                                          default=0,
+                                          verbose_name='Origin Amount')
 
     def fill_data(self):
         self.document_type = DOC_TYPE_CURRENCY_EXCHANGE
@@ -164,15 +168,19 @@ class CurrencyExchange(FinantialDocument, AccountingDocument):
         exchange_account = Account.objects.get(pk=self.exchange_account_id)
         self.name = '%s - Exchange to %s of %s %s from %s of %s %s' % (
             self.date, account, self.amount, account.get_currency_display(),
-            exchange_account, self.exchange_amount, exchange_account.get_currency_display())
+            exchange_account, self.exchange_amount,
+            exchange_account.get_currency_display())
 
 
 class Transfer(FinantialDocument, AccountingDocument):
     class Meta:
         verbose_name = 'Transfer'
         verbose_name_plural = 'Transfers'
-    transfer_account = models.ForeignKey(Account, related_name='transfer_account')
-    operation_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    transfer_account = models.ForeignKey(Account,
+                                         related_name='transfer_account',
+                                         verbose_name='Origin Account')
+    operation_cost = models.DecimalField(max_digits=10,
+                                         decimal_places=2, default=0)
 
     def fill_data(self):
         self.document_type = DOC_TYPE_TRANSFER
