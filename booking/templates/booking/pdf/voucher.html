@@ -34,18 +34,26 @@
          }
          .voucher-footer{
              padding-top: 2px;
+             padding-left: 5px;
              border-left: 1px solid black;
              border-right: 1px solid black;
              border-bottom: 1px solid black;
          }
          .voucher-delimiter{
-             border-top: 1px dashed black;
-             margin: 2px 0 2px 0;
+             border-bottom: 1px dashed black;
+             margin: 5px 0 10px 0;
+         }
+         .voucher{
+             margin-bottom: 15px;
+         }
+         .page-break{
+             page-break-after: always;
          }
         </style>
     </head>
     <body>
         <div class="vouchers-content">
+            {% cycle 1 2 3 as counter silent %}
             {% for service in services %}
                 <table class="voucher">
                     <tr class="voucher-header" height="100px">
@@ -55,7 +63,7 @@
                              src="{% static "/media/booking/img/logo_ergos.png" %}"
                              alt="ERGOS LOGO">
                         </td>
-                        <td class="voucher-head-2" width="20%">VOUCHER</td>
+                        <td class="voucher-head-2" width="20%"><b>VOUCHER</b></td>
                         <td class="voucher-head-3" width="40%">Ergos Continental SA<br>
                         Building Gomez Vila, Office 107, <br>Plaza Vieja, Habana Vieja
                         La Habana, Cuba<br>
@@ -93,7 +101,7 @@
                         <td colspan="3"><b>Notes:</b></td>
                     </tr>
                     <tr class="voucher-notes" height="400px">
-                        <td colspan="3">Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas  </td>
+                        <td colspan="3">Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas deL Voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas  </td>
                     </tr>
                     <tr class="voucher-footer">
                         <td colspan="3">
@@ -101,11 +109,16 @@
                                 <tr>
                                     <td>Emision:</td>
                                     <td>By</td>
-                                    <td>UID</td>
+                                    <td>UID: {% cycle counter %}</td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
+                    {% if not forloop.last and not counter == 3%}
+                    <tr class="voucher-delimiter page-break">
+                        <td colspan="3"></td>
+                    </tr>
+                    {% endif %}
                 </table>
             {% endfor %}
         </div>
