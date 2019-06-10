@@ -36,7 +36,7 @@ from finance.models import (
 from finance.services import FinanceService
 from finance.top_filters import LoanEntityTopFilter, LoanAccountTopFilter
 
-from accounting.top_filters import AccountTopFilter
+from accounting.top_filters import AccountTopFilter, AmountTopFilter
 from accounting.common_site import MENU_LABEL_ACCOUNTING
 from booking.services import BookingServices
 from common.sites import SiteModel
@@ -371,7 +371,8 @@ class DepositSiteModel(BaseFinantialDocumentSiteModel):
     menu_group = MENU_GROUP_LABEL_FINANCE_BASIC
     fields = ('name', 'account', 'amount', 'date', 'status', 'details')
     list_display = ('details', 'account', 'amount', 'date', 'status')
-    top_filters = ('details', 'account', 'status', 'date')
+    top_filters = ('details', 'account', 'status', 'date',
+                   ('amount', AmountTopFilter))
     form = AccountingForm
     totalsum_list = ['amount']
 
