@@ -805,17 +805,26 @@ class BookingSiteModel(SiteModel):
             return False
         return result
 
-    def save_model(self, request, obj, form, change):
-        with transaction.atomic(savepoint=False):
-            super(BookingSiteModel, self).save_model(request, obj, form, change)
-            BookingServices.update_bookingservices_amounts(obj)
-            BookingServices.update_booking(obj)
+    def response_change(self, request, obj):
+        bookingservices = BookingServices.find_bookingservices_with_different_amounts(obj)
+        if bookingservices:
+            self.select_bokingservices_view(request, obj, bookingservices)
+        else:
+            super(BookingSiteModel, self).response_change(request, obj)
 
-    def save_related(self, request, form, formsets, change):
-        with transaction.atomic(savepoint=False):
-            super(BookingSiteModel, self).save_related(request, form, formsets, change)
-            obj = self.save_form(request, form, change)
-            BookingServices.update_booking_amounts(obj)
+
+    def select_bokingservices_view(self, request, booking, bookingservices=None):
+
+        # for now do nothing here
+        super(BookingSiteModel, self).response_change(request, booking)
+
+        if request.method == 'POST' and 'service_selection' in request.POST:
+            selected_bookingservices = list();
+            BookingServices.update_bookingservices_amounts(selected_bookingservices)
+            booking = selected_bookingservices[0].booking
+            super(BookingSiteModel, self).response_change(request, booking)
+        # show selection view
+
 
 
 class BookingServiceSiteModel(SiteModel):

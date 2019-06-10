@@ -11,7 +11,7 @@ from django.http import JsonResponse, HttpResponse
 try:
     from cStringIO import StringIO
 except ImportError:
-    from io import StringIO
+    from _io import StringIO
 
 from xhtml2pdf import pisa
 
