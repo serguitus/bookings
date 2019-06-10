@@ -9,5 +9,6 @@ class AccountTopFilter(filters.ForeignKeyFilter):
     filter_title = 'Select Accounts'
     autocomplete_url = 'account-autocomplete'
 
+
 class AmountTopFilter(filters.TextFilter):
     filter_title = 'Amount'
