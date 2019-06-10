@@ -68,6 +68,7 @@ from booking.models import (
     BookingService,
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
     BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
+    BookingInvoice, BookingInvoiceLine, BookingInvoicePartial,
 )
 from booking.services import BookingServices
 from booking.top_filters import DateTopFilter, PackageTopFilter, CancelledTopFilter
@@ -1163,6 +1164,36 @@ class AgencyPackageServiceSiteModel(SiteModel):
     save_as = True
 
 
+class BookingInvoiceLineInline(CommonTabularInline):
+    model = BookingInvoiceLine
+    extra = 0
+    fields = ['bookingservice_name', 'date_from', 'date_to', 'price']
+
+
+class BookingInvoicePartialInline(CommonTabularInline):
+    model = BookingInvoicePartial
+    extra = 0
+    fields = ['pax_name', 'partial_amount',]
+
+
+class BookingInvoiceSiteModel(SiteModel):
+    recent_allowed = False
+
+    fields = (
+        ('booking_name', 'reference', 'status'),
+        ('date_from', 'date_to'),
+        ('amount', 'matched_amount'))
+
+    inlines = [BookingInvoiceLineInline, BookingInvoicePartialInline]
+
+    def response_post_save_change(self, request, obj):
+        if hasattr(obj, 'booking') and obj.booking:
+            return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
+        if 'booking' in request.POST:
+            return redirect(reverse('common:booking_booking_change', args=[request.POST['booking']]))
+        return super(BookingInvoiceSiteModel, self).response_post_save_change(request, obj)
+
+
 # Starts Registration Section
 
 bookings_site.register(Package, PackageSiteModel)
@@ -1193,3 +1224,5 @@ bookings_site.register(BookingPackage, BookingPackageSiteModel)
 bookings_site.register(BookingPackageAllotment, BookingPackageAllotmentSiteModel)
 bookings_site.register(BookingPackageTransfer, BookingPackageTransferSiteModel)
 bookings_site.register(BookingPackageExtra, BookingPackageExtraSiteModel)
+
+bookings_site.register(BookingInvoice, BookingInvoiceSiteModel)

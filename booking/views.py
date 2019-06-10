@@ -44,7 +44,8 @@ from booking.models import (
     Booking, BookingService,
     BookingPax, BookingServicePax,
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
-    BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra
+    BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
+    BookingInvoice, BookingInvoiceLine, BookingInvoicePartial,
 )
 from booking.forms import EmailProviderForm
 from booking.services import BookingServices
@@ -842,3 +843,55 @@ class QuotePaxVariantAutocompleteView(autocomplete.Select2QuerySetView):
         if self.q:
             qs = qs.filter(name__icontains=self.q)
         return qs[:20]
+
+
+class BookingInvoiceView(View):
+    """
+    A view to handle the invoice for a booking
+    """
+
+    def get(self, request, id, *args, **kwargs):
+        """
+        This will render the booking invoice
+        """
+        booking = Booking.objects.get(id=id)
+        if booking.invoice:
+            pdf = self.build_pdf(booking.invoice)
+            if pdf:
+                return HttpResponse(pdf.getvalue(), content_type='application/pdf')
+            # there was an error. show an error message
+            messages.add_message(request, messages.ERROR, "Failed PDF Generation")
+            return redirect(reverse('common:booking_booking_change', args=[id]))
+
+        if BookingServices.booking_to_invoice(request.user, booking):
+            messages.add_message(request, messages.SUCCESS, "Successful Booking Invoice")
+            if booking.invoice:
+                pdf = self.build_pdf(booking.invoice)
+                if pdf:
+                    return HttpResponse(pdf.getvalue(), content_type='application/pdf')
+                # there was an error. show an error message
+                messages.add_message(request, messages.ERROR, "Failed PDF Generation")
+                return redirect(reverse('common:booking_booking_change', args=[id]))
+        else:
+            messages.add_message(request, messages.ERROR , "Failed Booking Invoice")
+        return HttpResponseRedirect(
+            reverse('common:booking_booking_change', args=[id]))
+
+    def build_pdf(self, invoice):
+        # This helper builds the PDF object with all vouchers
+        template = get_template("booking/pdf/invoice.html")
+        lines = BookingInvoiceLine.objects.filter(invoice=invoice)
+        partials = BookingInvoiceLine.objects.filter(invoice=invoice)
+        context = {
+            'pagesize': 'Letter',
+            'invoice': invoice,
+            'lines': lines,
+            'partials': partials,
+        }
+        html = template.render(context)
+        result = StringIO()
+        pdf = pisa.pisaDocument(StringIO(html), dest=result)
+        if pdf.err:
+            return False
+        return result
+

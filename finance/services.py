@@ -556,13 +556,15 @@ class FinanceService(object):
                     match_type=MATCH_TYPE_ACCOUNT)
 
     @classmethod
-    def save_agency_invoice(cls, user, agency_invoice):
+    def save_agency_invoice(cls, user, agency_invoice, model_class=None):
         """
         Saves Agency Invoice
         """
+        if not model_class:
+            model_class = AgencyInvoice
         with transaction.atomic(savepoint=False):
             db_agency_invoice = cls._load_locked_model_object(
-                pk=agency_invoice.pk, model_class=AgencyInvoice)
+                pk=agency_invoice.pk, model_class=model_class)
             # validate matches on status, currency or amount change
             cls._validate_matches(
                 document=agency_invoice,

@@ -58,7 +58,7 @@ class BookingServices(object):
             invoice.date_from = booking.date_from
             invoice.date_to = booking.date_to
 
-            FinanceService.save_agency_invoice(user, invoice)
+            FinanceService.save_agency_invoice(user, invoice, BookingInvoice)
 
             # obtain lines
             booking_service_list = BookingService.objects.filter(
@@ -69,7 +69,6 @@ class BookingServices(object):
                 invoice_line.date_from = booking_service.datetime_from
                 invoice_line.date_to = booking_service.datetime_to
                 invoice_line.bookingservice_name = booking_service.name
-                invoice_line.service_name = booking_service.service.name
                 invoice_line.price = booking_service.price_amount
 
                 invoice_line.save()
@@ -85,8 +84,9 @@ class BookingServices(object):
 
             # verify if new invoice to save booking
             if new_invoice:
-                booking.agency_invoice = invoice
+                booking.invoice = invoice
                 booking.save()
+            return True
 
 
     @classmethod
@@ -3997,10 +3997,14 @@ class BookingServices(object):
         groups = dict()
         for pax in pax_list:
             if isinstance(pax, BookingPax):
+                if pax.pax_group is None:
+                    continue
                 if not groups.__contains__(pax.pax_group):
                     groups[pax.pax_group] = 0
                 groups[pax.pax_group] += 1
             else:
+                if pax.group is None:
+                    continue
                 if not groups.__contains__(pax.group):
                     groups[pax.group] = 0
                 groups[pax.group] += 1
