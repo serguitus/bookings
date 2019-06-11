@@ -2,10 +2,32 @@
     <head>
     </head>
     <body>
-        <h1>Invoice for {{ booking.name }}</h1>
-        {% if booking.reference %}
-            <h2>Agency Ref: {{ booking.reference }}</h2>
+        <h1>Invoice for {{ invoice.bookingname }}</h1>
+        <h2>Agency {{ invoice.agency }}</h3>
+        {% if invoice.reference %}
+            <h2>Agency Ref: {{ invoice.reference }}</h2>
             {% endif %}
+        <h3>From {{ invoice.date_from }}</h3>
+        <h3>To {{ invoice.date_to }}</h3>
+        <h3>Amount {{ invoice.amount }}</h3>
+        <br>
+        <table>
+        {% for line in lines %}
+            <tr>
+                <td>{{ line.bookingservice_name }}</td>
+                <td>{{ line.date_from }}</td>
+                <td>{{ line.date_to }}</td>
+                <td style="text-align:right;">{{ line.price }}</td>
+            </tr>
+        {% endfor %}
+        </table>
+        <table>
+        {% for partial in partials %}
+            <tr>
+                <td>{{ partial.pax_name }}</td>
+                <td style="text-align:right;">{{ partial.partial_amount }}</td>
+            </tr>
+        {% endfor %}
+        </table>
     </body>
-    
 </html>

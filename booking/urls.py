@@ -29,4 +29,5 @@ urlpatterns = [
     # url(r'^requests/(?P<id>\d+)/?', views.send_service_request, name='send_service_request'),
     url(r'^requests/(?P<id>\d+)/?', views.EmailProviderView.as_view(), name='send_service_request'),
     url(r'^confirm/(?P<id>\d+)/?', views.EmailConfirmationView.as_view(), name='send_booking_confirmation'),
+    url(r'^invoice/(?P<id>\d+)/?', views.BookingInvoiceView.as_view(), name='booking_invoice'),
 ]
