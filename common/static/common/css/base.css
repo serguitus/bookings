@@ -216,12 +216,13 @@ td.details-button button.collapsed span.glyphicon:before {
     content: "\e081";
 }
 
-input.btn-cancel {
+input[type="submit"].btn-cancel {
     background-color: #5cb85c;
     border-color: #4cae4c;
+    margin-right: 15px;
 }
 
-input.btn-cancel:hover {
+input[type="submit"].btn-cancel:hover {
     color: #fff;
     background-color: #449d44;
     border-color: #398439;

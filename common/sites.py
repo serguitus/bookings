@@ -322,11 +322,6 @@ class SiteModel(TotalsumAdmin):
     menu_option = None
     model_index_action = 'changelist'
 
-    """
-    actions are dict with name, label
-    """
-    change_actions = []
-
     add_form_template = 'common/change_form.html'
     change_form_template = 'common/change_form.html'
     change_list_template = 'common/change_list.html'
@@ -422,6 +417,19 @@ class SiteModel(TotalsumAdmin):
             return list(self.change_readonly_fields) + list(self.readonly_fields)
 
     @property
+    def change_actions(self):
+        """
+        actions are iterable of dicts with name, label and view_def
+        """
+        return self.get_change_actions()
+
+    def get_change_actions(self):
+        """
+        actions are dict with name, label and view_def
+        """
+        return []
+
+    @property
     def change_tools(self):
         """
         tools are iterable of dicts with name, label and view_def
@@ -477,6 +485,16 @@ class SiteModel(TotalsumAdmin):
             self.build_url(r'^(.+)/delete/$', self.delete_view, '%s_%s_delete' % info),
             self.build_url(r'^(.+)/change/$', self.change_view, '%s_%s_change' % info),
         ]
+        if self.change_actions:
+            for action in self.change_actions:
+                if action:
+                    urlpatterns += [
+                        self.build_url(r'^(.+)/%s/$' % action['name'], action['view_def'], '%s_%s_%s' % (
+                            self.model._meta.app_label,
+                            self.model._meta.model_name,
+                            action['name'],
+                        )),
+                    ]
         if self.change_tools:
             for tool in self.change_tools:
                 if tool:
@@ -989,6 +1007,16 @@ class SiteModel(TotalsumAdmin):
             ModelForm = self.get_form(request, obj)
             if request.method == 'POST':
                 form = ModelForm(request.POST, request.FILES, instance=obj)
+                change_actions = self.change_actions
+                if change_actions:
+                    for action in change_actions:
+                        if '_%s' % action['name'] in request.POST:
+                            object_id = str(obj.id)
+                            return HttpResponseRedirect(reverse('common:%s_%s_%s' % (
+                                    self.model._meta.app_label,
+                                    self.model._meta.model_name,
+                                    action['name'],
+                                ), args=(object_id,)))
                 if '_cancel' in request.POST:
                     form_validated = False
                     new_object = form.instance

@@ -14,6 +14,7 @@ from django import forms
 from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
 from django.template.response import SimpleTemplateResponse, TemplateResponse
+from django.urls.base import reverse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext as _, ungettext
 from django.utils import six
@@ -91,8 +92,6 @@ class MatchableChangeListForm(forms.ModelForm):
 
 class MatchableSiteModel(BaseFinantialDocumentSiteModel):
 
-    change_actions = [dict(name='match', label='Match')]
-
     match_model = None
     match_fieldsets = None
     match_fields = []
@@ -115,14 +114,11 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
     ]
     match_list_search_fields = []
 
+    def get_change_actions(self):
+        return [dict(name='match', label='Match', view_def=self.match_view)]
+
     def get_changelist_form(self, request, **kwargs):
         return MatchableChangeListForm
-
-    def do_match_saving(self):
-        pass
-
-    def get_change_tools(self):
-        return [dict(name='match', label='Match', view_def=self.match_view)]
 
     #@csrf_protect_m
     def match_view(self, request, object_id, extra_context=None):
@@ -269,6 +265,10 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
         formset = cl.formset = None
 
         # Handle POSTed bulk-edit data.
+        if request.method == 'POST' and '_cancel' in request.POST:
+            info = self.model._meta.app_label, self.model._meta.model_name
+            return HttpResponseRedirect(reverse('common:%s_%s_change' % info, args=[obj.id]))
+            
         if request.method == 'POST' and '_save' in request.POST:
             FormSet = self.get_matchlist_formset(request)
             formset = cl.formset = FormSet(request.POST, request.FILES, queryset=self.get_queryset(request))
