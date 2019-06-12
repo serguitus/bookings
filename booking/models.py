@@ -630,7 +630,7 @@ class BookingService(BaseService, BookService, DateInterval):
         # Call the "real" save() method.
         super(BookingService, self).save(*args, **kwargs)
 
-    def pax_qantities(self):
+    def pax_quantity(self):
         return self.rooming_list.count()
 
 
@@ -782,6 +782,14 @@ class BookingAllotment(BookingService, BaseAllotment):
         self.description = self.build_description()
         if self.service.location:
             self.service_location = self.service.location.name
+
+    def adult_quantity(self):
+        return self.rooming_list.filter(
+            booking_pax__pax_age__gte=self.service.child_age).count()
+
+    def child_quantity(self):
+        return self.rooming_list.filter(
+            booking_pax__pax_age__lt=self.service.child_age).count()
 
 
 class BookingTransfer(BookingService, BaseTransfer):

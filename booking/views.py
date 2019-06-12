@@ -499,9 +499,10 @@ def get_invoice(request, id):
 
 
 def build_voucher(request, id):
+    # TODO we can probably remove this method and the corresponding URL
     template = get_template("booking/pdf/voucher.html")
     booking = Booking.objects.get(id=id)
-    services = BookingService.objects.filter(id__in=[2, 1, 3, 4])
+    services = BookingService.objects.filter(id__in=[2, 1, 3, 4, 9, 10, 15, 18])
     objs = _get_child_objects(services)
     context = {'pagesize': 'Letter',
                'booking': booking,
