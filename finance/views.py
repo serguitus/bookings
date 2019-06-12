@@ -80,6 +80,7 @@ class MatchList(CommonChangeList):
     - base_class: the class name of the object invoking the match list
     - obj_id: the id of the object to get related match list
     """
+    show_list_cancel = True
 
     def __init__(self, request, list_display, list_display_links,
                  list_filter, top_filters, date_hierarchy, search_fields,
