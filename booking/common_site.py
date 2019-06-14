@@ -840,16 +840,15 @@ class BookingSiteModel(SiteModel):
         else:
             return HttpResponse('Errors')
 
-
     def response_change(self, request, obj):
         bookingservices = BookingServices.find_bookingservices_with_different_amounts(obj)
         if bookingservices:
-            self.select_bokingservices_view(request, obj, bookingservices)
+            self.select_bookingservices_view(request, obj, bookingservices)
         else:
             super(BookingSiteModel, self).response_change(request, obj)
 
 
-    def select_bokingservices_view(self, request, booking, bookingservices=None):
+    def select_bookingservices_view(self, request, booking, bookingservices=None):
 
         # for now do nothing here
         super(BookingSiteModel, self).response_change(request, booking)

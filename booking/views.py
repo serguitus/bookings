@@ -895,4 +895,3 @@ class BookingInvoiceView(View):
         if pdf.err:
             return False
         return result
-

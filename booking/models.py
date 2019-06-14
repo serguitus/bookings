@@ -773,7 +773,9 @@ class BookingAllotment(BookingService, BaseAllotment):
             if room_count[k]:
                 if dist:
                     dist += ' + '
-                dist += '%d %s' % (room_count[k], room_types[k])
+                dist += '%d %s' % (room_count[k],
+                                   room_types[k])
+        dist += ' (%s)' % self.board_type
         return dist
 
     def fill_data(self):
@@ -784,12 +786,16 @@ class BookingAllotment(BookingService, BaseAllotment):
             self.service_location = self.service.location.name
 
     def adult_quantity(self):
-        return self.rooming_list.filter(
-            booking_pax__pax_age__gte=self.service.child_age).count()
+        if self.service.child_age:
+            return self.rooming_list.filter(
+                booking_pax__pax_age__gte=self.service.child_age).count()
+        return None
 
     def child_quantity(self):
-        return self.rooming_list.filter(
-            booking_pax__pax_age__lt=self.service.child_age).count()
+        if self.service.child_age:
+            return self.rooming_list.filter(
+                booking_pax__pax_age__lt=self.service.child_age).count()
+        return None
 
 
 class BookingTransfer(BookingService, BaseTransfer):
