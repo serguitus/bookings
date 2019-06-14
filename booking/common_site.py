@@ -829,7 +829,6 @@ class BookingSiteModel(SiteModel):
         objs = _get_child_objects(services)
         context.update({'pagesize': 'Letter',
                         'booking': booking,
-                        # 'office': Office.objects.get(id=1),
                         'services': objs})
         html = template.render(context)
         result = StringIO()
@@ -847,8 +846,8 @@ class BookingSiteModel(SiteModel):
         else:
             super(BookingSiteModel, self).response_change(request, obj)
 
-
-    def select_bookingservices_view(self, request, booking, bookingservices=None):
+    def select_bookingservices_view(self, request,
+                                    booking, bookingservices=None):
 
         # for now do nothing here
         super(BookingSiteModel, self).response_change(request, booking)

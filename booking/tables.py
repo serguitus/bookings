@@ -182,3 +182,29 @@ class BookingPackageServiceTable(tables.Table):
 
     def before_render(self, request):
         self.columns.hide('service_type')
+
+
+class BookingServiceUpdateTable(tables.Table):
+    class Meta:
+        model = BookingService
+        template_name = 'booking/bookingservice_list.html'
+        fields = ['pk', 'name', 'datetime_from', 'datetime_to',
+                  'status', 'conf_number', 'provider']
+    pk = tables.CheckBoxColumn(accessor='pk',
+                               attrs={
+                                   'th__input': {
+                                       'id': 'action-toggle'},
+                                   'td__input': {
+                                       'class': 'action-select'},
+                               })
+
+    def __init__(self, *args, **kwargs):
+        # self.base_columns['service_type'].verbose_name='Request emails'
+        super(BookingServiceUpdateTable, self).__init__(*args, **kwargs)
+
+    def render_name(self, value, record):
+        obj_url = reverse(
+            'common:booking_%s_change' % (BOOKINGSERVICE_TYPES[record.service_type]),
+            args=(quote(record.pk),)
+        )
+        return format_html('<a href="%s">%s</a>' % (obj_url, value))
