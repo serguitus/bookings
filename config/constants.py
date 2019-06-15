@@ -73,7 +73,7 @@ BOARD_TYPE_HB = 'HB'
 BOARD_TYPE_FB = 'FB'
 BOARD_TYPE_AI = 'AI'
 BOARD_TYPES = (
-    (BOARD_TYPE_NB, 'None Board'),
+    (BOARD_TYPE_NB, 'No Board'),
     (BOARD_TYPE_BB, 'Breakfast Board'),
     (BOARD_TYPE_HB, 'Half Board'),
     (BOARD_TYPE_FB, 'Full Board'),

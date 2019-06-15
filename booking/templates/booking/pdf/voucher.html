@@ -53,7 +53,7 @@
     </head>
     <body>
         <div class="vouchers-content">
-            {% cycle 1 2 3 as counter silent %}
+            {% cycle 3 1 2 as counter silent %}
             {% for service in services %}
                 <table class="voucher">
                     <tr class="voucher-header" height="100px">
@@ -63,7 +63,7 @@
                              src="{% static "/media/booking/img/logo_ergos.png" %}"
                              alt="ERGOS LOGO">
                         </td>
-                        <td class="voucher-head-2" width="20%"><b>VOUCHER</b></td>
+                        <td class="voucher-head-2" width="20%"><h1><b>VOUCHER</b></h1></td>
                         <td class="voucher-head-3" width="40%">Ergos Continental SA<br>
                         Building Gomez Vila, Office 107, <br>Plaza Vieja, Habana Vieja
                         La Habana, Cuba<br>
@@ -86,8 +86,12 @@
                             <table width="100%">
                                 <tr>
                                     <td width="400px"><b>Client:</b> {{ service.booking.name }}</td>
-                                    <td>Adults:{{ service.rooming.count }}</td>
-                                    <td>Children:</td>
+                                    <td>{% if service.service_type == 'A' %}
+                                        <b>Adults:</b> {{ service.adult_quantity }}
+                                    {% else %}
+                                        <b>Pax:</b> {{ service.pax_quantity }}
+                                    {% endif %}</td>
+                                    <td>{% if service.service_type == 'A' and service.child_quantity %}<b>Children:</b> {{ service.child_quantity }}{% endif %}</td>
                                 </tr>
                                 <tr>
                                     <td colspan="3">
@@ -101,23 +105,28 @@
                         <td colspan="3"><b>Notes:</b></td>
                     </tr>
                     <tr class="voucher-notes" height="400px">
-                        <td colspan="3">Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas deL Voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas del voucher Aqui van las notas  </td>
+                        <td colspan="3">{% if service.v_notes %}{{ service.v_notes }}{% endif %}</td>
                     </tr>
                     <tr class="voucher-footer">
                         <td colspan="3">
                             <table class="t-voucher-footer">
                                 <tr>
                                     <td>Emision:</td>
-                                    <td>By</td>
-                                    <td>UID: {% cycle counter %}</td>
+                                    <td>By {{ office }}</td>
+                                    <td>UID: {{ uid }}</td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
-                    {% if not forloop.last and not counter == 3%}
-                    <tr class="voucher-delimiter page-break">
+                    {% if not forloop.last %}
+                    <tr class="voucher-delimiter">
                         <td colspan="3"></td>
                     </tr>
+                    {% endif %}
+                    {% if not forloop.first and forloop.counter0|divisibleby:'3' %}
+                        <div>
+                            <pdf:nextpage />
+                        </div>
                     {% endif %}
                 </table>
             {% endfor %}

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import os
+
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -8,6 +10,7 @@ from xhtml2pdf import pisa
 
 from common.sites import SiteModel
 
+from django.conf import settings
 from django.conf.urls import url
 from django.contrib import admin, messages
 from django.contrib.admin.options import (csrf_protect_m,
@@ -33,6 +36,7 @@ from django.utils.functional import curry
 # from django_tables2 import RequestConfig
 
 from finance.top_filters import AgencyTopFilter
+from finance.models import Office
 
 from booking.forms import (
     PackageAllotmentInlineForm, PackageTransferInlineForm,
@@ -87,7 +91,23 @@ MENU_LABEL_BOOKING = 'Booking'
 MENU_GROUP_LABEL_SERVICES = 'Services By Type'
 MENU_GROUP_LABEL_PACKAGE_SERVICES = 'Package Services By Type'
 
+
 # Starts Package Section
+
+# Utility method to get a list of
+# BookingService child objects from a BookingService list
+def _get_child_objects(services):
+    TYPE_MODELS = {
+        'T': BookingTransfer,
+        'E': BookingExtra,
+        'A': BookingAllotment,
+        'P': BookingPackage,
+    }
+    objs = []
+    for service in services:
+        obj = TYPE_MODELS[service.service_type].objects.get(id=service.id)
+        objs.append(obj)
+    return objs
 
 
 class PackageAllotmentInLine(CommonStackedInline):
@@ -781,9 +801,13 @@ class BookingSiteModel(SiteModel):
             # This is a POST. render vouchers
             ids = request.POST.getlist('pk', [])
             office = request.POST.get('office', None)
+            context.update({
+                'uid': request.user.pk,
+                'office': Office.objects.get(id=office)
+            })
             # use this two parameters to call methods to build pdf
             # it should return the pisa object to add it to the response object
-            pdf = self.build_vouchers(id, ids, office)
+            pdf = self._build_vouchers(id, ids, context)
             if pdf:
                 return HttpResponse(pdf.getvalue(),
                                     content_type='application/pdf')
@@ -791,30 +815,39 @@ class BookingSiteModel(SiteModel):
             return redirect(reverse('common:booking_booking_change',
                                     args=[id]))
 
-    def build_vouchers(self, bk, service_ids, office):
+    def _fetch_resources(self, uri, rel):
+        path = os.path.join(settings.MEDIA_ROOT,
+                            uri.replace(settings.MEDIA_URL, ""))
+        return path
+
+    def _build_vouchers(self, bk, service_ids, context):
         # This helper builds the PDF object with all vouchers
         template = get_template("booking/pdf/voucher.html")
         booking = Booking.objects.get(id=bk)
-        services = BookingService.objects.filter(pk__in=service_ids)
-        context = {'pagesize': 'Letter',
-                   'booking': booking,
-                   'services': services}
+        services = BookingService.objects.filter(id__in=service_ids). \
+                   prefetch_related('rooming_list')
+        objs = _get_child_objects(services)
+        context.update({'pagesize': 'Letter',
+                        'booking': booking,
+                        'services': objs})
         html = template.render(context)
         result = StringIO()
-        pdf = pisa.pisaDocument(StringIO(html), dest=result)
-        if pdf.err:
-            return False
-        return result
+        pdf = pisa.pisaDocument(StringIO(html), dest=result,
+                                link_callback=self._fetch_resources)
+        if not pdf.err:
+            return HttpResponse(result.getvalue(), content_type='application/pdf')
+        else:
+            return HttpResponse('Errors')
 
-    # def response_change(self, request, obj):
-    #     bookingservices = BookingServices.find_bookingservices_with_different_amounts(obj)
-    #     if bookingservices:
-    #         self.select_bokingservices_view(request, obj, bookingservices)
-    #     else:
-    #         super(BookingSiteModel, self).response_change(request, obj)
+    def response_change(self, request, obj):
+        bookingservices = BookingServices.find_bookingservices_with_different_amounts(obj)
+        if bookingservices:
+            self.select_bookingservices_view(request, obj, bookingservices)
+        else:
+            super(BookingSiteModel, self).response_change(request, obj)
 
-
-    def select_bokingservices_view(self, request, booking, bookingservices=None):
+    def select_bookingservices_view(self, request,
+                                    booking, bookingservices=None):
 
         # for now do nothing here
         super(BookingSiteModel, self).response_change(request, booking)
