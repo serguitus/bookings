@@ -6,8 +6,11 @@ Booking Service
 """
 from datetime import datetime, timedelta
 
+from django.contrib.admin.models import LogEntry, ADDITION, CHANGE
+from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
 from django.db.models import Q
+from django.utils.encoding import force_text
 
 from booking import constants
 from booking.models import (
@@ -34,19 +37,42 @@ class BookingServices(object):
     """
 
     @classmethod
-    def booking_to_invoice(cls, user, booking, force=False):
+    def cancel_bookinginvoice(cls, user, booking):
+        # cancel non cancelled invoices associated to booking
+        invoices = list(
+            BookingInvoice.objects.all().filter(booking=booking).exclude(status=STATUS_CANCELLED))
+        if invoices:
+            for invoice in invoices:
+                invoice.status = STATUS_CANCELLED
+                FinanceService.save_agency_invoice(user, invoice, BookingInvoice)
+                LogEntry.objects.log_action(
+                    user_id=user.pk,
+                    content_type_id=get_content_type_for_model(invoice).pk,
+                    object_id=invoice.pk,
+                    object_repr=force_text(invoice),
+                    action_flag=CHANGE,
+                    change_message="Booking Invoice Cancelled",
+                )
+            if booking.invoice:
+                booking.invoice = None
+                booking.save(update_fields=['invoice'])
+                LogEntry.objects.log_action(
+                    user_id=user.pk,
+                    content_type_id=get_content_type_for_model(booking).pk,
+                    object_id=booking.pk,
+                    object_repr=force_text(booking),
+                    action_flag=CHANGE,
+                    change_message="Booking Invoice Cancelled",
+                )
+
+    @classmethod
+    def create_bookinginvoice(cls, user, booking):
         with transaction.atomic(savepoint=False):
             invoice = booking.invoice
-            new_invoice = False
             if invoice is None:
-                new_invoice = True
                 invoice = BookingInvoice()
             else:
-                if force:
-                    invoice.status = STATUS_CANCELLED
-                    FinanceService.save_agency_invoice(user, invoice)
-                    new_invoice = True
-                    invoice = BookingInvoice()
+                return False
 
             invoice.agency = booking.agency
             invoice.currency = booking.currency
@@ -59,6 +85,14 @@ class BookingServices(object):
             invoice.date_to = booking.date_to
 
             FinanceService.save_agency_invoice(user, invoice, BookingInvoice)
+            LogEntry.objects.log_action(
+                user_id=user.pk,
+                content_type_id=get_content_type_for_model(invoice).pk,
+                object_id=invoice.pk,
+                object_repr=force_text(invoice),
+                action_flag=ADDITION,
+                change_message="Booking Invoice Created",
+            )
 
             # obtain lines
             booking_service_list = BookingService.objects.filter(
@@ -82,10 +116,16 @@ class BookingServices(object):
 
                 invoice_partial.save()
 
-            # verify if new invoice to save booking
-            if new_invoice:
-                booking.invoice = invoice
-                booking.save()
+            booking.invoice = invoice
+            booking.save()
+            LogEntry.objects.log_action(
+                user_id=user.pk,
+                content_type_id=get_content_type_for_model(booking).pk,
+                object_id=booking.pk,
+                object_repr=force_text(booking),
+                action_flag=CHANGE,
+                change_message="Booking Invoice Created",
+            )
             return True
 
 

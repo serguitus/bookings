@@ -806,12 +806,12 @@ class BookingSiteModel(SiteModel):
             return False
         return result
 
-    def response_change(self, request, obj):
-        bookingservices = BookingServices.find_bookingservices_with_different_amounts(obj)
-        if bookingservices:
-            self.select_bokingservices_view(request, obj, bookingservices)
-        else:
-            super(BookingSiteModel, self).response_change(request, obj)
+    # def response_change(self, request, obj):
+    #     bookingservices = BookingServices.find_bookingservices_with_different_amounts(obj)
+    #     if bookingservices:
+    #         self.select_bokingservices_view(request, obj, bookingservices)
+    #     else:
+    #         super(BookingSiteModel, self).response_change(request, obj)
 
 
     def select_bokingservices_view(self, request, booking, bookingservices=None):

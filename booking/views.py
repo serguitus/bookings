@@ -855,33 +855,24 @@ class BookingInvoiceView(View):
         This will render the booking invoice
         """
         booking = Booking.objects.get(id=id)
+        if not booking.invoice:
+            if not BookingServices.create_bookinginvoice(request.user, booking):
+                messages.add_message(request, messages.ERROR , "Failed Booking Invoice Creation")
+
         if booking.invoice:
-            pdf = self.build_pdf(booking.invoice)
+            pdf = self.build_pdf(booking)
             if pdf:
                 return HttpResponse(pdf.getvalue(), content_type='application/pdf')
             # there was an error. show an error message
-            messages.add_message(request, messages.ERROR, "Failed PDF Generation")
-            return redirect(reverse('common:booking_booking_change', args=[id]))
+            messages.add_message(request, messages.ERROR, "Failed Invoice PDF Generation")
 
-        if BookingServices.booking_to_invoice(request.user, booking):
-            messages.add_message(request, messages.SUCCESS, "Successful Booking Invoice")
-            if booking.invoice:
-                pdf = self.build_pdf(booking.invoice)
-                if pdf:
-                    return HttpResponse(pdf.getvalue(), content_type='application/pdf')
-                # there was an error. show an error message
-                messages.add_message(request, messages.ERROR, "Failed PDF Generation")
-                return redirect(reverse('common:booking_booking_change', args=[id]))
-        else:
-            messages.add_message(request, messages.ERROR , "Failed Booking Invoice")
-        return HttpResponseRedirect(
-            reverse('common:booking_booking_change', args=[id]))
+        return HttpResponseRedirect(reverse('common:booking_booking_change', args=[id]))
 
-    def build_pdf(self, invoice):
-        # This helper builds the PDF object with all vouchers
+    def build_pdf(self, booking):
+        invoice = booking.invoice
         template = get_template("booking/pdf/invoice.html")
         lines = BookingInvoiceLine.objects.filter(invoice=invoice)
-        partials = BookingInvoiceLine.objects.filter(invoice=invoice)
+        partials = BookingInvoicePartial.objects.filter(invoice=invoice)
         context = {
             'pagesize': 'Letter',
             'invoice': invoice,

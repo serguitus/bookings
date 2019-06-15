@@ -12,12 +12,14 @@ from booking.constants import (
     QUOTE_STATUS_LIST, QUOTE_STATUS_DRAFT,
     BOOKING_STATUS_LIST, BOOKING_STATUS_PENDING,
     SERVICE_STATUS_LIST, SERVICE_STATUS_PENDING,
-    PACKAGE_AMOUNTS_BY_PAX, PACKAGE_AMOUNTS_TYPES)
+    PACKAGE_AMOUNTS_BY_PAX, PACKAGE_AMOUNTS_TYPES,
+    INVOICE_FORMATS, INVOICE_FORMAT_DETAIL)
 
-from config.constants import (BOARD_TYPES,
-                              SERVICE_CATEGORY_TRANSFER,
-                              SERVICE_CATEGORY_ALLOTMENT,
-                              SERVICE_CATEGORY_EXTRA)
+from config.constants import (
+    BOARD_TYPES,
+    SERVICE_CATEGORY_TRANSFER,
+    SERVICE_CATEGORY_ALLOTMENT,
+    SERVICE_CATEGORY_EXTRA)
 from config.models import (
     Service,
     ServiceSupplement,
@@ -27,7 +29,7 @@ from config.models import (
     AmountDetail, AgencyCatalogue, ProviderCatalogue,
 )
 
-from finance.models import Agency, AgencyInvoice, Provider, ProviderInvoice
+from finance.models import Office, Agency, AgencyInvoice, Provider, ProviderInvoice
 
 
 class RelativeInterval(models.Model):
@@ -509,6 +511,8 @@ class Booking(models.Model):
         permissions = (
             ("change_amounts", "Can change amounts of Booking"),
         )
+        unique_together = (('invoice',),)
+
     name = models.CharField(max_length=100)
     agency = models.ForeignKey(Agency)
     reference = models.CharField(max_length=25, blank=True, null=True, verbose_name='TTOO Ref')
@@ -524,6 +528,9 @@ class Booking(models.Model):
     price_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
     invoice = models.ForeignKey(BookingInvoice, blank=True, null=True)
+    # invoice_office = models.ForeignKey(Office)
+    # invoice_format = models.CharField(
+    #    max_length=1, choices=INVOICE_FORMATS, default=INVOICE_FORMAT_DETAIL)
     is_package_price = models.BooleanField(default=False, verbose_name='Package Price')
     package_sgl_price_amount = models.DecimalField(
         max_digits=10, decimal_places=2, default=0.0, verbose_name='Price SGL')
