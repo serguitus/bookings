@@ -742,9 +742,10 @@ class BookingSiteModel(SiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                'internal_reference',
+                ('seller', 'internal_reference'),
                 ('name', 'reference', 'status'),
-                ('agency', 'date_from', 'date_to'),
+                ('agency',),
+                ('date_from', 'date_to'),
                 ('is_package_price', 'price_amount', 'cost_amount'),
                 ('package_sgl_price_amount', 'package_dbl_price_amount',
                  'package_tpl_price_amount'), 'id')
@@ -842,6 +843,7 @@ class BookingSiteModel(SiteModel):
     def response_change(self, request, obj):
         bookingservices = BookingServices.find_bookingservices_with_different_amounts(obj)
         if bookingservices:
+            # make a new GET request to show list of services to update
             self.select_bookingservices_view(request, obj, bookingservices)
         else:
             super(BookingSiteModel, self).response_change(request, obj)

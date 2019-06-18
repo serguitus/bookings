@@ -3766,13 +3766,13 @@ class BookingServices(object):
 
     @classmethod
     def find_bookingpackage_update_cost(cls, obj):
-        cost, cost_msg, price, price_msg = cls.find_bookingpackage_update_amounts(bookingpackage)
+        cost, cost_msg, price, price_msg = cls.find_bookingpackage_update_amounts(obj)
         return cost, cost_msg
 
 
     @classmethod
     def find_bookingpackage_update_price(cls, obj):
-        cost, cost_msg, price, price_msg = cls.find_bookingpackage_update_amounts(bookingpackage)
+        cost, cost_msg, price, price_msg = cls.find_bookingpackage_update_amounts(obj)
         return price, price_msg
 
 

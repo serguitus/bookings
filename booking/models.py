@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 Booking models
 """
 from django.db import models, transaction
+from django.contrib.auth.models import User
 
 from accounting.constants import CURRENCIES, CURRENCY_CUC
 
@@ -542,6 +543,7 @@ class Booking(models.Model):
     # a field to add global notes to a booking
     p_notes = models.CharField(
         max_length=1000, blank=True, null=True, verbose_name='Private Notes')
+    seller = models.ForeignKey(User)
 
     def internal_reference(self):
         if self.id:
