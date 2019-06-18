@@ -464,6 +464,7 @@ class BookingInvoice(AgencyInvoice):
     class Meta:
         verbose_name = 'Booking Invoice'
         verbose_name_plural = 'Bookings Invoices'
+    invoice_booking = models.ForeignKey('Booking')
     booking_name = models.CharField(max_length=100, blank=True, null=True)
     reference = models.CharField(max_length=25, blank=True, null=True)
     date_from = models.DateField(blank=True, null=True)
@@ -528,9 +529,9 @@ class Booking(models.Model):
     price_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
     invoice = models.ForeignKey(BookingInvoice, blank=True, null=True)
-    # invoice_office = models.ForeignKey(Office)
-    # invoice_format = models.CharField(
-    #    max_length=1, choices=INVOICE_FORMATS, default=INVOICE_FORMAT_DETAIL)
+    invoice_office = models.ForeignKey(Office)
+    invoice_format = models.CharField(
+        max_length=1, choices=INVOICE_FORMATS, default=INVOICE_FORMAT_DETAIL)
     is_package_price = models.BooleanField(default=False, verbose_name='Package Price')
     package_sgl_price_amount = models.DecimalField(
         max_digits=10, decimal_places=2, default=0.0, verbose_name='Price SGL')

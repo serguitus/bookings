@@ -406,7 +406,7 @@ class QuoteSiteModel(SiteModel):
                 formset = PaxFormSet(request.POST)
                 formset.is_valid()
                 booking, msg = BookingServices.build_booking_from_quote(
-                    quote_id, formset.cleaned_data)
+                    quote_id, formset.cleaned_data, request.user)
                 if booking:
                     return redirect(reverse('common:booking_booking_change', args=[booking.id]))
                 else:

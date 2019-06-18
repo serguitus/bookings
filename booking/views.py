@@ -859,6 +859,8 @@ class BookingInvoiceView(View):
         if not booking.invoice:
             if not BookingServices.create_bookinginvoice(request.user, booking):
                 messages.add_message(request, messages.ERROR , "Failed Booking Invoice Creation")
+            messages.add_message(request, messages.SUCCESS , "Successful Booking Invoice Creation")
+            return HttpResponseRedirect(reverse('common:booking_booking_change', args=[id]))
 
         if booking.invoice:
             pdf = self.build_pdf(booking)
@@ -886,3 +888,19 @@ class BookingInvoiceView(View):
         if pdf.err:
             return False
         return result
+
+
+class BookingInvoiceCancelView(View):
+    """
+    A view to handle the invoice cancellation for a booking
+    """
+
+    def get(self, request, id, *args, **kwargs):
+        """
+        This will cancel the booking invoice
+        """
+        booking = Booking.objects.get(id=id)
+        BookingServices.cancel_bookinginvoice(request.user, booking)
+        messages.add_message(request, messages.SUCCESS , "Successful Booking Invoice Cancellation")
+
+        return HttpResponseRedirect(reverse('common:booking_booking_change', args=[id]))

@@ -8,7 +8,7 @@
         <a class="btn btn-primary" href="{% url 'common:booking_booking_config_vouchers' current.id %}">Voucher</a>
         <a class="btn btn-primary" href="{% url 'booking_invoice' current.id %}">Invoice</a>
         {% if current.invoice %}
-            <a class="btn btn-danger" href="{% url 'booking_invoice' current.id %}">Cancel Invoice</a>
+            <a class="btn btn-danger" href="{% url 'booking_invoice_cancel' current.id %}">Cancel Invoice</a>
         {% endif %}
     </span>
 </div>
