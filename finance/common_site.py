@@ -706,9 +706,6 @@ class AgencyDocumentSiteModel(MatchableSiteModel):
     match_model = AgencyDocumentMatch
     match_fields = ('name', ('agency', 'currency'), ('amount', 'matched_amount'), ('date', 'status'))
     match_related_fields = ['agency', 'currency']
-    match_list_display = [
-        'name', 'included', 'match_amount', 'agencydocument_ptr'
-    ]
 
 
 class AgencyDebitDocumentSiteModel(AgencyDocumentSiteModel):
@@ -718,25 +715,47 @@ class AgencyDebitDocumentSiteModel(AgencyDocumentSiteModel):
     match_model_parent_field = 'debit_document'
     match_model_child_field = 'credit_document'
     match_child_model = AgencyCreditDocument
-    match_child_model_keyfield = 'agencydocument_ptr'
+    match_child_model_keyfield = 'agencydebitdocument_ptr'
+
+    match_list_display = [
+        'name', 'included', 'match_amount'
+    ]
 
 
 class AgencyCreditDocumentSiteModel(AgencyDocumentSiteModel):
     """
     class for agency credit documents
     """
+    fields = ('name', 'agency', 'currency','amount', 'matched_amount', 'date', 'status')
+    list_display = ['name', 'agency', 'currency', 'amount', 'matched_amount', 'date', 'status']
+    top_filters = ('currency', 'agency', 'status', 'date')
+
+    readonly_fields = ('name', 'matched_amount',)
+    form = AgencyDocumentForm
+
+    match_model = AgencyDocumentMatch
+    match_fields = ('name', ('agency', 'currency'), ('amount', 'matched_amount'), ('date', 'status'))
+    match_related_fields = ['agency', 'currency']
+
     match_model_parent_field = 'credit_document'
     match_model_child_field = 'debit_document'
     match_child_model = AgencyDebitDocument
-    match_child_model_keyfield = 'agencydocument_ptr'
+    match_child_model_keyfield = 'agencycreditdocument_ptr'
 
+    match_list_display = [
+        'name', 'included', 'match_amount'
+    ]
 
-class AgencyInvoiceSiteModel(MatchableSiteModel):
+class AgencyInvoiceSiteModel(AgencyDebitDocumentSiteModel):
     """
     class for agency invoices
     """
     model_order = 4220
     menu_label = MENU_LABEL_FINANCE_ADVANCED
+
+    fields = ('name', 'agency', 'currency','amount', 'matched_amount', 'date', 'status', 'agencydocument_ptr')
+    list_display = ['name', 'agency', 'currency', 'amount', 'matched_amount', 'date', 'status', 'agencydocument_ptr']
+    top_filters = ('currency', 'agency', 'status', 'date')
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
@@ -747,12 +766,16 @@ class AgencyInvoiceSiteModel(MatchableSiteModel):
         return FinanceService.match_agency_document(parent, matches, False)
 
 
-class AgencyPaymentSiteModel(MatchableSiteModel):
+class AgencyPaymentSiteModel(AgencyCreditDocumentSiteModel):
     """
     class for agency payments
     """
     model_order = 4230
     menu_label = MENU_LABEL_FINANCE_ADVANCED
+
+    fields = ('name', 'agency', 'account','amount', 'matched_amount', 'date', 'status', 'agencydocument_ptr')
+    list_display = ['name', 'agency', 'account', 'amount', 'matched_amount', 'date', 'status']
+    top_filters = ('account', 'agency', 'status', 'date')
 
     def save_model(self, request, obj, form, change):
         # overrides base class method

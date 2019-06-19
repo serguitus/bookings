@@ -3676,6 +3676,12 @@ class BookingServices(object):
                 price_groups,
                 bookingpackage.booking.agency)
 
+        if bookingpackage.manual_price:
+            price = bookingpackage.bookingpackage.price_amount
+            price_msg = None
+            if price is None:
+                price_msg = "Manual Price Missing"
+
         fields = []
         if not cls._equals_amounts(bookingpackage.cost_amount, cost):
             fields.append('cost_amount')

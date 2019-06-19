@@ -35,13 +35,14 @@ from django.utils.encoding import force_text
 from django.utils.functional import curry
 # from django_tables2 import RequestConfig
 
-from finance.top_filters import AgencyTopFilter
+from finance.top_filters import ProviderTopFilter, AgencyTopFilter
 from finance.models import Office
 
 from booking.forms import (
     PackageAllotmentInlineForm, PackageTransferInlineForm,
     PackageExtraInlineForm, PackageAllotmentForm,
-    PackageTransferForm, PackageExtraForm, AgencyPackageServiceForm,
+    PackageTransferForm, PackageExtraForm,
+    PackageProviderForm, AgencyPackageServiceForm,
     QuoteForm,
     QuoteAllotmentForm, QuoteTransferForm, QuoteExtraForm, QuotePackageForm,
     QuoteAllotmentInlineForm, QuoteTransferInlineForm,
@@ -61,7 +62,7 @@ from booking.forms import (
 )
 from booking.models import (
     Package, PackageAllotment, PackageTransfer, PackageExtra,
-    AgencyPackageService, AgencyPackageDetail,
+    AgencyPackageService, AgencyPackageDetail, PackageProvider,
     Quote,
     QuotePaxVariant, QuoteServicePaxVariant, QuotePackageServicePaxVariant,
     QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
@@ -1013,7 +1014,7 @@ class BookingPackageAllotmentSiteModel(BookingPackageServiceSiteModel):
     )
     list_display = ('booking_package', 'name', 'datetime_from',
                     'datetime_to', 'status',)
-    top_filters = (('booking_package__booking__name', 'booking_package__Booking'),
+    top_filters = (('booking_package__booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking_package__booking__reference', 'conf_number',
                    ('datetime_from', DateTopFilter), 'status')
@@ -1078,7 +1079,7 @@ class BookingPackageTransferSiteModel(BookingPackageServiceSiteModel):
     )
     list_display = ('booking_package', 'name', 'datetime_from', 'time', 'status')
     top_filters = (
-        ('booking_package__booking__name', 'Booking_package'),
+        ('booking_package__booking__name', 'Booking'),
         ('name', 'Service'),
         'booking_package__booking__reference', 'conf_number',
         ('datetime_from', DateTopFilter), 'status',)
@@ -1135,7 +1136,9 @@ class BookingPackageExtraSiteModel(BookingPackageServiceSiteModel):
     list_display = ('booking_package', 'name', 'addon', 'quantity', 'parameter',
                     'datetime_from', 'datetime_to', 'time', 'status',)
     top_filters = (
-        'booking_package__booking__name', 'service', 'booking_package__booking__reference',
+        ('booking_package__booking__name', 'Booking'),
+        ('name', 'Service'),
+         'booking_package__booking__reference',
         ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'booking_package', 'service__name',)
     form = BookingPackageExtraForm
@@ -1153,7 +1156,7 @@ class BookingPackageSiteModel(BookingServiceSiteModel):
             'fields': (
                 'booking', ('service', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to'),
-                ('manual_cost', 'provider'), 'cost_amount',
+                ('provider'), 'cost_amount',
                 ('manual_price', 'price_by_package_catalogue'), 'price_amount', 'id')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
@@ -1175,6 +1178,19 @@ class BookingPackageSiteModel(BookingServiceSiteModel):
             super(BookingPackageSiteModel, self).save_related(request, form, formsets, change)
             obj = self.save_form(request, form, change)
             BookingServices.update_bookingpackageservices_amounts(obj)
+
+
+class PackageProviderSiteModel(SiteModel):
+    model_order = 7250
+    menu_label = MENU_LABEL_CONFIG_BASIC
+    menu_group = 'Provider Catalogue'
+    fields = ('service', 'provider')
+    list_display = ('service', 'provider')
+    top_filters = (
+        ('service', PackageTopFilter), ('provider', ProviderTopFilter))
+    ordering = ['service', 'provider']
+    form = PackageProviderForm
+    save_as = True
 
 
 class AgencyPackageDetailInline(CommonStackedInline):
@@ -1238,6 +1254,7 @@ bookings_site.register(PackageTransfer, PackageTransferSiteModel)
 bookings_site.register(PackageExtra, PackageExtraSiteModel)
 
 bookings_site.register(AgencyPackageService, AgencyPackageServiceSiteModel)
+bookings_site.register(PackageProvider, PackageProviderSiteModel)
 
 bookings_site.register(Quote, QuoteSiteModel)
 

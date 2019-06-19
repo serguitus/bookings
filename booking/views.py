@@ -815,7 +815,7 @@ class ProviderPackageAutocompleteView(autocomplete.Select2QuerySetView):
             return Provider.objects.none()
 
         qs = qs.filter(
-            providerpackageservice__service=service,
+            packageprovider__service=service,
         )
 
         if self.q:

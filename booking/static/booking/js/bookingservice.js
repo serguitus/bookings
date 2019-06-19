@@ -32,7 +32,11 @@ $(document).ready(function(){
   }
 
   function changed_manual_cost(target){
-    isManualCost = target.checked;
+    if (target == undefined) {
+      isManualCost = false;
+    } else {
+      isManualCost = target.checked;
+    }
     if(isManualCost){
       $('.btn-copy-cost').show()
     } else {

@@ -1046,3 +1046,18 @@ class AgencyPackageDetail(AmountDetail):
     agency_service = models.ForeignKey(AgencyPackageService)
     pax_range_min = models.SmallIntegerField(blank=True, null=True)
     pax_range_max = models.SmallIntegerField(blank=True, null=True)
+
+
+class PackageProvider(models.Model):
+    """
+    PackageProvider
+    """
+    class Meta:
+        verbose_name = 'Package Provider'
+        verbose_name_plural = 'Packages Providers'
+        unique_together = (('service', 'provider'),)
+    service = models.ForeignKey(Package)
+    provider = models.ForeignKey(Provider)
+
+    def __str__(self):
+        return 'Package Prov. - %s : %s' % (self.service, self.provider)
