@@ -530,7 +530,7 @@ class Booking(models.Model):
     price_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
     invoice = models.ForeignKey(BookingInvoice, blank=True, null=True)
-    invoice_office = models.ForeignKey(Office)
+    invoice_office = models.ForeignKey(Office, blank=True, null=True)
     invoice_format = models.CharField(
         max_length=1, choices=INVOICE_FORMATS, default=INVOICE_FORMAT_DETAIL)
     is_package_price = models.BooleanField(default=False, verbose_name='Package Price')
