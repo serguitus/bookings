@@ -760,7 +760,7 @@ class BookingSiteModel(SiteModel):
                     'price_amount',)
     top_filters = (('name', 'Booking Name'), 'reference', 'agency',
                    ('date_from', DateTopFilter), 'rooming_list__pax_name',
-                    (CancelledTopFilter))
+                   (CancelledTopFilter), 'seller')
     ordering = ['date_from', 'reference']
     readonly_fields = ('date_from', 'date_to', 'status',
                        'cost_amount', 'price_amount',

@@ -156,7 +156,9 @@ class BooleanFilter(TopFilter):
         return queryset
 
 
-TopFilter.register(lambda f: isinstance(f, (models.BooleanField,)), BooleanFilter)
+TopFilter.register(lambda f: isinstance(f,
+                                        (models.BooleanField,)), BooleanFilter)
+
 
 class ChoicesFilter(TopFilter):
     _support_array = True
