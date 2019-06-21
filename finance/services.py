@@ -680,7 +680,7 @@ class FinanceService(object):
             parent = parent.agencycreditdocument_ptr
         else:
             parent = parent.agencydebitdocument_ptr
-        current_db_matches = list(parent.agencymatch_set.all())
+        current_db_matches = list(parent.agencydocumentmatch_set.all())
 
         decrease_matches = list()
         increase_matches = list()

@@ -138,13 +138,13 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
         }
         defaults.update(kwargs)
 
-        if self.match_parent_model is None:
-            formset_parent_model = self.model
+        if self.match_child_model is None:
+            formset_child_model = self.model
         else:
-            formset_parent_model = self.match_parent_model
+            formset_child_model = self.match_child_model
             
         result =  modelformset_factory(
-            formset_parent_model, self.get_changelist_form(request), extra=0,
+            formset_child_model, self.get_changelist_form(request), extra=0,
             fields=self.match_list_editable, **defaults
         )
         return result
@@ -740,7 +740,7 @@ class AgencyCreditDocumentSiteModel(AgencyDocumentSiteModel):
     match_model_parent_field = 'credit_document'
     match_model_child_field = 'debit_document'
     match_child_model = AgencyDebitDocument
-    match_child_model_keyfield = 'agencycreditdocument_ptr'
+    match_child_model_keyfield = 'agencydocument_ptr'
 
     match_list_display = [
         'name', 'included', 'match_amount'
@@ -773,7 +773,7 @@ class AgencyPaymentSiteModel(AgencyCreditDocumentSiteModel):
     model_order = 4230
     menu_label = MENU_LABEL_FINANCE_ADVANCED
 
-    fields = ('name', 'agency', 'account','amount', 'matched_amount', 'date', 'status', 'agencydocument_ptr')
+    fields = ('name', 'agency', 'account','amount', 'matched_amount', 'date', 'status')
     list_display = ['name', 'agency', 'account', 'amount', 'matched_amount', 'date', 'status']
     top_filters = ('account', 'agency', 'status', 'date')
 
