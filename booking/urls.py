@@ -31,5 +31,6 @@ urlpatterns = [
     url(r'^confirm/(?P<id>\d+)/?', views.EmailConfirmationView.as_view(), name='send_booking_confirmation'),
     url(r'^invoice/(?P<id>\d+)/?', views.BookingInvoiceView.as_view(), name='booking_invoice'),
     url(r'^invoice/cancel/(?P<id>\d+)/?', views.BookingInvoiceCancelView.as_view(), name='booking_invoice_cancel'),
+
     url(r'^updateservices/(?P<id>\d+)/?', views.BookingServiceUpdateView.as_view(), name='bookingservice_update'),
 ]
