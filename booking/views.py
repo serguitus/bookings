@@ -519,10 +519,32 @@ def build_voucher(request, id):
     # return render(request, 'booking/pdf/voucher.html', context)
 
 
+# helper method for build_voucher view. Remove once removed that view
 def _fetch_resources(uri, rel):
     path = os.path.join(settings.MEDIA_ROOT,
                         uri.replace(settings.MEDIA_URL, ""))
     return path
+
+
+class BookingServiceUpdateView(View):
+    """
+    A view to render the list of bookingservices with catalogue numbers
+    not matching the saved ones
+    """
+
+    def get(self, request, id, *args, **kwargs):
+        context = dict()
+        context.update(bookings_site.get_site_extra_context(request))
+        request.current_app = bookings_site.name
+        return render(request, 'booking/bookingservice_update_config.html', context)
+
+    def post(self, request, *args, **kwargs):
+        if 'service_selection' in request.POST:
+            selected_bookingservices = list()
+            BookingServices.update_bookingservices_amounts(
+                selected_bookingservices)
+            booking = selected_bookingservices[0].booking
+            super(BookingSiteModel, self).response_change(request, booking)
 
 
 class EmailProviderView(View):
