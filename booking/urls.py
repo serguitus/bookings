@@ -23,13 +23,13 @@ urlpatterns = [
 
     url(r'^bookingtransfer-time/?', views.BookingTransferTimeView.as_view(), name='bookingtransfer_time'),
 
-    url(r'^invoices/(?P<id>\d+)/print/?', views.get_invoice, name='get_invoice'),
     url(r'^voucher/(?P<id>\d+)/print/?', views.build_voucher, name='build_voucher'),
     # url(r'^actions/(?P<id>\d+)/?', views.booking_actions, name='exec_action'),
     # url(r'^requests/(?P<id>\d+)/?', views.send_service_request, name='send_service_request'),
     url(r'^requests/(?P<id>\d+)/?', views.EmailProviderView.as_view(), name='send_service_request'),
     url(r'^confirm/(?P<id>\d+)/?', views.EmailConfirmationView.as_view(), name='send_booking_confirmation'),
     url(r'^invoice/(?P<id>\d+)/?', views.BookingInvoiceView.as_view(), name='booking_invoice'),
+    url(r'^invoice/pdf/(?P<id>\d+)/?', views.BookingInvoicePDFView.as_view(), name='booking_invoice_pdf'),
     url(r'^invoice/cancel/(?P<id>\d+)/?', views.BookingInvoiceCancelView.as_view(), name='booking_invoice_cancel'),
 
     url(r'^updateservices/(?P<id>\d+)/?', views.BookingServiceUpdateView.as_view(), name='bookingservice_update'),

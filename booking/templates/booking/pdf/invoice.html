@@ -1,7 +1,41 @@
 <html>
-    <head>
-    </head>
+<head>
+    <style>
+        @page {
+            size: a4 portrait;
+            @frame content_frame { /* Content Frame */
+                left: 45pt; right: 45pt; top: 45pt; bottom: 295pt;
+            }
+            @frame footer_frame { /* Another static Frame */
+                -pdf-frame-content: footer_content;
+                left: 45pt; right: 45pt; bottom: 45pt; height: 250pt;
+            }
+        }
+    </style>
+</head>
     <body>
+        <div id="footer_content">
+            <p style="font-weight:bold">BANK DETAILS</p>
+            Beneficiary Name: LLOGO S.A.<br>
+            Beneficiary Account: 4021027875<br>
+            ADDRESS: CALLE 38, EDIF LOS CRISTALES, OFICINA 6-8, CIUDAD PANAMA<br>
+            Beneficiary Bank: CREDICORP BANK Panama, Rep. de Panama<br>
+            SWIFT: CRLDPAPA<br>
+            Address: Calle 50 Edif Plaza Credicorp Bank, Obarrio, CIUDAD PANAMA<br>
+            <p>Please send transfer through our correspondent bank below.<br>
+            Intermediary Bank:<br>
+            WELLS FARGO BANK NA<br>
+            375 Park Ave. NY 4080<br>
+            New York, N.Y. U.S.A.<br>
+            Fedwire : 026005092<br>
+            SWIFT: PNBPUS3NNYC<br>
+            Account with Intermediary Bank: 20001923715</p>
+            <p style="color:red; font-weight:bold;">IMPORTANT: This is a safe way to pay our services, but due to the US embargo against Cuba you MUST NOT write down in the bank forms any word that could be associated to Cuba, such as hotel names, tour names or any service in Cuba, only the name of the client or invoice number; otherwise your money could be retained by US government.
+            <br>
+            We are not responsible for retained payments for not following above indications.</p>
+        </div>
+
+        <img width=213 height=70 alt="{{ invoice.office.name }}">
         <h1>Invoice for {{ invoice.bookingname }}</h1>
         <h2>Agency {{ invoice.agency }}</h3>
         {% if invoice.reference %}
@@ -10,24 +44,24 @@
         <h3>From {{ invoice.date_from }}</h3>
         <h3>To {{ invoice.date_to }}</h3>
         <h3>Amount {{ invoice.amount }}</h3>
-        <br>
         <table>
         {% for line in lines %}
             <tr>
-                <td>{{ line.bookingservice_name }}</td>
-                <td>{{ line.date_from }}</td>
-                <td>{{ line.date_to }}</td>
-                <td style="text-align:right;">{{ line.price }}</td>
+                <td style="width:70%;">{{ line.bookingservice_name }}</td>
+                <td style="width:10%;">{{ line.date_from }}</td>
+                <td style="width:10%;">{{ line.date_to }}</td>
+                <td style="width:10%; text-align:right;">{{ line.price }}</td>
             </tr>
         {% endfor %}
         </table>
-        <table>
+        <p>
         {% for partial in partials %}
-            <tr>
-                <td>{{ partial.pax_name }}</td>
-                <td style="text-align:right;">{{ partial.partial_amount }}</td>
-            </tr>
+            {% if forloop.first %}
+                <span>{{ partial.pax_name }}</span>
+            {% else %}
+                <span>, {{ partial.pax_name }}</span>
+            {%endif %}
         {% endfor %}
-        </table>
+        </p>
     </body>
 </html>

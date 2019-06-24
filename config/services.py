@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 config services
 """
 
+
 from datetime import date, timedelta, time
 
 from django.db.models import Q
@@ -28,12 +29,12 @@ from config.models import (
 )
 from finance.models import Agency
 
+from reservas.custom_settings import ADDON_FOR_NO_ADDON
 
 class ConfigServices(object):
     """
     ConfigServices
     """
-
 
     @classmethod
     def copy_agency_amounts(cls, src_agency, dst_agency, is_update):
@@ -68,6 +69,7 @@ class ConfigServices(object):
                         agency_service_id=dst_agency_service.id,
                         room_type_id=detail.room_type_id,
                         board_type=detail.board_type,
+                        service_addon_id=detail.service_addon_id,
                         defaults=cls.calculate_default_amounts(
                             detail, src_agency.gain_percent, dst_agency.gain_percent)
                     )
@@ -77,6 +79,7 @@ class ConfigServices(object):
                         agency_service_id=dst_agency_service.id,
                         room_type_id=detail.room_type_id,
                         board_type=detail.board_type,
+                        service_addon_id=detail.service_addon_id,
                         defaults=cls.calculate_default_amounts(
                             detail, src_agency.gain_percent, dst_agency.gain_percent)
                     )
@@ -105,6 +108,7 @@ class ConfigServices(object):
                         agency_service_id=dst_agency_service.id,
                         a_location_from_id=detail.a_location_from_id,
                         a_location_to_id=detail.a_location_to_id,
+                        service_addon_id=detail.service_addon_id,
                         defaults=cls.calculate_default_amounts(
                             detail, src_agency.gain_percent, dst_agency.gain_percent)
                     )
@@ -114,6 +118,7 @@ class ConfigServices(object):
                         agency_service_id=dst_agency_service.id,
                         a_location_from_id=detail.a_location_from_id,
                         a_location_to_id=detail.a_location_to_id,
+                        service_addon_id=detail.service_addon_id,
                         defaults=cls.calculate_default_amounts(
                             detail, src_agency.gain_percent, dst_agency.gain_percent)
                     )
@@ -141,6 +146,7 @@ class ConfigServices(object):
                     agency_detail, created = AgencyExtraDetail.objects.get_or_create(
                         agency_service_id=dst_agency_service.id,
                         addon_id=detail.addon_id,
+                        service_addon_id=detail.service_addon_id,
                         pax_range_min=detail.pax_range_min,
                         pax_range_max=detail.pax_range_max,
                         defaults=cls.calculate_default_amounts(
@@ -151,6 +157,7 @@ class ConfigServices(object):
                     agency_detail, created = AgencyExtraDetail.objects.update_or_create(
                         agency_service_id=dst_agency_service.id,
                         addon_id=detail.addon_id,
+                        service_addon_id=detail.service_addon_id,
                         pax_range_min=detail.pax_range_min,
                         pax_range_max=detail.pax_range_max,
                         defaults=cls.calculate_default_amounts(
@@ -202,6 +209,7 @@ class ConfigServices(object):
                         agency_service=agency_service,
                         room_type=detail.room_type,
                         board_type=detail.board_type,
+                        service_addon_id=detail.service_addon_id,
                         # from provider src gain is 0
                         defaults=cls.calculate_default_amounts(detail, 0, gain_percent)
                     )
@@ -347,7 +355,7 @@ class ConfigServices(object):
     @classmethod
     def allotment_amounts(
             cls, service_id, date_from, date_to, cost_groups, price_groups, provider, agency,
-            board_type, room_type_id, quantity=None):
+            board_type, room_type_id, addon_id=None, quantity=None):
         if room_type_id is None or room_type_id == '':
             return None, 'Room Missing', None, 'Room Missing'
         if board_type is None or board_type == '':
@@ -360,12 +368,12 @@ class ConfigServices(object):
         # provider cost
         cost, cost_message = cls.allotment_costs(
             service_id, date_from, date_to, cost_groups,
-            provider, board_type, room_type_id, quantity)
+            provider, board_type, room_type_id, addon_id, quantity)
 
         # agency price
         price, price_message = cls.allotment_prices(
             service_id, date_from, date_to, price_groups,
-            agency, board_type, room_type_id, quantity)
+            agency, board_type, room_type_id, addon_id, quantity)
 
         return cost, cost_message, price, price_message
 
@@ -373,7 +381,7 @@ class ConfigServices(object):
     @classmethod
     def allotment_costs(
             cls, service_id, date_from, date_to, cost_groups, provider,
-            board_type, room_type_id, quantity=None):
+            board_type, room_type_id, addon_id=None, quantity=None):
         if room_type_id is None or room_type_id == '':
             return None, 'Room Missing'
         if board_type is None or board_type == '':
@@ -395,6 +403,11 @@ class ConfigServices(object):
             queryset = cls._get_provider_queryset(
                 ProviderAllotmentDetail.objects,
                 provider.id, service_id, date_from, date_to)
+            # addon filtering
+            if addon_id:
+                queryset = queryset.filter(addon_id=addon_id)
+            else:
+                queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
             detail_list = list(
                 queryset.filter(
                     board_type=board_type
@@ -414,7 +427,7 @@ class ConfigServices(object):
     @classmethod
     def allotment_prices(
             cls, service_id, date_from, date_to, price_groups, agency,
-            board_type, room_type_id, quantity=None):
+            board_type, room_type_id, addon_id=None, quantity=None):
         if room_type_id is None or room_type_id == '':
             return None, 'Room Missing'
         if board_type is None or board_type == '':
@@ -436,6 +449,11 @@ class ConfigServices(object):
             queryset = cls._get_agency_queryset(
                 AgencyAllotmentDetail.objects,
                 agency.id, service_id, date_from, date_to)
+            # addon filtering
+            if addon_id:
+                queryset = queryset.filter(addon_id=addon_id)
+            else:
+                queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
             detail_list = list(
                 queryset.filter(
                     board_type=board_type
@@ -455,7 +473,7 @@ class ConfigServices(object):
     @classmethod
     def transfer_amounts(
             cls, service_id, date_from, date_to, cost_groups, price_groups, provider, agency,
-            location_from_id, location_to_id, quantity=None):
+            location_from_id, location_to_id, addon_id=None, quantity=None):
         if location_from_id is None or location_from_id == '':
             return None, 'Location From Missing', None, 'Location From Missing'
         if location_to_id is None or location_to_id == '':
@@ -470,12 +488,12 @@ class ConfigServices(object):
         # provider cost
         cost, cost_message = cls.transfer_costs(
             service_id, date_from, date_to, cost_groups,
-            provider, location_from_id, location_to_id, quantity)
+            provider, location_from_id, location_to_id, addon_id, quantity)
 
         # agency price
         price, price_message = cls.transfer_prices(
             service_id, date_from, date_to, price_groups,
-            agency, location_from_id, location_to_id, quantity)
+            agency, location_from_id, location_to_id, addon_id, quantity)
 
         return cost, cost_message, price, price_message
 
@@ -483,7 +501,7 @@ class ConfigServices(object):
     @classmethod
     def transfer_costs(
             cls, service_id, date_from, date_to, cost_groups, provider,
-            location_from_id, location_to_id, quantity=None):
+            location_from_id, location_to_id, addon_id=None, quantity=None):
         if location_from_id is None or location_from_id == '':
             return None, 'Location From Missing'
         if location_to_id is None or location_to_id == '':
@@ -509,6 +527,11 @@ class ConfigServices(object):
             queryset = cls._get_provider_queryset(
                 ProviderTransferDetail.objects,
                 provider.id, service_id, date_from, date_to)
+            # addon filtering
+            if addon_id:
+                queryset = queryset.filter(addon_id=addon_id)
+            else:
+                queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
             detail_list = list(
                 queryset.filter(
                     p_location_from_id=location_from_id,
@@ -522,6 +545,7 @@ class ConfigServices(object):
                     queryset.filter(
                         p_location_to_id=location_from_id,
                         p_location_from_id=location_to_id))
+                # addon filtering
                 cost, cost_message = cls.find_groups_amount(
                     True, service, date_from, date_to, cost_groups,
                     quantity, None, detail_list
@@ -532,7 +556,7 @@ class ConfigServices(object):
     @classmethod
     def transfer_prices(
             cls, service_id, date_from, date_to, price_groups, agency,
-            location_from_id, location_to_id, quantity=None):
+            location_from_id, location_to_id, addon_id=None, quantity=None):
         if location_from_id is None or location_from_id == '':
             return None, 'Location From Missing'
         if location_to_id is None or location_to_id == '':
@@ -558,6 +582,11 @@ class ConfigServices(object):
             queryset = cls._get_agency_queryset(
                 AgencyTransferDetail.objects,
                 agency.id, service_id, date_from, date_to)
+            # addon filtering
+            if addon_id:
+                queryset = queryset.filter(addon_id=addon_id)
+            else:
+                queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
             detail_list = list(
                 queryset.filter(
                     a_location_from_id=location_from_id,
@@ -658,7 +687,7 @@ class ConfigServices(object):
                     if addon_id:
                         queryset = queryset.filter(addon_id=addon_id)
                     else:
-                        queryset = queryset.filter(addon_id__isnull=True)
+                        queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
 
                     detail_list = list(queryset)
 
@@ -681,7 +710,7 @@ class ConfigServices(object):
                 if addon_id:
                     queryset = queryset.filter(addon_id=addon_id)
                 else:
-                    queryset = queryset.filter(addon_id__isnull=True)
+                    queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
 
                 detail_list = list(queryset)
 
@@ -739,7 +768,7 @@ class ConfigServices(object):
                     if addon_id:
                         queryset = queryset.filter(addon_id=addon_id)
                     else:
-                        queryset = queryset.filter(addon_id__isnull=True)
+                        queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
 
                     detail_list = list(queryset)
                     group_price, group_price_message = cls.find_group_amount(
@@ -761,7 +790,7 @@ class ConfigServices(object):
                 if addon_id:
                     queryset = queryset.filter(addon_id=addon_id)
                 else:
-                    queryset = queryset.filter(addon_id__isnull=True)
+                    queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
 
                 detail_list = list(queryset)
 

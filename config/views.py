@@ -68,7 +68,7 @@ class AddonAutocompleteView(autocomplete.Select2QuerySetView):
         service = self.forwarded.get('service', None)
 
         if service:
-            qs = qs.filter(extraaddon__extra=service)
+            qs = qs.filter(serviceaddon__service=service)
 
         if self.q:
             qs = qs.filter(name__icontains=self.q)

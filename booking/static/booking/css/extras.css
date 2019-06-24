@@ -127,12 +127,16 @@ span.voucher-footer-4{
 }
 
 div.inline-change-link {
-    width: 50px;
     margin-top: 20px;
+    width: 50px;
     background-color: lightgray;
     border-radius: 3px;
     padding: 5px;
     vertical-align: baseline;
+}
+
+td.original div.inline-change-link {
+    margin-top: 0px;
 }
 
 div.readonly {
