@@ -16,6 +16,7 @@ from config.constants import (
 
 from finance.models import Agency, Provider
 
+from reservas.custom_settings import ADDON_FOR_NO_ADDON
 
 class Location(models.Model):
     """
@@ -94,6 +95,21 @@ class RoomType(models.Model):
         return self.name
 
 
+class Addon(models.Model):
+    """
+    Addon
+    """
+    class Meta:
+        verbose_name = 'Addon'
+        verbose_name_plural = 'Addons'
+        unique_together = (('name',),)
+    name = models.CharField(max_length=50)
+    enabled = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Service(models.Model):
     """
     Service
@@ -124,6 +140,21 @@ class Service(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class ServiceAddon(models.Model):
+    """
+    ServiceAddon
+    """
+    class Meta:
+        verbose_name = 'Service Addon'
+        verbose_name_plural = 'Services Addons'
+        unique_together = (('service', 'addon',),)
+    service = models.ForeignKey(Service)
+    addon = models.ForeignKey(Addon)
+
+    def __str__(self):
+        return '%s for %s' % (self.addon, self.service)
 
 
 class ServiceSupplement(models.Model):
@@ -216,21 +247,6 @@ class AmountDetail(models.Model):
 #===============================================================================
 # Extra
 #===============================================================================
-class Addon(models.Model):
-    """
-    Addon
-    """
-    class Meta:
-        verbose_name = 'Addon'
-        verbose_name_plural = 'Addons'
-        unique_together = (('name',),)
-    name = models.CharField(max_length=50)
-    enabled = models.BooleanField(default=True)
-
-    def __str__(self):
-        return self.name
-
-
 class Extra(Service):
     """
     Extra
@@ -293,7 +309,6 @@ class ProviderExtraService(ProviderCatalogue):
     def __str__(self):
         return 'Prov.Extra - %s : %s' % (self.provider, self.service)
 
-
 class ProviderExtraDetail(AmountDetail):
     """
     ProviderExtraDetail
@@ -306,7 +321,7 @@ class ProviderExtraDetail(AmountDetail):
                            'pax_range_min',
                            'pax_range_max')
     provider_service = models.ForeignKey(ProviderExtraService)
-    addon = models.ForeignKey(Addon, blank=True, null=True)
+    addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
     pax_range_min = models.SmallIntegerField(default=0)
     pax_range_max = models.SmallIntegerField(default=0)
 
@@ -337,7 +352,7 @@ class AgencyExtraDetail(AmountDetail):
                            'pax_range_min',
                            'pax_range_max')
     agency_service = models.ForeignKey(AgencyExtraService)
-    addon = models.ForeignKey(Addon, blank=True, null=True)
+    addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
     pax_range_min = models.SmallIntegerField(default=0)
     pax_range_max = models.SmallIntegerField(default=0)
 
@@ -425,10 +440,11 @@ class ProviderAllotmentDetail(AmountDetail):
     class Meta:
         verbose_name = 'Accomodation Provider Detail'
         verbose_name_plural = 'Accomodation Provider Details'
-        unique_together = (('provider_service', 'room_type', 'board_type'),)
+        unique_together = (('provider_service', 'room_type', 'board_type', 'addon'),)
     provider_service = models.ForeignKey(ProviderAllotmentService)
     room_type = models.ForeignKey(RoomType)
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
+    addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
 
 
 class AgencyAllotmentService(AgencyCatalogue):
@@ -452,10 +468,11 @@ class AgencyAllotmentDetail(AmountDetail):
     class Meta:
         verbose_name = 'Accomodation Agency Detail'
         verbose_name_plural = 'Accomodation Agency Details'
-        unique_together = (('agency_service', 'room_type', 'board_type'),)
+        unique_together = (('agency_service', 'room_type', 'board_type', 'addon'),)
     agency_service = models.ForeignKey(AgencyAllotmentService)
     room_type = models.ForeignKey(RoomType)
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
+    addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
 
 
 class AllotmentRoomAvailability(models.Model):
@@ -521,12 +538,13 @@ class ProviderTransferDetail(AmountDetail):
     class Meta:
         verbose_name = 'Transfer Provider Detail'
         verbose_name_plural = 'Transfer Provider Details'
-        unique_together = ('provider_service', 'p_location_from', 'p_location_to',)
+        unique_together = ('provider_service', 'p_location_from', 'p_location_to', 'addon')
     provider_service = models.ForeignKey(ProviderTransferService)
     p_location_from = models.ForeignKey(
         Location, related_name='p_location_from', verbose_name='Location from')
     p_location_to = models.ForeignKey(
         Location, related_name='p_location_to', verbose_name='Location to')
+    addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
 
 
 class AgencyTransferService(AgencyCatalogue):
@@ -550,11 +568,10 @@ class AgencyTransferDetail(AmountDetail):
     class Meta:
         verbose_name = 'Transfer Agency Detail'
         verbose_name_plural = 'Transfer Agency Details'
-        unique_together = (('agency_service', 'a_location_from', 'a_location_to',),)
+        unique_together = (('agency_service', 'a_location_from', 'a_location_to', 'addon'),)
     agency_service = models.ForeignKey(AgencyTransferService)
     a_location_from = models.ForeignKey(
         Location, related_name='a_location_from', verbose_name='Location from')
     a_location_to = models.ForeignKey(
         Location, related_name='a_location_to', verbose_name='Location to')
-
-
+    addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)

@@ -383,6 +383,7 @@ class QuoteSiteModel(SiteModel):
     form = QuoteForm
     add_form_template = 'booking/quote_change_form.html'
     change_form_template = 'booking/quote_change_form.html'
+    save_as = True
 
     def get_urls(self):
         info = self.model._meta.app_label, self.model._meta.model_name
@@ -431,6 +432,13 @@ class QuoteSiteModel(SiteModel):
             obj = self.save_form(request, form, change)
             BookingServices.sync_quote_paxvariants(obj)
 
+    def response_add_saveasnew(
+            self, request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue=None):
+
+        BookingServices.copy_quote_services(request, obj)
+        
+        super(QuoteSiteModel, self).response_add_saveasnew(
+            request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue)
 
 class QuoteServiceSiteModel(SiteModel):
     def response_post_delete(self, request, obj):
@@ -474,8 +482,8 @@ class QuoteAllotmentSiteModel(QuoteServiceSiteModel):
 
     fields = (
         'quote', ('service', 'status'), ('datetime_from', 'datetime_to'),
-        'room_type', 'board_type', 'provider', 'id')
-    list_display = ('quote', 'service', 'datetime_from', 'datetime_to', 'status',)
+        'room_type', 'board_type', 'service_addon', 'provider', 'id')
+    list_display = ('quote', 'service', 'service_addon', 'datetime_from', 'datetime_to', 'status',)
     top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote__reference', 'service__name',)
     form = QuoteAllotmentForm
@@ -491,9 +499,9 @@ class QuoteTransferSiteModel(QuoteServiceSiteModel):
 
     fields = (
         'quote', ('service', 'status'), ('datetime_from', 'datetime_to'),
-        ('location_from', 'location_to'),
+        ('location_from', 'location_to'), 'service_addon',
         'provider', 'id')
-    list_display = ('quote', 'name', 'datetime_from', 'status',)
+    list_display = ('quote', 'name', 'service_addon', 'datetime_from', 'status',)
     top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote__reference', 'service__name',)
     form = QuoteTransferForm
@@ -510,10 +518,10 @@ class QuoteExtraSiteModel(QuoteServiceSiteModel):
     fields = (
         'quote',
         ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
-        ('addon', 'quantity', 'parameter'),
+        ('addon', 'service_addon'), ('quantity', 'parameter'),
         'provider', 'description', 'id')
     list_display = (
-        'quote', 'service', 'addon', 'quantity', 'parameter',
+        'quote', 'service', 'addon', 'service_addon', 'quantity', 'parameter',
         'datetime_from', 'datetime_to', 'time', 'status',)
     top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote__reference', 'service__name',)
@@ -650,8 +658,8 @@ class QuotePackageAllotmentSiteModel(QuotePackageServiceSiteModel):
 
     fields = (
         'quote_package', ('service', 'status'), ('datetime_from', 'datetime_to'),
-        'room_type', 'board_type', 'provider', 'id')
-    list_display = ('quote_package', 'service', 'datetime_from', 'datetime_to', 'status',)
+        'room_type', 'board_type', 'service_addon', 'provider', 'id')
+    list_display = ('quote_package', 'service', 'service_addon', 'datetime_from', 'datetime_to', 'status',)
     top_filters = ('service', 'quote_package__quote__reference', ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote_package__quote__reference', 'service__name',)
     form = QuotePackageAllotmentForm
@@ -667,9 +675,9 @@ class QuotePackageTransferSiteModel(QuotePackageServiceSiteModel):
 
     fields = (
         'quote_package', ('service', 'status'), ('datetime_from', 'datetime_to'),
-        ('location_from', 'location_to'),
+        ('location_from', 'location_to'), 'service_addon',
         'provider', 'id')
-    list_display = ('quote_package', 'name', 'datetime_from', 'status',)
+    list_display = ('quote_package', 'name', 'service_addon', 'datetime_from', 'status',)
     top_filters = ('service', 'quote_package__quote__reference', ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote_package__quote__reference', 'service__name',)
     form = QuotePackageTransferForm
@@ -686,10 +694,10 @@ class QuotePackageExtraSiteModel(QuotePackageServiceSiteModel):
     fields = (
         'quote_package',
         ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
-        ('addon', 'quantity', 'parameter'),
+        ('addon', 'service_addon'), ('quantity', 'parameter'),
         'provider', 'id')
     list_display = (
-        'quote_package', 'service', 'addon', 'quantity', 'parameter',
+        'quote_package', 'service', 'addon', 'service_addon', 'quantity', 'parameter',
         'datetime_from', 'datetime_to', 'time', 'status',)
     top_filters = ('service', 'quote_package__quote__reference', ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote_package__quote__reference', 'service__name',)
@@ -974,14 +982,14 @@ class BookingAllotmentSiteModel(BookingServiceSiteModel):
             'fields': (
                 'booking', ('service', 'status', 'conf_number'),
                 ('datetime_from', 'nights', 'datetime_to'),
-                ('room_type', 'board_type'),
+                ('room_type', 'board_type', 'service_addon'),
                 ('manual_cost', 'provider'), 'cost_amount', 'manual_price', 'price_amount', 'id')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
     )
 
-    list_display = ('booking', 'name', 'datetime_from',
+    list_display = ('booking', 'name', 'service_addon', 'datetime_from',
                     'datetime_to', 'cost_amount', 'manual_cost',
                     'price_amount', 'manual_price', 'status',)
     top_filters = (('booking__name', 'Booking'),
@@ -1006,13 +1014,13 @@ class BookingPackageAllotmentSiteModel(BookingPackageServiceSiteModel):
             'fields': (
                 'booking_package', ('service', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to'),
-                ('room_type', 'board_type'),
+                ('room_type', 'board_type', 'service_addon'),
                 ('manual_cost', 'provider'), 'cost_amount', 'manual_price', 'price_amount', 'id')
         }),
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
     )
-    list_display = ('booking_package', 'name', 'datetime_from',
+    list_display = ('booking_package', 'name', 'service_addon', 'datetime_from',
                     'datetime_to', 'status',)
     top_filters = (('booking_package__booking__name', 'Booking'),
                    ('name', 'Service'),
@@ -1038,12 +1046,13 @@ class BookingTransferSiteModel(BookingServiceSiteModel):
                 ('place_from'),
                 ('location_to', 'dropoff', 'schedule_to'),
                 ('place_to'),
+                'service_addon',
                 ('manual_cost', 'provider'), 'cost_amount', 'manual_price', 'price_amount', 'id')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
     )
-    list_display = ('booking', 'name',
+    list_display = ('booking', 'name', 'service_addon',
                     'datetime_from', 'time', 'cost_amount', 'manual_cost',
                     'price_amount', 'manual_price', 'status')
     top_filters = (
@@ -1072,12 +1081,13 @@ class BookingPackageTransferSiteModel(BookingPackageServiceSiteModel):
                 ('place_from'),
                 ('location_to', 'dropoff', 'schedule_to'),
                 ('place_to'),
+                'service_addon',
                 ('manual_cost', 'provider'), 'cost_amount', 'manual_price', 'price_amount', 'id')
         }),
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
     )
-    list_display = ('booking_package', 'name', 'datetime_from', 'time', 'status')
+    list_display = ('booking_package', 'name', 'service_addon', 'datetime_from', 'time', 'status')
     top_filters = (
         ('booking_package__booking__name', 'Booking'),
         ('name', 'Service'),
@@ -1099,13 +1109,14 @@ class BookingExtraSiteModel(BookingServiceSiteModel):
             'fields': (
                 'booking', ('service', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
+                'service_addon',
                 ('addon', 'quantity', 'parameter'),
                 ('manual_cost', 'provider'), 'cost_amount', 'manual_price', 'price_amount', 'id')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
     )
-    list_display = ('booking', 'name', 'addon', 'quantity', 'parameter',
+    list_display = ('booking', 'name', 'service_addon', 'addon', 'quantity', 'parameter',
                     'datetime_from', 'datetime_to', 'time',
                     'cost_amount', 'manual_cost', 'price_amount', 'manual_price', 'status',)
     top_filters = ('booking__name', 'service', 'booking__reference',
@@ -1127,13 +1138,14 @@ class BookingPackageExtraSiteModel(BookingPackageServiceSiteModel):
             'fields': (
                 'booking_package', ('service', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
+                'service_addon',
                 ('addon', 'quantity', 'parameter'),
                 ('manual_cost', 'provider'), 'cost_amount', 'manual_price', 'price_amount', 'id')
         }),
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
     )
-    list_display = ('booking_package', 'name', 'addon', 'quantity', 'parameter',
+    list_display = ('booking_package', 'name', 'service_addon', 'addon', 'quantity', 'parameter',
                     'datetime_from', 'datetime_to', 'time', 'status',)
     top_filters = (
         ('booking_package__booking__name', 'Booking'),
@@ -1228,6 +1240,7 @@ class BookingInvoicePartialInline(CommonTabularInline):
 
 
 class BookingInvoiceSiteModel(SiteModel):
+    delete_allowed = False
     recent_allowed = False
 
     fields = (
@@ -1237,11 +1250,22 @@ class BookingInvoiceSiteModel(SiteModel):
 
     inlines = [BookingInvoiceLineInline, BookingInvoicePartialInline]
 
+    def save_model(self, request, obj, form, change):
+        # disable save of agencyinvoice object
+        obj.save(update_fields=[])
+
+    def response_post_save_add(self, request, obj):
+        if hasattr(obj, 'invoice_booking') and obj.invoice_booking:
+            return redirect(reverse('common:booking_booking_change', args=[obj.invoice_booking.pk]))
+        if 'invoice_booking' in request.POST:
+            return redirect(reverse('common:booking_booking_change', args=[request.POST['invoice_booking']]))
+        return super(BookingInvoiceSiteModel, self).response_post_save_add(request, obj)
+
     def response_post_save_change(self, request, obj):
-        if hasattr(obj, 'booking') and obj.booking:
-            return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
-        if 'booking' in request.POST:
-            return redirect(reverse('common:booking_booking_change', args=[request.POST['booking']]))
+        if hasattr(obj, 'invoice_booking') and obj.invoice_booking:
+            return redirect(reverse('common:booking_booking_change', args=[obj.invoice_booking.pk]))
+        if 'invoice_booking' in request.POST:
+            return redirect(reverse('common:booking_booking_change', args=[request.POST['invoice_booking']]))
         return super(BookingInvoiceSiteModel, self).response_post_save_change(request, obj)
 
 

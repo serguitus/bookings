@@ -753,8 +753,8 @@ class AgencyInvoiceSiteModel(AgencyDebitDocumentSiteModel):
     model_order = 4220
     menu_label = MENU_LABEL_FINANCE_ADVANCED
 
-    fields = ('name', 'agency', 'currency','amount', 'matched_amount', 'date', 'status', 'agencydocument_ptr')
-    list_display = ['name', 'agency', 'currency', 'amount', 'matched_amount', 'date', 'status', 'agencydocument_ptr']
+    fields = ('name', 'agency', 'currency','amount', 'matched_amount', 'date', 'status')
+    list_display = ['name', 'agency', 'currency', 'amount', 'matched_amount', 'date', 'status']
     top_filters = ('currency', 'agency', 'status', 'date')
 
     def save_model(self, request, obj, form, change):

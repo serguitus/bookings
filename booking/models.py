@@ -83,6 +83,7 @@ class BaseService(models.Model):
     service_location = models.CharField(max_length=50, blank=True, null=True,
                                         verbose_name='Location')
     description = models.CharField(max_length=1000, blank=True, null=True)
+    service_addon = models.ForeignKey(Addon, blank=True, null=True)
     status = models.CharField(
         max_length=5, choices=SERVICE_STATUS_LIST,
         default=SERVICE_STATUS_PENDING)
@@ -470,6 +471,9 @@ class BookingInvoice(AgencyInvoice):
     reference = models.CharField(max_length=25, blank=True, null=True)
     date_from = models.DateField(blank=True, null=True)
     date_to = models.DateField(blank=True, null=True)
+    office = models.ForeignKey(Office, blank=True, null=True)
+    format = models.CharField(
+        max_length=1, choices=INVOICE_FORMATS, default=INVOICE_FORMAT_DETAIL)
 
     def fill_data(self):
         super(BookingInvoice, self).fill_data()
@@ -530,9 +534,6 @@ class Booking(models.Model):
     price_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
     invoice = models.ForeignKey(BookingInvoice, blank=True, null=True)
-    invoice_office = models.ForeignKey(Office, blank=True, null=True)
-    invoice_format = models.CharField(
-        max_length=1, choices=INVOICE_FORMATS, default=INVOICE_FORMAT_DETAIL)
     is_package_price = models.BooleanField(default=False, verbose_name='Package Price')
     package_sgl_price_amount = models.DecimalField(
         max_digits=10, decimal_places=2, default=0.0, verbose_name='Price SGL')

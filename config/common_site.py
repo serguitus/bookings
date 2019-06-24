@@ -26,7 +26,7 @@ from config.forms import (
     AgencyAllotmentDetailInlineForm, AgencyTransferDetailInlineForm,
     AgencyExtraDetailInlineForm,
     AllotmentRoomTypeInlineForm, ExtraAddonInlineForm,
-    LocationTransferIntervalInlineForm
+    LocationTransferIntervalInlineForm, ServiceAddonInlineForm
 )
 from config.models import (
     Location, Place, TransferInterval, Schedule, RoomType, Addon,
@@ -38,7 +38,7 @@ from config.models import (
     AgencyExtraService, AgencyExtraDetail,
     ProviderAllotmentService, ProviderAllotmentDetail,
     ProviderTransferService, ProviderTransferDetail,
-    ProviderExtraService, ProviderExtraDetail,
+    ProviderExtraService, ProviderExtraDetail, ServiceAddon
 )
 from config.services import ConfigServices
 from config.top_filters import (
@@ -93,6 +93,14 @@ class LocationSiteModel(SiteModel):
     top_filters = ('name', 'enabled',)
     inlines = [LocationPlaceInline, LocationTransferIntervalInline, LocationScheduleInline]
     save_as = True
+
+
+class ServiceAddonInline(CommonTabularInline):
+    model = ServiceAddon
+    extra = 0
+    show_change_link = True
+
+    form = ServiceAddonInlineForm
 
 
 class RoomTypeSiteModel(SiteModel):
@@ -163,7 +171,7 @@ class AllotmentSiteModel(SiteModel):
     top_filters = ('name', ('location', LocationTopFilter), 'is_shared_point', 'enabled')
     ordering = ['enabled', 'name']
     inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline,
-               AllotmentSupplementInline]
+               ServiceAddonInline]
 
 
 class TransferSupplementInline(CommonTabularInline):
@@ -179,7 +187,7 @@ class TransferSiteModel(SiteModel):
     list_display = ('name', 'cost_type', 'max_capacity', 'is_shared', 'enabled',)
     top_filters = ('name', 'is_shared', 'enabled',)
     ordering = ['enabled', 'name']
-    inlines = [TransferSupplementInline]
+    inlines = [ServiceAddonInline]
 
 
 class ExtraAddonInline(CommonTabularInline):
@@ -215,7 +223,7 @@ class ExtraSiteModel(SiteModel):
                     'parameter_type', 'enabled',)
     top_filters = ('name',)
     ordering = ['enabled', 'name']
-    inlines = [ExtraAddonInline, ExtraSupplementInline]
+    inlines = [ExtraAddonInline, ServiceAddonInline]
 
 
 class ProviderAllotmentDetailInline(CommonStackedInline):
@@ -223,7 +231,7 @@ class ProviderAllotmentDetailInline(CommonStackedInline):
     extra = 0
     fields = (
         ('single_supplement', 'third_pax_discount'),
-        ('room_type', 'board_type'),
+        ('room_type', 'board_type', 'addon'),
         ('ad_1_amount', 'ch_1_ad_1_amount', 'ch_2_ad_1_amount',), # 'ch_3_ad_1_amount',),
         ('ad_2_amount', 'ch_1_ad_2_amount', 'ch_2_ad_2_amount',), # 'ch_3_ad_2_amount',),
         ('ad_3_amount', 'ch_1_ad_3_amount', 'ch_2_ad_3_amount',), # 'ch_3_ad_3_amount',),
@@ -266,7 +274,8 @@ class ProviderTransferDetailInline(CommonStackedInline):
     model = ProviderTransferDetail
     extra = 0
     fields = (
-        ('p_location_from', 'p_location_to', 'ad_1_amount'),
+        ('p_location_from', 'p_location_to', 'addon'),
+        'ad_1_amount',
     )
     ordering = ['p_location_from', 'p_location_to']
     form = ProviderTransferDetailInlineForm
@@ -342,7 +351,7 @@ class AgencyAllotmentDetailInline(CommonStackedInline):
     model = AgencyAllotmentDetail
     extra = 0
     fields = (
-        ('room_type', 'board_type',),
+        ('room_type', 'board_type', 'addon'),
         ('ad_1_amount', 'ch_1_ad_1_amount', 'ch_2_ad_1_amount', 'ch_3_ad_1_amount',),
         ('ad_2_amount', 'ch_1_ad_2_amount', 'ch_2_ad_2_amount', 'ch_3_ad_2_amount',),
         ('ad_3_amount', 'ch_1_ad_3_amount', 'ch_2_ad_3_amount', 'ch_3_ad_3_amount',),
@@ -372,7 +381,8 @@ class AgencyTransferDetailInline(CommonStackedInline):
     model = AgencyTransferDetail
     extra = 0
     fields = (
-        ('a_location_from', 'a_location_to', 'ad_1_amount'),
+        ('a_location_from', 'a_location_to', 'addon'),
+        'ad_1_amount'
     )
     ordering = ['a_location_from', 'a_location_to']
     form = AgencyTransferDetailInlineForm

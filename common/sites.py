@@ -736,11 +736,8 @@ class SiteModel(TotalsumAdmin):
                 'popup_response_data': popup_response_data,
             })
 
-        elif "_continue" in request.POST or (
-                # Redirecting after "Save as new".
-                "_saveasnew" in request.POST and self.save_as_continue and
-                self.has_change_permission(request, obj)
-        ):
+        elif "_continue" in request.POST:
+
             msg = format_html(
                 _('The {name} "{obj}" was added successfully. You may edit it again below.'),
                 **msg_dict
@@ -753,6 +750,11 @@ class SiteModel(TotalsumAdmin):
                 post_url_continue
             )
             return HttpResponseRedirect(post_url_continue)
+
+        elif ("_saveasnew" in request.POST and self.save_as_continue and
+                self.has_change_permission(request, obj)):
+            return self.response_add_saveasnew(
+                request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue)
 
         elif "_addanother" in request.POST:
             msg = format_html(
@@ -771,6 +773,21 @@ class SiteModel(TotalsumAdmin):
             )
             self.message_user(request, msg, messages.SUCCESS)
             return self.response_post_save_add(request, obj)
+
+    def response_add_saveasnew(
+            self, request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue=None):
+        msg = format_html(
+            _('The {name} "{obj}" was added successfully. You may edit it again below.'),
+            **msg_dict
+        )
+        self.message_user(request, msg, messages.SUCCESS)
+        if post_url_continue is None:
+            post_url_continue = obj_url
+        post_url_continue = common_add_preserved_filters(
+            {'preserved_filters': preserved_filters, 'opts': opts},
+            post_url_continue
+        )
+        return HttpResponseRedirect(post_url_continue)
 
     def response_change(self, request, obj):
         """
@@ -817,17 +834,8 @@ class SiteModel(TotalsumAdmin):
             return HttpResponseRedirect(redirect_url)
 
         elif "_saveasnew" in request.POST:
-            msg = format_html(
-                _('The {name} "{obj}" was added successfully. You may edit it again below.'),
-                **msg_dict
-            )
-            self.message_user(request, msg, messages.SUCCESS)
-            redirect_url = reverse(self.change_url_format() %
-                                   (opts.app_label, opts.model_name),
-                                   args=(pk_value,),
-                                   current_app=self.admin_site.name)
-            redirect_url = common_add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
-            return HttpResponseRedirect(redirect_url)
+            return self.response_change_saveasnew(
+                request, obj, msg_dict, opts, pk_value, preserved_filters, redirect_url)
 
         elif "_addanother" in request.POST:
             msg = format_html(
@@ -848,6 +856,20 @@ class SiteModel(TotalsumAdmin):
             )
             self.message_user(request, msg, messages.SUCCESS)
             return self.response_post_save_change(request, obj)
+
+    def response_change_saveasnew(
+            self, request, obj, msg_dict, opts, pk_value, preserved_filters, redirect_url):
+        msg = format_html(
+            _('The {name} "{obj}" was added successfully. You may edit it again below.'),
+            **msg_dict
+        )
+        self.message_user(request, msg, messages.SUCCESS)
+        redirect_url = reverse(self.change_url_format() %
+                                (opts.app_label, opts.model_name),
+                                args=(pk_value,),
+                                current_app=self.admin_site.name)
+        redirect_url = common_add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
+        return HttpResponseRedirect(redirect_url)
 
     def response_cancel(self, request, obj, add):
         """

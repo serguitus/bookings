@@ -484,20 +484,6 @@ def booking_list(request, instance):
     return render(request, 'booking/booking_list.html', context)
 
 
-def get_invoice(request, id):
-    template = get_template("booking/pdf/invoice.html")
-    booking = Booking.objects.get(id=id)
-    context = {'pagesize': 'Letter',
-               'booking': booking,}
-    html = template.render(context)
-    result = StringIO()
-    pdf = pisa.pisaDocument(StringIO(html), dest=result)
-    if not pdf.err:
-        return HttpResponse(result.getvalue(), content_type='application/pdf')
-    else:
-        return HttpResponse('Errors')
-
-
 def build_voucher(request, id):
     # TODO we can probably remove this method and the corresponding URL
     template = get_template("booking/pdf/voucher.html")
@@ -859,19 +845,21 @@ class BookingInvoiceView(View):
         if not booking.invoice:
             if not BookingServices.create_bookinginvoice(request.user, booking):
                 messages.add_message(request, messages.ERROR , "Failed Booking Invoice Creation")
+                return HttpResponseRedirect(reverse('common:booking_booking_change', args=[id]))
             messages.add_message(request, messages.SUCCESS , "Successful Booking Invoice Creation")
+        return HttpResponseRedirect(reverse('common:booking_bookinginvoice_change', args=[booking.invoice_id]))
+
+
+class BookingInvoicePDFView(View):
+    """
+    A view to handle the invoice PDF for a booking
+    """
+    def get(self, request, id, *args, **kwargs):
+        booking = Booking.objects.get(id=id)
+        if not booking.invoice:
+            messages.add_message(request, messages.ERROR , "Failed Booking Invoice PDF")
             return HttpResponseRedirect(reverse('common:booking_booking_change', args=[id]))
 
-        if booking.invoice:
-            pdf = self.build_pdf(booking)
-            if pdf:
-                return HttpResponse(pdf.getvalue(), content_type='application/pdf')
-            # there was an error. show an error message
-            messages.add_message(request, messages.ERROR, "Failed Invoice PDF Generation")
-
-        return HttpResponseRedirect(reverse('common:booking_booking_change', args=[id]))
-
-    def build_pdf(self, booking):
         invoice = booking.invoice
         template = get_template("booking/pdf/invoice.html")
         lines = BookingInvoiceLine.objects.filter(invoice=invoice)
@@ -886,15 +874,16 @@ class BookingInvoiceView(View):
         result = StringIO()
         pdf = pisa.pisaDocument(StringIO(html), dest=result)
         if pdf.err:
-            return False
-        return result
+            messages.add_message(request, messages.ERROR, "Failed Invoice PDF Generation")
+            return HttpResponseRedirect(reverse('common:booking_booking_change', args=[id]))
+        
+        return HttpResponse(result.getvalue(), content_type='application/pdf')
 
 
 class BookingInvoiceCancelView(View):
     """
     A view to handle the invoice cancellation for a booking
     """
-
     def get(self, request, id, *args, **kwargs):
         """
         This will cancel the booking invoice

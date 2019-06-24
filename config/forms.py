@@ -163,3 +163,10 @@ class ExtraAddonInlineForm(forms.ModelForm):
         widgets = {
             'addon': autocomplete.ModelSelect2(url='addon-autocomplete'),
         }
+
+class ServiceAddonInlineForm(forms.ModelForm):
+    class Meta:
+        fields = ('__all__')
+        widgets = {
+            'addon': autocomplete.ModelSelect2(url='addon-autocomplete'),
+        }
