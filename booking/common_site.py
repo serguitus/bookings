@@ -843,12 +843,12 @@ class BookingSiteModel(SiteModel):
 
     def response_change(self, request, obj):
         bookingservices = BookingServices.find_bookingservices_with_different_amounts(obj)
-        print bookingservices
         if bookingservices:
+            print reverse('bookingservice_update', args=[obj.id])
             # make a new GET request to show list of services to update
-            redirect(reverse('booking:bookingservice_update'),
-                     args=[obj.id],
-                     kwargs={'bookingservices': bookingservices})
+            return redirect(reverse('bookingservice_update',
+                                    args=[obj.id]),
+                            kwargs={'bookingservices': bookingservices})
             self.select_bookingservices_view(request, obj, bookingservices)
         else:
             super(BookingSiteModel, self).response_change(request, obj)

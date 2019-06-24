@@ -534,6 +534,8 @@ class BookingServiceUpdateView(View):
 
     def get(self, request, id, *args, **kwargs):
         context = dict()
+        if kwargs.get('bookingservices',False):
+            context.update({'bookingservices':kwargs['bookingservices']})
         context.update(bookings_site.get_site_extra_context(request))
         request.current_app = bookings_site.name
         return render(request, 'booking/bookingservice_update_config.html', context)
