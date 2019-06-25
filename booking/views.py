@@ -520,19 +520,26 @@ class BookingServiceUpdateView(View):
 
     def get(self, request, id, *args, **kwargs):
         context = dict()
-        if kwargs.get('bookingservices',False):
-            context.update({'bookingservices':kwargs['bookingservices']})
-        context.update(bookings_site.get_site_extra_context(request))
-        request.current_app = bookings_site.name
-        return render(request, 'booking/bookingservice_update_config.html', context)
+        bk = Booking.objects.get(pk=id)
+        services = BookingServices.find_bookingservices_with_different_amounts(bk)
+        if services:
+            context.update({'services': services})
+            context.update(bookings_site.get_site_extra_context(request))
+            request.current_app = bookings_site.name
+            return render(request,
+                          'booking/bookingservice_update_config.html', context)
+        return redirect(reverse('common:booking_booking_change', args=[id]))
 
-    def post(self, request, *args, **kwargs):
-        if 'service_selection' in request.POST:
-            selected_bookingservices = list()
-            BookingServices.update_bookingservices_amounts(
-                selected_bookingservices)
-            booking = selected_bookingservices[0].booking
-            super(BookingSiteModel, self).response_change(request, booking)
+    def post(self, request, id, *args, **kwargs):
+        services = request.POST.get(id, None)
+        print services
+        if not services:
+            messages.info(request, 'Booking Saved and no Service Updated')
+        return redirect(reverse('common:booking_booking_change', args=[id]))
+
+        BookingServices.update_bookingservices_amounts(
+            services)
+
 
 
 class EmailProviderView(View):

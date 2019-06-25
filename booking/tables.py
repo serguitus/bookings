@@ -187,8 +187,12 @@ class BookingPackageServiceTable(tables.Table):
 class BookingServiceUpdateTable(tables.Table):
     class Meta:
         model = BookingService
+        # fields update_cost_amount and update_price_amount are lazy
+        # they contain computed values that will be saved upon save action
         template_name = 'booking/bookingservice_list.html'
         fields = ['pk', 'name', 'datetime_from', 'datetime_to',
+                  'cost_amount', 'update_cost_amount',
+                  'price_amount', 'update_price_amount',
                   'status', 'conf_number', 'provider']
     pk = tables.CheckBoxColumn(accessor='pk',
                                attrs={
@@ -199,7 +203,12 @@ class BookingServiceUpdateTable(tables.Table):
                                })
 
     def __init__(self, *args, **kwargs):
-        # self.base_columns['service_type'].verbose_name='Request emails'
+        self.base_columns['update_cost_amount'].verbose_name = 'New Cost'
+        self.base_columns['update_price_amount'].verbose_name = 'New Price'
+        self.base_columns['cost_amount'].verbose_name = 'Saved Cost'
+        self.base_columns['price_amount'].verbose_name = 'Saved Price'
+        self.base_columns['datetime_from'].verbose_name = 'From'
+        self.base_columns['datetime_to'].verbose_name = 'To'
         super(BookingServiceUpdateTable, self).__init__(*args, **kwargs)
 
     def render_name(self, value, record):

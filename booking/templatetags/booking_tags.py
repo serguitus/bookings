@@ -70,9 +70,9 @@ def vouchers_table(booking):
 
 
 @register.simple_tag
-def bookingservice_update_table(booking):
+def bookingservice_update_table(services):
     table = BookingServiceUpdateTable(
-        booking.booking_services.all(),
+        services,
         order_by=('datetime_from', 'datetime_to'))
     return table
 
