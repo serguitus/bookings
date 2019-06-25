@@ -151,11 +151,11 @@ class PackageSiteModel(SiteModel):
     menu_label = MENU_LABEL_PACKAGE
     fields = (
         ('name', 'enabled'), 
-        ('amounts_type', 'has_pax_range'),
+        ('amounts_type', 'pax_range', 'has_pax_range'),
     )
-    list_display = ('name', 'amounts_type', 'has_pax_range', 'enabled')
+    list_display = ('name', 'amounts_type', 'pax_range', 'has_pax_range', 'enabled')
     list_editable = ('enabled',)
-    top_filters = ('name', 'amounts_type', 'has_pax_range', 'enabled')
+    top_filters = ('name', 'amounts_type', 'pax_range', 'has_pax_range', 'enabled')
     ordering = ('enabled', 'name',)
     details_template = 'booking/package_details.html'
     inlines = [
@@ -434,10 +434,9 @@ class QuoteSiteModel(SiteModel):
 
     def response_add_saveasnew(
             self, request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue=None):
-
         BookingServices.copy_quote_services(request, obj)
         
-        super(QuoteSiteModel, self).response_add_saveasnew(
+        return super(QuoteSiteModel, self).response_add_saveasnew(
             request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue)
 
 class QuoteServiceSiteModel(SiteModel):

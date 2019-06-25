@@ -70,6 +70,8 @@ class ConfigServices(object):
                         room_type_id=detail.room_type_id,
                         board_type=detail.board_type,
                         service_addon_id=detail.service_addon_id,
+                        pax_range_min=detail.pax_range_min,
+                        pax_range_max=detail.pax_range_max,
                         defaults=cls.calculate_default_amounts(
                             detail, src_agency.gain_percent, dst_agency.gain_percent)
                     )
@@ -80,6 +82,8 @@ class ConfigServices(object):
                         room_type_id=detail.room_type_id,
                         board_type=detail.board_type,
                         service_addon_id=detail.service_addon_id,
+                        pax_range_min=detail.pax_range_min,
+                        pax_range_max=detail.pax_range_max,
                         defaults=cls.calculate_default_amounts(
                             detail, src_agency.gain_percent, dst_agency.gain_percent)
                     )
@@ -109,6 +113,8 @@ class ConfigServices(object):
                         a_location_from_id=detail.a_location_from_id,
                         a_location_to_id=detail.a_location_to_id,
                         service_addon_id=detail.service_addon_id,
+                        pax_range_min=detail.pax_range_min,
+                        pax_range_max=detail.pax_range_max,
                         defaults=cls.calculate_default_amounts(
                             detail, src_agency.gain_percent, dst_agency.gain_percent)
                     )
@@ -119,6 +125,8 @@ class ConfigServices(object):
                         a_location_from_id=detail.a_location_from_id,
                         a_location_to_id=detail.a_location_to_id,
                         service_addon_id=detail.service_addon_id,
+                        pax_range_min=detail.pax_range_min,
+                        pax_range_max=detail.pax_range_max,
                         defaults=cls.calculate_default_amounts(
                             detail, src_agency.gain_percent, dst_agency.gain_percent)
                     )
@@ -210,6 +218,8 @@ class ConfigServices(object):
                         room_type=detail.room_type,
                         board_type=detail.board_type,
                         service_addon_id=detail.service_addon_id,
+                        pax_range_min=detail.pax_range_min,
+                        pax_range_max=detail.pax_range_max,
                         # from provider src gain is 0
                         defaults=cls.calculate_default_amounts(detail, 0, gain_percent)
                     )
@@ -400,27 +410,74 @@ class ConfigServices(object):
             cost = None
             cost_message = 'Provider Not Found'
         else:
-            queryset = cls._get_provider_queryset(
-                ProviderAllotmentDetail.objects,
-                provider.id, service_id, date_from, date_to)
-            # addon filtering
-            if addon_id:
-                queryset = queryset.filter(addon_id=addon_id)
-            else:
-                queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
-            detail_list = list(
-                queryset.filter(
-                    board_type=board_type
-                ).filter(
-                    room_type_id=room_type_id
-                )
-            )
             service = Allotment.objects.get(pk=service_id)
 
-            cost, cost_message = cls.find_groups_amount(
-                True, service, date_from, date_to, cost_groups,
-                quantity, None, detail_list
-            )
+            if service.pax_range:
+                cost = 0
+                cost_message = ''
+                # each group can have different details
+                for group in cost_groups:
+                    paxes = group[0] + group[1]
+                    if paxes == 0:
+                        continue
+                    queryset = cls._get_provider_queryset(
+                        ProviderAllotmentDetail.objects,
+                        provider.id, service_id, date_from, date_to)
+                    # pax range filtering
+                    queryset = queryset.filter(
+                        (Q(pax_range_min=0) & Q(pax_range_max__gte=paxes)) |
+                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__gte=paxes)) |
+                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max=0)) |
+                        (Q(pax_range_min=0) & Q(pax_range_max=0))
+                    )
+                    # addon filtering
+                    if addon_id:
+                        queryset = queryset.filter(addon_id=addon_id)
+                    else:
+                        queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
+
+                    detail_list = list(
+                        queryset.filter(
+                            board_type=board_type
+                        ).filter(
+                            room_type_id=room_type_id
+                        )
+                    )
+                    if not detail_list:
+                        return None, "Cost Not Found"
+                    group_cost, group_cost_message = cls.find_group_amount(
+                        True, service, date_from, date_to, group,
+                        quantity, None, detail_list
+                    )
+                    if group_cost:
+                        cost += group_cost
+                        cost_message = group_cost_message
+                    else:
+                        cost = None
+                        cost_message = group_cost_message
+                        break
+            else:
+                queryset = cls._get_provider_queryset(
+                    ProviderAllotmentDetail.objects,
+                    provider.id, service_id, date_from, date_to)
+                # addon filtering
+                if addon_id:
+                    queryset = queryset.filter(addon_id=addon_id)
+                else:
+                    queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
+                detail_list = list(
+                    queryset.filter(
+                        board_type=board_type
+                    ).filter(
+                        room_type_id=room_type_id
+                    )
+                )
+                if not detail_list:
+                    return None, "Cost Not Found"
+                cost, cost_message = cls.find_groups_amount(
+                    True, service, date_from, date_to, cost_groups,
+                    quantity, None, detail_list
+                )
         return cost, cost_message
 
 
@@ -446,27 +503,74 @@ class ConfigServices(object):
             price = None
             price_message = 'Agency Not Found'
         else:
-            queryset = cls._get_agency_queryset(
-                AgencyAllotmentDetail.objects,
-                agency.id, service_id, date_from, date_to)
-            # addon filtering
-            if addon_id:
-                queryset = queryset.filter(addon_id=addon_id)
-            else:
-                queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
-            detail_list = list(
-                queryset.filter(
-                    board_type=board_type
-                ).filter(
-                    room_type_id=room_type_id
-                )
-            )
             service = Allotment.objects.get(pk=service_id)
 
-            price, price_message = cls.find_groups_amount(
-                False, service, date_from, date_to, price_groups,
-                quantity, None, detail_list
-            )
+            if service.pax_range:
+                price = 0
+                price_message = ''
+                # each group can have different details
+                for group in price_groups:
+                    paxes = group[0] + group[1]
+                    if paxes == 0:
+                        continue
+                    queryset = cls._get_agency_queryset(
+                        AgencyAllotmentDetail.objects,
+                        agency.id, service_id, date_from, date_to)
+                    # pax range filtering
+                    queryset = queryset.filter(
+                        (Q(pax_range_min=0) & Q(pax_range_max__gte=paxes)) |
+                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__gte=paxes)) |
+                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max=0)) |
+                        (Q(pax_range_min=0) & Q(pax_range_max=0))
+                    )
+                    # addon filtering
+                    if addon_id:
+                        queryset = queryset.filter(addon_id=addon_id)
+                    else:
+                        queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
+
+                    detail_list = list(
+                        queryset.filter(
+                            board_type=board_type
+                        ).filter(
+                            room_type_id=room_type_id
+                        )
+                    )
+                    if not detail_list:
+                        return None, "Price Not Found"
+                    group_price, group_price_message = cls.find_group_amount(
+                        False, service, date_from, date_to, group,
+                        quantity, None, detail_list
+                    )
+                    if group_price:
+                        price += group_price
+                        price_message = group_price_message
+                    else:
+                        price = None
+                        price_message = group_price_message
+                        break
+            else:
+                queryset = cls._get_agency_queryset(
+                    AgencyAllotmentDetail.objects,
+                    agency.id, service_id, date_from, date_to)
+                # addon filtering
+                if addon_id:
+                    queryset = queryset.filter(addon_id=addon_id)
+                else:
+                    queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
+                detail_list = list(
+                    queryset.filter(
+                        board_type=board_type
+                    ).filter(
+                        room_type_id=room_type_id
+                    )
+                )
+                if not detail_list:
+                    return None, "Price Not Found"
+                price, price_message = cls.find_groups_amount(
+                    False, service, date_from, date_to, price_groups,
+                    quantity, None, detail_list
+                )
         return price, price_message
 
 
@@ -513,10 +617,10 @@ class ConfigServices(object):
         if date_to is None:
             date_to = date_from
 
-        service = Transfer.objects.get(pk=service_id)
-
         # provider cost
         # obtain details order by date_from asc, date_to desc
+        service = Transfer.objects.get(pk=service_id)
+
         if (cost_groups is None or not cost_groups) and service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
             cost = None
             cost_message = 'Paxes Missing'
@@ -524,32 +628,89 @@ class ConfigServices(object):
             cost = None
             cost_message = 'Provider Not Found'
         else:
-            queryset = cls._get_provider_queryset(
-                ProviderTransferDetail.objects,
-                provider.id, service_id, date_from, date_to)
-            # addon filtering
-            if addon_id:
-                queryset = queryset.filter(addon_id=addon_id)
+            if service.pax_range:
+                cost = 0
+                cost_message = ''
+                # each group can have different details
+                for group in cost_groups:
+                    paxes = group[0] + group[1]
+                    if paxes == 0:
+                        continue
+                    queryset = cls._get_provider_queryset(
+                        ProviderTransferDetail.objects,
+                        provider.id, service_id, date_from, date_to)
+                    # pax range filtering
+                    queryset = queryset.filter(
+                        (Q(pax_range_min=0) & Q(pax_range_max__gte=paxes)) |
+                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__gte=paxes)) |
+                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max=0)) |
+                        (Q(pax_range_min=0) & Q(pax_range_max=0))
+                    )
+                    # addon filtering
+                    if addon_id:
+                        queryset = queryset.filter(addon_id=addon_id)
+                    else:
+                        queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
+
+                    detail_list = list(
+                        queryset.filter(
+                            p_location_from_id=location_from_id,
+                            p_location_to_id=location_to_id))
+                    group_cost = None
+                    if detail_list:
+                        group_cost, group_cost_message = cls.find_groups_amount(
+                            True, service, date_from, date_to, cost_groups,
+                            quantity, None, detail_list
+                        )
+                    if group_cost is None:
+                        detail_list = list(
+                            queryset.filter(
+                                p_location_to_id=location_from_id,
+                                p_location_from_id=location_to_id))
+                        if not detail_list:
+                            return None, "Cost Not Found"
+                        group_cost, group_cost_message = cls.find_groups_amount(
+                            True, service, date_from, date_to, cost_groups,
+                            quantity, None, detail_list
+                        )
+
+                    if group_cost:
+                        cost += group_cost
+                        cost_message = group_cost_message
+                    else:
+                        cost = None
+                        cost_message = group_cost_message
+                        break
             else:
-                queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
-            detail_list = list(
-                queryset.filter(
-                    p_location_from_id=location_from_id,
-                    p_location_to_id=location_to_id))
-            cost, cost_message = cls.find_groups_amount(
-                True, service, date_from, date_to, cost_groups,
-                quantity, None, detail_list
-            )
-            if cost is None:
+                queryset = cls._get_provider_queryset(
+                    ProviderTransferDetail.objects,
+                    provider.id, service_id, date_from, date_to)
+                # addon filtering
+                if addon_id:
+                    queryset = queryset.filter(addon_id=addon_id)
+                else:
+                    queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
                 detail_list = list(
                     queryset.filter(
-                        p_location_to_id=location_from_id,
-                        p_location_from_id=location_to_id))
-                # addon filtering
-                cost, cost_message = cls.find_groups_amount(
-                    True, service, date_from, date_to, cost_groups,
-                    quantity, None, detail_list
-                )
+                        p_location_from_id=location_from_id,
+                        p_location_to_id=location_to_id))
+                cost = None
+                if detail_list:
+                    cost, cost_message = cls.find_groups_amount(
+                        True, service, date_from, date_to, cost_groups,
+                        quantity, None, detail_list
+                    )
+                if cost is None:
+                    detail_list = list(
+                        queryset.filter(
+                            p_location_to_id=location_from_id,
+                            p_location_from_id=location_to_id))
+                    if not detail_list:
+                        return None, "Cost Not Found"
+                    cost, cost_message = cls.find_groups_amount(
+                        True, service, date_from, date_to, cost_groups,
+                        quantity, None, detail_list
+                    )
         return cost, cost_message
 
 
@@ -568,10 +729,10 @@ class ConfigServices(object):
         if date_to is None:
             date_to = date_from
 
-        service = Transfer.objects.get(pk=service_id)
-
         # agency price
         # obtain details order by date_from asc, date_to desc
+        service = Transfer.objects.get(pk=service_id)
+
         if (price_groups is None or not price_groups) and service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
             price = None
             price_message = 'Paxes Missing'
@@ -579,31 +740,89 @@ class ConfigServices(object):
             price = None
             price_message = 'Agency Not Found'
         else:
-            queryset = cls._get_agency_queryset(
-                AgencyTransferDetail.objects,
-                agency.id, service_id, date_from, date_to)
-            # addon filtering
-            if addon_id:
-                queryset = queryset.filter(addon_id=addon_id)
+            if service.pax_range:
+                price = 0
+                price_message = ''
+                # each group can have different details
+                for group in price_groups:
+                    paxes = group[0] + group[1]
+                    if paxes == 0:
+                        continue
+                    queryset = cls._get_agency_queryset(
+                        AgencyTransferDetail.objects,
+                        agency.id, service_id, date_from, date_to)
+                    # pax range filtering
+                    queryset = queryset.filter(
+                        (Q(pax_range_min=0) & Q(pax_range_max__gte=paxes)) |
+                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__gte=paxes)) |
+                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max=0)) |
+                        (Q(pax_range_min=0) & Q(pax_range_max=0))
+                    )
+                    # addon filtering
+                    if addon_id:
+                        queryset = queryset.filter(addon_id=addon_id)
+                    else:
+                        queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
+
+                    detail_list = list(
+                        queryset.filter(
+                            a_location_from_id=location_from_id,
+                            a_location_to_id=location_to_id))
+                    group_price = None
+                    if detail_list:
+                        group_price, group_price_message = cls.find_groups_amount(
+                            False, service, date_from, date_to, price_groups,
+                            quantity, None, detail_list
+                        )
+                    if group_price is None:
+                        detail_list = list(
+                            queryset.filter(
+                                a_location_to_id=location_from_id,
+                                a_location_from_id=location_to_id))
+                        if not detail_list:
+                            return None, "Price Not Found"
+                        group_price, group_price_message = cls.find_groups_amount(
+                            False, service, date_from, date_to, price_groups,
+                            quantity, None, detail_list
+                        )
+
+                    if group_price:
+                        price += group_price
+                        price_message = group_price_message
+                    else:
+                        price = None
+                        price_message = group_price_message
+                        break
             else:
-                queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
-            detail_list = list(
-                queryset.filter(
-                    a_location_from_id=location_from_id,
-                    a_location_to_id=location_to_id))
-            price, price_message = cls.find_groups_amount(
-                False, service, date_from, date_to, price_groups,
-                quantity, None, detail_list
-            )
-            if price is None:
+                queryset = cls._get_agency_queryset(
+                    AgencyTransferDetail.objects,
+                    agency.id, service_id, date_from, date_to)
+                # addon filtering
+                if addon_id:
+                    queryset = queryset.filter(addon_id=addon_id)
+                else:
+                    queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
                 detail_list = list(
                     queryset.filter(
-                        a_location_to_id=location_from_id,
-                        a_location_from_id=location_to_id))
-                price, price_message = cls.find_groups_amount(
-                    False, service, date_from, date_to, price_groups,
-                    quantity, None, detail_list
-                )
+                        a_location_from_id=location_from_id,
+                        a_location_to_id=location_to_id))
+                price = None
+                if detail_list:
+                    price, price_message = cls.find_groups_amount(
+                        False, service, date_from, date_to, price_groups,
+                        quantity, None, detail_list
+                    )
+                if price is None:
+                    detail_list = list(
+                        queryset.filter(
+                            a_location_to_id=location_from_id,
+                            a_location_from_id=location_to_id))
+                    if not detail_list:
+                        return None, "Price Not Found"
+                    price, price_message = cls.find_groups_amount(
+                        False, service, date_from, date_to, price_groups,
+                        quantity, None, detail_list
+                    )
 
         return price, price_message
 
@@ -679,9 +898,10 @@ class ConfigServices(object):
                         provider.id, service_id, date_from, date_to)
                     # pax range filtering
                     queryset = queryset.filter(
-                        (Q(pax_range_min__isnull=True) & Q(pax_range_max__gte=paxes)) |
+                        (Q(pax_range_min=0) & Q(pax_range_max__gte=paxes)) |
                         (Q(pax_range_min__lte=paxes) & Q(pax_range_max__gte=paxes)) |
-                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__isnull=True))
+                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max=0)) |
+                        (Q(pax_range_min=0) & Q(pax_range_max=0))
                     )
                     # addon filtering
                     if addon_id:
@@ -690,7 +910,8 @@ class ConfigServices(object):
                         queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
 
                     detail_list = list(queryset)
-
+                    if not detail_list:
+                        return None, "Cost Not Found"
                     group_cost, group_cost_message = cls.find_group_amount(
                         True, service, date_from, date_to, group,
                         quantity, parameter, detail_list
@@ -713,7 +934,8 @@ class ConfigServices(object):
                     queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
 
                 detail_list = list(queryset)
-
+                if not detail_list:
+                    return None, "Cost Not Found"
                 cost, cost_message = cls.find_groups_amount(
                     True, service, date_from, date_to, cost_groups,
                     quantity, parameter, detail_list
@@ -760,9 +982,10 @@ class ConfigServices(object):
                         agency.id, service_id, date_from, date_to)
                     # pax range filtering
                     queryset = queryset.filter(
-                        (Q(pax_range_min__isnull=True) & Q(pax_range_max__gte=paxes)) |
+                        (Q(pax_range_min=0) & Q(pax_range_max__gte=paxes)) |
                         (Q(pax_range_min__lte=paxes) & Q(pax_range_max__gte=paxes)) |
-                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__isnull=True))
+                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max=0)) |
+                        (Q(pax_range_min=0) & Q(pax_range_max=0))
                     )
                     # addon filtering
                     if addon_id:
@@ -771,6 +994,8 @@ class ConfigServices(object):
                         queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
 
                     detail_list = list(queryset)
+                    if not detail_list:
+                        return None, "Price Not Found"
                     group_price, group_price_message = cls.find_group_amount(
                         False, service, date_from, date_to, group,
                         quantity, parameter, detail_list
@@ -793,7 +1018,8 @@ class ConfigServices(object):
                     queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
 
                 detail_list = list(queryset)
-
+                if not detail_list:
+                    return None, "Price Not Found"
                 price, price_message = cls.find_groups_amount(
                     False, service, date_from, date_to, price_groups,
                     quantity, parameter, detail_list

@@ -75,6 +75,7 @@ def post_save_quoteextra(sender, instance, **kwargs):
 @receiver(post_save, sender=QuotePackage)
 def post_save_quotepackage(sender, instance, **kwargs):
     with transaction.atomic(savepoint=False):
+        BookingServices.update_quoteservice_paxvariants_amounts(instance)
         BookingServices.sync_quotepackage_services(instance)
         BookingServices.update_quote(instance)
 

@@ -121,6 +121,7 @@ class Service(models.Model):
     name = models.CharField(max_length=150)
     category = models.CharField(max_length=5, choices=SERVICE_CATEGORIES)
     grouping = models.BooleanField(default=False)
+    pax_range = models.BooleanField(default=False)
     child_age = models.IntegerField(blank=True, null=True)
     infant_age = models.IntegerField(default=2, blank=True, null=True)
     enabled = models.BooleanField(default=True)
@@ -440,11 +441,15 @@ class ProviderAllotmentDetail(AmountDetail):
     class Meta:
         verbose_name = 'Accomodation Provider Detail'
         verbose_name_plural = 'Accomodation Provider Details'
-        unique_together = (('provider_service', 'room_type', 'board_type', 'addon'),)
+        unique_together = (
+            ('provider_service', 'room_type', 'board_type', 'addon',
+            'pax_range_min', 'pax_range_max'),)
     provider_service = models.ForeignKey(ProviderAllotmentService)
     room_type = models.ForeignKey(RoomType)
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
     addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
+    pax_range_min = models.SmallIntegerField(default=0)
+    pax_range_max = models.SmallIntegerField(default=0)
 
 
 class AgencyAllotmentService(AgencyCatalogue):
@@ -468,11 +473,15 @@ class AgencyAllotmentDetail(AmountDetail):
     class Meta:
         verbose_name = 'Accomodation Agency Detail'
         verbose_name_plural = 'Accomodation Agency Details'
-        unique_together = (('agency_service', 'room_type', 'board_type', 'addon'),)
+        unique_together = (
+            ('agency_service', 'room_type', 'board_type', 'addon',
+            'pax_range_min', 'pax_range_max'),)
     agency_service = models.ForeignKey(AgencyAllotmentService)
     room_type = models.ForeignKey(RoomType)
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
     addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
+    pax_range_min = models.SmallIntegerField(default=0)
+    pax_range_max = models.SmallIntegerField(default=0)
 
 
 class AllotmentRoomAvailability(models.Model):
@@ -538,13 +547,17 @@ class ProviderTransferDetail(AmountDetail):
     class Meta:
         verbose_name = 'Transfer Provider Detail'
         verbose_name_plural = 'Transfer Provider Details'
-        unique_together = ('provider_service', 'p_location_from', 'p_location_to', 'addon')
+        unique_together = (
+            ('provider_service', 'p_location_from', 'p_location_to', 'addon',
+            'pax_range_min', 'pax_range_max'),)
     provider_service = models.ForeignKey(ProviderTransferService)
     p_location_from = models.ForeignKey(
         Location, related_name='p_location_from', verbose_name='Location from')
     p_location_to = models.ForeignKey(
         Location, related_name='p_location_to', verbose_name='Location to')
     addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
+    pax_range_min = models.SmallIntegerField(default=0)
+    pax_range_max = models.SmallIntegerField(default=0)
 
 
 class AgencyTransferService(AgencyCatalogue):
@@ -568,10 +581,14 @@ class AgencyTransferDetail(AmountDetail):
     class Meta:
         verbose_name = 'Transfer Agency Detail'
         verbose_name_plural = 'Transfer Agency Details'
-        unique_together = (('agency_service', 'a_location_from', 'a_location_to', 'addon'),)
+        unique_together = (
+            ('agency_service', 'a_location_from', 'a_location_to', 'addon',
+            'pax_range_min', 'pax_range_max'),)
     agency_service = models.ForeignKey(AgencyTransferService)
     a_location_from = models.ForeignKey(
         Location, related_name='a_location_from', verbose_name='Location from')
     a_location_to = models.ForeignKey(
         Location, related_name='a_location_to', verbose_name='Location to')
     addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
+    pax_range_min = models.SmallIntegerField(default=0)
+    pax_range_max = models.SmallIntegerField(default=0)

@@ -165,7 +165,7 @@ class AllotmentSiteModel(SiteModel):
     fields = (('name', 'location', 'is_shared_point'),
               ('phone', 'address'),
               ('time_from', 'time_to'),
-              'enabled',
+              ('pax_range', 'enabled'),
               ('child_age', 'infant_age'))
     list_display = ('name', 'phone', 'location', 'is_shared_point', 'enabled',)
     top_filters = ('name', ('location', LocationTopFilter), 'is_shared_point', 'enabled')
@@ -183,7 +183,7 @@ class TransferSiteModel(SiteModel):
     model_order = 6120
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
-    fields = ('name', 'cost_type', 'max_capacity', 'is_shared','enabled',)
+    fields = ('name', 'cost_type', 'max_capacity', 'is_shared', 'pax_range', 'enabled',)
     list_display = ('name', 'cost_type', 'max_capacity', 'is_shared', 'enabled',)
     top_filters = ('name', 'is_shared', 'enabled',)
     ordering = ['enabled', 'name']
@@ -218,7 +218,7 @@ class ExtraSiteModel(SiteModel):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
     fields = ('name', 'location', 'cost_type', 'parameter_type',
-              'has_pax_range', 'enabled',)
+              'pax_range', 'has_pax_range', 'enabled',)
     list_display = ('name', 'location', 'cost_type',
                     'parameter_type', 'enabled',)
     top_filters = ('name',)
@@ -232,6 +232,7 @@ class ProviderAllotmentDetailInline(CommonStackedInline):
     fields = (
         ('single_supplement', 'third_pax_discount'),
         ('room_type', 'board_type', 'addon'),
+        ('pax_range_min', 'pax_range_max'),
         ('ad_1_amount', 'ch_1_ad_1_amount', 'ch_2_ad_1_amount',), # 'ch_3_ad_1_amount',),
         ('ad_2_amount', 'ch_1_ad_2_amount', 'ch_2_ad_2_amount',), # 'ch_3_ad_2_amount',),
         ('ad_3_amount', 'ch_1_ad_3_amount', 'ch_2_ad_3_amount',), # 'ch_3_ad_3_amount',),
@@ -275,6 +276,7 @@ class ProviderTransferDetailInline(CommonStackedInline):
     extra = 0
     fields = (
         ('p_location_from', 'p_location_to', 'addon'),
+        ('pax_range_min', 'pax_range_max'),
         'ad_1_amount',
     )
     ordering = ['p_location_from', 'p_location_to']
@@ -314,7 +316,8 @@ class ProviderExtraDetailInline(CommonStackedInline):
     model = ProviderExtraDetail
     extra = 0
     fields = (
-        ('addon', 'ad_1_amount'), ('pax_range_min', 'pax_range_max'))
+        ('pax_range_min', 'pax_range_max'),
+        ('addon','ad_1_amount'))
     ordering = ['addon']
     form = ProviderExtraDetailInlineForm
 
@@ -352,6 +355,7 @@ class AgencyAllotmentDetailInline(CommonStackedInline):
     extra = 0
     fields = (
         ('room_type', 'board_type', 'addon'),
+        ('pax_range_min', 'pax_range_max'),
         ('ad_1_amount', 'ch_1_ad_1_amount', 'ch_2_ad_1_amount', 'ch_3_ad_1_amount',),
         ('ad_2_amount', 'ch_1_ad_2_amount', 'ch_2_ad_2_amount', 'ch_3_ad_2_amount',),
         ('ad_3_amount', 'ch_1_ad_3_amount', 'ch_2_ad_3_amount', 'ch_3_ad_3_amount',),
@@ -382,6 +386,7 @@ class AgencyTransferDetailInline(CommonStackedInline):
     extra = 0
     fields = (
         ('a_location_from', 'a_location_to', 'addon'),
+        ('pax_range_min', 'pax_range_max'),
         'ad_1_amount'
     )
     ordering = ['a_location_from', 'a_location_to']
@@ -409,7 +414,8 @@ class AgencyExtraDetailInline(CommonStackedInline):
     model = AgencyExtraDetail
     extra = 0
     fields = (
-        ('addon', 'ad_1_amount'), ('pax_range_min', 'pax_range_max'),)
+        ('pax_range_min', 'pax_range_max'),
+        ('addon', 'ad_1_amount'), )
     ordering = ['addon']
     form = AgencyExtraDetailInlineForm
 

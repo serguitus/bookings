@@ -769,8 +769,8 @@ class BookingServices(object):
                     c2, c2_msg, p2, p2_msg, \
                     c3, c3_msg, p3, p3_msg = cls._find_quotepackage_amounts(
                         quote_pax_variant=pax_variant.quote_pax_variant,
-                        package=quotepackage,
-                        agency=quotepackage.quote.agency,
+                        package=quoteservice,
+                        agency=quoteservice.quote.agency,
                         service_pax_variant=pax_variant,
                         manuals=True)
                 else:
@@ -843,9 +843,10 @@ class BookingServices(object):
                         agency.id, service_id, date_from, date_to)
                     # pax range filtering
                     queryset = queryset.filter(
-                        (Q(pax_range_min__isnull=True) & Q(pax_range_max__gte=paxes)) |
+                        (Q(pax_range_min=0) & Q(pax_range_max__gte=paxes)) |
                         (Q(pax_range_min__lte=paxes) & Q(pax_range_max__gte=paxes)) |
-                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__isnull=True))
+                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max=0)) |
+                        (Q(pax_range_min=0) & Q(pax_range_max=0))
                     )
                     detail_list = list(queryset)
                     group_price, group_price_message = cls._find_package_group_price(
@@ -2405,6 +2406,8 @@ class BookingServices(object):
 
     @classmethod
     def sync_quotepackage_paxvariants(cls, quotepackage):
+        cls.sync_quote_paxvariants(quotepackage.quote)
+
         quotepackage_services = list(QuotePackageService.objects.all().filter(
             quote_package=quotepackage.id))
         quotepackage_paxvariants = list(QuoteServicePaxVariant.objects.all().filter(
@@ -4211,17 +4214,32 @@ class BookingServices(object):
                 quote=db_quote))
             for allotment in allotments:
                 allotment.pk = None
+                allotment.id = None
                 allotment.quote = new_quote
+                allotment.quote_id = new_quote.pk
                 allotment.save()
             transfers = list(QuoteTransfer.objects.filter(
                 quote=db_quote))
             for transfer in transfers:
                 transfer.pk = None
+                transfer.id = None
                 transfer.quote = new_quote
+                transfer.quote_id = new_quote.pk
                 transfer.save()
             extras = list(QuoteExtra.objects.filter(
                 quote=db_quote))
             for extra in extras:
                 extra.pk = None
+                extra.id = None
                 extra.quote = new_quote
+                extra.quote_id = new_quote.pk
                 extra.save()
+            packages = list(QuotePackage.objects.filter(
+                quote=db_quote))
+            for package in packages:
+                package.pk = None
+                package.id = None
+                package.quote = new_quote
+                package.quote_id = new_quote.pk
+                package.save()
+            new_quote.refresh_from_db()
