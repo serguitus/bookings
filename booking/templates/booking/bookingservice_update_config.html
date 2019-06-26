@@ -1,0 +1,22 @@
+{% extends "common/base_site.html" %}
+{% load booking_tags static %}
+{% load render_table from django_tables2 %}
+{% block head_extra %}
+    <script src="{% static 'admin/js/jquery.init.js' %}"></script>
+    <script type="text/javascript" src="/admin/jsi18n/"></script>
+    <script src="{% static 'admin/js/actions.js' %}"></script>
+{% endblock head_extra %}
+{% block content %}
+    <h1>This services might be updated according to catalogs.
+        Select services to update numbers</h1>
+  <form method="post" novalidate>{% csrf_token %}
+      {% bookingservice_update_table services as table %}
+      <div class="bookingservice-update-list-container">
+          {% render_table table %}
+      </div>
+      {{ form }}
+    <div class="submitbtn bookingservice-update-submit">  
+        <button class="btn btn-primary" id="btn-build" type="submit">Update</button>
+    </div>
+  </form>
+{% endblock content %}

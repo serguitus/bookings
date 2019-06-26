@@ -844,14 +844,18 @@ class BookingSiteModel(SiteModel):
         pdf = pisa.pisaDocument(StringIO(html), dest=result,
                                 link_callback=self._fetch_resources)
         if not pdf.err:
-            return HttpResponse(result.getvalue(), content_type='application/pdf')
+            return HttpResponse(result.getvalue(),
+                                content_type='application/pdf')
         else:
             return HttpResponse('Errors')
 
     def response_change(self, request, obj):
-        bookingservices = BookingServices.find_bookingservices_with_different_amounts(obj)
+        bookingservices = BookingServices. \
+                          find_bookingservices_with_different_amounts(obj)
         if bookingservices:
             # make a new GET request to show list of services to update
+            return redirect(reverse('bookingservice_update',
+                                    args=[obj.id]))
             self.select_bookingservices_view(request, obj, bookingservices)
         else:
             super(BookingSiteModel, self).response_change(request, obj)

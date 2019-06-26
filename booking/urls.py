@@ -31,4 +31,6 @@ urlpatterns = [
     url(r'^invoice/(?P<id>\d+)/?', views.BookingInvoiceView.as_view(), name='booking_invoice'),
     url(r'^invoice/pdf/(?P<id>\d+)/?', views.BookingInvoicePDFView.as_view(), name='booking_invoice_pdf'),
     url(r'^invoice/cancel/(?P<id>\d+)/?', views.BookingInvoiceCancelView.as_view(), name='booking_invoice_cancel'),
+
+    url(r'^updateservices/(?P<id>\d+)/?', views.BookingServiceUpdateView.as_view(), name='bookingservice_update'),
 ]
