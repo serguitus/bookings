@@ -417,6 +417,9 @@ class BookingServices(object):
         else:
             return
 
+        if hasattr(quote_or_service, "avoid_sync_paxvariants"):
+            quote.avoid_sync_paxvariants = True
+
         date_from = None
         date_to = None
         for service in quote.quote_services.all():
@@ -440,6 +443,8 @@ class BookingServices(object):
 
     @classmethod
     def sync_quotepackage_services(cls, quote_package):
+        if hasattr(quote_package, "avoid_sync_services"):
+            return
 
         services = list(
             QuotePackageService.objects.filter(quote_package_id=quote_package.id).all())
@@ -1400,9 +1405,12 @@ class BookingServices(object):
                         quoteservice_paxvariant = QuoteServicePaxVariant.objects.get(
                             quote_pax_variant=service_pax_variant.quote_pax_variant_id,
                             quote_service=allotment.quote_package_id)
-                        packageservice_paxvariant = QuotePackageServicePaxVariant.objects.get(
-                            quotepackage_pax_variant=quoteservice_paxvariant.id,
-                            quotepackage_service=allotment.id)
+                        try:
+                            packageservice_paxvariant = QuotePackageServicePaxVariant.objects.get(
+                                quotepackage_pax_variant=quoteservice_paxvariant.id,
+                                quotepackage_service=allotment.id)
+                        except QuotePackageServicePaxVariant.DoesNotExist as ex:
+                            continue
                     if isinstance(allotment, PackageAllotment):
                         days_after = allotment.days_after
                         if days_after is None:
@@ -1464,9 +1472,12 @@ class BookingServices(object):
                         quoteservice_paxvariant = QuoteServicePaxVariant.objects.get(
                             quote_pax_variant=service_pax_variant.quote_pax_variant_id,
                             quote_service=transfer.quote_package_id)
-                        packageservice_paxvariant = QuotePackageServicePaxVariant.objects.get(
-                            quotepackage_pax_variant=quoteservice_paxvariant.id,
-                            quotepackage_service=transfer.id)
+                        try:
+                            packageservice_paxvariant = QuotePackageServicePaxVariant.objects.get(
+                                quotepackage_pax_variant=quoteservice_paxvariant.id,
+                                quotepackage_service=transfer.id)
+                        except QuotePackageServicePaxVariant.DoesNotExist as ex:
+                            continue
                     if isinstance(transfer, PackageTransfer):
                         days_after = transfer.days_after
                         if days_after is None:
@@ -1527,9 +1538,12 @@ class BookingServices(object):
                         quoteservice_paxvariant = QuoteServicePaxVariant.objects.get(
                             quote_pax_variant=service_pax_variant.quote_pax_variant_id,
                             quote_service=extra.quote_package_id)
-                        packageservice_paxvariant = QuotePackageServicePaxVariant.objects.get(
-                            quotepackage_pax_variant=quoteservice_paxvariant.id,
-                            quotepackage_service=extra.id)
+                        try:
+                            packageservice_paxvariant = QuotePackageServicePaxVariant.objects.get(
+                                quotepackage_pax_variant=quoteservice_paxvariant.id,
+                                quotepackage_service=extra.id)
+                        except QuotePackageServicePaxVariant.DoesNotExist as ex:
+                            continue
                     if isinstance(extra, PackageExtra):
                         days_after = extra.days_after
                         if days_after is None:
@@ -2350,6 +2364,8 @@ class BookingServices(object):
 
     @classmethod
     def sync_quote_paxvariants(cls, quote, user=None):
+        if hasattr(quote, "avoid_sync_paxvariants"):
+            return 
         # verify on all services if pax variant exists
         quote_services = list(QuoteService.objects.all().filter(
             quote=quote.id))
@@ -2472,6 +2488,9 @@ class BookingServices(object):
 
     @classmethod
     def update_quoteservice_paxvariants_amounts(cls, quote_service):
+        if hasattr(quote_service, "avoid_sync_paxvariants"):
+            return
+
         quote = quote_service.quote
         # find quote pax variants
         quote_pax_variants = list(QuotePaxVariant.objects.all().filter(quote=quote.id))
@@ -2529,9 +2548,12 @@ class BookingServices(object):
 
     @classmethod
     def update_quotepackageservice_paxvariants_amounts(cls, quotepackage_service):
+        if hasattr(quotepackage_service, "avoid_sync_paxvariants"):
+            return
+
         quote_package = quotepackage_service.quote_package
         # find pax variants
-        quotepackage_pax_variants = list(QuoteServicePaxVariant.objects.all().filter(quote_service=quote_package.id))
+        quotepackage_pax_variants = list(c.objects.all().filter(quote_service=quote_package.id))
         # for each quote pax variant get or create
         for quotepackage_pax_variant in quotepackage_pax_variants:
             defaults = cls._calculate_default_paxvariant_amounts(
@@ -4212,34 +4234,70 @@ class BookingServices(object):
 
             allotments = list(QuoteAllotment.objects.filter(
                 quote=db_quote))
-            for allotment in allotments:
-                allotment.pk = None
-                allotment.id = None
-                allotment.quote = new_quote
-                allotment.quote_id = new_quote.pk
-                allotment.save()
+            for service in allotments:
+                service.pk = None
+                service.id = None
+                service.quote = new_quote
+                service.quote_id = new_quote.pk
+                service.avoid_sync_paxvariants = True
+                service.save()
+
             transfers = list(QuoteTransfer.objects.filter(
                 quote=db_quote))
-            for transfer in transfers:
-                transfer.pk = None
-                transfer.id = None
-                transfer.quote = new_quote
-                transfer.quote_id = new_quote.pk
-                transfer.save()
+            for service in transfers:
+                service.pk = None
+                service.id = None
+                service.quote = new_quote
+                service.quote_id = new_quote.pk
+                service.avoid_sync_paxvariants = True
+                service.save()
             extras = list(QuoteExtra.objects.filter(
                 quote=db_quote))
-            for extra in extras:
-                extra.pk = None
-                extra.id = None
-                extra.quote = new_quote
-                extra.quote_id = new_quote.pk
-                extra.save()
+            for service in extras:
+                service.pk = None
+                service.id = None
+                service.quote = new_quote
+                service.quote_id = new_quote.pk
+                service.avoid_sync_paxvariants = True
+                service.save()
             packages = list(QuotePackage.objects.filter(
                 quote=db_quote))
-            for package in packages:
-                package.pk = None
-                package.id = None
-                package.quote = new_quote
-                package.quote_id = new_quote.pk
-                package.save()
+            for service in packages:
+                package_pk = service.pk
+                service.pk = None
+                service.id = None
+                service.quote = new_quote
+                service.quote_id = new_quote.pk
+                service.avoid_sync_paxvariants = True
+                service.avoid_sync_services = True
+                service.save()
+                # package services
+                allotments = list(QuotePackageAllotment.objects.filter(
+                    quote_package=package_pk))
+                for package_service in allotments:
+                    package_service.pk = None
+                    package_service.id = None
+                    package_service.quote_package = service
+                    package_service.quote_package_id = service.pk
+                    package_service.avoid_sync_paxvariants = True
+                    package_service.save()
+                transfers = list(QuotePackageTransfer.objects.filter(
+                    quote_package=package_pk))
+                for package_service in transfers:
+                    package_service.pk = None
+                    package_service.id = None
+                    package_service.quote_package = service
+                    package_service.quote_package_id = service.pk
+                    package_service.avoid_sync_paxvariants = True
+                    package_service.save()
+                extras = list(QuotePackageExtra.objects.filter(
+                    quote_package=package_pk))
+                for package_service in extras:
+                    package_service.pk = None
+                    package_service.id = None
+                    package_service.quote_package = service
+                    package_service.quote_package_id = service.pk
+                    package_service.avoid_sync_paxvariants = True
+                    package_service.save()
+
             new_quote.refresh_from_db()
