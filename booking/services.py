@@ -4327,7 +4327,8 @@ class BookingServices(object):
         pax_variant.id = None
         pax_variant.quotepackage_service = package_service
         pax_variant.quotepackage_service_id = package_service.pk
-        quotepackage_pax_variant = cls._find_quotepackage_paxvariant(pax_variant, package_service.quote_package)
+        quotepackage_pax_variant = cls._find_quotepackage_paxvariant(
+            pax_variant, package_service.quote_package)
         pax_variant.quotepackage_pax_variant = quotepackage_pax_variant
         pax_variant.quotepackage_pax_variant_id = quotepackage_pax_variant.pk
         pax_variant.avoid_all = True
@@ -4336,5 +4337,15 @@ class BookingServices(object):
     @classmethod
     def _find_quotepackage_paxvariant(cls, pax_variant, quote_package):
         pax_variants = list(QuoteServicePaxVariant.objects.filter(
-            quote_service=quote_package.id, quote_pax_variant__pax_quantity=pax_variant.quotepackage_pax_variant.quote_pax_variant.pax_quantity))
+            quote_service=quote_package.id,
+            quote_pax_variant__pax_quantity=pax_variant.quotepackage_pax_variant.quote_pax_variant.pax_quantity))
         return pax_variants[0]
+
+    @classmethod
+    def add_bookingpax_to_services(cls, booking_pax, services):
+        for service in services:
+            service_pax = BookingServicePax()
+            service_pax.booking_pax = booking_pax
+            service_pax.booking_service = service
+            service_pax.group = booking_pax.pax_group
+            service_pax.save()
