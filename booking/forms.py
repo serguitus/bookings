@@ -36,9 +36,13 @@ class PackageAllotmentInlineForm(forms.ModelForm):
             'board_type': autocomplete.ListSelect2(
                 url='boardtype-autocomplete',
                 forward=['service']),
+            'service_addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['service'],
+                ),
             'provider': autocomplete.ModelSelect2(
                 url='providerallotment-autocomplete',
-                forward=['service', 'room_type', 'board_type'],
+                forward=['service', 'room_type', 'board_type', 'service_addon'],
                 ),
         }
 
@@ -50,9 +54,13 @@ class PackageTransferInlineForm(forms.ModelForm):
             'service': autocomplete.ModelSelect2(url='transfer-autocomplete'),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'service_addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['service'],
+                ),
             'provider': autocomplete.ModelSelect2(
                 url='providertransfer-autocomplete',
-                forward=['service', 'location_from', 'location_to'],
+                forward=['service', 'location_from', 'location_to', 'service_addon'],
                 ),
         }
 
@@ -66,9 +74,13 @@ class PackageExtraInlineForm(forms.ModelForm):
                 url='addon-autocomplete',
                 forward=['service'],
                 ),
+            'service_addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['service'],
+                ),
             'provider': autocomplete.ModelSelect2(
                 url='providerextra-autocomplete',
-                forward=['service', 'addon'],
+                forward=['service', 'service_addon'],
                 ),
         }
 
@@ -92,7 +104,7 @@ class PackageAllotmentForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providerallotment-autocomplete',
-                forward=['service', 'service_addon', 'room_type', 'board_type'],
+                forward=['service', 'room_type', 'board_type', 'service_addon'],
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
@@ -183,7 +195,7 @@ class QuotePackageAllotmentInlineForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providerallotment-autocomplete',
-                forward=['service', 'room_type', 'board_type'],
+                forward=['service', 'room_type', 'board_type', 'service_addon'],
                 ),
         }
 
@@ -207,7 +219,7 @@ class QuotePackageAllotmentForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providerallotment-autocomplete',
-                forward=['service', 'room_type', 'board_type'],
+                forward=['service', 'room_type', 'board_type', 'service_addon'],
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
@@ -226,7 +238,7 @@ class QuotePackageTransferInlineForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providertransfer-autocomplete',
-                forward=['service', 'location_from', 'location_to'],
+                forward=['service', 'location_from', 'location_to', 'service_addon'],
                 ),
         }
 
@@ -245,7 +257,7 @@ class QuotePackageTransferForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providertransfer-autocomplete',
-                forward=['service', 'location_from', 'location_to'],
+                forward=['service', 'location_from', 'location_to', 'service_addon'],
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
@@ -266,7 +278,7 @@ class QuotePackageExtraInlineForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providerextra-autocomplete',
-                forward=['service', 'addon'],
+                forward=['service', 'service_addon'],
                 ),
         }
 
@@ -287,7 +299,7 @@ class QuotePackageExtraForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providerextra-autocomplete',
-                forward=['service', 'addon'],
+                forward=['service', 'service_addon'],
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
@@ -311,7 +323,7 @@ class QuoteAllotmentInlineForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providerallotment-autocomplete',
-                forward=['service', 'room_type', 'board_type'],
+                forward=['service', 'room_type', 'board_type', 'service_addon'],
                 ),
         }
 
@@ -335,7 +347,7 @@ class QuoteAllotmentForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providerallotment-autocomplete',
-                forward=['service', 'room_type', 'board_type'],
+                forward=['service', 'room_type', 'board_type', 'service_addon'],
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
@@ -354,7 +366,7 @@ class QuoteTransferInlineForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providertransfer-autocomplete',
-                forward=['service', 'location_from', 'location_to'],
+                forward=['service', 'location_from', 'location_to', 'service_addon'],
                 ),
         }
 
@@ -373,7 +385,7 @@ class QuoteTransferForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providertransfer-autocomplete',
-                forward=['service', 'location_from', 'location_to'],
+                forward=['service', 'location_from', 'location_to', 'service_addon'],
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
@@ -394,7 +406,7 @@ class QuoteExtraInlineForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providerextra-autocomplete',
-                forward=['service', 'addon'],
+                forward=['service', 'service_addon'],
                 ),
         }
 
@@ -488,7 +500,7 @@ class BookingAllotmentForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providerallotment-autocomplete',
-                forward=['service', 'room_type', 'board_type'],
+                forward=['service', 'room_type', 'board_type', 'service_addon'],
                 ),
             'p_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
             'v_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
@@ -536,7 +548,7 @@ class BookingTransferForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providertransfer-autocomplete',
-                forward=['service', 'location_from', 'location_to'],
+                forward=['service', 'location_from', 'location_to', 'service_addon'],
                 ),
             'p_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
             'v_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
@@ -606,7 +618,7 @@ class BookingPackageAllotmentForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providerallotment-autocomplete',
-                forward=['service', 'room_type', 'board_type'],
+                forward=['service', 'room_type', 'board_type', 'service_addon'],
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
@@ -650,7 +662,7 @@ class BookingPackageTransferForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providertransfer-autocomplete',
-                forward=['service', 'location_from', 'location_to'],
+                forward=['service', 'location_from', 'location_to', 'service_addon'],
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())

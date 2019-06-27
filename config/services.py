@@ -69,7 +69,7 @@ class ConfigServices(object):
                         agency_service_id=dst_agency_service.id,
                         room_type_id=detail.room_type_id,
                         board_type=detail.board_type,
-                        service_addon_id=detail.service_addon_id,
+                        addon_id=detail.addon_id,
                         pax_range_min=detail.pax_range_min,
                         pax_range_max=detail.pax_range_max,
                         defaults=cls.calculate_default_amounts(
@@ -81,7 +81,7 @@ class ConfigServices(object):
                         agency_service_id=dst_agency_service.id,
                         room_type_id=detail.room_type_id,
                         board_type=detail.board_type,
-                        service_addon_id=detail.service_addon_id,
+                        addon_id=detail.addon_id,
                         pax_range_min=detail.pax_range_min,
                         pax_range_max=detail.pax_range_max,
                         defaults=cls.calculate_default_amounts(
@@ -112,7 +112,7 @@ class ConfigServices(object):
                         agency_service_id=dst_agency_service.id,
                         a_location_from_id=detail.a_location_from_id,
                         a_location_to_id=detail.a_location_to_id,
-                        service_addon_id=detail.service_addon_id,
+                        addon_id=detail.addon_id,
                         pax_range_min=detail.pax_range_min,
                         pax_range_max=detail.pax_range_max,
                         defaults=cls.calculate_default_amounts(
@@ -124,7 +124,7 @@ class ConfigServices(object):
                         agency_service_id=dst_agency_service.id,
                         a_location_from_id=detail.a_location_from_id,
                         a_location_to_id=detail.a_location_to_id,
-                        service_addon_id=detail.service_addon_id,
+                        addon_id=detail.addon_id,
                         pax_range_min=detail.pax_range_min,
                         pax_range_max=detail.pax_range_max,
                         defaults=cls.calculate_default_amounts(
@@ -154,7 +154,6 @@ class ConfigServices(object):
                     agency_detail, created = AgencyExtraDetail.objects.get_or_create(
                         agency_service_id=dst_agency_service.id,
                         addon_id=detail.addon_id,
-                        service_addon_id=detail.service_addon_id,
                         pax_range_min=detail.pax_range_min,
                         pax_range_max=detail.pax_range_max,
                         defaults=cls.calculate_default_amounts(
@@ -165,7 +164,6 @@ class ConfigServices(object):
                     agency_detail, created = AgencyExtraDetail.objects.update_or_create(
                         agency_service_id=dst_agency_service.id,
                         addon_id=detail.addon_id,
-                        service_addon_id=detail.service_addon_id,
                         pax_range_min=detail.pax_range_min,
                         pax_range_max=detail.pax_range_max,
                         defaults=cls.calculate_default_amounts(
@@ -217,7 +215,7 @@ class ConfigServices(object):
                         agency_service=agency_service,
                         room_type=detail.room_type,
                         board_type=detail.board_type,
-                        service_addon_id=detail.service_addon_id,
+                        addon_id=detail.addon_id,
                         pax_range_min=detail.pax_range_min,
                         pax_range_max=detail.pax_range_max,
                         # from provider src gain is 0
