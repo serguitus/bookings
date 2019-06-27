@@ -6,17 +6,19 @@ from django.db import migrations, IntegrityError, transaction
 
 
 def update_existent_serviceAddon(apps, schema_editor):
-    ExtraAddon = apps.get_model('config', 'ExtraAddon')
-    ServiceAddon = apps.get_model('config', 'ServiceAddon')
-
-    obs = ExtraAddon.objects.all()
-    for obj in obs:
-        s = ServiceAddon(addon=obj.addon, service=obj.extra)
-        try:
-            with transaction.atomic():
-                s.save()
-        except IntegrityError:
-            continue
+    BookingExtra = apps.get_model('booking', 'BookingExtra')
+    BookingPackageExtra = apps.get_model('booking', 'BookingPackageExtra')
+    QuoteExtra = apps.get_model('booking', 'QuoteExtra')
+    QuotePackageExtra = apps.get_model('booking', 'QuotePackageExtra')
+    for cls in [BookingExtra, BookingPackageExtra,
+                QuoteExtra, QuotePackageExtra]:
+        for obj in cls.objects.all():
+            obj.service_addon = obj.addon
+            try:
+                with transaction.atomic():
+                    obj.save()
+            except IntegrityError:
+                continue
 
 
 def backwards_function(apps, schema_editor):
