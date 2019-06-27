@@ -148,7 +148,8 @@ class PackageTransferForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providertransfer-autocomplete',
-                forward=['service', 'location_from', 'location_to', 'service_addon'],
+                forward=['service', 'service_addon',
+                         'location_from', 'location_to'],
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
