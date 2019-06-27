@@ -532,7 +532,7 @@ class BookingServiceUpdateView(View):
 
     def post(self, request, id, *args, **kwargs):
         services = request.POST.get(id, None)
-        print services
+        print(services)
         if not services:
             messages.info(request, 'Booking Saved and no Service Updated')
         return redirect(reverse('common:booking_booking_change', args=[id]))

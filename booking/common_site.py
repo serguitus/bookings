@@ -429,12 +429,14 @@ class QuoteSiteModel(SiteModel):
     def save_related(self, request, form, formsets, change):
         with transaction.atomic(savepoint=False):
             super(QuoteSiteModel, self).save_related(request, form, formsets, change)
-            obj = self.save_form(request, form, change)
-            BookingServices.sync_quote_paxvariants(obj)
+            if not "_saveasnew" in request.POST:
+                obj = self.save_form(request, form, change)
+                BookingServices.sync_quote_paxvariants(obj)
 
     def response_add_saveasnew(
             self, request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue=None):
-        BookingServices.copy_quote_services(request, obj)
+        if 'id' in request.POST and request.POST['id'] and obj:
+            BookingServices.clone_quote_services(request.POST['id'], obj)
         
         return super(QuoteSiteModel, self).response_add_saveasnew(
             request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue)
