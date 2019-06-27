@@ -140,7 +140,7 @@ class PackageExtraInLine(CommonStackedInline):
     extra = 0
     fields = [
         ('service', 'time'),
-        ('addon', 'quantity', 'parameter'),
+        ('service_addon', 'quantity', 'parameter'),
         ('days_after', 'days_duration', 'provider')]
     ordering = ['days_after']
     form = PackageExtraInlineForm
@@ -193,7 +193,7 @@ class PackageAllotmentSiteModel(PackageServiceSiteModel):
     fields = (
         'package', ('service'),
         ('days_after', 'days_duration'),
-        ('room_type', 'board_type'), 'provider', 'id')
+        ('room_type', 'board_type', 'service_addon'), 'provider', 'id')
     list_display = ('package', 'service', 'days_after', 'days_duration',)
     top_filters = ('package__name', 'service',)
     ordering = ('package__name', 'days_after', 'service__name',)
@@ -226,9 +226,9 @@ class PackageExtraSiteModel(PackageServiceSiteModel):
 
     fields = ['package', ('service'),
               ('days_after', 'days_duration', 'time'),
-              ('addon', 'quantity', 'parameter'),
+              ('service_addon', 'quantity', 'parameter'),
               'provider', 'id']
-    list_display = ('package', 'service', 'addon', 'quantity', 'parameter',
+    list_display = ('package', 'service', 'service_addon', 'quantity', 'parameter',
                     'days_after', 'time',)
     top_filters = ('package__name', 'service',)
     ordering = ('package__name', 'days_after', 'service__name',)

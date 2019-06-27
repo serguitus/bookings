@@ -92,7 +92,7 @@ class PackageAllotmentForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providerallotment-autocomplete',
-                forward=['service', 'room_type', 'board_type'],
+                forward=['service', 'service_addon', 'room_type', 'board_type'],
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
@@ -136,7 +136,8 @@ class PackageTransferForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providertransfer-autocomplete',
-                forward=['service', 'location_from', 'location_to'],
+                forward=['service', 'service_addon',
+                         'location_from', 'location_to'],
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
@@ -158,7 +159,7 @@ class PackageExtraForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providerextra-autocomplete',
-                forward=['service', 'addon'],
+                forward=['service', 'service_addon'],
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
@@ -414,7 +415,7 @@ class QuoteExtraForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providerextra-autocomplete',
-                forward=['service', 'addon'],
+                forward=['service', 'service_addon'],
                 ),
             'description': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
         }
@@ -560,7 +561,7 @@ class BookingExtraForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providerextra-autocomplete',
-                forward=['service', 'addon'],
+                forward=['service', 'service_addon'],
                 ),
             'p_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
             'v_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
@@ -671,7 +672,7 @@ class BookingPackageExtraForm(forms.ModelForm):
                 ),
             'provider': autocomplete.ModelSelect2(
                 url='providerextra-autocomplete',
-                forward=['service', 'addon'],
+                forward=['service', 'service_addon'],
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())

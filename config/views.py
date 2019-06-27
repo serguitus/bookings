@@ -218,7 +218,7 @@ class ProviderExtraAutocompleteView(autocomplete.Select2QuerySetView):
         if not service:
             return Provider.objects.none()
 
-        addon = self.forwarded.get('addon', None)
+        addon = self.forwarded.get('service_addon', None)
 
         if addon:
             qs = qs.filter(
