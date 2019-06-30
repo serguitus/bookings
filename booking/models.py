@@ -30,7 +30,8 @@ from config.models import (
     AmountDetail, AgencyCatalogue, ProviderCatalogue,
 )
 
-from finance.models import Office, Agency, AgencyInvoice, Provider, ProviderInvoice
+from finance.models import (Office, Agency, AgencyInvoice,
+                            Provider, ProviderInvoice)
 
 
 class RelativeInterval(models.Model):
@@ -240,6 +241,7 @@ class Quote(models.Model):
         max_length=2000, blank=True, null=True, verbose_name='Program')
     history = models.CharField(
         max_length=2000, blank=True, null=True, verbose_name='History')
+    seller = models.ForeignKey(User, blank=True, null=True)
 
     def fill_data(self):
         pass

@@ -8,7 +8,7 @@
 {% endblock head_extra %}
 
 {% block content %}
-  <h2>Booking Paxes</h2>
+  <h2>Rooming List</h2>
   <form method="post"  novalidate>
     {% csrf_token %}
     <input type="hidden" id="quote_id" name="quote_id" value="{{ quote_id }}">
@@ -20,7 +20,7 @@
         <p>
       </div>
     {% endfor %}
-    <p><a id="add" class="btn btn-primary add-row">Add Row</a></p>
+    <p><a id="add" class="btn btn-primary add-row">Add Pax</a></p>
     <button class="btn btn-primary" id="btn-build" type="submit">Build Booking</button>
     <a class="btn btn-success build-booking" href="{% url 'common:booking_quote_change' quote_id %}">
       Cancel

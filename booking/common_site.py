@@ -369,12 +369,12 @@ class QuoteSiteModel(SiteModel):
 
     recent_allowed = True
     fields = (
-        ('reference', 'agency'),
+        ('reference', 'agency', 'seller'),
         ('status', 'currency'),
         ('date_from', 'date_to'), 'id'
     )
     list_display = ('reference', 'agency', 'date_from',
-                    'date_to', 'status', 'currency',)
+                    'date_to', 'status', 'currency', 'seller')
     top_filters = ('reference', ('date_from', DateTopFilter), 'status')
     ordering = ('date_from', 'reference',)
     readonly_fields = ('date_from', 'date_to', 'status')
@@ -410,7 +410,8 @@ class QuoteSiteModel(SiteModel):
                 booking, msg = BookingServices.build_booking_from_quote(
                     quote_id, formset.cleaned_data, request.user)
                 if booking:
-                    return redirect(reverse('common:booking_booking_change', args=[booking.id]))
+                    return redirect(reverse('common:booking_booking_change',
+                                            args=[booking.id]))
                 else:
                     self.message_user(request, msg, messages.ERROR)
             else:
@@ -858,7 +859,7 @@ class BookingSiteModel(SiteModel):
                                     args=[obj.id]))
             self.select_bookingservices_view(request, obj, bookingservices)
         else:
-            super(BookingSiteModel, self).response_change(request, obj)
+            return super(BookingSiteModel, self).response_change(request, obj)
 
     def select_bookingservices_view(self, request,
                                     booking, bookingservices=None):
@@ -872,7 +873,6 @@ class BookingSiteModel(SiteModel):
             booking = selected_bookingservices[0].booking
             super(BookingSiteModel, self).response_change(request, booking)
         # show selection view
-
 
 
 class BookingServiceSiteModel(SiteModel):
