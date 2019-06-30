@@ -2782,8 +2782,11 @@ class BookingServices(object):
 
 
     @classmethod
-    def update_quote_paxvariants_amounts(cls, service):
-        quote = service.quote
+    def update_quote_paxvariants_amounts(cls, quote_or_service):
+        if isinstance(quote_or_service, Quote):
+            quote = quote_or_service
+        else:
+            quote = quote_or_service.quote
         quote_pax_variants = list(
             QuotePaxVariant.objects.all().filter(quote=quote.id))
 
@@ -4228,76 +4231,121 @@ class BookingServices(object):
         return providers
 
     @classmethod
-    def copy_quote_services(cls, request, new_quote):
-        if 'id' in request.POST and request.POST['id'] and new_quote:
-            db_quote = Quote.objects.get(pk=request.POST['id'])
+    def clone_quote_services(cls, old_quote_id, new_quote):
+        new_quote.avoid_all = True
 
-            allotments = list(QuoteAllotment.objects.filter(
-                quote=db_quote))
-            for service in allotments:
-                service.pk = None
-                service.id = None
-                service.quote = new_quote
-                service.quote_id = new_quote.pk
-                service.avoid_sync_paxvariants = True
-                service.save()
+        old_quote = Quote.objects.get(pk=old_quote_id)
 
-            transfers = list(QuoteTransfer.objects.filter(
-                quote=db_quote))
-            for service in transfers:
-                service.pk = None
-                service.id = None
-                service.quote = new_quote
-                service.quote_id = new_quote.pk
-                service.avoid_sync_paxvariants = True
-                service.save()
-            extras = list(QuoteExtra.objects.filter(
-                quote=db_quote))
-            for service in extras:
-                service.pk = None
-                service.id = None
-                service.quote = new_quote
-                service.quote_id = new_quote.pk
-                service.avoid_sync_paxvariants = True
-                service.save()
-            packages = list(QuotePackage.objects.filter(
-                quote=db_quote))
-            for service in packages:
-                package_pk = service.pk
-                service.pk = None
-                service.id = None
-                service.quote = new_quote
-                service.quote_id = new_quote.pk
-                service.avoid_sync_paxvariants = True
-                service.avoid_sync_services = True
-                service.save()
-                # package services
-                allotments = list(QuotePackageAllotment.objects.filter(
-                    quote_package=package_pk))
-                for package_service in allotments:
-                    package_service.pk = None
-                    package_service.id = None
-                    package_service.quote_package = service
-                    package_service.quote_package_id = service.pk
-                    package_service.avoid_sync_paxvariants = True
-                    package_service.save()
-                transfers = list(QuotePackageTransfer.objects.filter(
-                    quote_package=package_pk))
-                for package_service in transfers:
-                    package_service.pk = None
-                    package_service.id = None
-                    package_service.quote_package = service
-                    package_service.quote_package_id = service.pk
-                    package_service.avoid_sync_paxvariants = True
-                    package_service.save()
-                extras = list(QuotePackageExtra.objects.filter(
-                    quote_package=package_pk))
-                for package_service in extras:
-                    package_service.pk = None
-                    package_service.id = None
-                    package_service.quote_package = service
-                    package_service.quote_package_id = service.pk
-                    package_service.avoid_sync_paxvariants = True
-                    package_service.save()
+        allotments = list(QuoteAllotment.objects.filter(
+            quote=old_quote))
+        for service in allotments:
+            cls._clone_quote_service(service, new_quote)
 
-            new_quote.refresh_from_db()
+        transfers = list(QuoteTransfer.objects.filter(
+            quote=old_quote))
+        for service in transfers:
+            cls._clone_quote_service(service, new_quote)
+
+        extras = list(QuoteExtra.objects.filter(
+            quote=old_quote))
+        for service in extras:
+            cls._clone_quote_service(service, new_quote)
+
+        packages = list(QuotePackage.objects.filter(
+            quote=old_quote))
+        for service in packages:
+            package_pk = service.pk
+            service.avoid_sync_services = True
+            cls._clone_quote_service(service, new_quote)
+
+            # package services
+            allotments = list(QuotePackageAllotment.objects.filter(
+                quote_package=package_pk))
+            for package_service in allotments:
+                cls._clone_quotepackage_service(package_service, service)
+
+            transfers = list(QuotePackageTransfer.objects.filter(
+                quote_package=package_pk))
+            for package_service in transfers:
+                cls._clone_quotepackage_service(package_service, service)
+
+            extras = list(QuotePackageExtra.objects.filter(
+                quote_package=package_pk))
+            for package_service in extras:
+                cls._clone_quotepackage_service(package_service, service)
+
+        cls.update_quote(new_quote)
+        cls.update_quote_paxvariants_amounts(new_quote)
+
+    @classmethod
+    def _clone_quote_service(cls, quote_service, quote):
+        pax_variants = list(QuoteServicePaxVariant.objects.filter(
+            quote_service=quote_service))
+        quote_service.pk = None
+        quote_service.id = None
+        quote_service.quote = quote
+        quote_service.quote_id = quote.pk
+        quote_service.avoid_all = True
+        quote_service.save()
+        for pax_variant in pax_variants:
+            cls._clone_quoteservice_paxvariant(pax_variant, quote_service)
+
+    @classmethod
+    def _clone_quotepackage_service(cls, package_service, package):
+        pax_variants = list(QuotePackageServicePaxVariant.objects.filter(
+            quotepackage_service=package_service))
+        package_service.pk = None
+        package_service.id = None
+        package_service.quote_package = package
+        package_service.quote_package_id = package.pk
+        package_service.avoid_all = True
+        package_service.save()
+        for pax_variant in pax_variants:
+            cls._clone_quotepackageservice_paxvariant(pax_variant, package_service)
+
+    @classmethod
+    def _clone_quoteservice_paxvariant(cls, pax_variant, quote_service):
+        pax_variant.pk = None
+        pax_variant.id = None
+        pax_variant.quote_service = quote_service
+        pax_variant.quote_service_id = quote_service.pk
+        quote_pax_variant = cls._find_quote_paxvariant(pax_variant, quote_service.quote)
+        pax_variant.quote_pax_variant = quote_pax_variant
+        pax_variant.quote_pax_variant_id = quote_pax_variant.pk
+        pax_variant.avoid_all = True
+        pax_variant.save()
+
+    @classmethod
+    def _find_quote_paxvariant(cls, pax_variant, quote):
+        pax_variants = list(QuotePaxVariant.objects.filter(
+            quote=quote.id, pax_quantity=pax_variant.quote_pax_variant.pax_quantity))
+        return pax_variants[0]
+
+    @classmethod
+    def _clone_quotepackageservice_paxvariant(cls, pax_variant, package_service):
+        pax_variant.pk = None
+        pax_variant.id = None
+        pax_variant.quotepackage_service = package_service
+        pax_variant.quotepackage_service_id = package_service.pk
+        quotepackage_pax_variant = cls._find_quotepackage_paxvariant(
+            pax_variant, package_service.quote_package)
+        pax_variant.quotepackage_pax_variant = quotepackage_pax_variant
+        pax_variant.quotepackage_pax_variant_id = quotepackage_pax_variant.pk
+        pax_variant.avoid_all = True
+        pax_variant.save()
+
+    @classmethod
+    def _find_quotepackage_paxvariant(cls, pax_variant, quote_package):
+        pax_variants = list(QuoteServicePaxVariant.objects.filter(
+            quote_service=quote_package.id,
+            quote_pax_variant__pax_quantity=pax_variant.quotepackage_pax_variant.quote_pax_variant.pax_quantity))
+        return pax_variants[0]
+
+    @classmethod
+    def add_bookingpax_to_services(cls, booking_pax, services):
+        for service in services:
+            service_pax = BookingServicePax()
+            service_pax.booking_pax = booking_pax
+            service_pax.booking_service = service
+            service_pax.group = booking_pax.pax_group
+            service_pax.save()

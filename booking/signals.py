@@ -21,102 +21,114 @@ from booking.services import BookingServices
 
 @receiver(post_save, sender=Quote)
 def post_save_quote(sender, instance, **kwargs):
-    if not hasattr(instance, 'code_updated'):
+    if not hasattr(instance, 'code_updated') and not hasattr(instance, 'avoid_all'):
         with transaction.atomic(savepoint=False):
             BookingServices.sync_quote_paxvariants(instance)
 
 
 @receiver(post_save, sender=QuotePaxVariant)
 def post_save_quote_paxvariant(sender, instance, **kwargs):
-    if not hasattr(instance, 'code_updated'):
+    if not hasattr(instance, 'code_updated') and not hasattr(instance, 'avoid_all'):
         with transaction.atomic(savepoint=False):
             BookingServices.sync_quote_children_paxvariants(instance)
 
 
 @receiver(pre_save, sender=QuoteServicePaxVariant)
 def pre_save_quoteservice_paxvariant_setup_amounts(sender, instance, **kwargs):
-    BookingServices.setup_paxvariant_amounts(instance)
+    if not hasattr(instance, 'avoid_all'):
+        BookingServices.setup_paxvariant_amounts(instance)
 
 
 receiver(post_save, sender=QuoteServicePaxVariant)
 def post_save_quoteservice_paxvariant(sender, instance, **kwargs):
-    with transaction.atomic(savepoint=False):
-        BookingServices.sync_quotepackage_children_paxvariants(instance)
-        BookingServices.update_quote_paxvariant_amounts(instance)
+    if not hasattr(instance, 'avoid_all'):
+        with transaction.atomic(savepoint=False):
+            BookingServices.sync_quotepackage_children_paxvariants(instance)
+            BookingServices.update_quote_paxvariant_amounts(instance)
 
 
 receiver(post_delete, sender=QuoteServicePaxVariant)
 def post_delete_quoteservice_paxvariant(sender, instance, **kwargs):
-    with transaction.atomic(savepoint=False):
-        BookingServices.update_quote_paxvariant_amounts(instance)
+    if not hasattr(instance, 'avoid_all'):
+        with transaction.atomic(savepoint=False):
+            BookingServices.update_quote_paxvariant_amounts(instance)
 
 
 @receiver(post_save, sender=QuoteAllotment)
 def post_save_quoteallotment(sender, instance, **kwargs):
-    with transaction.atomic(savepoint=False):
-        BookingServices.update_quoteservice_paxvariants_amounts(instance)
-        BookingServices.update_quote(instance)
+    if not hasattr(instance, 'avoid_all'):
+        with transaction.atomic(savepoint=False):
+            BookingServices.update_quoteservice_paxvariants_amounts(instance)
+            BookingServices.update_quote(instance)
 
 
 @receiver(post_save, sender=QuoteTransfer)
 def post_save_quotetransfer(sender, instance, **kwargs):
-    with transaction.atomic(savepoint=False):
-        BookingServices.update_quoteservice_paxvariants_amounts(instance)
-        BookingServices.update_quote(instance)
+    if not hasattr(instance, 'avoid_all'):
+        with transaction.atomic(savepoint=False):
+            BookingServices.update_quoteservice_paxvariants_amounts(instance)
+            BookingServices.update_quote(instance)
 
 
 @receiver(post_save, sender=QuoteExtra)
 def post_save_quoteextra(sender, instance, **kwargs):
-    with transaction.atomic(savepoint=False):
-        BookingServices.update_quoteservice_paxvariants_amounts(instance)
-        BookingServices.update_quote(instance)
+    if not hasattr(instance, 'avoid_all'):
+        with transaction.atomic(savepoint=False):
+            BookingServices.update_quoteservice_paxvariants_amounts(instance)
+            BookingServices.update_quote(instance)
 
 
 @receiver(post_save, sender=QuotePackage)
 def post_save_quotepackage(sender, instance, **kwargs):
-    with transaction.atomic(savepoint=False):
-        BookingServices.update_quoteservice_paxvariants_amounts(instance)
-        BookingServices.sync_quotepackage_services(instance)
-        BookingServices.update_quote(instance)
+    if not hasattr(instance, 'avoid_all'):
+        with transaction.atomic(savepoint=False):
+            BookingServices.update_quoteservice_paxvariants_amounts(instance)
+            BookingServices.sync_quotepackage_services(instance)
+            BookingServices.update_quote(instance)
 
 
 @receiver(pre_save, sender=QuotePackageServicePaxVariant)
 def pre_save_setup_amounts(sender, instance, **kwargs):
-    BookingServices.setup_paxvariant_amounts(instance)
+    if not hasattr(instance, 'avoid_all'):
+        BookingServices.setup_paxvariant_amounts(instance)
 
 
 @receiver(post_save, sender=QuotePackageServicePaxVariant)
 def post_save_quotepackage_service_paxvariant(sender, instance, **kwargs):
-    if not hasattr(instance, 'code_updated'):
+    if not hasattr(instance, 'code_updated') and not hasattr(instance, 'avoid_all'):
         with transaction.atomic(savepoint=False):
             BookingServices.update_quotepackage_paxvariant_amounts(instance)
 
 
 @receiver(post_delete, sender=QuotePackageServicePaxVariant)
 def post_delete_quotepackage_service_paxvariant(sender, instance, **kwargs):
-    with transaction.atomic(savepoint=False):
-        BookingServices.update_quotepackage_paxvariant_amounts(instance)
+    if not hasattr(instance, 'avoid_all'):
+        with transaction.atomic(savepoint=False):
+            BookingServices.update_quotepackage_paxvariant_amounts(instance)
 
 
 @receiver(post_save, sender=QuotePackageAllotment)
 def post_save_quotepackage_allotment(sender, instance, **kwargs):
-    with transaction.atomic(savepoint=False):
-        BookingServices.update_quotepackageservice_paxvariants_amounts(instance)
-        BookingServices.update_quotepackage(instance)
+    if not hasattr(instance, 'avoid_all'):
+        with transaction.atomic(savepoint=False):
+            BookingServices.update_quotepackageservice_paxvariants_amounts(instance)
+            BookingServices.update_quotepackage(instance)
 
 
 @receiver(post_save, sender=QuotePackageTransfer)
 def post_save_quotepackage_transfer(sender, instance, **kwargs):
-    with transaction.atomic(savepoint=False):
-        BookingServices.update_quotepackageservice_paxvariants_amounts(instance)
-        BookingServices.update_quotepackage(instance)
+    if not hasattr(instance, 'avoid_all'):
+        with transaction.atomic(savepoint=False):
+            BookingServices.update_quotepackageservice_paxvariants_amounts(instance)
+            BookingServices.update_quotepackage(instance)
 
 
 @receiver(post_save, sender=QuotePackageExtra)
 def post_save_quotepackage_extra(sender, instance, **kwargs):
-    with transaction.atomic(savepoint=False):
-        BookingServices.update_quotepackageservice_paxvariants_amounts(instance)
-        BookingServices.update_quotepackage(instance)
+    if not hasattr(instance, 'avoid_all'):
+        with transaction.atomic(savepoint=False):
+            BookingServices.update_quotepackageservice_paxvariants_amounts(instance)
+            BookingServices.update_quotepackage(instance)
 
 
 # Booking
