@@ -541,7 +541,6 @@ class BookingServiceUpdateView(View):
             services)
 
 
-
 class EmailProviderView(View):
     """
     A view to handle the email that will be sent to providers

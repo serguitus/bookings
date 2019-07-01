@@ -141,20 +141,20 @@ class BookingServices(object):
             bookingservice_pax.avoid_booking_update = True
             bookingservice_pax.save()
 
-
     @classmethod
     def build_booking_from_quote(cls, quote_id, rooming, user=None):
-        quote = list(Quote.objects.filter(pk=quote_id).all())
-        if not quote:
-            return None, 'Quote Not Found'
-        quote = quote[0]
+        try:
+            quote = Quote.objects.get(pk=quote_id)
+        except Quote.DoesNotExist:
+            return None, 'Quote with id %s Not Found' % quote_id
         try:
             with transaction.atomic(savepoint=False):
                 # create booking
                 booking = Booking()
-                booking.name = '< booking name >'
+                booking.name = quote.reference
                 booking.agency = quote.agency
                 booking.reference = '< reference> '
+                booking.seller = quote.seller or user
                 # date_from auto
                 # date_to auto
                 # status auto
