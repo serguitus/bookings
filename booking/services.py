@@ -30,6 +30,8 @@ from finance.constants import STATUS_CANCELLED, STATUS_READY
 from finance.services import FinanceService
 from finance.models import Agency
 
+from reservas.custom_settings import ADDON_FOR_NO_ADDON
+
 
 class BookingServices(object):
     """
@@ -4210,36 +4212,44 @@ class BookingServices(object):
     @classmethod
     def find_providers(cls, bookingservice):
         if bookingservice.service:
-            qs = Provider.objects.all().filter(
-                providerallotmentservice__service=bookingservice.service)
+            qs = Provider.objects.all()
+            if bookingservice.service_addon:
+                addon = bookingservice.service_addon
+            else:
+                addon = ADDON_FOR_NO_ADDON
+
             if isinstance(bookingservice, (BookingAllotment, BookingPackageallotment)) \
                     and bookingservice.room_type and bookingservice.board_type:
                 qs = qs.filter(
+                    providerallotmentservice__service=bookingservice.service,
                     providerallotmentservice__providerallotmentdetail__room_type=bookingservice.room_type,
                     providerallotmentservice__providerallotmentdetail__board_type=bookingservice.board_type,
+                    providerallotmentservice__providerallotmentdetail__addon=addon,
                 )
             elif isinstance(bookingservice, (BookingTransfer, BookingPackageTransfer)) \
                     and bookingservice.location_from and bookingservice.location_to:
                 qs = qs.filter(
+                    Q(providertransferservice__service=bookingservice.service)
+                    &
+                    Q(providerallotmentservice__providerallotmentdetail__addon=addon)
+                    &
                     (
-                        Q(providertransferservice__providertransferdetail__p_location_from=bookingservice.location_from)
-                        & Q(providertransferservice__providertransferdetail__p_location_to=bookingservice.location_to)
-                    )
-                    |
-                    (
-                        Q(providertransferservice__providertransferdetail__p_location_from=bookingservice.location_to)
-                        & Q(providertransferservice__providertransferdetail__p_location_to=bookingservice.location_from)
+                        (
+                            Q(providertransferservice__providertransferdetail__p_location_from=bookingservice.location_from)
+                            & Q(providertransferservice__providertransferdetail__p_location_to=bookingservice.location_to)
+                        )
+                        |
+                        (
+                            Q(providertransferservice__providertransferdetail__p_location_from=bookingservice.location_to)
+                            & Q(providertransferservice__providertransferdetail__p_location_to=bookingservice.location_from)
+                        )
                     )
                 )
             elif isinstance(bookingservice, (BookingExtra, BookingPackageExtra)):
-                if bookingservice.addon:
-                    qs = qs.filter(
-                        providerextraservice__providerextradetail__addon=bookingservice.addon,
-                    )
-                else:
-                    qs = qs.filter(
-                        providerextraservice__providerextradetail__addon__isnull=True,
-                    )
+                qs = qs.filter(
+                    providerextraservice__service=bookingservice.service,
+                    providerextraservice__providerextradetail__addon=addon,
+                )
             else:
                 return Provider.objects.none()
             return list(qs)
