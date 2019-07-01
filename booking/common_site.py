@@ -712,7 +712,7 @@ class QuotePackageExtraSiteModel(QuotePackageServiceSiteModel):
 
 class BookingPaxInline(TabularInline):
     model = BookingPax
-    fields = ['pax_name', 'pax_group', 'pax_age']
+    fields = ['pax_name', 'pax_group', 'pax_age', 'is_price_free']
     verbose_name_plural = 'Rooming List'
     extra = 4
     ordering = ('pax_group', 'pax_name')

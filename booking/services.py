@@ -183,6 +183,7 @@ class BookingServices(object):
                         booking_pax.pax_name = pax['pax_name']
                         booking_pax.pax_age = pax['pax_age']
                         booking_pax.pax_group = pax['pax_group']
+                        booking_pax.is_price_free = pax['is_price_free']
                         booking_pax.avoid_booking_update = True
                         booking_pax.save()
 
@@ -714,20 +715,6 @@ class BookingServices(object):
                         cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
                         cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
                 counter = counter + 1
-
-        if not pax_variant.price_percent is None:
-            if cost_1 is None:
-                price_1, price_1_msg = None, 'Cost for % is empty'
-            else:
-                price_1, price_1_msg = cls._round_price(float(cost_1) * (1.0 + float(pax_variant.price_percent) / 100.0)), None
-            if cost_2 is None:
-                price_2, price_2_msg = None, 'Cost for % is empty'
-            else:
-                price_2, price_2_msg = cls._round_price(float(cost_2) * (1.0 + float(pax_variant.price_percent) / 100.0)), None
-            if cost_3 is None:
-                price_3, price_3_msg = None, 'Cost for % is empty'
-            else:
-                price_3, price_3_msg = cls._round_price(float(cost_3) * (1.0 + float(pax_variant.price_percent) / 100.0)), None
 
         return cost_1, cost_1_msg, price_1, price_1_msg, \
             cost_2, cost_2_msg, price_2, price_2_msg, \
@@ -2051,7 +2038,8 @@ class BookingServices(object):
             provider=quoteservice.provider,
             agency=agency,
             service_pax_variant=service_pax_variant,
-            manuals=manuals)
+            manuals=manuals,
+            quote_pax_variant=quote_pax_variant)
 
 
     @classmethod
@@ -2122,7 +2110,7 @@ class BookingServices(object):
     @classmethod
     def _find_quoteservice_amounts(
             cls, pax_quantity, quoteservice, date_from, date_to,
-            provider, agency, service_pax_variant, manuals=False, quotepackageservice_pax_variant=None):
+            provider, agency, service_pax_variant, manuals=False, quote_pax_variant=None):
         if service_pax_variant is None:
             return None, "Service Pax Variant Not Found", \
                 None, "Service Pax Variant Not Found", \
@@ -2208,6 +2196,29 @@ class BookingServices(object):
         elif auto_price:
             p1, p1_msg, p2, p2_msg, p3, p3_msg = cls._find_quoteservice_prices(
                 pax_quantity, quoteservice, date_from, date_to, agency, service_pax_variant)
+
+        if not quote_pax_variant:
+            if isinstance(service_pax_variant, QuoteServicePaxVariant):
+                quote_pax_variant = service_pax_variant.quote_pax_variant
+            else:
+                quote_pax_variant = service_pax_variant.package_pax_variant.quote_pax_variant
+
+        if quote_pax_variant.price_percent:
+            if c1 is None:
+                p1, p1_msg = None, 'Cost SGL for % is empty'
+            else:
+                p1 = cls._round_price(cls._apply_percent(c1, quote_pax_variant.price_percent))
+                p1_msg = None
+            if c2 is None:
+                p2, p2_msg = None, 'Cost DBL for % is empty'
+            else:
+                p2 = cls._round_price(cls._apply_percent(c2, quote_pax_variant.price_percent))
+                p2_msg = None
+            if c3 is None:
+                p3, p3_msg = None, 'Cost TPL for % is empty'
+            else:
+                p3 = cls._round_price(cls._apply_percent(c3, quote_pax_variant.price_percent))
+                p3_msg = None
 
         return c1, c1_msg, p1, p1_msg, c2, c2_msg, p2, p2_msg, c3, c3_msg, p3, p3_msg
 
@@ -2808,20 +2819,6 @@ class BookingServices(object):
                     quote_service__status=constants.SERVICE_STATUS_CANCELLED))
 
         c1, c2, c3, p1, p2, p3 = cls._totalize_pax_variants(quoteservice_pax_variants)
-
-        if not quote_pax_variant.price_percent is None:
-            if c1 is None:
-                p1 = None
-            else:
-                p1 = cls._round_price(cls._apply_percent(c1, quote_pax_variant.price_percent))
-            if c2 is None:
-                p2 = None
-            else:
-                p2 = cls._round_price(cls._apply_percent(c2, quote_pax_variant.price_percent))
-            if c3 is None:
-                p3 = None
-            else:
-                p3 = cls._round_price(cls._apply_percent(c3, quote_pax_variant.price_percent))
 
         fields = cls._build_pax_variant_fields(quote_pax_variant, c1, c2, c3, p1, p2, p3)
         if fields:
@@ -4110,27 +4107,56 @@ class BookingServices(object):
 
 
     @classmethod
+    def _find_booking_pricepackage_groups(cls, booking, pax_list=None):
+        if not pax_list:
+            pax_list = list(BookingPax.objects.filter(booking=booking.id))
+        groups = dict()
+        for pax in pax_list:
+            if pax.pax_group is None:
+                continue
+            if not groups.__contains__(pax.pax_group):
+                groups[pax.pax_group] = dict()
+                groups[pax.pax_group]['qtty'] = 0
+                groups[pax.pax_group]['free'] = 0
+            groups[pax.pax_group]['qtty'] += 1
+            if pax.is_price_free:
+                groups[pax.pax_group]['free'] += 1
+        return groups.values()
+
+
+    @classmethod
     def _find_booking_package_price(cls, booking, pax_list=None):
-        groups = cls._find_booking_groups(booking, pax_list)
+        groups = cls._find_booking_pricepackage_groups(booking, pax_list)
         price, price_msg = 0, None
-        for pax_qtty in groups:
-            if pax_qtty == 1:
-                if not booking.package_sgl_price_amount is None:
-                    price += booking.package_sgl_price_amount
-                else:
-                    return None, "Package Price Missing Single Amount"
-            elif pax_qtty == 2:
-                if not booking.package_dbl_price_amount is None:
-                    price += 2 * booking.package_dbl_price_amount
-                else:
-                    return None, "Package Price Missing Double Amount"
-            elif pax_qtty == 3:
-                if not booking.package_tpl_price_amount is None:
-                    price += 3 * booking.package_tpl_price_amount
-                else:
-                    return None, "Package Price Missing Triple Amount"
+        for group in groups:
+            if group['qtty'] == 1:
+                if group['free'] < 1:
+                    if not booking.package_sgl_price_amount is None:
+                        price += booking.package_sgl_price_amount
+                    else:
+                        return None, "Package Price Missing Single Amount"
+            elif group['qtty'] == 2:
+                if group['free'] < 2:
+                    if not booking.package_dbl_price_amount is None:
+                        if group['free'] == 0:
+                            price += 2 * booking.package_dbl_price_amount
+                        else:
+                            price += booking.package_dbl_price_amount
+                    else:
+                        return None, "Package Price Missing Double Amount"
+            elif group['qtty'] == 3:
+                if group['free'] < 3:
+                    if not booking.package_tpl_price_amount is None:
+                        if group['free'] == 0:
+                            price += 3 * booking.package_tpl_price_amount
+                        elif group['free'] == 1:
+                            price += 2 * booking.package_tpl_price_amount
+                        else:
+                            price += booking.package_tpl_price_amount
+                    else:
+                        return None, "Package Price Missing Triple Amount"
             else:
-                return None, "Package Price Unsupported Pax Quantity (%s)" % pax_qtty
+                return None, "Package Price Unsupported Pax Quantity (%s)" % group['qtty']
         return price, price_msg
 
 

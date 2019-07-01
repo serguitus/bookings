@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 Booking models
 """
 from django.db import models, transaction
+from django.db.models.query_utils import Q
 from django.contrib.auth.models import User
 
 from accounting.constants import CURRENCIES, CURRENCY_CUC
@@ -582,6 +583,7 @@ class BookingPax(models.Model):
     pax_name = models.CharField(max_length=50)
     pax_age = models.SmallIntegerField(blank=True, null=True, verbose_name='Age')
     pax_group = models.SmallIntegerField(verbose_name='Room')
+    is_price_free = models.BooleanField(default=False)
     cost_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost')
     cost_comments = models.CharField(max_length=1000, blank=True, null=True)
@@ -799,7 +801,8 @@ class BookingAllotment(BookingService, BaseAllotment):
     def adult_quantity(self):
         if self.service.child_age:
             return self.rooming_list.filter(
-                booking_pax__pax_age__gte=self.service.child_age).count()
+                Q(booking_pax__pax_age__isnull=True) |
+                Q(booking_pax__pax_age__gte=self.service.child_age)).count()
         return None
 
     def child_quantity(self):
