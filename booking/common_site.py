@@ -73,7 +73,7 @@ from booking.models import (
     BookingService,
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
     BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
-    BookingInvoice, BookingInvoiceLine, BookingInvoicePartial,
+    BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine, BookingInvoicePartial,
 )
 from booking.services import BookingServices
 from booking.top_filters import DateTopFilter, PackageTopFilter, CancelledTopFilter
@@ -1232,10 +1232,16 @@ class AgencyPackageServiceSiteModel(SiteModel):
     save_as = True
 
 
+class BookingInvoiceDetailInline(CommonTabularInline):
+    model = BookingInvoiceDetail
+    extra = 0
+    fields = ['date_from', 'date_to', 'description', 'detail', 'price']
+
+
 class BookingInvoiceLineInline(CommonTabularInline):
     model = BookingInvoiceLine
     extra = 0
-    fields = ['bookingservice_name', 'date_from', 'date_to', 'price']
+    fields = ['date_from', 'date_to', 'bookingservice_name', 'price']
 
 
 class BookingInvoicePartialInline(CommonTabularInline):
@@ -1250,14 +1256,14 @@ class BookingInvoiceSiteModel(SiteModel):
 
     fields = (
         ('booking_name', 'reference', 'status'),
-        ('date_from', 'date_to'),
+        ('date_from', 'date_to', 'office'),
         ('amount', 'matched_amount'))
 
-    inlines = [BookingInvoiceLineInline, BookingInvoicePartialInline]
+    inlines = [BookingInvoiceDetailInline, BookingInvoiceLineInline, BookingInvoicePartialInline]
 
     def save_model(self, request, obj, form, change):
         # disable save of agencyinvoice object
-        obj.save(update_fields=[])
+        obj.save(update_fields=['office'])
 
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'invoice_booking') and obj.invoice_booking:

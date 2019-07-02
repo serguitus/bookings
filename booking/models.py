@@ -499,6 +499,18 @@ class BookingInvoiceLine(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
 
+class BookingInvoiceDetail(models.Model):
+    class Meta:
+        verbose_name = 'Booking Invoice Detail'
+        verbose_name_plural = 'Bookings Invoices Details'
+    invoice = models.ForeignKey(BookingInvoice)
+    description = models.CharField(max_length=100, blank=True, null=True)
+    detail = models.CharField(max_length=100, blank=True, null=True)
+    date_from = models.DateField(blank=True, null=True)
+    date_to = models.DateField(blank=True, null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+
 class BookingInvoicePartial(models.Model):
     class Meta:
         verbose_name = 'Booking Invoice Partial'

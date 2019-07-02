@@ -5,11 +5,19 @@
             size: a4 portrait;
             @frame content_frame { /* Content Frame */
                 left: 45pt; right: 45pt; top: 45pt; bottom: 295pt;
-            }
+            };
             @frame footer_frame { /* Another static Frame */
                 -pdf-frame-content: footer_content;
                 left: 45pt; right: 45pt; bottom: 45pt; height: 250pt;
             }
+        }
+        td.label {
+            text-align: right;
+            padding: 4px,3px,0px,0px;
+        }
+        td.content {
+            text-align: left;
+            padding: 4px,0px,0px,3px;
         }
     </style>
 </head>
@@ -34,15 +42,80 @@
             <br>
             We are not responsible for retained payments for not following above indications.</p>
         </div>
-
-        <img width=213 height=70 alt="{{ invoice.office.name }}">
-        <h1>Invoice for {{ invoice.bookingname }}</h1>
-        <h2>Agency {{ invoice.agency }}</h3>
-        {% if invoice.reference %}
-            <h2>Agency Ref: {{ invoice.reference }}</h2>
-            {% endif %}
-        <h3>From {{ invoice.date_from }}</h3>
-        <h3>To {{ invoice.date_to }}</h3>
+        <table>
+            <tr>
+                <td width="30%">
+                    {% if invoice.office.logo %}
+                        <img width=150 height=90 src="{{ invoice.office.logo.url }}"  alt="Office">
+                    {% endif %}
+                </td>
+                <td width="35%" style="text-align: center;">
+                    <h1><b>INVOICE</b></h1>
+                    <h2><b>{{ invoice.reference }}</b></h2>
+                </td>
+                <td width="35%" style="text-align: center;">
+                    {{ invoice.office.name }}<br>
+                    {{ invoice.office.address }}<br>
+                    {{ invoice.office.detail1 }}<br>
+                    {{ invoice.office.detail2 }}
+                </td>
+            </tr>
+        </table>
+        <table style="border: 1px solid black;">
+            <tr">
+                <td width="15%" class="label">
+                    CLIENT
+                </td>
+                <td width="55%" class="content">
+                    {{ invoice.agency }}
+                </td>
+                <td width="15%" class="label">
+                    CURRENCY
+                </td>
+                <td width="15%" class="content">
+                    {{ invoice.currency }}
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    CLIENT REF.
+                </td>
+                <td class="content">
+                    {{ invoice.booking_name }}
+                </td>
+                <td class="label">
+                    FROM
+                </td>
+                <td class="content">
+                    {{ invoice.date_from|date:"d-M-y" }}
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    COUNTRY
+                </td>
+                <td class="content">
+                </td>
+                <td class="label">
+                    TO
+                </td>
+                <td class="content">
+                    {{ invoice.date_to|date:"d-M-y" }}
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    ISSUED BY
+                </td>
+                <td class="content">
+                </td>
+                <td class="label">
+                    DATE
+                </td>
+                <td class="content">
+                </td>
+            </tr>
+        </table>
         <h3>Amount {{ invoice.amount }}</h3>
         <table>
         {% for line in lines %}

@@ -1,7 +1,5 @@
-{% load static %}
 <html>
     <head>
-        <link rel="stylesheet" type="text/css" href="{% static 'booking/css/extras.css' %}" />
         <style>
          .voucher-header{
              border-top: 1px solid black;
@@ -57,18 +55,19 @@
             {% for service in services %}
                 <table class="voucher">
                     <tr class="voucher-header" height="100px">
-                        <td class="voucher-head-1" width="40%">
-                            <img width=213 height=70
-                             {# TODO here specify logo according to office #}
-                             src="{% static "/media/booking/img/logo_ergos.png" %}"
-                             alt="ERGOS LOGO">
+                        <td class="voucher-head-1" width="35%">
+                            {% if office.logo %}
+                                <img width=150 height=70
+                                    src="{{ office.logo.url }}"
+                                    alt="Office">
+                            {% endif %}
                         </td>
-                        <td class="voucher-head-2" width="20%"><h1><b>VOUCHER</b></h1></td>
-                        <td class="voucher-head-3" width="40%">Ergos Continental SA<br>
+                        <td class="voucher-head-2" width="30%"><h1><b>VOUCHER</b></h1></td>
+                        <td class="voucher-head-3" width="35%">Ergos Continental SA<br>
                         Building Gomez Vila, Office 107, <br>Plaza Vieja, Habana Vieja
                         La Habana, Cuba<br>
                         (+53) 5 551 1234, (+53) 5 242 5699
-</td>
+                        </td>
                     </tr>
                     <tr class="voucher-title">
                         <td colspan="3">
