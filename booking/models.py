@@ -822,13 +822,14 @@ class BookingAllotment(BookingService, BaseAllotment):
             return self.rooming_list.filter(
                 Q(booking_pax__pax_age__isnull=True) |
                 Q(booking_pax__pax_age__gte=self.service.child_age)).count()
-        return None
+        else:
+            return self.rooming_list.count()
 
     def child_quantity(self):
         if self.service.child_age:
             return self.rooming_list.filter(
                 booking_pax__pax_age__lt=self.service.child_age).count()
-        return None
+        return 0
 
 
 class BookingTransfer(BookingService, BaseTransfer):
