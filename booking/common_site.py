@@ -1259,7 +1259,7 @@ class BookingInvoiceSiteModel(SiteModel):
             'fields': (
                 ('booking_name', 'reference'),
                 ('date_from', 'date_to'),
-                ('issued_name'),
+                ('issued_name', 'cash_amount'),
                 ('status', 'amount', 'matched_amount')
             )
         }),
@@ -1273,7 +1273,9 @@ class BookingInvoiceSiteModel(SiteModel):
 
     def save_model(self, request, obj, form, change):
         # disable save of agencyinvoice object
-        obj.save(update_fields=['booking_name', 'reference', 'date_from', 'date_to',  'office'])
+        obj.save(
+            update_fields=[
+                'booking_name', 'reference', 'date_from', 'date_to', 'cash_amount', 'office'])
 
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'invoice_booking') and obj.invoice_booking:

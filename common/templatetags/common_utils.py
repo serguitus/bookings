@@ -25,6 +25,14 @@ register = template.Library()
 
 DOT = '.'
 
+@register.filter
+def substract_days(value, arg):
+    return value - datetime.timedelta(days=arg)
+
+@register.filter
+def substract(value, arg):
+    return value - arg
+
 @register.assignment_tag
 def setvar(val=None):
     return val

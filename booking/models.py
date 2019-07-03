@@ -474,6 +474,7 @@ class BookingInvoice(AgencyInvoice):
     reference = models.CharField(max_length=25, blank=True, null=True)
     date_from = models.DateField(blank=True, null=True)
     date_to = models.DateField(blank=True, null=True)
+    cash_amount = models.DecimalField(decimal_places=2, max_digits=9, default=0.0)
     office = models.ForeignKey(Office, blank=True, null=True)
     issued_name = models.CharField(max_length=60, blank=True, null=True)
     date_issued = models.DateField(blank=True, null=True)

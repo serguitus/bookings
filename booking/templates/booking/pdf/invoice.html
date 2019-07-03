@@ -1,3 +1,5 @@
+{% load common_utils %}
+
 <html>
 <head>
     <style>
@@ -11,12 +13,22 @@
                 left: 45pt; right: 45pt; bottom: 45pt; height: 250pt;
             }
         }
+        tr.top-line {
+            border-top: 1px solid black;
+        }
+        tr.bottom-line {
+            border-bottom: 1px solid black;
+        }
         td.label {
             text-align: right;
             padding: 4px,3px,0px,0px;
         }
         td.content {
             text-align: left;
+            padding: 4px,0px,0px,3px;
+        }
+        td.content-centered {
+            text-align: center;
             padding: 4px,0px,0px,3px;
         }
     </style>
@@ -118,17 +130,6 @@
                 </td>
             </tr>
         </table>
-        <h3>Amount {{ invoice.amount }}</h3>
-        <table>
-        {% for line in lines %}
-            <tr>
-                <td style="width:70%;">{{ line.bookingservice_name }}</td>
-                <td style="width:10%;">{{ line.date_from }}</td>
-                <td style="width:10%;">{{ line.date_to }}</td>
-                <td style="width:10%; text-align:right;">{{ line.price }}</td>
-            </tr>
-        {% endfor %}
-        </table>
         <p>
         {% for partial in partials %}
             {% if forloop.first %}
@@ -140,6 +141,8 @@
                 <span> (free)</span>
             {%endif %}
         {% endfor %}
+        </p>
+        <table>
         {% for line in lines %}
             <tr>
                 <td style="width:70%;">{{ line.bookingservice_name }}</td>
@@ -148,6 +151,41 @@
                 <td style="width:10%; text-align:right;">{{ line.price }}</td>
             </tr>
         {% endfor %}
-        </p>
+        </table>
+        <table>
+            <tr class="top-line">
+                <td width="60%">
+                </td>
+                <td width="25%" class="label">
+                    <b>TOTAL</b>
+                </td>
+                <td width="15%" class="label">
+                    <b>{{ invoice.amount }}</b>
+                </td>
+            </tr>
+            {% if invoice.cash_amount %}
+            <tr>
+                <td class="content-centered">
+                    <b>THIS INVOICE MUST BE PAID BY {{ invoice.date_from|substract_days:10|date:"d-M-y" }}</b>
+                </td>
+                <td class="label">
+                    <b>TO BE PAID IN CASH</b>
+                </td>
+                <td class="label">
+                    <b>{{ invoice.cash_amount }}</b>
+                </td>
+            </tr>
+            <tr class="bottom-line">
+                <td>
+                </td>
+                <td class="label">
+                    <b>TO BE PAID BY TRANSFER</b>
+                </td>
+                <td class="label">
+                    <b>{{ invoice.amount|substract:invoice.cash_amount }}</b>
+                </td>
+            </tr>
+            {%endif %}
+        </table>
     </body>
 </html>
