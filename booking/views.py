@@ -908,7 +908,7 @@ class BookingInvoicePDFView(View):
         }
         html = template.render(context)
         result = StringIO()
-        pdf = pisa.pisaDocument(StringIO(html), dest=result)
+        pdf = pisa.pisaDocument(StringIO(html), dest=result, link_callback=_fetch_resources)
         if pdf.err:
             messages.add_message(request, messages.ERROR, "Failed Invoice PDF Generation")
             return HttpResponseRedirect(reverse('common:booking_booking_change', args=[id]))

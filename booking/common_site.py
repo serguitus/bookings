@@ -73,7 +73,7 @@ from booking.models import (
     BookingService,
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
     BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
-    BookingInvoice, BookingInvoiceLine, BookingInvoicePartial,
+    BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine, BookingInvoicePartial,
 )
 from booking.services import BookingServices
 from booking.top_filters import DateTopFilter, PackageTopFilter, CancelledTopFilter
@@ -398,7 +398,7 @@ class QuoteSiteModel(SiteModel):
     def booking_build(self, request, id, extra_context=None):
         PaxFormSet = modelformset_factory(
             model=BookingPax,
-            fields=['pax_name', 'pax_age', 'pax_group'],
+            fields=['pax_name', 'pax_age', 'pax_group', 'is_price_free'],
             extra=1,
         )
         formset = None
@@ -1232,32 +1232,50 @@ class AgencyPackageServiceSiteModel(SiteModel):
     save_as = True
 
 
+class BookingInvoiceDetailInline(CommonTabularInline):
+    model = BookingInvoiceDetail
+    extra = 0
+    fields = ['date_from', 'date_to', 'description', 'detail', 'price']
+
+
 class BookingInvoiceLineInline(CommonTabularInline):
     model = BookingInvoiceLine
     extra = 0
-    fields = ['bookingservice_name', 'date_from', 'date_to', 'price']
+    fields = ['date_from', 'date_to', 'bookingservice_name', 'price']
 
 
 class BookingInvoicePartialInline(CommonTabularInline):
     model = BookingInvoicePartial
     extra = 0
-    fields = ['pax_name', 'partial_amount',]
+    fields = ['pax_name', 'is_free', 'partial_amount',]
 
 
 class BookingInvoiceSiteModel(SiteModel):
     delete_allowed = False
     recent_allowed = False
 
-    fields = (
-        ('booking_name', 'reference', 'status'),
-        ('date_from', 'date_to'),
-        ('amount', 'matched_amount'))
+    fieldsets = (
+        (None, {
+            'fields': (
+                ('booking_name', 'reference'),
+                ('date_from', 'date_to'),
+                ('issued_name', 'cash_amount'),
+                ('status', 'amount', 'matched_amount')
+            )
+        }),
+        ('Configuration', {
+            'fields': ('office', 'content_format', 'date_issued'),
+        })
+    )
+    readonly_fields = ('status', 'amount', 'matched_amount')
 
-    inlines = [BookingInvoiceLineInline, BookingInvoicePartialInline]
+    inlines = [BookingInvoiceDetailInline, BookingInvoiceLineInline, BookingInvoicePartialInline]
 
     def save_model(self, request, obj, form, change):
         # disable save of agencyinvoice object
-        obj.save(update_fields=[])
+        obj.save(
+            update_fields=[
+                'booking_name', 'reference', 'date_from', 'date_to', 'cash_amount', 'office'])
 
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'invoice_booking') and obj.invoice_booking:

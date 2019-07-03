@@ -474,8 +474,12 @@ class BookingInvoice(AgencyInvoice):
     reference = models.CharField(max_length=25, blank=True, null=True)
     date_from = models.DateField(blank=True, null=True)
     date_to = models.DateField(blank=True, null=True)
+    cash_amount = models.DecimalField(decimal_places=2, max_digits=9, default=0.0)
     office = models.ForeignKey(Office, blank=True, null=True)
-    format = models.CharField(
+    issued_name = models.CharField(max_length=60, blank=True, null=True)
+    date_issued = models.DateField(blank=True, null=True)
+    office = models.ForeignKey(Office, blank=True, null=True)
+    content_format = models.CharField(
         max_length=1, choices=INVOICE_FORMATS, default=INVOICE_FORMAT_DETAIL)
 
     def fill_data(self):
@@ -499,12 +503,25 @@ class BookingInvoiceLine(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
 
+class BookingInvoiceDetail(models.Model):
+    class Meta:
+        verbose_name = 'Booking Invoice Detail'
+        verbose_name_plural = 'Bookings Invoices Details'
+    invoice = models.ForeignKey(BookingInvoice)
+    description = models.CharField(max_length=100, blank=True, null=True)
+    detail = models.CharField(max_length=100, blank=True, null=True)
+    date_from = models.DateField(blank=True, null=True)
+    date_to = models.DateField(blank=True, null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+
 class BookingInvoicePartial(models.Model):
     class Meta:
         verbose_name = 'Booking Invoice Partial'
         verbose_name_plural = 'Bookings Invoices Partials'
     invoice = models.ForeignKey(BookingInvoice)
     pax_name = models.CharField(max_length=100, blank=True, null=True)
+    is_free = models.BooleanField(default=False)
     detail2 = models.CharField(max_length=100, blank=True, null=True)
     partial_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
