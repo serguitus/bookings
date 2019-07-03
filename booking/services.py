@@ -2569,7 +2569,7 @@ class BookingServices(object):
 
         quote_package = quotepackage_service.quote_package
         # find pax variants
-        quotepackage_pax_variants = list(c.objects.all().filter(quote_service=quote_package.id))
+        quotepackage_pax_variants = list(QuotePackageServicePaxVariant.objects.all().filter(quote_service=quote_package.id))
         # for each quote pax variant get or create
         for quotepackage_pax_variant in quotepackage_pax_variants:
             defaults = cls._calculate_default_paxvariant_amounts(
