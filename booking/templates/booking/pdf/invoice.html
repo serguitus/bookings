@@ -146,8 +146,8 @@
         {% for line in lines %}
             <tr>
                 <td style="width:70%;">{{ line.bookingservice_name }}</td>
-                <td style="width:10%;">{{ line.date_from }}</td>
-                <td style="width:10%;">{{ line.date_to }}</td>
+                <td style="width:10%;">{{ line.date_from|date:"d-M-y" }}</td>
+                <td style="width:10%;">{{ line.date_to|date:"d-M-y" }}</td>
                 <td style="width:10%; text-align:right;">{{ line.price }}</td>
             </tr>
         {% endfor %}

@@ -73,10 +73,10 @@
                         <td colspan="3">
                             <table width="100%">
                                 <tr>
-                                    <td class="voucher-title-1" width="40%">Ref. {{ service.booking.internal_reference }}</td>
-                                    <td class="voucher-title-2" width="20%">From: {{ service.datetime_from }}</td>
-                                    <td class="voucher-title-3" width="20%">{% if service.datetime_to %}To: {{ service.datetime_to }}{% endif %}</td>
-                                    <td class="voucher-title-4" width="20%">{% if service.conf_number %}Confirm. {{ service.conf_number }}{% endif %}</td>
+                                    <td class="voucher-title-1" width="40%"><b>Ref. </b>{{ service.booking.internal_reference }}</td>
+                                    <td class="voucher-title-2" width="20%"><b>From: </b>{{ service.datetime_from }}</td>
+                                    <td class="voucher-title-3" width="20%">{% if service.datetime_to %}<b>To: </b>{{ service.datetime_to }}{% endif %}</td>
+                                    <td class="voucher-title-4" width="20%"><b>Confirm. </b>{% if service.conf_number %}{{ service.conf_number }}{% else %}OK{% endif %}</td>
                                 </tr>
                             </table>
                         </td>
@@ -151,9 +151,9 @@
                         <td colspan="3">
                             <table class="t-voucher-footer">
                                 <tr>
-                                    <td>Emision:</td>
-                                    <td>By {{ office }}</td>
-                                    <td>UID: {{ uid }}</td>
+                                    <td><b>Issued: </b>{% now "d-M-y" %}</td>
+                                    <td><b>By </b>{{ office }}</td>
+                                    <td><b>UID: </b>{{ uid }}</td>
                                 </tr>
                             </table>
                         </td>
