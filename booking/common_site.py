@@ -787,17 +787,11 @@ class BookingSiteModel(SiteModel):
         info = self.model._meta.app_label, self.model._meta.model_name
         urls = super(BookingSiteModel, self).get_urls()
         urlpatterns = [
-            self.build_url(r'^invoices/(?P<id>\d+)/config/?',
-                           self.config_invoice, 'config_invoice'),
             self.build_url(r'^voucher/(?P<id>\d+)/config/?',
                            self.config_vouchers,
                            '%s_%s_config_vouchers' % info),
         ]
         return urlpatterns + urls
-
-    def config_invoice(self, request, id):
-        # this handles configuration form to build invoices
-        pass
 
     def config_vouchers(self, request, id, extra_context=None):
         # this handles configuration form to build vouchers
@@ -875,6 +869,12 @@ class BookingSiteModel(SiteModel):
             booking = selected_bookingservices[0].booking
             super(BookingSiteModel, self).response_change(request, booking)
         # show selection view
+
+    def save_related(self, request, form, formsets, change):
+        with transaction.atomic(savepoint=False):
+            super(BookingSiteModel, self).save_related(request, form, formsets, change)
+            obj = self.save_form(request, form, change)
+            BookingServices.update_booking_amounts(obj)
 
 
 class BookingServiceSiteModel(SiteModel):
