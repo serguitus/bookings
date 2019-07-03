@@ -859,10 +859,10 @@ class BookingSiteModel(SiteModel):
             # make a new GET request to show list of services to update
             return redirect(reverse('bookingservice_update',
                                     args=[obj.id]))
-            self.select_bookingservices_view(request, obj, bookingservices)
         else:
             return super(BookingSiteModel, self).response_change(request, obj)
 
+    # TODO remove this in favor of booking.views.BookingServiceUpdateView
     def select_bookingservices_view(self, request,
                                     booking, bookingservices=None):
 
