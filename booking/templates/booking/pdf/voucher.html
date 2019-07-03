@@ -7,7 +7,7 @@
          .voucher-head-1{
              border-left: 1px solid black;
          }
-         .voucher-head-3{
+         .voucher-head-3, .voucher-head-4 {
              border-right: 1px solid black;
          }
          .voucher-header td{
@@ -73,9 +73,10 @@
                         <td colspan="3">
                             <table width="100%">
                                 <tr>
-                                    <td class="voucher-title-1" width="600px">Ref. {{ service.booking.internal_reference }}</td>
-                                    <td class="voucher-title-2" width="400px">From: {{ service.datetime_from }}</td>
-                                    <td class="voucher-title-3">{% if service.datetime_to %}To: {{ service.datetime_to }}{% endif %}</td>
+                                    <td class="voucher-title-1" width="40%">Ref. {{ service.booking.internal_reference }}</td>
+                                    <td class="voucher-title-2" width="20%">From: {{ service.datetime_from }}</td>
+                                    <td class="voucher-title-3" width="20%">{% if service.datetime_to %}To: {{ service.datetime_to }}{% endif %}</td>
+                                    <td class="voucher-title-4" width="20%">{% if service.conf_number %}Confirm. {{ service.conf_number }}{% endif %}</td>
                                 </tr>
                             </table>
                         </td>
@@ -84,19 +85,59 @@
                         <td colspan="3">
                             <table width="100%">
                                 <tr>
-                                    <td width="400px"><b>Client:</b> {{ service.booking.name }}</td>
-                                    <td>{% if service.service_type == 'A' %}
+                                    <td width="60%"><b>Client:</b> {{ service.booking.name }}</td>
+                                    <td width="20%">
+                                    {% if service.service_type == 'A' %}
                                         <b>Adults:</b> {{ service.adult_quantity }}
                                     {% else %}
                                         <b>Pax:</b> {{ service.pax_quantity }}
-                                    {% endif %}</td>
-                                    <td>{% if service.service_type == 'A' and service.child_quantity %}<b>Children:</b> {{ service.child_quantity }}{% endif %}</td>
+                                    {% endif %}
+                                    </td>
+                                    <td width="20%">
+                                    {% if service.service_type == 'A' and service.child_quantity %}
+                                        <b>Children:</b> {{ service.child_quantity }}
+                                    {% endif %}
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td colspan="3">
                                         <b>Service:</b> {{ service.name }} [{{ service.description }}]
                                     </td>
                                 </tr>
+                                {% if service.service_type == 'A' and service.service.address %}
+                                <tr>
+                                    <td colspan="3">
+                                        <b>Address:</b> {{ service.service.address }}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% if service.time or service.pickup or service.dropoff %}
+                                <tr>
+                                    <td colspan="3">
+                                        <table>
+                                            <tr>
+                                                <td width="20%">
+                                                {% if service.time %}
+                                                    <b>Time:</b> {{ service.time|time:"H:i" }}
+                                                {% endif %}
+                                                </td>
+                                                <td width="40%">
+                                                {% if service.pickup %}
+                                                    <b>Pickup:</b> {{ service.pickup }}<br>
+                                                    <b>Address:</b> {{ service.pickup.address }}
+                                                {% endif %}
+                                                </td>
+                                                <td width="40%">
+                                                {% if service.dropoff %}
+                                                    <b>Dropoff:</b> {{ service.dropoff }}<br>
+                                                    <b>Address:</b> {{ service.dropoff.address }}
+                                                {% endif %}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                {% endif %}
                             </table>
                         </td>
                     </tr>
