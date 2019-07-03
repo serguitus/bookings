@@ -475,7 +475,10 @@ class BookingInvoice(AgencyInvoice):
     date_from = models.DateField(blank=True, null=True)
     date_to = models.DateField(blank=True, null=True)
     office = models.ForeignKey(Office, blank=True, null=True)
-    format = models.CharField(
+    issued_name = models.CharField(max_length=60, blank=True, null=True)
+    date_issued = models.DateField(blank=True, null=True)
+    office = models.ForeignKey(Office, blank=True, null=True)
+    content_format = models.CharField(
         max_length=1, choices=INVOICE_FORMATS, default=INVOICE_FORMAT_DETAIL)
 
     def fill_data(self):
@@ -517,6 +520,7 @@ class BookingInvoicePartial(models.Model):
         verbose_name_plural = 'Bookings Invoices Partials'
     invoice = models.ForeignKey(BookingInvoice)
     pax_name = models.CharField(max_length=100, blank=True, null=True)
+    is_free = models.BooleanField(default=False)
     detail2 = models.CharField(max_length=100, blank=True, null=True)
     partial_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 

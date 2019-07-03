@@ -108,11 +108,13 @@
                     ISSUED BY
                 </td>
                 <td class="content">
+                    {{ invoice.issued_name }}
                 </td>
                 <td class="label">
                     DATE
                 </td>
                 <td class="content">
+                    {{ invoice.date_issued|date:"d-M-y" }}
                 </td>
             </tr>
         </table>
@@ -134,6 +136,17 @@
             {% else %}
                 <span>, {{ partial.pax_name }}</span>
             {%endif %}
+            {% if partial.is_free %}
+                <span> (free)</span>
+            {%endif %}
+        {% endfor %}
+        {% for line in lines %}
+            <tr>
+                <td style="width:70%;">{{ line.bookingservice_name }}</td>
+                <td style="width:10%;">{{ line.date_from }}</td>
+                <td style="width:10%;">{{ line.date_to }}</td>
+                <td style="width:10%; text-align:right;">{{ line.price }}</td>
+            </tr>
         {% endfor %}
         </p>
     </body>

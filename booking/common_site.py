@@ -398,7 +398,7 @@ class QuoteSiteModel(SiteModel):
     def booking_build(self, request, id, extra_context=None):
         PaxFormSet = modelformset_factory(
             model=BookingPax,
-            fields=['pax_name', 'pax_age', 'pax_group'],
+            fields=['pax_name', 'pax_age', 'pax_group', 'is_price_free'],
             extra=1,
         )
         formset = None
@@ -1247,23 +1247,33 @@ class BookingInvoiceLineInline(CommonTabularInline):
 class BookingInvoicePartialInline(CommonTabularInline):
     model = BookingInvoicePartial
     extra = 0
-    fields = ['pax_name', 'partial_amount',]
+    fields = ['pax_name', 'is_free', 'partial_amount',]
 
 
 class BookingInvoiceSiteModel(SiteModel):
     delete_allowed = False
     recent_allowed = False
 
-    fields = (
-        ('booking_name', 'reference', 'status'),
-        ('date_from', 'date_to', 'office'),
-        ('amount', 'matched_amount'))
+    fieldsets = (
+        (None, {
+            'fields': (
+                ('booking_name', 'reference'),
+                ('date_from', 'date_to'),
+                ('issued_name'),
+                ('status', 'amount', 'matched_amount')
+            )
+        }),
+        ('Configuration', {
+            'fields': ('office', 'content_format', 'date_issued'),
+        })
+    )
+    readonly_fields = ('status', 'amount', 'matched_amount')
 
     inlines = [BookingInvoiceDetailInline, BookingInvoiceLineInline, BookingInvoicePartialInline]
 
     def save_model(self, request, obj, form, change):
         # disable save of agencyinvoice object
-        obj.save(update_fields=['office'])
+        obj.save(update_fields=['booking_name', 'reference', 'date_from', 'date_to',  'office'])
 
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'invoice_booking') and obj.invoice_booking:

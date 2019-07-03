@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 """
 Booking Service
 """
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from django.contrib.admin.models import LogEntry, ADDITION, CHANGE
 from django.contrib.admin.options import get_content_type_for_model
@@ -86,6 +86,9 @@ class BookingServices(object):
             invoice.date_from = booking.date_from
             invoice.date_to = booking.date_to
 
+            invoice.date_issued = date.today()
+            invoice.issued_name = booking.seller.get_full_name()
+
             FinanceService.save_agency_invoice(user, invoice, BookingInvoice)
             LogEntry.objects.log_action(
                 user_id=user.pk,
@@ -115,7 +118,7 @@ class BookingServices(object):
                 invoice_partial = BookingInvoicePartial()
                 invoice_partial.invoice = invoice
                 invoice_partial.pax_name = booking_pax.pax_name
-
+                invoice_partial.is_free = booking_pax.is_price_free
                 invoice_partial.save()
 
             booking.invoice = invoice
