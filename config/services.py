@@ -1434,6 +1434,9 @@ class ConfigServices(object):
                     agency_service_id=dst_agency_service.id,
                     room_type_id=detail.room_type_id,
                     board_type=detail.board_type,
+                    addon_id=detail.addon_id,
+                    pax_range_min=detail.pax_range_min,
+                    pax_range_max=detail.pax_range_max,
                     defaults=cls.calculate_default_amounts(
                         detail, 0, dst_agency.gain_percent)
                 )
@@ -1443,6 +1446,9 @@ class ConfigServices(object):
                     agency_service_id=dst_agency_service.id,
                     room_type_id=detail.room_type_id,
                     board_type=detail.board_type,
+                    addon_id=detail.addon_id,
+                    pax_range_min=detail.pax_range_min,
+                    pax_range_max=detail.pax_range_max,
                     defaults=cls.calculate_default_amounts(
                         detail, 0, dst_agency.gain_percent)
                 )
@@ -1467,6 +1473,9 @@ class ConfigServices(object):
                     agency_service_id=dst_agency_service.id,
                     a_location_from_id=detail.p_location_from_id,
                     a_location_to_id=detail.p_location_to_id,
+                    addon_id=detail.addon_id,
+                    pax_range_min=detail.pax_range_min,
+                    pax_range_max=detail.pax_range_max,
                     defaults=cls.calculate_default_amounts(
                         detail, 0, dst_agency.gain_percent)
                 )
@@ -1476,6 +1485,9 @@ class ConfigServices(object):
                     agency_service_id=dst_agency_service.id,
                     a_location_from_id=detail.p_location_from_id,
                     a_location_to_id=detail.p_location_to_id,
+                    addon_id=detail.addon_id,
+                    pax_range_min=detail.pax_range_min,
+                    pax_range_max=detail.pax_range_max,
                     defaults=cls.calculate_default_amounts(
                         detail, 0, dst_agency.gain_percent)
                 )
