@@ -2899,17 +2899,20 @@ class BookingServices(object):
             fields.append('cost_triple_amount')
             pax_variant.cost_triple_amount = c3
 
-        if not cls._equals_amounts(pax_variant.price_single_amount, p1):
+        extra = cls._round_price(pax_variant.extra_single_amount)
+        if not cls._equals_amounts(pax_variant.price_single_amount, p1 + extra):
             fields.append('price_single_amount')
-            pax_variant.price_single_amount = p1
+            pax_variant.price_single_amount = p1 + extra
 
-        if not cls._equals_amounts(pax_variant.price_double_amount, p2):
+        extra = cls._round_price(float(pax_variant.extra_double_amount))
+        if not cls._equals_amounts(pax_variant.price_double_amount, p2 + extra):
             fields.append('price_double_amount')
-            pax_variant.price_double_amount = p2
+            pax_variant.price_double_amount = p2 + extra
 
-        if not cls._equals_amounts(pax_variant.price_triple_amount, p3):
+        extra = cls._round_price(float(pax_variant.extra_triple_amount))
+        if not cls._equals_amounts(pax_variant.price_triple_amount, p3 + extra):
             fields.append('price_triple_amount')
-            pax_variant.price_triple_amount = p3
+            pax_variant.price_triple_amount = p3 + extra
         return fields
 
 
