@@ -153,8 +153,11 @@
         {% endfor %}
         </table>
         <table>
-            <tr class="top-line">
-                <td width="60%">
+            <tr class="top-line{% if not invoice.cash_amount %} bottom-line{%endif %}">
+                <td width="60%" class="content-centered">
+                {% if not invoice.cash_amount %}
+                    <b>THIS INVOICE MUST BE PAID BY {{ invoice.date_from|substract_days:10|date:"d-M-y" }}</b>
+                {%endif %}
                 </td>
                 <td width="25%" class="label">
                     <b>TOTAL</b>
