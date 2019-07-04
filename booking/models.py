@@ -269,6 +269,12 @@ class QuotePaxVariant(PaxVariantAmounts):
     quote = models.ForeignKey(Quote, related_name='quote_paxvariants')
     pax_quantity = models.SmallIntegerField()
     price_percent = models.SmallIntegerField(blank=True, null=True, verbose_name='Price %')
+    extra_single_amount = models.DecimalField(
+        max_digits=5, decimal_places=2, default=0.0, verbose_name='Extra SGL')
+    extra_double_amount = models.DecimalField(
+        max_digits=5, decimal_places=2, default=0.0, verbose_name='Extra DBL')
+    extra_triple_amount = models.DecimalField(
+        max_digits=5, decimal_places=2, default=0.0, verbose_name='Extra TPL')
 
     def __str__(self):
         return '%s paxes' % (self.pax_quantity)
