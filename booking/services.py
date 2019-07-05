@@ -22,7 +22,7 @@ from booking.models import (
     Booking, BookingService, BookingPax, BookingServicePax,
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
     BookingPackageService, BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
-    BookingInvoice, BookingInvoiceLine, BookingInvoicePartial)
+    BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine, BookingInvoicePartial)
 
 from config.services import ConfigServices
 
@@ -67,6 +67,47 @@ class BookingServices(object):
                     change_message="Booking Invoice Cancelled",
                 )
 
+
+    @classmethod
+    def _find_booking_package_paxes(cls, booking):
+        pax_list = list(BookingPax.objects.filter(booking=booking.id))
+        groups = dict()
+        for pax in pax_list:
+            if pax.pax_group is None:
+                continue
+            if not groups.__contains__(pax.pax_group):
+                groups[pax.pax_group] = dict()
+                groups[pax.pax_group]['qtty'] = 0
+                groups[pax.pax_group]['free'] = 0
+            groups[pax.pax_group]['qtty'] += 1
+            if pax.is_price_free:
+                groups[pax.pax_group]['free'] += 1
+        result = dict()
+        result['1'] = dict()
+        result['1']['qtty'] = 0
+        result['1']['free'] = 0
+        result['2'] = dict()
+        result['2']['qtty'] = 0
+        result['2']['free'] = 0
+        result['3'] = dict()
+        result['3']['qtty'] = 0
+        result['3']['free'] = 0
+        for group in groups.values():
+            if group['qtty'] == 1:
+                result['1']['qtty'] += group['qtty']
+                if group['free'] > 0:
+                    result['1']['free'] += group['free']
+            elif group['qtty'] == 2:
+                result['2']['qtty'] += group['qtty']
+                if group['free'] > 0:
+                    result['2']['free'] += group['free']
+            elif group['qtty'] == 3:
+                result['3']['qtty'] += group['qtty']
+                if group['free'] > 0:
+                    result['3']['free'] += group['free']
+        return result
+
+
     @classmethod
     def create_bookinginvoice(cls, user, booking):
         with transaction.atomic(savepoint=False):
@@ -98,6 +139,36 @@ class BookingServices(object):
                 action_flag=ADDITION,
                 change_message="Booking Invoice Created",
             )
+
+            # obtain detail
+            paxes = cls._find_booking_package_paxes(booking)
+            if paxes['1']['qtty'] > 0:
+                invoice_detail = BookingInvoiceDetail()
+                invoice_detail.invoice = invoice
+                invoice_detail.description = "PACKAGE PRICE IN SINGLE %s x Pax" % booking.package_sgl_price_amount
+                invoice_detail.detail = "%s Pax" % (paxes['1']['qtty'] - paxes['1']['free'])
+                invoice_detail.date_from = booking.date_from
+                invoice_detail.date_to = booking.date_to
+                invoice_detail.price = (paxes['1']['qtty'] - paxes['1']['free']) * booking.package_sgl_price_amount
+                invoice_detail.save()
+            if paxes['2']['qtty'] > 0:
+                invoice_detail = BookingInvoiceDetail()
+                invoice_detail.invoice = invoice
+                invoice_detail.description = "PACKAGE PRICE IN DOUBLE %s x Pax" % booking.package_dbl_price_amount
+                invoice_detail.detail = "%s Pax" % (paxes['2']['qtty'] - paxes['2']['free'])
+                invoice_detail.date_from = booking.date_from
+                invoice_detail.date_to = booking.date_to
+                invoice_detail.price = (paxes['2']['qtty'] - paxes['2']['free']) * booking.package_dbl_price_amount
+                invoice_detail.save()
+            if paxes['1']['qtty'] > 0:
+                invoice_detail = BookingInvoiceDetail()
+                invoice_detail.invoice = invoice
+                invoice_detail.description = "PACKAGE PRICE IN TRIPLE %s x Pax" % booking.package_tpl_price_amount
+                invoice_detail.detail = "%s Pax" % (paxes['3']['qtty'] - paxes['3']['free'])
+                invoice_detail.date_from = booking.date_from
+                invoice_detail.date_to = booking.date_to
+                invoice_detail.price = (paxes['3']['qtty'] - paxes['3']['free']) * booking.package_tpl_price_amount
+                invoice_detail.save()
 
             # obtain lines
             booking_service_list = BookingService.objects.filter(

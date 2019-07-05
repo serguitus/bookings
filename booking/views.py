@@ -45,7 +45,7 @@ from booking.models import (
     BookingPax, BookingServicePax,
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
     BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
-    BookingInvoice, BookingInvoiceLine, BookingInvoicePartial,
+    BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine, BookingInvoicePartial,
 )
 from booking.forms import EmailProviderForm
 from booking.services import BookingServices
@@ -898,11 +898,13 @@ class BookingInvoicePDFView(View):
 
         invoice = booking.invoice
         template = get_template("booking/pdf/invoice.html")
+        details = BookingInvoiceDetail.objects.filter(invoice=invoice)
         lines = BookingInvoiceLine.objects.filter(invoice=invoice)
         partials = BookingInvoicePartial.objects.filter(invoice=invoice)
         context = {
             'pagesize': 'Letter',
             'invoice': invoice,
+            'details': details,
             'lines': lines,
             'partials': partials,
         }
