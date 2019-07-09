@@ -2973,9 +2973,10 @@ class BookingServices(object):
         extra = 0.0
         if isinstance(pax_variant, QuotePaxVariant):
             extra = cls._round_price(pax_variant.extra_single_amount)
-        if p1 is None and not pax_variant.price_single_amount is None:
-            fields.append('price_single_amount')
-            pax_variant.price_single_amount = None
+        if p1 is None:
+            if not pax_variant.price_single_amount is None:
+                fields.append('price_single_amount')
+                pax_variant.price_single_amount = None
         else:
             if not cls._equals_amounts(pax_variant.price_single_amount, p1 + extra):
                 fields.append('price_single_amount')
@@ -2983,9 +2984,10 @@ class BookingServices(object):
 
         if isinstance(pax_variant, QuotePaxVariant):
             extra = cls._round_price(float(pax_variant.extra_double_amount))
-        if p2 is None and not pax_variant.price_double_amount is None:
-            fields.append('price_double_amount')
-            pax_variant.price_double_amount = None
+        if p2 is None:
+            if not pax_variant.price_double_amount is None:
+                fields.append('price_double_amount')
+                pax_variant.price_double_amount = None
         else:
             if not cls._equals_amounts(pax_variant.price_double_amount, p2 + extra):
                 fields.append('price_double_amount')
@@ -2993,9 +2995,10 @@ class BookingServices(object):
 
         if isinstance(pax_variant, QuotePaxVariant):
             extra = cls._round_price(float(pax_variant.extra_triple_amount))
-        if p3 is None and not pax_variant.price_triple_amount is None:
-            fields.append('price_triple_amount')
-            pax_variant.price_triple_amount = None
+        if p3 is None:
+            if not pax_variant.price_triple_amount is None:
+                fields.append('price_triple_amount')
+                pax_variant.price_triple_amount = None
         else:
             if not cls._equals_amounts(pax_variant.price_triple_amount, p3 + extra):
                 fields.append('price_triple_amount')
