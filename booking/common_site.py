@@ -150,7 +150,7 @@ class PackageSiteModel(SiteModel):
     model_order = 1010
     menu_label = MENU_LABEL_PACKAGE
     fields = (
-        ('name', 'enabled'), 
+        ('name', 'enabled'),
         ('amounts_type', 'pax_range', 'has_pax_range'),
     )
     list_display = ('name', 'amounts_type', 'pax_range', 'has_pax_range', 'enabled')
@@ -1114,8 +1114,7 @@ class BookingExtraSiteModel(BookingServiceSiteModel):
             'fields': (
                 'booking', ('service', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
-                'service_addon',
-                ('addon', 'quantity', 'parameter'),
+                ('service_addon', 'quantity', 'parameter'),
                 ('manual_cost', 'provider'), 'cost_amount', 'manual_price', 'price_amount', 'id')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
@@ -1143,8 +1142,7 @@ class BookingPackageExtraSiteModel(BookingPackageServiceSiteModel):
             'fields': (
                 'booking_package', ('service', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
-                'service_addon',
-                ('addon', 'quantity', 'parameter'),
+                ('service_addon', 'quantity', 'parameter'),
                 ('manual_cost', 'provider'), 'cost_amount', 'manual_price', 'price_amount', 'id')
         }),
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
