@@ -11,32 +11,30 @@
                 <li><a href="{% url 'common:booking_bookingpackage_add' %}?booking={{ current.id }}">New Package</a></li>
             </ul>
         </span>
-        <a class="btn btn-success" href="{% url 'common:booking_bookingallotment_add' %}?booking={{ current.id }}">+ Accomodation</a>
-        <a class="btn btn-success" href="{% url 'common:booking_bookingtransfer_add' %}?booking={{ current.id }}">+ Transfer</a>
-        <a class="btn btn-success" href="{% url 'common:booking_bookingextra_add' %}?booking={{ current.id }}">+ Extra</a>
-        <a class="btn btn-success" href="{% url 'common:booking_bookingpackage_add' %}?booking={{ current.id }}">+ Package</a>
+        <a class="btn btn-success" href="{% url 'common:booking_bookingallotment_add' %}?booking={{ current.id }}">Add Pax</a>
         <a class="btn btn-primary" href="{% url 'send_booking_confirmation' current.id %}">Confirmation</a>
         <a class="btn btn-primary" href="{% url 'common:booking_booking_config_vouchers' current.id %}">Voucher</a>
         <a class="btn btn-primary" href="{% url 'booking_invoice' current.id %}">Invoice</a>
         {% if current.invoice %}
             <a class="btn btn-primary" href="{% url 'booking_invoice_pdf' current.id %}">PDF</a>
-            <a class="btn btn-danger" href="{% url 'booking_invoice_cancel' current.id %}">Cancel Invoice</a>
-        {% endif %}
-        <a class="btn btn-info" data-toggle="modal" data-target="#myModal" href="#">Open Small Modal</a>
+            <a class="btn btn-danger" data-toggle="modal" data-target="#myModal" href="#">Cancel Invoice</a>
+            {% endif %}
     </span>
 </div>
+
 <div class="modal fade" id="myModal" tab-index="-1" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title" id="modal-title">Modal Header</h4>
+                <h4 class="modal-title" id="modal-title">Confirm Cancelation</h4>
             </div>
             <div class="modal-body">
-                <p>This is a small modal.</p>
+                <p>Are you sure you want to cancel the invoice</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" data-dismiss="modal">Abort</button>
+                <a class="btn btn-danger" href="{% url 'booking_invoice_cancel' current.id %}">Cancel Invoice</a>
             </div>
         </div>
     </div>
