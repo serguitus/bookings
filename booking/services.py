@@ -2280,21 +2280,44 @@ class BookingServices(object):
                 quote_pax_variant = service_pax_variant.quotepackage_pax_variant.quote_pax_variant
 
         if quote_pax_variant.price_percent:
-            if c1 is None:
-                p1, p1_msg = None, 'Cost SGL for % is empty'
+            if service_pax_variant.manual_costs:
+                if service_pax_variant.cost_single_amount:
+                    p1 = cls._round_price(
+                        cls._apply_percent(
+                            service_pax_variant.cost_single_amount, quote_pax_variant.price_percent))
+                    p1_msg = None
+                else:
+                    p1, p1_msg = None, 'Cost SGL for % is empty'
+                if service_pax_variant.cost_double_amount:
+                    p2 = cls._round_price(
+                        cls._apply_percent(
+                            service_pax_variant.cost_double_amount, quote_pax_variant.price_percent))
+                    p2_msg = None
+                else:
+                    p2, p2_msg = None, 'Cost DBL for % is empty'
+                if service_pax_variant.cost_triple_amount:
+                    p3 = cls._round_price(
+                        cls._apply_percent(
+                            service_pax_variant.cost_triple_amount, quote_pax_variant.price_percent))
+                    p3_msg = None
+                else:
+                    p3, p3_msg = None, 'Cost TPL for % is empty'
             else:
-                p1 = cls._round_price(cls._apply_percent(c1, quote_pax_variant.price_percent))
-                p1_msg = None
-            if c2 is None:
-                p2, p2_msg = None, 'Cost DBL for % is empty'
-            else:
-                p2 = cls._round_price(cls._apply_percent(c2, quote_pax_variant.price_percent))
-                p2_msg = None
-            if c3 is None:
-                p3, p3_msg = None, 'Cost TPL for % is empty'
-            else:
-                p3 = cls._round_price(cls._apply_percent(c3, quote_pax_variant.price_percent))
-                p3_msg = None
+                if c1 is None:
+                    p1, p1_msg = None, 'Cost SGL for % is empty'
+                else:
+                    p1 = cls._round_price(cls._apply_percent(c1, quote_pax_variant.price_percent))
+                    p1_msg = None
+                if c2 is None:
+                    p2, p2_msg = None, 'Cost DBL for % is empty'
+                else:
+                    p2 = cls._round_price(cls._apply_percent(c2, quote_pax_variant.price_percent))
+                    p2_msg = None
+                if c3 is None:
+                    p3, p3_msg = None, 'Cost TPL for % is empty'
+                else:
+                    p3 = cls._round_price(cls._apply_percent(c3, quote_pax_variant.price_percent))
+                    p3_msg = None
 
         return c1, c1_msg, p1, p1_msg, c2, c2_msg, p2, p2_msg, c3, c3_msg, p3, p3_msg
 
