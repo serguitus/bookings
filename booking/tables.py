@@ -9,7 +9,7 @@ from booking.models import (
     Booking, BookingService, BookingPax, BookingPackageService)
 from booking.constants import (
     PACKAGESERVICE_TYPES, QUOTESERVICE_TYPES, QUOTEPACKAGESERVICE_TYPES,
-    BOOKINGSERVICE_TYPES, BOOKINGPACKAGESERVICE_TYPES)
+    BOOKINGSERVICE_TYPES, BOOKINGPACKAGESERVICE_TYPES, BOOTSTRAP_STYLE_STATUS_MAPPING)
 
 
 class PackageServiceTable(tables.Table):
@@ -111,6 +111,10 @@ class BookingServiceTable(tables.Table):
                   'datetime_to', 'description',
                   'cost_amount', 'price_amount',
                   'provider', 'service_type', 'status']
+        attrs = {'class': 'table table-hover table-condensed'}
+        row_attrs = {
+            'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_STATUS_MAPPING[record.status]),
+        }
 
     def __init__(self, *args, **kwargs):
         # self.base_columns['service_type'].verbose_name='Request emails'
