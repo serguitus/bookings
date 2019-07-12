@@ -140,35 +140,36 @@ class BookingServices(object):
                 change_message="Booking Invoice Created",
             )
 
-            # obtain detail
-            paxes = cls._find_booking_package_paxes(booking)
-            if paxes['1']['qtty'] > 0:
-                invoice_detail = BookingInvoiceDetail()
-                invoice_detail.invoice = invoice
-                invoice_detail.description = "PACKAGE PRICE IN SINGLE %s x Pax" % booking.package_sgl_price_amount
-                invoice_detail.detail = "%s Pax" % (paxes['1']['qtty'] - paxes['1']['free'])
-                invoice_detail.date_from = booking.date_from
-                invoice_detail.date_to = booking.date_to
-                invoice_detail.price = (paxes['1']['qtty'] - paxes['1']['free']) * booking.package_sgl_price_amount
-                invoice_detail.save()
-            if paxes['2']['qtty'] > 0:
-                invoice_detail = BookingInvoiceDetail()
-                invoice_detail.invoice = invoice
-                invoice_detail.description = "PACKAGE PRICE IN DOUBLE %s x Pax" % booking.package_dbl_price_amount
-                invoice_detail.detail = "%s Pax" % (paxes['2']['qtty'] - paxes['2']['free'])
-                invoice_detail.date_from = booking.date_from
-                invoice_detail.date_to = booking.date_to
-                invoice_detail.price = (paxes['2']['qtty'] - paxes['2']['free']) * booking.package_dbl_price_amount
-                invoice_detail.save()
-            if paxes['1']['qtty'] > 0:
-                invoice_detail = BookingInvoiceDetail()
-                invoice_detail.invoice = invoice
-                invoice_detail.description = "PACKAGE PRICE IN TRIPLE %s x Pax" % booking.package_tpl_price_amount
-                invoice_detail.detail = "%s Pax" % (paxes['3']['qtty'] - paxes['3']['free'])
-                invoice_detail.date_from = booking.date_from
-                invoice_detail.date_to = booking.date_to
-                invoice_detail.price = (paxes['3']['qtty'] - paxes['3']['free']) * booking.package_tpl_price_amount
-                invoice_detail.save()
+            if booking.is_package_price:
+                # obtain detail
+                paxes = cls._find_booking_package_paxes(booking)
+                if paxes['1']['qtty'] > 0:
+                    invoice_detail = BookingInvoiceDetail()
+                    invoice_detail.invoice = invoice
+                    invoice_detail.description = "PACKAGE PRICE IN SINGLE %s x Pax" % booking.package_sgl_price_amount
+                    invoice_detail.detail = "%s Pax" % (paxes['1']['qtty'] - paxes['1']['free'])
+                    invoice_detail.date_from = booking.date_from
+                    invoice_detail.date_to = booking.date_to
+                    invoice_detail.price = (paxes['1']['qtty'] - paxes['1']['free']) * booking.package_sgl_price_amount
+                    invoice_detail.save()
+                if paxes['2']['qtty'] > 0:
+                    invoice_detail = BookingInvoiceDetail()
+                    invoice_detail.invoice = invoice
+                    invoice_detail.description = "PACKAGE PRICE IN DOUBLE %s x Pax" % booking.package_dbl_price_amount
+                    invoice_detail.detail = "%s Pax" % (paxes['2']['qtty'] - paxes['2']['free'])
+                    invoice_detail.date_from = booking.date_from
+                    invoice_detail.date_to = booking.date_to
+                    invoice_detail.price = (paxes['2']['qtty'] - paxes['2']['free']) * booking.package_dbl_price_amount
+                    invoice_detail.save()
+                if paxes['3']['qtty'] > 0:
+                    invoice_detail = BookingInvoiceDetail()
+                    invoice_detail.invoice = invoice
+                    invoice_detail.description = "PACKAGE PRICE IN TRIPLE %s x Pax" % booking.package_tpl_price_amount
+                    invoice_detail.detail = "%s Pax" % (paxes['3']['qtty'] - paxes['3']['free'])
+                    invoice_detail.date_from = booking.date_from
+                    invoice_detail.date_to = booking.date_to
+                    invoice_detail.price = (paxes['3']['qtty'] - paxes['3']['free']) * booking.package_tpl_price_amount
+                    invoice_detail.save()
 
             # obtain lines
             booking_service_list = BookingService.objects.filter(

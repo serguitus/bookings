@@ -15,7 +15,7 @@ from booking.constants import (
     BOOKING_STATUS_LIST, BOOKING_STATUS_PENDING,
     SERVICE_STATUS_LIST, SERVICE_STATUS_PENDING,
     PACKAGE_AMOUNTS_BY_PAX, PACKAGE_AMOUNTS_TYPES,
-    INVOICE_FORMATS, INVOICE_FORMAT_DETAIL)
+    INVOICE_FORMATS, INVOICE_FORMAT_COMPACT)
 
 from config.constants import (
     BOARD_TYPES,
@@ -486,7 +486,7 @@ class BookingInvoice(AgencyInvoice):
     date_issued = models.DateField(blank=True, null=True)
     office = models.ForeignKey(Office, blank=True, null=True)
     content_format = models.CharField(
-        max_length=1, choices=INVOICE_FORMATS, default=INVOICE_FORMAT_DETAIL)
+        max_length=1, choices=INVOICE_FORMATS, default=INVOICE_FORMAT_COMPACT)
 
     def fill_data(self):
         super(BookingInvoice, self).fill_data()

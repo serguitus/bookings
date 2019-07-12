@@ -142,6 +142,7 @@
             {% endif %}
         {% endfor %}
         </p>
+        {% if details %}
         <table>
             <tr style="border: 1px solid black;">
                 <td width=10% class="content-centered"><b>FROM</b></td>
@@ -160,6 +161,24 @@
             </tr>
             {% endfor %}
         </table>
+        {% endif %}
+        {% if invoice.content_format == "S" %}
+        <br>
+        <table>
+            <tr style="border: 1px solid black;">
+                <td width=10% class="content-centered"><b>FROM</b></td>
+                <td width=10% class="content-centered"><b>TO</b></td>
+                <td width=80% class="content"><b>DESCRIPTION</b></td>
+            </tr>
+        {% for line in lines %}
+            <tr style="padding-top: 2px;">
+                <td style="text-align: center;">{{ line.date_from|date:"d-M-y" }}</td>
+                <td style="text-align: center;">{{ line.date_to|date:"d-M-y" }}</td>
+                <td style="padding-left: 3px;">{{ line.bookingservice_name }}</td>
+            </tr>
+        {% endfor %}
+        </table>
+        {% endif %}
         {% if invoice.content_format == "D" %}
         <br>
         <table>
