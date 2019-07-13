@@ -2280,7 +2280,7 @@ class BookingServices(object):
             else:
                 quote_pax_variant = service_pax_variant.quotepackage_pax_variant.quote_pax_variant
 
-        if quote_pax_variant.price_percent:
+        if quote_pax_variant.price_percent and auto_price:
             if service_pax_variant.manual_costs:
                 if service_pax_variant.cost_single_amount:
                     p1 = cls._round_price(
