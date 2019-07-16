@@ -715,7 +715,7 @@ class BookingPaxInline(TabularInline):
     model = BookingPax
     fields = ['pax_name', 'pax_group', 'pax_age', 'is_price_free', 'version']
     verbose_name_plural = 'Rooming List'
-    extra = 4
+    extra = 0
     ordering = ('pax_group', 'pax_name')
 
 

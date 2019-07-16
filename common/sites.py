@@ -9,6 +9,8 @@ import sys
 from functools import update_wrapper
 from totalsum.admin import TotalsumAdmin
 
+from concurrency.exceptions import RecordModifiedError
+
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.contrib.admin.exceptions import DisallowedModelAdminLookup, DisallowedModelAdminToField
@@ -988,6 +990,13 @@ class SiteModel(TotalsumAdmin):
         except IntegrityError as ex:
             self.message_user(request, ex, messages.ERROR)
             return False
+        except RecordModifiedError as ex:
+            self.message_user(request, ex, messages.ERROR)
+            opts = self.model._meta
+            preserved_filters = self.get_preserved_filters(request)
+            redirect_url = request.path
+            redirect_url = common_add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
+            return HttpResponseRedirect(redirect_url)
 
     @csrf_protect_m
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
