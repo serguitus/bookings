@@ -713,7 +713,7 @@ class QuotePackageExtraSiteModel(QuotePackageServiceSiteModel):
 
 class BookingPaxInline(TabularInline):
     model = BookingPax
-    fields = ['pax_name', 'pax_group', 'pax_age', 'is_price_free']
+    fields = ['pax_name', 'pax_group', 'pax_age', 'is_price_free', 'version']
     verbose_name_plural = 'Rooming List'
     extra = 4
     ordering = ('pax_group', 'pax_name')
@@ -721,7 +721,7 @@ class BookingPaxInline(TabularInline):
 
 class BookingServicePaxInline(TabularInline):
     model = BookingServicePax
-    fields = ['booking_pax', 'group', 'is_cost_free', 'is_price_free']
+    fields = ['booking_pax', 'group', 'is_cost_free', 'is_price_free', 'version']
     verbose_name_plural = 'Service Rooming List'
     form = BookingServicePaxInlineForm
     ordering = ('group', 'booking_pax__pax_name')
@@ -759,7 +759,7 @@ class BookingSiteModel(SiteModel):
                 ('date_from', 'date_to'),
                 ('is_package_price', 'price_amount', 'cost_amount'),
                 ('package_sgl_price_amount', 'package_dbl_price_amount',
-                 'package_tpl_price_amount'), 'id')
+                 'package_tpl_price_amount'), 'id', 'version')
         }),
         ('General Notes', {'fields': ('p_notes',),
                            'classes': ('collapse', 'wide')})
@@ -988,7 +988,8 @@ class BookingAllotmentSiteModel(BookingServiceSiteModel):
                 'booking', ('service', 'status', 'conf_number'),
                 ('datetime_from', 'nights', 'datetime_to'),
                 ('room_type', 'board_type', 'service_addon'),
-                ('manual_cost', 'provider'), 'cost_amount', 'manual_price', 'price_amount', 'id')
+                ('manual_cost', 'provider'),
+                'cost_amount', 'manual_price', 'price_amount', 'id', 'version')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -1020,7 +1021,8 @@ class BookingPackageAllotmentSiteModel(BookingPackageServiceSiteModel):
                 'booking_package', ('service', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to'),
                 ('room_type', 'board_type', 'service_addon'),
-                ('manual_cost', 'provider'), 'cost_amount', 'manual_price', 'price_amount', 'id')
+                ('manual_cost', 'provider'),
+                'cost_amount', 'manual_price', 'price_amount', 'id', 'version')
         }),
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -1052,7 +1054,8 @@ class BookingTransferSiteModel(BookingServiceSiteModel):
                 ('location_to', 'dropoff', 'schedule_to'),
                 ('place_to'),
                 'service_addon',
-                ('manual_cost', 'provider'), 'cost_amount', 'manual_price', 'price_amount', 'id')
+                ('manual_cost', 'provider'),
+                'cost_amount', 'manual_price', 'price_amount', 'id', 'version')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -1087,7 +1090,8 @@ class BookingPackageTransferSiteModel(BookingPackageServiceSiteModel):
                 ('location_to', 'dropoff', 'schedule_to'),
                 ('place_to'),
                 'service_addon',
-                ('manual_cost', 'provider'), 'cost_amount', 'manual_price', 'price_amount', 'id')
+                ('manual_cost', 'provider'),
+                'cost_amount', 'manual_price', 'price_amount', 'id', 'version')
         }),
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -1116,7 +1120,8 @@ class BookingExtraSiteModel(BookingServiceSiteModel):
                 ('datetime_from', 'datetime_to', 'time'),
                 'service_addon',
                 ('addon', 'quantity', 'parameter'),
-                ('manual_cost', 'provider'), 'cost_amount', 'manual_price', 'price_amount', 'id')
+                ('manual_cost', 'provider'),
+                'cost_amount', 'manual_price', 'price_amount', 'id', 'version')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -1145,7 +1150,8 @@ class BookingPackageExtraSiteModel(BookingPackageServiceSiteModel):
                 ('datetime_from', 'datetime_to', 'time'),
                 'service_addon',
                 ('addon', 'quantity', 'parameter'),
-                ('manual_cost', 'provider'), 'cost_amount', 'manual_price', 'price_amount', 'id')
+                ('manual_cost', 'provider'),
+                'cost_amount', 'manual_price', 'price_amount', 'id', 'version')
         }),
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -1174,7 +1180,8 @@ class BookingPackageSiteModel(BookingServiceSiteModel):
                 'booking', ('service', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to'),
                 ('provider'), 'cost_amount',
-                ('manual_price', 'price_by_package_catalogue'), 'price_amount', 'id')
+                ('manual_price', 'price_by_package_catalogue'),
+                'price_amount', 'id', 'version')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
