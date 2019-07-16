@@ -4497,8 +4497,16 @@ class BookingServices(object):
             quote_pax_variant__pax_quantity=pax_variant.quotepackage_pax_variant.quote_pax_variant.pax_quantity))
         return pax_variants[0]
 
+
+    @classmethod
+    def add_bookingpax_to_services(cls, booking_pax_list, services):
+        for booking_pax in booking_pax_list:
+            cls.add_bookingpax_to_services(booking_pax, services)
+
+
     @classmethod
     def add_bookingpax_to_services(cls, booking_pax, services):
+        booking_pax.save()
         for service in services:
             service_pax = BookingServicePax()
             service_pax.booking_pax = booking_pax

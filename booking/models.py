@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 """
 Booking models
 """
+from concurrency.fields import AutoIncVersionField
+
 from django.db import models, transaction
 from django.db.models.query_utils import Q
 from django.contrib.auth.models import User
@@ -545,6 +547,7 @@ class Booking(models.Model):
         )
         unique_together = (('invoice',),)
 
+    version = AutoIncVersionField( )
     name = models.CharField(max_length=100)
     agency = models.ForeignKey(Agency)
     reference = models.CharField(max_length=25, blank=True, null=True, verbose_name='TTOO Ref')
@@ -604,6 +607,7 @@ class BookingPax(models.Model):
         verbose_name = 'Booking Pax'
         verbose_name_plural = 'Booking Rooming List'
         unique_together = (('booking', 'pax_name'),)
+    version = AutoIncVersionField( )
     booking = models.ForeignKey(Booking, related_name='rooming_list')
     pax_name = models.CharField(max_length=50)
     pax_age = models.SmallIntegerField(blank=True, null=True, verbose_name='Age')
@@ -679,6 +683,7 @@ class BookingServicePax(models.Model):
     class Meta:
         verbose_name = 'Booking Service Pax'
         verbose_name_plural = 'Booking Service Rooming'
+    version = AutoIncVersionField( )
     booking_pax = models.ForeignKey(BookingPax)
     booking_service = models.ForeignKey(BookingService, related_name='rooming_list')
     group = models.SmallIntegerField(verbose_name='Room')
@@ -769,6 +774,7 @@ class BookingAllotment(BookingService, BaseAllotment):
         verbose_name = 'Booking Accomodation'
         verbose_name_plural = 'Bookings Accomodations'
         default_permissions = ('add', 'change',)
+    version = AutoIncVersionField( )
 
     def __unicode__(self):
         return '%s (%s - %s)' % (self.name,
@@ -846,6 +852,7 @@ class BookingTransfer(BookingService, BaseTransfer):
         verbose_name = 'Booking Transfer'
         verbose_name_plural = 'Booking Transfers'
         default_permissions = ('add', 'change',)
+    version = AutoIncVersionField( )
     location_from = models.ForeignKey(
         Location, related_name='location_from', verbose_name='Location from')
     place_from = models.ForeignKey(
@@ -901,6 +908,7 @@ class BookingExtra(BookingService, BaseExtra):
         verbose_name = 'Booking Extra'
         verbose_name_plural = 'Booking Extras'
         default_permissions = ('add', 'change',)
+    version = AutoIncVersionField( )
 
     def build_description(self):
         return '%s pax' % self.rooming_list.count()
@@ -928,6 +936,7 @@ class BookingPackage(BookingService):
         verbose_name = 'Booking Package'
         verbose_name_plural = 'Bookings Packages'
         default_permissions = ('add', 'change',)
+    version = AutoIncVersionField( )
     service = models.ForeignKey(Package)
     price_by_package_catalogue = models.BooleanField(
         default=True, verbose_name='Use Catalogue Price')
@@ -982,6 +991,7 @@ class BookingPackageAllotment(BookingPackageService, BaseAllotment):
         verbose_name = 'Booking Package Accomodation'
         verbose_name_plural = 'Bookings Packages Accomodations'
         default_permissions = ('add', 'change',)
+    version = AutoIncVersionField( )
 
     def fill_data(self):
         self.name = '%s' % (self.service,)
@@ -996,6 +1006,7 @@ class BookingPackageTransfer(BookingPackageService, BaseTransfer):
         verbose_name = 'Booking Package Transfer'
         verbose_name_plural = 'Bookingss Packages Transfers'
         default_permissions = ('add', 'change',)
+    version = AutoIncVersionField( )
     location_from = models.ForeignKey(
         Location, related_name='booking_package_location_from', verbose_name='Location from')
     place_from = models.ForeignKey(
@@ -1030,6 +1041,7 @@ class BookingPackageExtra(BookingPackageService, BaseExtra):
         verbose_name = 'Booking Package Extra'
         verbose_name_plural = 'Bookings Packages Extras'
         default_permissions = ('add', 'change',)
+    version = AutoIncVersionField( )
 
     def fill_data(self):
         # setting name for this quote_service
