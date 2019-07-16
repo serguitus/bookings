@@ -1,7 +1,7 @@
 {% load booking_tags %}
 {% load render_table from django_tables2 %}
 
-{# buttons to add new bookingServices to the current invoice #}
+{# buttons to add new bookingServices to the current booking #}
 {% include 'booking/booking_details_buttons.html' %}
 {% bookingservice_table current as table %}
 <div class="bookingservices-container">
