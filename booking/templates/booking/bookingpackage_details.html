@@ -1,6 +1,8 @@
 {% load booking_tags %}
 {% load render_table from django_tables2 %}
 
+{# buttons to add new bookingServices to the current booking #}
+{% include 'booking/bookingpackage_details_buttons.html' %}
 {% bookingpackage_table current as table %}
 <div class="bookingpackage-container">
     {% render_table table %}
