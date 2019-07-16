@@ -140,35 +140,36 @@ class BookingServices(object):
                 change_message="Booking Invoice Created",
             )
 
-            # obtain detail
-            paxes = cls._find_booking_package_paxes(booking)
-            if paxes['1']['qtty'] > 0:
-                invoice_detail = BookingInvoiceDetail()
-                invoice_detail.invoice = invoice
-                invoice_detail.description = "PACKAGE PRICE IN SINGLE %s x Pax" % booking.package_sgl_price_amount
-                invoice_detail.detail = "%s Pax" % (paxes['1']['qtty'] - paxes['1']['free'])
-                invoice_detail.date_from = booking.date_from
-                invoice_detail.date_to = booking.date_to
-                invoice_detail.price = (paxes['1']['qtty'] - paxes['1']['free']) * booking.package_sgl_price_amount
-                invoice_detail.save()
-            if paxes['2']['qtty'] > 0:
-                invoice_detail = BookingInvoiceDetail()
-                invoice_detail.invoice = invoice
-                invoice_detail.description = "PACKAGE PRICE IN DOUBLE %s x Pax" % booking.package_dbl_price_amount
-                invoice_detail.detail = "%s Pax" % (paxes['2']['qtty'] - paxes['2']['free'])
-                invoice_detail.date_from = booking.date_from
-                invoice_detail.date_to = booking.date_to
-                invoice_detail.price = (paxes['2']['qtty'] - paxes['2']['free']) * booking.package_dbl_price_amount
-                invoice_detail.save()
-            if paxes['1']['qtty'] > 0:
-                invoice_detail = BookingInvoiceDetail()
-                invoice_detail.invoice = invoice
-                invoice_detail.description = "PACKAGE PRICE IN TRIPLE %s x Pax" % booking.package_tpl_price_amount
-                invoice_detail.detail = "%s Pax" % (paxes['3']['qtty'] - paxes['3']['free'])
-                invoice_detail.date_from = booking.date_from
-                invoice_detail.date_to = booking.date_to
-                invoice_detail.price = (paxes['3']['qtty'] - paxes['3']['free']) * booking.package_tpl_price_amount
-                invoice_detail.save()
+            if booking.is_package_price:
+                # obtain detail
+                paxes = cls._find_booking_package_paxes(booking)
+                if paxes['1']['qtty'] > 0:
+                    invoice_detail = BookingInvoiceDetail()
+                    invoice_detail.invoice = invoice
+                    invoice_detail.description = "PACKAGE PRICE IN SINGLE %s x Pax" % booking.package_sgl_price_amount
+                    invoice_detail.detail = "%s Pax" % (paxes['1']['qtty'] - paxes['1']['free'])
+                    invoice_detail.date_from = booking.date_from
+                    invoice_detail.date_to = booking.date_to
+                    invoice_detail.price = (paxes['1']['qtty'] - paxes['1']['free']) * booking.package_sgl_price_amount
+                    invoice_detail.save()
+                if paxes['2']['qtty'] > 0:
+                    invoice_detail = BookingInvoiceDetail()
+                    invoice_detail.invoice = invoice
+                    invoice_detail.description = "PACKAGE PRICE IN DOUBLE %s x Pax" % booking.package_dbl_price_amount
+                    invoice_detail.detail = "%s Pax" % (paxes['2']['qtty'] - paxes['2']['free'])
+                    invoice_detail.date_from = booking.date_from
+                    invoice_detail.date_to = booking.date_to
+                    invoice_detail.price = (paxes['2']['qtty'] - paxes['2']['free']) * booking.package_dbl_price_amount
+                    invoice_detail.save()
+                if paxes['3']['qtty'] > 0:
+                    invoice_detail = BookingInvoiceDetail()
+                    invoice_detail.invoice = invoice
+                    invoice_detail.description = "PACKAGE PRICE IN TRIPLE %s x Pax" % booking.package_tpl_price_amount
+                    invoice_detail.detail = "%s Pax" % (paxes['3']['qtty'] - paxes['3']['free'])
+                    invoice_detail.date_from = booking.date_from
+                    invoice_detail.date_to = booking.date_to
+                    invoice_detail.price = (paxes['3']['qtty'] - paxes['3']['free']) * booking.package_tpl_price_amount
+                    invoice_detail.save()
 
             # obtain lines
             booking_service_list = BookingService.objects.filter(
@@ -2279,22 +2280,45 @@ class BookingServices(object):
             else:
                 quote_pax_variant = service_pax_variant.quotepackage_pax_variant.quote_pax_variant
 
-        if quote_pax_variant.price_percent:
-            if c1 is None:
-                p1, p1_msg = None, 'Cost SGL for % is empty'
+        if quote_pax_variant.price_percent and auto_price:
+            if service_pax_variant.manual_costs:
+                if service_pax_variant.cost_single_amount:
+                    p1 = cls._round_price(
+                        cls._apply_percent(
+                            service_pax_variant.cost_single_amount, quote_pax_variant.price_percent))
+                    p1_msg = None
+                else:
+                    p1, p1_msg = None, 'Cost SGL for % is empty'
+                if service_pax_variant.cost_double_amount:
+                    p2 = cls._round_price(
+                        cls._apply_percent(
+                            service_pax_variant.cost_double_amount, quote_pax_variant.price_percent))
+                    p2_msg = None
+                else:
+                    p2, p2_msg = None, 'Cost DBL for % is empty'
+                if service_pax_variant.cost_triple_amount:
+                    p3 = cls._round_price(
+                        cls._apply_percent(
+                            service_pax_variant.cost_triple_amount, quote_pax_variant.price_percent))
+                    p3_msg = None
+                else:
+                    p3, p3_msg = None, 'Cost TPL for % is empty'
             else:
-                p1 = cls._round_price(cls._apply_percent(c1, quote_pax_variant.price_percent))
-                p1_msg = None
-            if c2 is None:
-                p2, p2_msg = None, 'Cost DBL for % is empty'
-            else:
-                p2 = cls._round_price(cls._apply_percent(c2, quote_pax_variant.price_percent))
-                p2_msg = None
-            if c3 is None:
-                p3, p3_msg = None, 'Cost TPL for % is empty'
-            else:
-                p3 = cls._round_price(cls._apply_percent(c3, quote_pax_variant.price_percent))
-                p3_msg = None
+                if c1 is None:
+                    p1, p1_msg = None, 'Cost SGL for % is empty'
+                else:
+                    p1 = cls._round_price(cls._apply_percent(c1, quote_pax_variant.price_percent))
+                    p1_msg = None
+                if c2 is None:
+                    p2, p2_msg = None, 'Cost DBL for % is empty'
+                else:
+                    p2 = cls._round_price(cls._apply_percent(c2, quote_pax_variant.price_percent))
+                    p2_msg = None
+                if c3 is None:
+                    p3, p3_msg = None, 'Cost TPL for % is empty'
+                else:
+                    p3 = cls._round_price(cls._apply_percent(c3, quote_pax_variant.price_percent))
+                    p3_msg = None
 
         return c1, c1_msg, p1, p1_msg, c2, c2_msg, p2, p2_msg, c3, c3_msg, p3, p3_msg
 
@@ -2973,9 +2997,10 @@ class BookingServices(object):
         extra = 0.0
         if isinstance(pax_variant, QuotePaxVariant):
             extra = cls._round_price(pax_variant.extra_single_amount)
-        if p1 is None and not pax_variant.price_single_amount is None:
-            fields.append('price_single_amount')
-            pax_variant.price_single_amount = None
+        if p1 is None:
+            if not pax_variant.price_single_amount is None:
+                fields.append('price_single_amount')
+                pax_variant.price_single_amount = None
         else:
             if not cls._equals_amounts(pax_variant.price_single_amount, p1 + extra):
                 fields.append('price_single_amount')
@@ -2983,9 +3008,10 @@ class BookingServices(object):
 
         if isinstance(pax_variant, QuotePaxVariant):
             extra = cls._round_price(float(pax_variant.extra_double_amount))
-        if p2 is None and not pax_variant.price_double_amount is None:
-            fields.append('price_double_amount')
-            pax_variant.price_double_amount = None
+        if p2 is None:
+            if not pax_variant.price_double_amount is None:
+                fields.append('price_double_amount')
+                pax_variant.price_double_amount = None
         else:
             if not cls._equals_amounts(pax_variant.price_double_amount, p2 + extra):
                 fields.append('price_double_amount')
@@ -2993,9 +3019,10 @@ class BookingServices(object):
 
         if isinstance(pax_variant, QuotePaxVariant):
             extra = cls._round_price(float(pax_variant.extra_triple_amount))
-        if p3 is None and not pax_variant.price_triple_amount is None:
-            fields.append('price_triple_amount')
-            pax_variant.price_triple_amount = None
+        if p3 is None:
+            if not pax_variant.price_triple_amount is None:
+                fields.append('price_triple_amount')
+                pax_variant.price_triple_amount = None
         else:
             if not cls._equals_amounts(pax_variant.price_triple_amount, p3 + extra):
                 fields.append('price_triple_amount')

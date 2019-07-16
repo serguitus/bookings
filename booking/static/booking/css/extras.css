@@ -21,6 +21,10 @@
     color: white;
 }
 
+.service_type a.btn {
+    padding: 0px 3px;
+}
+
 #rooming_list-group .tabular tr td.original{
     width: 200px;
 }

@@ -142,6 +142,7 @@
             {% endif %}
         {% endfor %}
         </p>
+        {% if details %}
         <table>
             <tr style="border: 1px solid black;">
                 <td width=10% class="content-centered"><b>FROM</b></td>
@@ -160,8 +161,38 @@
             </tr>
             {% endfor %}
         </table>
-        {% if invoice.content_format == "D" %}
+        {% endif %}
         <br>
+        {% if invoice.content_format == "S" %}
+        <table>
+            <tr style="border: 1px solid black;">
+                <td width=10% class="content-centered"><b>FROM</b></td>
+                <td width=10% class="content-centered"><b>TO</b></td>
+                <td width=80% class="content"><b>DESCRIPTION</b></td>
+            </tr>
+        {% for line in lines %}
+            <tr style="padding-top: 2px;">
+                <td style="text-align: center;">
+                    {% if line.date_from %}
+                        {{ line.date_from|date:"d-M-y" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td style="text-align: center;">
+                    {% if line.date_to %}
+                        {{ line.date_to|date:"d-M-y" }}</td>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td style="padding-left: 3px;">{{ line.bookingservice_name }}</td>
+            </tr>
+        {% endfor %}
+        </table>
+        <br>
+        {% endif %}
+        {% if invoice.content_format == "D" %}
         <table>
             <tr style="border: 1px solid black;">
                 <td width=10% class="content-centered"><b>FROM</b></td>
@@ -171,23 +202,35 @@
             </tr>
         {% for line in lines %}
             <tr style="padding-top: 2px;">
-                <td style="text-align: center;">{{ line.date_from|date:"d-M-y" }}</td>
-                <td style="text-align: center;">{{ line.date_to|date:"d-M-y" }}</td>
+                <td style="text-align: center;">
+                    {% if line.date_from %}
+                        {{ line.date_from|date:"d-M-y" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td style="text-align: center;">
+                    {% if line.date_to %}
+                        {{ line.date_to|date:"d-M-y" }}</td>
+                    {% else %}
+                        -
+                    {% endif %}
                 <td style="padding-left: 3px;">{{ line.bookingservice_name }}</td>
                 <td style="padding-right: 3px; text-align:right;">{{ line.price }}</td>
             </tr>
         {% endfor %}
         </table>
+        <br>
         {% endif %}
 
         <table>
             <tr class="top-line{% if not invoice.cash_amount %} bottom-line{%endif %}">
-                <td width="75%" class="content-centered">
+                <td width="65%" class="content-centered">
                 {% if not invoice.cash_amount %}
                     <b>THIS INVOICE MUST BE PAID BY {{ invoice.date_from|substract_days:10|date:"d-M-y" }}</b>
                 {%endif %}
                 </td>
-                <td width="15%" class="label">
+                <td width="25%" class="label">
                     <b>TOTAL</b>
                 </td>
                 <td width="10%" class="label">
