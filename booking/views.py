@@ -775,7 +775,7 @@ class ScheduleArrivalAutocompleteView(autocomplete.Select2QuerySetView):
             )
 
         if self.q:
-            qs = qs.filter(name__icontains=self.q)
+            qs = qs.filter(number__icontains=self.q)
         return qs[:20]
 
 
@@ -794,7 +794,7 @@ class ScheduleDepartureAutocompleteView(autocomplete.Select2QuerySetView):
             )
 
         if self.q:
-            qs = qs.filter(name__icontains=self.q)
+            qs = qs.filter(number__icontains=self.q)
         return qs[:20]
 
 
