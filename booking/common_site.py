@@ -730,6 +730,7 @@ class BookingServicePaxInline(TabularInline):
     model = BookingServicePax
     fields = ['booking_pax', 'group', 'is_cost_free', 'is_price_free', 'version']
     verbose_name_plural = 'Service Rooming List'
+    extra = 0
     form = BookingServicePaxInlineForm
     ordering = ('group', 'booking_pax__pax_name')
 
