@@ -718,6 +718,13 @@ class BookingPaxInline(TabularInline):
     extra = 0
     ordering = ('pax_group', 'pax_name')
 
+    def get_max_num(self, request, obj=None, **kwargs):
+        adding = obj is None or obj.id is None
+        if adding:
+            return super(BookingPaxInline, self).get_max_num(request, obj, **kwargs)
+        else:
+            return 0
+
 
 class BookingServicePaxInline(TabularInline):
     model = BookingServicePax
