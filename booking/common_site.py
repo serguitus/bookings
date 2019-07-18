@@ -150,10 +150,10 @@ class PackageSiteModel(SiteModel):
     model_order = 1010
     menu_label = MENU_LABEL_PACKAGE
     fields = (
-        ('name', 'enabled'), 
+        ('name', 'service_category', 'enabled'), 
         ('amounts_type', 'pax_range', 'has_pax_range'),
     )
-    list_display = ('name', 'amounts_type', 'pax_range', 'has_pax_range', 'enabled')
+    list_display = ('name', 'service_category', 'amounts_type', 'pax_range', 'has_pax_range', 'enabled')
     list_editable = ('enabled',)
     top_filters = ('name', 'amounts_type', 'pax_range', 'has_pax_range', 'enabled')
     ordering = ('enabled', 'name',)

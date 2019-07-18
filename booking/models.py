@@ -199,6 +199,8 @@ class PackageTransfer(PackageService, BaseTransfer):
         Schedule, related_name='package_schedule_to', blank=True, null=True)
     dropoff = models.ForeignKey(Allotment, related_name='package_dropoff',
                                 null=True, blank=True)
+    schedule_time_from = models.TimeField(blank=True, null=True)
+    schedule_time_to = models.TimeField(blank=True, null=True)
 
     def fill_data(self):
         # setting name for this booking_service
@@ -869,6 +871,8 @@ class BookingTransfer(BookingService, BaseTransfer):
         Schedule, related_name='schedule_to', blank=True, null=True)
     dropoff = models.ForeignKey(
         Allotment, related_name='transfer_dropoff', null=True, blank=True)
+    schedule_time_from = models.TimeField(blank=True, null=True)
+    schedule_time_to = models.TimeField(blank=True, null=True)
 
     def build_description(self):
         return '%s pax' % self.rooming_list.count()

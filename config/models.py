@@ -80,6 +80,20 @@ class Schedule(models.Model):
         return '%s at %s' % (self.number, self.time)
 
 
+class ServiceCategory(models.Model):
+    """
+    ServiceCategory
+    """
+    class Meta:
+        verbose_name = 'Service Category'
+        verbose_name_plural = 'Services Categories'
+        unique_together = (('name',),)
+    name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
+
+
 class RoomType(models.Model):
     """
     RoomType
@@ -119,6 +133,7 @@ class Service(models.Model):
         verbose_name_plural = 'Services'
         unique_together = (('category', 'name'),)
     name = models.CharField(max_length=150)
+    service_category = models.ForeignKey(ServiceCategory, blank=True, null=True, verbose_name='Category')
     category = models.CharField(max_length=5, choices=SERVICE_CATEGORIES)
     grouping = models.BooleanField(default=False)
     pax_range = models.BooleanField(default=False)
