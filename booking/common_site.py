@@ -208,10 +208,10 @@ class PackageTransferSiteModel(PackageServiceSiteModel):
     fields = (
         'package', ('service'),
         ('days_after', 'days_duration', 'time'),
-        ('location_from', 'pickup', 'schedule_from'),
-        ('place_from'),
-        ('location_to', 'dropoff', 'schedule_to'),
-        ('place_to'),
+        ('location_from', 'place_from'),
+        ('pickup', 'schedule_from', 'schedule_time_from'),
+        ('location_to', 'place_to'),
+        ('dropoff', 'schedule_to', 'schedule_time_to'),
         'provider', 'id')
     list_display = ('package', 'service', 'days_after', 'time')
     top_filters = ('package__name', 'service',)
@@ -1057,10 +1057,10 @@ class BookingTransferSiteModel(BookingServiceSiteModel):
             'fields': (
                 'booking', ('service', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
-                ('location_from', 'pickup', 'schedule_from'),
-                ('place_from'),
-                ('location_to', 'dropoff', 'schedule_to'),
-                ('place_to'),
+                ('location_from', 'place_from'),
+                ('pickup', 'schedule_from', 'schedule_time_from'),
+                ('location_to', 'place_to'),
+                ('dropoff', 'schedule_to', 'schedule_time_to'),
                 'service_addon',
                 ('manual_cost', 'provider'),
                 'cost_amount', 'manual_price', 'price_amount', 'id', 'version')
@@ -1093,10 +1093,10 @@ class BookingPackageTransferSiteModel(BookingPackageServiceSiteModel):
             'fields': (
                 'booking_package', ('service', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
-                ('location_from', 'pickup', 'schedule_from'),
-                ('place_from'),
-                ('location_to', 'dropoff', 'schedule_to'),
-                ('place_to'),
+                ('location_from', 'place_from'),
+                ('pickup', 'schedule_from', 'schedule_time_from'),
+                ('location_to', 'place_to'),
+                ('dropoff', 'schedule_to', 'schedule_time_to'),
                 'service_addon',
                 ('manual_cost', 'provider'),
                 'cost_amount', 'manual_price', 'price_amount', 'id', 'version')

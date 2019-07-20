@@ -1027,6 +1027,8 @@ class BookingPackageTransfer(BookingPackageService, BaseTransfer):
         Schedule, related_name='booking_package_schedule_to', blank=True, null=True)
     dropoff = models.ForeignKey(
         Allotment, related_name='booking_package_transfer_dropoff', null=True, blank=True)
+    schedule_time_from = models.TimeField(blank=True, null=True)
+    schedule_time_to = models.TimeField(blank=True, null=True)
 
     def fill_data(self):
         # setting name for this quote_service

@@ -2,10 +2,11 @@ var bookingservice_amounts_url = base_url + 'booking/bookingtransfer-amounts/';
 var bookingservice_form_selector = '#bookingtransfer_form';
 
 var bookingtransfer_time_url = base_url + 'booking/bookingtransfer-time/';
+
 var time_autofilled = false;
 
 $(document).ready(function(){
-  $('#bookingtransfer_form #id_time').after("<button class='btn btn-success btn-copy btn-copy-time'><<</button><span class='computed-value'>Calculated: <b data-computed=time>N/A</b></span>");
+  $( bookingservice_form_selector + ' #id_time').after("<button class='btn btn-success btn-copy btn-copy-time'><<</button><span class='computed-value'>Calculated: <b data-computed=time>N/A</b></span>");
   var computedTime = $('b[data-computed=time]');
   var timeInput = $('#id_time')[0];
 
