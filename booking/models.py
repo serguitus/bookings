@@ -598,6 +598,9 @@ class Booking(models.Model):
             self.agency.name, self.name,
             self.reference, self.get_status_display())
 
+    def has_p_notes(self):
+        return bool(self.p_notes)
+
 
 class BookingPax(models.Model):
     """
