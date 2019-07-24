@@ -4,7 +4,7 @@ config services
 """
 
 
-from datetime import date, timedelta, time
+from datetime import date, timedelta, time, datetime
 
 from django.db.models import Q
 
@@ -1316,7 +1316,10 @@ class ConfigServices(object):
 
     @classmethod
     def transfer_time(
-            cls, schedule_from_id, schedule_to_id, location_from_id, location_to_id):
+            cls, schedule_from_id, schedule_to_id, location_from_id, location_to_id,
+            time_from, time_to):
+        if (time_from):
+            return time_from, 'Scheduled time From'
         if (schedule_from_id and schedule_from_id != ''):
             # pickup schedule specified
             schedule = Schedule.objects.get(pk=schedule_from_id)
@@ -1333,10 +1336,13 @@ class ConfigServices(object):
                 .filter(t_location_from_id=location_from_id)
                 .filter(location_id=location_to_id))
             if intervals:
-                t = schedule.time
+                if not time_to:
+                    time_to = schedule.time
+                else:
+                    time_to = datetime.strptime(time_to, '%H:%M:%S')
                 it = intervals[0].interval
                 interval = timedelta(hours=it.hour, minutes=it.minute)
-                drop_time = timedelta(hours=t.hour, minutes=t.minute)
+                drop_time = timedelta(hours=time_to.hour, minutes=time_to.minute)
                 pickup = drop_time - interval
                 if pickup < timedelta(hours=0):
                     pickup = pickup + timedelta(hours=24)
