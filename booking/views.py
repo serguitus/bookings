@@ -541,7 +541,7 @@ class BookingServiceUpdateView(View):
             return redirect(reverse('common:booking_booking_change',
                                     args=[id]))
         if not type(services) == list:
-            services = list(services)
+            services = [services]
         booking_services = BookingService.objects.filter(pk__in=services)
         BookingServices.update_bookingservices_amounts(booking_services)
         messages.info(request,
