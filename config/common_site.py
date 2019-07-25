@@ -30,6 +30,7 @@ from config.forms import (
 )
 from config.models import (
     ServiceCategory, Location, Place, TransferInterval, Schedule, RoomType, Addon,
+    Service,
     Allotment, AllotmentRoomType, AllotmentBoardType, AllotmentSupplement,
     Transfer, TransferSupplement,
     Extra, ExtraAddon, ExtraSupplement,
@@ -42,7 +43,7 @@ from config.models import (
 )
 from config.services import ConfigServices
 from config.top_filters import (
-    RoomTypeTopFilter, LocationTopFilter,
+    RoomTypeTopFilter, LocationTopFilter, ServiceCategoryTopFilter,
     AddonTopFilter,
     AllotmentTopFilter, TransferTopFilter, ExtraTopFilter,
     LocationForProviderTransferTopFilter, ExtraLocationForProviderTransferTopFilter,
@@ -104,12 +105,21 @@ class ServiceAddonInline(CommonTabularInline):
 
 
 class ServiceCategorySiteModel(SiteModel):
-    model_order = 6100
+    model_order = 6000
     menu_label = MENU_LABEL_CONFIG_BASIC
-    menu_group = 'Configuration Services'
     fields = ('name',)
     list_display = ('name',)
     top_filters = ('name',)
+
+
+class ServiceSiteModel(SiteModel):
+    model_order = 6100
+    menu_label = MENU_LABEL_CONFIG_BASIC
+    menu_group = 'Configuration Services'
+    fields = (('name', 'enabled'), ('service_category', 'category'),)
+    list_display = ('name', 'service_category', 'category', 'enabled')
+    top_filters = ('name', ('service_category', ServiceCategoryTopFilter), 'category', 'enabled')
+    ordering = ['enabled', 'category', 'name']
 
 
 class RoomTypeSiteModel(SiteModel):
@@ -178,7 +188,7 @@ class AllotmentSiteModel(SiteModel):
               ('pax_range', 'enabled'),
               ('child_age', 'infant_age'))
     list_display = ('name', 'service_category', 'phone', 'location', 'is_shared_point', 'enabled',)
-    top_filters = ('name', ('location', LocationTopFilter), 'is_shared_point', 'enabled')
+    top_filters = ('name', ('location', LocationTopFilter), ('service_category', ServiceCategoryTopFilter), 'is_shared_point', 'enabled')
     ordering = ['enabled', 'name']
     inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline,
                ServiceAddonInline]
@@ -195,7 +205,7 @@ class TransferSiteModel(SiteModel):
     menu_group = 'Configuration Services'
     fields = ('name', 'service_category', 'cost_type', 'max_capacity', 'is_shared', 'pax_range', 'enabled',)
     list_display = ('name', 'cost_type', 'max_capacity', 'is_shared', 'enabled',)
-    top_filters = ('name', 'service_category', 'is_shared', 'enabled',)
+    top_filters = ('name', ('service_category', ServiceCategoryTopFilter), 'is_shared', 'enabled',)
     ordering = ['enabled', 'name']
     inlines = [ServiceAddonInline]
 
@@ -231,7 +241,7 @@ class ExtraSiteModel(SiteModel):
               'pax_range', 'has_pax_range', 'enabled',)
     list_display = ('name', 'service_category', 'location', 'cost_type',
                     'parameter_type', 'enabled',)
-    top_filters = ('name',)
+    top_filters = (('service_category', ServiceCategoryTopFilter), 'name',)
     ordering = ['enabled', 'name']
     inlines = [ExtraAddonInline, ServiceAddonInline]
 
@@ -455,6 +465,7 @@ bookings_site.register(AllotmentRoomType, AllotmentRoomTypeSiteModel)
 bookings_site.register(AllotmentBoardType, AllotmentBoardTypeSiteModel)
 bookings_site.register(ExtraAddon, ExtraAddonSiteModel)
 
+bookings_site.register(Service, ServiceSiteModel)
 bookings_site.register(Allotment, AllotmentSiteModel)
 bookings_site.register(Transfer, TransferSiteModel)
 bookings_site.register(Extra, ExtraSiteModel)

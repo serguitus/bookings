@@ -27,7 +27,8 @@ from finance.views import (
     AgencyAutocompleteView, ProviderAutocompleteView,
 )
 from config.views import (
-    LocationAutocompleteView, RoomTypeAutocompleteView, BoardTypeAutocompleteView,
+    LocationAutocompleteView, ServiceCategoryAutocompleteView,
+    RoomTypeAutocompleteView, BoardTypeAutocompleteView,
     AllotmentAutocompleteView, ProviderAllotmentAutocompleteView,
     TransferAutocompleteView, ProviderTransferAutocompleteView,
     AddonAutocompleteView,
@@ -86,6 +87,10 @@ urlpatterns = [
     url(r'^location-autocomplete/$',
         LocationAutocompleteView.as_view(),
         name='location-autocomplete',
+    ),
+    url(r'^servicecategory-autocomplete/$',
+        ServiceCategoryAutocompleteView.as_view(),
+        name='servicecategory-autocomplete',
     ),
     url(r'^provider-autocomplete/$',
         ProviderAutocompleteView.as_view(),

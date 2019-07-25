@@ -957,8 +957,11 @@ class Provider(models.Model):
     address = models.CharField(max_length=500, blank=True, null=True)
     phone = models.CharField(max_length=30, blank=True, null=True)
     alias = models.CharField(max_length=30, blank=True, null=True)
+    is_private = models.BooleanField(default=False)
 
     def __unicode__(self):
+        if self.is_private:
+            return '%s (private)' % self.name
         return self.name
 
     def __str__(self):

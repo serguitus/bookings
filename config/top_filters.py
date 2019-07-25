@@ -17,6 +17,11 @@ class AddonTopFilter(filters.ForeignKeyFilter):
     autocomplete_url = 'addon-autocomplete'
 
 
+class ServiceCategoryTopFilter(filters.ForeignKeyFilter):
+    filter_title = 'Select categories'
+    autocomplete_url = 'servicecategory-autocomplete'
+
+
 class LocationTopFilter(filters.ForeignKeyFilter):
     filter_title = 'Select Locations'
     autocomplete_url = 'location-autocomplete'

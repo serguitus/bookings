@@ -7,7 +7,7 @@ Config Views
 from dal import autocomplete
 
 from config.models import (
-    Location, RoomType, Addon, AllotmentBoardType,
+    Location, ServiceCategory, RoomType, Addon, AllotmentBoardType,
     Allotment, Transfer, Extra
 )
 
@@ -26,6 +26,17 @@ class LocationAutocompleteView(autocomplete.Select2QuerySetView):
         if not self.request.user.is_authenticated():
             return Location.objects.none()
         qs = Location.objects.filter(enabled=True).all()
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs[:20]
+
+
+class ServiceCategoryAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return ServiceCategory.objects.none()
+        qs = ServiceCategory.objects.all()
         if self.q:
             qs = qs.filter(name__icontains=self.q)
         return qs[:20]

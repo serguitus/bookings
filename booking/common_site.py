@@ -886,6 +886,33 @@ class BookingSiteModel(SiteModel):
 
 
 class BookingServiceSiteModel(SiteModel):
+    delete_allowed = False
+
+    model_order = 1260
+    menu_label = MENU_LABEL_BOOKING
+    menu_group = MENU_GROUP_LABEL_SERVICES
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                'booking', ('name', 'status', 'conf_number'),
+                ('datetime_from', 'datetime_to', 'service_addon'),
+                ('manual_cost', 'provider'),
+                'cost_amount', 'manual_price', 'price_amount')
+        }),
+        ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
+                   'classes': ('collapse', 'wide')})
+    )
+
+    list_display = ('booking', 'name', 'service_addon', 'datetime_from',
+                    'datetime_to', 'cost_amount', 'manual_cost',
+                    'price_amount', 'manual_price', 'status',)
+    top_filters = (('booking__name', 'Booking'),
+                   ('name', 'Service'),
+                   'booking__reference', 'conf_number',
+                   ('datetime_from', DateTopFilter), 'status', 'provider',
+                   ('provider__is_private', 'Private'))
+    ordering = ('datetime_from', 'booking__reference', 'name',)
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super(BookingServiceSiteModel, self).get_readonly_fields(request, obj) or []
@@ -1330,6 +1357,8 @@ bookings_site.register(QuotePackageExtra, QuotePackageExtraSiteModel)
 
 
 bookings_site.register(Booking, BookingSiteModel)
+
+bookings_site.register(BookingService, BookingServiceSiteModel)
 
 bookings_site.register(BookingAllotment, BookingAllotmentSiteModel)
 bookings_site.register(BookingTransfer, BookingTransferSiteModel)
