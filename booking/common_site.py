@@ -723,7 +723,8 @@ class BookingPaxInline(TabularInline):
         if adding:
             return super(BookingPaxInline, self).get_max_num(request, obj, **kwargs)
         else:
-            return 0
+            # TODO poner 0 cuando se implemente agregar booking pax
+            return 1
 
 
 class BookingServicePaxInline(TabularInline):
