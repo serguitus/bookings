@@ -1532,3 +1532,88 @@ class ConfigServices(object):
                     defaults=cls.calculate_default_amounts(
                         detail, 0, dst_agency.gain_percent)
                 )
+
+
+    @classmethod
+    def update_detail_amount(cls, detail_amount, percent, amount):
+        if percent is Nane and amount is None:
+            return detail_amount
+        if detail_amount is None:
+            return None
+        result = float(detail_amount)
+        if not percent is None:
+            result += result * float(percent) / 100.0
+        if not amount is None:
+            result += float(amount)
+        return round(0.499999 + result)
+
+
+    @classmethod
+    def next_year_price(cls, manager, agency_service, percent, amount):
+        details = list(manager.filter(agency_service=agency_service.id))
+        new_agency_service = agency_service
+        new_agency_service.pk = None
+        new_agency_service.id = None
+        one_year = timedelta(years=1)
+        if new_agency_service.date_from:
+            new_agency_service.date_from = new_agency_service.date_from + one_year
+        if new_agency_service.date_to:
+            new_agency_service.date_to = new_agency_service.date_to + one_year
+        new_agency_service.save()
+        for detail in details:
+            new_detail = detail
+            new_detail.pk = None
+            new_detail.id = None
+
+            ad_1_amount = cls.update_detail_amount(ad_1_amount, percent, amount)
+            ad_2_amount = cls.update_detail_amount(ad_2_amount, percent, amount)
+            ad_3_amount = cls.update_detail_amount(ad_3_amount, percent, amount)
+            ad_4_amount = cls.update_detail_amount(ad_4_amount, percent, amount)
+            ch_1_ad_0_amount = cls.update_detail_amount(ch_1_ad_0_amount, percent, amount)
+            ch_1_ad_1_amount = cls.update_detail_amount(ch_1_ad_1_amount, percent, amount)
+            ch_1_ad_2_amount = cls.update_detail_amount(ch_1_ad_2_amount, percent, amount)
+            ch_1_ad_3_amount = cls.update_detail_amount(ch_1_ad_3_amount, percent, amount)
+            ch_1_ad_4_amount = cls.update_detail_amount(ch_1_ad_4_amount, percent, amount)
+            ch_2_ad_0_amount = cls.update_detail_amount(ch_2_ad_0_amount, percent, amount)
+            ch_2_ad_1_amount = cls.update_detail_amount(ch_2_ad_1_amount, percent, amount)
+            ch_2_ad_2_amount = cls.update_detail_amount(ch_2_ad_2_amount, percent, amount)
+            ch_2_ad_3_amount = cls.update_detail_amount(ch_2_ad_3_amount, percent, amount)
+            ch_2_ad_4_amount = cls.update_detail_amount(ch_2_ad_4_amount, percent, amount)
+            ch_3_ad_0_amount = cls.update_detail_amount(ch_3_ad_0_amount, percent, amount)
+            ch_3_ad_1_amount = cls.update_detail_amount(ch_3_ad_1_amount, percent, amount)
+            ch_3_ad_2_amount = cls.update_detail_amount(ch_3_ad_2_amount, percent, amount)
+            ch_3_ad_3_amount = cls.update_detail_amount(ch_3_ad_3_amount, percent, amount)
+            ch_3_ad_4_amount = cls.update_detail_amount(ch_3_ad_4_amount, percent, amount)
+
+            new_detail.agency_service = new_agency_service
+            new_detail.save()
+
+
+    @classmethod
+    def next_year_allotment_prices(cls, agency_service_ids, percent=None, amount=None):
+        for agency_service_id in agency_service_ids:
+            try:
+                agency_service = AgencyAllotmentService.objects.get(agency_service_id)
+                cls.next_year_price(AgencyAllotmentDetail.objects, agency_service, percent, amount)
+            except Error as ex:
+                print(ex)
+
+
+    @classmethod
+    def next_year_transfer_prices(cls, agency_service_ids, percent=None, amount=None):
+        for agency_service_id in agency_service_ids:
+            try:
+                agency_service = AgencyTransferService.objects.get(agency_service_id)
+                cls.next_year_price(AgencyTransferDetail.objects, agency_service, percent, amount)
+            except Error as ex:
+                print(ex)
+
+
+    @classmethod
+    def next_year_extra_prices(cls, agency_service_ids, percent=None, amount=None):
+        for agency_service_id in agency_service_ids:
+            try:
+                agency_service = AgencyExtraService.objects.get(agency_service_id)
+                cls.next_year_price(AgencyExtraDetail.objects, agency_service, percent, amount)
+            except Error as ex:
+                print(ex)

@@ -4514,3 +4514,14 @@ class BookingServices(object):
             service_pax.booking_service = service
             service_pax.group = booking_pax.pax_group
             service_pax.save()
+
+
+    @classmethod
+    def next_year_package_prices(cls, agency_service_ids, percent=None, amount=None):
+        for agency_service_id in agency_service_ids:
+            try:
+                agency_service = AgencyPackageService.objects.get(agency_service_id)
+                ConfigServices.next_year_price(
+                    AgencyPackageDetail.objects, agency_service, percent, amount)
+            except Error as ex:
+                print(ex)
