@@ -479,6 +479,36 @@ class BookingTransferTimeView(ModelChangeFormProcessorView):
         })
 
 
+class BookingTransferScheduleFromView(ModelChangeFormProcessorView):
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+
+        schedule_from_id = request.POST.get('schedule_from')
+        if schedule_from_id:
+            schedule = Schedule.objects.get(pk=schedule_from_id)
+            return JsonResponse({
+                'time': schedule.time,
+            })
+        return JsonResponse({})
+
+
+class BookingTransferScheduleToView(ModelChangeFormProcessorView):
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+
+        schedule_to_id = request.POST.get('schedule_to')
+        if schedule_to_id:
+            schedule = Schedule.objects.get(pk=schedule_to_id)
+            return JsonResponse({
+                'time': schedule.time,
+            })
+        return JsonResponse({})
+
+
 def booking_list(request, instance):
     """ a list of bookings with their services """
     context = {}

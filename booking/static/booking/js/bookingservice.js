@@ -144,12 +144,7 @@ $(document).ready(function(){
   });
 
   // for dates changed by calendar
-  $(bookingservice_form_selector + ' input[name*="date"]').focusout(function (e) {
-    e.preventDefault();
-    get_computed_amounts();
-  });
-  // for times changed by calendar
-  $(bookingservice_form_selector + ' input[name*="time"]').focusout(function (e) {
+  $(bookingservice_form_selector + ' input[name*="datetime"]').focusout(function (e) {
     e.preventDefault();
     get_computed_amounts();
   });

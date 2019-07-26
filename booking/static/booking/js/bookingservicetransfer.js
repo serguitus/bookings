@@ -4,6 +4,8 @@ $(document).ready(function(){
   $( bookingservice_form_selector + ' #id_time').after("<button class='btn btn-success btn-copy btn-copy-time'><<</button><span class='computed-value'>Calculated: <b data-computed=time>N/A</b></span>");
   var computedTime = $('b[data-computed=time]');
   var timeInput = $('#id_time')[0];
+  var timeFromInput = $('#id_schedule_time_from');
+  var timeToInput = $('#id_schedule_time_to');
 
   function compare_time(evt) {
     // a function to check if computed values differ from set values
@@ -140,18 +142,66 @@ $(document).ready(function(){
     })
   }
 
+  function get_time_from(evt){
+    // sending a request to get time from value
+    $.ajax({
+      'url': bookingservicetransfer_schedule_from_url,
+      'async': true,
+      'datatype': 'json',
+      'type': 'POST',
+      'data': $(bookingservice_form_selector).serialize(),
+    }).done(function(data){
+      if(data['time']){
+        timeFromInput.val(data['time']).trigger('change');
+      }
+    })
+  }
+
+  function get_time_to(evt){
+    // sending a request to get time from value
+    $.ajax({
+      'url': bookingservicetransfer_schedule_to_url,
+      'async': true,
+      'datatype': 'json',
+      'type': 'POST',
+      'data': $(bookingservice_form_selector).serialize(),
+    }).done(function(data){
+      if(data['time']){
+        timeToInput.val(data['time']).trigger('change');
+      }
+    })
+  }
+
   get_computed_time();
 
-  $(bookingservice_form_selector + ' input, ' + bookingservice_form_selector + ' select').on('change', function(evt){
+  // for times changed by calendar
+  $('#id_schedule_time_from').focusout(function (evt) {
+    evt.preventDefault();
+    get_computed_time(evt);
+  });
+  $('#id_schedule_time_to').focusout(function (evt) {
+    evt.preventDefault();
     get_computed_time(evt);
   });
 
-  $('.btn-copy-time').on('click', function(e){
-    e.preventDefault();
+  $(bookingservice_form_selector + ' input[name*="schedule_time"]').on('change', function(evt){
+    get_computed_time(evt);
+  });
+
+  $('#id_schedule_from').on('change', function(evt){
+    get_time_from(evt);
+  });
+
+  $('#id_schedule_to').on('change', function(evt){
+    get_time_to(evt);
+  });
+
+  $('.btn-copy-time').on('click', function(evt){
+    evt.preventDefault();
     if(is_time(computedTime.html())){
       timeInput.value = computedTime.html();
     }
-    compare_time(e)
+    compare_time(evt)
   })
 
 });
