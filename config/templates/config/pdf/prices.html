@@ -1,0 +1,20 @@
+{% load export_prices %}
+<html>
+    <head>
+        <style>
+        @page {
+            size: a4 portrait;
+            @frame content_frame { /* Content Frame */
+                left: 45pt; right: 45pt; top: 45pt; bottom: 45pt;
+            };
+        }
+        </style>
+    </head>
+    <body>
+    <b>Agency:</b> {{ agency.name }}<br>
+    {% for service in services %}
+        <b>Service:</b> {{ service.name }}<br>
+        {% service_prices service agency date_from date_to %}
+    {% endfor %}
+    </body>
+</html>

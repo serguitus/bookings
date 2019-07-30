@@ -1,0 +1,14 @@
+{% for detail in details %}
+    {% if detail.agency_service.service.category == 'A' %}
+        {% include 'config/pdf/allotment_prices.html' %}
+    {% endif %}
+    {% if detail.agency_service.service.category == 'T' %}
+        {% include 'config/pdf/transfer_prices.html' %}
+    {% endif %}
+    {% if detail.agency_service.service.category == 'E' %}
+        {% include 'config/pdf/extra_prices.html' %}
+    {% endif %}
+    {% if detail.agency_service.service.category == 'P' %}
+        {% include 'config/pdf/package_prices.html' %}
+    {% endif %}
+{% endfor %}

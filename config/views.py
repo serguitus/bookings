@@ -4,20 +4,35 @@ from __future__ import unicode_literals
 Config Views
 """
 
+import os
+from django.conf import settings
+
 from dal import autocomplete
 
 from config.models import (
     Location, ServiceCategory, RoomType, Addon, AllotmentBoardType,
+    Service,
     Allotment, Transfer, Extra
 )
 
+from django.contrib import messages
 from django.db.models import Q
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import redirect
+from django.template.loader import get_template
+from django.urls import reverse
+from django.views import View
 
-from finance.models import (
-    Provider
-)
+from finance.models import Agency, Provider
 
 from reservas.custom_settings import ADDON_FOR_NO_ADDON
+
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from _io import StringIO
+
+from xhtml2pdf import pisa
 
 
 class LocationAutocompleteView(autocomplete.Select2QuerySetView):
@@ -335,3 +350,38 @@ class ProviderExtraAutocompleteView(autocomplete.Select2QuerySetView):
         if self.q:
             qs = qs.filter(name__icontains=self.q)
         return qs[:20]
+
+
+class PricesPDFView(View):
+    """
+    A view to handle prices PDF
+    """
+    def get(self, request, *args, **kwargs):
+        agency = Agency.objects.get(pk=1)
+        services = list(Service.objects.all())
+
+        template = get_template("config/pdf/prices.html")
+        context = {
+            'pagesize': 'Letter',
+            'agency': agency,
+            'services': services,
+            'date_from': None,
+            'date_to': None,
+        }
+        html = template.render(context)
+        result = StringIO()
+        pdf = pisa.pisaDocument(StringIO(html), dest=result, link_callback=_fetch_resources)
+        if pdf.err:
+            messages.add_message(request, messages.ERROR, "Failed Prices PDF Generation")
+            return HttpResponseRedirect(reverse('common:config_service'))
+        
+        return HttpResponse(result.getvalue(), content_type='application/pdf')
+
+
+# helper method for build_voucher view. Remove once removed that view
+def _fetch_resources(uri, rel):
+    path = os.path.join(settings.MEDIA_ROOT,
+                        uri.replace(settings.MEDIA_URL, ""))
+    return path
+
+

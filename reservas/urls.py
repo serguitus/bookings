@@ -26,6 +26,7 @@ from finance.views import (
     AccountAutocompleteView, LoanEntityAutocompleteView, LoanAccountAutocompleteView,
     AgencyAutocompleteView, ProviderAutocompleteView,
 )
+from config import urls as config_urls
 from config.views import (
     LocationAutocompleteView, ServiceCategoryAutocompleteView,
     RoomTypeAutocompleteView, BoardTypeAutocompleteView,
@@ -122,6 +123,9 @@ urlpatterns = [
     ),
     url(r'^bookings/booking/',
         include(booking_urls)
+    ),
+    url(r'^bookings/config/',
+        include(config_urls)
     ),
     url(r'^pickup-autocomplete/$',
         PickUpAutocompleteView.as_view(),

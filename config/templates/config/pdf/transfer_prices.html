@@ -1,0 +1,30 @@
+<table width="100%">
+    <tr>
+        <td><b>Location From</b></td>
+        <td><b>Location To</b></td>
+        <td><b>Addon</b></td>
+        <td><b>From</b></td>
+        <td><b>To</b></td>
+        <td><b>SGL</b></td>
+    </tr>
+    <tr>
+        <td>
+            {{ detail.a_location_from.name }}
+        </td>
+        <td>
+            {{ detail.a_location_to.name }}
+        </td>
+        <td>
+            {{ detail.addon.name }}
+        </td>
+        <td>
+            {{ detail.agency_service.date_from | date:"d-b-Y" }}
+        </td>
+        <td>
+            {{ detail.agency_service.date_to | date:"d-b-Y" }}
+        </td>
+        <td>
+            {{ detail.ad_1_amount }}
+        </td>
+    </tr>
+</table>

@@ -1617,3 +1617,69 @@ class ConfigServices(object):
                 cls.next_year_price(AgencyExtraDetail.objects, agency_service, percent, amount)
             except Error as ex:
                 print(ex)
+
+
+    @classmethod
+    def list_allotment_details(cls, allotment, agency, date_from, date_to):
+        qs = AgencyAllotmentDetail.objects.all()
+        qs = qs.filter(
+            agency_service__agency=agency,
+            agency_service__service=allotment)
+        if date_from:
+            qs = qs.filter(agency_service__date_to__gte=date_from)
+        if date_to:
+            qs = qs.filter(agency_service__date_from__lte=date_to)
+        qs.order_by(
+            'roomtype', 'board_type', 'addon', 'pax_range_min', '-pax_range_max',
+            'agency_service__date_from', '-agency_service__date_to')
+        return list(qs)
+
+
+    @classmethod
+    def list_transfer_details(cls, transfer, agency, date_from, date_to):
+        qs = AgencyTransferDetail.objects.all()
+        qs = qs.filter(
+            agency_service__agency=agency,
+            agency_service__service=transfer)
+        if date_from:
+            qs = qs.filter(agency_service__date_to__gte=date_from)
+        if date_to:
+            qs = qs.filter(agency_service__date_from__lte=date_to)
+        qs.order_by(
+            'a_location_from', 'a_location_to', 'addon', 'pax_range_min', '-pax_range_max',
+            'agency_service__date_from', '-agency_service__date_to')
+        return list(qs)
+
+
+    @classmethod
+    def list_extra_details(cls, extra, agency, date_from, date_to):
+        qs = AgencyExtraDetail.objects.all()
+        qs = qs.filter(
+            agency_service__agency=agency,
+            agency_service__service=extra)
+        if date_from:
+            qs = qs.filter(agency_service__date_to__gte=date_from)
+        if date_to:
+            qs = qs.filter(agency_service__date_from__lte=date_to)
+        qs.order_by(
+            'addon', 'pax_range_min', '-pax_range_max',
+            'agency_service__date_from', '-agency_service__date_to')
+        return list(qs)
+
+
+    @classmethod
+    def list_service_prices(cls, service, agency, date_from, date_to):
+        if service.category == 'A':
+            allotment = Allotment.objects.get(pk=service.id)
+            return cls.list_allotment_details(allotment, agency, date_from, date_to)
+        if service.category == 'T':
+            transfer = Transfer.objects.get(pk=service.id)
+            return cls.list_transfer_details(transfer, agency, date_from, date_to)
+        if service.category == 'E':
+            extra = Extra.objects.get(pk=service.id)
+            return cls.list_extra_details(extra, agency, date_from, date_to)
+        if service.category == 'P':
+            from booking.models import Package
+            package = Package.objects.get(pk=service.id)
+            from booking.services import BookingServices
+            return BookingServices.list_package_details(package, agency, date_from, date_to)

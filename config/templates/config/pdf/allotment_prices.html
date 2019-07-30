@@ -1,0 +1,38 @@
+<table width="100%">
+    <tr>
+        <td><b>Board</b></td>
+        <td><b>Room</b></td>
+        <td><b>Addon</b></td>
+        <td><b>From</b></td>
+        <td><b>To</b></td>
+        <td><b>SGL</b></td>
+        <td><b>DBL</b></td>
+        <td><b>TPL</b></td>
+    </tr>
+    <tr>
+        <td>
+            {{ detail.board_type }}
+        </td>
+        <td>
+            {{ detail.room_type.name }}
+        </td>
+        <td>
+            {{ detail.addon.name }}
+        </td>
+        <td>
+            {{ detail.agency_service.date_from | date:"d-b-Y" }}
+        </td>
+        <td>
+            {{ detail.agency_service.date_to | date:"d-b-Y" }}
+        </td>
+        <td>
+            {{ detail.ad_1_amount }}
+        </td>
+        <td>
+            {{ detail.ad_2_amount }}
+        </td>
+        <td>
+            {{ detail.ad_3_amount }}
+        </td>
+    </tr>
+</table>

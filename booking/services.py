@@ -4525,3 +4525,19 @@ class BookingServices(object):
                     AgencyPackageDetail.objects, agency_service, percent, amount)
             except Error as ex:
                 print(ex)
+
+
+    @classmethod
+    def list_package_details(cls, package, agency, date_from, date_to):
+        qs = AgencyPackageDetail.objects.all()
+        qs = qs.filter(
+            agency_service__agency=agency,
+            agency_service__service=package)
+        if date_from:
+            qs = qs.filter(agency_service__date_to__gte=date_from)
+        if date_to:
+            qs = qs.filter(agency_service__date_from__lte=date_to)
+        qs.order_by(
+            'pax_range_min', '-pax_range_max',
+            'agency_service__date_from', '-agency_service__date_to')
+        return list(qs)
