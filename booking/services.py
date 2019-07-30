@@ -3028,7 +3028,7 @@ class BookingServices(object):
             if not cls._equals_amounts(pax_variant.price_triple_amount, p3 + extra):
                 fields.append('price_triple_amount')
                 pax_variant.price_triple_amount = p3 + extra
-            return fields
+        return fields
 
 
     @classmethod
