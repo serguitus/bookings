@@ -1955,6 +1955,7 @@ class BookingServices(object):
         dst_package.status = constants.SERVICE_STATUS_PENDING
         dst_package.provider = src_package.provider
         dst_package.service = src_package.service
+        dst_package.service_addon = src_package.service_addon
 
 
     @classmethod
@@ -3461,7 +3462,7 @@ class BookingServices(object):
                 agency,
                 bookingservice.board_type, bookingservice.room_type_id,
                 bookingservice.service_addon_id)
-        elif isinstance(bookingpackage_service, BookingPackageTransfer):
+        elif isinstance(bookingservice, BookingPackageTransfer):
             if not agency:
                 agency = bookingservice.booking_package.booking.agency
             price, price_msg = ConfigServices.transfer_prices(
@@ -3472,7 +3473,7 @@ class BookingServices(object):
                 bookingservice.location_from_id, bookingservice.location_to_id,
                 bookingservice.service_addon_id,
                 bookingservice.quantity)
-        elif isinstance(bookingpackage_service, BookingPackageExtra):
+        elif isinstance(bookingservice, BookingPackageExtra):
             if not agency:
                 agency = bookingservice.booking_package.booking.agency
             price, price_msg = ConfigServices.extra_prices(

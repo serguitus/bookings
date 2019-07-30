@@ -22,6 +22,8 @@ urlpatterns = [
     url(r'^bookingpackageextra-amounts/?', views.BookingPackageExtraAmountsView.as_view(), name='bookingpackageextra_amounts'),
 
     url(r'^bookingtransfer-time/?', views.BookingTransferTimeView.as_view(), name='bookingtransfer_time'),
+    url(r'^bookingtransfer-schedule-from/?', views.BookingTransferScheduleFromView.as_view(), name='bookingtransfer_schedule_from'),
+    url(r'^bookingtransfer-schedule-to/?', views.BookingTransferScheduleToView.as_view(), name='bookingtransfer_schedule_to'),
 
     url(r'^voucher/(?P<id>\d+)/print/?', views.build_voucher, name='build_voucher'),
     # url(r'^actions/(?P<id>\d+)/?', views.booking_actions, name='exec_action'),

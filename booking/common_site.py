@@ -8,7 +8,7 @@ except ImportError:
     from _io import StringIO
 from xhtml2pdf import pisa
 
-from common.sites import SiteModel
+from common.sites import SiteModel, CommonChangeList
 
 from django.conf import settings
 from django.conf.urls import url
@@ -18,7 +18,7 @@ from django.contrib.admin.options import (csrf_protect_m,
                                           TO_FIELD_VAR)
 from django.contrib.admin import TabularInline
 from django.contrib.admin.checks import ModelAdminChecks
-from django.contrib.admin.utils import unquote
+from django.contrib.admin.utils import quote, unquote
 from django.core import checks
 from django.core.exceptions import (FieldDoesNotExist,
                                     ValidationError,
@@ -723,7 +723,8 @@ class BookingPaxInline(TabularInline):
         if adding:
             return super(BookingPaxInline, self).get_max_num(request, obj, **kwargs)
         else:
-            return 0
+            # TODO poner 0 cuando se implemente agregar booking pax
+            return 1
 
 
 class BookingServicePaxInline(TabularInline):
@@ -886,9 +887,68 @@ class BookingSiteModel(SiteModel):
 
 
 class BookingServiceSiteModel(SiteModel):
+    delete_allowed = False
+
+    model_order = 1260
+    menu_label = MENU_LABEL_BOOKING
+    menu_group = MENU_GROUP_LABEL_SERVICES
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                'booking', ('name', 'status', 'conf_number'),
+                ('datetime_from', 'datetime_to', 'service_addon'),
+                ('manual_cost', 'provider'),
+                'cost_amount', 'manual_price', 'price_amount')
+        }),
+        ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
+                   'classes': ('collapse', 'wide')})
+    )
+
+    list_display = ('booking', 'name', 'service_addon', 'datetime_from',
+                    'datetime_to', 'cost_amount', 'manual_cost',
+                    'price_amount', 'manual_price', 'status',)
+    top_filters = (('booking__name', 'Booking'),
+                   ('name', 'Service'),
+                   'booking__reference', 'conf_number',
+                   ('datetime_from', DateTopFilter), 'status', 'provider',
+                   ('provider__is_private', 'Private'))
+    ordering = ('datetime_from', 'booking__reference', 'name',)
+
+    def get_changelist(self, request, **kwargs):
+        """
+        Returns the ChangeList class for use on the changelist page.
+        """
+        class ServiceChangeList(CommonChangeList):
+            def url_for_result(self, result):
+                pk = getattr(result, self.pk_attname)
+                service_type = getattr(result, 'service_type')
+                if service_type == 'A':
+                    model_name = 'bookingallotment'
+                elif service_type == 'T':
+                    model_name = 'bookingtransfer'
+                elif service_type == 'E':
+                    model_name = 'bookingextra'
+                elif service_type == 'P':
+                    model_name = 'bookingpackage'
+                else:
+                    model_name = self.opts.app_label.model_name
+                return reverse(
+                    '%s:%s_%s_change' % (
+                        self.model_admin.admin_site.site_namespace,
+                        self.opts.app_label,
+                        model_name),
+                    args=(quote(pk),),
+                    current_app=self.model_admin.admin_site.name)
+
+        return ServiceChangeList
+
+
+class BaseBookingServiceSiteModel(SiteModel):
+    delete_allowed = False
 
     def get_readonly_fields(self, request, obj=None):
-        readonly_fields = super(BookingServiceSiteModel, self).get_readonly_fields(request, obj) or []
+        readonly_fields = super(BaseBookingServiceSiteModel, self).get_readonly_fields(request, obj) or []
 
         if not request.user.has_perm("booking.change_amounts"):
             return readonly_fields + ['manual_cost', 'cost_amount', 'manual_price', 'price_amount']
@@ -900,25 +960,25 @@ class BookingServiceSiteModel(SiteModel):
             return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
         if 'booking' in request.POST:
             return redirect(reverse('common:booking_booking_change', args=[request.POST['booking']]))
-        return super(BookingServiceSiteModel, self).response_post_delete(request, obj)
+        return super(BaseBookingServiceSiteModel, self).response_post_delete(request, obj)
 
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'booking') and obj.booking:
             return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
         if 'booking' in request.POST:
             return redirect(reverse('common:booking_booking_change', args=[request.POST['booking']]))
-        return super(BookingServiceSiteModel, self).response_post_save_add(request, obj)
+        return super(BaseBookingServiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
         if hasattr(obj, 'booking') and obj.booking:
             return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
         if 'booking' in request.POST:
             return redirect(reverse('common:booking_booking_change', args=[request.POST['booking']]))
-        return super(BookingServiceSiteModel, self).response_post_save_change(request, obj)
+        return super(BaseBookingServiceSiteModel, self).response_post_save_change(request, obj)
 
     def delete_model(self, request, obj):
         with transaction.atomic(savepoint=False):
-            super(BookingServiceSiteModel, self).delete_model(request, obj)
+            super(BaseBookingServiceSiteModel, self).delete_model(request, obj)
             BookingServices.update_booking_amounts(obj)
             BookingServices.update_booking(obj)
 
@@ -930,7 +990,7 @@ class BookingServiceSiteModel(SiteModel):
 
     def save_related(self, request, form, formsets, change):
         with transaction.atomic(savepoint=False):
-            super(BookingServiceSiteModel, self).save_related(request, form, formsets, change)
+            super(BaseBookingServiceSiteModel, self).save_related(request, form, formsets, change)
             obj = self.save_form(request, form, change)
             BookingServices.update_bookingservice_amounts(obj)
             BookingServices.update_bookingservice_description(obj)
@@ -985,7 +1045,7 @@ class BookingPackageServiceSiteModel(SiteModel):
             BookingServices.update_bookingpackage_amounts(obj)
 
 
-class BookingAllotmentSiteModel(BookingServiceSiteModel):
+class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):
     model_order = 1210
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
@@ -1047,7 +1107,7 @@ class BookingPackageAllotmentSiteModel(BookingPackageServiceSiteModel):
     change_form_template = 'booking/bookingpackageallotment_change_form.html'
 
 
-class BookingTransferSiteModel(BookingServiceSiteModel):
+class BookingTransferSiteModel(BaseBookingServiceSiteModel):
     model_order = 1220
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
@@ -1116,7 +1176,7 @@ class BookingPackageTransferSiteModel(BookingPackageServiceSiteModel):
     change_form_template = 'booking/bookingpackagetransfer_change_form.html'
 
 
-class BookingExtraSiteModel(BookingServiceSiteModel):
+class BookingExtraSiteModel(BaseBookingServiceSiteModel):
     model_order = 1230
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
@@ -1177,7 +1237,7 @@ class BookingPackageExtraSiteModel(BookingPackageServiceSiteModel):
     change_form_template = 'booking/bookingpackageextra_change_form.html'
 
 
-class BookingPackageSiteModel(BookingServiceSiteModel):
+class BookingPackageSiteModel(BaseBookingServiceSiteModel):
     model_order = 1240
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
@@ -1330,6 +1390,8 @@ bookings_site.register(QuotePackageExtra, QuotePackageExtraSiteModel)
 
 
 bookings_site.register(Booking, BookingSiteModel)
+
+bookings_site.register(BookingService, BookingServiceSiteModel)
 
 bookings_site.register(BookingAllotment, BookingAllotmentSiteModel)
 bookings_site.register(BookingTransfer, BookingTransferSiteModel)
