@@ -776,7 +776,7 @@ class BookingSiteModel(SiteModel):
     list_display = ('name', 'internal_reference', 'agency',
                     'reference', 'date_from',
                     'date_to', 'status', 'cost_amount',
-                    'price_amount',)
+                    'price_amount', 'has_p_notes')
     top_filters = (('name', 'Booking Name'), 'reference', 'agency',
                    ('date_from', DateTopFilter), 'rooming_list__pax_name',
                    (CancelledTopFilter), 'seller')
@@ -1065,7 +1065,7 @@ class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):
 
     list_display = ('booking', 'name', 'service_addon', 'datetime_from',
                     'datetime_to', 'cost_amount', 'manual_cost',
-                    'price_amount', 'manual_price', 'status',)
+                    'price_amount', 'manual_price', 'status')
     top_filters = (('booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking__reference', 'conf_number',
