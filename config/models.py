@@ -465,6 +465,8 @@ class ProviderAllotmentDetail(AmountDetail):
     addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
     pax_range_min = models.SmallIntegerField(default=0)
     pax_range_max = models.SmallIntegerField(default=0)
+    single_supplement = models.IntegerField(blank=True, null=True, verbose_name='SGL Suppl.')
+    third_pax_discount = models.IntegerField(blank=True, null=True, verbose_name='TPL Dscnt %')
 
 
 class AgencyAllotmentService(AgencyCatalogue):
