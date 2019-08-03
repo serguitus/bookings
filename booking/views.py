@@ -564,14 +564,11 @@ class BookingServiceUpdateView(View):
         return redirect(reverse('common:booking_booking_change', args=[id]))
 
     def post(self, request, id, *args, **kwargs):
-        services = request.POST.get('pk', None)
-        print(type(services))
+        services = request.POST.getlist('pk', None)
         if not services:
             messages.info(request, 'Booking Saved and no Service Updated')
             return redirect(reverse('common:booking_booking_change',
                                     args=[id]))
-        if not type(services) == list:
-            services = [services]
         booking_services = BookingService.objects.filter(pk__in=services)
         BookingServices.update_bookingservices_amounts(booking_services)
         messages.info(request,
