@@ -111,7 +111,7 @@
                                     </td>
                                 </tr>
                                 {% endif %}
-                                {% if service.time or service.pickup or service.dropoff %}
+                                {% if service.time or service.booking_package.time or service.pickup or service.dropoff %}
                                 <tr>
                                     <td colspan="3">
                                         <table>
@@ -119,6 +119,8 @@
                                                 <td width="20%">
                                                 {% if service.time %}
                                                     <b>Time:</b> {{ service.time|time:"H:i" }}
+                                                {% elif service.booking_package.time %}
+                                                    <b>Time:</b> {{ service.booking_package.time|time:"H:i" }}
                                                 {% endif %}
                                                 </td>
                                                 <td width="40%">

@@ -72,7 +72,7 @@ from booking.models import (
     BookingServicePax,
     BookingService,
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
-    BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
+    BookingPackageService, BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
     BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine, BookingInvoicePartial,
 )
 from booking.services import BookingServices
@@ -110,6 +110,25 @@ def _get_child_objects(services):
         objs.append(obj)
     return objs
 
+def _get_voucher_services(services):
+    objs = []
+    booking_services = _get_child_objects(services)
+    for booking_service in booking_services:
+        if isinstance(booking_service, BookingPackage) and booking_service.voucher_detail:
+            PACKAGE_MODELS = {
+                'T': BookingPackageTransfer,
+                'E': BookingPackageExtra,
+                'A': BookingPackageAllotment,
+            }
+            package_services = list(BookingPackageService.objects.filter(
+                booking_package=booking_service).exclude(status='CN'))
+            for package_service in package_services:
+                service = PACKAGE_MODELS[package_service.service_type].objects.get(
+                    id=package_service.id)
+                objs.append(service)
+        else:
+            objs.append(booking_service)
+    return objs
 
 class PackageAllotmentInLine(CommonStackedInline):
     model = PackageAllotment
@@ -843,7 +862,7 @@ class BookingSiteModel(SiteModel):
         booking = Booking.objects.get(id=bk)
         services = BookingService.objects.filter(id__in=service_ids). \
                    prefetch_related('rooming_list')
-        objs = _get_child_objects(services)
+        objs = _get_voucher_services(services)
         context.update({'pagesize': 'Letter',
                         'booking': booking,
                         'services': objs})
