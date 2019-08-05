@@ -152,8 +152,10 @@ class PackageSiteModel(SiteModel):
     fields = (
         ('name', 'service_category', 'enabled'), 
         ('amounts_type', 'pax_range', 'has_pax_range'),
+        'time',
     )
-    list_display = ('name', 'service_category', 'amounts_type', 'pax_range', 'has_pax_range', 'enabled')
+    list_display = (
+        'name', 'service_category', 'amounts_type', 'pax_range', 'has_pax_range', 'time', 'enabled')
     list_editable = ('enabled',)
     top_filters = ('name', 'amounts_type', 'pax_range', 'has_pax_range', 'enabled')
     ordering = ('enabled', 'name',)
@@ -1245,8 +1247,8 @@ class BookingPackageSiteModel(BaseBookingServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                'booking', ('service', 'status', 'conf_number'),
-                ('datetime_from', 'datetime_to'),
+                ('booking', 'voucher_detail'), ('service', 'status', 'conf_number'),
+                ('datetime_from', 'datetime_to', 'time'),
                 ('provider'), 'cost_amount',
                 ('manual_price', 'price_by_package_catalogue'),
                 'price_amount', 'id', 'version')
