@@ -14,6 +14,7 @@ from django.db import router, transaction
 from django import forms
 from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
+from django.shortcuts import render
 from django.template.response import SimpleTemplateResponse, TemplateResponse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext as _, ungettext
@@ -192,6 +193,24 @@ class AllotmentSiteModel(SiteModel):
     ordering = ['enabled', 'name']
     inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline,
                ServiceAddonInline]
+    actions = ['export_prices']
+
+    def export_prices(self, request, queryset, extra_context=None):
+        """
+        This allows exporting service prices for certain agency and dates
+        """
+        context = {}
+        if 'apply' in request.POST:
+            # The user clicked submit on the intermediate form.
+            # render the pdf
+            pass
+        context.update({'services': queryset})
+        context.update({'site_title': 'Export Services'})
+        context.update(self.get_model_extra_context(request))
+        context.update(extra_context or {})
+        # context.update({'quote_id': id})
+        return render(request, 'config/agency_allotment_export.html',
+                      context=context)
 
 
 class TransferSupplementInline(CommonTabularInline):
