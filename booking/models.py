@@ -600,8 +600,14 @@ class Booking(models.Model):
             self.agency.name, self.name,
             self.reference, self.get_status_display())
 
-    def has_p_notes(self):
-        return bool(self.p_notes)
+    def has_notes(self):
+        # this shows a waring sign with mouse-over message
+        # for bookings with private notes
+        if self.p_notes:
+            return '<a href="#" data-toggle="tooltip" title="%s"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span></a>' % self.p_notes
+        return
+    has_notes.allow_tags = True
+    has_notes.short_description = 'Notes'
 
 
 class BookingPax(models.Model):
