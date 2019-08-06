@@ -4003,6 +4003,10 @@ class BookingServices(object):
             return False
 
         package = bookingpackage.service
+        if bookingpackage.time is None and not package.time is None:
+            bookingpackage.refresh_from_db(fields=['version'])
+            bookingpackage.time = package.time
+            bookingpackage.save(update_fields=['time'])
         # create bookingallotment list
         for package_allotment in PackageAllotment.objects.filter(package_id=package.id).all():
             booking_package_allotment = BookingPackageAllotment()

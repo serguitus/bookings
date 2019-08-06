@@ -139,6 +139,7 @@ class Package(Service):
     amounts_type = models.CharField(
         default=PACKAGE_AMOUNTS_BY_PAX, max_length=5, choices=PACKAGE_AMOUNTS_TYPES)
     has_pax_range = models.BooleanField(default=False)
+    time = models.TimeField(blank=True, null=True)
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_PACKAGE
@@ -378,6 +379,7 @@ class QuotePackage(QuoteService):
     service = models.ForeignKey(Package)
     price_by_package_catalogue = models.BooleanField(
         default=False, verbose_name='Prices By Catalogue')
+    time = models.TimeField(blank=True, null=True)
 
     def fill_data(self):
         # setting name for this quote_service
@@ -953,6 +955,8 @@ class BookingPackage(BookingService):
     service = models.ForeignKey(Package)
     price_by_package_catalogue = models.BooleanField(
         default=True, verbose_name='Use Catalogue Price')
+    time = models.TimeField(blank=True, null=True)
+    voucher_detail = models.BooleanField(default=False)
 
     def build_description(self):
         return '%s pax' % self.rooming_list.count()
