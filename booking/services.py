@@ -3221,9 +3221,9 @@ class BookingServices(object):
 
 
     @classmethod
-    def find_bookingservice_amounts(cls, bookingservice, pax_list=None, agency=None):
+    def find_bookingservice_amounts(cls, bookingservice, pax_list=None, agency=None, manuals=False):
         if isinstance(bookingservice, BookingPackage):
-            return cls.find_bookingpackage_update_amounts(bookingservice, agency)
+            return cls.find_bookingpackage_update_amounts(bookingservice, agency, manuals)
 
         if not pax_list:
             pax_list = cls._find_bookingservice_pax_list(bookingservice)
@@ -3524,7 +3524,7 @@ class BookingServices(object):
             return None, "Service Not Found", None, "Service Not Found"
 
         if isinstance(bookingservice, BookingPackage):
-            return cls.find_bookingpackage_update_amounts(bookingservice, pax_list, agency)
+            return cls.find_bookingpackage_update_amounts(bookingservice, pax_list, agency, True)
 
         if bookingservice.manual_cost is None:
             bookingservice.manual_cost = False
@@ -3901,7 +3901,7 @@ class BookingServices(object):
 
 
     @classmethod
-    def find_bookingpackage_update_amounts(cls, obj, pax_list=None, agency=None):
+    def find_bookingpackage_update_amounts(cls, obj, pax_list=None, agency=None, manuals=False):
         if isinstance(obj, BookingPackage):
             bookingpackage = obj
         else:
@@ -3909,7 +3909,7 @@ class BookingServices(object):
 
         cost, cost_msg, price, price_msg = 0, None, 0, None
 
-        if agency is None:
+        if not agency:
             agency = bookingpackage.booking.agency
         if agency is None:
             price, price_msg = None, "Missing Agency"
@@ -3927,7 +3927,7 @@ class BookingServices(object):
             return None, "Booking Package Empty", None, "Booking Package Empty"
 
         if agency and bookingpackage.price_by_package_catalogue:
-            if bookingpackage.manual_price:
+            if manuals and bookingpackage.manual_price:
                 if bookingpackage.price_amount is None:
                     price, price_msg = None, "Missing Manual Price"
                 else:
