@@ -3927,11 +3927,17 @@ class BookingServices(object):
             return None, "Booking Package Empty", None, "Booking Package Empty"
 
         if agency and bookingpackage.price_by_package_catalogue:
-            price, price_msg = BookingServices.package_price(
-                bookingpackage.service_id,
-                bookingpackage.datetime_from, bookingpackage.datetime_to,
-                cls.find_groups(bookingpackage, bookingpackage.service, False),
-                agency)
+            if bookingpackage.manual_price:
+                if bookingpackage.price_amount is None:
+                    price, price_msg = None, "Missing Manual Price"
+                else:
+                    price, price_msg = bookingpackage.price_amount, None
+            else:
+                price, price_msg = BookingServices.package_price(
+                    bookingpackage.service_id,
+                    bookingpackage.datetime_from, bookingpackage.datetime_to,
+                    cls.find_groups(bookingpackage, bookingpackage.service, False),
+                    agency)
             if allotment_list:
                 for allotment in allotment_list:
                     c, c_msg = cls.find_bookingservice_update_cost(allotment)
