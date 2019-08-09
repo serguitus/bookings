@@ -592,9 +592,17 @@ class EmailProviderView(View):
             booking=bs.booking,
             provider=bs.provider)
         provider_name = ''
+        provider_email = ''
+        from_email = request.user.email or None
+        bcc = request.user.email or None
         if bs.provider:
             provider_name = bs.provider.alias or bs.provider.name
+            provider_email = bs.provider.email
+            if not bs.provider.is_private:
+                # use former email for state companies
+                from_email = 'reservas1@ergosonline.com'
         rooming = bs.rooming_list.all()
+        bcc = request.user.email or None
         initial = {
             'services': services,
             'provider': provider_name,
@@ -604,6 +612,8 @@ class EmailProviderView(View):
         t = get_template('booking/emails/provider_email.html')
         form = EmailProviderForm(request.user,
                                  initial={
+                                     'to_address': provider_email,
+                                     'bcc_address': bcc,
                                      'subject': 'Solicitud de Reserva',
                                      'body': t.render(initial)
                                  })
