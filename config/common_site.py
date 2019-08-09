@@ -27,7 +27,8 @@ from config.forms import (
     AgencyAllotmentDetailInlineForm, AgencyTransferDetailInlineForm,
     AgencyExtraDetailInlineForm,
     AllotmentRoomTypeInlineForm, ExtraAddonInlineForm,
-    LocationTransferIntervalInlineForm, ServiceAddonInlineForm
+    LocationTransferIntervalInlineForm, ServiceAddonInlineForm,
+    PricesExportForm,
 )
 from config.models import (
     ServiceCategory, Location, Place, TransferInterval, Schedule, RoomType, Addon,
@@ -50,8 +51,10 @@ from config.top_filters import (
     LocationForProviderTransferTopFilter, ExtraLocationForProviderTransferTopFilter,
     LocationForAgencyTransferTopFilter, ExtraLocationForAgencyTransferTopFilter,
     DateToTopFilter)
+from config.views import render_prices_pdf
 
-from finance.top_filters import ProviderTopFilter, AgencyTopFilter 
+from finance.top_filters import ProviderTopFilter, AgencyTopFilter
+from finance.models import Agency
 
 from functools import update_wrapper, partial
 
@@ -178,6 +181,7 @@ class AllotmentSupplementInline(CommonTabularInline):
     model = AllotmentSupplement
     extra = 0
 
+
 class AllotmentSiteModel(SiteModel):
     model_order = 6110
     menu_label = MENU_LABEL_CONFIG_BASIC
@@ -188,8 +192,11 @@ class AllotmentSiteModel(SiteModel):
               ('time_from', 'time_to'),
               ('pax_range', 'enabled'),
               ('child_age', 'infant_age'))
-    list_display = ('name', 'service_category', 'phone', 'location', 'is_shared_point', 'enabled',)
-    top_filters = ('name', ('location', LocationTopFilter), ('service_category', ServiceCategoryTopFilter), 'is_shared_point', 'enabled')
+    list_display = ('name', 'service_category', 'phone',
+                    'location', 'is_shared_point', 'enabled',)
+    top_filters = ('name', ('location', LocationTopFilter),
+                   ('service_category', ServiceCategoryTopFilter),
+                   'is_shared_point', 'enabled')
     ordering = ['enabled', 'name']
     inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline,
                ServiceAddonInline]
@@ -203,8 +210,15 @@ class AllotmentSiteModel(SiteModel):
         if 'apply' in request.POST:
             # The user clicked submit on the intermediate form.
             # render the pdf
-            pass
+            agency = request.POST.get('agency', False)
+            services = request.POST.getlist('_selected_action', [])
+            if agency and services:
+                return render_prices_pdf({
+                    'agency': Agency.objects.get(id=agency),
+                    'services': Service.objects.filter(id__in=services)
+                })
         context.update({'services': queryset})
+        context.update({'form': PricesExportForm()})
         context.update({'site_title': 'Export Services'})
         context.update(self.get_model_extra_context(request))
         context.update(extra_context or {})

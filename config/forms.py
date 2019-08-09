@@ -8,6 +8,7 @@ from config.models import (
     ProviderAllotmentService, ProviderTransferService, ProviderExtraService,
     AgencyAllotmentService, AgencyTransferService, AgencyExtraService,
 )
+from finance.models import Agency
 
 
 class LocationTransferIntervalInlineForm(forms.ModelForm):
@@ -157,9 +158,18 @@ class ExtraAddonInlineForm(forms.ModelForm):
             'addon': autocomplete.ModelSelect2(url='addon-autocomplete'),
         }
 
+
 class ServiceAddonInlineForm(forms.ModelForm):
     class Meta:
         fields = ('__all__')
         widgets = {
             'addon': autocomplete.ModelSelect2(url='addon-autocomplete'),
         }
+
+
+class PricesExportForm(forms.Form):
+    # action = forms.CharField(widget=forms.widgets.HiddenInput, default='export_prices')
+    agency = forms.ModelChoiceField(queryset=Agency.objects.all(),
+                                    label='Pick Agency to export prices for')
+    start_date = forms.DateField(label='Starting Date', required=False)
+    end_date = forms.DateField(label='End Date', required=False)

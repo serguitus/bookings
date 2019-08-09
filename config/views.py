@@ -385,3 +385,38 @@ def _fetch_resources(uri, rel):
     return path
 
 
+def render_prices_pdf(extra_context=None):
+    """
+    helper method
+    given some extra context with services renders a pdf of prices
+    requires a context with:
+    - agency: an agency to search prices for
+    - services: a list of services to include in list
+    - date_from: the starting date to fetch prices
+    - date_to: the ending date to fetch prices for
+    """
+    context = {}
+    context.update(extra_context)
+    if 'agency' not in context or 'services' not in context:
+        # Missing data. no pdf can be rendered
+        return redirect(reverse('common:config_service'))
+    template = get_template("config/pdf/prices.html")
+    context.update({
+        'pagesize': 'Letter',
+        # 'agency': agency,
+        # 'services': services,
+        # 'date_from': None,
+        # 'date_to': None,
+    })
+    html = template.render(context)
+    result = StringIO()
+    pdf = pisa.pisaDocument(StringIO(html),
+                            dest=result,
+                            link_callback=_fetch_resources)
+    if pdf.err:
+        messages.add_message(request,
+                             messages.ERROR,
+                             "Failed Prices PDF Generation")
+        return HttpResponseRedirect(reverse('common:config_service'))
+
+    return HttpResponse(result.getvalue(), content_type='application/pdf')

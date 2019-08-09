@@ -5,7 +5,8 @@
   {% csrf_token %}
         <p><h1>
             You are going to export prices for the following services. Are you sure?
-        </h1></p>  
+        </h1></p>
+        {{ form }}
   {% for service in services %}
     <p>
       {{ service }}
