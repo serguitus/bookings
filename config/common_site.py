@@ -124,6 +124,16 @@ class ServiceSiteModel(SiteModel):
     list_display = ('name', 'service_category', 'category', 'enabled')
     top_filters = ('name', ('service_category', ServiceCategoryTopFilter), 'category', 'enabled')
     ordering = ['enabled', 'category', 'name']
+    actions = ['export_prices']
+
+    def export_prices(self, request, queryset, extra_context=None):
+        """
+        This allows exporting service prices for certain agency and dates
+        """
+        context = {}
+        context.update(self.get_model_extra_context(request))
+        context.update(extra_context or {})
+        return export_prices(request, queryset, context)
 
 
 class RoomTypeSiteModel(SiteModel):
