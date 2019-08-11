@@ -736,12 +736,13 @@ class BookingPaxInline(TabularInline):
     model = BookingPax
     fields = ['pax_name', 'pax_group', 'pax_age', 'is_price_free', 'version']
     verbose_name_plural = 'Rooming List'
-    # TODO poner 0 cuando se implemente agregar booking pax
-    extra = 1
+    extra = 0
     ordering = ('pax_group', 'pax_name')
 
     def get_max_num(self, request, obj=None, **kwargs):
-        adding = obj is None or obj.id is None
+        # TODO poner 0 cuando se implemente agregar booking pax
+        #adding = obj is None or obj.id is None
+        adding = True;
         if adding:
             return super(BookingPaxInline, self).get_max_num(request, obj, **kwargs)
         else:
