@@ -12,3 +12,8 @@ def service_prices(service=None, agency=None, date_from=None, date_to=None):
     return {
         'service': service,
         'details': details}
+
+# a filter to add css classes to widgets. used to style form fields
+@register.filter(name='addclass')
+def addclass(value, arg):
+    return value.as_widget(attrs={'class': arg})
