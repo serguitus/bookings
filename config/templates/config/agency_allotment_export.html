@@ -1,12 +1,31 @@
 {% extends "common/change_form.html" %}
+{% load export_prices %}
+{% load static %}
+
+{% block head_extra %}
+  {{ block.super }}
+    <script type="text/javascript" src="{% static 'admin/js/calendar.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/core.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/admin/DateTimeShortcuts.js' %}"></script>
+ {% endblock %}
 
 {% block content %}
-    <form action="" method="post">
+    <form action="" method="post" class="form-inline">
+        {{ form.non_field_errors }}
   {% csrf_token %}
         <p><h1>
             You are going to export prices for the following services. Are you sure?
         </h1></p>
-        {{ form }}
+        {{ form.agency.errors }}
+        {{ form.agency.label_tag }}
+        {{ form.agency|addclass:'form-control' }}
+        {{ form.start_date.errors }}
+        {{ form.start_date.label_tag }}
+        {{ form.start_date|addclass:'vDateField form-control' }}
+        {{ form.end_date.errors }}
+        {{ form.end_date.label_tag }}
+        {{ form.end_date|addclass:'vDateField form-control' }}
+
   {% for service in services %}
     <p>
       {{ service }}
