@@ -182,6 +182,33 @@ class AllotmentSupplementInline(CommonTabularInline):
     extra = 0
 
 
+def export_prices(request, queryset, extra_context=None):
+    """
+    This allows exporting service prices for certain agency and dates
+    """
+    context = {}
+    if 'apply' in request.POST:
+        # The user clicked submit on the intermediate form.
+        # render the pdf
+        agency = request.POST.get('agency', None)
+        date_from = request.POST.get('date_from', None)
+        date_to = request.POST.get('date_to', None)
+        services = request.POST.getlist('_selected_action', [])
+        if agency and services:
+            return render_prices_pdf({
+                'agency': Agency.objects.get(id=agency),
+                'date_from': date_from,
+                'date_to': date_to,
+                'services': Service.objects.filter(id__in=services)
+            })
+    context.update({'services': queryset})
+    context.update({'form': PricesExportForm()})
+    context.update({'site_title': 'Export Services'})
+    context.update(extra_context or {})
+    # context.update({'quote_id': id})
+    return render(request, 'config/agency_allotment_export.html', context=context)
+
+
 class AllotmentSiteModel(SiteModel):
     model_order = 6110
     menu_label = MENU_LABEL_CONFIG_BASIC
@@ -207,24 +234,9 @@ class AllotmentSiteModel(SiteModel):
         This allows exporting service prices for certain agency and dates
         """
         context = {}
-        if 'apply' in request.POST:
-            # The user clicked submit on the intermediate form.
-            # render the pdf
-            agency = request.POST.get('agency', False)
-            services = request.POST.getlist('_selected_action', [])
-            if agency and services:
-                return render_prices_pdf({
-                    'agency': Agency.objects.get(id=agency),
-                    'services': Service.objects.filter(id__in=services)
-                })
-        context.update({'services': queryset})
-        context.update({'form': PricesExportForm()})
-        context.update({'site_title': 'Export Services'})
         context.update(self.get_model_extra_context(request))
         context.update(extra_context or {})
-        # context.update({'quote_id': id})
-        return render(request, 'config/agency_allotment_export.html',
-                      context=context)
+        return export_prices(request, queryset, context)
 
 
 class TransferSupplementInline(CommonTabularInline):
@@ -241,6 +253,16 @@ class TransferSiteModel(SiteModel):
     top_filters = ('name', ('service_category', ServiceCategoryTopFilter), 'is_shared', 'enabled',)
     ordering = ['enabled', 'name']
     inlines = [ServiceAddonInline]
+    actions = ['export_prices']
+
+    def export_prices(self, request, queryset, extra_context=None):
+        """
+        This allows exporting service prices for certain agency and dates
+        """
+        context = {}
+        context.update(self.get_model_extra_context(request))
+        context.update(extra_context or {})
+        return export_prices(request, queryset, context)
 
 
 class ExtraAddonInline(CommonTabularInline):
@@ -277,6 +299,16 @@ class ExtraSiteModel(SiteModel):
     top_filters = (('service_category', ServiceCategoryTopFilter), 'name',)
     ordering = ['enabled', 'name']
     inlines = [ExtraAddonInline, ServiceAddonInline]
+    actions = ['export_prices']
+
+    def export_prices(self, request, queryset, extra_context=None):
+        """
+        This allows exporting service prices for certain agency and dates
+        """
+        context = {}
+        context.update(self.get_model_extra_context(request))
+        context.update(extra_context or {})
+        return export_prices(request, queryset, context)
 
 
 class ProviderAllotmentDetailInline(CommonStackedInline):
