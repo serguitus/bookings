@@ -352,32 +352,6 @@ class ProviderExtraAutocompleteView(autocomplete.Select2QuerySetView):
         return qs[:20]
 
 
-class PricesPDFView(View):
-    """
-    A view to handle prices PDF
-    """
-    def get(self, request, *args, **kwargs):
-        agency = Agency.objects.get(pk=1)
-        services = list(Service.objects.all())
-
-        template = get_template("config/pdf/prices.html")
-        context = {
-            'pagesize': 'Letter',
-            'agency': agency,
-            'services': services,
-            'date_from': None,
-            'date_to': None,
-        }
-        html = template.render(context)
-        result = StringIO()
-        pdf = pisa.pisaDocument(StringIO(html), dest=result, link_callback=_fetch_resources)
-        if pdf.err:
-            messages.add_message(request, messages.ERROR, "Failed Prices PDF Generation")
-            return HttpResponseRedirect(reverse('common:config_service'))
-        
-        return HttpResponse(result.getvalue(), content_type='application/pdf')
-
-
 # helper method for build_voucher view. Remove once removed that view
 def _fetch_resources(uri, rel):
     path = os.path.join(settings.MEDIA_ROOT,
