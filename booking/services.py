@@ -4560,12 +4560,12 @@ class BookingServices(object):
         qs = AgencyPackageDetail.objects.all()
         qs = qs.filter(
             agency_service__agency=agency,
-            agency_service__service=package)
+            agency_service__service=package.id)
         if date_from:
             qs = qs.filter(agency_service__date_to__gte=date_from)
         if date_to:
             qs = qs.filter(agency_service__date_from__lte=date_to)
-        qs.order_by(
+        qs = qs.order_by(
             'pax_range_min', '-pax_range_max',
             'agency_service__date_from', '-agency_service__date_to')
         return list(qs)

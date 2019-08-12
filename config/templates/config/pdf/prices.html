@@ -2,19 +2,58 @@
 <html>
     <head>
         <style>
-        @page {
-            size: a4 portrait;
-            @frame content_frame { /* Content Frame */
-                left: 45pt; right: 45pt; top: 45pt; bottom: 45pt;
-            };
-        }
+            @page {
+                size: a4 portrait;
+                @frame content_frame { /* Content Frame */
+                    left: 45pt; right: 45pt; top: 45pt; bottom: 45pt;
+                };
+            }
+            td.bold-top-line {
+                border-top: 2px solid black;
+                padding-top: 3px;
+            }
+            td.top-line {
+                border-top: 1px solid black;
+                padding-top: 2px;
+            }
+            td.addon-content {
+                width: 25%;
+                text-align: left;
+            }
+            td.pax-range-content {
+                width: 18%;
+                text-align: center;
+            }
+            td.pax-range {
+                text-align: center;
+            }
+            td.date-content {
+                width: 18%;
+                text-align: center;
+            }
+            td.date {
+                text-align: center;
+            }
+            td.amount-content {
+                width: 9%;
+                text-align: right;
+            }
+            td.amount {
+                text-align: right;
+            }
         </style>
     </head>
     <body>
     <b>Agency:</b> {{ agency.name }}<br>
+    <table width=100%>
     {% for service in services %}
-        <b>Service:</b> {{ service.name }}<br>
-        {% service_prices service agency date_from date_to %}
+        <tr><td class="bold-top-line">
+            <b>Service:</b> {{ service.name }}
+        </td></tr>
+        <tr><td class="top-line">
+            {% service_prices service agency date_from date_to %}
+        </td></tr>
     {% endfor %}
+    </table>
     </body>
 </html>
