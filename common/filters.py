@@ -311,7 +311,7 @@ class DateFilter(TopFilter):
         self._add_media(model_admin, widget)
 
         attrs = self.widget_attrs.copy()
-        attrs['id'] = 'id-%s-dal-filter' % self.field_path
+        attrs['id'] = 'id-%s-start-dal-filter' % self.field_path
         attrs['placeholder'] = 'Starting'
 
         from_widget = widget.render(
@@ -320,6 +320,7 @@ class DateFilter(TopFilter):
             attrs=attrs
         )
 
+        attrs['id'] = 'id-%s-end-dal-filter' % self.field_path
         attrs['placeholder'] = 'Ending'
 
         to_widget = widget.render(
