@@ -201,8 +201,12 @@ def export_prices(request, queryset, extra_context=None):
         # The user clicked submit on the intermediate form.
         # render the pdf
         agency = request.POST.get('agency', None)
-        date_from = request.POST.get('date_from', None)
-        date_to = request.POST.get('date_to', None)
+
+        from common.filters import parse_date
+
+        date_from = parse_date(request.POST.get('start_date', None))
+        date_to = parse_date(date_to = request.POST.get('end_date', None))
+
         services = request.POST.getlist('_selected_action', [])
         if agency and services:
             return render_prices_pdf({
@@ -216,7 +220,7 @@ def export_prices(request, queryset, extra_context=None):
     context.update({'site_title': 'Export Services'})
     context.update(extra_context or {})
     # context.update({'quote_id': id})
-    return render(request, 'config/agency_allotment_export.html', context=context)
+    return render(request, 'config/agency_prices_export.html', context=context)
 
 
 class AllotmentSiteModel(SiteModel):

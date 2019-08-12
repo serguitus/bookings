@@ -376,6 +376,8 @@ TopFilter.register(lambda f: isinstance(f, (models.DateField,)), DateFilter)
 
 def parse_date(date_str):
     """Parse date from string by DATE_INPUT_FORMATS of current language"""
+    if not date_str:
+        return None
     for item in get_format('DATE_INPUT_FORMATS'):
         try:
             return datetime.strptime(date_str, item).date()
