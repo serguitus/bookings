@@ -205,7 +205,7 @@ def export_prices(request, queryset, extra_context=None):
         from common.filters import parse_date
 
         date_from = parse_date(request.POST.get('start_date', None))
-        date_to = parse_date(date_to = request.POST.get('end_date', None))
+        date_to = parse_date(request.POST.get('end_date', None))
 
         services = request.POST.getlist('_selected_action', [])
         if agency and services:
