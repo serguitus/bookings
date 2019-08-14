@@ -2,17 +2,28 @@
 <table width="100%">
 {% if service.category == 'A' %}
     <tr>
-        <td><b>Board</b></td>
-        <td><b>Room</b></td>
-        <td class="addon-content"><b>Addon</b></td>
         {% if service.pax_range %}
-            <td class="pax-range-content"><b>Pax Range</b></td>
+            <td colspan="9" class="bold-top-line">
+                <b>Service:</b> {{ service.name }}
+            </td>
+        {% else %}
+            <td colspan="8" class="bold-top-line">
+                <b>Service:</b> {{ service.name }}
+            </td>
         {% endif %}
-        <td class="date-content"><b>From</b></td>
-        <td class="date-content"><b>To</b></td>
-        <td class="amount-content"><b>SGL</b></td>
-        <td class="amount-content"><b>DBL</b></td>
-        <td class="amount-content"><b>TPL</b></td>
+    </tr>
+    <tr>
+        <td class="top-line"><b>Board</b></td>
+        <td class="top-line"><b>Room</b></td>
+        <td class="top-line addon-content"><b>Addon</b></td>
+        {% if service.pax_range %}
+            <td class="top-line pax-range-content"><b>Pax Range</b></td>
+        {% endif %}
+        <td class="top-line date-content"><b>From</b></td>
+        <td class="top-line date-content"><b>To</b></td>
+        <td class="top-line amount-content"><b>SGL</b></td>
+        <td class="top-line amount-content"><b>DBL</b></td>
+        <td class="top-line amount-content"><b>TPL</b></td>
     </tr>
     {% setvar '' as prev_board %}
     {% setvar '' as prev_room %}
@@ -79,15 +90,26 @@
 
 {% if service.category == 'T' %}
     <tr>
-        <td><b>Location From</b></td>
-        <td><b>Location To</b></td>
-        <td class="addon-content"><b>Addon</b></td>
         {% if service.pax_range %}
-            <td class="pax-range-content"><b>Pax Range</b></td>
+            <td colspan="7" class="bold-top-line">
+                <b>Service:</b> {{ service.name }}
+            </td>
+        {% else %}
+            <td colspan="6" class="bold-top-line">
+                <b>Service:</b> {{ service.name }}
+            </td>
         {% endif %}
-        <td class="date-content"><b>From</b></td>
-        <td class="date-content"><b>To</b></td>
-        <td class="amount-content"><b>SGL</b></td>
+    </tr>
+    <tr>
+        <td class="top-line"><b>Location From</b></td>
+        <td class="top-line"><b>Location To</b></td>
+        <td class="top-line addon-content"><b>Addon</b></td>
+        {% if service.pax_range %}
+            <td class="top-line pax-range-content"><b>Pax Range</b></td>
+        {% endif %}
+        <td class="top-line date-content"><b>From</b></td>
+        <td class="top-line date-content"><b>To</b></td>
+        <td class="top-line amount-content"><b>SGL</b></td>
     </tr>
     {% setvar '' as prev_from %}
     {% setvar '' as prev_to %}
@@ -148,13 +170,24 @@
 
 {% if service.category == 'E' %}
     <tr>
-        <td><b>Addon</b></td>
         {% if service.pax_range %}
-            <td class="pax-range-content"><b>Pax Range</b></td>
+            <td colspan="5" class="bold-top-line">
+                <b>Service:</b> {{ service.name }}
+            </td>
+        {% else %}
+            <td colspan="4" class="bold-top-line">
+                <b>Service:</b> {{ service.name }}
+            </td>
         {% endif %}
-        <td class="date-content"><b>From</b></td>
-        <td class="date-content"><b>To</b></td>
-        <td class="amount-content"><b>SGL</b></td>
+    </tr>
+    <tr>
+        <td class="top-line"><b>Addon</b></td>
+        {% if service.pax_range %}
+            <td class="top-line pax-range-content"><b>Pax Range</b></td>
+        {% endif %}
+        <td class="top-line date-content"><b>From</b></td>
+        <td class="top-line date-content"><b>To</b></td>
+        <td class="top-line amount-content"><b>SGL</b></td>
     </tr>
     {% setvar '' as prev_addon %}
     {% for detail in details %}
@@ -192,15 +225,28 @@
 {% if service.category == 'P' %}
     <tr>
         {% if service.pax_range %}
-            <td class="pax-range-content"><b>Pax Range</b></td>
+            <td colspan="5" class="bold-top-line">
+                <b>Service:</b> {{ service.name }}
+            </td>
+        {% else %}
+            <td colspan="4" class="bold-top-line">
+                <b>Service:</b> {{ service.name }}
+            </td>
         {% endif %}
-        <td class="date-content"><b>From</b></td>
-        <td class="date-content"><b>To</b></td>
-        <td class="amount-content"><b>SGL</b></td>
+    </tr>
+    <tr>
+        <td class="top-line"></td>
+        {% if service.pax_range %}
+            <td class="top-line pax-range-content"><b>Pax Range</b></td>
+        {% endif %}
+        <td class="top-line date-content"><b>From</b></td>
+        <td class="top-line date-content"><b>To</b></td>
+        <td class="top-line amount-content"><b>SGL</b></td>
     </tr>
     {% for detail in details %}
         {% setvar False as print_top_line %}
         <tr>
+            <td class="top-line"></td>
             {% if service.pax_range %}
                 <td class="top-line pax-range">
                     {{ detail.pax_range_min }} - {{ detail.pax_range_max }}

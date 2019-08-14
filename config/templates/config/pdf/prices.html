@@ -45,14 +45,8 @@
     </head>
     <body>
     <b>Agency:</b> {{ agency.name }}<br>
-    <table width=100%>
     {% for service in services %}
-        <tr><td class="bold-top-line">
-            <b>Service:</b> {{ service.name }}
-        </td></tr>
-        <tr><td class="top-line">
-            {% service_prices service agency date_from date_to %}
-        </td></tr>
+        {% service_prices service agency date_from date_to %}
     {% endfor %}
     </table>
     </body>
