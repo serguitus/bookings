@@ -24,3 +24,16 @@ class CancelledTopFilter(filters.BooleanFilter):
 
         queryset = queryset.distinct()
         return queryset
+
+class InternalReferenceTopFilter(filters.TextFilter):
+    filter_title = 'Int.Ref.'
+
+    def queryset(self, request, queryset):
+        search_terms = self._values[0]
+        if search_terms and search_terms != '':
+            try:
+                number = int(search_terms)
+                queryset = queryset.filter(id=number - 20000)
+            except:
+                queryset = queryset.none()
+        return queryset
