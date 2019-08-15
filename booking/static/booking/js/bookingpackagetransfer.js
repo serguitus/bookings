@@ -1,4 +1,5 @@
 var bookingservice_amounts_url = base_url + 'booking/bookingpackagetransfer-amounts/';
+var bookingservice_providers_costs_url = base_url + 'booking/bookingpackagetransfer-providers-costs/';
 var bookingservice_form_selector = '#bookingpackagetransfer_form';
 
 var bookingservicetransfer_time_url = base_url + 'booking/bookingtransfer-time/';

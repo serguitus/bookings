@@ -8,3 +8,8 @@
   <script type="text/javascript" src="{% static 'booking/js/bookingservice.js' %}"></script>
   <script type="text/javascript" src="{% static 'booking/js/bookingservicetransfer.js' %}"></script>
 {% endblock head_extra %}
+
+{% block content %}
+  {{ block.super }}
+  {% include "booking/popup_providers_costs.html" %}
+{% endblock content %}

@@ -114,75 +114,81 @@ class AllotmentAutocompleteView(autocomplete.Select2QuerySetView):
         return qs[:20]
 
 
-class ProviderAllotmentAutocompleteView(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        if not self.request.user.is_authenticated():
-            return Provider.objects.none()
-        qs = Provider.objects.filter(enabled=True).all().distinct()
+def provider_allotment_queryset(
+        service, room_type=None, board_type=None, addon=None, text=None):
+    if not service:
+        return Provider.objects.none()
 
-        service = self.forwarded.get('service', None)
-        if not service:
-            return Provider.objects.none()
+    qs = Provider.objects.filter(enabled=True).all().distinct()
 
-        room_type = self.forwarded.get('room_type', None)
-        board_type = self.forwarded.get('board_type', None)
-        addon = self.forwarded.get('service_addon', None)
-
-        if room_type:
-            if board_type:
-                if addon:
-                    qs = qs.filter(
-                        providerallotmentservice__service=service,
-                        providerallotmentservice__providerallotmentdetail__room_type=room_type,
-                        providerallotmentservice__providerallotmentdetail__board_type=board_type,
-                        providerallotmentservice__providerallotmentdetail__addon=addon,
-                    )
-                else:
-                    qs = qs.filter(
-                        providerallotmentservice__service=service,
-                        providerallotmentservice__providerallotmentdetail__room_type=room_type,
-                        providerallotmentservice__providerallotmentdetail__board_type=board_type,
-                        providerallotmentservice__providerallotmentdetail__addon=ADDON_FOR_NO_ADDON,
-                    )
-            elif addon:
-                qs = qs.filter(
-                    providerallotmentservice__service=service,
-                    providerallotmentservice__providerallotmentdetail__room_type=room_type,
-                    providerallotmentservice__providerallotmentdetail__addon=addon,
-                )
-            else:
-                qs = qs.filter(
-                    providerallotmentservice__service=service,
-                    providerallotmentservice__providerallotmentdetail__room_type=room_type,
-                    providerallotmentservice__providerallotmentdetail__addon=ADDON_FOR_NO_ADDON,
-                )
-        elif board_type:
+    if room_type:
+        if board_type:
             if addon:
                 qs = qs.filter(
                     providerallotmentservice__service=service,
+                    providerallotmentservice__providerallotmentdetail__room_type=room_type,
                     providerallotmentservice__providerallotmentdetail__board_type=board_type,
                     providerallotmentservice__providerallotmentdetail__addon=addon,
                 )
             else:
                 qs = qs.filter(
                     providerallotmentservice__service=service,
+                    providerallotmentservice__providerallotmentdetail__room_type=room_type,
                     providerallotmentservice__providerallotmentdetail__board_type=board_type,
                     providerallotmentservice__providerallotmentdetail__addon=ADDON_FOR_NO_ADDON,
                 )
         elif addon:
             qs = qs.filter(
                 providerallotmentservice__service=service,
+                providerallotmentservice__providerallotmentdetail__room_type=room_type,
                 providerallotmentservice__providerallotmentdetail__addon=addon,
             )
         else:
             qs = qs.filter(
                 providerallotmentservice__service=service,
+                providerallotmentservice__providerallotmentdetail__room_type=room_type,
                 providerallotmentservice__providerallotmentdetail__addon=ADDON_FOR_NO_ADDON,
             )
+    elif board_type:
+        if addon:
+            qs = qs.filter(
+                providerallotmentservice__service=service,
+                providerallotmentservice__providerallotmentdetail__board_type=board_type,
+                providerallotmentservice__providerallotmentdetail__addon=addon,
+            )
+        else:
+            qs = qs.filter(
+                providerallotmentservice__service=service,
+                providerallotmentservice__providerallotmentdetail__board_type=board_type,
+                providerallotmentservice__providerallotmentdetail__addon=ADDON_FOR_NO_ADDON,
+            )
+    elif addon:
+        qs = qs.filter(
+            providerallotmentservice__service=service,
+            providerallotmentservice__providerallotmentdetail__addon=addon,
+        )
+    else:
+        qs = qs.filter(
+            providerallotmentservice__service=service,
+            providerallotmentservice__providerallotmentdetail__addon=ADDON_FOR_NO_ADDON,
+        )
 
-        if self.q:
-            qs = qs.filter(name__icontains=self.q)
-        return qs[:20]
+    if text:
+        qs = qs.filter(name__icontains=text)
+    return qs[:20]
+
+
+class ProviderAllotmentAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if not self.request.user.is_authenticated():
+            return Provider.objects.none()
+
+        service = self.forwarded.get('service', None)
+        room_type = self.forwarded.get('room_type', None)
+        board_type = self.forwarded.get('board_type', None)
+        addon = self.forwarded.get('service_addon', None)
+
+        return provider_allotment_queryset(service, room_type, board_type, addon, self.q)
 
 
 class TransferAutocompleteView(autocomplete.Select2QuerySetView):
@@ -196,83 +202,15 @@ class TransferAutocompleteView(autocomplete.Select2QuerySetView):
         return qs[:20]
 
 
-class ProviderTransferAutocompleteView(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        if not self.request.user.is_authenticated():
-            return Provider.objects.none()
-        qs = Provider.objects.filter(enabled=True).all().distinct()
+def provider_transfer_queryset(
+        service, location_from=None, location_to=None, addon=None, text=None):
+    if not service:
+        return Provider.objects.none()
 
-        service = self.forwarded.get('service', None)
-        if not service:
-            return Provider.objects.none()
+    qs = Provider.objects.filter(enabled=True).all().distinct()
 
-        location_from = self.forwarded.get('location_from', None)
-        location_to = self.forwarded.get('location_to', None)
-        addon = self.forwarded.get('service_addon', None)
-
-        if location_from:
-            if location_to:
-                if addon:
-                    qs = qs.filter(
-                        Q(providertransferservice__service=service)
-                        &
-                        Q(providertransferservice__providertransferdetail__addon=addon)
-                        &
-                        (
-                            (
-                                Q(providertransferservice__providertransferdetail__p_location_from=location_from)
-                                & Q(providertransferservice__providertransferdetail__p_location_to=location_to)
-                            )
-                            |
-                            (
-                                Q(providertransferservice__providertransferdetail__p_location_from=location_to)
-                                & Q(providertransferservice__providertransferdetail__p_location_to=location_from)
-                            )
-                        )
-                    )
-                else:
-                    qs = qs.filter(
-                        Q(providertransferservice__service=service)
-                        &
-                        Q(providertransferservice__providertransferdetail__addon=ADDON_FOR_NO_ADDON)
-                        &
-                        (
-                            (
-                                Q(providertransferservice__providertransferdetail__p_location_from=location_from)
-                                & Q(providertransferservice__providertransferdetail__p_location_to=location_to)
-                            )
-                            |
-                            (
-                                Q(providertransferservice__providertransferdetail__p_location_from=location_to)
-                                & Q(providertransferservice__providertransferdetail__p_location_to=location_from)
-                            )
-                        )
-                    )
-            elif addon:
-                qs = qs.filter(
-                    Q(providertransferservice__service=service)
-                    &
-                    Q(providertransferservice__providertransferdetail__addon=addon)
-                    &
-                    (
-                        Q(providertransferservice__providertransferdetail__p_location_from=location_from)
-                        |
-                        Q(providertransferservice__providertransferdetail__p_location_to=location_from)
-                    )
-                )
-            else:
-                qs = qs.filter(
-                    Q(providertransferservice__service=service)
-                    &
-                    Q(providertransferservice__providertransferdetail__addon=ADDON_FOR_NO_ADDON)
-                    &
-                    (
-                        Q(providertransferservice__providertransferdetail__p_location_from=location_from)
-                        |
-                        Q(providertransferservice__providertransferdetail__p_location_to=location_from)
-                    )
-                )
-        elif location_to:
+    if location_from:
+        if location_to:
             if addon:
                 qs = qs.filter(
                     Q(providertransferservice__service=service)
@@ -280,9 +218,15 @@ class ProviderTransferAutocompleteView(autocomplete.Select2QuerySetView):
                     Q(providertransferservice__providertransferdetail__addon=addon)
                     &
                     (
-                        Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                        (
+                            Q(providertransferservice__providertransferdetail__p_location_from=location_from)
+                            & Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                        )
                         |
-                        Q(providertransferservice__providertransferdetail__p_location_from=location_to)
+                        (
+                            Q(providertransferservice__providertransferdetail__p_location_from=location_to)
+                            & Q(providertransferservice__providertransferdetail__p_location_to=location_from)
+                        )
                     )
                 )
             else:
@@ -292,25 +236,93 @@ class ProviderTransferAutocompleteView(autocomplete.Select2QuerySetView):
                     Q(providertransferservice__providertransferdetail__addon=ADDON_FOR_NO_ADDON)
                     &
                     (
-                        Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                        (
+                            Q(providertransferservice__providertransferdetail__p_location_from=location_from)
+                            & Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                        )
                         |
-                        Q(providertransferservice__providertransferdetail__p_location_from=location_to)
+                        (
+                            Q(providertransferservice__providertransferdetail__p_location_from=location_to)
+                            & Q(providertransferservice__providertransferdetail__p_location_to=location_from)
+                        )
                     )
                 )
         elif addon:
             qs = qs.filter(
-                providertransferservice__service=service,
-                providertransferservice__providertransferdetail__addon=addon
+                Q(providertransferservice__service=service)
+                &
+                Q(providertransferservice__providertransferdetail__addon=addon)
+                &
+                (
+                    Q(providertransferservice__providertransferdetail__p_location_from=location_from)
+                    |
+                    Q(providertransferservice__providertransferdetail__p_location_to=location_from)
+                )
             )
         else:
             qs = qs.filter(
-                providertransferservice__service=service,
-                providertransferservice__providertransferdetail__addon=ADDON_FOR_NO_ADDON
+                Q(providertransferservice__service=service)
+                &
+                Q(providertransferservice__providertransferdetail__addon=ADDON_FOR_NO_ADDON)
+                &
+                (
+                    Q(providertransferservice__providertransferdetail__p_location_from=location_from)
+                    |
+                    Q(providertransferservice__providertransferdetail__p_location_to=location_from)
+                )
             )
+    elif location_to:
+        if addon:
+            qs = qs.filter(
+                Q(providertransferservice__service=service)
+                &
+                Q(providertransferservice__providertransferdetail__addon=addon)
+                &
+                (
+                    Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                    |
+                    Q(providertransferservice__providertransferdetail__p_location_from=location_to)
+                )
+            )
+        else:
+            qs = qs.filter(
+                Q(providertransferservice__service=service)
+                &
+                Q(providertransferservice__providertransferdetail__addon=ADDON_FOR_NO_ADDON)
+                &
+                (
+                    Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                    |
+                    Q(providertransferservice__providertransferdetail__p_location_from=location_to)
+                )
+            )
+    elif addon:
+        qs = qs.filter(
+            providertransferservice__service=service,
+            providertransferservice__providertransferdetail__addon=addon
+        )
+    else:
+        qs = qs.filter(
+            providertransferservice__service=service,
+            providertransferservice__providertransferdetail__addon=ADDON_FOR_NO_ADDON
+        )
 
-        if self.q:
-            qs = qs.filter(name__icontains=self.q)
-        return qs[:20]
+    if text:
+        qs = qs.filter(name__icontains=text)
+    return qs[:20]
+
+
+class ProviderTransferAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if not self.request.user.is_authenticated():
+            return Provider.objects.none()
+
+        service = self.forwarded.get('service', None)
+        location_from = self.forwarded.get('location_from', None)
+        location_to = self.forwarded.get('location_to', None)
+        addon = self.forwarded.get('service_addon', None)
+
+        return provider_transfer_queryset(service, location_from, location_to, addon, self.q)
 
 
 class ExtraAutocompleteView(autocomplete.Select2QuerySetView):
@@ -324,6 +336,28 @@ class ExtraAutocompleteView(autocomplete.Select2QuerySetView):
         return qs[:20]
 
 
+def provider_extra_queryset(service, addon=None, text=None):
+    if not service:
+        return Provider.objects.none()
+
+    qs = Provider.objects.filter(enabled=True).all().distinct()
+
+    if addon:
+        qs = qs.filter(
+            providerextraservice__service=service,
+            providerextraservice__providerextradetail__addon=addon,
+        )
+    else:
+        qs = qs.filter(
+            providerextraservice__service=service,
+            providerextraservice__providerextradetail__addon=ADDON_FOR_NO_ADDON,
+        )
+
+    if text:
+        qs = qs.filter(name__icontains=text)
+    return qs[:20]
+
+
 class ProviderExtraAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         if not self.request.user.is_authenticated():
@@ -331,25 +365,9 @@ class ProviderExtraAutocompleteView(autocomplete.Select2QuerySetView):
         qs = Provider.objects.filter(enabled=True).all().distinct()
 
         service = self.forwarded.get('service', None)
-        if not service:
-            return Provider.objects.none()
-
         addon = self.forwarded.get('service_addon', None)
 
-        if addon:
-            qs = qs.filter(
-                providerextraservice__service=service,
-                providerextraservice__providerextradetail__addon=addon,
-            )
-        else:
-            qs = qs.filter(
-                providerextraservice__service=service,
-                providerextraservice__providerextradetail__addon=ADDON_FOR_NO_ADDON,
-            )
-
-        if self.q:
-            qs = qs.filter(name__icontains=self.q)
-        return qs[:20]
+        return provider_extra_queryset(service, addon, self.q)
 
 
 # helper method for build_voucher view. Remove once removed that view

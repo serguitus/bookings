@@ -1,5 +1,45 @@
 $(document).ready(function(){
 
+  $('div.field-box.field-provider>div.related-widget-wrapper').after('<a id="btn-costs" data-toggle="modal" data-target="#popup-costs" class="btn btn-costs" href="#">Costs</a>');
+
+  $('#btn-costs').on('click', function (e) {
+    get_providers_costs();
+  });
+
+  function get_providers_costs(){
+    // sending a request to get computed numbers
+    $.ajax({
+      'url': bookingservice_providers_costs_url,
+      'async': true,
+      'datatype': 'json',
+      'type': 'POST',
+      'data': $(bookingservice_form_selector).serialize(),
+    }).done(function(data){
+      update_providers_costs(data);
+    }).fail(function(){
+      update_providers_costs(null);
+    })
+  }
+
+  function update_providers_costs(data){
+    content = $('#providers-costs-content');
+    has_costs = false;
+    if (data && data.costs) {
+      html = "<table>";
+      for (let index = 0; index < data.costs.length; index++) {
+        has_costs = true;
+        const line = data.costs[index];
+        html += "<tr><td>" + line.provider_name + "</td><td style='padding-left: 20px; text-align: right;'>" + line.cost + "</td></tr>";
+      }
+      html += "</table>";
+    }
+    if (has_costs) {
+      content.html(html);
+    } else {
+      content.html('No Providres Costs Are Available');
+    }
+  }
+
   function get_computed_amounts(){
     // sending a request to get computed numbers
     $.ajax({

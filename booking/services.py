@@ -25,6 +25,8 @@ from booking.models import (
     BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine, BookingInvoicePartial)
 
 from config.services import ConfigServices
+from config.views import (
+    provider_allotment_queryset, provider_transfer_queryset, provider_extra_queryset)
 
 from finance.constants import STATUS_CANCELLED, STATUS_READY
 from finance.services import FinanceService
@@ -4569,3 +4571,42 @@ class BookingServices(object):
             'pax_range_min', '-pax_range_max',
             'agency_service__date_from', '-agency_service__date_to')
         return list(qs)
+
+
+    @classmethod
+    def find_bookingservice_providers_costs(cls, bookingservice, pax_list=None):
+        if not pax_list:
+            pax_list = cls._find_bookingservice_pax_list(bookingservice)
+
+        providers = list()
+        if isinstance(bookingservice, (BookingAllotment, BookingPackageAllotment)):
+            providers = list(provider_allotment_queryset(
+                bookingservice.service,
+                bookingservice.room_type,
+                bookingservice.board_type,
+                bookingservice.service_addon))
+        elif isinstance(bookingservice, (BookingTransfer, BookingPackageTransfer)):
+            providers = list(provider_transfer_queryset(
+                bookingservice.service,
+                bookingservice.location_from,
+                bookingservice.location_to,
+                bookingservice.service_addon))
+        elif isinstance(bookingservice, (BookingExtra, BookingPackageExtra)):
+            providers = list(provider_extra_queryset(
+                bookingservice.service,
+                bookingservice.service_addon))
+        else:
+            return list()
+
+        cost_groups = BookingServices.find_bookingservice_paxes_groups(
+            pax_list, bookingservice.service, True)
+        result = list()
+        for provider in providers:
+            bookingservice.provider = provider
+            cost, cost_msg = cls._find_bookingservice_cost(bookingservice, cost_groups)
+            result.append({
+                'provider_id': provider.id,
+                'provider_name': provider.name,
+                'cost': cost, 'cost_msg': cost_msg})
+        return result
+

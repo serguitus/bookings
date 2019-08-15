@@ -970,3 +970,116 @@ class BookingInvoiceCancelView(View):
         messages.add_message(request, messages.SUCCESS , "Successful Booking Invoice Cancellation")
 
         return HttpResponseRedirect(reverse('common:booking_booking_change', args=[id]))
+
+
+class BookingServiceProvidersCostsView(ModelChangeFormProcessorView):
+    common_site = bookings_site
+
+    def verify(self, bookingservice, inlines):
+        if not hasattr(bookingservice, 'booking') or not bookingservice.booking:
+            return JsonResponse({
+                'cost': None,
+                'cost_message': 'Booking Id Missing',
+                'price': None,
+                'price_message': 'Booking Id Missing',
+            }), None
+        if not hasattr(bookingservice, 'service') or not bookingservice.service:
+            return JsonResponse({
+                'cost': None,
+                'cost_message': 'Service Id Missing',
+                'price': None,
+                'price_message': 'Service Id Missing',
+            }), None
+        pax_list = inlines[0]
+        if not pax_list:
+            return JsonResponse({
+                'cost': None,
+                'cost_message': 'Paxes Missing',
+                'price': None,
+                'price_message': 'Paxes Missing',
+            }), pax_list
+        return None, pax_list
+
+    def process_data(self, bookingservice, inlines):
+    
+        response, pax_list = self.verify(bookingservice, inlines)
+        if response:
+            return response
+
+        costs = BookingServices.find_bookingservice_providers_costs(
+            bookingservice, pax_list)
+        return JsonResponse({
+            'costs': costs,
+        })
+
+
+class BookingPackageServiceProvidersCostsView(ModelChangeFormProcessorView):
+    common_site = bookings_site
+
+    def verify(self, bookingpackageservice):
+        if not hasattr(bookingpackageservice, 'booking_package') or not bookingpackageservice.booking_package:
+            return JsonResponse({
+                'cost': None,
+                'cost_message': 'BookingPackage Id Missing',
+                'price': None,
+                'price_message': 'BookingPackage Id Missing',
+            }), None
+        if not hasattr(bookingpackageservice, 'service') or not bookingpackageservice.service:
+            return JsonResponse({
+                'cost': None,
+                'cost_message': 'Service Id Missing',
+                'price': None,
+                'price_message': 'Service Id Missing',
+            }), None
+        pax_list = list(BookingServicePax.objects.filter(
+            booking_service=bookingpackageservice.booking_package_id).all())
+        if not pax_list:
+            return JsonResponse({
+                'cost': None,
+                'cost_message': 'Paxes Missing',
+                'price': None,
+                'price_message': 'Paxes Missing',
+            }), pax_list
+        return None, pax_list
+
+    def process_data(self, bookingpackageservice, inlines):
+        
+        response, pax_list = self.verify(bookingpackageservice)
+        if response:
+            return response
+
+        costs = BookingServices.find_bookingservice_providers_costs(
+            bookingpackageservice, pax_list)
+        return JsonResponse({
+            'costs': costs,
+        })
+
+
+class BookingAllotmentProvidersCostsView(BookingServiceProvidersCostsView):
+    model = BookingAllotment
+    common_sitemodel = BookingAllotmentSiteModel
+
+
+class BookingTransferProvidersCostsView(BookingServiceProvidersCostsView):
+    model = BookingTransfer
+    common_sitemodel = BookingTransferSiteModel
+
+
+class BookingExtraProvidersCostsView(BookingServiceProvidersCostsView):
+    model = BookingExtra
+    common_sitemodel = BookingExtraSiteModel
+
+
+class BookingPackageAllotmentProvidersCostsView(BookingPackageServiceProvidersCostsView):
+    model = BookingPackageAllotment
+    common_sitemodel = BookingPackageAllotmentSiteModel
+
+
+class BookingPackageTransferProvidersCostsView(BookingPackageServiceProvidersCostsView):
+    model = BookingPackageTransfer
+    common_sitemodel = BookingPackageTransferSiteModel
+
+
+class BookingPackageExtraProvidersCostsView(BookingPackageServiceProvidersCostsView):
+    model = BookingPackageExtra
+    common_sitemodel = BookingPackageExtraSiteModel

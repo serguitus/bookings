@@ -35,4 +35,11 @@ urlpatterns = [
     url(r'^invoice/cancel/(?P<id>\d+)/?', views.BookingInvoiceCancelView.as_view(), name='booking_invoice_cancel'),
 
     url(r'^updateservices/(?P<id>\d+)/?', views.BookingServiceUpdateView.as_view(), name='bookingservice_update'),
+
+    url(r'^bookingallotment-providers-costs/?', views.BookingAllotmentProvidersCostsView.as_view(), name='bookingallotment_providers_costs'),
+    url(r'^bookingtransfer-providers-costs/?', views.BookingTransferProvidersCostsView.as_view(), name='bookingtransfer_providers_costs'),
+    url(r'^bookingextra-providers-costs/?', views.BookingExtraProvidersCostsView.as_view(), name='bookingextra_providers_costs'),
+    url(r'^bookingpackageallotment-providers-costs/?', views.BookingPackageAllotmentProvidersCostsView.as_view(), name='bookingpackageallotment_providers_costs'),
+    url(r'^bookingpackagetransfer-providers-costs/?', views.BookingPackageTransferProvidersCostsView.as_view(), name='bookingpackagetransfer_providers_costs'),
+    url(r'^bookingpackageextra-providers-costs/?', views.BookingPackageExtraProvidersCostsView.as_view(), name='bookingpackageextra_providers_costs'),
 ]
