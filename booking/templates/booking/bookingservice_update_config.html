@@ -17,6 +17,7 @@
       {{ form }}
     <div class="submitbtn bookingservice-update-submit">  
         <button class="btn btn-primary" id="btn-build" type="submit">Update</button>
+        <a class="btn btn-back" href="{% url 'common:booking_booking_change' current.id %}">Back</a>
     </div>
   </form>
 {% endblock content %}

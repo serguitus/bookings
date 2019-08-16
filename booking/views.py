@@ -556,6 +556,7 @@ class BookingServiceUpdateView(View):
         services = BookingServices.find_bookingservices_with_different_amounts(
             bk)
         if services:
+            context.update({'current': bk})
             context.update({'services': services})
             context.update(bookings_site.get_site_extra_context(request))
             request.current_app = bookings_site.name
