@@ -227,3 +227,15 @@ input[type="submit"].btn-cancel:hover {
     background-color: #449d44;
     border-color: #398439;
 }
+
+a.btn-back {
+    color: #fff;
+    background-color: #5cb85c;
+    border-color: #4cae4c;
+}
+
+a.btn-back:hover {
+    color: #fff;
+    background-color: #449d44;
+    border-color: #398439;
+}
