@@ -1151,7 +1151,7 @@ class ConfigServices(object):
                     return None
                 children_amount = children * detail.ch_1_ad_1_amount
             amount = adult_amount + children_amount
-        if amount and amount >= 0:
+        if amount is not None and amount >= 0:
             return amount * days * quantity
         return None
 
@@ -1167,7 +1167,7 @@ class ConfigServices(object):
     def _get_transfer_amount(
             cls, service, detail, adults, children, quantity):
         quantity = cls.get_service_quantity(service, adults + children)
-        if service.cost_type == TRANSFER_COST_TYPE_FIXED and detail.ad_1_amount:
+        if service.cost_type == TRANSFER_COST_TYPE_FIXED and detail.ad_1_amount is not None:
             return detail.ad_1_amount * quantity
         if service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
             if not service.grouping:
@@ -1184,7 +1184,7 @@ class ConfigServices(object):
                 amount = adult_amount + children_amount
             else:
                 amount = cls.find_detail_amount(detail, adults, children)
-            if amount and (amount >= 0):
+            if amount is not None and (amount >= 0):
                 return amount * quantity
         return None
 
@@ -1208,8 +1208,8 @@ class ConfigServices(object):
         if quantity is None or quantity < 1:
             quantity = cls.get_service_quantity(service, adults + children)
         if (
-                service.cost_type == EXTRA_COST_TYPE_FIXED and
-                detail.ad_1_amount is not None):
+                service.cost_type == EXTRA_COST_TYPE_FIXED
+                and detail.ad_1_amount is not None):
             return detail.ad_1_amount * quantity * parameter
         if service.cost_type == EXTRA_COST_TYPE_BY_PAX:
             if not service.grouping:
@@ -1233,47 +1233,47 @@ class ConfigServices(object):
     @classmethod
     def find_detail_amount(cls, detail, adults, children):
         if adults == 0:
-            if children == 1 and detail.ch_1_ad_0_amount:
+            if children == 1 and detail.ch_1_ad_0_amount is not None:
                 return 1 * detail.ch_1_ad_0_amount
-            if children == 2 and detail.ch_2_ad_0_amount:
+            if children == 2 and detail.ch_2_ad_0_amount is not None:
                 return 2 * detail.ch_2_ad_0_amount
-            if children == 3 and detail.ch_3_ad_0_amount:
+            if children == 3 and detail.ch_3_ad_0_amount is not None:
                 return 3 * detail.ch_3_ad_0_amount
-        if adults == 1 and detail.ad_1_amount:
+        if adults == 1 and detail.ad_1_amount is not None:
             if children == 0:
                 return 1 * detail.ad_1_amount
-            if children == 1 and detail.ch_1_ad_1_amount:
+            if children == 1 and detail.ch_1_ad_1_amount is not None:
                 return 1 * detail.ad_1_amount + 1 * detail.ch_1_ad_1_amount
-            if children == 2 and detail.ch_2_ad_1_amount:
+            if children == 2 and detail.ch_2_ad_1_amount is not None:
                 return 1 * detail.ad_1_amount + 2 * detail.ch_2_ad_1_amount
-            if children == 3 and detail.ch_3_ad_1_amount:
+            if children == 3 and detail.ch_3_ad_1_amount is not None:
                 return 1 * detail.ad_1_amount + 3 * detail.ch_3_ad_1_amount
-        if adults == 2 and detail.ad_2_amount:
+        if adults == 2 and detail.ad_2_amount is not None:
             if children == 0:
                 return 2 * detail.ad_2_amount
-            if children == 1 and detail.ch_1_ad_2_amount:
+            if children == 1 and detail.ch_1_ad_2_amount is not None:
                 return 2 * detail.ad_2_amount + 1 * detail.ch_1_ad_2_amount
-            if children == 2 and detail.ch_2_ad_2_amount:
+            if children == 2 and detail.ch_2_ad_2_amount is not None:
                 return 2 * detail.ad_2_amount + 2 * detail.ch_2_ad_2_amount
-            if children == 3 and detail.ch_3_ad_2_amount:
+            if children == 3 and detail.ch_3_ad_2_amount is not None:
                 return 2 * detail.ad_2_amount + 3 * detail.ch_3_ad_2_amount
-        if adults == 3 and detail.ad_3_amount:
+        if adults == 3 and detail.ad_3_amount is not None:
             if children == 0:
                 return 3 * detail.ad_3_amount
-            if children == 1 and detail.ch_1_ad_3_amount:
+            if children == 1 and detail.ch_1_ad_3_amount is not None:
                 return 3 * detail.ad_3_amount + 1 * detail.ch_1_ad_3_amount
-            if children == 2 and detail.ch_2_ad_3_amount:
+            if children == 2 and detail.ch_2_ad_3_amount is not None:
                 return 3 * detail.ad_3_amount + 2 * detail.ch_2_ad_3_amount
-            if children == 3 and detail.ch_3_ad_3_amount:
+            if children == 3 and detail.ch_3_ad_3_amount is not None:
                 return 3 * detail.ad_3_amount + 3 * detail.ch_3_ad_3_amount
-        if adults == 4 and detail.ad_4_amount:
+        if adults == 4 and detail.ad_4_amount is not None:
             if children == 0:
                 return 4 * detail.ad_4_amount
-            if children == 1 and detail.ch_1_ad_4_amount:
+            if children == 1 and detail.ch_1_ad_4_amount is not None:
                 return 4 * detail.ad_4_amount + 1 * detail.ch_1_ad_4_amount
-            if children == 2 and detail.ch_2_ad_4_amount:
+            if children == 2 and detail.ch_2_ad_4_amount is not None:
                 return 4 * detail.ad_4_amount + 2 * detail.ch_2_ad_4_amount
-            if children == 3 and detail.ch_3_ad_4_amount:
+            if children == 3 and detail.ch_3_ad_4_amount is not None:
                 return 4 * detail.ad_4_amount + 3 * detail.ch_3_ad_4_amount
         return None
 
@@ -1541,9 +1541,9 @@ class ConfigServices(object):
         if detail_amount is None:
             return None
         result = float(detail_amount)
-        if not percent is None:
+        if percent is not None:
             result += result * float(percent) / 100.0
-        if not amount is None:
+        if amount is not None:
             result += float(amount)
         return round(0.499999 + result)
 

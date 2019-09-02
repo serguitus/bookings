@@ -980,13 +980,13 @@ class BookingServices(object):
                         and (date_to is None or date_to < service.datetime_to)):
                     date_to = service.datetime_to
                 # cost
-                if not cost is None:
+                if cost is not None:
                     if service.cost_amount is None:
                         cost = None
                     else:
                         cost += service.cost_amount
                 # price
-                if not price is None:
+                if price is not None:
                     if service.price_amount is None:
                         price = None
                     else:
@@ -1055,7 +1055,7 @@ class BookingServices(object):
         if service.grouping:
             groups = dict()
             for pax in pax_list:
-                if not pax.booking_pax_id is None and not pax.group is None:
+                if pax.booking_pax_id is not None and pax.group is not None:
                     if not groups.__contains__(pax.group):
                         groups[pax.group] = dict()
                         groups[pax.group][0] = 0 # adults count
@@ -1087,7 +1087,7 @@ class BookingServices(object):
             adults = 0
             children = 0
             for pax in pax_list:
-                if not pax.booking_pax_id is None:
+                if pax.booking_pax_id is not None:
                     if for_cost and pax.is_cost_free:
                         continue
                     if not for_cost and pax.is_price_free:
@@ -1149,13 +1149,13 @@ class BookingServices(object):
                         and (date_to is None or date_to < service.datetime_to)):
                     date_to = service.datetime_to
                 # cost
-                if not cost is None:
+                if cost is not None:
                     if service.cost_amount is None:
                         cost = None
                     else:
                         cost += service.cost_amount
                 # price
-                if not price is None:
+                if price is not None:
                     if service.price_amount is None:
                         price = None
                     else:

@@ -78,7 +78,7 @@ class BoardTypeAutocompleteView(autocomplete.Select2ListView):
     def get_list(self):
         result = []
         service = self.forwarded.get('service', None)
-        if not service is None:
+        if service is not None:
             allotment_boards = AllotmentBoardType.objects.filter(allotment=service).distinct().all()
             for allotment_board in allotment_boards:
                 result.append(allotment_board.board_type)
