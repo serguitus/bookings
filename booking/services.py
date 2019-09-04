@@ -249,6 +249,12 @@ class BookingServices(object):
                 booking.package_sgl_price_amount = pax_variant.price_single_amount
                 booking.package_dbl_price_amount = pax_variant.price_double_amount
                 booking.package_tpl_price_amount = pax_variant.price_triple_amount
+                if booking.package_sgl_price_amount is None:
+                    booking.package_sgl_price_amount = 0
+                if booking.package_dbl_price_amount is None:
+                    booking.package_dbl_price_amount = 0
+                if booking.package_tpl_price_amount is None:
+                    booking.package_tpl_price_amount = 0
 
                 booking.avoid_bookingservices_update = True
                 booking.save()
