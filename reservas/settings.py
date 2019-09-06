@@ -124,3 +124,4 @@ FORMAT_MODULE_PATH = [
     'common.formats',
     # 'some_app.formats',
 ]
+DEFAULT_FROM_EMAIL = 'sales@thenaturexperts.com'
