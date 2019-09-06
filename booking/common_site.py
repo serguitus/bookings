@@ -23,6 +23,7 @@ from django.core import checks
 from django.core.exceptions import (FieldDoesNotExist,
                                     ValidationError,
                                     PermissionDenied)
+from django.core.mail import EmailMessage
 from django.db import router, transaction
 from django import forms
 from django.forms.models import modelformset_factory
@@ -838,7 +839,6 @@ class BookingSiteModel(SiteModel):
             context.update({'form': form})
             return render(request, 'booking/voucher_config.html', context)
         else:
-            # This is a POST. render vouchers
             ids = request.POST.getlist('pk', [])
             office = request.POST.get('office', None)
             context.update({
@@ -847,13 +847,37 @@ class BookingSiteModel(SiteModel):
             })
             # use this two parameters to call methods to build pdf
             # it should return the pisa object to add it to the response object
-            pdf = self._build_vouchers(id, ids, context)
-            if pdf:
-                return HttpResponse(pdf.getvalue(),
-                                    content_type='application/pdf')
-            # there was an error. show an error message
-            return redirect(reverse('common:booking_booking_change',
-                                    args=[id]))
+            result, pdf = self._build_vouchers(id, ids, context)
+            if result.err:
+                # there was an error. show an error message
+                messages.add_message(
+                    request=request, level=messages.ERROR,
+                    message='Error generating PDF - %s' % (result.err),
+                    extra_tags='', fail_silently=False)
+                form = VouchersConfigForm()
+                context.update(self.get_model_extra_context(request))
+                context.update(extra_context or {})
+                context.update({'current': Booking.objects.get(id=id)})
+                context.update({'form': form})
+                return render(request, 'booking/voucher_config.html', context)
+            if request.POST['submit_action'] == '_send_mail':
+                email = EmailMessage(
+                    to=list(request.POST.get('mail_to')),
+                    cc=request.POST.get('mail_cc'),
+                    bcc=request.POST.get('mail_bcc'),
+                    subject=request.POST.get('mail_subject'),
+                    body=request.POST.get('mail_body'))
+
+                email.attach('vouchers', pdf.getvalue(), 'application/pdf')
+                email.send()
+
+                messages.add_message(
+                    request=request, level=messages.SUCCESS,
+                    message='Email  sent successfully.',
+                    extra_tags='', fail_silently=False)
+                return redirect(reverse('common:booking_booking_change', args=[id]))
+            return HttpResponse(pdf.getvalue(), content_type='application/pdf')
+
 
     def _fetch_resources(self, uri, rel):
         path = os.path.join(settings.MEDIA_ROOT,
@@ -871,14 +895,10 @@ class BookingSiteModel(SiteModel):
                         'booking': booking,
                         'services': objs})
         html = template.render(context)
-        result = StringIO()
-        pdf = pisa.pisaDocument(StringIO(html), dest=result,
+        pdf = StringIO()
+        result = pisa.pisaDocument(StringIO(html), dest=pdf,
                                 link_callback=self._fetch_resources)
-        if not pdf.err:
-            return HttpResponse(result.getvalue(),
-                                content_type='application/pdf')
-        else:
-            return HttpResponse('Errors')
+        return result, pdf
 
     def response_change(self, request, obj):
         bookingservices = BookingServices. \

@@ -756,4 +756,10 @@ class VouchersConfigForm(forms.Form):
     # id = forms.MultiValueField()
     # here comes also some inputs to select logo and other details
     office = forms.ModelChoiceField(queryset=Office.objects.all())
+    submit_action = forms.CharField(widget=forms.HiddenInput())
+    mail_to = forms.CharField(widget=forms.HiddenInput())
+    mail_cc = forms.CharField(widget=forms.HiddenInput())
+    mail_bcc = forms.CharField(widget=forms.HiddenInput())
+    mail_subject = forms.CharField(widget=forms.HiddenInput())
+    mail_body = forms.CharField(widget=forms.HiddenInput())
     # extra = forms.CharField()

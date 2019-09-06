@@ -5,17 +5,57 @@
     <script src="{% static 'admin/js/jquery.init.js' %}"></script>
     <script type="text/javascript" src="/admin/jsi18n/"></script>
     <script src="{% static 'admin/js/actions.js' %}"></script>
+  <script type="text/javascript" src="{% static 'booking/js/voucher_config.js' %}"></script>
 {% endblock head_extra %}
 {% block content %}
   <form method="post" novalidate>{% csrf_token %}
-      {% vouchers_table current as table %}
-      <div class="bookingvouchers-container">
-          {% render_table table %}
+    {% vouchers_table current as table %}
+    <div class="bookingvouchers-container">
+      {% render_table table %}
+    </div>
+    {{ form }}
+    <div class="modal fade" id="mailModal" tabindex="-1" role="dialog" aria-labelledby="mailModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="mailModalLabel">Voucher Mail</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="m_to" class="col-form-label">To:</label>
+              <input type="text" class="form-control" id="m_to">
+            </div>
+            <div class="form-group">
+              <label for="m_cc" class="col-form-label">Cc:</label>
+              <input type="text" class="form-control" id="m_cc">
+            </div>
+            <div class="form-group">
+              <label for="m_bcc" class="col-form-label">Bcc:</label>
+              <input type="text" class="form-control" id="m_bcc">
+            </div>
+            <div class="form-group">
+              <label for="m_subject" class="col-form-label">Subject:</label>
+              <input type="text" class="form-control" id="m_subject">
+            </div>
+            <div class="form-group">
+              <label for="m_body" class="col-form-label">Message:</label>
+              <textarea class="form-control" id="m_body"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button id="send_btn" type="button" class="btn btn-primary">Send</button>
+          </div>
+        </div>
       </div>
-      {{ form }}
+    </div>    
     <div class="submitbtn vouchers-submit">  
-        <button class="btn btn-primary" id="btn-build" type="submit">Generate</button>
-        <a class="btn btn-back" href="{% url 'common:booking_booking_change' current.id %}">Back</a>
+      <button class="btn btn-primary" id="btn-build" type="submit">Generate</button>
+      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#mailModal">Send Mail</button>
+      <a class="btn btn-back" href="{% url 'common:booking_booking_change' current.id %}">Back</a>
     </div>
   </form>
 {% endblock content %}
