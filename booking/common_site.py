@@ -878,7 +878,6 @@ class BookingSiteModel(SiteModel):
                 return redirect(reverse('common:booking_booking_change', args=[id]))
             return HttpResponse(pdf.getvalue(), content_type='application/pdf')
 
-
     def _fetch_resources(self, uri, rel):
         path = os.path.join(settings.MEDIA_ROOT,
                             uri.replace(settings.MEDIA_URL, ""))
@@ -896,8 +895,8 @@ class BookingSiteModel(SiteModel):
                         'services': objs})
         html = template.render(context)
         pdf = StringIO()
-        result = pisa.pisaDocument(StringIO(html), dest=pdf,
-                                link_callback=self._fetch_resources)
+        result = pisa.pisaDocument(StringIO(html.encode('UTF-8')), dest=pdf,
+                                   link_callback=self._fetch_resources)
         return result, pdf
 
     def response_change(self, request, obj):

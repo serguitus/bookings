@@ -528,7 +528,7 @@ def build_voucher(request, id):
                'services': objs}
     html = template.render(context)
     result = StringIO()
-    pdf = pisa.pisaDocument(StringIO(html), dest=result,
+    pdf = pisa.pisaDocument(StringIO(html.encode('UTF-8')), dest=result,
                             link_callback=_fetch_resources)
     if not pdf.err:
         return HttpResponse(result.getvalue(), content_type='application/pdf')
@@ -950,11 +950,13 @@ class BookingInvoicePDFView(View):
         }
         html = template.render(context)
         result = StringIO()
-        pdf = pisa.pisaDocument(StringIO(html), dest=result, link_callback=_fetch_resources)
+        pdf = pisa.pisaDocument(StringIO(html.encode('UTF-8')),
+                                dest=result,
+                                link_callback=_fetch_resources)
         if pdf.err:
             messages.add_message(request, messages.ERROR, "Failed Invoice PDF Generation")
             return HttpResponseRedirect(reverse('common:booking_booking_change', args=[id]))
-        
+
         return HttpResponse(result.getvalue(), content_type='application/pdf')
 
 
