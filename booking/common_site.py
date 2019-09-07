@@ -336,7 +336,7 @@ class QuotePackageExtraInLine(CommonStackedInline):
     extra = 0
     fields = [
         ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
-        ('addon', 'quantity', 'parameter'),
+        ('quantity', 'parameter'),
         'provider']
     ordering = ['datetime_from']
     form = QuotePackageExtraInlineForm
@@ -369,7 +369,7 @@ class QuoteExtraInLine(CommonStackedInline):
     extra = 0
     fields = [
         ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
-        ('addon', 'quantity', 'parameter'),
+        ('quantity', 'parameter'),
         'provider']
     ordering = ['datetime_from']
     form = QuoteExtraInlineForm
@@ -543,10 +543,10 @@ class QuoteExtraSiteModel(QuoteServiceSiteModel):
     fields = (
         'quote',
         ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
-        ('addon', 'service_addon'), ('quantity', 'parameter'),
+        ('service_addon'), ('quantity', 'parameter'),
         'provider', 'description', 'id')
     list_display = (
-        'quote', 'service', 'addon', 'service_addon', 'quantity', 'parameter',
+        'quote', 'service', 'service_addon', 'quantity', 'parameter',
         'datetime_from', 'datetime_to', 'time', 'status',)
     top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote__reference', 'service__name',)
@@ -719,10 +719,10 @@ class QuotePackageExtraSiteModel(QuotePackageServiceSiteModel):
     fields = (
         'quote_package',
         ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
-        ('addon', 'service_addon'), ('quantity', 'parameter'),
+        ('service_addon'), ('quantity', 'parameter'),
         'provider', 'id')
     list_display = (
-        'quote_package', 'service', 'addon', 'service_addon', 'quantity', 'parameter',
+        'quote_package', 'service', 'service_addon', 'quantity', 'parameter',
         'datetime_from', 'datetime_to', 'time', 'status',)
     top_filters = ('service', 'quote_package__quote__reference', ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote_package__quote__reference', 'service__name',)
@@ -878,7 +878,6 @@ class BookingSiteModel(SiteModel):
                 return redirect(reverse('common:booking_booking_change', args=[id]))
             return HttpResponse(pdf.getvalue(), content_type='application/pdf')
 
-
     def _fetch_resources(self, uri, rel):
         path = os.path.join(settings.MEDIA_ROOT,
                             uri.replace(settings.MEDIA_URL, ""))
@@ -896,8 +895,8 @@ class BookingSiteModel(SiteModel):
                         'services': objs})
         html = template.render(context)
         pdf = StringIO()
-        result = pisa.pisaDocument(StringIO(html), dest=pdf,
-                                link_callback=self._fetch_resources)
+        result = pisa.pisaDocument(StringIO(html.encode('UTF-8')), dest=pdf,
+                                   link_callback=self._fetch_resources)
         return result, pdf
 
     def response_change(self, request, obj):
@@ -1232,14 +1231,14 @@ class BookingExtraSiteModel(BaseBookingServiceSiteModel):
                 'booking', ('service', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
                 'service_addon',
-                ('addon', 'quantity', 'parameter'),
+                ('quantity', 'parameter'),
                 ('manual_cost', 'provider'),
                 'cost_amount', 'manual_price', 'price_amount', 'id', 'version')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
     )
-    list_display = ('booking', 'name', 'service_addon', 'addon', 'quantity', 'parameter',
+    list_display = ('booking', 'name', 'service_addon', 'quantity', 'parameter',
                     'datetime_from', 'datetime_to', 'time',
                     'cost_amount', 'manual_cost', 'price_amount', 'manual_price', 'status',)
     top_filters = ('booking__name', 'service', 'booking__reference',
@@ -1262,14 +1261,14 @@ class BookingPackageExtraSiteModel(BookingPackageServiceSiteModel):
                 'booking_package', ('service', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
                 'service_addon',
-                ('addon', 'quantity', 'parameter'),
+                ('quantity', 'parameter'),
                 ('manual_cost', 'provider'),
                 'cost_amount', 'manual_price', 'price_amount', 'id', 'version')
         }),
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
     )
-    list_display = ('booking_package', 'name', 'service_addon', 'addon', 'quantity', 'parameter',
+    list_display = ('booking_package', 'name', 'service_addon', 'quantity', 'parameter',
                     'datetime_from', 'datetime_to', 'time', 'status',)
     top_filters = (
         ('booking_package__booking__name', 'Booking'),
