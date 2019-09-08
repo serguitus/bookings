@@ -460,7 +460,16 @@ class QuotePackageForm(forms.ModelForm):
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
-class BookingForm(forms.ModelForm):
+class MailForm(forms.Form):
+    submit_action = forms.CharField(widget=forms.HiddenInput(), required=False)
+    mail_to = forms.CharField(widget=forms.HiddenInput(), required=False)
+    mail_cc = forms.CharField(widget=forms.HiddenInput(), required=False)
+    mail_bcc = forms.CharField(widget=forms.HiddenInput(), required=False)
+    mail_subject = forms.CharField(widget=forms.HiddenInput(), required=False)
+    mail_body = forms.CharField(widget=forms.HiddenInput(), required=False)
+
+
+class BookingForm(forms.ModelForm, MailForm):
     class Meta:
         model = Booking
         fields = ('__all__')
@@ -748,7 +757,7 @@ class EmailProviderForm(forms.Form):
         self.initial['from_address'] = self.user.email
 
 
-class VouchersConfigForm(forms.Form):
+class VouchersConfigForm(MailForm):
     # states = forms.ChoiceField(settings.ESTADOS)
     # this helps to point back to current booking
     # referer = forms.HiddenInput()
@@ -756,10 +765,3 @@ class VouchersConfigForm(forms.Form):
     # id = forms.MultiValueField()
     # here comes also some inputs to select logo and other details
     office = forms.ModelChoiceField(queryset=Office.objects.all())
-    submit_action = forms.CharField(widget=forms.HiddenInput())
-    mail_to = forms.CharField(widget=forms.HiddenInput())
-    mail_cc = forms.CharField(widget=forms.HiddenInput())
-    mail_bcc = forms.CharField(widget=forms.HiddenInput())
-    mail_subject = forms.CharField(widget=forms.HiddenInput())
-    mail_body = forms.CharField(widget=forms.HiddenInput())
-    # extra = forms.CharField()

@@ -34,6 +34,7 @@ from django.template.loader import get_template
 from django.utils.encoding import force_text
 # from django.utils.translation import ugettext as _, ungettext
 from django.utils.functional import curry
+from django.utils.six import PY2
 # from django_tables2 import RequestConfig
 
 from finance.top_filters import ProviderTopFilter, AgencyTopFilter
@@ -793,7 +794,8 @@ class BookingSiteModel(SiteModel):
                 ('date_from', 'date_to'),
                 ('is_package_price', 'price_amount', 'cost_amount'),
                 ('package_sgl_price_amount', 'package_dbl_price_amount',
-                 'package_tpl_price_amount'), 'id', 'version')
+                 'package_tpl_price_amount'), 'id', 'version',
+                 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body', 'submit_action')
         }),
         ('General Notes', {'fields': ('p_notes',),
                            'classes': ('collapse', 'wide')})
@@ -868,12 +870,12 @@ class BookingSiteModel(SiteModel):
                     subject=request.POST.get('mail_subject'),
                     body=request.POST.get('mail_body'))
 
-                email.attach('vouchers', pdf.getvalue(), 'application/pdf')
+                email.attach('vouchers.pdf', pdf.getvalue(), 'application/pdf')
                 email.send()
 
                 messages.add_message(
                     request=request, level=messages.SUCCESS,
-                    message='Email  sent successfully.',
+                    message='Vouchers mail  sent successfully.',
                     extra_tags='', fail_silently=False)
                 return redirect(reverse('common:booking_booking_change', args=[id]))
             return HttpResponse(pdf.getvalue(), content_type='application/pdf')
@@ -895,7 +897,7 @@ class BookingSiteModel(SiteModel):
                         'services': objs})
         html = template.render(context)
         pdf = StringIO()
-        result = pisa.pisaDocument(StringIO(html.encode('UTF-8')), dest=pdf,
+        result = pisa.pisaDocument(StringIO(html), dest=pdf,
                                    link_callback=self._fetch_resources)
         return result, pdf
 
@@ -928,6 +930,62 @@ class BookingSiteModel(SiteModel):
             super(BookingSiteModel, self).save_related(request, form, formsets, change)
             obj = self.save_form(request, form, change)
             BookingServices.update_booking_amounts(obj)
+
+    @csrf_protect_m
+    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
+        if 'submit_action' in request.POST and request.POST['submit_action'] == '_send_mail':
+            booking = Booking.objects.get(id=object_id)
+            if not booking.invoice:
+                messages.add_message(request, messages.ERROR , "Error Booking without Invoice")
+                return redirect(reverse('common:booking_booking_change', args=[object_id]))
+
+            invoice = booking.invoice
+            result, pdf = self._build_invoice_pdf(invoice)
+            if result.err:
+                messages.add_message(request, messages.ERROR, "Failed Invoice PDF Generation - %s" % result.err)
+                return redirect(reverse('common:booking_booking_change', args=[object_id]))
+
+            email = EmailMessage(
+                to=list(request.POST.get('mail_to')),
+                cc=request.POST.get('mail_cc'),
+                bcc=request.POST.get('mail_bcc'),
+                subject=request.POST.get('mail_subject'),
+                body=request.POST.get('mail_body'))
+
+            email.attach('invoice.pdf', pdf.getvalue(), 'application/pdf')
+            email.send()
+
+            messages.add_message(
+                request=request, level=messages.SUCCESS,
+                message='Invoice mail  sent successfully.',
+                extra_tags='', fail_silently=False)
+            return redirect(reverse('common:booking_booking_change', args=[object_id]))
+        else:
+            return super(BookingSiteModel, self).changeform_view(
+                request=request,
+                object_id=object_id,
+                form_url=form_url,
+                extra_context=extra_context)
+
+    def _build_invoice_pdf(self, invoice):
+        template = get_template("booking/pdf/invoice.html")
+        details = BookingInvoiceDetail.objects.filter(invoice=invoice)
+        lines = BookingInvoiceLine.objects.filter(invoice=invoice)
+        partials = BookingInvoicePartial.objects.filter(invoice=invoice)
+        context = {
+            'pagesize': 'Letter',
+            'invoice': invoice,
+            'details': details,
+            'lines': lines,
+            'partials': partials,
+        }
+        html = template.render(context)
+        if PY2:
+            html = html.encode('UTF-8')
+        pdf = StringIO()
+        result = pisa.pisaDocument(StringIO(html), dest=pdf,
+                                link_callback=self._fetch_resources)
+        return result, pdf
 
 
 class BookingServiceSiteModel(SiteModel):

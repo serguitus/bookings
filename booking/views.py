@@ -24,6 +24,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.template.loader import get_template
 from django.urls import reverse
+from django.utils.six import PY2
 from django.views import View
 
 from booking.common_site import (
@@ -527,8 +528,10 @@ def build_voucher(request, id):
                'office': Office.objects.get(id=1),
                'services': objs}
     html = template.render(context)
+    if PY2:
+        html = html.encode('UTF-8')
     result = StringIO()
-    pdf = pisa.pisaDocument(StringIO(html.encode('UTF-8')), dest=result,
+    pdf = pisa.pisaDocument(StringIO(html), dest=result,
                             link_callback=_fetch_resources)
     if not pdf.err:
         return HttpResponse(result.getvalue(), content_type='application/pdf')
@@ -949,8 +952,10 @@ class BookingInvoicePDFView(View):
             'partials': partials,
         }
         html = template.render(context)
+        if PY2:
+            html = html.encode('UTF-8')
         result = StringIO()
-        pdf = pisa.pisaDocument(StringIO(html.encode('UTF-8')),
+        pdf = pisa.pisaDocument(StringIO(html),
                                 dest=result,
                                 link_callback=_fetch_resources)
         if pdf.err:
