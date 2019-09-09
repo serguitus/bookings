@@ -906,10 +906,12 @@ class BookingSiteModel(SiteModel):
                           find_bookingservices_with_different_amounts(obj)
         if bookingservices:
             # make a new GET request to show list of services to update
-            return redirect(reverse('bookingservice_update',
-                                    args=[obj.id]))
-        else:
-            return super(BookingSiteModel, self).response_change(request, obj)
+            redirect_url = reverse('bookingservice_update', args=[obj.id])
+            if "_continue" in request.POST or "_saveasnew" in request.POST or "_addanother" in request.POST:
+                redirect_url = '{}?{}'.format(redirect_url, 'stay_on_booking=1')
+            return redirect(redirect_url)
+
+        return super(BookingSiteModel, self).response_change(request, obj)
 
     # TODO remove this in favor of booking.views.BookingServiceUpdateView
     def select_bookingservices_view(self, request,

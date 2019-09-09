@@ -556,8 +556,7 @@ class BookingServiceUpdateView(View):
     def get(self, request, id, *args, **kwargs):
         context = dict()
         bk = Booking.objects.get(pk=id)
-        services = BookingServices.find_bookingservices_with_different_amounts(
-            bk)
+        services = BookingServices.find_bookingservices_with_different_amounts(bk)
         if services:
             context.update({'current': bk})
             context.update({'services': services})
@@ -571,13 +570,14 @@ class BookingServiceUpdateView(View):
         services = request.POST.getlist('pk', None)
         if not services:
             messages.info(request, 'Booking Saved and no Service Updated')
-            return redirect(reverse('common:booking_booking_change',
-                                    args=[id]))
-        booking_services = BookingService.objects.filter(pk__in=services)
-        BookingServices.update_bookingservices_amounts(booking_services)
-        messages.info(request,
-                      'Booking Saved and %s services updated' % len(services))
-        return redirect(reverse('common:booking_booking_change', args=[id]))
+        else:
+            booking_services = BookingService.objects.filter(pk__in=services)
+            BookingServices.update_bookingservices_amounts(booking_services)
+            messages.info(request, 'Booking Saved and %s services updated' % len(services))
+        stay_on_booking = request.GET.get('stay_on_booking', False)
+        if stay_on_booking:
+            return redirect(reverse('common:booking_booking_change', args=[id]))
+        return redirect(reverse('common:booking_booking_changelist'))
 
 
 class EmailProviderView(View):
