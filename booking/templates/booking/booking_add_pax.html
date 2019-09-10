@@ -1,0 +1,62 @@
+{% extends "common/base_site.html" %}
+
+{% load booking_tags static %}
+{% load render_table from django_tables2 %}
+{% block head_extra %}
+    {{ block.super }}
+    <script src="{% static 'admin/js/jquery.init.js' %}"></script>
+    <script type="text/javascript" src="/admin/jsi18n/"></script>
+    <script type="text/javascript" src="{% static 'booking/js/dynamic_formset.js' %}"></script>
+{% endblock head_extra %}
+
+{% block content %}
+    <form method="post"  novalidate>
+    {% csrf_token %}
+    <input type="hidden" id="booking_id" name="booking_id" value="{{ booking_id }}">
+    {{ formset.management_form }}
+    <h2>Rooming List</h2>
+    <table class="table table-hover table-sm">
+  <thead>
+    <tr>
+      <th scope="col">Room</th>
+      <th scope="col">Name</th>
+      <th scope="col">Age</th>
+      <th scope="col">Is Free</th>
+      <th scope="col">Delete</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% if rooming %}
+      {% for pax in rooming %}
+    <tr>
+      <th scope="row">{{ pax.pax_group }}</th>
+      <td>{{ pax.pax_name }}</td>
+      <td>{{ pax.pax_age }}</td>
+      <td>{{ pax.is_price_free }}</td>
+      <td></td>
+      
+    </tr>
+      {% endfor %}
+    {% endif %}
+    {% for form in formset.forms %}
+    <tr class="dynamic-row">
+      <th scope="row">{{ form.pax_group }}</th>
+      <td>{{ form.pax_name }}</td>
+      <td>{{ form.pax_age }}</td>
+      <td>{{ form.is_price_free }}</td>
+      <td><a class="btn btn-danger delete-row">Delete</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+    </table>
+    <p><a id="add" class="btn btn-primary add-row">Add Pax</a></p>
+    <h2>Choose Services to add new pax to:</h2>
+    {% bookingservice_update_table services as table %}
+    <div class="bookingservice-update-list-container">
+        {% render_table table %}
+    </div>
+    <a class="btn btn-success build-booking" href="{% url 'common:booking_quote_change' booking_id %}">Cancel</a>
+    <button class="btn btn-primary pull-right" id="btn-update-rooming" type="submit">Continue</button>
+  </form>
+
+{% endblock content %}
