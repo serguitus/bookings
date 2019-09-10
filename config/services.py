@@ -385,7 +385,6 @@ class ConfigServices(object):
 
         return cost, cost_message, price, price_message
 
-
     @classmethod
     def allotment_costs(
             cls, service_id, date_from, date_to, cost_groups, provider,
@@ -1137,20 +1136,7 @@ class ConfigServices(object):
             cls, service, detail, days, adults, children, quantity):
         if quantity is None or (quantity < 1):
             quantity = 1
-        if service.grouping:
-            amount = cls.find_detail_amount(detail, adults, children)
-        else:
-            adult_amount = 0
-            if adults > 0:
-                if detail.ad_1_amount is None:
-                    return None
-                adult_amount = adults * detail.ad_1_amount
-            children_amount = 0
-            if children > 0:
-                if detail.ch_1_ad_1_amount is None:
-                    return None
-                children_amount = children * detail.ch_1_ad_1_amount
-            amount = adult_amount + children_amount
+        amount = cls._find_amount(service, detail, adults, children)
         if amount is not None and amount >= 0:
             return amount * days * quantity
         return None
@@ -1170,20 +1156,7 @@ class ConfigServices(object):
         if service.cost_type == TRANSFER_COST_TYPE_FIXED and detail.ad_1_amount is not None:
             return detail.ad_1_amount * quantity
         if service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
-            if not service.grouping:
-                adult_amount = 0
-                if adults > 0:
-                    if detail.ad_1_amount is None:
-                        return None
-                    adult_amount = adults * detail.ad_1_amount
-                children_amount = 0
-                if children > 0:
-                    if detail.ch_1_ad_1_amount is None:
-                        return None
-                    children_amount = children * detail.ch_1_ad_1_amount
-                amount = adult_amount + children_amount
-            else:
-                amount = cls.find_detail_amount(detail, adults, children)
+            amount = cls._find_amount(service, detail, adults, children)
             if amount is not None and (amount >= 0):
                 return amount * quantity
         return None
@@ -1212,23 +1185,28 @@ class ConfigServices(object):
                 and detail.ad_1_amount is not None):
             return detail.ad_1_amount * quantity * parameter
         if service.cost_type == EXTRA_COST_TYPE_BY_PAX:
-            if not service.grouping:
-                adult_amount = 0
-                if adults > 0:
-                    if detail.ad_1_amount is None:
-                        return None
-                    adult_amount = adults * detail.ad_1_amount
-                children_amount = 0
-                if children > 0:
-                    if detail.ch_1_ad_1_amount is None:
-                        return None
-                    children_amount = children * detail.ch_1_ad_1_amount
-                amount = adult_amount + children_amount
-            else:
-                amount = cls.find_detail_amount(detail, adults, children)
+            amount = cls._find_amount(service, detail, adults, children)
             if amount is not None and amount >= 0:
                 return amount * quantity * parameter
         return None
+
+    @classmethod
+    def _find_amount(cls, service, detail, adults, children):
+        if service.grouping:
+            amount = cls.find_detail_amount(detail, adults, children)
+        else:
+            adult_amount = 0
+            if adults > 0:
+                if detail.ad_1_amount is None:
+                    return None
+                adult_amount = adults * detail.ad_1_amount
+            children_amount = 0
+            if children > 0:
+                if detail.ch_1_ad_1_amount is None:
+                    return None
+                children_amount = children * detail.ch_1_ad_1_amount
+            amount = adult_amount + children_amount
+        return amount
 
     @classmethod
     def find_detail_amount(cls, detail, adults, children):
@@ -1678,3 +1656,79 @@ class ConfigServices(object):
         if service.category == 'P':
             from booking.services import BookingServices
             return BookingServices.list_package_details(service, agency, date_from, date_to)
+
+
+    @classmethod
+    def find_amount_details(
+            cls, amount_for_provider, service, date_from, date_to, adults, children,
+            quantity, parameter, detail_list):
+        if adults + children == 0:
+            return 0, ''
+        message = ''
+        stop = False
+        solved = False
+        current_date = date_from
+        amount = 0
+        details = list(detail_list)
+        # continue until solved or empty details list
+        result_list = list()
+        while not stop:
+            # verify list not empty
+            if details:
+                # working with first detail
+                detail = details[0]
+
+                # verify current dat included
+                if amount_for_provider:
+                    detail_date_from = detail.provider_service.date_from
+                    detail_date_to = detail.provider_service.date_to
+                else:
+                    detail_date_from = detail.agency_service.date_from
+                    detail_date_to = detail.agency_service.date_to
+
+                if current_date >= detail_date_from:
+                    # verify final date included
+                    end_date = detail_date_to + timedelta(days=1)
+                    if end_date >= date_to:
+                        # full date range
+
+                        result = cls._get_service_amount(
+                            service, detail, current_date, date_to,
+                            adults, children,
+                            quantity, parameter)
+                        if result is not None and result >= 0:
+                            line = object()
+                            line.date_from = current_date
+                            line.date_to = detail_date_to
+                            line.amount = result
+                            result_list.append(line)
+                            solved = True
+                            stop = True
+                    else:
+                        result = cls._get_service_amount(
+                            service, detail, current_date,
+                            date(year=end_date.year, month=end_date.month, day=end_date.day),
+                            adults, children,
+                            quantity, parameter)
+                        if result is not None and result >= 0:
+                            line = object()
+                            line.date_from = current_date
+                            line.date_to = detail_date_to
+                            line.amount = result
+                            result_list.append(line)
+                            current_date = date(
+                                year=end_date.year, month=end_date.month, day=end_date.day)
+                # remove detail from list
+                details.remove(detail)
+            else:
+                # empty list, no solved all days
+                stop = True
+                message = 'Amount Not Found for date %s' % current_date
+        if not solved:
+            if resut_list:
+                message = 'Not completely covered'
+            else:
+                message = 'Nothing found'
+
+        return resut_list, message
+

@@ -24,6 +24,7 @@ from booking.models import (
     BookingPackageService, BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
     BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine, BookingInvoicePartial)
 
+from config.models import ProviderAllotmentDetail, ProviderTransferDetail, ProviderExtraDetail
 from config.services import ConfigServices
 from config.views import (
     provider_allotment_queryset, provider_transfer_queryset, provider_extra_queryset)
@@ -4584,35 +4585,134 @@ class BookingServices(object):
         if not pax_list:
             pax_list = cls._find_bookingservice_pax_list(bookingservice)
 
-        providers = list()
         if isinstance(bookingservice, (BookingAllotment, BookingPackageAllotment)):
-            providers = list(provider_allotment_queryset(
+            detail_list = list(details_allotment_queryset(
                 bookingservice.service,
+                bookingservice.datetime_from,
+                bookingservice.datetime_to,
                 bookingservice.room_type,
                 bookingservice.board_type,
                 bookingservice.service_addon))
         elif isinstance(bookingservice, (BookingTransfer, BookingPackageTransfer)):
-            providers = list(provider_transfer_queryset(
+            detail_list = list(details_transfer_queryset(
                 bookingservice.service,
+                bookingservice.datetime_from,
+                bookingservice.datetime_to,
                 bookingservice.location_from,
                 bookingservice.location_to,
                 bookingservice.service_addon))
         elif isinstance(bookingservice, (BookingExtra, BookingPackageExtra)):
-            providers = list(provider_extra_queryset(
+            detail_list = list(details_extra_queryset(
                 bookingservice.service,
+                bookingservice.datetime_from,
+                bookingservice.datetime_to,
                 bookingservice.service_addon))
         else:
             return list()
 
-        cost_groups = BookingServices.find_bookingservice_paxes_groups(
-            pax_list, bookingservice.service, True)
         result = list()
-        for provider in providers:
-            bookingservice.provider = provider
-            cost, cost_msg = cls._find_bookingservice_cost(bookingservice, cost_groups)
+        for detail in detail_list:
             result.append({
-                'provider_id': provider.id,
-                'provider_name': provider.name,
-                'cost': cost, 'cost_msg': cost_msg})
+                'provider_id': detail.provider_service.provider.id,
+                'provider_name': detail.provider_service.provider.name,
+                'date_from': detail.provider_service.date_from,
+                'date_to': detail.provider_service.date_to,
+                'sgl_cost': detail.ad_1_amount,
+                'dbl_cost': detail.ad_2_amount,
+                'tpl_cost': detail.ad_3_amount,})
         return result
 
+def details_allotment_queryset(
+        service, date_from=None, date_to=None, room_type=None, board_type=None, addon=None):
+    if not service:
+        return ProviderAllotmentDetail.objects.none()
+
+    qs = ProviderAllotmentDetail.objects.all().distinct().filter(
+        provider_service__service=service,
+        provider_service__provider__enabled=True)
+
+    if date_from:
+        qs = qs.filter(provider_service__date_to__gte=date_from)
+    if date_to:
+        qs = qs.filter(provider_service__date_from__lte=date_to)
+    if room_type:
+        qs = qs.filter(room_type=room_type)
+    if board_type:
+        qs = qs.filter(board_type=board_type)
+    if addon:
+        qs = qs.filter(addon=addon)
+    else:
+        qs = qs.filter(addon=ADDON_FOR_NO_ADDON)
+    qs = qs.order_by(
+        'provider_service__provider',
+        'provider_service__date_from',
+        'provider_service__date_to',
+        'board_type', 'room_type', 'addon')
+    return qs[:50]
+
+def details_transfer_queryset(
+        service, date_from=None, date_to=None, location_from=None, location_to=None, addon=None):
+    if not service:
+        return ProviderTransferDetail.objects.none()
+
+    qs = ProviderTransferDetail.objects.all().distinct().filter(
+        provider_service__service=service,
+        provider_service__provider__enabled=True)
+
+    if date_from:
+        qs = qs.filter(provider_service__date_to__gte=date_from)
+    if date_to:
+        qs = qs.filter(provider_service__date_from__lte=date_to)
+    if location_from:
+        if location_to:
+            qs = qs.filter(
+                (Q(p_location_from=location_from)
+                & Q(p_location_to=location_to))
+                |
+                (Q(p_location_from=location_to)
+                & Q(p_location_to=location_from)))
+        else:
+            qs = qs.filter(
+                Q(p_location_from=location_from)
+                |
+                Q(p_location_to=location_from))
+    else:
+        if location_to:
+            qs = qs.filter(
+                Q(p_location_from=location_to)
+                |
+                Q(p_location_to=location_to))
+    if addon:
+        qs = qs.filter(addon=addon)
+    else:
+        qs = qs.filter(addon=ADDON_FOR_NO_ADDON)
+    qs = qs.order_by(
+        'provider_service__provider',
+        'provider_service__date_from',
+        'provider_service__date_to',
+        'p_location_from', 'p_location_to', 'addon')
+    return qs[:50]
+
+
+def details_extra_queryset(service, date_from=None, date_to=None, addon=None):
+    if not service:
+        return ProviderExtraDetail.objects.none()
+
+    qs = ProviderExtraDetail.objects.all().distinct().filter(
+        provider_service__service=service,
+        provider_service__provider__enabled=True)
+
+    if date_from:
+        qs = qs.filter(provider_service__date_to__gte=date_from)
+    if date_to:
+        qs = qs.filter(provider_service__date_from__lte=date_to)
+    if addon:
+        qs = qs.filter(addon=addon)
+    else:
+        qs = qs.filter(addon=ADDON_FOR_NO_ADDON)
+    qs = qs.order_by(
+        'provider_service__provider',
+        'provider_service__date_from',
+        'provider_service__date_to',
+        'addon')
+    return qs[:50]
