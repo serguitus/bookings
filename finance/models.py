@@ -768,6 +768,7 @@ class Agency(models.Model):
     currency = models.CharField(
         max_length=5, choices=CURRENCIES, default=CURRENCY_USD)
     gain_percent = models.SmallIntegerField(blank=True, null=True)
+    country = models.CharField(max_length=50, blank=True, null=True)
     enabled = models.BooleanField(default=True)
 
     def __str__(self):

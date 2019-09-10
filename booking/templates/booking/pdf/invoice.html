@@ -7,12 +7,8 @@
         @page {
             size: a4 portrait;
             @frame content_frame { /* Content Frame */
-                left: 45pt; right: 45pt; top: 45pt; bottom: 295pt;
+                left: 45pt; right: 45pt; top: 45pt; bottom: 45pt;
             };
-            @frame footer_frame { /* Another static Frame */
-                -pdf-frame-content: footer_content;
-                left: 45pt; right: 45pt; bottom: 45pt; height: 250pt;
-            }
         }
         tr.top-line {
             border-top: 1px solid black;
@@ -35,26 +31,6 @@
     </style>
 </head>
     <body>
-        <div id="footer_content">
-            <p style="font-weight:bold">BANK DETAILS</p>
-            Beneficiary Name: LLOGO S.A.<br>
-            Beneficiary Account: 4021027875<br>
-            ADDRESS: CALLE 38, EDIF LOS CRISTALES, OFICINA 6-8, CIUDAD PANAMA<br>
-            Beneficiary Bank: CREDICORP BANK Panama, Rep. de Panama<br>
-            SWIFT: CRLDPAPA<br>
-            Address: Calle 50 Edif Plaza Credicorp Bank, Obarrio, CIUDAD PANAMA<br>
-            <p>Please send transfer through our correspondent bank below.<br>
-            Intermediary Bank:<br>
-            WELLS FARGO BANK NA<br>
-            375 Park Ave. NY 4080<br>
-            New York, N.Y. U.S.A.<br>
-            Fedwire : 026005092<br>
-            SWIFT: PNBPUS3NNYC<br>
-            Account with Intermediary Bank: 20001923715</p>
-            <p style="color:red; font-weight:bold;">IMPORTANT: This is a safe way to pay our services, but due to the US embargo against Cuba you MUST NOT write down in the bank forms any word that could be associated to Cuba, such as hotel names, tour names or any service in Cuba, only the name of the client or invoice number; otherwise your money could be retained by US government.
-            <br>
-            We are not responsible for retained payments for not following above indications.</p>
-        </div>
         <table>
             <tr>
                 <td width="30%">
@@ -75,7 +51,7 @@
             </tr>
         </table>
         <table style="border: 1px solid black;">
-            <tr">
+            <tr>
                 <td width="15%" class="label">
                     CLIENT
                 </td>
@@ -108,6 +84,7 @@
                     COUNTRY
                 </td>
                 <td class="content">
+                    {{ invoice.agency.country }}
                 </td>
                 <td class="label">
                     TO
@@ -262,5 +239,26 @@
             </tr>
             {%endif %}
         </table>
+        <br>
+        <div id="footer_content">
+            <p style="font-weight:bold">BANK DETAILS</p>
+            Beneficiary Name: LLOGO S.A.<br>
+            Beneficiary Account: 4021027875<br>
+            ADDRESS: CALLE 38, EDIF LOS CRISTALES, OFICINA 6-8, CIUDAD PANAMA<br>
+            Beneficiary Bank: CREDICORP BANK Panama, Rep. de Panama<br>
+            SWIFT: CRLDPAPA<br>
+            Address: Calle 50 Edif Plaza Credicorp Bank, Obarrio, CIUDAD PANAMA<br>
+            <p>Please send transfer through our correspondent bank below.<br>
+            Intermediary Bank:<br>
+            WELLS FARGO BANK NA<br>
+            375 Park Ave. NY 4080<br>
+            New York, N.Y. U.S.A.<br>
+            Fedwire : 026005092<br>
+            SWIFT: PNBPUS3NNYC<br>
+            Account with Intermediary Bank: 20001923715</p>
+            <p style="color:red; font-weight:bold;">IMPORTANT: This is a safe way to pay our services, but due to the US embargo against Cuba you MUST NOT write down in the bank forms any word that could be associated to Cuba, such as hotel names, tour names or any service in Cuba, only the name of the client or invoice number; otherwise your money could be retained by US government.
+            <br>
+            We are not responsible for retained payments for not following above indications.</p>
+        </div>
     </body>
 </html>

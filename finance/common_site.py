@@ -666,7 +666,7 @@ class AgencySiteModel(SiteModel):
     model_order = 4210
     menu_label = MENU_LABEL_FINANCE_ADVANCED
     menu_group = 'Tour Operators'
-    list_display = ('name', 'currency', 'gain_percent', 'enabled')
+    list_display = ('name', 'currency', 'gain_percent', 'country', 'enabled')
     list_editable = ('gain_percent', 'enabled',)
     top_filters = ('name', 'currency', 'enabled')
     ordering = ['enabled', 'currency', 'name']
