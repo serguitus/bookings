@@ -40,7 +40,7 @@
                 </td>
                 <td width="35%" style="text-align: center;">
                     <h1><b>INVOICE</b></h1>
-                    <h2><b>{{ invoice.reference }}</b></h2>
+                    <h2><b>{{ invoice.reference|default:'' }}</b></h2>
                 </td>
                 <td width="35%" style="text-align: center;">
                     {{ invoice.office.name }}<br>
@@ -84,7 +84,7 @@
                     COUNTRY
                 </td>
                 <td class="content">
-                    {{ invoice.agency.country }}
+                    {{ invoice.agency.country|default:'' }}
                 </td>
                 <td class="label">
                     TO
