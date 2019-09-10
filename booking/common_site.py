@@ -825,6 +825,9 @@ class BookingSiteModel(SiteModel):
             self.build_url(r'^voucher/(?P<id>\d+)/config/?',
                            self.config_vouchers,
                            '%s_%s_config_vouchers' % info),
+            self.build_url(r'^(?P<id>\d+)/add_pax/?',
+                           self.add_booking_pax,
+                           '%s_%s_add_booking_pax' % info),
         ]
         return urlpatterns + urls
 
@@ -877,6 +880,49 @@ class BookingSiteModel(SiteModel):
                     extra_tags='', fail_silently=False)
                 return redirect(reverse('common:booking_booking_change', args=[id]))
             return HttpResponse(pdf.getvalue(), content_type='application/pdf')
+
+    def add_booking_pax(self, request, id, extra_context=None):
+        """
+        this will show a config form to add multiple pax to rooming
+        of a booking and select services to update
+        """
+        PaxFormSet = modelformset_factory(
+            model=BookingPax,
+            fields=['pax_name', 'pax_age', 'pax_group', 'is_price_free'],
+            extra=1,
+        )
+        if request.method == 'POST':
+            formset = PaxFormSet(request.POST, prefix='form')
+            bookingservices = BookingService.objects.filter(booking=id)
+            current_rooming = BookingPax.objects.filter(booking=id)
+            if formset.is_valid():
+                # en este punto tienes los datos de los nuevos bookingPax en 'formset'
+                # y la lista de id de bookings a actualizar en 'bookingservices'
+                # debes hacer tus movimientos y luego redireccionar a la pag de edicion
+                # del booking
+                print formset
+                print request.POST.getlist('pk')
+                # return redirect(reverse('common:booking_booking_change',
+                #                         args=[booking.id]))
+            else:
+                # some data missing. show error message
+                messages.add_message(request, messages.ERROR,
+                                     'Check new pax data')
+        else:
+            # GET request
+            formset = PaxFormSet(prefix='form',
+                                 queryset=BookingPax.objects.none())
+            bookingservices = BookingService.objects.filter(booking=id)
+            current_rooming = BookingPax.objects.filter(booking=id)
+
+        context = {}
+        context.update(self.get_model_extra_context(request))
+        context.update(extra_context or {})
+        context.update({'booking_id': id})
+        context.update({'formset': formset})
+        context.update({'services': bookingservices or []})
+        context.update({'rooming': current_rooming or []})
+        return render(request, 'booking/booking_add_pax.html', context)
 
     def _fetch_resources(self, uri, rel):
         path = os.path.join(settings.MEDIA_ROOT,

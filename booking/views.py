@@ -28,12 +28,14 @@ from django.views import View
 
 from booking.common_site import (
     QuoteSiteModel,
-    QuoteAllotmentSiteModel, QuoteTransferSiteModel, QuoteExtraSiteModel, QuotePackageSiteModel,
-    QuotePackageAllotmentSiteModel, QuotePackageTransferSiteModel, QuotePackageExtraSiteModel,
-    BookingSiteModel,
+    QuoteAllotmentSiteModel, QuoteTransferSiteModel,
+    QuoteExtraSiteModel, QuotePackageSiteModel,
+    QuotePackageAllotmentSiteModel, QuotePackageTransferSiteModel,
+    QuotePackageExtraSiteModel, BookingSiteModel,
     BookingAllotmentSiteModel, BookingTransferSiteModel, BookingExtraSiteModel,
     BookingPackageSiteModel,
-    BookingPackageAllotmentSiteModel, BookingPackageTransferSiteModel, BookingPackageExtraSiteModel,
+    BookingPackageAllotmentSiteModel, BookingPackageTransferSiteModel,
+    BookingPackageExtraSiteModel,
 )
 from booking.constants import ACTIONS
 from booking.models import (
@@ -134,7 +136,7 @@ class QuoteAmountsView(ModelChangeFormProcessorView):
 
 
 class QuoteAllotmentAmountsView(ModelChangeFormProcessorView):
-    
+
     model = QuoteAllotment
     common_sitemodel = QuoteAllotmentSiteModel
     common_site = bookings_site
@@ -160,7 +162,7 @@ class QuoteAllotmentAmountsView(ModelChangeFormProcessorView):
 
 
 class QuoteTransferAmountsView(ModelChangeFormProcessorView):
-    
+
     model = QuoteTransfer
     common_sitemodel = QuoteTransferSiteModel
     common_site = bookings_site
@@ -186,7 +188,7 @@ class QuoteTransferAmountsView(ModelChangeFormProcessorView):
 
 
 class QuoteExtraAmountsView(ModelChangeFormProcessorView):
-    
+
     model = QuoteExtra
     common_sitemodel = QuoteExtraSiteModel
     common_site = bookings_site
@@ -212,7 +214,7 @@ class QuoteExtraAmountsView(ModelChangeFormProcessorView):
 
 
 class QuotePackageAmountsView(ModelChangeFormProcessorView):
-    
+
     model = QuotePackage
     common_sitemodel = QuotePackageSiteModel
     common_site = bookings_site
@@ -238,7 +240,7 @@ class QuotePackageAmountsView(ModelChangeFormProcessorView):
 
 
 class QuotePackageAllotmentAmountsView(ModelChangeFormProcessorView):
-    
+
     model = QuotePackageAllotment
     common_sitemodel = QuotePackageAllotmentSiteModel
     common_site = bookings_site
@@ -264,7 +266,7 @@ class QuotePackageAllotmentAmountsView(ModelChangeFormProcessorView):
 
 
 class QuotePackageTransferAmountsView(ModelChangeFormProcessorView):
-    
+
     model = QuotePackageTransfer
     common_sitemodel = QuotePackageTransferSiteModel
     common_site = bookings_site
@@ -290,7 +292,7 @@ class QuotePackageTransferAmountsView(ModelChangeFormProcessorView):
 
 
 class QuotePackageExtraAmountsView(ModelChangeFormProcessorView):
-    
+
     model = QuotePackageExtra
     common_sitemodel = QuotePackageExtraSiteModel
     common_site = bookings_site
