@@ -1916,7 +1916,7 @@ class BookingServices(object):
         if variants:
             result = variants[0]
             for variant in variants:
-                if variant.pax_quantity < pax_qtty:
+                if variant.pax_quantity <= pax_qtty:
                     result = variant
             return result
         return None

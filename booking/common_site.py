@@ -34,11 +34,13 @@ from django.template.loader import get_template
 from django.utils.encoding import force_text
 # from django.utils.translation import ugettext as _, ungettext
 from django.utils.functional import curry
+from django.utils.six import PY2
 # from django_tables2 import RequestConfig
 
 from finance.top_filters import ProviderTopFilter, AgencyTopFilter
 from finance.models import Office
 
+from booking.constants import SERVICE_STATUS_PENDING
 from booking.forms import (
     PackageAllotmentInlineForm, PackageTransferInlineForm,
     PackageExtraInlineForm, PackageAllotmentForm,
@@ -793,7 +795,8 @@ class BookingSiteModel(SiteModel):
                 ('date_from', 'date_to'),
                 ('is_package_price', 'price_amount', 'cost_amount'),
                 ('package_sgl_price_amount', 'package_dbl_price_amount',
-                 'package_tpl_price_amount'), 'id', 'version')
+                 'package_tpl_price_amount'), 'id', 'version',
+                 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body', 'submit_action')
         }),
         ('General Notes', {'fields': ('p_notes',),
                            'classes': ('collapse', 'wide')})
@@ -864,19 +867,22 @@ class BookingSiteModel(SiteModel):
                 context.update({'form': form})
                 return render(request, 'booking/voucher_config.html', context)
             if request.POST['submit_action'] == '_send_mail':
+                to_list = self._build_mail_address_list(request.POST.get('mail_to'))
+                cc_list = self._build_mail_address_list(request.POST.get('mail_cc'))
+                bcc_list = self._build_mail_address_list(request.POST.get('mail_bcc'))
                 email = EmailMessage(
-                    to=list(request.POST.get('mail_to')),
-                    cc=request.POST.get('mail_cc'),
-                    bcc=request.POST.get('mail_bcc'),
+                    to=to_list,
+                    cc=cc_list,
+                    bcc=bcc_list,
                     subject=request.POST.get('mail_subject'),
                     body=request.POST.get('mail_body'))
 
-                email.attach('vouchers', pdf.getvalue(), 'application/pdf')
+                email.attach('vouchers.pdf', pdf.getvalue(), 'application/pdf')
                 email.send()
 
                 messages.add_message(
                     request=request, level=messages.SUCCESS,
-                    message='Email  sent successfully.',
+                    message='Vouchers mail  sent successfully.',
                     extra_tags='', fail_silently=False)
                 return redirect(reverse('common:booking_booking_change', args=[id]))
             return HttpResponse(pdf.getvalue(), content_type='application/pdf')
@@ -924,6 +930,11 @@ class BookingSiteModel(SiteModel):
         context.update({'rooming': current_rooming or []})
         return render(request, 'booking/booking_add_pax.html', context)
 
+    def _build_mail_address_list(self, addresses):
+        mail_address_list = addresses.replace(';', ' ').replace(',', ' ').split()
+        mail_address_list = [mail_address for mail_address in mail_address_list if mail_address]
+        return mail_address_list
+
     def _fetch_resources(self, uri, rel):
         path = os.path.join(settings.MEDIA_ROOT,
                             uri.replace(settings.MEDIA_URL, ""))
@@ -941,7 +952,7 @@ class BookingSiteModel(SiteModel):
                         'services': objs})
         html = template.render(context)
         pdf = StringIO()
-        result = pisa.pisaDocument(StringIO(html.encode('UTF-8')), dest=pdf,
+        result = pisa.pisaDocument(StringIO(html), dest=pdf,
                                    link_callback=self._fetch_resources)
         return result, pdf
 
@@ -950,10 +961,12 @@ class BookingSiteModel(SiteModel):
                           find_bookingservices_with_different_amounts(obj)
         if bookingservices:
             # make a new GET request to show list of services to update
-            return redirect(reverse('bookingservice_update',
-                                    args=[obj.id]))
-        else:
-            return super(BookingSiteModel, self).response_change(request, obj)
+            redirect_url = reverse('bookingservice_update', args=[obj.id])
+            if "_continue" in request.POST or "_saveasnew" in request.POST or "_addanother" in request.POST:
+                redirect_url = '{}?{}'.format(redirect_url, 'stay_on_booking=1')
+            return redirect(redirect_url)
+
+        return super(BookingSiteModel, self).response_change(request, obj)
 
     # TODO remove this in favor of booking.views.BookingServiceUpdateView
     def select_bookingservices_view(self, request,
@@ -975,10 +988,67 @@ class BookingSiteModel(SiteModel):
             obj = self.save_form(request, form, change)
             BookingServices.update_booking_amounts(obj)
 
+    @csrf_protect_m
+    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
+        if 'submit_action' in request.POST and request.POST['submit_action'] == '_send_mail':
+            booking = Booking.objects.get(id=object_id)
+            if not booking.invoice:
+                messages.add_message(request, messages.ERROR , "Error Booking without Invoice")
+                return redirect(reverse('common:booking_booking_change', args=[object_id]))
+
+            invoice = booking.invoice
+            result, pdf = self._build_invoice_pdf(invoice)
+            if result.err:
+                messages.add_message(request, messages.ERROR, "Failed Invoice PDF Generation - %s" % result.err)
+                return redirect(reverse('common:booking_booking_change', args=[object_id]))
+
+            to_list = self._build_mail_address_list(request.POST.get('mail_to'))
+            cc_list = self._build_mail_address_list(request.POST.get('mail_cc'))
+            bcc_list = self._build_mail_address_list(request.POST.get('mail_bcc'))
+            email = EmailMessage(
+                to=to_list,
+                cc=cc_list,
+                bcc=bcc_list,
+                subject=request.POST.get('mail_subject'),
+                body=request.POST.get('mail_body'))
+
+            email.attach('invoice.pdf', pdf.getvalue(), 'application/pdf')
+            email.send()
+
+            messages.add_message(
+                request=request, level=messages.SUCCESS,
+                message='Invoice mail  sent successfully.',
+                extra_tags='', fail_silently=False)
+            return redirect(reverse('common:booking_booking_change', args=[object_id]))
+        else:
+            return super(BookingSiteModel, self).changeform_view(
+                request=request,
+                object_id=object_id,
+                form_url=form_url,
+                extra_context=extra_context)
+
+    def _build_invoice_pdf(self, invoice):
+        template = get_template("booking/pdf/invoice.html")
+        details = BookingInvoiceDetail.objects.filter(invoice=invoice)
+        lines = BookingInvoiceLine.objects.filter(invoice=invoice)
+        partials = BookingInvoicePartial.objects.filter(invoice=invoice)
+        context = {
+            'pagesize': 'Letter',
+            'invoice': invoice,
+            'details': details,
+            'lines': lines,
+            'partials': partials,
+        }
+        html = template.render(context)
+        if PY2:
+            html = html.encode('UTF-8')
+        pdf = StringIO()
+        result = pisa.pisaDocument(StringIO(html), dest=pdf,
+                                link_callback=self._fetch_resources)
+        return result, pdf
+
 
 class BookingServiceSiteModel(SiteModel):
-    delete_allowed = False
-
     model_order = 1260
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
@@ -1035,8 +1105,6 @@ class BookingServiceSiteModel(SiteModel):
 
 
 class BaseBookingServiceSiteModel(SiteModel):
-    delete_allowed = False
-
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super(BaseBookingServiceSiteModel, self).get_readonly_fields(request, obj) or []
 
@@ -1084,6 +1152,19 @@ class BaseBookingServiceSiteModel(SiteModel):
             obj = self.save_form(request, form, change)
             BookingServices.update_bookingservice_amounts(obj)
             BookingServices.update_bookingservice_description(obj)
+
+    @csrf_protect_m
+    def delete_view(self, request, object_id, extra_context=None):
+        bookingservice = BookingService.objects.get(pk=object_id)
+        if bookingservice.status == SERVICE_STATUS_PENDING:
+            return super(BaseBookingServiceSiteModel, self).delete_view(request, object_id, extra_context)
+        messages.add_message(
+            request=request, level=messages.ERROR,
+            message='Only Pending Service can be Deleted. You can set Status to Cancelled.',
+            extra_tags='', fail_silently=False)
+        return redirect(reverse(
+            'common:%s_%s_change' % (self.model._meta.app_label, self.model._meta.model_name),
+            args=[object_id]))
 
 
 class BookingPackageServiceSiteModel(SiteModel):
@@ -1133,6 +1214,19 @@ class BookingPackageServiceSiteModel(SiteModel):
             super(BookingPackageServiceSiteModel, self).save_related(request, form, formsets, change)
             obj = self.save_form(request, form, change)
             BookingServices.update_bookingpackage_amounts(obj)
+
+    @csrf_protect_m
+    def delete_view(self, request, object_id, extra_context=None):
+        bookingpackageservice = BookingPackageService.objects.get(pk=object_id)
+        if bookingpackageservice.status == SERVICE_STATUS_PENDING:
+            return super(BookingPackageServiceSiteModel, self).delete_view(request, object_id, extra_context)
+        messages.add_message(
+            request=request, level=messages.ERROR,
+            message='Only Pending Service can be Deleted. You can set Status to Cancelled.',
+            extra_tags='', fail_silently=False)
+        return redirect(reverse(
+            'common:%s_%s_change' % (self.model._meta.app_label, self.model._meta.model_name),
+            args=[object_id]))
 
 
 class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):

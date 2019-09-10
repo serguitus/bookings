@@ -17,10 +17,13 @@
         <a class="btn btn-primary" href="{% url 'booking_invoice' current.id %}">Invoice</a>
         {% if current.invoice %}
             <a class="btn btn-primary" href="{% url 'booking_invoice_pdf' current.id %}">PDF</a>
+            {% include "booking/emails/popup_button.html" with btn_label='Send Invoice' only %}
             <a class="btn btn-danger" data-toggle="modal" data-target="#myModal" href="#">Cancel Invoice</a>
             {% endif %}
     </span>
 </div>
+
+{% include 'booking/emails/popup_modal.html' with modal_title='Invoice Mail' only %}
 
 <div class="modal fade" id="myModal" tab-index="-1" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
     <div class="modal-dialog modal-sm">
