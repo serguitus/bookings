@@ -40,6 +40,7 @@ from django.utils.six import PY2
 from finance.top_filters import ProviderTopFilter, AgencyTopFilter
 from finance.models import Office
 
+from booking.constants import SERVICE_STATUS_PENDING
 from booking.forms import (
     PackageAllotmentInlineForm, PackageTransferInlineForm,
     PackageExtraInlineForm, PackageAllotmentForm,
@@ -863,10 +864,13 @@ class BookingSiteModel(SiteModel):
                 context.update({'form': form})
                 return render(request, 'booking/voucher_config.html', context)
             if request.POST['submit_action'] == '_send_mail':
+                to_list = self._build_mail_address_list(request.POST.get('mail_to'))
+                cc_list = self._build_mail_address_list(request.POST.get('mail_cc'))
+                bcc_list = self._build_mail_address_list(request.POST.get('mail_bcc'))
                 email = EmailMessage(
-                    to=list(request.POST.get('mail_to')),
-                    cc=request.POST.get('mail_cc'),
-                    bcc=request.POST.get('mail_bcc'),
+                    to=to_list,
+                    cc=cc_list,
+                    bcc=bcc_list,
                     subject=request.POST.get('mail_subject'),
                     body=request.POST.get('mail_body'))
 
@@ -879,6 +883,11 @@ class BookingSiteModel(SiteModel):
                     extra_tags='', fail_silently=False)
                 return redirect(reverse('common:booking_booking_change', args=[id]))
             return HttpResponse(pdf.getvalue(), content_type='application/pdf')
+
+    def _build_mail_address_list(self, addresses):
+        mail_address_list = addresses.replace(';',' ').replace(',',' ').split()
+        mail_address_list = [mail_address for mail_address in mail_address_list if mail_address]
+        return mail_address_list
 
     def _fetch_resources(self, uri, rel):
         path = os.path.join(settings.MEDIA_ROOT,
@@ -947,10 +956,13 @@ class BookingSiteModel(SiteModel):
                 messages.add_message(request, messages.ERROR, "Failed Invoice PDF Generation - %s" % result.err)
                 return redirect(reverse('common:booking_booking_change', args=[object_id]))
 
+            to_list = self._build_mail_address_list(request.POST.get('mail_to'))
+            cc_list = self._build_mail_address_list(request.POST.get('mail_cc'))
+            bcc_list = self._build_mail_address_list(request.POST.get('mail_bcc'))
             email = EmailMessage(
-                to=list(request.POST.get('mail_to')),
-                cc=request.POST.get('mail_cc'),
-                bcc=request.POST.get('mail_bcc'),
+                to=to_list,
+                cc=cc_list,
+                bcc=bcc_list,
                 subject=request.POST.get('mail_subject'),
                 body=request.POST.get('mail_body'))
 
@@ -991,8 +1003,6 @@ class BookingSiteModel(SiteModel):
 
 
 class BookingServiceSiteModel(SiteModel):
-    delete_allowed = False
-
     model_order = 1260
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
@@ -1049,8 +1059,6 @@ class BookingServiceSiteModel(SiteModel):
 
 
 class BaseBookingServiceSiteModel(SiteModel):
-    delete_allowed = False
-
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super(BaseBookingServiceSiteModel, self).get_readonly_fields(request, obj) or []
 
@@ -1098,6 +1106,19 @@ class BaseBookingServiceSiteModel(SiteModel):
             obj = self.save_form(request, form, change)
             BookingServices.update_bookingservice_amounts(obj)
             BookingServices.update_bookingservice_description(obj)
+
+    @csrf_protect_m
+    def delete_view(self, request, object_id, extra_context=None):
+        bookingservice = BookingService.objects.get(pk=object_id)
+        if bookingservice.status == SERVICE_STATUS_PENDING:
+            return super(BaseBookingServiceSiteModel, self).delete_view(request, object_id, extra_context)
+        messages.add_message(
+            request=request, level=messages.ERROR,
+            message='Only Pending Service can be Deleted. You can set Status to Cancelled.',
+            extra_tags='', fail_silently=False)
+        return redirect(reverse(
+            'common:%s_%s_change' % (self.model._meta.app_label, self.model._meta.model_name),
+            args=[object_id]))
 
 
 class BookingPackageServiceSiteModel(SiteModel):
@@ -1147,6 +1168,19 @@ class BookingPackageServiceSiteModel(SiteModel):
             super(BookingPackageServiceSiteModel, self).save_related(request, form, formsets, change)
             obj = self.save_form(request, form, change)
             BookingServices.update_bookingpackage_amounts(obj)
+
+    @csrf_protect_m
+    def delete_view(self, request, object_id, extra_context=None):
+        bookingpackageservice = BookingPackageService.objects.get(pk=object_id)
+        if bookingpackageservice.status == SERVICE_STATUS_PENDING:
+            return super(BookingPackageServiceSiteModel, self).delete_view(request, object_id, extra_context)
+        messages.add_message(
+            request=request, level=messages.ERROR,
+            message='Only Pending Service can be Deleted. You can set Status to Cancelled.',
+            extra_tags='', fail_silently=False)
+        return redirect(reverse(
+            'common:%s_%s_change' % (self.model._meta.app_label, self.model._meta.model_name),
+            args=[object_id]))
 
 
 class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):

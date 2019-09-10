@@ -1,10 +1,10 @@
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models.signals import pre_save, post_save, post_delete
-
+from django.db.models.signals import pre_save, post_save, pre_delete, post_delete
 from django.dispatch import receiver
 
-from booking.constants import SERVICE_CATEGORY_PACKAGE
+from booking.constants import SERVICE_CATEGORY_PACKAGE, SERVICE_STATUS_PENDING
 from booking.models import (
     Quote, QuotePaxVariant,
     QuoteServicePaxVariant,
@@ -12,8 +12,9 @@ from booking.models import (
     QuotePackageServicePaxVariant,
     QuotePackage, QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
     Booking, BookingPax,
-    BookingServicePax, BookingAllotment, BookingTransfer, BookingExtra,
-    BookingPackage, BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra)
+    BookingService, BookingServicePax,
+    BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
+    BookingPackageService, BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra)
 from booking.services import BookingServices
 
 
@@ -156,6 +157,60 @@ def pre_save_bookingtransfer(sender, instance, **kwargs):
 def pre_save_bookingextra(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_update'):
         BookingServices.setup_bookingservice_amounts(instance)
+
+
+@receiver(pre_delete, sender=BookingService)
+def pre_delete_bookingservice(sender, instance, **kwargs):
+    if instance.status != SERVICE_STATUS_PENDING:
+        raise ValidationError('Can not delete Booking Services that are Not Pending')
+
+
+@receiver(pre_delete, sender=BookingAllotment)
+def pre_delete_bookingallotment(sender, instance, **kwargs):
+    if instance.status != SERVICE_STATUS_PENDING:
+        raise ValidationError('Can not delete Booking Services that are Not Pending')
+
+
+@receiver(pre_delete, sender=BookingTransfer)
+def pre_delete_bookingtransfer(sender, instance, **kwargs):
+    if instance.status != SERVICE_STATUS_PENDING:
+        raise ValidationError('Can not delete Booking Services that are Not Pending')
+
+
+@receiver(pre_delete, sender=BookingExtra)
+def pre_delete_bookingextra(sender, instance, **kwargs):
+    if instance.status != SERVICE_STATUS_PENDING:
+        raise ValidationError('Can not delete Booking Services that are Not Pending')
+
+
+@receiver(pre_delete, sender=BookingPackage)
+def pre_delete_bookingpackage(sender, instance, **kwargs):
+    if instance.status != SERVICE_STATUS_PENDING:
+        raise ValidationError('Can not delete Booking Services that are Not Pending')
+
+
+@receiver(pre_delete, sender=BookingPackageService)
+def pre_delete_bookingpackageservice(sender, instance, **kwargs):
+    if instance.status != SERVICE_STATUS_PENDING:
+        raise ValidationError('Can not delete Booking Services that are Not Pending')
+
+
+@receiver(pre_delete, sender=BookingPackageAllotment)
+def pre_delete_bookingpackageallotment(sender, instance, **kwargs):
+    if instance.status != SERVICE_STATUS_PENDING:
+        raise ValidationError('Can not delete Booking Services that are Not Pending')
+
+
+@receiver(pre_delete, sender=BookingPackageTransfer)
+def pre_delete_bookingpackagetransfer(sender, instance, **kwargs):
+    if instance.status != SERVICE_STATUS_PENDING:
+        raise ValidationError('Can not delete Booking Services that are Not Pending')
+
+
+@receiver(pre_delete, sender=BookingPackageExtra)
+def pre_delete_bookingpackageextra(sender, instance, **kwargs):
+    if instance.status != SERVICE_STATUS_PENDING:
+        raise ValidationError('Can not delete Booking Services that are Not Pending')
 
 
 @receiver((post_save, post_delete), sender=BookingAllotment)
