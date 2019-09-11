@@ -7,6 +7,7 @@
     <script src="{% static 'admin/js/jquery.init.js' %}"></script>
     <script type="text/javascript" src="/admin/jsi18n/"></script>
     <script type="text/javascript" src="{% static 'booking/js/dynamic_formset.js' %}"></script>
+    <script src="{% static 'admin/js/actions.js' %}"></script>
 {% endblock head_extra %}
 
 {% block content %}
@@ -51,11 +52,11 @@
     </table>
     <p><a id="add" class="btn btn-primary add-row">Add Pax</a></p>
     <h2>Choose Services to add new pax to:</h2>
-    {% bookingservice_update_table services as table %}
-    <div class="bookingservice-update-list-container">
+    {% add_pax_bookingservices_table services as table %}
+    <div class="add-pax-bookingservices-container">
         {% render_table table %}
     </div>
-    <a class="btn btn-success build-booking" href="{% url 'common:booking_quote_change' booking_id %}">Cancel</a>
+    <a class="btn btn-success build-booking" href="{% url 'common:booking_booking_change' booking_id %}">Cancel</a>
     <button class="btn btn-primary pull-right" id="btn-update-rooming" type="submit">Continue</button>
   </form>
 

@@ -13,7 +13,8 @@ from booking.tables import (
     BookingServiceTable, BookingPaxTable,
     BookingVouchersTable,
     BookingServiceUpdateTable,
-    BookingPackageServiceTable)
+    BookingPackageServiceTable,
+    AddPaxBookingServicesTable)
 from booking.services import BookingServices
 
 register = template.Library()
@@ -72,6 +73,14 @@ def vouchers_table(booking):
 @register.simple_tag
 def bookingservice_update_table(services):
     table = BookingServiceUpdateTable(
+        services,
+        order_by=('datetime_from', 'datetime_to'))
+    return table
+
+
+@register.simple_tag
+def add_pax_bookingservices_table(services):
+    table = AddPaxBookingServicesTable(
         services,
         order_by=('datetime_from', 'datetime_to'))
     return table

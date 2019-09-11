@@ -221,3 +221,34 @@ class BookingServiceUpdateTable(tables.Table):
             args=(quote(record.pk),)
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
+
+
+class AddPaxBookingServicesTable(tables.Table):
+    class Meta:
+        model = BookingService
+        # fields update_cost_amount and update_price_amount are lazy
+        # they contain computed values that will be saved upon save action
+        template_name = 'booking/add_pax_bookingservices.html'
+        fields = ['pk', 'name', 'datetime_from', 'datetime_to',
+                  'cost_amount', 'price_amount', 'status', 'conf_number', 'provider']
+    pk = tables.CheckBoxColumn(accessor='pk',
+                               attrs={
+                                   'th__input': {
+                                       'id': 'action-toggle'},
+                                   'td__input': {
+                                       'class': 'action-select'},
+                               })
+
+    def __init__(self, *args, **kwargs):
+        self.base_columns['cost_amount'].verbose_name = 'Cost'
+        self.base_columns['price_amount'].verbose_name = 'Price'
+        self.base_columns['datetime_from'].verbose_name = 'From'
+        self.base_columns['datetime_to'].verbose_name = 'To'
+        super(AddPaxBookingServicesTable, self).__init__(*args, **kwargs)
+
+    def render_name(self, value, record):
+        obj_url = reverse(
+            'common:booking_%s_change' % (BOOKINGSERVICE_TYPES[record.service_type]),
+            args=(quote(record.pk),)
+        )
+        return format_html('<a href="%s">%s</a>' % (obj_url, value))
