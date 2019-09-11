@@ -110,7 +110,7 @@ class BookingServiceTable(tables.Table):
         fields = ['name', 'service_location', 'datetime_from',
                   'datetime_to', 'description',
                   'cost_amount', 'price_amount',
-                  'provider', 'service_type', 'status']
+                  'provider', 'conf_number', 'service_type', 'status']
         attrs = {'class': 'table table-hover table-condensed'}
         row_attrs = {
             'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_STATUS_MAPPING[record.status]),
