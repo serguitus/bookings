@@ -4537,20 +4537,30 @@ class BookingServices(object):
 
 
     @classmethod
-    def add_bookingpax_to_services(cls, booking_pax_list, services):
-        for booking_pax in booking_pax_list:
-            cls.add_bookingpax_to_services(booking_pax, services)
+    def add_paxes_to_booking(cls, booking, pax_list, bookingservice_ids):
+        with transaction.atomic(savepoint=False):
+            for pax in pax_list:
+                booking_pax = BookingPax()
+                booking_pax.booking = booking
+                booking_pax.pax_name = pax['pax_name']
+                booking_pax.pax_group = pax['pax_group']
+                booking_pax.pax_age = pax['pax_age']
+                booking_pax.is_price_free = pax['is_price_free']
+                booking_pax.avoid_booking_update = True
+                booking_pax.save()
+
+                cls._add_bookingpax_to_bookingservices(booking_pax, bookingservice_ids)
 
 
     @classmethod
-    def add_bookingpax_to_services(cls, booking_pax, services):
-        booking_pax.save()
-        for service in services:
-            service_pax = BookingServicePax()
-            service_pax.booking_pax = booking_pax
-            service_pax.booking_service = service
-            service_pax.group = booking_pax.pax_group
-            service_pax.save()
+    def _add_bookingpax_to_bookingservices(cls, booking_pax, bookingservice_ids):
+        for bookingservice_id in bookingservice_ids:
+            bookingservice = BookingService.objects.get(pk=bookingservice_id)
+            bookingservice_pax = BookingServicePax()
+            bookingservice_pax.booking_service = bookingservice
+            bookingservice_pax.booking_pax = booking_pax
+            bookingservice_pax.group = booking_pax.pax_group
+            bookingservice_pax.save()
 
 
     @classmethod
