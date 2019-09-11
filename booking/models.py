@@ -999,6 +999,12 @@ class BookingPackageService(BaseService, BookService, DateInterval):
         # Call the "real" save() method.
         super(BookingPackageService, self).save(*args, **kwargs)
 
+    def booking(self):
+        return self.booking_package.booking
+
+    def pax_quantity(self):
+        return self.booking_package.rooming_list.count()
+
 
 class BookingPackageAllotment(BookingPackageService, BaseAllotment):
     """
@@ -1010,9 +1016,63 @@ class BookingPackageAllotment(BookingPackageService, BaseAllotment):
         default_permissions = ('add', 'change',)
     version = AutoIncVersionField( )
 
+    def build_description(self):
+        """ makes a string detailing room quantity and types"""
+        from booking.services import BookingServices
+        rooms = BookingServices.find_groups(
+            booking_service=self.booking_package, service=self.service, for_cost=True)
+        dist = ''
+        room_count = {
+            '00': 0,  # NONE counter
+            '10': 0,  # SGL counter
+            '20': 0,  # DBL counter
+            '30': 0,  # TPL counter
+            '11': 0,  # SGL+1Child
+            '21': 0,  # DBL+1Child
+            '22': 0,  # DBL+2Child
+            '31': 0,  # TPL+1Child
+            '40': 0,
+        }
+        room_types = {
+            '00': 'NONE',
+            '10': 'SGL',
+            '20': 'DBL',
+            '30': 'TPL',
+            '11': 'SGL&1Chld',
+            '21': 'DBL&1Chld',
+            '22': 'DBL&2Chld',
+            '31': 'TPL&1Chld',
+            '40': 'QUAD'
+        }
+        for room in rooms:
+            room_count['%d%d' % (room[0], room[1])] += 1
+        for k in room_count.keys():
+            if room_count[k]:
+                if dist:
+                    dist += ' + '
+                dist += '%d %s' % (room_count[k],
+                                   room_types[k])
+        dist += ' (%s)' % self.board_type
+        return dist
+
     def fill_data(self):
         self.name = '%s' % (self.service,)
         self.service_type = SERVICE_CATEGORY_ALLOTMENT
+        self.description = self.build_description()
+
+    def adult_quantity(self):
+        if self.service.child_age:
+            return self.booking_package.rooming_list.filter(
+                Q(booking_pax__pax_age__isnull=True) |
+                Q(booking_pax__pax_age__gte=self.service.child_age)).count()
+        else:
+            return self.booking_package.rooming_list.count()
+
+    def child_quantity(self):
+        if self.service.child_age:
+            return self.booking_package.rooming_list.filter(
+                booking_pax__pax_age__lt=self.service.child_age).count()
+        return 0
 
 
 class BookingPackageTransfer(BookingPackageService, BaseTransfer):
@@ -1043,13 +1103,17 @@ class BookingPackageTransfer(BookingPackageService, BaseTransfer):
     schedule_time_from = models.TimeField(blank=True, null=True)
     schedule_time_to = models.TimeField(blank=True, null=True)
 
+    def build_description(self):
+        return '%s pax' % self.booking_package.rooming_list.count()
+
     def fill_data(self):
-        # setting name for this quote_service
+        # setting name for this booking_service
         self.name = '%s (%s -> %s)' % (
             self.service,
             self.location_from.short_name or self.location_from,
             self.location_to.short_name or self.location_to)
         self.service_type = SERVICE_CATEGORY_TRANSFER
+        self.description = self.build_description()
 
 
 class BookingPackageExtra(BookingPackageService, BaseExtra):
@@ -1062,10 +1126,14 @@ class BookingPackageExtra(BookingPackageService, BaseExtra):
         default_permissions = ('add', 'change',)
     version = AutoIncVersionField( )
 
+    def build_description(self):
+        return '%s pax' % self.booking_package.rooming_list.count()
+
     def fill_data(self):
-        # setting name for this quote_service
+        # setting name for this booking_service
         self.name = self.service.name
         self.service_type = SERVICE_CATEGORY_EXTRA
+        self.description = self.build_description()
 
 
 class ProviderPackageService(ProviderCatalogue):
