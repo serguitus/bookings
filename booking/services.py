@@ -1193,7 +1193,7 @@ class BookingServices(object):
         else:
             status = constants.BOOKING_STATUS_PENDING
 
-        fields = []
+        fields = ['description']
         if bookingpackage.datetime_from != date_from:
             fields.append('datetime_from')
             bookingpackage.datetime_from = date_from
@@ -1760,7 +1760,7 @@ class BookingServices(object):
 
     @classmethod
     def _save_booking_service_amounts(cls, booking_service, cost, price):
-        fields = []
+        fields = ['description']
         if not cls._equals_amounts(booking_service.cost_amount, cost):
             fields.append('cost_amount')
             booking_service.cost_amount = cost
@@ -3896,7 +3896,7 @@ class BookingServices(object):
             if price is None:
                 price_msg = "Manual Price Missing"
 
-        fields = []
+        fields = ['description']
         if not cls._equals_amounts(bookingpackage.cost_amount, cost):
             fields.append('cost_amount')
             bookingpackage.cost_amount = cost
@@ -4150,7 +4150,7 @@ class BookingServices(object):
                 status = constants.BOOKING_STATUS_CANCELLED
         else:
             status = constants.BOOKING_STATUS_PENDING
-        fields = []
+        fields = ['description']
         if bookingpackage.datetime_from != date_from:
             fields.append('datetime_from')
             bookingpackage.datetime_from = date_from
