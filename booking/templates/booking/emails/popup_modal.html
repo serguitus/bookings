@@ -1,32 +1,36 @@
-<div class="modal fade" id="mailModal" tabindex="-1" role="dialog" aria-labelledby="mailModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+<div id="mailModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="mailModalLabel">{{ modal_title }}</h5>
+                <h5 id="mailModalLabel" class="modal-title">{{ modal_title }}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
+                    <label for="m_from" class="col-form-label">From:</label>
+                    <input type="text" class="form-control" id="m_from" value="{{ default_mail_from }}">
+                </div>
+                <div class="form-group">
                     <label for="m_to" class="col-form-label">To:</label>
-                    <input type="text" class="form-control" id="m_to">
+                    <input type="text" class="form-control" id="m_to" value="{{ default_mail_to }}">
                 </div>
                 <div class="form-group">
                     <label for="m_cc" class="col-form-label">Cc:</label>
-                    <input type="text" class="form-control" id="m_cc">
+                    <input type="text" class="form-control" id="m_cc" value="{{ default_mail_cc }}">
                 </div>
                 <div class="form-group">
                     <label for="m_bcc" class="col-form-label">Bcc:</label>
-                    <input type="text" class="form-control" id="m_bcc">
+                    <input type="text" class="form-control" id="m_bcc" value="{{ default_mail_bcc }}">
                 </div>
                 <div class="form-group">
                     <label for="m_subject" class="col-form-label">Subject:</label>
-                    <input type="text" class="form-control" id="m_subject">
+                    <input type="text" class="form-control" id="m_subject" value="{{ default_mail_subject }}">
                 </div>
                 <div class="form-group">
                     <label for="m_body" class="col-form-label">Message:</label>
-                    <textarea class="form-control" id="m_body"></textarea>
+                    <textarea rows="10" class="form-control" id="m_body">{{ default_mail_body }}</textarea>
                 </div>
             </div>
             <div class="modal-footer">

@@ -5,6 +5,9 @@ from booking.models import (
     BookingTransfer,
     BookingAllotment,
     BookingExtra,
+    BookingPackageTransfer,
+    BookingPackageAllotment,
+    BookingPackageExtra,
     BookingPackage)
 from booking.tables import (
     PackageServiceTable,
@@ -106,15 +109,25 @@ def render_service(booking_service):
     Renders some html into provider emails depending on
     booking_service type
     """
+    bs = None
     if booking_service.service_type == 'T':
         # Transfer service
-        bs = BookingTransfer.objects.get(id=booking_service.id)
+        if hasattr(booking_service, 'booking_package'):
+            bs = BookingPackageTransfer.objects.get(id=booking_service.id)
+        else:
+            bs = BookingTransfer.objects.get(id=booking_service.id)
     elif booking_service.service_type == 'A':
         # Accomodation service
-        bs = BookingAllotment.objects.get(id=booking_service.id)
+        if hasattr(booking_service, 'booking_package'):
+            bs = BookingPackageAllotment.objects.get(id=booking_service.id)
+        else:
+            bs = BookingAllotment.objects.get(id=booking_service.id)
     elif booking_service.service_type == 'E':
         # Extra Service
-        bs = BookingExtra.objects.get(id=booking_service.id)
+        if hasattr(booking_service, 'booking_package'):
+            bs = BookingPackageExtra.objects.get(id=booking_service.id)
+        else:
+            bs = BookingExtra.objects.get(id=booking_service.id)
     elif booking_service.service_type == 'P':
         # Package Service
         bs = BookingPackage.objects.get(id=booking_service.id)

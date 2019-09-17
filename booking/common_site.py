@@ -25,6 +25,7 @@ from django.core.exceptions import (FieldDoesNotExist,
                                     PermissionDenied)
 from django.core.mail import EmailMessage
 from django.db import router, transaction
+from django.db.models.query_utils import Q
 from django import forms
 from django.forms.models import modelformset_factory
 from django.http import HttpResponse
@@ -796,7 +797,7 @@ class BookingSiteModel(SiteModel):
                 ('is_package_price', 'price_amount', 'cost_amount'),
                 ('package_sgl_price_amount', 'package_dbl_price_amount',
                  'package_tpl_price_amount'), 'id', 'version',
-                 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body', 'submit_action')
+                 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body', 'submit_action')
         }),
         ('General Notes', {'fields': ('p_notes',),
                            'classes': ('collapse', 'wide')})
@@ -867,10 +868,12 @@ class BookingSiteModel(SiteModel):
                 context.update({'form': form})
                 return render(request, 'booking/voucher_config.html', context)
             if request.POST['submit_action'] == '_send_mail':
-                to_list = self._build_mail_address_list(request.POST.get('mail_to'))
-                cc_list = self._build_mail_address_list(request.POST.get('mail_cc'))
-                bcc_list = self._build_mail_address_list(request.POST.get('mail_bcc'))
+                mail_from = request.POST.get('mail_from')
+                to_list = _build_mail_address_list(request.POST.get('mail_to'))
+                cc_list = _build_mail_address_list(request.POST.get('mail_cc'))
+                bcc_list = _build_mail_address_list(request.POST.get('mail_bcc'))
                 email = EmailMessage(
+                    from_email=mail_from,
                     to=to_list,
                     cc=cc_list,
                     bcc=bcc_list,
@@ -927,11 +930,6 @@ class BookingSiteModel(SiteModel):
         context.update({'services': bookingservices or []})
         context.update({'rooming': current_rooming or []})
         return render(request, 'booking/booking_add_pax.html', context)
-
-    def _build_mail_address_list(self, addresses):
-        mail_address_list = addresses.replace(';', ' ').replace(',', ' ').split()
-        mail_address_list = [mail_address for mail_address in mail_address_list if mail_address]
-        return mail_address_list
 
     def _fetch_resources(self, uri, rel):
         path = os.path.join(settings.MEDIA_ROOT,
@@ -999,11 +997,12 @@ class BookingSiteModel(SiteModel):
             if result.err:
                 messages.add_message(request, messages.ERROR, "Failed Invoice PDF Generation - %s" % result.err)
                 return redirect(reverse('common:booking_booking_change', args=[object_id]))
-
-            to_list = self._build_mail_address_list(request.POST.get('mail_to'))
-            cc_list = self._build_mail_address_list(request.POST.get('mail_cc'))
-            bcc_list = self._build_mail_address_list(request.POST.get('mail_bcc'))
+            mail_from = request.POST.get('mail_from')
+            to_list = _build_mail_address_list(request.POST.get('mail_to'))
+            cc_list = _build_mail_address_list(request.POST.get('mail_cc'))
+            bcc_list = _build_mail_address_list(request.POST.get('mail_bcc'))
             email = EmailMessage(
+                from_email=mail_from,
                 to=to_list,
                 cc=cc_list,
                 bcc=bcc_list,
@@ -1045,6 +1044,10 @@ class BookingSiteModel(SiteModel):
                                 link_callback=self._fetch_resources)
         return result, pdf
 
+def _build_mail_address_list(addresses):
+    mail_address_list = addresses.replace(';', ' ').replace(',', ' ').split()
+    mail_address_list = [mail_address for mail_address in mail_address_list if mail_address]
+    return mail_address_list
 
 class BookingServiceSiteModel(SiteModel):
     model_order = 1260
@@ -1103,6 +1106,9 @@ class BookingServiceSiteModel(SiteModel):
 
 
 class BaseBookingServiceSiteModel(SiteModel):
+
+    custom_actions_template = 'booking/emails/email_button.html'
+
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super(BaseBookingServiceSiteModel, self).get_readonly_fields(request, obj) or []
 
@@ -1151,6 +1157,43 @@ class BaseBookingServiceSiteModel(SiteModel):
             BookingServices.update_bookingservice_amounts(obj)
             BookingServices.update_bookingservice_description(obj)
 
+    @csrf_protect_m
+    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
+        if request.method == 'POST' and 'submit_action' in request.POST and request.POST['submit_action'] == '_send_mail':
+            mail_from = request.POST.get('mail_from')
+            to_list = _build_mail_address_list(request.POST.get('mail_to'))
+            cc_list = _build_mail_address_list(request.POST.get('mail_cc'))
+            bcc_list = _build_mail_address_list(request.POST.get('mail_bcc'))
+            email = EmailMessage(
+                from_email=mail_from,
+                to=to_list,
+                cc=cc_list,
+                bcc=bcc_list,
+                subject=request.POST.get('mail_subject'),
+                body=request.POST.get('mail_body'))
+            email.send()
+            messages.add_message(
+                request=request, level=messages.SUCCESS,
+                message='Requests mail  sent successfully.',
+                extra_tags='', fail_silently=False)
+            return redirect(reverse('common:booking_%s_change' % self.model._meta.model_name, args=[object_id]))
+        else:
+            bs = BookingService.objects.get(pk=object_id)
+            if not extra_context:
+                extra_context = dict()
+            extra_context.update(
+                {
+                    'modal_title': 'Provider Requests Mail',
+                    'default_mail_from': default_requests_mail_from(request, bs.provider, bs.booking),
+                    'default_mail_to': default_requests_mail_to(request, bs.provider, bs.booking),
+                    'default_mail_cc': '',
+                    'default_mail_bcc': default_requests_mail_bcc(request, bs.provider, bs.booking),
+                    'default_mail_subject': default_requests_mail_subject(request, bs.provider, bs.booking),
+                    'default_mail_body': default_requests_mail_body(request, bs.provider, bs.booking),
+                })
+
+            return super(BaseBookingServiceSiteModel, self).changeform_view(request, object_id, form_url, extra_context)
+    
     @csrf_protect_m
     def delete_view(self, request, object_id, extra_context=None):
         bookingservice = BookingService.objects.get(pk=object_id)
@@ -1239,7 +1282,8 @@ class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):
                 ('datetime_from', 'nights', 'datetime_to'),
                 ('room_type', 'board_type', 'service_addon'),
                 ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'id', 'version')
+                'cost_amount', 'manual_price', 'price_amount', 'id', 'version',
+                'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -1305,7 +1349,8 @@ class BookingTransferSiteModel(BaseBookingServiceSiteModel):
                 ('dropoff', 'schedule_to', 'schedule_time_to'),
                 'service_addon',
                 ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'id', 'version')
+                'cost_amount', 'manual_price', 'price_amount', 'id', 'version',
+                'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -1371,7 +1416,8 @@ class BookingExtraSiteModel(BaseBookingServiceSiteModel):
                 'service_addon',
                 ('quantity', 'parameter'),
                 ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'id', 'version')
+                'cost_amount', 'manual_price', 'price_amount', 'id', 'version',
+                'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -1547,6 +1593,50 @@ class BookingInvoiceSiteModel(SiteModel):
         if 'invoice_booking' in request.POST:
             return redirect(reverse('common:booking_booking_change', args=[request.POST['invoice_booking']]))
         return super(BookingInvoiceSiteModel, self).response_post_save_change(request, obj)
+
+
+def default_requests_mail_from(request, provider=None, booking=None):
+    if provider and not provider.is_private:
+        return 'reservas1@ergosonline.com'
+    return request.user.email or None
+
+
+def default_requests_mail_to(request, provider=None, booking=None):
+    if provider:
+        return provider.email
+    return None
+
+
+def default_requests_mail_bcc(request, provider=None, booking=None):
+    return request.user.email or None
+
+
+def default_requests_mail_subject(request, provider=None, booking=None):
+    return 'Solicitud de Reserva'
+
+
+def default_requests_mail_body(request, provider=None, booking=None):
+    services = list(BookingService.objects.filter(
+        booking=booking,
+        provider=provider).all())
+    package_services = list(BookingPackageService.objects.filter(
+        Q(booking_package__booking=booking)
+        & (
+            Q(provider=provider)
+            | (
+                Q(booking_package__provider=provider) & Q(provider__isnull=True)
+            )
+        )).all())
+    services.extend(package_services)
+    services.sort(key=lambda x: x.datetime_from)
+    #rooming = bs.rooming_list.all()
+    initial = {
+            'user': request.user,
+            'booking': booking,
+            'provider': provider,
+            'services': services,
+    }
+    return get_template('booking/emails/provider_email.html').render(initial)
 
 
 # Starts Registration Section
