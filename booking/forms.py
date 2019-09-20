@@ -592,7 +592,7 @@ class BookingExtraForm(forms.ModelForm, MailForm):
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
-class BookingPackageForm(forms.ModelForm):
+class BookingPackageForm(forms.ModelForm, MailForm):
     class Meta:
         model = BookingPackage
         fields = '__all__'
@@ -609,7 +609,7 @@ class BookingPackageForm(forms.ModelForm):
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
-class BookingPackageAllotmentForm(forms.ModelForm):
+class BookingPackageAllotmentForm(forms.ModelForm, MailForm):
     class Meta:
         model = BookingPackageAllotment
         fields = '__all__'
@@ -634,7 +634,7 @@ class BookingPackageAllotmentForm(forms.ModelForm):
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
-class BookingPackageTransferForm(forms.ModelForm):
+class BookingPackageTransferForm(forms.ModelForm, MailForm):
     class Meta:
         model = BookingPackageTransfer
         fields = ('__all__')
@@ -678,7 +678,7 @@ class BookingPackageTransferForm(forms.ModelForm):
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
-class BookingPackageExtraForm(forms.ModelForm):
+class BookingPackageExtraForm(forms.ModelForm, MailForm):
     class Meta:
         model = BookingPackageExtra
         fields = ('__all__')

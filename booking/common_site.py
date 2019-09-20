@@ -1209,6 +1209,8 @@ class BaseBookingServiceSiteModel(SiteModel):
 
 
 class BookingPackageServiceSiteModel(SiteModel):
+
+    custom_actions_template = 'booking/emails/email_button.html'
     
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super(BookingPackageServiceSiteModel, self).get_readonly_fields(request, obj) or []
@@ -1256,6 +1258,46 @@ class BookingPackageServiceSiteModel(SiteModel):
             obj = self.save_form(request, form, change)
             BookingServices.update_bookingpackage_amounts(obj)
 
+    @csrf_protect_m
+    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
+        if request.method == 'POST' and 'submit_action' in request.POST and request.POST['submit_action'] == '_send_mail':
+            mail_from = request.POST.get('mail_from')
+            to_list = _build_mail_address_list(request.POST.get('mail_to'))
+            cc_list = _build_mail_address_list(request.POST.get('mail_cc'))
+            bcc_list = _build_mail_address_list(request.POST.get('mail_bcc'))
+            email = EmailMessage(
+                from_email=mail_from,
+                to=to_list,
+                cc=cc_list,
+                bcc=bcc_list,
+                subject=request.POST.get('mail_subject'),
+                body=request.POST.get('mail_body'))
+            email.send()
+            messages.add_message(
+                request=request, level=messages.SUCCESS,
+                message='Requests mail  sent successfully.',
+                extra_tags='', fail_silently=False)
+            return redirect(reverse('common:booking_%s_change' % self.model._meta.model_name, args=[object_id]))
+        else:
+            bps = BookingPackageService.objects.get(pk=object_id)
+            provider = bps.provider
+            if not provider:
+                provider = bps.booking_package.provider
+            if not extra_context:
+                extra_context = dict()
+            extra_context.update(
+                {
+                    'modal_title': 'Provider Requests Mail',
+                    'default_mail_from': default_requests_mail_from(request, provider, bps.booking()),
+                    'default_mail_to': default_requests_mail_to(request, provider, bps.booking()),
+                    'default_mail_cc': '',
+                    'default_mail_bcc': default_requests_mail_bcc(request, provider, bps.booking()),
+                    'default_mail_subject': default_requests_mail_subject(request, provider, bps.booking()),
+                    'default_mail_body': default_requests_mail_body(request, provider, bps.booking()),
+                })
+
+            return super(BookingPackageServiceSiteModel, self).changeform_view(request, object_id, form_url, extra_context)
+    
     @csrf_protect_m
     def delete_view(self, request, object_id, extra_context=None):
         bookingpackageservice = BookingPackageService.objects.get(pk=object_id)
@@ -1316,7 +1358,8 @@ class BookingPackageAllotmentSiteModel(BookingPackageServiceSiteModel):
                 ('datetime_from', 'datetime_to'),
                 ('room_type', 'board_type', 'service_addon'),
                 ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'id', 'version')
+                'cost_amount', 'manual_price', 'price_amount', 'id', 'version',
+                'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -1386,7 +1429,8 @@ class BookingPackageTransferSiteModel(BookingPackageServiceSiteModel):
                 ('dropoff', 'schedule_to', 'schedule_time_to'),
                 'service_addon',
                 ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'id', 'version')
+                'cost_amount', 'manual_price', 'price_amount', 'id', 'version',
+                'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -1447,7 +1491,8 @@ class BookingPackageExtraSiteModel(BookingPackageServiceSiteModel):
                 'service_addon',
                 ('quantity', 'parameter'),
                 ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'id', 'version')
+                'cost_amount', 'manual_price', 'price_amount', 'id', 'version',
+                'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -1477,7 +1522,8 @@ class BookingPackageSiteModel(BaseBookingServiceSiteModel):
                 ('datetime_from', 'datetime_to', 'time'),
                 ('provider'), 'cost_amount',
                 ('manual_price', 'price_by_package_catalogue'),
-                'price_amount', 'id', 'version')
+                'price_amount', 'id', 'version',
+                'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -1616,19 +1662,22 @@ def default_requests_mail_subject(request, provider=None, booking=None):
 
 
 def default_requests_mail_body(request, provider=None, booking=None):
-    services = list(BookingService.objects.filter(
-        booking=booking,
-        provider=provider).all())
-    package_services = list(BookingPackageService.objects.filter(
-        Q(booking_package__booking=booking)
-        & (
-            Q(provider=provider)
-            | (
-                Q(booking_package__provider=provider) & Q(provider__isnull=True)
-            )
-        )).all())
-    services.extend(package_services)
-    services.sort(key=lambda x: x.datetime_from)
+    if provider:
+        services = list(BookingService.objects.filter(
+            booking=booking,
+            provider=provider).all())
+        package_services = list(BookingPackageService.objects.filter(
+            Q(booking_package__booking=booking)
+            & (
+                Q(provider=provider)
+                | (
+                    Q(booking_package__provider=provider) & Q(provider__isnull=True)
+                )
+            )).all())
+        services.extend(package_services)
+        services.sort(key=lambda x: x.datetime_from)
+    else:
+        services = []
     #rooming = bs.rooming_list.all()
     initial = {
             'user': request.user,
