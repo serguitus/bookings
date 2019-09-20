@@ -4579,7 +4579,6 @@ class BookingServices(object):
             quote_pax_variant__pax_quantity=pax_variant.quotepackage_pax_variant.quote_pax_variant.pax_quantity))
         return pax_variants[0]
 
-
     @classmethod
     def add_paxes_to_booking(cls, booking, pax_list, bookingservice_ids):
         with transaction.atomic(savepoint=False):
@@ -4593,11 +4592,12 @@ class BookingServices(object):
                 booking_pax.avoid_booking_update = True
                 booking_pax.save()
 
-                cls._add_bookingpax_to_bookingservices(booking_pax, bookingservice_ids)
-
+                cls._add_bookingpax_to_bookingservices(booking_pax,
+                                                       bookingservice_ids)
 
     @classmethod
-    def _add_bookingpax_to_bookingservices(cls, booking_pax, bookingservice_ids):
+    def _add_bookingpax_to_bookingservices(cls, booking_pax,
+                                           bookingservice_ids):
         for bookingservice_id in bookingservice_ids:
             bookingservice = BookingService.objects.get(pk=bookingservice_id)
             bookingservice_pax = BookingServicePax()
