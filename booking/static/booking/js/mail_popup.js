@@ -6,6 +6,7 @@ $(document).ready(function(){
 
   function submit_form() {
     $('#id_submit_action').val('_send_mail');
+    $('#id_mail_from').val($('#m_from').val());
     $('#id_mail_to').val($('#m_to').val());
     $('#id_mail_cc').val($('#m_cc').val());
     $('#id_mail_bcc').val($('#m_bcc').val());

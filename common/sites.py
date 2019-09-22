@@ -333,6 +333,7 @@ class SiteModel(TotalsumAdmin):
     popup_response_template = None
 
     recent_allowed = False
+    custom_actions_template = ''
 
 
     class Media:
@@ -648,6 +649,7 @@ class SiteModel(TotalsumAdmin):
             errors=helpers.AdminErrorList(form, formsets),
             preserved_filters=self.get_preserved_filters(request),
             change_actions=self.change_actions,
+            custom_actions_template=self.custom_actions_template,
             change_tools=self.change_tools,
         )
         context.update(self.get_model_extra_context(request))

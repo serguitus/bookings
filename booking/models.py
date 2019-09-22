@@ -1002,6 +1002,9 @@ class BookingPackageService(BaseService, BookService, DateInterval):
     def booking(self):
         return self.booking_package.booking
 
+    def rooming_list(self):
+        return self.booking_package.rooming_list
+
     def pax_quantity(self):
         return self.booking_package.rooming_list.count()
 

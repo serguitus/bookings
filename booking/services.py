@@ -1067,57 +1067,113 @@ class BookingServices(object):
                         groups[pax.group] = dict()
                         groups[pax.group][0] = 0 # adults count
                         groups[pax.group][1] = 0 # child count
-                    if for_cost and pax.is_cost_free:
-                        continue
-                    if not for_cost and pax.is_price_free:
-                        continue
+                        groups[pax.group][2] = 0 # free adults
+                        groups[pax.group][3] = 0 # free children
                     if pax.booking_pax.pax_age is None:
                         groups[pax.group][0] += 1
+                        if for_cost:
+                            if pax.is_cost_free:
+                                groups[pax.group][2] += 1
+                        elif pax.is_price_free:
+                            groups[pax.group][2] += 1
                     else:
                         if service.child_age is None:
                             if service.infant_age is None:
                                 groups[pax.group][0] += 1
+                                if for_cost:
+                                    if pax.is_cost_free:
+                                        groups[pax.group][2] += 1
+                                elif pax.is_price_free:
+                                    groups[pax.group][2] += 1
                             else:
                                 if pax.booking_pax.pax_age > service.infant_age:
                                     groups[pax.group][0] += 1
+                                    if for_cost:
+                                        if pax.is_cost_free:
+                                            groups[pax.group][2] += 1
+                                    elif pax.is_price_free:
+                                        groups[pax.group][2] += 1
                         else:
                             if pax.booking_pax.pax_age > service.child_age:
                                 groups[pax.group][0] += 1
+                                if for_cost:
+                                    if pax.is_cost_free:
+                                        groups[pax.group][2] += 1
+                                elif pax.is_price_free:
+                                    groups[pax.group][2] += 1
                             else:
                                 if service.infant_age is None:
                                     groups[pax.group][1] += 1
+                                    if for_cost:
+                                        if pax.is_cost_free:
+                                            groups[pax.group][3] += 1
+                                    elif pax.is_price_free:
+                                        groups[pax.group][3] += 1
                                 else:
                                     if pax.booking_pax.pax_age > service.infant_age:
                                         groups[pax.group][1] += 1
+                                        if for_cost:
+                                            if pax.is_cost_free:
+                                                groups[pax.group][3] += 1
+                                        elif pax.is_price_free:
+                                            groups[pax.group][3] += 1
             return groups.values()
         else:
             adults = 0
             children = 0
+            free_adults = 0
+            free_children = 0
             for pax in pax_list:
                 if pax.booking_pax_id is not None:
-                    if for_cost and pax.is_cost_free:
-                        continue
-                    if not for_cost and pax.is_price_free:
-                        continue
                     if pax.booking_pax.pax_age is None:
                         adults += 1
+                        if for_cost:
+                            if pax.is_cost_free:
+                                free_adults += 1
+                        elif pax.is_price_free:
+                            free_adults += 1
                     else:
                         if service.child_age is None:
                             if service.infant_age is None:
                                 adults += 1
+                                if for_cost:
+                                    if pax.is_cost_free:
+                                        free_adults += 1
+                                elif pax.is_price_free:
+                                    free_adults += 1
                             else:
                                 if pax.booking_pax.pax_age > service.infant_age:
                                     adults += 1
+                                    if for_cost:
+                                        if pax.is_cost_free:
+                                            free_adults += 1
+                                    elif pax.is_price_free:
+                                        free_adults += 1
                         else:
                             if pax.booking_pax.pax_age > service.child_age:
                                 adults += 1
+                                if for_cost:
+                                    if pax.is_cost_free:
+                                        free_adults += 1
+                                elif pax.is_price_free:
+                                    free_adults += 1
                             else:
                                 if service.infant_age is None:
                                     children += 1
+                                    if for_cost:
+                                        if pax.is_cost_free:
+                                            free_children += 1
+                                    elif pax.is_price_free:
+                                        free_children += 1
                                 else:
                                     if pax.booking_pax.pax_age > service.infant_age:
                                         children += 1
-            return ({0: adults, 1: children},)
+                                        if for_cost:
+                                            if pax.is_cost_free:
+                                                free_children += 1
+                                        elif pax.is_price_free:
+                                            free_children += 1
+            return ({0: adults, 1: children, 2: free_adults, 3: free_children},)
 
 
     @classmethod
@@ -1291,7 +1347,13 @@ class BookingServices(object):
     @classmethod
     def _find_package_group_price(cls, service, date_from, date_to, group, detail_list):
         adults, children = group[0], group[1]
-        if adults + children == 0:
+        free_adults, free_children = 0, 0
+        if 2 in group:
+            free_adults = group[2]
+        if 3 in group:
+            free_children = group[3]
+
+        if adults + children - free_adults - free_children == 0:
             return 0, ''
         message = ''
         stop = False
@@ -1316,7 +1378,7 @@ class BookingServices(object):
                         # full date range
                         result = cls._get_package_price(
                             service, detail, current_date, date_to,
-                            adults, children)
+                            adults, children, free_adults, free_children)
                         if result is not None and result >= 0:
                             amount += result
                             solved = True
@@ -1325,7 +1387,7 @@ class BookingServices(object):
                         result = cls._get_package_price(
                             service, detail, current_date,
                             datetime(year=end_date.year, month=end_date.month, day=end_date.day),
-                            adults, children)
+                            adults, children, free_adults, free_children)
                         if result is not None and result >= 0:
                             amount += result
                             current_date = datetime(
@@ -1347,25 +1409,26 @@ class BookingServices(object):
 
     @classmethod
     def _get_package_price(
-            cls, service, detail, date_from, date_to, adults, children):
-        if (service.cost_type == constants.PACKAGE_AMOUNTS_FIXED and
+            cls, service, detail, date_from, date_to, adults, children, free_adults=0, free_children=0):
+        if (service.amounts_type == constants.PACKAGE_AMOUNTS_FIXED and
                 detail.ad_1_amount is not None):
-            return detail.ad_1_amount
-        if service.cost_type == constants.PACKAGE_AMOUNTS_BY_PAX:
+            # TODO verificar si esto es correcto
+            return (adults - free_adults) * detail.ad_1_amount / adults
+        if service.amounts_type == constants.PACKAGE_AMOUNTS_BY_PAX:
             if not service.grouping:
                 adult_amount = 0
-                if adults > 0:
+                if adults - free_adults > 0:
                     if detail.ad_1_amount is None:
                         return None
-                    adult_amount = adults * detail.ad_1_amount
+                    adult_amount = (adults - free_adults) * detail.ad_1_amount
                 children_amount = 0
-                if children > 0:
+                if children - free_children > 0:
                     if detail.ch_1_ad_1_amount is None:
                         return None
-                    children_amount = children * detail.ch_1_ad_1_amount
+                    children_amount = (children - free_children) * detail.ch_1_ad_1_amount
                 amount = adult_amount + children_amount
             else:
-                amount = ConfigServices.find_detail_amount(detail, adults, children)
+                amount = ConfigServices.find_detail_amount(detail, adults, children, free_adults, free_children)
             if amount is not None and amount >= 0:
                 return amount
         return None
@@ -2462,25 +2525,6 @@ class BookingServices(object):
         if price is None:
             return None
         return round(0.499999 + float(price))
-
-
-    @classmethod
-    def _get_package_price(
-            cls, package, detail, date_from, date_to, adults, children):
-        adult_price = 0
-        if adults > 0:
-            if detail.ad_1_amount is None:
-                return None
-            adult_price = adults * detail.ad_1_amount
-        children_price = 0
-        if children > 0:
-            if detail.ch_1_ad_1_amount is None:
-                return None
-            children_price = children * detail.ch_1_ad_1_amount
-        price = adult_price + children_price
-        if price and price >= 0:
-            return price
-        return None
 
 
     @classmethod

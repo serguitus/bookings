@@ -175,7 +175,7 @@ class BookingPackageServiceTable(tables.Table):
     class Meta:
         model = BookingPackageService
         template_name = 'booking/bookingpackageservice_list.html'
-        fields = ['name', 'service_type', 'datetime_from', 'datetime_to', 'cost_amount', 'price_amount', 'provider']
+        fields = ['name', 'datetime_from', 'datetime_to', 'cost_amount', 'price_amount', 'provider', 'service_type']
 
     def render_name(self, value, record):
         obj_url = reverse(
@@ -184,8 +184,15 @@ class BookingPackageServiceTable(tables.Table):
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
-    def before_render(self, request):
-        self.columns.hide('service_type')
+    def render_service_type(self, value, record):
+        email_url = reverse(
+            'send_package_service_request',
+            args=(record.pk,)
+        )
+        return format_html('<a class="btn btn-primary" href="%s">Request</a>' % (email_url))
+
+    #def before_render(self, request):
+    #    self.columns.hide('service_type')
 
 
 class BookingServiceUpdateTable(tables.Table):

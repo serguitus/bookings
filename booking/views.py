@@ -37,6 +37,8 @@ from booking.common_site import (
     BookingPackageSiteModel,
     BookingPackageAllotmentSiteModel, BookingPackageTransferSiteModel,
     BookingPackageExtraSiteModel,
+    default_requests_mail_from, default_requests_mail_to, default_requests_mail_bcc,
+    default_requests_mail_subject, default_requests_mail_body,
 )
 from booking.constants import ACTIONS
 from booking.models import (
@@ -44,7 +46,7 @@ from booking.models import (
     Quote, QuotePaxVariant, QuoteService,
     QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
     QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
-    Booking, BookingService,
+    Booking, BookingService, BookingPackageService,
     BookingPax, BookingServicePax,
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
     BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
@@ -594,35 +596,15 @@ class EmailProviderView(View):
         allowing it to be customiced
         """
         bs = BookingService.objects.get(id=id)
-        services = BookingService.objects.filter(
-            booking=bs.booking,
-            provider=bs.provider)
-        provider_name = ''
-        provider_email = ''
-        from_email = request.user.email or None
-        bcc = request.user.email or None
-        if bs.provider:
-            provider_name = bs.provider.alias or bs.provider.name
-            provider_email = bs.provider.email
-            if not bs.provider.is_private:
-                # use former email for state companies
-                from_email = 'reservas1@ergosonline.com'
-        rooming = bs.rooming_list.all()
-        bcc = request.user.email or None
-        initial = {
-            'services': services,
-            'provider': provider_name,
-            'rooming': rooming,
-            'user': request.user,
-        }
-        t = get_template('booking/emails/provider_email.html')
-        form = EmailProviderForm(request.user,
-                                 initial={
-                                     'to_address': provider_email,
-                                     'bcc_address': bcc,
-                                     'subject': 'Solicitud de Reserva',
-                                     'body': t.render(initial)
-                                 })
+        form = EmailProviderForm(
+            request.user,
+            initial={
+                'from_address': default_requests_mail_from(request, bs.provider, bs.booking),
+                'to_address': default_requests_mail_to(request, bs.provider, bs.booking),
+                'bcc_address': default_requests_mail_bcc(request, bs.provider, bs.booking),
+                'subject': default_requests_mail_subject(request, bs.provider, bs.booking),
+                'body': default_requests_mail_body(request, bs.provider, bs.booking)
+            })
         context = dict()
         context.update(bookings_site.get_site_extra_context(request))
         request.current_app = bookings_site.name
@@ -646,6 +628,55 @@ class EmailProviderView(View):
             extra_tags='', fail_silently=False)
         return HttpResponseRedirect(
             reverse('common:booking_booking_change', args=(booking_service.booking.id,)))
+
+
+class EmailProviderPackageServiceView(View):
+    """
+    A view to handle the email that will be sent to providers
+    It allows to customice the default email
+    """
+
+    def get(self, request, id, *args, **kwargs):
+        """
+        This will render the default email for certain provider
+        allowing it to be customiced
+        """
+        bps = BookingPackageService.objects.get(id=id)
+        provider = bps.provider
+        if not provider:
+            provider = bps.booking_package.provider
+        form = EmailProviderForm(
+            request.user,
+            initial={
+                'from_address': default_requests_mail_from(request, provider, bps.booking()),
+                'to_address': default_requests_mail_to(request, provider, bps.booking()),
+                'bcc_address': default_requests_mail_bcc(request, provider, bps.booking()),
+                'subject': default_requests_mail_subject(request, provider, bps.booking()),
+                'body': default_requests_mail_body(request, provider, bps.booking())
+            })
+        context = dict()
+        context.update(bookings_site.get_site_extra_context(request))
+        request.current_app = bookings_site.name
+        context.update({'form': form})
+        return render(request, 'booking/email_provider_form.html', context)
+
+    def post(self, request, id, *args, **kwargs):
+        bps = BookingPackageService.objects.get(id=id)
+        from_address = request.POST.get('from_address')
+        to_address = request.POST.get('to_address')
+        cc_address = request.POST.get('cc_address')
+        bcc_address = request.POST.get('bcc_address')
+        subject = request.POST.get('subject')
+        body = request.POST.get('body')
+
+        _send_service_request(
+            subject, body, from_address, to_address, cc_address, bcc_address, from_address)
+        messages.add_message(
+            request=request, level=messages.SUCCESS,
+            message='Email  sent successfully.',
+            extra_tags='', fail_silently=False)
+        return HttpResponseRedirect(
+            reverse('common:booking_bookingpackage_change', args=(bps.booking_package.id,)))
 
 
 class EmailConfirmationView(View):

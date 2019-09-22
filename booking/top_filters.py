@@ -14,6 +14,7 @@ class PackageTopFilter(filters.ForeignKeyFilter):
 class CancelledTopFilter(filters.BooleanFilter):
     default_value = ["False"]
     filter_title = 'Cancelled'
+    filter_field_path = 'cancelled'
 
     def queryset(self, request, queryset):
         search_option = self._values[0]
@@ -27,6 +28,7 @@ class CancelledTopFilter(filters.BooleanFilter):
 
 class InternalReferenceTopFilter(filters.TextFilter):
     filter_title = 'Int.Ref.'
+    filter_field_path = 'int_ref'
 
     def queryset(self, request, queryset):
         search_terms = self._values[0]

@@ -25,4 +25,7 @@
             <input class="change-action change-action-{{action.name}}" type="submit" value="{% trans action.label %}" name="_{{ action.name }}" />
         {% endfor %}
     {% endif %}
+    {% if custom_actions_template %}
+        {% include custom_actions_template %}
+    {% endif %}
 </div>
