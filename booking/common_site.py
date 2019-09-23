@@ -1179,7 +1179,6 @@ class BaseBookingServiceSiteModel(SiteModel):
             return redirect(reverse('common:booking_%s_change' % self.model._meta.model_name, args=[object_id]))
         else:
             if object_id:
-                print object_id
                 bs = BookingService.objects.get(pk=object_id)
                 if not extra_context:
                     extra_context = dict()
