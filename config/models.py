@@ -102,6 +102,7 @@ class RoomType(models.Model):
         verbose_name = 'Room Type'
         verbose_name_plural = 'Rooms Types'
         unique_together = (('name',),)
+        ordering = ['name']
     name = models.CharField(max_length=50)
     enabled = models.BooleanField(default=True)
 
@@ -166,6 +167,7 @@ class ServiceAddon(models.Model):
         verbose_name = 'Service Addon'
         verbose_name_plural = 'Services Addons'
         unique_together = (('service', 'addon',),)
+        ordering = ['service__name']
     service = models.ForeignKey(Service)
     addon = models.ForeignKey(Addon)
 
