@@ -1178,22 +1178,23 @@ class BaseBookingServiceSiteModel(SiteModel):
                 extra_tags='', fail_silently=False)
             return redirect(reverse('common:booking_%s_change' % self.model._meta.model_name, args=[object_id]))
         else:
-            bs = BookingService.objects.get(pk=object_id)
-            if not extra_context:
-                extra_context = dict()
-            extra_context.update(
-                {
-                    'modal_title': 'Provider Requests Mail',
-                    'default_mail_from': default_requests_mail_from(request, bs.provider, bs.booking),
-                    'default_mail_to': default_requests_mail_to(request, bs.provider, bs.booking),
-                    'default_mail_cc': '',
-                    'default_mail_bcc': default_requests_mail_bcc(request, bs.provider, bs.booking),
-                    'default_mail_subject': default_requests_mail_subject(request, bs.provider, bs.booking),
-                    'default_mail_body': default_requests_mail_body(request, bs.provider, bs.booking),
-                })
+            if object_id:
+                print object_id
+                bs = BookingService.objects.get(pk=object_id)
+                if not extra_context:
+                    extra_context = dict()
+                    extra_context.update({
+                        'modal_title': 'Provider Requests Mail',
+                        'default_mail_from': default_requests_mail_from(request, bs.provider, bs.booking),
+                        'default_mail_to': default_requests_mail_to(request, bs.provider, bs.booking),
+                        'default_mail_cc': '',
+                        'default_mail_bcc': default_requests_mail_bcc(request, bs.provider, bs.booking),
+                        'default_mail_subject': default_requests_mail_subject(request, bs.provider, bs.booking),
+                        'default_mail_body': default_requests_mail_body(request, bs.provider, bs.booking),
+                    })
 
             return super(BaseBookingServiceSiteModel, self).changeform_view(request, object_id, form_url, extra_context)
-    
+
     @csrf_protect_m
     def delete_view(self, request, object_id, extra_context=None):
         bookingservice = BookingService.objects.get(pk=object_id)
