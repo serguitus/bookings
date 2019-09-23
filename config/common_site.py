@@ -279,6 +279,7 @@ class TransferSiteModel(SiteModel):
         return export_prices(request, queryset, context)
 
 
+# TODO deprecated class. To be removed with related elements
 class ExtraAddonInline(CommonTabularInline):
     model = ExtraAddon
     extra = 0
@@ -312,7 +313,7 @@ class ExtraSiteModel(SiteModel):
                     'parameter_type', 'enabled',)
     top_filters = (('service_category', ServiceCategoryTopFilter), 'name',)
     ordering = ['enabled', 'name']
-    inlines = [ExtraAddonInline, ServiceAddonInline]
+    inlines = [ServiceAddonInline]
     actions = ['export_prices']
 
     def export_prices(self, request, queryset, extra_context=None):
