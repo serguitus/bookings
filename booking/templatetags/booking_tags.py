@@ -180,9 +180,9 @@ def get_distribution(booking_service):
         '10': 'SGL',
         '20': 'DBL',
         '30': 'TPL',
-        '21': 'DBL+1Chld',
-        '22': 'DBL+2Chld',
-        '31': 'TPL+1Chld',
+        '21': 'DBL&1Chld',
+        '22': 'DBL&2Chld',
+        '31': 'TPL&1Chld',
     }
     for room in rooms:
         try:
