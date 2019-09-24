@@ -5,6 +5,10 @@ $(document).ready(function(){
   $('#btn-costs').on('click', function (e) {
     get_providers_costs();
   });
+  // check if there are notes on bookingServices to Expand collapsed notes
+  if($('#id_v_notes').val() || $('#id_p_notes').val() || $('#id_provider_notes').val()){
+    $('#fieldsetcollapser0.collapse-toggle').click()
+  }
 
   function get_providers_costs(){
     // sending a request to get computed numbers

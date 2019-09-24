@@ -66,4 +66,9 @@ $(document).ready(function(){
 
   show_package_amounts();
 
+  // check if there are general notes on the booking to Expand collapsed notes
+  if($('#id_p_notes').val()){
+    $('#fieldsetcollapser0.collapse-toggle').click()
+  }
+
 });

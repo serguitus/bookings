@@ -949,6 +949,7 @@ class Provider(models.Model):
         verbose_name = 'Provider'
         verbose_name_plural = 'Providers'
         unique_together = (('name',),)
+        ordering = ['name']
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=500, blank=True, null=True)
     currency = models.CharField(

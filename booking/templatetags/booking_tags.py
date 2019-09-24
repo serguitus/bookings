@@ -164,7 +164,9 @@ def render_confirmed_service(booking_service):
 @register.simple_tag
 def get_distribution(booking_service):
     rooms = BookingServices.find_groups(
-        booking_service=booking_service, service=booking_service.service, for_cost=True)
+        booking_service=booking_service,
+        service=booking_service.service,
+        for_cost=True)
     dist = ''
     room_count = {
         '10': 0,  # SGL counter
@@ -178,12 +180,16 @@ def get_distribution(booking_service):
         '10': 'SGL',
         '20': 'DBL',
         '30': 'TPL',
-        '21': 'DBL+1Chld',
-        '22': 'DBL+2Chld',
-        '31': 'TPL+1Chld',
+        '21': 'DBL&1Chld',
+        '22': 'DBL&2Chld',
+        '31': 'TPL&1Chld',
     }
     for room in rooms:
-        room_count['%d%d' % (room[0], room[1])] += 1
+        try:
+            room_count['%d%d' % (room[0], room[1])] += 1
+        except KeyError:
+            # unknown room type. skip
+            pass
     for k in room_count.keys():
         if room_count[k]:
             if dist:
