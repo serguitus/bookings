@@ -16,11 +16,11 @@ from booking.constants import (
     QUOTE_STATUS_LIST, QUOTE_STATUS_DRAFT,
     BOOKING_STATUS_LIST, BOOKING_STATUS_PENDING,
     SERVICE_STATUS_LIST, SERVICE_STATUS_PENDING,
-    PACKAGE_AMOUNTS_BY_PAX, PACKAGE_AMOUNTS_TYPES,
+    PACKAGE_AMOUNTS_TYPES,
     INVOICE_FORMATS, INVOICE_FORMAT_COMPACT)
 
 from config.constants import (
-    BOARD_TYPES,
+    BOARD_TYPES, AMOUNTS_BY_PAX, 
     SERVICE_CATEGORY_TRANSFER,
     SERVICE_CATEGORY_ALLOTMENT,
     SERVICE_CATEGORY_EXTRA)
@@ -137,7 +137,7 @@ class Package(Service):
         verbose_name = 'Package'
         verbose_name_plural = 'Packages'
     amounts_type = models.CharField(
-        default=PACKAGE_AMOUNTS_BY_PAX, max_length=5, choices=PACKAGE_AMOUNTS_TYPES)
+        default=AMOUNTS_BY_PAX, max_length=5, choices=PACKAGE_AMOUNTS_TYPES)
     has_pax_range = models.BooleanField(default=False)
     time = models.TimeField(blank=True, null=True)
 

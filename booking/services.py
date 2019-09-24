@@ -24,6 +24,7 @@ from booking.models import (
     BookingPackageService, BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
     BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine, BookingInvoicePartial)
 
+from config.constants import AMOUNTS_FIXED
 from config.models import ProviderAllotmentDetail, ProviderTransferDetail, ProviderExtraDetail
 from config.services import ConfigServices
 from config.views import (
@@ -1059,7 +1060,7 @@ class BookingServices(object):
 
     @classmethod
     def find_bookingservice_paxes_groups(cls, pax_list, service, for_cost):
-        if service.grouping:
+        if service.cost_type != AMOUNTS_FIXED and service.grouping:
             groups = dict()
             for pax in pax_list:
                 if pax.booking_pax_id is not None and pax.group is not None:
@@ -1410,7 +1411,7 @@ class BookingServices(object):
     @classmethod
     def _get_package_price(
             cls, service, detail, date_from, date_to, adults, children, free_adults=0, free_children=0):
-        if (service.amounts_type == constants.PACKAGE_AMOUNTS_FIXED and
+        if (service.amounts_type == constants.AMOUNTS_FIXED and
                 detail.ad_1_amount is not None):
             # TODO verificar si esto es correcto
             return (adults - free_adults) * detail.ad_1_amount / adults

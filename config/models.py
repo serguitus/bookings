@@ -11,6 +11,7 @@ from config.constants import (
     ROOM_CAPACITIES,
     BOARD_TYPES,
     EXTRA_COST_TYPES, EXTRA_PARAMETER_TYPES, EXTRA_PARAMETER_TYPE_HOURS,
+    ALLOTMENT_COST_TYPES, AMOUNTS_BY_PAX,
     ALLOTMENT_SUPPLEMENT_COST_TYPES, TRANSFER_SUPPLEMENT_COST_TYPES,
     TRANSFER_COST_TYPES)
 
@@ -385,6 +386,8 @@ class Allotment(Service):
     class Meta:
         verbose_name = 'Accomodation'
         verbose_name_plural = 'Accomodation'
+    cost_type = models.CharField(
+        max_length=5, choices=ALLOTMENT_COST_TYPES, default=AMOUNTS_BY_PAX)
     location = models.ForeignKey(Location)
     time_from = models.TimeField(default='16:00')
     time_to = models.TimeField(default='12:00')
@@ -517,7 +520,7 @@ class AllotmentRoomAvailability(models.Model):
 
 
 #===============================================================================
-# TRANFER
+# TRANSFER
 #===============================================================================
 class Transfer(Service):
     """

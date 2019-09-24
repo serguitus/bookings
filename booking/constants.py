@@ -1,6 +1,6 @@
-from config.constants import (SERVICE_CATEGORY_EXTRA,
-                              SERVICE_CATEGORY_ALLOTMENT,
-                              SERVICE_CATEGORY_TRANSFER)
+from config.constants import (
+    AMOUNTS_FIXED, AMOUNTS_BY_PAX,
+    SERVICE_CATEGORY_EXTRA, SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER)
 
 SERVICE_CATEGORY_PACKAGE = 'P'
 SERVICE_CATEGORIES = (
@@ -89,11 +89,9 @@ ACTIONS = {
     'vouchers': 'BookingSiteModel.config_vouchers',
 }
 
-PACKAGE_AMOUNTS_FIXED = 'F'
-PACKAGE_AMOUNTS_BY_PAX = 'P'
 PACKAGE_AMOUNTS_TYPES = (
-    (PACKAGE_AMOUNTS_FIXED, 'Fixed'),
-    (PACKAGE_AMOUNTS_BY_PAX, 'By Pax'),
+    (AMOUNTS_FIXED, 'Fixed'),
+    (AMOUNTS_BY_PAX, 'By Pax'),
 )
 
 INVOICE_FORMAT_COMPACT = 'C'

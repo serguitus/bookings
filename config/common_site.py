@@ -228,7 +228,7 @@ class AllotmentSiteModel(SiteModel):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
     fields = (('name', 'location', 'is_shared_point'),
-              'service_category',
+              ('service_category', 'cost_type'),
               ('phone', 'address'),
               ('time_from', 'time_to'),
               ('pax_range', 'enabled'),
