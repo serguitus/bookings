@@ -1060,7 +1060,8 @@ class BookingServices(object):
 
     @classmethod
     def find_bookingservice_paxes_groups(cls, pax_list, service, for_cost):
-        if service.cost_type != AMOUNTS_FIXED and service.grouping:
+        if service.grouping and (
+                not hasattr(service, 'cost_type') or service.cost_type != AMOUNTS_FIXED):
             groups = dict()
             for pax in pax_list:
                 if pax.booking_pax_id is not None and pax.group is not None:
@@ -1415,7 +1416,7 @@ class BookingServices(object):
                 detail.ad_1_amount is not None):
             # TODO verificar si esto es correcto
             return (adults - free_adults) * detail.ad_1_amount / adults
-        if service.amounts_type == constants.PACKAGE_AMOUNTS_BY_PAX:
+        if service.amounts_type == constants.AMOUNTS_BY_PAX:
             if not service.grouping:
                 adult_amount = 0
                 if adults - free_adults > 0:
