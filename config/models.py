@@ -19,6 +19,7 @@ from finance.models import Agency, Provider
 
 from reservas.custom_settings import ADDON_FOR_NO_ADDON
 
+
 class Location(models.Model):
     """
     Location
@@ -30,6 +31,7 @@ class Location(models.Model):
     name = models.CharField(max_length=50)
     enabled = models.BooleanField(default=True)
     short_name = models.CharField(max_length=10, blank=True, null=True)
+    ordering = ['name']
 
     def __str__(self):
         return self.name
