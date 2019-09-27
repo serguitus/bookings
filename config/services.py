@@ -10,8 +10,7 @@ from django.db.models import Q
 
 from config.constants import (
     SERVICE_CATEGORY_EXTRA, SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER,
-    TRANSFER_COST_TYPE_FIXED, TRANSFER_COST_TYPE_BY_PAX,
-    EXTRA_COST_TYPE_FIXED, EXTRA_COST_TYPE_BY_PAX,
+    AMOUNTS_FIXED, AMOUNTS_BY_PAX,
     EXTRA_PARAMETER_TYPE_HOURS, EXTRA_PARAMETER_TYPE_DAYS,
     EXTRA_PARAMETER_TYPE_NIGHTS, EXTRA_PARAMETER_TYPE_STAY,
     ERROR_INVALID_SERVICE_CATEGORY)
@@ -400,15 +399,15 @@ class ConfigServices(object):
 
         # provider cost
         # obtain details order by date_from asc, date_to desc
-        if cost_groups is None or not cost_groups:
+        service = Allotment.objects.get(pk=service_id)
+
+        if (cost_groups is None or not cost_groups) and service.cost_type == AMOUNTS_BY_PAX:
             cost = None
             cost_message = 'Paxes Missing'
         elif provider is None:
             cost = None
             cost_message = 'Provider Not Found'
         else:
-            service = Allotment.objects.get(pk=service_id)
-
             if service.pax_range:
                 cost = 0
                 cost_message = ''
@@ -493,15 +492,15 @@ class ConfigServices(object):
 
         # agency price
         # obtain details order by date_from asc, date_to desc
-        if price_groups is None or not price_groups:
+        service = Allotment.objects.get(pk=service_id)
+
+        if (price_groups is None or not price_groups) and service.cost_type == AMOUNTS_BY_PAX:
             price = None
             price_message = 'Paxes Missing'
         elif agency is None:
             price = None
             price_message = 'Agency Not Found'
         else:
-            service = Allotment.objects.get(pk=service_id)
-
             if service.pax_range:
                 price = 0
                 price_message = ''
@@ -618,7 +617,7 @@ class ConfigServices(object):
         # obtain details order by date_from asc, date_to desc
         service = Transfer.objects.get(pk=service_id)
 
-        if (cost_groups is None or not cost_groups) and service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
+        if (cost_groups is None or not cost_groups) and service.cost_type == AMOUNTS_BY_PAX:
             cost = None
             cost_message = 'Paxes Missing'
         elif provider is None:
@@ -730,7 +729,7 @@ class ConfigServices(object):
         # obtain details order by date_from asc, date_to desc
         service = Transfer.objects.get(pk=service_id)
 
-        if (price_groups is None or not price_groups) and service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
+        if (price_groups is None or not price_groups) and service.cost_type == AMOUNTS_BY_PAX:
             price = None
             price_message = 'Paxes Missing'
         elif agency is None:
@@ -875,7 +874,7 @@ class ConfigServices(object):
 
         # provider cost
         # obtain details order by date_from asc, date_to desc
-        if (cost_groups is None or not cost_groups) and service.cost_type == EXTRA_COST_TYPE_BY_PAX:
+        if (cost_groups is None or not cost_groups) and service.cost_type == AMOUNTS_BY_PAX:
             cost = None
             cost_message = 'Paxes Missing'
         elif provider is None:
@@ -961,7 +960,7 @@ class ConfigServices(object):
 
         # agency price
         # obtain details order by date_from asc, date_to desc
-        if (price_groups is None or not price_groups) and service.cost_type == EXTRA_COST_TYPE_BY_PAX:
+        if (price_groups is None or not price_groups) and service.cost_type == AMOUNTS_BY_PAX:
             price = None
             price_message = 'Paxes Missing'
         elif agency is None:
@@ -1146,6 +1145,9 @@ class ConfigServices(object):
             cls, service, detail, days, adults, children, free_adults, free_children, quantity):
         if quantity is None or (quantity < 1):
             quantity = 1
+        if service.cost_type == AMOUNTS_FIXED and detail.ad_1_amount is not None:
+            # TODO verificar si esto es correcto
+            return (adults + children - free_adults - free_children) * detail.ad_1_amount * quantity / (adults + children)
         amount = cls._find_amount(service, detail, adults, children, free_adults, free_children)
         if amount is not None and amount >= 0:
             return amount * days * quantity
@@ -1163,10 +1165,10 @@ class ConfigServices(object):
     def _get_transfer_amount(
             cls, service, detail, adults, children, free_adults, free_children, quantity):
         quantity = cls.get_service_quantity(service, adults + children)
-        if service.cost_type == TRANSFER_COST_TYPE_FIXED and detail.ad_1_amount is not None:
+        if service.cost_type == AMOUNTS_FIXED and detail.ad_1_amount is not None:
             # TODO verificar si esto es correcto
             return (adults + children - free_adults - free_children) * detail.ad_1_amount * quantity / (adults + children)
-        if service.cost_type == TRANSFER_COST_TYPE_BY_PAX:
+        if service.cost_type == AMOUNTS_BY_PAX:
             amount = cls._find_amount(service, detail, adults, children, free_adults, free_children)
             if amount is not None and (amount >= 0):
                 return amount * quantity
@@ -1191,12 +1193,10 @@ class ConfigServices(object):
                 return None
         if quantity is None or quantity < 1:
             quantity = cls.get_service_quantity(service, adults + children)
-        if (
-                service.cost_type == EXTRA_COST_TYPE_FIXED
-                and detail.ad_1_amount is not None):
+        if service.cost_type == AMOUNTS_FIXED and detail.ad_1_amount is not None:
             # TODO verificar si esto es correcto
             return (adults + children - free_adults - free_children) * detail.ad_1_amount * quantity * parameter / (adults + children)
-        if service.cost_type == EXTRA_COST_TYPE_BY_PAX:
+        if service.cost_type == AMOUNTS_BY_PAX:
             amount = cls._find_amount(service, detail, adults, children, free_adults, free_children)
             if amount is not None and amount >= 0:
                 return amount * quantity * parameter

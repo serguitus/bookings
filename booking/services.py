@@ -24,6 +24,7 @@ from booking.models import (
     BookingPackageService, BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
     BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine, BookingInvoicePartial)
 
+from config.constants import AMOUNTS_FIXED
 from config.models import ProviderAllotmentDetail, ProviderTransferDetail, ProviderExtraDetail
 from config.services import ConfigServices
 from config.views import (
@@ -1059,7 +1060,8 @@ class BookingServices(object):
 
     @classmethod
     def find_bookingservice_paxes_groups(cls, pax_list, service, for_cost):
-        if service.grouping:
+        if service.grouping and (
+                not hasattr(service, 'cost_type') or service.cost_type != AMOUNTS_FIXED):
             groups = dict()
             for pax in pax_list:
                 if pax.booking_pax_id is not None and pax.group is not None:
@@ -1410,11 +1412,11 @@ class BookingServices(object):
     @classmethod
     def _get_package_price(
             cls, service, detail, date_from, date_to, adults, children, free_adults=0, free_children=0):
-        if (service.amounts_type == constants.PACKAGE_AMOUNTS_FIXED and
+        if (service.amounts_type == constants.AMOUNTS_FIXED and
                 detail.ad_1_amount is not None):
             # TODO verificar si esto es correcto
             return (adults - free_adults) * detail.ad_1_amount / adults
-        if service.amounts_type == constants.PACKAGE_AMOUNTS_BY_PAX:
+        if service.amounts_type == constants.AMOUNTS_BY_PAX:
             if not service.grouping:
                 adult_amount = 0
                 if adults - free_adults > 0:
@@ -1538,9 +1540,12 @@ class BookingServices(object):
                     if isinstance(allotment, QuotePackageAllotment):
                         date_from = allotment.datetime_from
                         date_to = allotment.datetime_to
-                        quoteservice_paxvariant = QuoteServicePaxVariant.objects.get(
-                            quote_pax_variant=service_pax_variant.quote_pax_variant_id,
-                            quote_service=allotment.quote_package_id)
+                        try:
+                            quoteservice_paxvariant = QuoteServicePaxVariant.objects.get(
+                                quote_pax_variant=service_pax_variant.quote_pax_variant_id,
+                                quote_service=allotment.quote_package_id)
+                        except QuoteServicePaxVariant.DoesNotExist as ex:
+                            continue
                         try:
                             packageservice_paxvariant = QuotePackageServicePaxVariant.objects.get(
                                 quotepackage_pax_variant=quoteservice_paxvariant.id,
@@ -1605,9 +1610,12 @@ class BookingServices(object):
                     if isinstance(transfer, QuotePackageTransfer):
                         date_from = transfer.datetime_from
                         date_to = transfer.datetime_to
-                        quoteservice_paxvariant = QuoteServicePaxVariant.objects.get(
-                            quote_pax_variant=service_pax_variant.quote_pax_variant_id,
-                            quote_service=transfer.quote_package_id)
+                        try:
+                            quoteservice_paxvariant = QuoteServicePaxVariant.objects.get(
+                                quote_pax_variant=service_pax_variant.quote_pax_variant_id,
+                                quote_service=transfer.quote_package_id)
+                        except QuoteServicePaxVariant.DoesNotExist as ex:
+                            continue
                         try:
                             packageservice_paxvariant = QuotePackageServicePaxVariant.objects.get(
                                 quotepackage_pax_variant=quoteservice_paxvariant.id,
@@ -1671,9 +1679,12 @@ class BookingServices(object):
                     if isinstance(extra, QuotePackageExtra):
                         date_from = extra.datetime_from
                         date_to = extra.datetime_to
-                        quoteservice_paxvariant = QuoteServicePaxVariant.objects.get(
-                            quote_pax_variant=service_pax_variant.quote_pax_variant_id,
-                            quote_service=extra.quote_package_id)
+                        try:
+                            quoteservice_paxvariant = QuoteServicePaxVariant.objects.get(
+                                quote_pax_variant=service_pax_variant.quote_pax_variant_id,
+                                quote_service=extra.quote_package_id)
+                        except QuoteServicePaxVariant.DoesNotExist as ex:
+                            continue
                         try:
                             packageservice_paxvariant = QuotePackageServicePaxVariant.objects.get(
                                 quotepackage_pax_variant=quoteservice_paxvariant.id,
