@@ -671,7 +671,6 @@ class BookingService(BaseService, BookService, DateInterval):
     class Meta:
         verbose_name = 'Booking Service'
         verbose_name_plural = 'Booking Services'
-        default_permissions = ('add', 'change',)
         ordering = ['datetime_from']
     booking = models.ForeignKey(Booking, related_name='booking_services')
     v_notes = models.CharField(
@@ -786,7 +785,6 @@ class BookingAllotment(BookingService, BaseAllotment):
     class Meta:
         verbose_name = 'Booking Accomodation'
         verbose_name_plural = 'Bookings Accomodations'
-        default_permissions = ('add', 'change',)
     version = AutoIncVersionField( )
 
     def __unicode__(self):
@@ -864,7 +862,6 @@ class BookingTransfer(BookingService, BaseTransfer):
     class Meta:
         verbose_name = 'Booking Transfer'
         verbose_name_plural = 'Booking Transfers'
-        default_permissions = ('add', 'change',)
     version = AutoIncVersionField( )
     location_from = models.ForeignKey(
         Location, related_name='location_from', verbose_name='Location from')
@@ -922,7 +919,6 @@ class BookingExtra(BookingService, BaseExtra):
     class Meta:
         verbose_name = 'Booking Extra'
         verbose_name_plural = 'Booking Extras'
-        default_permissions = ('add', 'change',)
     version = AutoIncVersionField( )
 
     def build_description(self):
@@ -950,7 +946,6 @@ class BookingPackage(BookingService):
     class Meta:
         verbose_name = 'Booking Package'
         verbose_name_plural = 'Bookings Packages'
-        default_permissions = ('add', 'change',)
     version = AutoIncVersionField( )
     service = models.ForeignKey(Package)
     price_by_package_catalogue = models.BooleanField(
@@ -988,7 +983,6 @@ class BookingPackageService(BaseService, BookService, DateInterval):
     class Meta:
         verbose_name = 'Booking Package Service'
         verbose_name_plural = 'Bookingss Packages Services'
-        default_permissions = ('add', 'change',)
     booking_package = models.ForeignKey(BookingPackage, related_name='booking_package_services')
 
     def fill_data(self):
@@ -1016,7 +1010,6 @@ class BookingPackageAllotment(BookingPackageService, BaseAllotment):
     class Meta:
         verbose_name = 'Booking Package Accomodation'
         verbose_name_plural = 'Bookings Packages Accomodations'
-        default_permissions = ('add', 'change',)
     version = AutoIncVersionField( )
 
     def build_description(self):
@@ -1085,7 +1078,6 @@ class BookingPackageTransfer(BookingPackageService, BaseTransfer):
     class Meta:
         verbose_name = 'Booking Package Transfer'
         verbose_name_plural = 'Bookingss Packages Transfers'
-        default_permissions = ('add', 'change',)
     version = AutoIncVersionField( )
     location_from = models.ForeignKey(
         Location, related_name='booking_package_location_from', verbose_name='Location from')
@@ -1126,7 +1118,6 @@ class BookingPackageExtra(BookingPackageService, BaseExtra):
     class Meta:
         verbose_name = 'Booking Package Extra'
         verbose_name_plural = 'Bookings Packages Extras'
-        default_permissions = ('add', 'change',)
     version = AutoIncVersionField( )
 
     def build_description(self):
