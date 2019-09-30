@@ -1486,10 +1486,14 @@ class BookingServices(object):
         service_pax_variant = cls._find_service_pax_variant(
             package, quote_pax_variant, service_pax_variant)
 
-        # for saved ones use saved quote package services
+        if not quote_pax_variant:
+            quote_pax_variant = service_pax_variant.quote_pax_variant
+
+        if not hasattr(package, 'price_by_package_catalogue'):
+            package.price_by_package_catalogue = False
 
         if hasattr(package, 'id') and package.id:
-            if isinstance(package, QuoteService):
+            if not isinstance(package, QuotePackage):
                 package = QuotePackage.objects.get(pk=package.id)
             allotment_list = list(
                 QuotePackageAllotment.objects.filter(
@@ -1511,24 +1515,6 @@ class BookingServices(object):
             extra_list = list(
                 PackageExtra.objects.filter(package=package.service_id).all())
 
-        if not hasattr(package, 'price_by_package_catalogue'):
-            package.price_by_package_catalogue = False
-
-        if package.price_by_package_catalogue:
-
-            date_from = package.datetime_from
-            date_to = package.datetime_to
-
-            price_1, price_1_msg, \
-            price_2, price_2_msg, \
-            price_3, price_3_msg = cls._find_quote_package_prices(
-                pax_quantity=quote_pax_variant.pax_quantity,
-                service=package.service,
-                date_from=date_from,
-                date_to=date_to,
-                agency=agency,
-                service_pax_variant=service_pax_variant)
-
         if allotment_list:
             for allotment in allotment_list:
                 if hasattr(allotment, 'service'):
@@ -1542,7 +1528,7 @@ class BookingServices(object):
                         date_to = allotment.datetime_to
                         try:
                             quoteservice_paxvariant = QuoteServicePaxVariant.objects.get(
-                                quote_pax_variant=service_pax_variant.quote_pax_variant_id,
+                                quote_pax_variant=quote_pax_variant.id,
                                 quote_service=allotment.quote_package_id)
                         except QuoteServicePaxVariant.DoesNotExist as ex:
                             continue
@@ -1563,41 +1549,43 @@ class BookingServices(object):
                                 days_duration = 0
                             date_to = date_from + timedelta(days=days_duration)
                         packageservice_paxvariant = QuotePackageServicePaxVariant()
-                    if package.price_by_package_catalogue:
-                        c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._find_quoteservice_costs(
+
+                    c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._find_quoteservice_costs(
+                        pax_quantity=quote_pax_variant.pax_quantity,
+                        quoteservice=allotment,
+                        date_from=date_from,
+                        date_to=date_to,
+                        provider=provider,
+                        service_pax_variant=packageservice_paxvariant,
+                        manuals=manuals)
+
+                    # service amounts
+                    cost_1, cost_1_msg, \
+                    cost_2, cost_2_msg, \
+                    cost_3, cost_3_msg = cls._variant_cost_totals(
+                        cost_1, cost_1_msg, c1, c1_msg,
+                        cost_2, cost_2_msg, c2, c2_msg,
+                        cost_3, cost_3_msg, c3, c3_msg)
+
+                    if not quote_pax_variant.price_percent and not package.price_by_package_catalogue:
+                        p1, p1_msg, p2, p2_msg, p3, p3_msg = cls._find_quoteservice_prices(
                             pax_quantity=quote_pax_variant.pax_quantity,
                             quoteservice=allotment,
                             date_from=date_from,
                             date_to=date_to,
-                            provider=provider,
-                            service_pax_variant=packageservice_paxvariant,
-                            manuals=manuals)
-                        # service amounts
-                        cost_1, cost_1_msg, \
-                        cost_2, cost_2_msg, \
-                        cost_3, cost_3_msg = cls._variant_cost_totals(
-                            cost_1, cost_1_msg, c1, c1_msg,
-                            cost_2, cost_2_msg, c2, c2_msg,
-                            cost_3, cost_3_msg, c3, c3_msg)
-                    else:
-                        c1, c1_msg, p1, p1_msg, \
-                        c2, c2_msg, p2, p2_msg, \
-                        c3, c3_msg, p3, p3_msg = cls._find_quoteservice_amounts(
-                            pax_quantity=quote_pax_variant.pax_quantity,
-                            quoteservice=allotment,
-                            date_from=date_from,
-                            date_to=date_to,
-                            provider=provider,
                             agency=agency,
                             service_pax_variant=packageservice_paxvariant,
-                            manuals=manuals)
+                            manuals=manuals,
+                            quote_pax_variant=quote_pax_variant,
+                            cost_sgl=c1, cost_dbl=c2, cost_tpl=c3)
+
                         # service amounts
-                        cost_1, cost_1_msg, price_1, price_1_msg, \
-                        cost_2, cost_2_msg, price_2, price_2_msg, \
-                        cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
-                            cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
-                            cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
-                            cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
+                        price_1, price_1_msg, \
+                        price_2, price_2_msg, \
+                        price_3, price_3_msg = cls._variant_price_totals(
+                            price_1, price_1_msg, p1, p1_msg,
+                            price_2, price_2_msg, p2, p2_msg,
+                            price_3, price_3_msg, p3, p3_msg)
 
         if transfer_list:
             for transfer in transfer_list:
@@ -1612,7 +1600,7 @@ class BookingServices(object):
                         date_to = transfer.datetime_to
                         try:
                             quoteservice_paxvariant = QuoteServicePaxVariant.objects.get(
-                                quote_pax_variant=service_pax_variant.quote_pax_variant_id,
+                                quote_pax_variant=quote_pax_variant.id,
                                 quote_service=transfer.quote_package_id)
                         except QuoteServicePaxVariant.DoesNotExist as ex:
                             continue
@@ -1633,41 +1621,44 @@ class BookingServices(object):
                                 days_duration = 0
                             date_to = date_from + timedelta(days=days_duration)
                         packageservice_paxvariant = QuotePackageServicePaxVariant()
-                    if package.price_by_package_catalogue:
-                        c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._find_quoteservice_costs(
+
+                    c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._find_quoteservice_costs(
+                        pax_quantity=quote_pax_variant.pax_quantity,
+                        quoteservice=transfer,
+                        date_from=date_from,
+                        date_to=date_to,
+                        provider=provider,
+                        service_pax_variant=packageservice_paxvariant,
+                        manuals=manuals)
+
+                    # service amounts
+                    cost_1, cost_1_msg, \
+                    cost_2, cost_2_msg, \
+                    cost_3, cost_3_msg = cls._variant_cost_totals(
+                        cost_1, cost_1_msg, c1, c1_msg,
+                        cost_2, cost_2_msg, c2, c2_msg,
+                        cost_3, cost_3_msg, c3, c3_msg)
+
+                    if not quote_pax_variant.price_percent and not package.price_by_package_catalogue:
+                        p1, p1_msg, p2, p2_msg, p3, p3_msg = cls._find_quoteservice_prices(
                             pax_quantity=quote_pax_variant.pax_quantity,
                             quoteservice=transfer,
                             date_from=date_from,
                             date_to=date_to,
-                            provider=provider,
-                            service_pax_variant=packageservice_paxvariant,
-                            manuals=manuals)
-                        # service amounts
-                        cost_1, cost_1_msg, \
-                        cost_2, cost_2_msg, \
-                        cost_3, cost_3_msg = cls._variant_cost_totals(
-                            cost_1, cost_1_msg, c1, c1_msg,
-                            cost_2, cost_2_msg, c2, c2_msg,
-                            cost_3, cost_3_msg, c3, c3_msg)
-                    else:
-                        c1, c1_msg, p1, p1_msg, \
-                        c2, c2_msg, p2, p2_msg, \
-                        c3, c3_msg, p3, p3_msg = cls._find_quoteservice_amounts(
-                            pax_quantity=quote_pax_variant.pax_quantity,
-                            quoteservice=transfer,
-                            date_from=date_from,
-                            date_to=date_to,
-                            provider=provider,
                             agency=agency,
                             service_pax_variant=packageservice_paxvariant,
-                            manuals=manuals)
+                            manuals=manuals,
+                            quote_pax_variant=quote_pax_variant,
+                            cost_sgl=c1, cost_dbl=c2, cost_tpl=c3)
+
                         # service amounts
-                        cost_1, cost_1_msg, price_1, price_1_msg, \
-                        cost_2, cost_2_msg, price_2, price_2_msg, \
-                        cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
-                            cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
-                            cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
-                            cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
+                        price_1, price_1_msg, \
+                        price_2, price_2_msg, \
+                        price_3, price_3_msg = cls._variant_price_totals(
+                            price_1, price_1_msg, p1, p1_msg,
+                            price_2, price_2_msg, p2, p2_msg,
+                            price_3, price_3_msg, p3, p3_msg)
+
         if extra_list:
             for extra in extra_list:
                 if hasattr(extra, 'service'):
@@ -1681,7 +1672,7 @@ class BookingServices(object):
                         date_to = extra.datetime_to
                         try:
                             quoteservice_paxvariant = QuoteServicePaxVariant.objects.get(
-                                quote_pax_variant=service_pax_variant.quote_pax_variant_id,
+                                quote_pax_variant=quote_pax_variant.id,
                                 quote_service=extra.quote_package_id)
                         except QuoteServicePaxVariant.DoesNotExist as ex:
                             continue
@@ -1702,41 +1693,77 @@ class BookingServices(object):
                                 days_duration = 0
                             date_to = date_from + timedelta(days=days_duration)
                         packageservice_paxvariant = QuotePackageServicePaxVariant()
-                    if package.price_by_package_catalogue:
-                        c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._find_quoteservice_costs(
+                    c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._find_quoteservice_costs(
+                        pax_quantity=quote_pax_variant.pax_quantity,
+                        quoteservice=extra,
+                        date_from=date_from,
+                        date_to=date_to,
+                        provider=provider,
+                        service_pax_variant=packageservice_paxvariant,
+                        manuals=manuals)
+                    # service amounts
+                    cost_1, cost_1_msg, \
+                    cost_2, cost_2_msg, \
+                    cost_3, cost_3_msg = cls._variant_cost_totals(
+                        cost_1, cost_1_msg, c1, c1_msg,
+                        cost_2, cost_2_msg, c2, c2_msg,
+                        cost_3, cost_3_msg, c3, c3_msg)
+
+                    if not quote_pax_variant.price_percent and not package.price_by_package_catalogue:
+                        p1, p1_msg, p2, p2_msg, p3, p3_msg = cls._find_quoteservice_prices(
                             pax_quantity=quote_pax_variant.pax_quantity,
                             quoteservice=extra,
                             date_from=date_from,
                             date_to=date_to,
-                            provider=provider,
-                            service_pax_variant=packageservice_paxvariant,
-                            manuals=manuals)
-                        # service amounts
-                        cost_1, cost_1_msg, \
-                        cost_2, cost_2_msg, \
-                        cost_3, cost_3_msg = cls._variant_cost_totals(
-                            cost_1, cost_1_msg, c1, c1_msg,
-                            cost_2, cost_2_msg, c2, c2_msg,
-                            cost_3, cost_3_msg, c3, c3_msg)
-                    else:
-                        c1, c1_msg, p1, p1_msg, \
-                        c2, c2_msg, p2, p2_msg, \
-                        c3, c3_msg, p3, p3_msg = cls._find_quoteservice_amounts(
-                            pax_quantity=quote_pax_variant.pax_quantity,
-                            quoteservice=extra,
-                            date_from=date_from,
-                            date_to=date_to,
-                            provider=provider,
                             agency=agency,
                             service_pax_variant=packageservice_paxvariant,
-                            manuals=manuals)
+                            manuals=manuals,
+                            quote_pax_variant=quote_pax_variant,
+                            cost_sgl=c1, cost_dbl=c2, cost_tpl=c3)
+
                         # service amounts
-                        cost_1, cost_1_msg, price_1, price_1_msg, \
-                        cost_2, cost_2_msg, price_2, price_2_msg, \
-                        cost_3, cost_3_msg, price_3, price_3_msg = cls._variant_totals(
-                            cost_1, cost_1_msg, c1, c1_msg, price_1, price_1_msg, p1, p1_msg,
-                            cost_2, cost_2_msg, c2, c2_msg, price_2, price_2_msg, p2, p2_msg,
-                            cost_3, cost_3_msg, c3, c3_msg, price_3, price_3_msg, p3, p3_msg)
+                        price_1, price_1_msg, \
+                        price_2, price_2_msg, \
+                        price_3, price_3_msg = cls._variant_price_totals(
+                            price_1, price_1_msg, p1, p1_msg,
+                            price_2, price_2_msg, p2, p2_msg,
+                            price_3, price_3_msg, p3, p3_msg)
+
+        if quote_pax_variant.price_percent:
+            if cost_1 is not None:
+                price_1 = cls._round_price(
+                    cls._apply_percent(
+                        cost_1, quote_pax_variant.price_percent))
+                price_1_msg = None
+            else:
+                price_1, price_1_msg = None, 'Cost SGL for % is empty'
+            if cost_2 is not None:
+                price_2 = cls._round_price(
+                    cls._apply_percent(
+                        cost_2, quote_pax_variant.price_percent))
+                price_2_msg = None
+            else:
+                price_2, price_2_msg = None, 'Cost DBL for % is empty'
+            if cost_3 is not None:
+                price_3 = cls._round_price(
+                    cls._apply_percent(
+                        cost_3, quote_pax_variant.price_percent))
+                price_3_msg = None
+            else:
+                price_3, price_3_msg = None, 'Cost TPL for % is empty'
+        elif package.price_by_package_catalogue:
+            date_from = package.datetime_from
+            date_to = package.datetime_to
+
+            price_1, price_1_msg, \
+            price_2, price_2_msg, \
+            price_3, price_3_msg = cls._find_quotepackage_catalog_prices(
+                pax_quantity=quote_pax_variant.pax_quantity,
+                service=package.service,
+                date_from=date_from,
+                date_to=date_to,
+                agency=agency,
+                service_pax_variant=service_pax_variant)
 
         return cost_1, cost_1_msg, price_1, price_1_msg, \
             cost_2, cost_2_msg, price_2, price_2_msg, \
@@ -1784,6 +1811,19 @@ class BookingServices(object):
         rc3, rc3_msg = cls._merge_costs(cost_3, cost_3_msg, c3, c3_msg)
 
         return rc1, rc1_msg, rc2, rc2_msg, rc3, rc3_msg
+
+
+    @classmethod
+    def _variant_price_totals(
+            cls,
+            price_1, price_1_msg, p1, p1_msg,
+            price_2, price_2_msg, p2, p2_msg,
+            price_3, price_3_msg, p3, p3_msg):
+        rp1, rp1_msg = cls._merge_prices(price_1, price_1_msg, p1, p1_msg)
+        rp2, rp2_msg = cls._merge_prices(price_2, price_2_msg, p2, p2_msg)
+        rp3, rp3_msg = cls._merge_prices(price_3, price_3_msg, p3, p3_msg)
+
+        return rp1, rp1_msg, rp2, rp2_msg, rp3, rp3_msg
 
 
     @classmethod
@@ -2206,28 +2246,10 @@ class BookingServices(object):
     @classmethod
     def _quoteservice_amounts(
             cls, quoteservice, date_from, date_to, cost_groups, price_groups, provider, agency):
-        if isinstance(quoteservice, (QuoteAllotment, QuotePackageAllotment)):
-            c, c_msg, p, p_msg = ConfigServices.allotment_amounts(
-                quoteservice.service, date_from, date_to, cost_groups, price_groups,
-                provider, agency,
-                quoteservice.board_type, quoteservice.room_type_id,
-                quoteservice.service_addon_id)
-            return c, c_msg, p, p_msg
-        if isinstance(quoteservice, (QuoteTransfer, QuotePackageTransfer)):
-            c, c_msg, p, p_msg = ConfigServices.transfer_amounts(
-                quoteservice.service, date_from, date_to, cost_groups, price_groups,
-                provider, agency,
-                quoteservice.location_from_id, quoteservice.location_to_id,
-                quoteservice.service_addon_id,
-                quoteservice.quantity)
-            return c, c_msg, p, p_msg
-        if isinstance(quoteservice, (QuoteExtra, QuotePackageExtra)):
-            c, c_msg, p, p_msg = ConfigServices.extra_amounts(
-                quoteservice.service, date_from, date_to, cost_groups, price_groups,
-                provider, agency,
-                quoteservice.service_addon_id, quoteservice.quantity, quoteservice.parameter)
-            return c, c_msg, p, p_msg
-        return None, "Unknown Service", None, "Unknown Service"
+
+        c, c_msg = cls._quoteservice_costs(quoteservice, date_from, date_to, cost_groups, provider)
+        p, p_msg = cls._quoteservice_prices(quoteservice, date_from, date_to, price_groups, agency)
+        return c, c_msg, p, p_msg
 
 
     @classmethod
@@ -2272,137 +2294,14 @@ class BookingServices(object):
     def _find_quoteservice_amounts(
             cls, pax_quantity, quoteservice, date_from, date_to,
             provider, agency, service_pax_variant, manuals=False, quote_pax_variant=None):
-        if service_pax_variant is None:
-            return None, "Service Pax Variant Not Found", \
-                None, "Service Pax Variant Not Found", \
-                None, "Service Pax Variant Not Found", \
-                None, "Service Pax Variant Not Found", \
-                None, "Service Pax Variant Not Found", \
-                None, "Service Pax Variant Not Found"
-        auto_cost, auto_price = True, True
-        if manuals:
-            if service_pax_variant.manual_costs:
-                auto_cost = False
-                if service_pax_variant.cost_single_amount:
-                    c1, c1_msg = service_pax_variant.cost_single_amount, None
-                else:
-                    c1, c1_msg = None, "Missing Manual Cost for Single"
-                if service_pax_variant.cost_double_amount:
-                    c2, c2_msg = service_pax_variant.cost_double_amount, None
-                else:
-                    c2, c2_msg = None, "Missing Manual Cost for Double"
-                if service_pax_variant.cost_triple_amount:
-                    c3, c3_msg = service_pax_variant.cost_triple_amount, None
-                else:
-                    c3, c3_msg = None, "Missing Manual Cost for Triple"
-                if service_pax_variant.manual_prices:
-                    if service_pax_variant.price_single_amount:
-                        p1, p1_msg = service_pax_variant.price_single_amount, None
-                    else:
-                        p1, p1_msg = None, "Missing Manual Price for Single"
-                    if service_pax_variant.price_double_amount:
-                        p2, p2_msg = service_pax_variant.price_double_amount, None
-                    else:
-                        p2, p2_msg = None, "Missing Manual Price for Double"
-                    if service_pax_variant.price_triple_amount:
-                        p3, p3_msg = service_pax_variant.price_triple_amount, None
-                    else:
-                        p3, p3_msg = None, "Missing Manual Price for Triple"
-                    return c1, c1_msg, p1, p1_msg, c2, c2_msg, p2, p2_msg, c3, c3_msg, p3, p3_msg
-            elif service_pax_variant.manual_prices:
-                auto_price = False
-                if service_pax_variant.price_single_amount:
-                    p1, p1_msg = service_pax_variant.price_single_amount, None
-                else:
-                    p1, p1_msg = None, "Missing Manual Price for Single"
-                if service_pax_variant.price_double_amount:
-                    p2, p2_msg = service_pax_variant.price_double_amount, None
-                else:
-                    p2, p2_msg = None, "Missing Manual Price for Double"
-                if service_pax_variant.price_triple_amount:
-                    p3, p3_msg = service_pax_variant.price_triple_amount, None
-                else:
-                    p3, p3_msg = None, "Missing Manual Price for Triple"
-        if auto_cost and auto_price:
-            if quoteservice.service.grouping:
-                # grouping means passing 1,2,3 as pax quantity
-                c1, c1_msg, p1, p1_msg = cls._quoteservice_amounts(
-                    quoteservice, date_from, date_to, ({0:1, 1:0},), ({0:1, 1:0},), provider, agency)
-                c2, c2_msg, p2, p2_msg = cls._quoteservice_amounts(
-                    quoteservice, date_from, date_to, ({0:2, 1:0},), ({0:2, 1:0},), provider, agency)
-                c3, c3_msg, p3, p3_msg = cls._quoteservice_amounts(
-                    quoteservice, date_from, date_to, ({0:3, 1:0},), ({0:3, 1:0},), provider, agency)
 
-                c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._adjust_group_free_amounts(
-                    c1, c2, c3, pax_quantity, service_pax_variant, True)
-                p1, p1_msg, p2, p2_msg, p3, p3_msg = cls._adjust_group_free_amounts(
-                    p1, p2, p3, pax_quantity, service_pax_variant, False)
-            else:
-                # no grouping means passing total pax quantity
-                total_free_cost, total_free_price = cls._find_free_paxes(service_pax_variant)
-                c1, c1_msg, p1, p1_msg = cls._quoteservice_amounts(
-                    quoteservice, date_from, date_to,
-                    ({0:pax_quantity, 1:0},),
-                    ({0:pax_quantity, 1:0},),
-                    provider, agency)
-                if c1:
-                    c1 = cls._round_cost(cls._adjust_cost(c1, pax_quantity, total_free_cost))
-                if p1:
-                    p1 = cls._round_price(cls._adjust_price(p1, pax_quantity, total_free_price))
-                c2, c2_msg, p2, p2_msg = c1, c1_msg, p1, p1_msg
-                c3, c3_msg, p3, p3_msg = c1, c1_msg, p1, p1_msg
-        elif auto_cost:
-            c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._find_quoteservice_costs(
-                pax_quantity, quoteservice, date_from, date_to, provider, service_pax_variant)
-        elif auto_price:
-            p1, p1_msg, p2, p2_msg, p3, p3_msg = cls._find_quoteservice_prices(
-                pax_quantity, quoteservice, date_from, date_to, agency, service_pax_variant)
+        c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._find_quoteservice_costs(
+            pax_quantity, quoteservice, date_from, date_to, provider,
+            service_pax_variant, manuals)
 
-        if not quote_pax_variant:
-            if isinstance(service_pax_variant, QuoteServicePaxVariant):
-                quote_pax_variant = service_pax_variant.quote_pax_variant
-            else:
-                quote_pax_variant = service_pax_variant.quotepackage_pax_variant.quote_pax_variant
-
-        if quote_pax_variant.price_percent and auto_price:
-            if service_pax_variant.manual_costs:
-                if service_pax_variant.cost_single_amount:
-                    p1 = cls._round_price(
-                        cls._apply_percent(
-                            service_pax_variant.cost_single_amount, quote_pax_variant.price_percent))
-                    p1_msg = None
-                else:
-                    p1, p1_msg = None, 'Cost SGL for % is empty'
-                if service_pax_variant.cost_double_amount:
-                    p2 = cls._round_price(
-                        cls._apply_percent(
-                            service_pax_variant.cost_double_amount, quote_pax_variant.price_percent))
-                    p2_msg = None
-                else:
-                    p2, p2_msg = None, 'Cost DBL for % is empty'
-                if service_pax_variant.cost_triple_amount:
-                    p3 = cls._round_price(
-                        cls._apply_percent(
-                            service_pax_variant.cost_triple_amount, quote_pax_variant.price_percent))
-                    p3_msg = None
-                else:
-                    p3, p3_msg = None, 'Cost TPL for % is empty'
-            else:
-                if c1 is None:
-                    p1, p1_msg = None, 'Cost SGL for % is empty'
-                else:
-                    p1 = cls._round_price(cls._apply_percent(c1, quote_pax_variant.price_percent))
-                    p1_msg = None
-                if c2 is None:
-                    p2, p2_msg = None, 'Cost DBL for % is empty'
-                else:
-                    p2 = cls._round_price(cls._apply_percent(c2, quote_pax_variant.price_percent))
-                    p2_msg = None
-                if c3 is None:
-                    p3, p3_msg = None, 'Cost TPL for % is empty'
-                else:
-                    p3 = cls._round_price(cls._apply_percent(c3, quote_pax_variant.price_percent))
-                    p3_msg = None
+        p1, p1_msg, p2, p2_msg, p3, p3_msg = cls._find_quoteservice_prices(
+            pax_quantity, quoteservice, date_from, date_to, agency,
+            service_pax_variant, manuals, quote_pax_variant, c1, c2, c3)
 
         return c1, c1_msg, p1, p1_msg, c2, c2_msg, p2, p2_msg, c3, c3_msg, p3, p3_msg
 
@@ -2420,10 +2319,16 @@ class BookingServices(object):
             if service_pax_variant.manual_costs:
                 if service_pax_variant.cost_single_amount:
                     c1, c1_msg = service_pax_variant.cost_single_amount, None
+                else:
+                    c1, c1_msg = None, "Missing Manual Cost for Single"
                 if service_pax_variant.cost_double_amount:
                     c2, c2_msg = service_pax_variant.cost_double_amount, None
+                else:
+                    c2, c2_msg = None, "Missing Manual Cost for Double"
                 if service_pax_variant.cost_triple_amount:
                     c3, c3_msg = service_pax_variant.cost_triple_amount, None
+                else:
+                    c3, c3_msg = None, "Missing Manual Cost for Triple"
                 return c1, c1_msg, c2, c2_msg, c3, c3_msg
         if quoteservice.service.grouping:
             # grouping means passing 1,2,3 as pax quantity
@@ -2436,11 +2341,10 @@ class BookingServices(object):
 
             c1, c1_msg, c2, c2_msg, c3, c3_msg = cls._adjust_group_free_amounts(
                 c1, c2, c3, pax_quantity, service_pax_variant, True)
-
         else:
             # no grouping means passing total pax quantity
             total_free_cost, total_free_price = cls._find_free_paxes(service_pax_variant)
-                
+
             c1, c1_msg = cls._quoteservice_costs(
                 quoteservice, date_from, date_to,
                 ({0:pax_quantity, 1:0},),
@@ -2454,29 +2358,60 @@ class BookingServices(object):
     @classmethod
     def _find_quoteservice_prices(
             cls, pax_quantity, quoteservice, date_from, date_to,
-            agency, service_pax_variant, manuals=False, quotepackageservice_pax_variant=None):
+            agency, service_pax_variant, manuals, quote_pax_variant,
+            cost_sgl, cost_dbl, cost_tpl):
         if service_pax_variant is None:
             return None, "Service Pax Variant Not Found", \
                 None, "Service Pax Variant Not Found", \
                 None, "Service Pax Variant Not Found"
 
+        if not quote_pax_variant:
+            if isinstance(service_pax_variant, QuoteServicePaxVariant):
+                quote_pax_variant = service_pax_variant.quote_pax_variant
+            else:
+                quote_pax_variant = service_pax_variant.quotepackage_pax_variant.quote_pax_variant
+
+        if quote_pax_variant.price_percent:
+            if cost_sgl is not None:
+                p1 = cls._round_price(
+                    cls._apply_percent(
+                        cost_sgl, quote_pax_variant.price_percent))
+                p1_msg = None
+            else:
+                p1, p1_msg = None, 'Cost SGL for % is empty'
+            if cost_dbl is not None:
+                p2 = cls._round_price(
+                    cls._apply_percent(
+                        cost_dbl, quote_pax_variant.price_percent))
+                p2_msg = None
+            else:
+                p2, p2_msg = None, 'Cost DBL for % is empty'
+            if cost_tpl is not None:
+                p3 = cls._round_price(
+                    cls._apply_percent(
+                        cost_tpl, quote_pax_variant.price_percent))
+                p3_msg = None
+            else:
+                p3, p3_msg = None, 'Cost TPL for % is empty'
+
+            return p1, p1_msg, p2, p2_msg, p3, p3_msg
+
         if manuals:
-            if quotepackageservice_pax_variant and quotepackageservice_pax_variant.manual_prices:
-                if quotepackageservice_pax_variant.price_single_amount:
-                    p1, p1_msg = quotepackageservice_pax_variant.price_single_amount, None
-                if quotepackageservice_pax_variant.price_double_amount:
-                    p2, p2_msg = quotepackageservice_pax_variant.price_double_amount, None
-                if quotepackageservice_pax_variant.price_triple_amount:
-                    p3, p3_msg = quotepackageservice_pax_variant.price_triple_amount, None
-                return p1, p1_msg, p2, p2_msg, p3, p3_msg
             if service_pax_variant.manual_prices:
                 if service_pax_variant.price_single_amount:
                     p1, p1_msg = service_pax_variant.price_single_amount, None
+                else:
+                    p1, p1_msg = None, "Missing Manual Price for Single"
                 if service_pax_variant.price_double_amount:
                     p2, p2_msg = service_pax_variant.price_double_amount, None
+                else:
+                    p2, p2_msg = None, "Missing Manual Price for Double"
                 if service_pax_variant.price_triple_amount:
                     p3, p3_msg = service_pax_variant.price_triple_amount, None
+                else:
+                    p3, p3_msg = None, "Missing Manual Price for Triple"
                 return p1, p1_msg, p2, p2_msg, p3, p3_msg
+
         if quoteservice.service.grouping:
             # grouping means passing 1,2,3 as pax quantity
             p1, p1_msg = cls._quoteservice_prices(
@@ -2499,11 +2434,12 @@ class BookingServices(object):
             if p1:
                 p1 = cls._round_price(cls._adjust_price(p1, pax_quantity, total_free_price))
             p2, p2_msg, p3, p3_msg = p1, p1_msg, p1, p1_msg
+
         return p1, p1_msg, p2, p2_msg, p3, p3_msg
 
 
     @classmethod
-    def _find_quote_package_prices(
+    def _find_quotepackage_catalog_prices(
             cls, pax_quantity, service, date_from, date_to, agency, service_pax_variant):
         total_free_cost, total_free_price = cls._find_free_paxes(service_pax_variant)
         p1, p1_msg = cls.package_price(
