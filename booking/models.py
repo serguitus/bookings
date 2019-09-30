@@ -136,6 +136,7 @@ class Package(Service):
     class Meta:
         verbose_name = 'Package'
         verbose_name_plural = 'Packages'
+        ordering = ['name']
     amounts_type = models.CharField(
         default=AMOUNTS_BY_PAX, max_length=5, choices=PACKAGE_AMOUNTS_TYPES)
     has_pax_range = models.BooleanField(default=False)
