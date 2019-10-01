@@ -289,6 +289,7 @@ class BookingServices(object):
                         dst_service=booking_allotment, src_service=quote_allotment)
                     booking_allotment.room_type = quote_allotment.room_type
                     booking_allotment.board_type = quote_allotment.board_type
+                    booking_allotment.service_addon = quote_allotment.service_addon
 
                     # find service variant
                     service_pax_variant = cls._find_quoteservice_paxvariant_for_bookingservice(
@@ -324,6 +325,7 @@ class BookingServices(object):
                     # schedule_from
                     # pickup
                     booking_transfer.location_to = quote_transfer.location_to
+                    booking_transfer.service_addon = quote_transfer.service_addon
                     # place_to
                     # schedule_to
                     # dropoff
@@ -354,7 +356,7 @@ class BookingServices(object):
                     booking_extra.name = quote_extra.name
                     cls._copy_service_info(
                         dst_service=booking_extra, src_service=quote_extra)
-                    booking_extra.addon = quote_extra.addon
+                    booking_extra.service_addon = quote_extra.service_addon
                     booking_extra.time = quote_extra.time
                     booking_extra.quantity = quote_extra.quantity
                     booking_extra.parameter = quote_extra.parameter
@@ -417,6 +419,7 @@ class BookingServices(object):
                             src_service=quotepackage_allotment)
                         bookingpackage_allotment.room_type = quotepackage_allotment.room_type
                         bookingpackage_allotment.board_type = quotepackage_allotment.board_type
+                        bookingpackage_allotment.service_addon = quotepackage_allotment.service_addon
 
                         if service_pax_variant:
                             cls.setup_bookingservice_amounts_from_quote(
@@ -446,6 +449,7 @@ class BookingServices(object):
                         # schedule_from
                         # pickup
                         bookingpackage_transfer.location_to = quotepackage_transfer.location_to
+                        bookingpackage_transfer.service_addon = quotepackage_transfer.service_addon
                         # place_to
                         # schedule_to
                         # dropoff
@@ -470,7 +474,7 @@ class BookingServices(object):
                         bookingpackage_extra.name = quotepackage_extra.name
                         cls._copy_service_info(
                             dst_service=bookingpackage_extra, src_service=quotepackage_extra)
-                        bookingpackage_extra.addon = quotepackage_extra.addon
+                        bookingpackage_extra.service_addon = quotepackage_extra.service_addon
                         bookingpackage_extra.time = quotepackage_extra.time
                         bookingpackage_extra.quantity = quotepackage_extra.quantity
                         bookingpackage_extra.parameter = quotepackage_extra.parameter
@@ -557,6 +561,7 @@ class BookingServices(object):
                 dst_package=quote_package_allotment, src_package=package_allotment)
             quote_package_allotment.room_type = package_allotment.room_type
             quote_package_allotment.board_type = package_allotment.board_type
+            quote_package_allotment.service_addon = package_allotment.service_addon
             quote_package_allotment.save()
 
         # create bookingtransfer list
@@ -580,6 +585,7 @@ class BookingServices(object):
             # schedule_from
             # pickup
             quote_package_transfer.location_to = package_transfer.location_to
+            quote_package_transfer.service_addon = package_transfer.service_addon
             # place_to
             # schedule_to
             # dropoff
@@ -599,7 +605,7 @@ class BookingServices(object):
             # service_type auto
             cls._copy_package_info(
                 dst_package=quote_package_extra, src_package=package_extra)
-            quote_package_extra.addon = package_extra.addon
+            quote_package_extra.service_addon = package_extra.service_addon
             quote_package_extra.time = package_extra.time
             quote_package_extra.quantity = package_extra.quantity
             quote_package_extra.parameter = package_extra.parameter
@@ -2258,16 +2264,17 @@ class BookingServices(object):
         if isinstance(quoteservice, (QuoteAllotment, QuotePackageAllotment)):
             return ConfigServices.allotment_costs(
                 quoteservice.service, date_from, date_to, cost_groups, provider,
-                quoteservice.board_type, quoteservice.room_type_id)
+                quoteservice.board_type, quoteservice.room_type_id,
+                quoteservice.service_addon_id)
         if isinstance(quoteservice, (QuoteTransfer, QuotePackageTransfer)):
             return ConfigServices.transfer_costs(
                 quoteservice.service, date_from, date_to, cost_groups, provider,
                 quoteservice.location_from_id, quoteservice.location_to_id,
-                quoteservice.quantity)
+                quoteservice.service_addon_id, quoteservice.quantity)
         if isinstance(quoteservice, (QuoteExtra, QuotePackageExtra)):
             return ConfigServices.extra_costs(
                 quoteservice.service, date_from, date_to, cost_groups, provider,
-                quoteservice.addon_id, quoteservice.quantity, quoteservice.parameter)
+                quoteservice.service_addon_id, quoteservice.quantity, quoteservice.parameter)
         return None, "Unknown Service"
 
 
@@ -2277,16 +2284,17 @@ class BookingServices(object):
         if isinstance(quoteservice, (QuoteAllotment, QuotePackageAllotment)):
             return ConfigServices.allotment_prices(
                 quoteservice.service, date_from, date_to, price_groups, agency,
-                quoteservice.board_type, quoteservice.room_type_id)
+                quoteservice.board_type, quoteservice.room_type_id,
+                quoteservice.service_addon_id)
         if isinstance(quoteservice, (QuoteTransfer, QuotePackageTransfer)):
             return ConfigServices.transfer_prices(
                 quoteservice.service, date_from, date_to, price_groups, agency,
                 quoteservice.location_from_id, quoteservice.location_to_id,
-                quoteservice.quantity)
+                quoteservice.service_addon_id, quoteservice.quantity)
         if isinstance(quoteservice, (QuoteExtra, QuotePackageExtra)):
             return ConfigServices.extra_prices(
                 quoteservice.service, date_from, date_to, price_groups, agency,
-                quoteservice.addon_id, quoteservice.quantity, quoteservice.parameter)
+                quoteservice.service_addon_id, quoteservice.quantity, quoteservice.parameter)
         return None, "Unknown Service"
 
 
@@ -4024,6 +4032,7 @@ class BookingServices(object):
                 dst_package=booking_package_allotment, src_package=package_allotment)
             booking_package_allotment.room_type = package_allotment.room_type
             booking_package_allotment.board_type = package_allotment.board_type
+            booking_package_allotment.service_addon = package_allotment.service_addon
             cls.setup_bookingservice_amounts(booking_package_allotment)
             booking_package_allotment.save()
 
@@ -4044,6 +4053,7 @@ class BookingServices(object):
             booking_package_transfer.place_to = package_transfer.place_to
             booking_package_transfer.schedule_to = package_transfer.schedule_to
             booking_package_transfer.dropoff = package_transfer.dropoff
+            booking_package_transfer.service_addon = package_transfer.service_addon
             cls.setup_bookingservice_amounts(booking_package_transfer)
             booking_package_transfer.save()
 
@@ -4054,7 +4064,7 @@ class BookingServices(object):
             booking_package_extra.conf_number = '< confirm number >'
             cls._copy_package_info(
                 dst_package=booking_package_extra, src_package=package_extra)
-            booking_package_extra.addon = package_extra.addon
+            booking_package_extra.service_addon = package_extra.service_addon
             booking_package_extra.time = package_extra.time
             booking_package_extra.quantity = package_extra.quantity
             booking_package_extra.parameter = package_extra.parameter
