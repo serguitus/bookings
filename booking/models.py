@@ -53,6 +53,18 @@ class DateInterval(models.Model):
     datetime_to = models.DateField(blank=True, null=True, verbose_name='Date To')
 
 
+def utility(cost, price):
+    if not price is None and not cost is None:
+        return price - cost
+    return '-'
+
+
+def utility_percent(cost, price):
+    if not price is None and cost:
+        return round(100 * (price / cost - 1), 1).__str__() + '%'
+    return '-'
+
+
 class PaxVariantAmounts(models.Model):
     class Meta:
         abstract = True
@@ -74,6 +86,36 @@ class PaxVariantAmounts(models.Model):
     free_price_single = models.SmallIntegerField(default=0)
     free_price_double = models.SmallIntegerField(default=0)
     free_price_triple = models.SmallIntegerField(default=0)
+
+    @property
+    def utility_single(self):
+        return utility(self.cost_single_amount, self.price_single_amount)
+    utility_single.fget.short_description = 'Util.SGL'
+
+    @property
+    def utility_double(self):
+        return utility(self.cost_double_amount, self.price_double_amount)
+    utility_double.fget.short_description = 'Util.DBL'
+
+    @property
+    def utility_triple(self):
+        return utility(self.cost_triple_amount, self.price_triple_amount)
+    utility_triple.fget.short_description = 'Util.TPL'
+
+    @property
+    def utility_percent_single(self):
+        return utility_percent(self.cost_single_amount, self.price_single_amount)
+    utility_percent_single.fget.short_description = 'Util.SGL %'
+
+    @property
+    def utility_percent_double(self):
+        return utility_percent(self.cost_double_amount, self.price_double_amount)
+    utility_percent_double.fget.short_description = 'Util.DBL %'
+
+    @property
+    def utility_percent_triple(self):
+        return utility_percent(self.cost_triple_amount, self.price_triple_amount)
+    utility_percent_triple.fget.short_description = 'Util.TPL %'
 
 
 class BaseService(models.Model):
@@ -580,6 +622,16 @@ class Booking(models.Model):
         max_length=1000, blank=True, null=True, verbose_name='Private Notes')
     seller = models.ForeignKey(User)
 
+    @property
+    def utility(self):
+        return utility(self.cost_amount, self.price_amount)
+    utility.fget.short_description = 'Util.'
+
+    @property
+    def utility_percent(self):
+        return utility_percent(self.cost_amount, self.price_amount)
+    utility_percent.fget.short_description = 'Util.%'
+
     def internal_reference(self):
         if self.id:
             code = self.id
@@ -663,6 +715,16 @@ class BookService(models.Model):
         max_length=1000, blank=True, null=True, verbose_name='Provider Notes')
     manual_cost = models.BooleanField(default=False)
     manual_price = models.BooleanField(default=False)
+
+    @property
+    def utility(self):
+        return utility(self.cost_amount, self.price_amount)
+    utility.fget.short_description = 'Util.'
+
+    @property
+    def utility_percent(self):
+        return utility_percent(self.cost_amount, self.price_amount)
+    utility_percent.fget.short_description = 'Util.%'
 
 
 class BookingService(BaseService, BookService, DateInterval):

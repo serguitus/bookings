@@ -271,13 +271,13 @@ class QuotePaxVariantInline(CommonStackedInline):
         ('free_cost_single', 'free_price_single'),
         ('free_cost_double', 'free_price_double'),
         ('free_cost_triple', 'free_price_triple'),
-        ('cost_single_amount', 'price_single_amount', 'extra_single_amount'),
-        ('cost_double_amount', 'price_double_amount', 'extra_double_amount'),
-        ('cost_triple_amount', 'price_triple_amount', 'extra_triple_amount')]
+        ('cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single', 'extra_single_amount'),
+        ('cost_double_amount', 'price_double_amount', 'utility_percent_double', 'utility_double', 'extra_double_amount'),
+        ('cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple', 'extra_triple_amount')]
     readonly_fields = [
-        'cost_single_amount', 'price_single_amount',
-        'cost_double_amount', 'price_double_amount',
-        'cost_triple_amount', 'price_triple_amount']
+        'cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single',
+        'cost_double_amount', 'price_double_amount', 'utility_percent_double', 'utility_double',
+        'cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple']
     verbose_name_plural = 'Paxes Variants'
 
 
@@ -290,11 +290,15 @@ class QuoteServicePaxVariantInline(CommonStackedInline):
         ('free_cost_double', 'free_price_double'),
         ('free_cost_triple', 'free_price_triple'),
         ('manual_costs', 'manual_prices'),
-        ('cost_single_amount', 'price_single_amount'),
-        ('cost_double_amount', 'price_double_amount'),
-        ('cost_triple_amount', 'price_triple_amount')]
+        ('cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single'),
+        ('cost_double_amount', 'price_double_amount', 'utility_percent_double', 'utility_double'),
+        ('cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple')]
     verbose_name_plural = 'Paxes Variants'
     can_delete = False
+
+    readonly_fields = [
+        'utility_percent_single', 'utility_percent_double', 'utility_percent_triple',
+        'utility_single', 'utility_double', 'utility_triple']
 
     def has_add_permission(self,request):
         return False
@@ -305,9 +309,9 @@ class QuoteServicePaxVariantInline(CommonStackedInline):
         if not request.user.has_perm("booking.change_amounts"):
             return readonly_fields + [
                 'manual_costs', 'manual_prices',
-                'cost_single_amount', 'price_single_amount',
-                'cost_double_amount', 'price_double_amount',
-                'cost_triple_amount', 'price_triple_amount']
+                'cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single',
+                'cost_double_amount', 'price_double_amount', 'utility_percent_double', 'utility_double',
+                'cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple']
 
         return readonly_fields
 
@@ -464,7 +468,7 @@ class QuoteSiteModel(SiteModel):
             self, request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue=None):
         if 'id' in request.POST and request.POST['id'] and obj:
             BookingServices.clone_quote_services(request.POST['id'], obj)
-        
+
         return super(QuoteSiteModel, self).response_add_saveasnew(
             request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue)
 
@@ -567,13 +571,13 @@ class QuotePackagePaxVariantInline(CommonStackedInline):
         ('free_cost_single', 'free_price_single'),
         ('free_cost_double', 'free_price_double'),
         ('free_cost_triple', 'free_price_triple'),
-        ('cost_single_amount', 'price_single_amount'),
-        ('cost_double_amount', 'price_double_amount'),
-        ('cost_triple_amount', 'price_triple_amount')]
+        ('cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single'),
+        ('cost_double_amount', 'price_double_amount', 'utility_percent_double', 'utility_double'),
+        ('cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple')]
     readonly_fields = [
-        'cost_single_amount', 'price_single_amount',
-        'cost_double_amount', 'price_double_amount',
-        'cost_triple_amount', 'price_triple_amount']
+        'cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single',
+        'cost_double_amount', 'price_double_amount', 'utility_percent_double', 'utility_double',
+        'cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple']
     verbose_name_plural = 'Paxes Variants'
     can_delete = False
 
@@ -657,13 +661,17 @@ class QuotePackageServicePaxVariantInline(CommonStackedInline):
     fields = [
         ('quotepackage_pax_variant'),
         ('manual_costs', 'manual_prices'),
-        ('cost_single_amount', 'price_single_amount'),
-        ('cost_double_amount', 'price_double_amount'),
-        ('cost_triple_amount', 'price_triple_amount')]
+        ('cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single'),
+        ('cost_double_amount', 'price_double_amount', 'utility_percent_double', 'utility_double'),
+        ('cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple')]
     verbose_name_plural = 'Paxes Variants'
     can_delete = False
 
-    def has_add_permission(self,request):
+    readonly_fields = [
+        'utility_percent_single', 'utility_percent_double', 'utility_percent_triple',
+        'utility_single', 'utility_double', 'utility_triple']
+
+    def has_add_permission(self, request):
         return False
 
     def get_readonly_fields(self, request, obj=None):
@@ -672,9 +680,9 @@ class QuotePackageServicePaxVariantInline(CommonStackedInline):
         if not request.user.has_perm("booking.change_amounts"):
             return readonly_fields + [
                 'manual_costs', 'manual_prices',
-                'cost_single_amount', 'price_single_amount',
-                'cost_double_amount', 'price_double_amount',
-                'cost_triple_amount', 'price_triple_amount']
+                'cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single',
+                'cost_double_amount', 'price_double_amount', 'utility_percent_double', 'utility_double',
+                'cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple']
 
         return readonly_fields
 
@@ -794,7 +802,7 @@ class BookingSiteModel(SiteModel):
                 ('name', 'reference', 'status'),
                 ('agency',),
                 ('date_from', 'date_to'),
-                ('is_package_price', 'price_amount', 'cost_amount'),
+                ('is_package_price', 'price_amount', 'cost_amount', 'utility_percent', 'utility'),
                 ('package_sgl_price_amount', 'package_dbl_price_amount',
                  'package_tpl_price_amount'), 'id', 'version',
                  'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body', 'submit_action')
@@ -805,14 +813,14 @@ class BookingSiteModel(SiteModel):
     list_display = ('name', 'internal_reference', 'agency',
                     'reference', 'date_from',
                     'date_to', 'status', 'cost_amount',
-                    'price_amount', 'has_notes')
+                    'price_amount', 'utility_percent', 'utility', 'has_notes')
     top_filters = (('name', 'Booking Name'), 'reference', 'agency',
                    ('date_from', DateTopFilter), 'rooming_list__pax_name',
                    (InternalReferenceTopFilter),
                    (CancelledTopFilter), 'seller')
     ordering = ['date_from', 'reference']
     readonly_fields = ('date_from', 'date_to', 'status',
-                       'cost_amount', 'price_amount',
+                       'cost_amount', 'price_amount', 'utility_percent', 'utility',
                        'internal_reference')
     details_template = 'booking/booking_details.html'
     inlines = [BookingPaxInline]
@@ -972,7 +980,7 @@ class BookingSiteModel(SiteModel):
         super(BookingSiteModel, self).response_change(request, booking)
 
         if request.method == 'POST' and 'service_selection' in request.POST:
-            selected_bookingservices = list();
+            selected_bookingservices = list()
             BookingServices.update_bookingservices_amounts(selected_bookingservices)
             booking = selected_bookingservices[0].booking
             super(BookingSiteModel, self).response_change(request, booking)
@@ -1054,13 +1062,15 @@ class BookingServiceSiteModel(SiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
 
+    readonly_fields = ['utility_percent', 'utility']
+
     fieldsets = (
         (None, {
             'fields': (
                 'booking', ('name', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'service_addon'),
                 ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount')
+                'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -1068,7 +1078,7 @@ class BookingServiceSiteModel(SiteModel):
 
     list_display = ('booking', 'name', 'service_addon', 'datetime_from',
                     'datetime_to', 'cost_amount', 'manual_cost',
-                    'price_amount', 'manual_price', 'status',)
+                    'price_amount', 'manual_price', 'utility_percent', 'utility', 'status',)
     top_filters = (('booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking__reference', 'conf_number',
@@ -1317,6 +1327,8 @@ class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
 
+    readonly_fields = ['utility_percent', 'utility']
+
     fieldsets = (
         (None, {
             'fields': (
@@ -1324,7 +1336,7 @@ class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):
                 ('datetime_from', 'nights', 'datetime_to'),
                 ('room_type', 'board_type', 'service_addon'),
                 ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'id', 'version',
+                'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility', 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
@@ -1333,7 +1345,7 @@ class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):
 
     list_display = ('booking', 'name', 'service_addon', 'datetime_from',
                     'datetime_to', 'cost_amount', 'manual_cost',
-                    'price_amount', 'manual_price', 'status')
+                    'price_amount', 'manual_price', 'utility_percent', 'utility', 'status')
     top_filters = (('booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking__reference', 'conf_number',
@@ -1351,6 +1363,8 @@ class BookingPackageAllotmentSiteModel(BookingPackageServiceSiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
 
+    readonly_fields = ['utility_percent', 'utility']
+
     fieldsets = (
         (None, {
             'fields': (
@@ -1358,14 +1372,15 @@ class BookingPackageAllotmentSiteModel(BookingPackageServiceSiteModel):
                 ('datetime_from', 'datetime_to'),
                 ('room_type', 'board_type', 'service_addon'),
                 ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'id', 'version',
+                'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility', 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
     )
     list_display = ('booking_package', 'name', 'service_addon', 'datetime_from',
-                    'datetime_to', 'status',)
+                    'datetime_to', 'cost_amount', 'manual_cost',
+                    'price_amount', 'manual_price', 'utility_percent', 'utility', 'status',)
     top_filters = (('booking_package__booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking_package__booking__reference', 'conf_number',
@@ -1381,6 +1396,8 @@ class BookingTransferSiteModel(BaseBookingServiceSiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
 
+    readonly_fields = ['utility_percent', 'utility']
+
     fieldsets = (
         (None, {
             'fields': (
@@ -1392,7 +1409,7 @@ class BookingTransferSiteModel(BaseBookingServiceSiteModel):
                 ('dropoff', 'schedule_to', 'schedule_time_to'),
                 'service_addon',
                 ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'id', 'version',
+                'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility', 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
@@ -1400,7 +1417,7 @@ class BookingTransferSiteModel(BaseBookingServiceSiteModel):
     )
     list_display = ('booking', 'name', 'service_addon',
                     'datetime_from', 'time', 'cost_amount', 'manual_cost',
-                    'price_amount', 'manual_price', 'status')
+                    'price_amount', 'manual_price', 'utility_percent', 'utility', 'status')
     top_filters = (
         ('booking__name', 'Booking'),
         ('name', 'Service'),
@@ -1418,6 +1435,8 @@ class BookingPackageTransferSiteModel(BookingPackageServiceSiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
 
+    readonly_fields = ['utility_percent', 'utility']
+
     fieldsets = (
         (None, {
             'fields': (
@@ -1429,13 +1448,14 @@ class BookingPackageTransferSiteModel(BookingPackageServiceSiteModel):
                 ('dropoff', 'schedule_to', 'schedule_time_to'),
                 'service_addon',
                 ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'id', 'version',
+                'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility', 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
     )
-    list_display = ('booking_package', 'name', 'service_addon', 'datetime_from', 'time', 'status')
+    list_display = ('booking_package', 'name', 'service_addon', 'datetime_from', 'time',
+                'cost_amount', 'manual_cost', 'price_amount', 'manual_price', 'utility_percent', 'utility', 'status')
     top_filters = (
         ('booking_package__booking__name', 'Booking'),
         ('name', 'Service'),
@@ -1452,6 +1472,8 @@ class BookingExtraSiteModel(BaseBookingServiceSiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
 
+    readonly_fields = ['utility_percent', 'utility']
+
     fieldsets = (
         (None, {
             'fields': (
@@ -1460,7 +1482,7 @@ class BookingExtraSiteModel(BaseBookingServiceSiteModel):
                 'service_addon',
                 ('quantity', 'parameter'),
                 ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'id', 'version',
+                'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility', 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
@@ -1468,7 +1490,8 @@ class BookingExtraSiteModel(BaseBookingServiceSiteModel):
     )
     list_display = ('booking', 'name', 'service_addon', 'quantity', 'parameter',
                     'datetime_from', 'datetime_to', 'time',
-                    'cost_amount', 'manual_cost', 'price_amount', 'manual_price', 'status',)
+                    'cost_amount', 'manual_cost', 'price_amount', 'manual_price', 'utility_percent', 'utility',
+                    'status',)
     top_filters = ('booking__name', 'service', 'booking__reference',
                    ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'booking__reference', 'service__name',)
@@ -1483,6 +1506,8 @@ class BookingPackageExtraSiteModel(BookingPackageServiceSiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
 
+    readonly_fields = ['utility_percent', 'utility']
+
     fieldsets = (
         (None, {
             'fields': (
@@ -1491,14 +1516,16 @@ class BookingPackageExtraSiteModel(BookingPackageServiceSiteModel):
                 'service_addon',
                 ('quantity', 'parameter'),
                 ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'id', 'version',
+                'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility', 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
     )
     list_display = ('booking_package', 'name', 'service_addon', 'quantity', 'parameter',
-                    'datetime_from', 'datetime_to', 'time', 'status',)
+                    'datetime_from', 'datetime_to', 'time',
+                    'cost_amount', 'manual_cost', 'price_amount', 'manual_price', 'utility_percent', 'utility',
+                    'status',)
     top_filters = (
         ('booking_package__booking__name', 'Booking'),
         ('name', 'Service'),
@@ -1515,6 +1542,8 @@ class BookingPackageSiteModel(BaseBookingServiceSiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
 
+    readonly_fields = ['status', 'utility_percent', 'utility'] 
+
     fieldsets = (
         (None, {
             'fields': (
@@ -1522,17 +1551,17 @@ class BookingPackageSiteModel(BaseBookingServiceSiteModel):
                 ('datetime_from', 'datetime_to', 'time'),
                 ('provider'), 'cost_amount',
                 ('manual_price', 'price_by_package_catalogue'),
-                'price_amount', 'id', 'version',
+                'price_amount', 'utility_percent', 'utility', 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
     )
-    list_display = ['booking', 'name', 'datetime_from', 'datetime_to', 'status']
+    list_display = ['booking', 'name', 'datetime_from', 'datetime_to',
+            'cost_amount', 'price_amount', 'utility_percent', 'utility', 'status']
     top_filters = ['booking__name', 'service', 'booking__reference',
                    ('datetime_from', DateTopFilter), 'status']
     ordering = ['datetime_from', 'booking__reference', 'service__name']
-    readonly_fields = ['status']
     details_template = 'booking/bookingpackage_details.html'
     inlines = [BookingServicePaxInline]
     form = BookingPackageForm

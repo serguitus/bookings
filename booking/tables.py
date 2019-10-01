@@ -85,7 +85,18 @@ class QuotePaxVariantTable(tables.Table):
             'pax_quantity',
             'cost_single_amount', 'cost_double_amount', 'cost_triple_amount',
             'price_percent',
-            'price_single_amount', 'price_double_amount', 'price_triple_amount']
+            'price_single_amount', 'utility_percent_single', 'utility_single',
+            'price_double_amount', 'utility_percent_double', 'utility_double',
+            'price_triple_amount', 'utility_percent_triple', 'utility_triple']
+
+    def __init__(self, *args, **kwargs):
+        self.base_columns['utility_percent_single'].verbose_name='Util.SGL %'
+        self.base_columns['utility_single'].verbose_name='Util.SGL'
+        self.base_columns['utility_percent_double'].verbose_name='Util.DBL %'
+        self.base_columns['utility_double'].verbose_name='Util.DBL'
+        self.base_columns['utility_percent_triple'].verbose_name='Util.TPL %'
+        self.base_columns['utility_triple'].verbose_name='Util.TPL'
+        super(QuotePaxVariantTable, self).__init__(*args, **kwargs)
 
 
 class BookingTable(tables.Table):
@@ -93,7 +104,12 @@ class BookingTable(tables.Table):
         model = Booking
         template_name = 'django_tables2/bootstrap.html'
         fields = ['id', 'reference', 'agency', 'date_from',
-                  'date_to', 'cost_amount', 'price_amount']
+                  'date_to', 'cost_amount', 'price_amount', 'utility_percent', 'utility']
+
+    def __init__(self, *args, **kwargs):
+        self.base_columns['utility_percent'].verbose_name='Util.%'
+        self.base_columns['utility'].verbose_name='Util.'
+        super(BookingTable, self).__init__(*args, **kwargs)
 
     def render_reference(self, value, record):
         return format_html(
@@ -109,7 +125,7 @@ class BookingServiceTable(tables.Table):
         template_name = 'booking/bookingservice_list.html'
         fields = ['name', 'service_location', 'datetime_from',
                   'datetime_to', 'description',
-                  'cost_amount', 'price_amount',
+                  'cost_amount', 'price_amount', 'utility_percent', 'utility',
                   'provider', 'conf_number', 'service_type', 'status']
         attrs = {'class': 'table table-hover table-condensed'}
         row_attrs = {
@@ -118,6 +134,8 @@ class BookingServiceTable(tables.Table):
 
     def __init__(self, *args, **kwargs):
         # self.base_columns['service_type'].verbose_name='Request emails'
+        self.base_columns['utility_percent'].verbose_name='Util.%'
+        self.base_columns['utility'].verbose_name='Util.'
         super(BookingServiceTable, self).__init__(*args, **kwargs)
 
     def render_name(self, value, record):
@@ -175,7 +193,15 @@ class BookingPackageServiceTable(tables.Table):
     class Meta:
         model = BookingPackageService
         template_name = 'booking/bookingpackageservice_list.html'
-        fields = ['name', 'datetime_from', 'datetime_to', 'cost_amount', 'price_amount', 'provider', 'service_type']
+        fields = [
+            'name', 'datetime_from', 'datetime_to',
+            'cost_amount', 'price_amount', 'utility_percent', 'utility',
+            'provider', 'service_type']
+
+    def __init__(self, *args, **kwargs):
+        self.base_columns['utility_percent'].verbose_name='Util.%'
+        self.base_columns['utility'].verbose_name='Util.'
+        super(BookingPackageServiceTable, self).__init__(*args, **kwargs)
 
     def render_name(self, value, record):
         obj_url = reverse(
