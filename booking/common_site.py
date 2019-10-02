@@ -43,6 +43,7 @@ from finance.models import Office
 
 from booking.constants import SERVICE_STATUS_PENDING
 from booking.forms import (
+    PackageForm,
     PackageAllotmentInlineForm, PackageTransferInlineForm,
     PackageExtraInlineForm, PackageAllotmentForm,
     PackageTransferForm, PackageExtraForm,
@@ -176,7 +177,7 @@ class PackageSiteModel(SiteModel):
     fields = (
         ('name', 'service_category', 'enabled'), 
         ('amounts_type', 'pax_range', 'has_pax_range'),
-        'time',
+        'time', 'description'
     )
     list_display = (
         'name', 'service_category', 'amounts_type', 'pax_range', 'has_pax_range', 'time', 'enabled')
@@ -184,6 +185,7 @@ class PackageSiteModel(SiteModel):
     top_filters = ('name', 'amounts_type', 'pax_range', 'has_pax_range', 'enabled')
     ordering = ('enabled', 'name',)
     details_template = 'booking/package_details.html'
+    form = PackageForm
     inlines = [
         PackageAllotmentInLine, PackageTransferInLine, PackageExtraInLine]
 

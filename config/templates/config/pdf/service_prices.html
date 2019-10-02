@@ -227,10 +227,16 @@
         {% if service.pax_range %}
             <td colspan="5" class="bold-top-line">
                 <b>Service:</b> {{ service.name }}
+                {% if service.description %}
+                    <br>{{ service.description }}
+                {% endif %}
             </td>
         {% else %}
             <td colspan="4" class="bold-top-line">
                 <b>Service:</b> {{ service.name }}
+                {% if service.description %}
+                    <br>{{ service.description }}
+                {% endif %}
             </td>
         {% endif %}
     </tr>
