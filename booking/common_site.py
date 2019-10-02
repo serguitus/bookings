@@ -438,14 +438,16 @@ class QuoteSiteModel(SiteModel):
             quote_id = request.POST.get('quote_id', None)
             if quote_id:
                 formset = PaxFormSet(request.POST)
-                formset.is_valid()
-                booking, msg = BookingServices.build_booking_from_quote(
-                    quote_id, formset.cleaned_data, request.user)
-                if booking:
-                    return redirect(reverse('common:booking_booking_change',
-                                            args=[booking.id]))
-                else:
-                    self.message_user(request, msg, messages.ERROR)
+                if formset.is_valid():
+                    booking, msg = BookingServices.build_booking_from_quote(
+                        quote_id, formset.cleaned_data, request.user)
+                    if booking:
+                        return redirect(reverse('common:booking_booking_change',
+                                                args=[booking.id]))
+                    else:
+                        self.message_user(request, msg, messages.ERROR)
+                else: # Error de validacion del form. Repeat
+                    self.message_user(request, 'Pax info missing', messages.ERROR)
             else:
                 self.message_user(request, 'Quote Missing', messages.ERROR)
 
