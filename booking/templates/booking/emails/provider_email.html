@@ -1,4 +1,4 @@
-{% load booking_tags %}Hola {{ provider }}:
+{% load booking_tags %}Hola {% if provider.alias %}{{ provider.alias }}{% else %}{{ provider }}{% endif %}:
 
 Por favor Confirmar:
 {{ booking.name }} {% if booking.reference %}({{ booking.reference }}){% endif %}
@@ -6,4 +6,4 @@ Por favor Confirmar:
 Servicios
 ----------------------------------
 {% for booking_service in services %}{% render_service booking_service %}{% endfor %}Gracias
-{{ user.get_short_name }}
+{% if provider.is_private %}{{ user.get_short_name }}{% else%}Liber{% endif %}

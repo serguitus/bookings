@@ -962,8 +962,6 @@ class Provider(models.Model):
     is_private = models.BooleanField(default=False)
 
     def __unicode__(self):
-        if self.is_private:
-            return '%s (private)' % self.name
         return self.name
 
     def __str__(self):
