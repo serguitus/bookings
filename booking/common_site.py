@@ -828,6 +828,7 @@ class BookingSiteModel(SiteModel):
     add_form_template = 'booking/booking_change_form.html'
     change_form_template = 'booking/booking_change_form.html'
     totalsum_list = ['cost_amount', 'price_amount']
+    save_as = True
 
     def get_urls(self):
 
@@ -987,10 +988,16 @@ class BookingSiteModel(SiteModel):
         # show selection view
 
     def save_related(self, request, form, formsets, change):
-        with transaction.atomic(savepoint=False):
-            super(BookingSiteModel, self).save_related(request, form, formsets, change)
-            obj = self.save_form(request, form, change)
-            BookingServices.update_booking_amounts(obj)
+        if "_saveasnew" in request.POST:
+            for formset in formsets:
+                formset.new_objects = []
+                formset.changed_objects = []
+                formset.deleted_objects = []
+        else:
+            with transaction.atomic(savepoint=False):
+                super(BookingSiteModel, self).save_related(request, form, formsets, change)
+                obj = self.save_form(request, form, change)
+                BookingServices.update_booking_amounts(obj)
 
     @csrf_protect_m
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
@@ -1051,6 +1058,15 @@ class BookingSiteModel(SiteModel):
         result = pisa.pisaDocument(StringIO(html), dest=pdf,
                                 link_callback=self._fetch_resources)
         return result, pdf
+
+    def response_add_saveasnew(
+            self, request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue=None):
+        if 'id' in request.POST and request.POST['id'] and obj:
+            BookingServices.clone_booking_services(request.POST['id'], obj)
+
+        return super(BookingSiteModel, self).response_add_saveasnew(
+            request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue)
+
 
 def _build_mail_address_list(addresses):
     mail_address_list = addresses.replace(';', ' ').replace(',', ' ').split()
