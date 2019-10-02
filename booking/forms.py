@@ -4,6 +4,7 @@ from dal import autocomplete
 from django.forms import widgets
 
 from booking.models import (
+    Package,
     PackageAllotment, PackageTransfer, PackageExtra,
     PackageProvider, AgencyPackageService,
     Quote, QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
@@ -766,3 +767,11 @@ class VouchersConfigForm(MailForm):
     # id = forms.MultiValueField()
     # here comes also some inputs to select logo and other details
     office = forms.ModelChoiceField(queryset=Office.objects.all())
+
+class PackageForm(forms.ModelForm):
+    class Meta:
+        model = Package
+        fields = ('__all__')
+        widgets = {
+            'description': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
+        }
