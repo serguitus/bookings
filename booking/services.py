@@ -2325,15 +2325,15 @@ class BookingServices(object):
 
         if manuals:
             if service_pax_variant.manual_costs:
-                if service_pax_variant.cost_single_amount:
+                if service_pax_variant.cost_single_amount is not None:
                     c1, c1_msg = service_pax_variant.cost_single_amount, None
                 else:
                     c1, c1_msg = None, "Missing Manual Cost for Single"
-                if service_pax_variant.cost_double_amount:
+                if service_pax_variant.cost_double_amount is not None:
                     c2, c2_msg = service_pax_variant.cost_double_amount, None
                 else:
                     c2, c2_msg = None, "Missing Manual Cost for Double"
-                if service_pax_variant.cost_triple_amount:
+                if service_pax_variant.cost_triple_amount is not None:
                     c3, c3_msg = service_pax_variant.cost_triple_amount, None
                 else:
                     c3, c3_msg = None, "Missing Manual Cost for Triple"
@@ -2406,15 +2406,15 @@ class BookingServices(object):
 
         if manuals:
             if service_pax_variant.manual_prices:
-                if service_pax_variant.price_single_amount:
+                if service_pax_variant.price_single_amount is not None:
                     p1, p1_msg = service_pax_variant.price_single_amount, None
                 else:
                     p1, p1_msg = None, "Missing Manual Price for Single"
-                if service_pax_variant.price_double_amount:
+                if service_pax_variant.price_double_amount is not None:
                     p2, p2_msg = service_pax_variant.price_double_amount, None
                 else:
                     p2, p2_msg = None, "Missing Manual Price for Double"
-                if service_pax_variant.price_triple_amount:
+                if service_pax_variant.price_triple_amount is not None:
                     p3, p3_msg = service_pax_variant.price_triple_amount, None
                 else:
                     p3, p3_msg = None, "Missing Manual Price for Triple"
@@ -2452,7 +2452,7 @@ class BookingServices(object):
         total_free_cost, total_free_price = cls._find_free_paxes(service_pax_variant)
         p1, p1_msg = cls.package_price(
             service, date_from, date_to, ({0:pax_quantity, 1:0},), agency)
-        if p1:
+        if p1 is not None:
             p1 = cls._round_price(cls._adjust_price(p1, pax_quantity, total_free_price))
         p2, p2_msg, p3, p3_msg = p1, p1_msg, p1, p1_msg
         return p1, p1_msg, p2, p2_msg, p3, p3_msg
@@ -2820,10 +2820,11 @@ class BookingServices(object):
                 c1, c1_msg = pax_variant.cost_single_amount, None
                 c2, c2_msg = pax_variant.cost_double_amount, None
                 c3, c3_msg = pax_variant.cost_triple_amount, None
-            if hasattr(pax_variant, 'manual_prices') and pax_variant.manual_prices:
-                p1, p1_msg = pax_variant.price_single_amount, None
-                p2, p2_msg = pax_variant.price_double_amount, None
-                p3, p3_msg = pax_variant.price_triple_amount, None
+            if not hasattr(quote_pax_variant, 'price_percent') or not quote_pax_variant.price_percent:
+                if hasattr(pax_variant, 'manual_prices') and pax_variant.manual_prices:
+                    p1, p1_msg = pax_variant.price_single_amount, None
+                    p2, p2_msg = pax_variant.price_double_amount, None
+                    p3, p3_msg = pax_variant.price_triple_amount, None
 
         return c1, c1_msg, p1, p1_msg, c2, c2_msg, p2, p2_msg, c3, c3_msg, p3, p3_msg
 
@@ -3080,15 +3081,14 @@ class BookingServices(object):
         if pax_variant.manual_costs is None:
             pax_variant.manual_costs = False
         if pax_variant.manual_prices is None:
-           pax_variant.manual_prices = False
-
-        if pax_variant.manual_costs and pax_variant.manual_prices:
-            return False
+            pax_variant.manual_prices = False
 
         if isinstance(pax_variant, QuoteServicePaxVariant):
             service = pax_variant.quote_service
+            quote_pax_variant = pax_variant.quote_pax_variant
         elif isinstance(pax_variant, QuotePackageServicePaxVariant):
             service = pax_variant.quotepackage_service
+            quote_pax_variant = pax_variant.quotepackage_pax_variant.quote_pax_variant
         else:
             return False
 
@@ -3115,7 +3115,7 @@ class BookingServices(object):
                 modified = True
                 pax_variant.cost_triple_amount = c3
 
-        if not pax_variant.manual_prices:
+        if quote_pax_variant.price_percent or not pax_variant.manual_prices:
 
             if not cls._equals_amounts(pax_variant.price_single_amount, p1):
                 modified = True
