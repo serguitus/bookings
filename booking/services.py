@@ -2380,6 +2380,11 @@ class BookingServices(object):
                 quote_pax_variant = service_pax_variant.quotepackage_pax_variant.quote_pax_variant
 
         if quote_pax_variant.price_percent:
+            if service_pax_variant.manual_costs:
+                cost_sgl = service_pax_variant.cost_single_amount
+                cost_dbl = service_pax_variant.cost_double_amount
+                cost_tpl = service_pax_variant.cost_triple_amount
+
             if cost_sgl is not None:
                 p1 = cls._round_price(
                     cls._apply_percent(
