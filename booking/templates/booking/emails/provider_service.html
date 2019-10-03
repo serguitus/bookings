@@ -1,16 +1,18 @@
-{% load booking_tags i18n %}{% language 'es' %}{% if bs.service_type == 'T' %}{# This is a Transfer #}{{ bs.service}} {{ bs.location_from }} -> {{ bs.location_to }}
-    Fecha: {{ bs.datetime_from|date:"d-b-Y" }}   Hora: {{ bs.time|time:"H:i" }} hrs
-    Pick Up: {% if bs.pickup %}{{ bs.pickup.name }}{% if bs.pickup.address %} ({{ bs.pickup.address }}){% endif %}{% endif %}
-    Drop Off: {% if bs.dropoff %}{{ bs.dropoff.name }}{% if bs.pickup.address %} ({{ bs.dropoff.address }}){% endif %}{% endif %}
-{% elif bs.service_type == 'A' %}{# This is an Accomodation #}{{ bs.name }}
+{% load booking_tags i18n %}{% language 'es' %}{% if bs.service_type == 'T' %}{# This is a Transfer #}{{ bs.name }} [{{ bs.description }}]
+    Fecha: {{ bs.datetime_from|date:"d-b-Y" }}
+    {% if bs.time %}Hora: {{ bs.time|time:"H:i" }} hrs{% endif %}{% if bs.schedule_from or bs.schedule_to %}
+    Vuelo: {% if bs.schedule_from %}{{ bs.schedule_from }}@{{ bs.schedule_time_from }}{% else %}{{ bs.schedule_to }}@{{ bs.schedule_time_to }}{% endif %}{% endif %}
+    Pick Up: {% if bs.pickup %}{{ bs.pickup.name }}{% if bs.pickup.address %} ({{ bs.pickup.address }}){% endif %}{% elif bs.place_from %}{{ bs.location_from }}({{ bs.place_from }}){% endif %}
+    Drop Off: {% if bs.dropoff %}{{ bs.dropoff.name }}{% if bs.pickup.address %} ({{ bs.dropoff.address }}){% endif %}{% elif bs.place_to %}{{ bs.location_to }} ({{ bs.place_to }}){% endif %}{% elif bs.service_type == 'A' %}{# This is an Accomodation #}{{ bs.name }}
     {% get_distribution bs %}
     Check In: {{ bs.datetime_from|date:"d-b-Y" }}
-    Check Out {{ bs.datetime_to|date:"d-b-Y" }}
-{% elif bs.service_type == 'E' %}{# This is an Extra #}{{ bs.service }}
+    Check Out {{ bs.datetime_to|date:"d-b-Y" }}{% elif bs.service_type == 'E' %}{# This is an Extra #}{{ bs.service }}
+    Fecha: {{ bs.datetime_from|date:"d-b-Y" }}   Hora: {{ bs.time|time:"H:i" }} hrs{% elif bs.service_type == 'P' %}{# This is a Package #}{{ bs.service }}
     Fecha: {{ bs.datetime_from|date:"d-b-Y" }}   Hora: {{ bs.time|time:"H:i" }} hrs
-{% elif bs.service_type == 'P' %}{# This is a Package #}{{ bs.service }}
-    Fecha: {{ bs.datetime_from|date:"d-b-Y" }}   Hora: {{ bs.time|time:"H:i" }} hrs
-{% endif %}Rooming:
-{% for pax in bs.rooming_list.all %}{{ pax.booking_pax.pax_name }}({{ pax.group }})
+{% endif %}{% if bs.provider_notes %}
+    NOTA: {{ bs.provider_notes }}
+{% endif %}
+Rooming:
+{% for pax in bs.rooming_list.all %}[{{ pax.group }}] {{ pax.booking_pax.pax_name }}
 {% endfor %}
 ----------------------------------{% endlanguage %}
