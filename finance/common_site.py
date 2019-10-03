@@ -582,7 +582,7 @@ class ProviderSiteModel(SiteModel):
     model_order = 4110
     menu_label = MENU_LABEL_FINANCE_ADVANCED
     menu_group = 'Providers'
-    list_display = ('name', 'email', 'phone',
+    list_display = ('name', 'email', 'phone', 'is_private',
                     'currency', 'enabled')
     top_filters = ['name', 'email', 'currency', 'enabled']
     ordering = ['enabled', 'currency', 'name']
