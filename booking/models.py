@@ -12,7 +12,7 @@ from django.contrib.auth.models import User
 from accounting.constants import CURRENCIES, CURRENCY_CUC
 
 from booking.constants import (
-    SERVICE_CATEGORY_PACKAGE, SERVICE_CATEGORIES,
+    SERVICE_CATEGORY_PACKAGE, SERVICE_CATEGORIES, BASE_CATEGORIES,
     QUOTE_STATUS_LIST, QUOTE_STATUS_DRAFT,
     BOOKING_STATUS_LIST, BOOKING_STATUS_PENDING,
     SERVICE_STATUS_LIST, SERVICE_STATUS_PENDING,
@@ -33,8 +33,9 @@ from config.models import (
     AmountDetail, AgencyCatalogue, ProviderCatalogue,
 )
 
-from finance.models import (Office, Agency, AgencyInvoice,
-                            Provider, ProviderInvoice)
+from finance.models import (
+    Office, Agency, AgencyInvoice,
+    Provider, ProviderInvoice, FinantialDocument, AccountingDocument)
 
 
 class RelativeInterval(models.Model):
@@ -696,25 +697,28 @@ class BookingPax(models.Model):
             return '%s' % (self.pax_name)
 
 
-class BookService(models.Model):
+class BaseBookingService(BaseService):
     """
-    Booking Service
+    Base Booking Service
     """
     class Meta:
-        abstract = True
+        # abstract = True
+        verbose_name = 'Base Booking Service'
+        verbose_name_plural = 'Base Bookings Services'
+        ordering = ['provider', 'service_type']
     # This holds the confirmation number when it exists
     conf_number = models.CharField(max_length=20, blank=True, null=True)
     cost_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     cost_comments = models.CharField(max_length=1000, blank=True, null=True)
     price_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
-    provider_invoice = models.ForeignKey(ProviderInvoice, blank=True, null=True)
     p_notes = models.CharField(
         max_length=1000, blank=True, null=True, verbose_name='Private Notes')
     provider_notes = models.CharField(
         max_length=1000, blank=True, null=True, verbose_name='Provider Notes')
     manual_cost = models.BooleanField(default=False)
     manual_price = models.BooleanField(default=False)
+    base_category = models.CharField(max_length=5, choices=BASE_CATEGORIES, blank=True, null=True)
 
     @property
     def utility(self):
@@ -727,7 +731,38 @@ class BookService(models.Model):
     utility_percent.fget.short_description = 'Util.%'
 
 
-class BookingService(BaseService, BookService, DateInterval):
+class BookService(BaseService):
+    """
+    Base Booking Service
+    """
+    class Meta:
+        abstract = True
+    # This holds the confirmation number when it exists
+    conf_number = models.CharField(max_length=20, blank=True, null=True)
+    cost_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    cost_comments = models.CharField(max_length=1000, blank=True, null=True)
+    price_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    price_comments = models.CharField(max_length=1000, blank=True, null=True)
+    p_notes = models.CharField(
+        max_length=1000, blank=True, null=True, verbose_name='Private Notes')
+    provider_notes = models.CharField(
+        max_length=1000, blank=True, null=True, verbose_name='Provider Notes')
+    manual_cost = models.BooleanField(default=False)
+    manual_price = models.BooleanField(default=False)
+    base_service = models.ForeignKey(BaseBookingService, blank=True, null=True)
+
+    @property
+    def utility(self):
+        return utility(self.cost_amount, self.price_amount)
+    utility.fget.short_description = 'Util.'
+
+    @property
+    def utility_percent(self):
+        return utility_percent(self.cost_amount, self.price_amount)
+    utility_percent.fget.short_description = 'Util.%'
+
+
+class BookingService(BookService, DateInterval):
     """
     Booking Service
     """
@@ -1039,7 +1074,7 @@ class BookingPackage(BookingService):
         return '%s : %s' % (self.name, self.booking)
 
 
-class BookingPackageService(BaseService, BookService, DateInterval):
+class BookingPackageService(BookService, DateInterval):
     """
     Booking Package Service
     """
@@ -1247,3 +1282,30 @@ class PackageProvider(models.Model):
 
     def __str__(self):
         return 'Package Prov. - %s : %s' % (self.service, self.provider)
+
+
+class ProviderBookingPayment(FinantialDocument, AccountingDocument):
+    """
+    ProviderBookingPayment
+    """
+    class Meta:
+        verbose_name = 'Provider Booking Payment'
+        verbose_name_plural = 'Providers Bookings Payments'
+    provider = models.ForeignKey(Provider)
+
+    def __str__(self):
+        return 'Prov. - %s : %s' % (self.provider, self.amount)
+
+class ProviderBookingPaymentService(models.Model):
+    """
+    ProviderBookingPaymentService
+    """
+    class Meta:
+        verbose_name = 'Provider Booking Payment'
+        verbose_name_plural = 'Providers Bookings Payments'
+    provider_payment = models.ForeignKey(ProviderBookingPayment)
+    # TODO change BookingService to BookService when BookService not longer abstract
+    provider_service = models.ForeignKey(BaseBookingService)
+
+    def __str__(self):
+        return '%s : %s' % (self.provider_payment, self.provider_service)
