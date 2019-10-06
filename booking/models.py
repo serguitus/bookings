@@ -137,7 +137,7 @@ class BaseService(models.Model):
     provider = models.ForeignKey(Provider, blank=True, null=True)
 
 
-class BaseAllotment(BaseService):
+class BaseAllotment(models.Model):
     """
     Base Service Allotment
     """
@@ -148,7 +148,7 @@ class BaseAllotment(BaseService):
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
 
 
-class BaseTransfer(BaseService):
+class BaseTransfer(models.Model):
     """
     Base Service Transfer
     """
@@ -159,7 +159,7 @@ class BaseTransfer(BaseService):
     quantity = models.SmallIntegerField(default=1)
 
 
-class BaseExtra(BaseService):
+class BaseExtra(models.Model):
     """
     Base Service Extra
     """
@@ -731,38 +731,7 @@ class BaseBookingService(BaseService):
     utility_percent.fget.short_description = 'Util.%'
 
 
-class BookService(BaseService):
-    """
-    Base Booking Service
-    """
-    class Meta:
-        abstract = True
-    # This holds the confirmation number when it exists
-    conf_number = models.CharField(max_length=20, blank=True, null=True)
-    cost_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    cost_comments = models.CharField(max_length=1000, blank=True, null=True)
-    price_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    price_comments = models.CharField(max_length=1000, blank=True, null=True)
-    p_notes = models.CharField(
-        max_length=1000, blank=True, null=True, verbose_name='Private Notes')
-    provider_notes = models.CharField(
-        max_length=1000, blank=True, null=True, verbose_name='Provider Notes')
-    manual_cost = models.BooleanField(default=False)
-    manual_price = models.BooleanField(default=False)
-    base_service = models.ForeignKey(BaseBookingService, blank=True, null=True)
-
-    @property
-    def utility(self):
-        return utility(self.cost_amount, self.price_amount)
-    utility.fget.short_description = 'Util.'
-
-    @property
-    def utility_percent(self):
-        return utility_percent(self.cost_amount, self.price_amount)
-    utility_percent.fget.short_description = 'Util.%'
-
-
-class BookingService(BookService, DateInterval):
+class BookingService(BaseBookingService, DateInterval):
     """
     Booking Service
     """
@@ -1074,7 +1043,7 @@ class BookingPackage(BookingService):
         return '%s : %s' % (self.name, self.booking)
 
 
-class BookingPackageService(BookService, DateInterval):
+class BookingPackageService(BaseBookingService, DateInterval):
     """
     Booking Package Service
     """
@@ -1304,7 +1273,6 @@ class ProviderBookingPaymentService(models.Model):
         verbose_name = 'Provider Booking Payment'
         verbose_name_plural = 'Providers Bookings Payments'
     provider_payment = models.ForeignKey(ProviderBookingPayment)
-    # TODO change BookingService to BookService when BookService not longer abstract
     provider_service = models.ForeignKey(BaseBookingService)
 
     def __str__(self):
