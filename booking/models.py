@@ -12,7 +12,15 @@ from django.contrib.auth.models import User
 from accounting.constants import CURRENCIES, CURRENCY_CUC
 
 from booking.constants import (
-    SERVICE_CATEGORY_PACKAGE, SERVICE_CATEGORIES, BASE_CATEGORIES,
+    SERVICE_CATEGORY_PACKAGE, SERVICE_CATEGORIES,
+    BASE_BOOKING_SERVICE_CATEGORIES,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE,
+    BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_ALLOTMENT,
+    BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_TRANSFER,
+    BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_EXTRA,
     QUOTE_STATUS_LIST, QUOTE_STATUS_DRAFT,
     BOOKING_STATUS_LIST, BOOKING_STATUS_PENDING,
     SERVICE_STATUS_LIST, SERVICE_STATUS_PENDING,
@@ -718,7 +726,7 @@ class BaseBookingService(BaseService):
         max_length=1000, blank=True, null=True, verbose_name='Provider Notes')
     manual_cost = models.BooleanField(default=False)
     manual_price = models.BooleanField(default=False)
-    base_category = models.CharField(max_length=5, choices=BASE_CATEGORIES, blank=True, null=True)
+    base_category = models.CharField(max_length=5, choices=BASE_BOOKING_SERVICE_CATEGORIES, blank=True, null=True)
 
     @property
     def utility(self):
@@ -902,6 +910,7 @@ class BookingAllotment(BookingService, BaseAllotment):
 
     def fill_data(self):
         self.name = '%s' % (self.service,)
+        self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT
         self.service_type = SERVICE_CATEGORY_ALLOTMENT
         self.description = self.build_description()
         if self.service.location:
@@ -958,6 +967,7 @@ class BookingTransfer(BookingService, BaseTransfer):
             self.service,
             self.location_from.short_name or self.location_from,
             self.location_to.short_name or self.location_to)
+        self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER
         self.service_type = SERVICE_CATEGORY_TRANSFER
         self.description = self.build_description()
         self.service_location = self.location_from.name
@@ -994,6 +1004,7 @@ class BookingExtra(BookingService, BaseExtra):
     def fill_data(self):
         # setting name for this booking_service
         self.name = self.service.name
+        self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA
         self.service_type = SERVICE_CATEGORY_EXTRA
         self.description = self.build_description()
         if self.service.location:
@@ -1026,6 +1037,7 @@ class BookingPackage(BookingService):
     def fill_data(self):
         # setting name for this booking_service
         self.name = self.service.name
+        self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE
         self.service_type = SERVICE_CATEGORY_PACKAGE
         self.description = self.build_description()
         # TODO define a location for packages to show
@@ -1120,6 +1132,7 @@ class BookingPackageAllotment(BookingPackageService, BaseAllotment):
 
     def fill_data(self):
         self.name = '%s' % (self.service,)
+        self.base_category = BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_ALLOTMENT
         self.service_type = SERVICE_CATEGORY_ALLOTMENT
         self.description = self.build_description()
 
@@ -1174,6 +1187,7 @@ class BookingPackageTransfer(BookingPackageService, BaseTransfer):
             self.service,
             self.location_from.short_name or self.location_from,
             self.location_to.short_name or self.location_to)
+        self.base_category = BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_TRANSFER
         self.service_type = SERVICE_CATEGORY_TRANSFER
         self.description = self.build_description()
 
@@ -1193,6 +1207,7 @@ class BookingPackageExtra(BookingPackageService, BaseExtra):
     def fill_data(self):
         # setting name for this booking_service
         self.name = self.service.name
+        self.base_category = BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_EXTRA
         self.service_type = SERVICE_CATEGORY_EXTRA
         self.description = self.build_description()
 
