@@ -1410,7 +1410,7 @@ class BookingServices(object):
             amount = None
 
         if amount is not None and amount >= 0:
-            return amount, message
+            return cls._round_price(amount), message
         else:
             return None, message
 
@@ -1420,7 +1420,6 @@ class BookingServices(object):
             cls, service, detail, date_from, date_to, adults, children, free_adults=0, free_children=0):
         if (service.amounts_type == constants.AMOUNTS_FIXED and
                 detail.ad_1_amount is not None):
-            # TODO verificar si esto es correcto
             return (adults - free_adults) * detail.ad_1_amount / adults
         if service.amounts_type == constants.AMOUNTS_BY_PAX:
             if not service.grouping:
