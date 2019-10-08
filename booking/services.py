@@ -4692,6 +4692,10 @@ class BookingServices(object):
     def _clone_booking_service(cls, booking_service, booking):
         booking_service.pk = None
         booking_service.id = None
+        booking_service.basebookingservice_ptr = None
+        booking_service.basebookingservice_ptr_id = None
+        booking_service.bookingservice_ptr = None
+        booking_service.bookingservice_ptr_id = None
         booking_service.booking = booking
         booking_service.booking_id = booking.pk
         booking_service.status = constants.SERVICE_STATUS_PENDING
@@ -4708,8 +4712,12 @@ class BookingServices(object):
     def _clone_bookingpackage_service(cls, bookingpackage_service, booking_package):
         bookingpackage_service.pk = None
         bookingpackage_service.id = None
+        bookingpackage_service.basebookingservice_ptr = None
+        bookingpackage_service.basebookingservice_ptr_id = None
+        bookingpackage_service.bookingpackageservice_ptr = None
+        bookingpackage_service.bookingpackageservice_ptr_id = None
         bookingpackage_service.booking_package = booking_package
-        bookingpackage_service.quote_package_id = booking_package.pk
+        bookingpackage_service.booking_package_id = booking_package.pk
         bookingpackage_service.status = constants.SERVICE_STATUS_PENDING
         bookingpackage_service.conf_number = ''
         if not hasattr(bookingpackage_service, 'manual_cost') or not bookingpackage_service.manual_cost:
