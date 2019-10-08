@@ -5,6 +5,40 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 
 
+def update_base_service_category(apps, schema_editor):
+    BookingAllotment = apps.get_model('booking', 'BookingAllotment')
+    BookingTransfer = apps.get_model('booking', 'BookingTransfer')
+    BookingExtra = apps.get_model('booking', 'BookingExtra')
+    BookingPackage = apps.get_model('booking', 'BookingPackage')
+    BookingPackageAllotment = apps.get_model('booking', 'BookingPackageAllotment')
+    BookingPackageTransfer = apps.get_model('booking', 'BookingPackageTransfer')
+    BookingPackageExtra = apps.get_model('booking', 'BookingPackageExtra')
+
+    for cl in [BookingAllotment, BookingTransfer, BookingExtra, BookingPackage, BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra]:
+        base_category = None
+        if cl is BookingAllotment:
+            base_category = 'BA'
+        elif cl is BookingTransfer:
+            base_category = 'BT'
+        elif cl is BookingExtra:
+            base_category = 'BE'
+        elif cl is BookingPackage:
+            base_category = 'BP'
+        elif cl is BookingPackageAllotment:
+            base_category = 'PA'
+        elif cl is BookingPackageTransfer:
+            base_category = 'PT'
+        elif cl is BookingPackageExtra:
+            base_category = 'PE'
+
+        for bs in cl.objects.all():
+            bs.base_category = base_category
+            bs.save(force_update=True, update_fields=['base_category'])
+
+
+def backwards_function(apps, schema_editor):
+    pass
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -17,4 +51,6 @@ class Migration(migrations.Migration):
             name='base_category',
             field=models.CharField(blank=True, choices=[('BA', 'Booking Allotment'), ('BT', 'Booking Transfer'), ('BE', 'Booking Extra'), ('BP', 'Booking Package'), ('PA', 'Booking Package Allotment'), ('PT', 'Booking Package Transfer'), ('PE', 'Booking Package Extra')], max_length=5, null=True),
         ),
+
+        migrations.RunPython(update_base_service_category, backwards_function),
     ]
