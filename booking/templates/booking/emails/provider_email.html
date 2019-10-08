@@ -1,7 +1,7 @@
 {% load booking_tags %}Hola {% if provider.alias %}{{ provider.alias }}{% else %}{{ provider }}{% endif %}:
 
-Por favor Confirmar:
-{{ booking.name }} {% if booking.reference %}({{ booking.reference }}){% endif %}
+Por favor confirmar:
+[Ref.{{ booking.internal_reference }}] {{ booking.name }} {% if booking.reference %}({{ booking.reference }}){% endif %}
 ----------------------------------
 Servicios
 ----------------------------------
