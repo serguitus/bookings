@@ -5,5 +5,5 @@ Por favor confirmar:
 ----------------------------------
 Servicios
 ----------------------------------
-{% for booking_service in services %}{% render_service booking_service %}{% endfor %}Gracias
+{% for booking_service in services %}{% render_service booking_service provider %}{% endfor %}Gracias
 {% if provider.is_private %}{{ user.get_short_name }}{% else%}Liber{% endif %}

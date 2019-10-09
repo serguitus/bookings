@@ -17,7 +17,7 @@ $(document).ready(function(){
     }
     if(tpl_dsc.val()){
       // if a 3rd pax discount is provided, TPL = DBL * TPL-discount %
-      tpl_val.val(Number(dbl_val.val()) - Number(dbl_val.val())*Number(tpl_dsc.val())/100);
+      tpl_val.val((3*Number(dbl_val.val()) - Number(dbl_val.val())*Number(tpl_dsc.val())/100)/3);
     }
 
   })

@@ -9,6 +9,8 @@
     Check Out {{ bs.datetime_to|date:"d-b-Y" }}{% elif bs.service_type == 'E' %}{# This is an Extra #}{{ bs.service }}
     Fecha: {{ bs.datetime_from|date:"d-b-Y" }}   Hora: {{ bs.time|time:"H:i" }} hrs{% elif bs.service_type == 'P' %}{# This is a Package #}{{ bs.service }}
     Fecha: {{ bs.datetime_from|date:"d-b-Y" }}   Hora: {{ bs.time|time:"H:i" }} hrs
+{% endif %}{% if bs.cost_amount and provider.is_private %}
+    TOTAL: ${{ bs.cost_amount }}
 {% endif %}{% if bs.provider_notes %}
     NOTA: {{ bs.provider_notes }}
 {% endif %}

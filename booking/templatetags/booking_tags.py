@@ -104,12 +104,13 @@ def bookingpackage_table(bookingpackage):
 
 
 @register.inclusion_tag('booking/emails/provider_service.html')
-def render_service(booking_service):
+def render_service(booking_service, provider=None):
     """
     Renders some html into provider emails depending on
     booking_service type
     """
     bs = None
+    c = {}
     if booking_service.service_type == 'T':
         # Transfer service
         if hasattr(booking_service, 'booking_package'):
@@ -131,10 +132,10 @@ def render_service(booking_service):
     elif booking_service.service_type == 'P':
         # Package Service
         bs = BookingPackage.objects.get(id=booking_service.id)
-
-    return {
-        'bs': bs,
-    }
+    c.update({'bs': bs})
+    if provider:
+        c.update({'provider': provider})
+    return c
 
 
 @register.inclusion_tag('booking/emails/confirmation_service.html')
