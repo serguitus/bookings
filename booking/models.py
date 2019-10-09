@@ -884,7 +884,8 @@ class BookingAllotment(BookingService, BaseAllotment):
             '21': 0,  # DBL+1Child
             '22': 0,  # DBL+2Child
             '31': 0,  # TPL+1Child
-            '40': 0,
+            '40': 0,  # Quad counter
+            'und': 0,  # Undefined room counter
         }
         room_types = {
             '00': 'NONE',
@@ -895,10 +896,14 @@ class BookingAllotment(BookingService, BaseAllotment):
             '21': 'DBL&1Chld',
             '22': 'DBL&2Chld',
             '31': 'TPL&1Chld',
-            '40': 'QUAD'
+            '40': 'QUAD',
+            'und': 'UNALLOCATED'
         }
         for room in rooms:
-            room_count['%d%d' % (room[0], room[1])] += 1
+            if '%d%d' % (room[0], room[1]) in room_count:
+                room_count['%d%d' % (room[0], room[1])] += 1
+            else:
+                room_count['und'] += 1
         for k in room_count.keys():
             if room_count[k]:
                 if dist:
