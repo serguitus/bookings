@@ -955,7 +955,7 @@ class BookingServices(object):
                     service, date_from, date_to, price_groups, detail_list
                 )
 
-        return price, price_message
+        return cls._round_price(price), price_message
 
 
     @classmethod
@@ -1437,7 +1437,7 @@ class BookingServices(object):
             else:
                 amount = ConfigServices.find_detail_amount(detail, adults, children, free_adults, free_children)
             if amount is not None and amount >= 0:
-                return amount
+                return cls._round_price(amount)
         return None
 
 
@@ -1957,7 +1957,7 @@ class BookingServices(object):
                 bookingpackage_service.service_addon_id,
                 bookingpackage_service.quantity, bookingpackage_service.parameter)
 
-        return cost, price
+        return cls._round_cost(cost), cls._round_price(price)
 
 
     @classmethod
@@ -2254,47 +2254,49 @@ class BookingServices(object):
 
         c, c_msg = cls._quoteservice_costs(quoteservice, date_from, date_to, cost_groups, provider)
         p, p_msg = cls._quoteservice_prices(quoteservice, date_from, date_to, price_groups, agency)
-        return c, c_msg, p, p_msg
+        return cls._round_cost(c), c_msg, cls._round_price(p), p_msg
 
 
     @classmethod
     def _quoteservice_costs(
             cls, quoteservice, date_from, date_to, cost_groups, provider):
+        c, c_msg = None, "Unknown Service"
         if isinstance(quoteservice, (QuoteAllotment, QuotePackageAllotment)):
-            return ConfigServices.allotment_costs(
+            c, c_msg = ConfigServices.allotment_costs(
                 quoteservice.service, date_from, date_to, cost_groups, provider,
                 quoteservice.board_type, quoteservice.room_type_id,
                 quoteservice.service_addon_id)
         if isinstance(quoteservice, (QuoteTransfer, QuotePackageTransfer)):
-            return ConfigServices.transfer_costs(
+            c, c_msg = ConfigServices.transfer_costs(
                 quoteservice.service, date_from, date_to, cost_groups, provider,
                 quoteservice.location_from_id, quoteservice.location_to_id,
                 quoteservice.service_addon_id, quoteservice.quantity)
         if isinstance(quoteservice, (QuoteExtra, QuotePackageExtra)):
-            return ConfigServices.extra_costs(
+            c, c_msg = ConfigServices.extra_costs(
                 quoteservice.service, date_from, date_to, cost_groups, provider,
                 quoteservice.service_addon_id, quoteservice.quantity, quoteservice.parameter)
-        return None, "Unknown Service"
+        return cls._round_cost(c), c_msg
 
 
     @classmethod
     def _quoteservice_prices(
             cls, quoteservice, date_from, date_to, price_groups, agency):
+        p, p_msg = None, "Unknown Service"
         if isinstance(quoteservice, (QuoteAllotment, QuotePackageAllotment)):
-            return ConfigServices.allotment_prices(
+            p, p_msg = ConfigServices.allotment_prices(
                 quoteservice.service, date_from, date_to, price_groups, agency,
                 quoteservice.board_type, quoteservice.room_type_id,
                 quoteservice.service_addon_id)
         if isinstance(quoteservice, (QuoteTransfer, QuotePackageTransfer)):
-            return ConfigServices.transfer_prices(
+            p, p_msg = ConfigServices.transfer_prices(
                 quoteservice.service, date_from, date_to, price_groups, agency,
                 quoteservice.location_from_id, quoteservice.location_to_id,
                 quoteservice.service_addon_id, quoteservice.quantity)
         if isinstance(quoteservice, (QuoteExtra, QuotePackageExtra)):
-            return ConfigServices.extra_prices(
+            p, p_msg = ConfigServices.extra_prices(
                 quoteservice.service, date_from, date_to, price_groups, agency,
                 quoteservice.service_addon_id, quoteservice.quantity, quoteservice.parameter)
-        return None, "Unknown Service"
+        return cls._round_price(p), p_msg
 
 
     @classmethod
@@ -2310,7 +2312,7 @@ class BookingServices(object):
             pax_quantity, quoteservice, date_from, date_to, agency,
             service_pax_variant, manuals, quote_pax_variant, c1, c2, c3)
 
-        return c1, c1_msg, p1, p1_msg, c2, c2_msg, p2, p2_msg, c3, c3_msg, p3, p3_msg
+        return cls._round_cost(c1), c1_msg, cls._round_price(p1), p1_msg, cls._round_cost(c2), c2_msg, cls._round_price(p2), p2_msg, cls._round_cost(c3), c3_msg, cls._round_price(p3), p3_msg
 
 
     @classmethod
@@ -2336,7 +2338,7 @@ class BookingServices(object):
                     c3, c3_msg = service_pax_variant.cost_triple_amount, None
                 else:
                     c3, c3_msg = None, "Missing Manual Cost for Triple"
-                return c1, c1_msg, c2, c2_msg, c3, c3_msg
+                return cls._round_cost(c1), c1_msg, cls._round_cost(c2), c2_msg, cls._round_cost(c3), c3_msg
         if quoteservice.service.grouping:
             # grouping means passing 1,2,3 as pax quantity
             c1, c1_msg = cls._quoteservice_costs(
@@ -2359,7 +2361,7 @@ class BookingServices(object):
             if c1:
                 c1 = cls._round_cost(cls._adjust_cost(c1, pax_quantity, total_free_cost))
             c2, c2_msg, c3, c3_msg = c1, c1_msg, c1, c1_msg
-        return c1, c1_msg, c2, c2_msg, c3, c3_msg
+        return cls._round_cost(c1), c1_msg, cls._round_cost(c2), c2_msg, cls._round_cost(c3), c3_msg
 
 
     @classmethod
@@ -2406,7 +2408,7 @@ class BookingServices(object):
             else:
                 p3, p3_msg = None, 'Cost TPL for % is empty'
 
-            return p1, p1_msg, p2, p2_msg, p3, p3_msg
+            return cls._round_price(p1), p1_msg, cls._round_price(p2), p2_msg, cls._round_price(p3), p3_msg
 
         if manuals:
             if service_pax_variant.manual_prices:
@@ -2422,7 +2424,7 @@ class BookingServices(object):
                     p3, p3_msg = service_pax_variant.price_triple_amount, None
                 else:
                     p3, p3_msg = None, "Missing Manual Price for Triple"
-                return p1, p1_msg, p2, p2_msg, p3, p3_msg
+                return cls._round_price(p1), p1_msg, cls._round_price(p2), p2_msg, cls._round_price(p3), p3_msg
 
         if quoteservice.service.grouping:
             # grouping means passing 1,2,3 as pax quantity
@@ -2447,7 +2449,7 @@ class BookingServices(object):
                 p1 = cls._round_price(cls._adjust_price(p1, pax_quantity, total_free_price))
             p2, p2_msg, p3, p3_msg = p1, p1_msg, p1, p1_msg
 
-        return p1, p1_msg, p2, p2_msg, p3, p3_msg
+        return cls._round_price(p1), p1_msg, cls._round_price(p2), p2_msg, cls._round_price(p3), p3_msg
 
 
     @classmethod
@@ -3373,7 +3375,7 @@ class BookingServices(object):
                 agency = bookingservice.booking.agency
             cost, cost_msg, price, price_msg = cls._bookingpackage_amounts(
                 bookingservice, cost_groups, price_groups, agency)
-        return cost, cost_msg, price, price_msg
+        return cls._round_cost(cost), cost_msg, cls._round_price(price), price_msg
 
 
     @classmethod
@@ -3431,7 +3433,7 @@ class BookingServices(object):
                 bookingservice.service_addon_id, bookingservice.quantity, bookingservice.parameter)
         elif isinstance(bookingservice, BookingPackage):
             cost, cost_msg = cls._bookingpackage_costs(bookingservice, pax_list)
-        return cost, cost_msg
+        return cls._round_cost(cost), cost_msg
 
 
     @classmethod
@@ -3500,7 +3502,7 @@ class BookingServices(object):
             if not agency:
                 agency = bookingservice.booking.agency
             price, price_msg = cls._bookingpackage_prices(bookingservice, pax_list, agency)
-        return price, price_msg
+        return cls._round_price(price), price_msg
 
 
     @classmethod
@@ -4347,7 +4349,7 @@ class BookingServices(object):
                         return None, "Package Price Missing Triple Amount"
             else:
                 return None, "Package Price Unsupported Pax Quantity (%s)" % group['qtty']
-        return price, price_msg
+        return cls._round_price(price), price_msg
 
 
     @classmethod
