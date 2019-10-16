@@ -10,11 +10,11 @@ from finance.constants import (
     STATUS_DRAFT, STATUS_READY,
     ERROR_MATCH_STATUS, ERROR_MATCH_AMOUNT, ERROR_MATCH_PROVIDER)
 from finance.models import Provider, ProviderInvoice, ProviderPayment, ProviderDocumentMatch
-from finance.services import FinanceService
+from finance.services import FinanceServices
 from finance.tests.utils import FinanceBaseTestCase
 
 
-class FinanceServiceTestCase(FinanceBaseTestCase):
+class FinanceServicesTestCase(FinanceBaseTestCase):
 
     test_user = None
 
@@ -45,7 +45,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             provider=test_provider,
             status=test_status)
 
-        provider_payment = FinanceService.save_provider_payment(
+        provider_payment = FinanceServices.save_provider_payment(
             user=self.test_user,
             provider_payment=provider_payment)
 
@@ -55,7 +55,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             provider=test_provider,
             status=test_status)
 
-        provider_invoice = FinanceService.save_provider_invoice(
+        provider_invoice = FinanceServices.save_provider_invoice(
             user=self.test_user,
             provider_invoice=provider_invoice)
 
@@ -64,7 +64,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             debit_document=provider_invoice,
             matched_amount=test_amount)
 
-        provider_match = FinanceService.save_provider_match(provider_match)
+        provider_match = FinanceServices.save_provider_match(provider_match)
 
         # entity matched incremented
         self.assertProviderCurrencyMatchedAmount(
@@ -101,7 +101,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             provider=test_provider,
             status=test_status)
 
-        provider_payment = FinanceService.save_provider_payment(
+        provider_payment = FinanceServices.save_provider_payment(
             user=self.test_user,
             provider_payment=provider_payment)
 
@@ -111,7 +111,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             provider=test_provider,
             status=test_status)
 
-        provider_invoice = FinanceService.save_provider_invoice(
+        provider_invoice = FinanceServices.save_provider_invoice(
             user=self.test_user,
             provider_invoice=provider_invoice)
 
@@ -120,7 +120,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             debit_document=provider_invoice,
             matched_amount=test_amount)
 
-        provider_match = FinanceService.save_provider_match(provider_match)
+        provider_match = FinanceServices.save_provider_match(provider_match)
 
         # entity matched incremented
         self.assertProviderCurrencyMatchedAmount(
@@ -138,7 +138,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         delta = -10
         provider_match.matched_amount += delta
 
-        provider_match = FinanceService.save_provider_match(provider_match)
+        provider_match = FinanceServices.save_provider_match(provider_match)
 
         # entity matched changed
         self.assertProviderCurrencyMatchedAmount(
@@ -175,7 +175,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             provider=test_provider,
             status=test_status)
 
-        provider_payment = FinanceService.save_provider_payment(
+        provider_payment = FinanceServices.save_provider_payment(
             user=self.test_user,
             provider_payment=provider_payment)
 
@@ -185,7 +185,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             provider=test_provider,
             status=test_status)
 
-        provider_invoice = FinanceService.save_provider_invoice(
+        provider_invoice = FinanceServices.save_provider_invoice(
             user=self.test_user,
             provider_invoice=provider_invoice)
 
@@ -194,7 +194,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             debit_document=provider_invoice,
             matched_amount=test_amount)
 
-        provider_match = FinanceService.save_provider_match(provider_match)
+        provider_match = FinanceServices.save_provider_match(provider_match)
 
         # entity matched incremented
         self.assertProviderCurrencyMatchedAmount(
@@ -209,7 +209,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         self.assertEqual(provider_invoice.matched_amount, test_amount)
 
         # delete
-        FinanceService.delete_provider_match(provider_match.pk)
+        FinanceServices.delete_provider_match(provider_match.pk)
 
         provider_payment.refresh_from_db()
         provider_invoice.refresh_from_db()
@@ -240,7 +240,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             provider=test_provider,
             status=test_status)
 
-        provider_payment = FinanceService.save_provider_payment(
+        provider_payment = FinanceServices.save_provider_payment(
             user=self.test_user,
             provider_payment=provider_payment)
 
@@ -250,7 +250,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             provider=test_provider,
             status=test_status)
 
-        provider_invoice = FinanceService.save_provider_invoice(
+        provider_invoice = FinanceServices.save_provider_invoice(
             user=self.test_user,
             provider_invoice=provider_invoice)
 
@@ -260,7 +260,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             matched_amount=test_amount)
 
         with self.assertRaises(ValidationError):
-            provider_match = FinanceService.save_provider_match(provider_match)
+            provider_match = FinanceServices.save_provider_match(provider_match)
 
     def test_provider_match_excesive_amount(self):
         """
@@ -285,7 +285,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             provider=test_provider,
             status=test_status)
 
-        provider_payment = FinanceService.save_provider_payment(
+        provider_payment = FinanceServices.save_provider_payment(
             user=self.test_user,
             provider_payment=provider_payment)
 
@@ -295,7 +295,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             provider=test_provider,
             status=test_status)
 
-        provider_invoice = FinanceService.save_provider_invoice(
+        provider_invoice = FinanceServices.save_provider_invoice(
             user=self.test_user,
             provider_invoice=provider_invoice)
 
@@ -305,7 +305,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             matched_amount=test_amount + 0.01)
 
         with self.assertRaises(ValidationError):
-            provider_match = FinanceService.save_provider_match(provider_match)
+            provider_match = FinanceServices.save_provider_match(provider_match)
 
     def test_provider_match_different_provider(self):
         """
@@ -330,7 +330,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             provider=test_provider1,
             status=test_status)
 
-        provider_payment = FinanceService.save_provider_payment(
+        provider_payment = FinanceServices.save_provider_payment(
             user=self.test_user,
             provider_payment=provider_payment)
 
@@ -343,7 +343,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             provider=test_provider2,
             status=test_status)
 
-        provider_invoice = FinanceService.save_provider_invoice(
+        provider_invoice = FinanceServices.save_provider_invoice(
             user=self.test_user,
             provider_invoice=provider_invoice)
 
@@ -353,7 +353,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             matched_amount=test_amount)
 
         with self.assertRaises(ValidationError):
-            provider_match = FinanceService.save_provider_match(provider_match)
+            provider_match = FinanceServices.save_provider_match(provider_match)
 
     def test_provider_match_then_increase_amount(self):
         """
@@ -378,7 +378,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             provider=test_provider,
             status=test_status)
 
-        provider_payment = FinanceService.save_provider_payment(
+        provider_payment = FinanceServices.save_provider_payment(
             user=self.test_user,
             provider_payment=provider_payment)
 
@@ -388,7 +388,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             provider=test_provider,
             status=test_status)
 
-        provider_invoice = FinanceService.save_provider_invoice(
+        provider_invoice = FinanceServices.save_provider_invoice(
             user=self.test_user,
             provider_invoice=provider_invoice)
 
@@ -397,7 +397,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             debit_document=provider_invoice,
             matched_amount=test_amount)
 
-        provider_match = FinanceService.save_provider_match(provider_match)
+        provider_match = FinanceServices.save_provider_match(provider_match)
 
         provider_payment.refresh_from_db()
         provider_invoice.refresh_from_db()
@@ -407,7 +407,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         provider_invoice.amount = provider_invoice.amount + 20
 
-        provider_invoice = FinanceService.save_provider_invoice(
+        provider_invoice = FinanceServices.save_provider_invoice(
             user=self.test_user,
             provider_invoice=provider_invoice)
 
@@ -436,7 +436,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             provider=test_provider,
             status=test_status)
 
-        provider_payment = FinanceService.save_provider_payment(
+        provider_payment = FinanceServices.save_provider_payment(
             user=self.test_user,
             provider_payment=provider_payment)
 
@@ -446,7 +446,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             provider=test_provider,
             status=test_status)
 
-        provider_invoice = FinanceService.save_provider_invoice(
+        provider_invoice = FinanceServices.save_provider_invoice(
             user=self.test_user,
             provider_invoice=provider_invoice)
 
@@ -455,7 +455,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             debit_document=provider_invoice,
             matched_amount=test_amount)
 
-        provider_match = FinanceService.save_provider_match(provider_match)
+        provider_match = FinanceServices.save_provider_match(provider_match)
 
         provider_payment.refresh_from_db()
         provider_invoice.refresh_from_db()
@@ -466,7 +466,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         provider_invoice.status = STATUS_DRAFT
 
         with self.assertRaisesMessage(ValidationError, ERROR_MATCH_STATUS):
-            provider_invoice = FinanceService.save_provider_invoice(
+            provider_invoice = FinanceServices.save_provider_invoice(
                 user=self.test_user,
                 provider_invoice=provider_invoice)
 
@@ -493,7 +493,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             provider=test_provider,
             status=test_status)
 
-        provider_payment = FinanceService.save_provider_payment(
+        provider_payment = FinanceServices.save_provider_payment(
             user=self.test_user,
             provider_payment=provider_payment)
 
@@ -503,7 +503,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             provider=test_provider,
             status=test_status)
 
-        provider_invoice = FinanceService.save_provider_invoice(
+        provider_invoice = FinanceServices.save_provider_invoice(
             user=self.test_user,
             provider_invoice=provider_invoice)
 
@@ -512,7 +512,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             debit_document=provider_invoice,
             matched_amount=test_amount)
 
-        provider_match = FinanceService.save_provider_match(provider_match)
+        provider_match = FinanceServices.save_provider_match(provider_match)
 
         provider_payment.refresh_from_db()
         provider_invoice.refresh_from_db()
@@ -523,7 +523,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         provider_invoice.amount = provider_invoice.amount - 20
 
         with self.assertRaisesMessage(ValidationError, ERROR_MATCH_AMOUNT):
-            provider_invoice = FinanceService.save_provider_invoice(
+            provider_invoice = FinanceServices.save_provider_invoice(
                 user=self.test_user,
                 provider_invoice=provider_invoice)
 
@@ -550,7 +550,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             provider=test_provider1,
             status=test_status)
 
-        provider_payment = FinanceService.save_provider_payment(
+        provider_payment = FinanceServices.save_provider_payment(
             user=self.test_user,
             provider_payment=provider_payment)
 
@@ -560,7 +560,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             provider=test_provider1,
             status=test_status)
 
-        provider_invoice = FinanceService.save_provider_invoice(
+        provider_invoice = FinanceServices.save_provider_invoice(
             user=self.test_user,
             provider_invoice=provider_invoice)
 
@@ -569,7 +569,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             debit_document=provider_invoice,
             matched_amount=test_amount)
 
-        provider_match = FinanceService.save_provider_match(provider_match)
+        provider_match = FinanceServices.save_provider_match(provider_match)
 
         provider_payment.refresh_from_db()
         provider_invoice.refresh_from_db()
@@ -583,6 +583,6 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         provider_invoice.provider = test_provider2
 
         with self.assertRaisesMessage(ValidationError, ERROR_MATCH_PROVIDER):
-            provider_invoice = FinanceService.save_provider_invoice(
+            provider_invoice = FinanceServices.save_provider_invoice(
                 user=self.test_user,
                 provider_invoice=provider_invoice)

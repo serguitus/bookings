@@ -11,11 +11,11 @@ from accounting.models import Account, Operation
 
 from finance.constants import STATUS_DRAFT, STATUS_READY, DOC_TYPE_PROVIDER_DEVOLUTION
 from finance.models import Provider, ProviderDevolution
-from finance.services import FinanceService
+from finance.services import FinanceServices
 from finance.tests.utils import FinanceBaseTestCase
 
 
-class FinanceServiceTestCase(FinanceBaseTestCase):
+class FinanceServicesTestCase(FinanceBaseTestCase):
 
     test_user = None
     test_provider = None
@@ -47,7 +47,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 
@@ -91,7 +91,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 
@@ -147,7 +147,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 
@@ -175,7 +175,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         provider_devolution.status = test_status2
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 
@@ -233,7 +233,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 
@@ -275,7 +275,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         provider_devolution.status = test_status2
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 
@@ -333,7 +333,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 
@@ -381,7 +381,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         provider_devolution.status = test_status2
         provider_devolution.account = test_account2
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 
@@ -440,7 +440,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 
@@ -468,7 +468,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         provider_devolution.amount = test_amount2
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 
@@ -506,7 +506,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 
@@ -548,7 +548,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         provider_devolution.amount = test_amount2
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 
@@ -616,7 +616,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 
@@ -647,7 +647,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         provider_devolution.account = test_account2
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 
@@ -685,7 +685,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 
@@ -730,7 +730,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         provider_devolution.account = test_account2
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 
@@ -799,7 +799,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 
@@ -847,7 +847,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         provider_devolution.account = test_account2
         provider_devolution.amount = test_amount2
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 
@@ -916,7 +916,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 
@@ -946,7 +946,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         provider_devolution.date = test_date2
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 
@@ -989,7 +989,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 
@@ -1033,7 +1033,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         provider_devolution.date = test_date2
 
-        provider_devolution = FinanceService.save_provider_devolution(
+        provider_devolution = FinanceServices.save_provider_devolution(
             user=self.test_user,
             provider_devolution=provider_devolution)
 

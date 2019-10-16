@@ -11,11 +11,11 @@ from accounting.models import Account, Operation
 
 from finance.constants import STATUS_DRAFT, STATUS_READY, DOC_TYPE_LOAN_ACCOUNT_WITHDRAW
 from finance.models import LoanAccount, LoanAccountWithdraw
-from finance.services import FinanceService
+from finance.services import FinanceServices
 from finance.tests.utils import FinanceBaseTestCase
 
 
-class FinanceServiceTestCase(FinanceBaseTestCase):
+class FinanceServicesTestCase(FinanceBaseTestCase):
 
     test_user = None
 
@@ -49,7 +49,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -101,7 +101,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -174,7 +174,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -204,7 +204,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         loan_account_withdraw.status = test_status2
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -279,7 +279,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -330,7 +330,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         loan_account_withdraw.status = test_status2
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -412,7 +412,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -476,7 +476,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_withdraw.account = test_account3
         loan_account_withdraw.loan_account = test_loan_account2
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -561,7 +561,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -591,7 +591,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         loan_account_withdraw.amount = test_amount2
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -638,7 +638,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -689,7 +689,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         loan_account_withdraw.amount = test_amount2
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -783,7 +783,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -824,7 +824,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_withdraw.account = test_account3
         loan_account_withdraw.loan_account = test_loan_account2
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -873,7 +873,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -934,7 +934,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_withdraw.account = test_account3
         loan_account_withdraw.loan_account = test_loan_account2
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -1033,7 +1033,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -1097,7 +1097,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_withdraw.loan_account = test_loan_account2
         loan_account_withdraw.amount = test_amount2
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -1197,7 +1197,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -1229,7 +1229,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         loan_account_withdraw.date = test_date2
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -1281,7 +1281,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -1334,7 +1334,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         loan_account_withdraw.date = test_date2
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -1392,6 +1392,6 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         with self.assertRaisesMessage(
             ValidationError, ERROR_DIFFERENT_CURRENCY % (test_account1, test_account2)) as ex:
-            loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+            loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
                 user=self.test_user,
                 loan_account_withdraw=loan_account_withdraw)

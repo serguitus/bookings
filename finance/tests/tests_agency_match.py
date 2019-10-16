@@ -10,11 +10,11 @@ from finance.constants import (
     STATUS_DRAFT, STATUS_READY,
     ERROR_MATCH_STATUS, ERROR_MATCH_AMOUNT, ERROR_MATCH_AGENCY)
 from finance.models import Agency, AgencyInvoice, AgencyPayment, AgencyDocumentMatch
-from finance.services import FinanceService
+from finance.services import FinanceServices
 from finance.tests.utils import FinanceBaseTestCase
 
 
-class FinanceServiceTestCase(FinanceBaseTestCase):
+class FinanceServicesTestCase(FinanceBaseTestCase):
 
     test_user = None
 
@@ -45,7 +45,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             agency=test_agency,
             status=test_status)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -55,7 +55,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             agency=test_agency,
             status=test_status)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -64,7 +64,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             debit_document=agency_invoice,
             matched_amount=test_amount)
 
-        agency_match = FinanceService.save_agency_match(agency_match)
+        agency_match = FinanceServices.save_agency_match(agency_match)
 
         # entity matched incremented
         self.assertAgencyCurrencyMatchedAmount(
@@ -101,7 +101,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             agency=test_agency,
             status=test_status)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -111,7 +111,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             agency=test_agency,
             status=test_status)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -120,7 +120,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             debit_document=agency_invoice,
             matched_amount=test_amount)
 
-        agency_match = FinanceService.save_agency_match(agency_match)
+        agency_match = FinanceServices.save_agency_match(agency_match)
 
         # entity matched incremented
         self.assertAgencyCurrencyMatchedAmount(
@@ -138,7 +138,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         delta = -10
         agency_match.matched_amount += delta
 
-        agency_match = FinanceService.save_agency_match(agency_match)
+        agency_match = FinanceServices.save_agency_match(agency_match)
 
         # entity matched changed
         self.assertAgencyCurrencyMatchedAmount(
@@ -175,7 +175,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             agency=test_agency,
             status=test_status)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -185,7 +185,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             agency=test_agency,
             status=test_status)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -194,7 +194,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             debit_document=agency_invoice,
             matched_amount=test_amount)
 
-        agency_match = FinanceService.save_agency_match(agency_match)
+        agency_match = FinanceServices.save_agency_match(agency_match)
 
         # entity matched incremented
         self.assertAgencyCurrencyMatchedAmount(
@@ -209,7 +209,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         self.assertEqual(agency_invoice.matched_amount, test_amount)
 
         # delete
-        FinanceService.delete_agency_match(agency_match.pk)
+        FinanceServices.delete_agency_match(agency_match.pk)
 
         agency_payment.refresh_from_db()
         agency_invoice.refresh_from_db()
@@ -240,7 +240,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             agency=test_agency,
             status=test_status)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -250,7 +250,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             agency=test_agency,
             status=test_status)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -260,7 +260,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             matched_amount=test_amount)
 
         with self.assertRaises(ValidationError):
-            agency_match = FinanceService.save_agency_match(agency_match)
+            agency_match = FinanceServices.save_agency_match(agency_match)
 
     def test_agency_match_excesive_amount(self):
         """
@@ -285,7 +285,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             agency=test_agency,
             status=test_status)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -295,7 +295,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             agency=test_agency,
             status=test_status)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -305,7 +305,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             matched_amount=test_amount + 0.01)
 
         with self.assertRaises(ValidationError):
-            agency_match = FinanceService.save_agency_match(agency_match)
+            agency_match = FinanceServices.save_agency_match(agency_match)
 
     def test_agency_match_different_agency(self):
         """
@@ -330,7 +330,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             agency=test_agency1,
             status=test_status)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -343,7 +343,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             agency=test_agency2,
             status=test_status)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -353,7 +353,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             matched_amount=test_amount)
 
         with self.assertRaises(ValidationError):
-            agency_match = FinanceService.save_agency_match(agency_match)
+            agency_match = FinanceServices.save_agency_match(agency_match)
 
     def test_agency_match_then_increase_amount(self):
         """
@@ -378,7 +378,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             agency=test_agency,
             status=test_status)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -388,7 +388,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             agency=test_agency,
             status=test_status)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -397,7 +397,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             debit_document=agency_invoice,
             matched_amount=test_amount)
 
-        agency_match = FinanceService.save_agency_match(agency_match)
+        agency_match = FinanceServices.save_agency_match(agency_match)
 
         agency_payment.refresh_from_db()
         agency_invoice.refresh_from_db()
@@ -407,7 +407,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_invoice.amount = agency_invoice.amount + 20
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -436,7 +436,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             agency=test_agency,
             status=test_status)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -446,7 +446,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             agency=test_agency,
             status=test_status)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -455,7 +455,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             debit_document=agency_invoice,
             matched_amount=test_amount)
 
-        agency_match = FinanceService.save_agency_match(agency_match)
+        agency_match = FinanceServices.save_agency_match(agency_match)
 
         agency_payment.refresh_from_db()
         agency_invoice.refresh_from_db()
@@ -466,7 +466,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         agency_invoice.status = STATUS_DRAFT
 
         with self.assertRaisesMessage(ValidationError, ERROR_MATCH_STATUS):
-            agency_invoice = FinanceService.save_agency_invoice(
+            agency_invoice = FinanceServices.save_agency_invoice(
                 user=self.test_user,
                 agency_invoice=agency_invoice)
 
@@ -493,7 +493,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             agency=test_agency,
             status=test_status)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -503,7 +503,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             agency=test_agency,
             status=test_status)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -512,7 +512,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             debit_document=agency_invoice,
             matched_amount=test_amount)
 
-        agency_match = FinanceService.save_agency_match(agency_match)
+        agency_match = FinanceServices.save_agency_match(agency_match)
 
         agency_payment.refresh_from_db()
         agency_invoice.refresh_from_db()
@@ -523,7 +523,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         agency_invoice.amount = agency_invoice.amount - 20
 
         with self.assertRaisesMessage(ValidationError, ERROR_MATCH_AMOUNT):
-            agency_invoice = FinanceService.save_agency_invoice(
+            agency_invoice = FinanceServices.save_agency_invoice(
                 user=self.test_user,
                 agency_invoice=agency_invoice)
 
@@ -550,7 +550,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             agency=test_agency1,
             status=test_status)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -560,7 +560,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             agency=test_agency1,
             status=test_status)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -569,7 +569,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             debit_document=agency_invoice,
             matched_amount=test_amount)
 
-        agency_match = FinanceService.save_agency_match(agency_match)
+        agency_match = FinanceServices.save_agency_match(agency_match)
 
         agency_payment.refresh_from_db()
         agency_invoice.refresh_from_db()
@@ -583,6 +583,6 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         agency_invoice.agency = test_agency2
 
         with self.assertRaisesMessage(ValidationError, ERROR_MATCH_AGENCY):
-            agency_invoice = FinanceService.save_agency_invoice(
+            agency_invoice = FinanceServices.save_agency_invoice(
                 user=self.test_user,
                 agency_invoice=agency_invoice)

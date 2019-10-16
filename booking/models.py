@@ -23,7 +23,7 @@ from booking.constants import (
     BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_EXTRA,
     QUOTE_STATUS_LIST, QUOTE_STATUS_DRAFT,
     BOOKING_STATUS_LIST, BOOKING_STATUS_PENDING,
-    SERVICE_STATUS_LIST, SERVICE_STATUS_PENDING,
+    SERVICE_STATUS_LIST, SERVICE_STATUS_PENDING, SERVICE_STATUS_REQUEST, SERVICE_STATUS_CANCELLED,
     PACKAGE_AMOUNTS_TYPES,
     INVOICE_FORMATS, INVOICE_FORMAT_COMPACT)
 
@@ -728,6 +728,10 @@ class BaseBookingService(BaseService):
     manual_price = models.BooleanField(default=False)
     base_category = models.CharField(max_length=5, choices=BASE_BOOKING_SERVICE_CATEGORIES, blank=True, null=True)
 
+    cost_amount_to_pay = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    cost_amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    has_payment = models.BooleanField(default=False)
+
     @property
     def utility(self):
         return utility(self.cost_amount, self.price_amount)
@@ -1292,8 +1296,13 @@ class ProviderBookingPaymentService(models.Model):
     class Meta:
         verbose_name = 'Provider Booking Payment'
         verbose_name_plural = 'Providers Bookings Payments'
+        unique_together = (('provider_payment', 'provider_service'),)
     provider_payment = models.ForeignKey(ProviderBookingPayment)
     provider_service = models.ForeignKey(BaseBookingService)
+    service_cost_amount_to_pay = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    service_cost_amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     def __str__(self):
-        return '%s : %s' % (self.provider_payment, self.provider_service)
+        return '%s : %s (%s)' % (
+            self.provider_payment, self.provider_service, self.cost_amount_paid)

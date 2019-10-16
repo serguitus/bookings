@@ -11,11 +11,11 @@ from accounting.models import Account, Operation
 
 from finance.constants import STATUS_DRAFT, STATUS_READY, DOC_TYPE_AGENCY_DEVOLUTION
 from finance.models import Agency, AgencyDevolution
-from finance.services import FinanceService
+from finance.services import FinanceServices
 from finance.tests.utils import FinanceBaseTestCase
 
 
-class FinanceServiceTestCase(FinanceBaseTestCase):
+class FinanceServicesTestCase(FinanceBaseTestCase):
 
     test_user = None
     test_agency = None
@@ -48,7 +48,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 
@@ -93,7 +93,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 
@@ -150,7 +150,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 
@@ -178,7 +178,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_devolution.status = test_status2
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 
@@ -237,7 +237,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 
@@ -279,7 +279,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_devolution.status = test_status2
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 
@@ -338,7 +338,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 
@@ -387,7 +387,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         agency_devolution.status = test_status2
         agency_devolution.account = test_account2
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 
@@ -447,7 +447,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 
@@ -475,7 +475,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_devolution.amount = test_amount2
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 
@@ -514,7 +514,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 
@@ -556,7 +556,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_devolution.amount = test_amount2
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 
@@ -622,7 +622,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 
@@ -654,7 +654,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_devolution.account = test_account2
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 
@@ -693,7 +693,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 
@@ -739,7 +739,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_devolution.account = test_account2
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 
@@ -805,7 +805,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 
@@ -854,7 +854,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         agency_devolution.account = test_account2
         agency_devolution.amount = test_amount2
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 
@@ -920,7 +920,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 
@@ -950,7 +950,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_devolution.date = test_date2
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 
@@ -994,7 +994,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 
@@ -1038,7 +1038,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_devolution.date = test_date2
 
-        agency_devolution = FinanceService.save_agency_devolution(
+        agency_devolution = FinanceServices.save_agency_devolution(
             user=self.test_user,
             agency_devolution=agency_devolution)
 

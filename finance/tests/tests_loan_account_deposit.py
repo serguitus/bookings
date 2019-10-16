@@ -11,11 +11,11 @@ from accounting.models import Account, Operation
 
 from finance.constants import STATUS_DRAFT, STATUS_READY, DOC_TYPE_LOAN_ACCOUNT_DEPOSIT
 from finance.models import LoanAccount, LoanAccountDeposit
-from finance.services import FinanceService
+from finance.services import FinanceServices
 from finance.tests.utils import FinanceBaseTestCase
 
 
-class FinanceServiceTestCase(FinanceBaseTestCase):
+class FinanceServicesTestCase(FinanceBaseTestCase):
 
     test_user = None
 
@@ -50,7 +50,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -103,7 +103,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -177,7 +177,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -207,7 +207,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         loan_account_deposit.status = test_status2
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -282,7 +282,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -333,7 +333,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         loan_account_deposit.status = test_status2
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -415,7 +415,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -480,7 +480,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_deposit.account = test_account3
         loan_account_deposit.loan_account = test_loan_account2
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -565,7 +565,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -595,7 +595,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         loan_account_deposit.amount = test_amount2
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -642,7 +642,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -693,7 +693,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         loan_account_deposit.amount = test_amount2
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -787,7 +787,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -828,7 +828,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_deposit.account = test_account3
         loan_account_deposit.loan_account = test_loan_account2
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -877,7 +877,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -939,7 +939,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_deposit.account = test_account3
         loan_account_deposit.loan_account = test_loan_account2
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -1038,7 +1038,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -1103,7 +1103,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_deposit.loan_account = test_loan_account2
         loan_account_deposit.amount = test_amount2
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -1202,7 +1202,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -1234,7 +1234,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         loan_account_deposit.date = test_date2
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -1286,7 +1286,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -1339,7 +1339,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         loan_account_deposit.date = test_date2
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -1397,6 +1397,6 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         with self.assertRaisesMessage(
             ValidationError, ERROR_DIFFERENT_CURRENCY % (test_account1, test_account2)) as ex:
-            loan_account_deposit = FinanceService.save_loan_account_deposit(
+            loan_account_deposit = FinanceServices.save_loan_account_deposit(
                 user=self.test_user,
                 loan_account_deposit=loan_account_deposit)

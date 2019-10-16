@@ -27,6 +27,7 @@ from django.core.mail import EmailMessage
 from django.db import router, transaction
 from django.db.models.query_utils import Q
 from django import forms
+from django.forms import formset_factory
 from django.forms.models import modelformset_factory
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, reverse
@@ -64,8 +65,10 @@ from booking.forms import (
     BookingPackageTransferForm,
     BookingPackageExtraForm,
     VouchersConfigForm,
+    ProviderBookingPaymentForm, ProviderBookingPaymentServiceForm,
 )
 from booking.models import (
+    BaseBookingService,
     Package, PackageAllotment, PackageTransfer, PackageExtra,
     AgencyPackageService, AgencyPackageDetail, PackageProvider,
     Quote,
@@ -79,6 +82,7 @@ from booking.models import (
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
     BookingPackageService, BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
     BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine, BookingInvoicePartial,
+    ProviderBookingPayment,
 )
 from booking.services import BookingServices
 from booking.top_filters import (
@@ -87,6 +91,8 @@ from booking.top_filters import (
 from common.sites import CommonStackedInline, CommonTabularInline
 
 from config.services import ConfigServices
+
+from finance.constants import STATUS_DRAFT
 
 from reservas.admin import bookings_site
 
@@ -1691,6 +1697,71 @@ class BookingInvoiceSiteModel(SiteModel):
         return super(BookingInvoiceSiteModel, self).response_post_save_change(request, obj)
 
 
+class ProviderBookingPaymentSiteModel(SiteModel):
+
+    from finance.common_site import MENU_LABEL_FINANCE_ADVANCED
+
+    model_order = 4130
+    menu_label = MENU_LABEL_FINANCE_ADVANCED
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                ('provider', 'name'),
+                ('date', 'status'),
+                ('account', 'amount')
+            )
+        }),
+    )
+    readonly_fields = ['amount']
+    add_readonly_fields = ['status']
+
+    recent_allowed = True
+    form = ProviderBookingPaymentForm
+    change_form_template = 'booking/providerbookingpayment_change_form.html'
+
+    def has_delete_permission(self, request, obj=None):
+        if obj is not None and obj.status != STATUS_DRAFT:
+            return False
+        return super(ProviderBookingPaymentSiteModel, self).has_delete_permission(request, obj)
+
+    def get_change_readonly_fields(self, request, obj=None):
+        if obj is not None and obj.status != STATUS_DRAFT:
+            return ['provider', 'account']
+        return []
+
+    def changeform_context(
+            self, request, form, obj, formsets, inline_instances,
+            add, opts, object_id, to_field, form_validated=None):
+
+        context = super().changeform_context(
+            request, form, obj, formsets, inline_instances, add, opts, object_id, to_field,
+            form_validated)
+
+        if object_id:
+            services = BookingServices.booking_provider_payment_services(obj)
+
+            ServicesFormSet = formset_factory(ProviderBookingPaymentServiceForm, extra=0)
+            services_formset = ServicesFormSet(initial=list(services))
+
+            context.update(dict(services_formset=services_formset))
+
+        return context
+
+    def save_model(self, request, obj, form, change):
+        if obj. pk:
+            # disable save of agencyinvoice object
+            ServicesFormSet = formset_factory(ProviderBookingPaymentServiceForm)
+            services_formset = ServicesFormSet(request.POST, request.FILES)
+            if services_formset.is_valid():
+                BookingServices.save_payment(
+                    request.user, obj, services_formset.cleaned_data)
+            else:
+                raise ValidationError('Invalid Services Payments Data')
+        else:
+            super(ProviderBookingPaymentSiteModel, self).save_model(request, obj, form, change)
+
+
 def default_requests_mail_from(request, provider=None, booking=None):
     if provider and not provider.is_private:
         return 'reservas1@ergosonline.com'
@@ -1773,3 +1844,5 @@ bookings_site.register(BookingPackageTransfer, BookingPackageTransferSiteModel)
 bookings_site.register(BookingPackageExtra, BookingPackageExtraSiteModel)
 
 bookings_site.register(BookingInvoice, BookingInvoiceSiteModel)
+
+bookings_site.register(ProviderBookingPayment, ProviderBookingPaymentSiteModel)

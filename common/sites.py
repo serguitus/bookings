@@ -417,7 +417,13 @@ class SiteModel(TotalsumAdmin):
         if obj is None:
             return list(self.add_readonly_fields) + list(self.readonly_fields)
         else:
-            return list(self.change_readonly_fields) + list(self.readonly_fields)
+            return list(self.get_change_readonly_fields(request, obj)) + list(self.readonly_fields)
+
+    def get_change_readonly_fields(self, request, obj=None):
+        """
+        Hook for specifying custom readonly fields.
+        """
+        return self.change_readonly_fields
 
     @property
     def change_actions(self):
@@ -634,7 +640,10 @@ class SiteModel(TotalsumAdmin):
 
         inline_formsets = self.get_inline_formsets(request, formsets, inline_instances, obj)
         for inline_formset in inline_formsets:
-            media = media + inline_formset.media
+            try:
+                media = media + inline_formset.media
+            except Exception as ex:
+                print(ex)
 
         context = dict(
             self.admin_site.each_context(request),
@@ -1005,101 +1014,101 @@ class SiteModel(TotalsumAdmin):
         """
         Recoding for allowing custom saving.
         """
-        with transaction.atomic(using=router.db_for_write(self.model)):
-            to_field = request.POST.get(TO_FIELD_VAR, request.GET.get(TO_FIELD_VAR))
-            if to_field and not self.to_field_allowed(request, to_field):
-                raise DisallowedModelAdminToField("The field %s cannot be referenced." % to_field)
+        #with transaction.atomic(using=router.db_for_write(self.model)):
+        to_field = request.POST.get(TO_FIELD_VAR, request.GET.get(TO_FIELD_VAR))
+        if to_field and not self.to_field_allowed(request, to_field):
+            raise DisallowedModelAdminToField("The field %s cannot be referenced." % to_field)
 
-            model = self.model
-            opts = model._meta
-            opts.details_template = self.details_template
+        model = self.model
+        opts = model._meta
+        opts.details_template = self.details_template
 
-            if request.method == 'POST' and '_saveasnew' in request.POST:
-                object_id = None
+        if request.method == 'POST' and '_saveasnew' in request.POST:
+            object_id = None
 
-            add = object_id is None
+        add = object_id is None
 
-            if add:
-                if not self.has_add_permission(request):
-                    raise PermissionDenied
-                obj = None
+        if add:
+            if not self.has_add_permission(request):
+                raise PermissionDenied
+            obj = None
 
+        else:
+            obj = self.get_object(request, unquote(object_id), to_field)
+
+            if (
+                    (not self.has_module_permission(request))
+                    and (not self.has_change_permission(request, obj))):
+                raise PermissionDenied
+
+            if obj is None:
+                return self.get_obj_does_not_exist_redirect(request, opts, object_id)
+
+        if obj:
+            self.recent_link(request, model_object=obj)
+        ModelForm = self.get_form(request, obj)
+        if request.method == 'POST':
+            form = ModelForm(request.POST, request.FILES, instance=obj)
+            change_actions = self.change_actions
+            if change_actions:
+                for action in change_actions:
+                    if '_%s' % action['name'] in request.POST:
+                        object_id = str(obj.id)
+                        return HttpResponseRedirect(reverse('common:%s_%s_%s' % (
+                                self.model._meta.app_label,
+                                self.model._meta.model_name,
+                                action['name'],
+                            ), args=(object_id,)))
+            if '_cancel' in request.POST:
+                form_validated = False
+                new_object = form.instance
+                formsets, inline_instances = self._create_formsets(
+                    request, new_object, change=not add)
+                return self.response_cancel(request, new_object, add)
             else:
-                obj = self.get_object(request, unquote(object_id), to_field)
-
-                if (
-                        (not self.has_module_permission(request))
-                        and (not self.has_change_permission(request, obj))):
-                    raise PermissionDenied
-
-                if obj is None:
-                    return self.get_obj_does_not_exist_redirect(request, opts, object_id)
-
-            if obj:
-                self.recent_link(request, model_object=obj)
-            ModelForm = self.get_form(request, obj)
-            if request.method == 'POST':
-                form = ModelForm(request.POST, request.FILES, instance=obj)
-                change_actions = self.change_actions
-                if change_actions:
-                    for action in change_actions:
-                        if '_%s' % action['name'] in request.POST:
-                            object_id = str(obj.id)
-                            return HttpResponseRedirect(reverse('common:%s_%s_%s' % (
-                                    self.model._meta.app_label,
-                                    self.model._meta.model_name,
-                                    action['name'],
-                                ), args=(object_id,)))
-                if '_cancel' in request.POST:
+                if form.is_valid():
+                    form_validated = True
+                    new_object = self.save_form(request, form, change=not add)
+                else:
                     form_validated = False
                     new_object = form.instance
-                    formsets, inline_instances = self._create_formsets(
-                        request, new_object, change=not add)
-                    return self.response_cancel(request, new_object, add)
-                else:
-                    if form.is_valid():
-                        form_validated = True
-                        new_object = self.save_form(request, form, change=not add)
+                formsets, inline_instances = self._create_formsets(
+                    request, new_object, change=not add)
+                if all_valid(formsets) and form_validated:
+                    response = self.changeform_do_saving(
+                        request=request, new_object=new_object, form=form, formsets=formsets,
+                        add=add, inlines=inline_instances)
+                    if response:
+                        return response
                     else:
                         form_validated = False
-                        new_object = form.instance
-                    formsets, inline_instances = self._create_formsets(
-                        request, new_object, change=not add)
-                    if all_valid(formsets) and form_validated:
-                        response = self.changeform_do_saving(
-                            request=request, new_object=new_object, form=form, formsets=formsets,
-                            add=add, inlines=inline_instances)
-                        if response:
-                            return response
-                        else:
-                            form_validated = False
-                    else:
-                        form_validated = False
-            else:
-                if add:
-                    initial = self.get_changeform_initial_data(request)
-                    form = ModelForm(initial=initial)
-                    formsets, inline_instances = self._create_formsets(
-                        request, form.instance, change=False)
-                    #self_formsets, self_inline_instances = self._create_self_formsets(
-                    #    request, form.instance, change=False)
                 else:
-                    form = ModelForm(instance=obj)
-                    formsets, inline_instances = self._create_formsets(request, obj, change=True)
-                    #self_formsets, self_inline_instances = self._create_self_formsets(
-                    #    request, obj, change=True)
-
-            if request.method == 'POST':
-                context = self.changeform_context(
-                    request, form, obj, formsets, inline_instances, add, opts, object_id, to_field,
-                    form_validated)
+                    form_validated = False
+        else:
+            if add:
+                initial = self.get_changeform_initial_data(request)
+                form = ModelForm(initial=initial)
+                formsets, inline_instances = self._create_formsets(
+                    request, form.instance, change=False)
+                #self_formsets, self_inline_instances = self._create_self_formsets(
+                #    request, form.instance, change=False)
             else:
-                context = self.changeform_context(
-                    request, form, obj, formsets, inline_instances, add, opts, object_id, to_field)
-            context.update(extra_context or {})
+                form = ModelForm(instance=obj)
+                formsets, inline_instances = self._create_formsets(request, obj, change=True)
+                #self_formsets, self_inline_instances = self._create_self_formsets(
+                #    request, obj, change=True)
 
-            return self.render_change_form(
-                request, context, add=add, change=not add, obj=obj, form_url=form_url)
+        if request.method == 'POST':
+            context = self.changeform_context(
+                request, form, obj, formsets, inline_instances, add, opts, object_id, to_field,
+                form_validated)
+        else:
+            context = self.changeform_context(
+                request, form, obj, formsets, inline_instances, add, opts, object_id, to_field)
+        context.update(extra_context or {})
+
+        return self.render_change_form(
+            request, context, add=add, change=not add, obj=obj, form_url=form_url)
 
     def do_deleting(self, request, obj, obj_display, obj_id):
         """
@@ -1122,69 +1131,69 @@ class SiteModel(TotalsumAdmin):
         """
         Recoding for allowing custom deleting.
         """
-        with transaction.atomic(using=router.db_for_write(self.model)):
-            opts = self.model._meta
-            app_label = opts.app_label
+        #with transaction.atomic(using=router.db_for_write(self.model)):
+        opts = self.model._meta
+        app_label = opts.app_label
 
-            to_field = request.POST.get(TO_FIELD_VAR, request.GET.get(TO_FIELD_VAR))
-            if to_field and not self.to_field_allowed(request, to_field):
-                raise DisallowedModelAdminToField("The field %s cannot be referenced." % to_field)
+        to_field = request.POST.get(TO_FIELD_VAR, request.GET.get(TO_FIELD_VAR))
+        if to_field and not self.to_field_allowed(request, to_field):
+            raise DisallowedModelAdminToField("The field %s cannot be referenced." % to_field)
 
-            obj = self.get_object(request, unquote(object_id), to_field)
+        obj = self.get_object(request, unquote(object_id), to_field)
 
-            if not self.has_delete_permission(request, obj):
+        if not self.has_delete_permission(request, obj):
+            raise PermissionDenied
+
+        if obj is None:
+            return self.get_obj_does_not_exist_redirect(request, opts, object_id)
+
+        using = router.db_for_write(self.model)
+
+        # Populate deleted_objects, a data structure of all related objects that
+        # will also be deleted.
+        (deleted_objects, model_count, perms_needed, protected) = get_deleted_objects(
+            [obj], opts, request.user, self.admin_site, using)
+
+        if request.POST and not protected:  # The user has confirmed the deletion.
+            if perms_needed:
                 raise PermissionDenied
+            obj_display = force_text(obj)
+            attr = str(to_field) if to_field else opts.pk.attname
+            obj_id = obj.serializable_value(attr)
 
-            if obj is None:
-                return self.get_obj_does_not_exist_redirect(request, opts, object_id)
+            response = self.do_deleting(request, obj, obj_display, obj_id)
+            if response:
+                return response
 
-            using = router.db_for_write(self.model)
+            return HttpResponseRedirect(reverse(
+                'common:%s_%s_change' % (self.model._meta.app_label, self.model._meta.model_name),
+                args=[obj.id]))
 
-            # Populate deleted_objects, a data structure of all related objects that
-            # will also be deleted.
-            (deleted_objects, model_count, perms_needed, protected) = get_deleted_objects(
-                [obj], opts, request.user, self.admin_site, using)
+        object_name = force_text(opts.verbose_name)
 
-            if request.POST and not protected:  # The user has confirmed the deletion.
-                if perms_needed:
-                    raise PermissionDenied
-                obj_display = force_text(obj)
-                attr = str(to_field) if to_field else opts.pk.attname
-                obj_id = obj.serializable_value(attr)
+        if perms_needed or protected:
+            title = _("Cannot delete %(name)s") % {"name": object_name}
+        else:
+            title = _("Are you sure?")
 
-                response = self.do_deleting(request, obj, obj_display, obj_id)
-                if response:
-                    return response
+        context = dict(
+            self.admin_site.each_context(request),
+            title=title,
+            object_name=object_name,
+            object=obj,
+            deleted_objects=deleted_objects,
+            model_count=dict(model_count).items(),
+            perms_lacking=perms_needed,
+            protected=protected,
+            opts=opts,
+            app_label=app_label,
+            preserved_filters=self.get_preserved_filters(request),
+            is_popup=(IS_POPUP_VAR in request.POST or IS_POPUP_VAR in request.GET),
+            to_field=to_field,
+        )
+        context.update(extra_context or {})
 
-                return HttpResponseRedirect(reverse(
-                    'common:%s_%s_change' % (self.model._meta.app_label, self.model._meta.model_name),
-                    args=[obj.id]))
-
-            object_name = force_text(opts.verbose_name)
-
-            if perms_needed or protected:
-                title = _("Cannot delete %(name)s") % {"name": object_name}
-            else:
-                title = _("Are you sure?")
-
-            context = dict(
-                self.admin_site.each_context(request),
-                title=title,
-                object_name=object_name,
-                object=obj,
-                deleted_objects=deleted_objects,
-                model_count=dict(model_count).items(),
-                perms_lacking=perms_needed,
-                protected=protected,
-                opts=opts,
-                app_label=app_label,
-                preserved_filters=self.get_preserved_filters(request),
-                is_popup=(IS_POPUP_VAR in request.POST or IS_POPUP_VAR in request.GET),
-                to_field=to_field,
-            )
-            context.update(extra_context or {})
-
-            return self.render_delete_form(request, context)
+        return self.render_delete_form(request, context)
 
     def get_changelist(self, request, **kwargs):
         """

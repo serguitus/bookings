@@ -10,11 +10,11 @@ from finance.constants import (
     STATUS_DRAFT, STATUS_READY,
     ERROR_MATCH_STATUS, ERROR_MATCH_AMOUNT, ERROR_MATCH_ACCOUNT, ERROR_MATCH_LOAN_ACCOUNT)
 from finance.models import LoanAccount, LoanAccountDeposit, LoanAccountWithdraw, LoanAccountMatch
-from finance.services import FinanceService
+from finance.services import FinanceServices
 from finance.tests.utils import FinanceBaseTestCase
 
 
-class FinanceServiceTestCase(FinanceBaseTestCase):
+class FinanceServicesTestCase(FinanceBaseTestCase):
 
     test_user = None
 
@@ -48,7 +48,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account,
             status=test_status)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -59,7 +59,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account,
             status=test_status)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -68,7 +68,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account_withdraw=loan_account_withdraw,
             matched_amount=test_amount)
 
-        loan_account_match = FinanceService.save_loan_account_match(loan_account_match)
+        loan_account_match = FinanceServices.save_loan_account_match(loan_account_match)
 
         test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
         # entity matched incremented
@@ -106,7 +106,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account,
             status=test_status)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -117,7 +117,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account,
             status=test_status)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -126,7 +126,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account_withdraw=loan_account_withdraw,
             matched_amount=test_amount)
 
-        loan_account_match = FinanceService.save_loan_account_match(loan_account_match)
+        loan_account_match = FinanceServices.save_loan_account_match(loan_account_match)
 
         test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
         # entity matched incremented
@@ -142,7 +142,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         delta = -10
         loan_account_match.matched_amount += delta
 
-        loan_account_match = FinanceService.save_loan_account_match(loan_account_match)
+        loan_account_match = FinanceServices.save_loan_account_match(loan_account_match)
 
         test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
         # entity matched changed
@@ -180,7 +180,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account,
             status=test_status)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -191,7 +191,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account,
             status=test_status)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -200,7 +200,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account_withdraw=loan_account_withdraw,
             matched_amount=test_amount)
 
-        loan_account_match = FinanceService.save_loan_account_match(loan_account_match)
+        loan_account_match = FinanceServices.save_loan_account_match(loan_account_match)
 
         test_loan_account = LoanAccount.objects.get(pk=test_loan_account.pk)
         # entity matched incremented
@@ -214,7 +214,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         # delete
 
-        FinanceService.delete_loan_account_match(loan_account_match.pk)
+        FinanceServices.delete_loan_account_match(loan_account_match.pk)
 
         loan_account_deposit.refresh_from_db()
         loan_account_withdraw.refresh_from_db()
@@ -248,7 +248,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account,
             status=test_status)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -259,7 +259,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account,
             status=test_status)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -269,7 +269,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             matched_amount=test_amount)
 
         with self.assertRaises(ValidationError):
-            loan_account_match = FinanceService.save_loan_account_match(loan_account_match)
+            loan_account_match = FinanceServices.save_loan_account_match(loan_account_match)
 
     def test_loan_account_match_excesive_amount(self):
         """
@@ -297,7 +297,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account,
             status=test_status)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -308,7 +308,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account,
             status=test_status)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -318,7 +318,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             matched_amount=test_amount + 0.01)
 
         with self.assertRaises(ValidationError):
-            loan_account_match = FinanceService.save_loan_account_match(loan_account_match)
+            loan_account_match = FinanceServices.save_loan_account_match(loan_account_match)
 
     def test_loan_account_match_different_loan_account(self):
         """
@@ -346,7 +346,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account1,
             status=test_status)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -364,7 +364,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account2,
             status=test_status)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -374,7 +374,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             matched_amount=test_amount)
 
         with self.assertRaises(ValidationError):
-            loan_account_match = FinanceService.save_loan_account_match(loan_account_match)
+            loan_account_match = FinanceServices.save_loan_account_match(loan_account_match)
 
     def test_loan_account_match_different_accounts(self):
         """
@@ -402,7 +402,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account,
             status=test_status)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -418,7 +418,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account,
             status=test_status)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -428,7 +428,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             matched_amount=test_amount)
 
         with self.assertRaises(ValidationError):
-            loan_account_match = FinanceService.save_loan_account_match(loan_account_match)
+            loan_account_match = FinanceServices.save_loan_account_match(loan_account_match)
 
     def test_loan_account_match_then_increase_amount(self):
         """
@@ -456,7 +456,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account,
             status=test_status)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -467,7 +467,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account,
             status=test_status)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -476,7 +476,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account_withdraw=loan_account_withdraw,
             matched_amount=test_amount)
 
-        loan_account_match = FinanceService.save_loan_account_match(loan_account_match)
+        loan_account_match = FinanceServices.save_loan_account_match(loan_account_match)
 
         loan_account_deposit.refresh_from_db()
         loan_account_withdraw.refresh_from_db()
@@ -486,7 +486,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         loan_account_withdraw.amount = loan_account_withdraw.amount + 20
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -518,7 +518,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account,
             status=test_status)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -529,7 +529,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account,
             status=test_status)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -538,7 +538,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account_withdraw=loan_account_withdraw,
             matched_amount=test_amount)
 
-        loan_account_match = FinanceService.save_loan_account_match(loan_account_match)
+        loan_account_match = FinanceServices.save_loan_account_match(loan_account_match)
 
         loan_account_deposit.refresh_from_db()
         loan_account_withdraw.refresh_from_db()
@@ -549,7 +549,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_withdraw.status = STATUS_DRAFT
 
         with self.assertRaisesMessage(ValidationError, ERROR_MATCH_STATUS):
-            loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+            loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
                 user=self.test_user,
                 loan_account_withdraw=loan_account_withdraw)
 
@@ -579,7 +579,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account,
             status=test_status)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -590,7 +590,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account,
             status=test_status)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -599,7 +599,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account_withdraw=loan_account_withdraw,
             matched_amount=test_amount)
 
-        loan_account_match = FinanceService.save_loan_account_match(loan_account_match)
+        loan_account_match = FinanceServices.save_loan_account_match(loan_account_match)
 
         loan_account_deposit.refresh_from_db()
         loan_account_withdraw.refresh_from_db()
@@ -610,7 +610,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_withdraw.amount = loan_account_withdraw.amount - 20
 
         with self.assertRaisesMessage(ValidationError, ERROR_MATCH_AMOUNT):
-            loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+            loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
                 user=self.test_user,
                 loan_account_withdraw=loan_account_withdraw)
 
@@ -640,7 +640,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account,
             status=test_status)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -651,7 +651,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account,
             status=test_status)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -660,7 +660,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account_withdraw=loan_account_withdraw,
             matched_amount=test_amount)
 
-        loan_account_match = FinanceService.save_loan_account_match(loan_account_match)
+        loan_account_match = FinanceServices.save_loan_account_match(loan_account_match)
 
         loan_account_deposit.refresh_from_db()
         loan_account_withdraw.refresh_from_db()
@@ -676,7 +676,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_withdraw.account = test_account2
 
         with self.assertRaisesMessage(ValidationError, ERROR_MATCH_ACCOUNT):
-            loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+            loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
                 user=self.test_user,
                 loan_account_withdraw=loan_account_withdraw)
 
@@ -706,7 +706,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account1,
             status=test_status)
 
-        loan_account_deposit = FinanceService.save_loan_account_deposit(
+        loan_account_deposit = FinanceServices.save_loan_account_deposit(
             user=self.test_user,
             loan_account_deposit=loan_account_deposit)
 
@@ -717,7 +717,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account=test_loan_account1,
             status=test_status)
 
-        loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+        loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
             user=self.test_user,
             loan_account_withdraw=loan_account_withdraw)
 
@@ -726,7 +726,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             loan_account_withdraw=loan_account_withdraw,
             matched_amount=test_amount)
 
-        loan_account_match = FinanceService.save_loan_account_match(loan_account_match)
+        loan_account_match = FinanceServices.save_loan_account_match(loan_account_match)
 
         loan_account_deposit.refresh_from_db()
         loan_account_withdraw.refresh_from_db()
@@ -744,6 +744,6 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         loan_account_withdraw.loan_account = test_loan_account2
 
         with self.assertRaisesMessage(ValidationError, ERROR_MATCH_LOAN_ACCOUNT):
-            loan_account_withdraw = FinanceService.save_loan_account_withdraw(
+            loan_account_withdraw = FinanceServices.save_loan_account_withdraw(
                 user=self.test_user,
                 loan_account_withdraw=loan_account_withdraw)

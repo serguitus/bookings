@@ -10,7 +10,9 @@ from booking.models import (
     Quote, QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
     QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
     Booking, BookingServicePax, BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
-    BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,)
+    BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
+    ProviderBookingPayment,
+)
 from finance.models import Office
 from django import forms
 
@@ -768,6 +770,7 @@ class VouchersConfigForm(MailForm):
     # here comes also some inputs to select logo and other details
     office = forms.ModelChoiceField(queryset=Office.objects.all())
 
+
 class PackageForm(forms.ModelForm):
     class Meta:
         model = Package
@@ -775,3 +778,40 @@ class PackageForm(forms.ModelForm):
         widgets = {
             'description': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
         }
+
+
+class ProviderBookingPaymentForm(forms.ModelForm):
+    class Meta:
+        model = ProviderBookingPayment
+        fields = ('__all__')
+        widgets = {
+            'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
+            'account': autocomplete.ModelSelect2(url='cuc-account-autocomplete'),
+        }
+
+
+class ProviderBookingPaymentServiceForm(forms.Form):
+    service_payment_id = forms.CharField(required=False, widget=forms.HiddenInput())
+    service_id = forms.CharField(required=False, widget=forms.HiddenInput())
+    is_selected = forms.BooleanField(label='sel', required=False)
+    service_name = forms.CharField(disabled=True, required=False)
+    saved_amount_to_pay = forms.DecimalField(
+        label='Saved To Pay', required=False,
+        disabled=True, widget=forms.TextInput(
+            attrs={'readonly':'readonly', 'style':'text-align: right; width: 100px;'}))
+    saved_amount_paid = forms.DecimalField(
+        label='Saved Paid', required=False,
+        disabled=True, widget=forms.TextInput(
+            attrs={'readonly':'readonly', 'style':'text-align: right; width: 100px;'}))
+    service_amount_to_pay = forms.DecimalField(
+        label='Serv.To Pay', required=False,
+        disabled=True, widget=forms.TextInput(
+            attrs={'readonly':'readonly', 'style':'text-align: right; width: 100px;'}))
+    service_amount_paid = forms.DecimalField(
+        label='Serv.Paid', required=False,
+        disabled=True, widget=forms.TextInput(
+            attrs={'readonly':'readonly', 'style':'text-align: right; width: 100px;'}))
+    amount_paid = forms.DecimalField(
+        label='Paid', required=False,
+        decimal_places=2, widget=forms.NumberInput(
+            attrs={'style':'text-align: right; width: 100px;'}))

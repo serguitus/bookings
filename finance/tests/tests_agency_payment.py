@@ -11,11 +11,11 @@ from accounting.models import Account, Operation
 
 from finance.constants import STATUS_DRAFT, STATUS_READY, DOC_TYPE_AGENCY_PAYMENT
 from finance.models import Agency, AgencyPayment
-from finance.services import FinanceService
+from finance.services import FinanceServices
 from finance.tests.utils import FinanceBaseTestCase
 
 
-class FinanceServiceTestCase(FinanceBaseTestCase):
+class FinanceServicesTestCase(FinanceBaseTestCase):
 
     test_user = None
     test_agency = None
@@ -47,7 +47,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -91,7 +91,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -147,7 +147,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -175,7 +175,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_payment.status = test_status2
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -233,7 +233,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -275,7 +275,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_payment.status = test_status2
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -333,7 +333,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -381,7 +381,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         agency_payment.status = test_status2
         agency_payment.account = test_account2
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -440,7 +440,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -468,7 +468,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_payment.amount = test_amount2
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -506,7 +506,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -548,7 +548,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_payment.amount = test_amount2
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -616,7 +616,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -647,7 +647,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_payment.account = test_account2
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -685,7 +685,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -730,7 +730,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_payment.account = test_account2
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -799,7 +799,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -847,7 +847,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         agency_payment.account = test_account2
         agency_payment.amount = test_amount2
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -916,7 +916,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -946,7 +946,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_payment.date = test_date2
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -989,7 +989,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
@@ -1033,7 +1033,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_payment.date = test_date2
 
-        agency_payment = FinanceService.save_agency_payment(
+        agency_payment = FinanceServices.save_agency_payment(
             user=self.test_user,
             agency_payment=agency_payment)
 
