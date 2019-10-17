@@ -39,7 +39,8 @@ MATCH_TYPE_AGENCY = 3
 MATCH_TYPE_PROVIDER = 4
 
 
-class FinanceService(object):
+class FinanceServices(object):
+
     """
     Finance Service
     """
