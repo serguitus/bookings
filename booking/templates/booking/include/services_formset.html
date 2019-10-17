@@ -1,0 +1,36 @@
+{{ services_formset.management_form }}
+{{ services_formset.non_form_errors.as_ul }}
+<table id="services_formset" class="form">
+{% for form in services_formset.forms %}
+  {% if forloop.first %}
+  <thead><tr>
+    {% for field in form.visible_fields %}
+    <th>{{ field.label|capfirst }}</th>
+    {% endfor %}
+  </tr></thead>
+  {% endif %}
+  <tr class="{% cycle row1 row2 %}">
+  {% for field in form.visible_fields %}
+    <td>
+    {# Include the hidden fields in the form #}
+    {% if forloop.first %}
+      {% for hidden in form.hidden_fields %}
+      {{ hidden }}
+      {% endfor %}
+    {% endif %}
+      {{ field.errors.as_ul }}
+
+      {% if field.field.disabled %}
+        {% if field.label == 'Service name' %}
+          <div id="{{ field.id_for_label }}" style="text-align: left;">{{ field.value }}</div>
+        {% else %}
+          <div id="{{ field.id_for_label }}" style="text-align: right;">{{ field.value }}</div>
+        {% endif %}
+      {% else %}
+        {{ field }}
+      {% endif %}
+    </td>
+  {% endfor %}
+  </tr>
+{% endfor %}
+</table>

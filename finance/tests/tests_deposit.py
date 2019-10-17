@@ -11,11 +11,11 @@ from accounting.models import Account, Operation
 
 from finance.constants import STATUS_DRAFT, STATUS_READY, DOC_TYPE_DEPOSIT
 from finance.models import Deposit
-from finance.services import FinanceService
+from finance.services import FinanceServices
 from finance.tests.utils import FinanceBaseTestCase
 
 
-class FinanceServiceTestCase(FinanceBaseTestCase):
+class FinanceServicesTestCase(FinanceBaseTestCase):
 
     test_user = None
 
@@ -42,7 +42,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 
@@ -85,7 +85,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 
@@ -142,7 +142,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 
@@ -170,7 +170,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         deposit.status = test_status2
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 
@@ -227,7 +227,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 
@@ -269,7 +269,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         deposit.status = test_status2
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 
@@ -326,7 +326,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 
@@ -374,7 +374,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         deposit.status = test_status2
         deposit.account = test_account2
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 
@@ -432,7 +432,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 
@@ -460,7 +460,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         deposit.amount = test_amount2
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 
@@ -497,7 +497,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 
@@ -539,7 +539,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         deposit.amount = test_amount2
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 
@@ -606,7 +606,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 
@@ -637,7 +637,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         deposit.account = test_account2
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 
@@ -674,7 +674,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 
@@ -719,7 +719,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         deposit.account = test_account2
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 
@@ -787,7 +787,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 
@@ -835,7 +835,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         deposit.account = test_account2
         deposit.amount = test_amount2
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 
@@ -903,7 +903,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 
@@ -933,7 +933,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         deposit.date = test_date2
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 
@@ -975,7 +975,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 
@@ -1019,7 +1019,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         deposit.date = test_date2
 
-        deposit = FinanceService.save_deposit(
+        deposit = FinanceServices.save_deposit(
             user=self.test_user,
             deposit=deposit)
 

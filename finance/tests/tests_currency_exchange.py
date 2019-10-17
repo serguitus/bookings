@@ -11,11 +11,11 @@ from accounting.models import Account, Operation
 
 from finance.constants import STATUS_DRAFT, STATUS_READY, DOC_TYPE_CURRENCY_EXCHANGE
 from finance.models import CurrencyExchange
-from finance.services import FinanceService
+from finance.services import FinanceServices
 from finance.tests.utils import FinanceBaseTestCase
 
 
-class FinanceServiceTestCase(FinanceBaseTestCase):
+class FinanceServicesTestCase(FinanceBaseTestCase):
 
     test_user = None
 
@@ -50,7 +50,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             exchange_amount=test_amount2,
             status=test_status)
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -102,7 +102,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             exchange_amount=test_amount2,
             status=test_status)
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -171,7 +171,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             exchange_amount=test_amount2,
             status=test_status1)
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -200,7 +200,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         currency_exchange.status = test_status2
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -268,7 +268,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             exchange_amount=test_amount2,
             status=test_status1)
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -313,7 +313,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         currency_exchange.status = test_status2
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -390,7 +390,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             exchange_amount=test_amount2,
             status=test_status1)
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -448,7 +448,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         currency_exchange.account = test_account3
         currency_exchange.exchange_account = test_account4
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -528,7 +528,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             exchange_amount=test_amount2,
             status=test_status)
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -559,7 +559,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         currency_exchange.amount = test_amount3
         currency_exchange.exchange_amount = test_amount4
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -605,7 +605,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             exchange_amount=test_amount2,
             status=test_status)
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -653,7 +653,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         currency_exchange.amount = test_amount3
         currency_exchange.exchange_amount = test_amount4
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -742,7 +742,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             exchange_amount=test_amount2,
             status=test_status)
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -780,7 +780,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         currency_exchange.account = test_account3
         currency_exchange.exchange_account = test_account4
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -828,7 +828,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             exchange_amount=test_amount2,
             status=test_status)
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -883,7 +883,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         currency_exchange.account = test_account3
         currency_exchange.exchange_account = test_account4
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -974,7 +974,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             exchange_amount=test_amount2,
             status=test_status)
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -1034,7 +1034,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         currency_exchange.amount = test_amount3
         currency_exchange.exchange_amount = test_amount4
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -1125,7 +1125,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             exchange_amount=test_amount2,
             status=test_status)
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -1156,7 +1156,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         currency_exchange.date = test_date2
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -1207,7 +1207,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             exchange_amount=test_amount2,
             status=test_status)
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -1255,7 +1255,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         currency_exchange.date = test_date2
 
-        currency_exchange = FinanceService.save_currency_exchange(
+        currency_exchange = FinanceServices.save_currency_exchange(
             user=self.test_user,
             currency_exchange=currency_exchange)
 
@@ -1308,7 +1308,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         with self.assertRaisesMessage(
             ValidationError, ERROR_SAME_CURRENCY % (test_account1, test_account2)) as ex:
-            currency_exchange = FinanceService.save_currency_exchange(
+            currency_exchange = FinanceServices.save_currency_exchange(
                 user=self.test_user,
                 currency_exchange=currency_exchange)
 

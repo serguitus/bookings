@@ -12,9 +12,11 @@ from booking.models import (
     QuotePackageServicePaxVariant,
     QuotePackage, QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
     Booking, BookingPax,
-    BookingService, BookingServicePax,
+    BaseBookingService, BookingService, BookingServicePax,
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
-    BookingPackageService, BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra)
+    BookingPackageService, BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
+    ProviderBookingPayment, ProviderBookingPaymentService,
+)
 from booking.services import BookingServices
 
 
@@ -145,71 +147,74 @@ def post_save_post_delete_bookingservicepax(sender, instance, **kwargs):
 def pre_save_bookingallotment(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_update'):
         BookingServices.setup_bookingservice_amounts(instance)
+    BookingServices.validate_basebookingservice(instance)
 
 
 @receiver(pre_save, sender=BookingTransfer)
 def pre_save_bookingtransfer(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_update'):
         BookingServices.setup_bookingservice_amounts(instance)
+    BookingServices.validate_basebookingservice(instance)
 
 
 @receiver(pre_save, sender=BookingExtra)
 def pre_save_bookingextra(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_update'):
         BookingServices.setup_bookingservice_amounts(instance)
+    BookingServices.validate_basebookingservice(instance)
 
 
 @receiver(pre_delete, sender=BookingService)
 def pre_delete_bookingservice(sender, instance, **kwargs):
-    if instance.status != SERVICE_STATUS_PENDING:
+    if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
         raise ValidationError('Can not delete Booking Services that are Not Pending')
 
 
 @receiver(pre_delete, sender=BookingAllotment)
 def pre_delete_bookingallotment(sender, instance, **kwargs):
-    if instance.status != SERVICE_STATUS_PENDING:
+    if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
         raise ValidationError('Can not delete Booking Services that are Not Pending')
 
 
 @receiver(pre_delete, sender=BookingTransfer)
 def pre_delete_bookingtransfer(sender, instance, **kwargs):
-    if instance.status != SERVICE_STATUS_PENDING:
+    if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
         raise ValidationError('Can not delete Booking Services that are Not Pending')
 
 
 @receiver(pre_delete, sender=BookingExtra)
 def pre_delete_bookingextra(sender, instance, **kwargs):
-    if instance.status != SERVICE_STATUS_PENDING:
+    if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
         raise ValidationError('Can not delete Booking Services that are Not Pending')
 
 
 @receiver(pre_delete, sender=BookingPackage)
 def pre_delete_bookingpackage(sender, instance, **kwargs):
-    if instance.status != SERVICE_STATUS_PENDING:
+    if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
         raise ValidationError('Can not delete Booking Services that are Not Pending')
 
 
 @receiver(pre_delete, sender=BookingPackageService)
 def pre_delete_bookingpackageservice(sender, instance, **kwargs):
-    if instance.status != SERVICE_STATUS_PENDING:
+    if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
         raise ValidationError('Can not delete Booking Services that are Not Pending')
 
 
 @receiver(pre_delete, sender=BookingPackageAllotment)
 def pre_delete_bookingpackageallotment(sender, instance, **kwargs):
-    if instance.status != SERVICE_STATUS_PENDING:
+    if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
         raise ValidationError('Can not delete Booking Services that are Not Pending')
 
 
 @receiver(pre_delete, sender=BookingPackageTransfer)
 def pre_delete_bookingpackagetransfer(sender, instance, **kwargs):
-    if instance.status != SERVICE_STATUS_PENDING:
+    if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
         raise ValidationError('Can not delete Booking Services that are Not Pending')
 
 
 @receiver(pre_delete, sender=BookingPackageExtra)
 def pre_delete_bookingpackageextra(sender, instance, **kwargs):
-    if instance.status != SERVICE_STATUS_PENDING:
+    if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
         raise ValidationError('Can not delete Booking Services that are Not Pending')
 
 
@@ -245,18 +250,21 @@ def post_save_post_delete_bookingpackage(sender, instance, **kwargs):
 def pre_save_bookingpackageallotment(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_update'):
         BookingServices.setup_bookingservice_amounts(instance)
+    BookingServices.validate_basebookingservice(instance)
 
 
 @receiver(pre_save, sender=BookingPackageTransfer)
 def pre_save_bookingpackagetransfer(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_update'):
         BookingServices.setup_bookingservice_amounts(instance)
+    BookingServices.validate_basebookingservice(instance)
 
 
 @receiver(pre_save, sender=BookingPackageExtra)
 def pre_save_bookingpackageextra(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_update'):
         BookingServices.setup_bookingservice_amounts(instance)
+    BookingServices.validate_basebookingservice(instance)
 
 
 @receiver((post_save, post_delete), sender=BookingPackageAllotment)

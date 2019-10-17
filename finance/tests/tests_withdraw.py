@@ -11,11 +11,11 @@ from accounting.models import Account, Operation
 
 from finance.constants import STATUS_DRAFT, STATUS_READY, DOC_TYPE_WITHDRAW
 from finance.models import Withdraw
-from finance.services import FinanceService
+from finance.services import FinanceServices
 from finance.tests.utils import FinanceBaseTestCase
 
 
-class FinanceServiceTestCase(FinanceBaseTestCase):
+class FinanceServicesTestCase(FinanceBaseTestCase):
 
     test_user = None
 
@@ -43,7 +43,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 
@@ -87,7 +87,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 
@@ -145,7 +145,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 
@@ -173,7 +173,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         withdraw.status = test_status2
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 
@@ -231,7 +231,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 
@@ -273,7 +273,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         withdraw.status = test_status2
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 
@@ -331,7 +331,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 
@@ -380,7 +380,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         withdraw.status = test_status2
         withdraw.account = test_account2
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 
@@ -439,7 +439,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 
@@ -467,7 +467,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         withdraw.amount = test_amount2
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 
@@ -505,7 +505,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 
@@ -547,7 +547,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         withdraw.amount = test_amount2
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 
@@ -615,7 +615,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 
@@ -647,7 +647,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         withdraw.account = test_account2
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 
@@ -685,7 +685,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 
@@ -731,7 +731,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         withdraw.account = test_account2
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 
@@ -800,7 +800,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 
@@ -849,7 +849,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         withdraw.account = test_account2
         withdraw.amount = test_amount2
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 
@@ -918,7 +918,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 
@@ -948,7 +948,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         withdraw.date = test_date2
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 
@@ -991,7 +991,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 
@@ -1035,7 +1035,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         withdraw.date = test_date2
 
-        withdraw = FinanceService.save_withdraw(
+        withdraw = FinanceServices.save_withdraw(
             user=self.test_user,
             withdraw=withdraw)
 

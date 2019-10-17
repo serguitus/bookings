@@ -8,6 +8,8 @@ from django.db.models import Exists, OuterRef, Subquery, Q, F, Value, DecimalFie
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext
 
+from accounting.constants import CURRENCY_CUC
+
 from finance.models import Account, LoanEntity, LoanAccount, Agency, Provider
 from finance.constants import STATUS_READY
 
@@ -18,6 +20,17 @@ class AccountAutocompleteView(autocomplete.Select2QuerySetView):
         if not self.request.user.is_authenticated():
             return Account.objects.none()
         qs = Account.objects.filter(enabled=True).all()
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs[:20]
+
+
+class CUCAccountAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return Account.objects.none()
+        qs = Account.objects.filter(enabled=True, currency=CURRENCY_CUC).all()
         if self.q:
             qs = qs.filter(name__icontains=self.q)
         return qs[:20]

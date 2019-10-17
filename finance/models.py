@@ -59,7 +59,7 @@ class FinantialDocument(models.Model):
     name = models.CharField(max_length=200, default='Finantial Document')
     date = models.DateField(default=now)
     currency = models.CharField(max_length=5, choices=CURRENCIES)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     status = models.CharField(
         max_length=5, choices=STATUSES, default=STATUS_DRAFT)
     details = models.TextField(blank=True)

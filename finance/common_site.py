@@ -34,7 +34,7 @@ from finance.models import (
     AgencyInvoice, AgencyPayment,
     Provider, ProviderDocumentMatch, ProviderCreditDocument, ProviderDebitDocument,
     ProviderInvoice, ProviderPayment)
-from finance.services import FinanceService
+from finance.services import FinanceServices
 from finance.top_filters import LoanEntityTopFilter, LoanAccountTopFilter
 
 from accounting.top_filters import AccountTopFilter, AmountTopFilter
@@ -378,7 +378,7 @@ class DepositSiteModel(BaseFinantialDocumentSiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        return FinanceService.save_deposit(request.user, obj)
+        return FinanceServices.save_deposit(request.user, obj)
 
 
 class WithdrawSiteModel(DepositSiteModel):
@@ -386,7 +386,7 @@ class WithdrawSiteModel(DepositSiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        return FinanceService.save_withdraw(request.user, obj)
+        return FinanceServices.save_withdraw(request.user, obj)
 
 
 class CurrencyExchangeSiteModel(BaseFinantialDocumentSiteModel):
@@ -403,7 +403,7 @@ class CurrencyExchangeSiteModel(BaseFinantialDocumentSiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        return FinanceService.save_currency_exchange(request.user, obj)
+        return FinanceServices.save_currency_exchange(request.user, obj)
 
 
 class TransferSiteModel(BaseFinantialDocumentSiteModel):
@@ -421,7 +421,7 @@ class TransferSiteModel(BaseFinantialDocumentSiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        return FinanceService.save_transfer(request.user, obj)
+        return FinanceServices.save_transfer(request.user, obj)
 
 
 class LoanEntitySiteModel(SiteModel):
@@ -470,11 +470,11 @@ class LoanEntityDepositSiteModel(LoanEntityDocumentSiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        return FinanceService.save_loan_entity_deposit(request.user, obj)
+        return FinanceServices.save_loan_entity_deposit(request.user, obj)
 
     def save_matches(self, parent, matches):
         # overrides base class method
-        return FinanceService.match_loan_entity_document(parent, matches, True)
+        return FinanceServices.match_loan_entity_document(parent, matches, True)
 
 
 class LoanEntityWithdrawSiteModel(LoanEntityDocumentSiteModel):
@@ -490,11 +490,11 @@ class LoanEntityWithdrawSiteModel(LoanEntityDocumentSiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        return FinanceService.save_loan_entity_withdraw(request.user, obj)
+        return FinanceServices.save_loan_entity_withdraw(request.user, obj)
 
     def save_matches(self, parent, matches):
         # overrides base class method
-        return FinanceService.match_loan_entity_document(parent, matches, False)
+        return FinanceServices.match_loan_entity_document(parent, matches, False)
 
 
 class LoanAccountSiteModel(SiteModel):
@@ -544,11 +544,11 @@ class LoanAccountDepositSiteModel(LoanAccountDocumentSiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        return FinanceService.save_loan_account_deposit(request.user, obj)
+        return FinanceServices.save_loan_account_deposit(request.user, obj)
 
     def save_matches(self, parent, matches):
         # overrides base class method
-        return FinanceService.match_loan_account_document(parent, matches, True)
+        return FinanceServices.match_loan_account_document(parent, matches, True)
 
 
 class LoanAccountWithdrawSiteModel(LoanAccountDocumentSiteModel):
@@ -564,11 +564,11 @@ class LoanAccountWithdrawSiteModel(LoanAccountDocumentSiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        return FinanceService.save_loan_account_withdraw(request.user, obj)
+        return FinanceServices.save_loan_account_withdraw(request.user, obj)
 
     def save_matches(self, parent, matches):
         # overrides base class method
-        return FinanceService.match_loan_account_document(parent, matches, False)
+        return FinanceServices.match_loan_account_document(parent, matches, False)
 
 
 class OfficeSiteModel(SiteModel):
@@ -639,11 +639,11 @@ class ProviderInvoiceSiteModel(ProviderDebitDocumentSiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        return FinanceService.save_provider_invoice(request.user, obj)
+        return FinanceServices.save_provider_invoice(request.user, obj)
 
     def save_matches(self, parent, matches):
         # overrides base class method
-        return FinanceService.match_provider_document(parent, matches, False)
+        return FinanceServices.match_provider_document(parent, matches, False)
 
 
 class ProviderPaymentSiteModel(ProviderCreditDocumentSiteModel):
@@ -655,11 +655,11 @@ class ProviderPaymentSiteModel(ProviderCreditDocumentSiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        return FinanceService.save_provider_payment(request.user, obj)
+        return FinanceServices.save_provider_payment(request.user, obj)
 
     def save_matches(self, parent, matches):
         # overrides base class method
-        return FinanceService.match_provider_document(parent, matches, True)
+        return FinanceServices.match_provider_document(parent, matches, True)
 
 
 class AgencySiteModel(SiteModel):
@@ -759,11 +759,11 @@ class AgencyInvoiceSiteModel(AgencyDebitDocumentSiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        return FinanceService.save_agency_invoice(request.user, obj)
+        return FinanceServices.save_agency_invoice(request.user, obj)
 
     def save_matches(self, parent, matches):
         # overrides base class method
-        return FinanceService.match_agency_document(parent, matches, False)
+        return FinanceServices.match_agency_document(parent, matches, False)
 
 
 class AgencyPaymentSiteModel(AgencyCreditDocumentSiteModel):
@@ -779,11 +779,11 @@ class AgencyPaymentSiteModel(AgencyCreditDocumentSiteModel):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        return FinanceService.save_agency_payment(request.user, obj)
+        return FinanceServices.save_agency_payment(request.user, obj)
 
     def save_matches(self, parent, matches):
         # overrides base class method
-        return FinanceService.match_agency_document(parent, matches, True)
+        return FinanceServices.match_agency_document(parent, matches, True)
 
 
 bookings_site.register(Deposit, DepositSiteModel)
@@ -801,10 +801,10 @@ bookings_site.register(LoanAccountWithdraw, LoanAccountWithdrawSiteModel)
 bookings_site.register(Office, OfficeSiteModel)
 
 bookings_site.register(Provider, ProviderSiteModel)
-bookings_site.register(ProviderCreditDocument, ProviderCreditDocumentSiteModel)
-bookings_site.register(ProviderDebitDocument, ProviderDebitDocumentSiteModel)
-bookings_site.register(ProviderPayment, ProviderPaymentSiteModel)
-bookings_site.register(ProviderInvoice, ProviderInvoiceSiteModel)
+# bookings_site.register(ProviderCreditDocument, ProviderCreditDocumentSiteModel)
+# bookings_site.register(ProviderDebitDocument, ProviderDebitDocumentSiteModel)
+# bookings_site.register(ProviderPayment, ProviderPaymentSiteModel)
+# bookings_site.register(ProviderInvoice, ProviderInvoiceSiteModel)
 
 bookings_site.register(Agency, AgencySiteModel)
 bookings_site.register(AgencyCreditDocument, AgencyCreditDocumentSiteModel)

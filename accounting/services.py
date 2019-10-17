@@ -109,9 +109,9 @@ class AccountingService():
     # account should be locked
     def _do_account_movement(cls, account, amount, movement_type):
         if movement_type == MOVEMENT_TYPE_INPUT:
-            account.balance = account.balance + amount
+            account.balance = float(account.balance) + float(amount)
         if movement_type == MOVEMENT_TYPE_OUTPUT:
-            account.balance = account.balance - amount
+            account.balance = float(account.balance) - float(amount)
         account.save()
         return account
 

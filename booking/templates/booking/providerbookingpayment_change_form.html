@@ -1,0 +1,13 @@
+{% extends "common/change_form.html" %}
+
+{% load static %}
+
+{% block head_extra %}
+  {{ block.super }}
+  <script type="text/javascript" src="{% static 'booking/js/providerbookingpayment.js' %}"></script>
+{% endblock head_extra %}
+
+{% block after_related_objects %}
+  {{ block.super }}
+  {% include "booking/include/services_formset.html" %}
+{% endblock after_related_objects %}

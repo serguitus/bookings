@@ -10,11 +10,11 @@ from accounting.constants import (
 
 from finance.constants import STATUS_DRAFT, STATUS_READY, DOC_TYPE_AGENCY_INVOICE
 from finance.models import Agency, AgencyInvoice
-from finance.services import FinanceService
+from finance.services import FinanceServices
 from finance.tests.utils import FinanceBaseTestCase
 
 
-class FinanceServiceTestCase(FinanceBaseTestCase):
+class FinanceServicesTestCase(FinanceBaseTestCase):
 
     test_user = None
     test_agency = None
@@ -42,7 +42,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -75,7 +75,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -108,7 +108,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -129,7 +129,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_invoice.status = test_status2
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -162,7 +162,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -183,7 +183,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_invoice.status = test_status2
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -216,7 +216,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -239,7 +239,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         agency_invoice.status = test_status2
         agency_invoice.currency = test_currency2
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -272,7 +272,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -293,7 +293,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_invoice.amount = test_amount2
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -320,7 +320,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -341,7 +341,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_invoice.amount = test_amount2
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -368,7 +368,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -389,7 +389,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_invoice.currency = test_currency2
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -416,7 +416,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -437,7 +437,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_invoice.currency = test_currency2
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -464,7 +464,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -487,7 +487,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         agency_invoice.currency = test_currency2
         agency_invoice.amount = test_amount2
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -514,7 +514,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -537,7 +537,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_invoice.date = test_date2
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -569,7 +569,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 
@@ -592,7 +592,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_invoice.date = test_date2
 
-        agency_invoice = FinanceService.save_agency_invoice(
+        agency_invoice = FinanceServices.save_agency_invoice(
             user=self.test_user,
             agency_invoice=agency_invoice)
 

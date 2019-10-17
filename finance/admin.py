@@ -19,7 +19,7 @@ from finance.models import (
     Deposit, Withdraw, CurrencyExchange, Transfer,
     LoanAccountWithdraw, LoanAccountDeposit,
     LoanEntity, LoanEntityWithdraw, LoanEntityDeposit)
-from finance.services import FinanceService
+from finance.services import FinanceServices
 
 
 class IncorrectLookupParameters(Exception):
@@ -295,14 +295,14 @@ class DepositAdmin(BaseFinantialDocumentAdmin):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        return FinanceService.save_deposit(request.user, obj)
+        return FinanceServices.save_deposit(request.user, obj)
 
 
 class WithdrawAdmin(DepositAdmin):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        return FinanceService.save_withdraw(request.user, obj)
+        return FinanceServices.save_withdraw(request.user, obj)
 
 
 class CurrencyExchangeAdmin(BaseFinantialDocumentAdmin):
@@ -313,7 +313,7 @@ class CurrencyExchangeAdmin(BaseFinantialDocumentAdmin):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        return FinanceService.save_currency_exchange(request.user, obj)
+        return FinanceServices.save_currency_exchange(request.user, obj)
 
 
 class TransferAdmin(BaseFinantialDocumentAdmin):
@@ -323,7 +323,7 @@ class TransferAdmin(BaseFinantialDocumentAdmin):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        return FinanceService.save_transfer(request.user, obj)
+        return FinanceServices.save_transfer(request.user, obj)
 
 
 class LoanAccountDocumentAdmin(MatchableModelAdmin):
@@ -346,7 +346,7 @@ class LoanAccountDepositAdmin(LoanAccountDocumentAdmin):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        return FinanceService.save_loan_account_deposit(request.user, obj)
+        return FinanceServices.save_loan_account_deposit(request.user, obj)
 
 
 class LoanAccountWithdrawAdmin(LoanAccountDocumentAdmin):
@@ -357,7 +357,7 @@ class LoanAccountWithdrawAdmin(LoanAccountDocumentAdmin):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        return FinanceService.save_loan_account_withdraw(request.user, obj)
+        return FinanceServices.save_loan_account_withdraw(request.user, obj)
 
 
 class LoanEntityDocumentAdmin(MatchableModelAdmin):
@@ -380,7 +380,7 @@ class LoanEntityDepositAdmin(LoanEntityDocumentAdmin):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        return FinanceService.save_loan_entity_deposit(request.user, obj)
+        return FinanceServices.save_loan_entity_deposit(request.user, obj)
 
 
 class LoanEntityWithdrawAdmin(LoanEntityDocumentAdmin):
@@ -391,7 +391,7 @@ class LoanEntityWithdrawAdmin(LoanEntityDocumentAdmin):
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
-        return FinanceService.save_loan_entity_withdraw(request.user, obj)
+        return FinanceServices.save_loan_entity_withdraw(request.user, obj)
 
 
 reservas_admin.register(Provider, ProviderAdmin)

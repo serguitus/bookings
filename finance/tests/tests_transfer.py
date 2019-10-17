@@ -11,11 +11,11 @@ from accounting.models import Account, Operation
 
 from finance.constants import STATUS_DRAFT, STATUS_READY, DOC_TYPE_TRANSFER
 from finance.models import Transfer
-from finance.services import FinanceService
+from finance.services import FinanceServices
 from finance.tests.utils import FinanceBaseTestCase
 
 
-class FinanceServiceTestCase(FinanceBaseTestCase):
+class FinanceServicesTestCase(FinanceBaseTestCase):
 
     test_user = None
 
@@ -48,7 +48,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -98,7 +98,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -168,7 +168,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -197,7 +197,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         transfer.status = test_status2
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -267,7 +267,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -314,7 +314,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         transfer.status = test_status2
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -389,7 +389,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -449,7 +449,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         transfer.account = test_account3
         transfer.transfer_account = test_account4
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -527,7 +527,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -556,7 +556,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         transfer.amount = test_amount2
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -600,7 +600,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -648,7 +648,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         transfer.amount = test_amount2
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -735,7 +735,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -773,7 +773,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         transfer.account = test_account3
         transfer.transfer_account = test_account4
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -819,7 +819,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -874,7 +874,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         transfer.account = test_account3
         transfer.transfer_account = test_account4
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -963,7 +963,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -1021,7 +1021,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         transfer.transfer_account = test_account4
         transfer.amount = test_amount2
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -1110,7 +1110,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -1141,7 +1141,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         transfer.date = test_date2
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -1190,7 +1190,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -1238,7 +1238,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         transfer.date = test_date2
 
-        transfer = FinanceService.save_transfer(
+        transfer = FinanceServices.save_transfer(
             user=self.test_user,
             transfer=transfer)
 
@@ -1289,7 +1289,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         with self.assertRaisesMessage(
             ValidationError, ERROR_DIFFERENT_CURRENCY % (test_account1, test_account2)) as ex:
-            transfer = FinanceService.save_transfer(
+            transfer = FinanceServices.save_transfer(
                 user=self.test_user,
                 transfer=transfer)
 

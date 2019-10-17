@@ -10,11 +10,11 @@ from accounting.constants import (
 
 from finance.constants import STATUS_DRAFT, STATUS_READY, DOC_TYPE_AGENCY_DISCOUNT
 from finance.models import Agency, AgencyDiscount
-from finance.services import FinanceService
+from finance.services import FinanceServices
 from finance.tests.utils import FinanceBaseTestCase
 
 
-class FinanceServiceTestCase(FinanceBaseTestCase):
+class FinanceServicesTestCase(FinanceBaseTestCase):
 
     test_user = None
     test_agency = None
@@ -42,7 +42,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
@@ -75,7 +75,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
@@ -108,7 +108,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
@@ -129,7 +129,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_discount.status = test_status2
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
@@ -162,7 +162,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
@@ -183,7 +183,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_discount.status = test_status2
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
@@ -216,7 +216,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status1)
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
@@ -239,7 +239,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         agency_discount.status = test_status2
         agency_discount.currency = test_currency2
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
@@ -272,7 +272,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
@@ -293,7 +293,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_discount.amount = test_amount2
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
@@ -320,7 +320,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
@@ -341,7 +341,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_discount.amount = test_amount2
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
@@ -368,7 +368,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
@@ -389,7 +389,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_discount.currency = test_currency2
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
@@ -416,7 +416,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
@@ -437,7 +437,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_discount.currency = test_currency2
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
@@ -464,7 +464,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount1,
             status=test_status)
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
@@ -487,7 +487,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
         agency_discount.currency = test_currency2
         agency_discount.amount = test_amount2
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
@@ -514,7 +514,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
@@ -537,7 +537,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_discount.date = test_date2
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
@@ -569,7 +569,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
             amount=test_amount,
             status=test_status)
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
@@ -592,7 +592,7 @@ class FinanceServiceTestCase(FinanceBaseTestCase):
 
         agency_discount.date = test_date2
 
-        agency_discount = FinanceService.save_agency_discount(
+        agency_discount = FinanceServices.save_agency_discount(
             user=self.test_user,
             agency_discount=agency_discount)
 
