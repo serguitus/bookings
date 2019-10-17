@@ -793,7 +793,6 @@ class ProviderBookingPaymentForm(forms.ModelForm):
 class ProviderBookingPaymentServiceForm(forms.Form):
     service_payment_id = forms.CharField(required=False, widget=forms.HiddenInput())
     service_id = forms.CharField(required=False, widget=forms.HiddenInput())
-    is_selected = forms.BooleanField(label='sel', required=False)
     service_name = forms.CharField(disabled=True, required=False)
     saved_amount_to_pay = forms.DecimalField(
         label='Saved To Pay', required=False,
@@ -811,6 +810,10 @@ class ProviderBookingPaymentServiceForm(forms.Form):
         label='Serv.Paid', required=False,
         disabled=True, widget=forms.TextInput(
             attrs={'readonly':'readonly', 'style':'text-align: right; width: 100px;'}))
+    is_selected = forms.BooleanField(label='sel', required=False,
+        widget=forms.CheckboxInput(
+            attrs={'style':'text-align: center; width: 40px;'}
+        ))
     amount_paid = forms.DecimalField(
         label='Paid', required=False,
         decimal_places=2, widget=forms.NumberInput(
