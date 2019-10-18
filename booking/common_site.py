@@ -1734,7 +1734,7 @@ class ProviderBookingPaymentSiteModel(SiteModel):
             self, request, form, obj, formsets, inline_instances,
             add, opts, object_id, to_field, form_validated=None):
 
-        context = super().changeform_context(
+        context = super(ProviderBookingPaymentSiteModel, self).changeform_context(
             request, form, obj, formsets, inline_instances, add, opts, object_id, to_field,
             form_validated)
 
