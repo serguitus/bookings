@@ -47,7 +47,7 @@ class OperationMovementSiteModel(SiteModel):
     actions_on_top = False
     list_display = ('operation', 'account', 'movement_type', 'amount',)
     top_filters = (('account', AccountTopFilter), 'movement_type', 'amount',)
-    ordering = ['operation',]
+    ordering = ['-operation__datetime']
 
 
 bookings_site.register(Account, AccountSiteModel)
