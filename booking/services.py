@@ -4840,7 +4840,7 @@ class BookingServices(object):
             payment_service.amount_paid = float(service_data['amount_paid'])
             payment_service.save()
 
-            booking_service.cost_amount_paid -= payment_service.amount_paid
+            booking_service.cost_amount_paid = float(booking_service.cost_amount_paid) - float(payment_service.amount_paid)
             booking_service.has_payment = True
             booking_service.save(update_fields=['cost_amount_paid', 'has_payment'])
 
