@@ -3056,7 +3056,7 @@ class BookingServices(object):
     def totalize(cls, total, increment):
         if total is None or increment is None:
             return None
-        return total + increment
+        return float(total) + float(increment)
 
 
     @classmethod
