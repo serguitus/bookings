@@ -310,7 +310,7 @@ class ExtraSiteModel(SiteModel):
     fields = ('name', 'service_category', 'location', 'cost_type', 'parameter_type',
               'pax_range', 'enabled',)
     list_display = ('name', 'service_category', 'location', 'cost_type',
-                    'parameter_type', 'enabled',)
+                    'parameter_type', 'enabled', 'pax_range', 'has_pax_range')
     top_filters = (('service_category', ServiceCategoryTopFilter), 'name',)
     ordering = ['enabled', 'name']
     inlines = [ServiceAddonInline]
