@@ -10,6 +10,7 @@ from django.db.models.query_utils import Q
 from django.contrib.auth.models import User
 
 from accounting.constants import CURRENCIES, CURRENCY_CUC
+from accounting.models import Account
 
 from booking.constants import (
     SERVICE_CATEGORY_PACKAGE, SERVICE_CATEGORIES,
@@ -41,9 +42,10 @@ from config.models import (
     AmountDetail, AgencyCatalogue, ProviderCatalogue,
 )
 
+from finance.constants import DOC_TYPE_PROVIDER_PAYMENT_WITHDRAW
 from finance.models import (
     Office, Agency, AgencyInvoice,
-    Provider, ProviderInvoice, FinantialDocument, AccountingDocument)
+    Provider, ProviderInvoice, Withdraw)
 
 
 class RelativeInterval(models.Model):
@@ -1276,8 +1278,7 @@ class PackageProvider(models.Model):
     def __str__(self):
         return 'Package Prov. - %s : %s' % (self.service, self.provider)
 
-
-class ProviderBookingPayment(FinantialDocument, AccountingDocument):
+class ProviderBookingPayment(Withdraw):
     """
     ProviderBookingPayment
     """
@@ -1286,8 +1287,17 @@ class ProviderBookingPayment(FinantialDocument, AccountingDocument):
         verbose_name_plural = 'Providers Bookings Payments'
     provider = models.ForeignKey(Provider)
 
+    def fill_data(self):
+        self.document_type = DOC_TYPE_PROVIDER_PAYMENT_WITHDRAW
+        account = Account.objects.get(pk=self.account_id)
+        self.name = '%s - Prov. (%s) Payment Withdraw from %s of %s %s ' % (
+            self.date, self.provider, account, self.amount, account.get_currency_display())
+        return self.name
+
+
     def __str__(self):
         return 'Prov. - %s : %s' % (self.provider, self.amount)
+
 
 class ProviderBookingPaymentService(models.Model):
     """
