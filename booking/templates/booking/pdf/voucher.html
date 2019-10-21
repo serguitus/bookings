@@ -85,7 +85,7 @@
                         <td colspan="3">
                             <table width="100%">
                                 <tr>
-                                    <td width="60%"><b>Client:</b> {{ service.booking.name }}</td>
+                                    <td width="60%"><b>Client:</b> {{ service.booking.name }} {% if service.booking.reference %}({{ service.booking.reference }}){% endif %}</td>
                                     <td width="20%">
                                     {% if service.service_type == 'A' %}
                                         <b>Adults:</b> {{ service.adult_quantity }}
