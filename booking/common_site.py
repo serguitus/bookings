@@ -967,6 +967,8 @@ class BookingSiteModel(SiteModel):
                         'services': objs})
         html = template.render(context)
         pdf = StringIO()
+        if PY2:
+            html = html.encode('UTF-8')
         result = pisa.pisaDocument(StringIO(html), dest=pdf,
                                    link_callback=self._fetch_resources)
         return result, pdf

@@ -53,6 +53,7 @@ class Account(models.Model):
         finally:
             cursor.close()
 
+
 class Operation(models.Model):
     class Meta:
         verbose_name = 'Operation'
