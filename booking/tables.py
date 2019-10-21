@@ -196,7 +196,7 @@ class BookingPackageServiceTable(tables.Table):
         fields = [
             'name', 'datetime_from', 'datetime_to',
             'cost_amount', 'price_amount', 'utility_percent', 'utility',
-            'provider', 'service_type']
+            'provider', 'status', 'service_type']
 
     def __init__(self, *args, **kwargs):
         self.base_columns['utility_percent'].verbose_name='Util.%'

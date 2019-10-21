@@ -85,7 +85,7 @@
                         <td colspan="3">
                             <table width="100%">
                                 <tr>
-                                    <td width="60%"><b>Client:</b> {{ service.booking.name }}</td>
+                                    <td width="60%"><b>Client:</b> {{ service.booking.name }} {% if service.booking.reference %}({{ service.booking.reference }}){% endif %}</td>
                                     <td width="20%">
                                     {% if service.service_type == 'A' %}
                                         <b>Adults:</b> {{ service.adult_quantity }}
@@ -127,12 +127,16 @@
                                                 {% if service.pickup %}
                                                     <b>Pickup:</b> {{ service.pickup }}<br>
                                                     <b>Address:</b> {{ service.pickup.address }}
+                                                {% elif service.place_from %}
+                                                    <b>Pickup:</b> {{ service.place_from }}<br>
                                                 {% endif %}
                                                 </td>
                                                 <td width="40%">
                                                 {% if service.dropoff %}
                                                     <b>Drop-off:</b> {{ service.dropoff }}<br>
                                                     <b>Address:</b> {{ service.dropoff.address }}
+                                                {% elif service.place_to %}
+                                                    <b>Drop-off:</b> {{ service.place_to }}<br>
                                                 {% endif %}
                                                 </td>
                                             </tr>
