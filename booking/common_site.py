@@ -1798,7 +1798,12 @@ def default_requests_mail_body(request, provider=None, booking=None):
                 )
             )).all())
         services.extend(package_services)
-        services.sort(key=lambda x: x.datetime_from)
+        try:
+            services.sort(key=lambda x: x.datetime_from)
+        except TypeError:
+            # probably a date missing. ignore ordering
+            # this bookingService has to be fixed by user
+            pass
     else:
         services = []
     #rooming = bs.rooming_list.all()
