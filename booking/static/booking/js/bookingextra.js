@@ -3,7 +3,7 @@ var bookingservice_providers_costs_url = base_url + 'booking/bookingextra-provid
 var bookingservice_form_selector = '#bookingextra_form';
 
 $(document).ready(function(){
-  var cleave_start = new Cleave('#id_datetime_from', {
+  /*var cleave_start = new Cleave('#id_datetime_from', {
     date: true,
     delimiter: '-',
     datePattern: ['d', 'm', 'y']
@@ -12,7 +12,7 @@ $(document).ready(function(){
     date: true,
     delimiter: '-',
     datePattern: ['d', 'm', 'y']
-  });
+  });*/
   var nights_selector = $('#id_nights');
   var start_selector = $('#id_datetime_from');
   var end_selector = $('#id_datetime_to');
