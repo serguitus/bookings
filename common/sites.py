@@ -1504,6 +1504,9 @@ class CommonChangeList(ChangeList):
             list_per_page, list_max_show_all, list_editable, model_admin)
 
 
+    def row_classes_for_result(self, result):
+        return ''
+
     def url_for_result(self, result):
         pk = getattr(result, self.pk_attname)
         return reverse(

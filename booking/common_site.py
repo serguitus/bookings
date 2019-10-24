@@ -42,7 +42,7 @@ from django.utils.six import PY2
 from finance.models import Office
 from finance.top_filters import ProviderTopFilter, AgencyTopFilter
 
-from booking.constants import SERVICE_STATUS_PENDING
+from booking.constants import SERVICE_STATUS_PENDING, BOOTSTRAP_STYLE_STATUS_MAPPING
 from booking.forms import (
     PackageForm,
     PackageAllotmentInlineForm, PackageTransferInlineForm,
@@ -840,6 +840,17 @@ class BookingSiteModel(SiteModel):
     change_form_template = 'booking/booking_change_form.html'
     totalsum_list = ['cost_amount', 'price_amount']
     save_as = False
+
+    def get_changelist(self, request, **kwargs):
+        """
+        Returns the ChangeList class for use on the changelist page.
+        """
+
+        class BookingChangeList(CommonChangeList):
+            def row_classes_for_result(self, result):
+                return BOOTSTRAP_STYLE_STATUS_MAPPING[result.status]
+
+        return BookingChangeList
 
     def get_urls(self):
 

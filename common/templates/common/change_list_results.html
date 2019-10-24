@@ -10,7 +10,7 @@
 {% endif %}
 {% if results %}
 	<div class="results">
-		<table id="result_list">
+		<table id="result_list" class="table">
 			<thead>
 				<tr>
 					{% for header in result_headers %}
@@ -47,7 +47,7 @@
 							<td colspan="{{ result|length }}">{{ result.form.non_field_errors }}</td>
 						</tr>
 					{% endif %}
-					<tr class="{% cycle 'row1' 'row2' %}">
+					<tr class="{{ result.result.row_classes }} {% cycle 'row1' 'row2' %}">
 						{% for item in result %}
 							{{ item }}
 						{% endfor %}

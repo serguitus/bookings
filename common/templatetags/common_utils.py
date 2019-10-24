@@ -149,9 +149,9 @@ def _items_for_result(cl, result, form, namespace='common'):
             empty_value_display = getattr(attr, 'empty_value_display', empty_value_display)
             if f is None or f.auto_created:
                 if field_name == 'action_checkbox':
-                    row_classes = ['action-checkbox']
+                    row_classes.append('action-checkbox')
                 if field_name == 'details_button':
-                    row_classes = ['details-button']
+                    row_classes.append('details-button')
                 allow_tags = getattr(attr, 'allow_tags', False)
                 boolean = getattr(attr, 'boolean', False)
                 result_repr = display_for_value(value, empty_value_display, boolean)
@@ -231,9 +231,11 @@ def _results(cl, namespace='common'):
 
     if cl.formset:
         for res, form in zip(cl.result_list, cl.formset.forms):
+            res.row_classes = cl.row_classes_for_result(res)
             yield ResultList(form, res, _items_for_result(cl, res, form, namespace))
     else:
         for res in cl.result_list:
+            res.row_classes = cl.row_classes_for_result(res)
             yield ResultList(None, res, _items_for_result(cl, res, None, namespace))
 
 
