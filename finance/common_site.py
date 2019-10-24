@@ -5,6 +5,7 @@ from django.conf.urls import url
 from django.contrib import admin, messages
 from django.contrib.admin.options import csrf_protect_m, IS_POPUP_VAR, TO_FIELD_VAR
 from django.contrib.admin import helpers
+from django.contrib.admin import TabularInline
 from django.contrib.admin.checks import ModelAdminChecks
 from django.contrib.admin.utils import unquote
 from django.core import checks
@@ -30,7 +31,8 @@ from finance.models import (
     Deposit, Withdraw, CurrencyExchange, Transfer,
     LoanAccount, LoanAccountDeposit, LoanAccountWithdraw, LoanAccountMatch,
     LoanEntity, LoanEntityDeposit, LoanEntityWithdraw, LoanEntityMatch,
-    Agency, AgencyDocumentMatch, AgencyCreditDocument, AgencyDebitDocument,
+    Agency, AgencyContact,
+    AgencyDocumentMatch, AgencyCreditDocument, AgencyDebitDocument,
     AgencyInvoice, AgencyPayment,
     Provider, ProviderDocumentMatch, ProviderCreditDocument, ProviderDebitDocument,
     ProviderInvoice, ProviderPayment)
@@ -662,6 +664,14 @@ class ProviderPaymentSiteModel(ProviderCreditDocumentSiteModel):
         return FinanceServices.match_provider_document(parent, matches, True)
 
 
+class AgencyContactInline(TabularInline):
+    model = AgencyContact
+    fields = ['name', 'email',]
+    verbose_name_plural = 'Agency Contact List'
+    extra = 0
+    ordering = ('name',)
+
+        
 class AgencySiteModel(SiteModel):
     model_order = 4210
     menu_label = MENU_LABEL_FINANCE_ADVANCED
@@ -672,6 +682,8 @@ class AgencySiteModel(SiteModel):
     ordering = ['enabled', 'currency', 'name']
 
     actions = ['rewrite_agency_amounts', 'update_agency_amounts']
+
+    inlines = [AgencyContactInline]
 
     def rewrite_agency_amounts(self, request, queryset):
 

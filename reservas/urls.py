@@ -25,7 +25,8 @@ from booking.views import (
 from finance.views import (
     AccountAutocompleteView, CUCAccountAutocompleteView,
     LoanEntityAutocompleteView, LoanAccountAutocompleteView,
-    AgencyAutocompleteView, ProviderAutocompleteView,
+    AgencyAutocompleteView, AgencyContactAutocompleteView,
+    ProviderAutocompleteView,
 )
 from config import urls as config_urls
 from config.views import (
@@ -61,6 +62,10 @@ urlpatterns = [
     url(r'^agency-autocomplete/$',
         AgencyAutocompleteView.as_view(),
         name='agency-autocomplete',
+    ),
+    url(r'^agencycontact-autocomplete/$',
+        AgencyContactAutocompleteView.as_view(),
+        name='agencycontact-autocomplete',
     ),
     url(r'^allotment-autocomplete/$',
         AllotmentAutocompleteView.as_view(),

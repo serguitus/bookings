@@ -44,7 +44,7 @@ from config.models import (
 
 from finance.constants import DOC_TYPE_PROVIDER_PAYMENT_WITHDRAW, STATUS_DRAFT
 from finance.models import (
-    Office, Agency, AgencyInvoice,
+    Office, Agency, AgencyInvoice, AgencyContact,
     Provider, ProviderInvoice, Withdraw)
 
 
@@ -632,6 +632,7 @@ class Booking(models.Model):
     p_notes = models.CharField(
         max_length=1000, blank=True, null=True, verbose_name='Private Notes')
     seller = models.ForeignKey(User)
+    agency_contact = models.ForeignKey(AgencyContact, blank=True, null=True, verbose_name='Contact')
 
     @property
     def utility(self):

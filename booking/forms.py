@@ -479,6 +479,10 @@ class BookingForm(forms.ModelForm, MailForm):
         fields = ('__all__')
         widgets = {
             'agency': autocomplete.ModelSelect2(url='agency-autocomplete'),
+            'agency_contact': autocomplete.ModelSelect2(
+                url='agencycontact-autocomplete',
+                forward=['agency'],
+            ),
             'p_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())

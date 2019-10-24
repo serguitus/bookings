@@ -775,6 +775,19 @@ class Agency(models.Model):
         return self.name
 
 
+class AgencyContact(models.Model):
+    class Meta:
+        verbose_name = 'Agency Contact'
+        verbose_name_plural = 'Agencies Contacts'
+        unique_together = (('agency', 'name',),)
+    agency = models.ForeignKey(Agency)
+    name = models.CharField(max_length=50)
+    email = models.EmailField()
+
+    def __str__(self):
+        return '%s - %s' % (self.name, self.email)
+
+
 class AgencyCurrency(SummaryModel):
     class Meta:
         verbose_name = 'Agency Currency'
