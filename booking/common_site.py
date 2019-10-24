@@ -1364,7 +1364,7 @@ class BookingPackageServiceSiteModel(SiteModel):
                     })
 
             return super(BookingPackageServiceSiteModel, self).changeform_view(request, object_id, form_url, extra_context)
-    
+
     @csrf_protect_m
     def delete_view(self, request, object_id, extra_context=None):
         bookingpackageservice = BookingPackageService.objects.get(pk=object_id)
@@ -1375,7 +1375,8 @@ class BookingPackageServiceSiteModel(SiteModel):
             message='Only Pending Service can be Deleted. You can set Status to Cancelled.',
             extra_tags='', fail_silently=False)
         return redirect(reverse(
-            'common:%s_%s_change' % (self.model._meta.app_label, self.model._meta.model_name),
+            'common:%s_%s_change' % (self.model._meta.app_label,
+                                     self.model._meta.model_name),
             args=[object_id]))
 
 
@@ -1393,8 +1394,10 @@ class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):
                 ('datetime_from', 'nights', 'datetime_to'),
                 ('room_type', 'board_type', 'service_addon'),
                 ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility', 'id', 'version',
-                'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
+                'cost_amount', 'manual_price', 'price_amount',
+                'utility_percent', 'utility', 'id', 'version',
+                'submit_action', 'mail_from', 'mail_to', 'mail_cc',
+                'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -1402,7 +1405,8 @@ class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):
 
     list_display = ('booking', 'name', 'service_addon', 'datetime_from',
                     'datetime_to', 'cost_amount', 'manual_cost',
-                    'price_amount', 'manual_price', 'utility_percent', 'utility', 'status')
+                    'price_amount', 'manual_price', 'utility_percent',
+                    'utility', 'status')
     top_filters = (('booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking__reference', 'conf_number',
@@ -1535,7 +1539,7 @@ class BookingExtraSiteModel(BaseBookingServiceSiteModel):
         (None, {
             'fields': (
                 'booking', ('service', 'status', 'conf_number'),
-                ('datetime_from', 'datetime_to', 'time'),
+                ('datetime_from', 'nights', 'datetime_to', 'time'),
                 'service_addon',
                 ('quantity', 'parameter'),
                 ('manual_cost', 'provider'),

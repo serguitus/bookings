@@ -593,6 +593,7 @@ class BookingExtraForm(forms.ModelForm, MailForm):
             'provider_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
+    nights = forms.IntegerField(initial=0)
 
 
 class BookingPackageForm(forms.ModelForm, MailForm):
