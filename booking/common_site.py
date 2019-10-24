@@ -42,7 +42,13 @@ from django.utils.six import PY2
 from finance.models import Office
 from finance.top_filters import ProviderTopFilter, AgencyTopFilter
 
-from booking.constants import SERVICE_STATUS_PENDING, BOOTSTRAP_STYLE_STATUS_MAPPING
+from booking.constants import (
+    SERVICE_STATUS_PENDING, BOOTSTRAP_STYLE_STATUS_MAPPING,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT, BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA, BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE,
+    BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_ALLOTMENT, BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_TRANSFER,
+    BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_EXTRA
+)
 from booking.forms import (
     PackageForm,
     PackageAllotmentInlineForm, PackageTransferInlineForm,
@@ -1098,6 +1104,68 @@ class StatusChangeList(CommonChangeList):
         return BOOTSTRAP_STYLE_STATUS_MAPPING[result.status]
 
 
+class ServiceChangeList(StatusChangeList):
+    def url_for_result(self, result):
+        pk = getattr(result, self.pk_attname)
+        base_category = getattr(result, 'base_category')
+        if base_category == BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT:
+            model_name = 'bookingallotment'
+        elif base_category == BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER:
+            model_name = 'bookingtransfer'
+        elif base_category == BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA:
+            model_name = 'bookingextra'
+        elif base_category == BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE:
+            model_name = 'bookingpackage'
+        elif base_category == BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_ALLOTMENT:
+            model_name = 'bookingpackageallotment'
+        elif base_category == BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_TRANSFER:
+            model_name = 'bookingpackagetransfer'
+        elif base_category == BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_EXTRA:
+            model_name = 'bookingpackageextra'
+        else:
+            model_name = self.opts.app_label.model_name
+        return reverse(
+            '%s:%s_%s_change' % (
+                self.model_admin.admin_site.site_namespace,
+                self.opts.app_label,
+                model_name),
+            args=(quote(pk),),
+            current_app=self.model_admin.admin_site.name)
+
+
+class BookingBaseServiceSiteModel(SiteModel):
+    model_order = 1260
+    menu_label = MENU_LABEL_BOOKING
+    menu_group = MENU_GROUP_LABEL_SERVICES
+
+    readonly_fields = ['utility_percent', 'utility']
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                ('name', 'status', 'conf_number'),
+                ('service_addon'),
+                ('manual_cost', 'provider'),
+                'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility')
+        }),
+        ('Notes', {'fields': ('p_notes', 'provider_notes'),
+                   'classes': ('collapse', 'wide')})
+    )
+
+    list_display = ('name', 'service_addon', 'cost_amount', 'manual_cost',
+                    'price_amount', 'manual_price', 'utility_percent', 'utility', 'status',)
+    top_filters = (('name', 'Service'), 'conf_number',
+                   'status', 'provider',
+                   ('provider__is_private', 'Private'))
+    ordering = ('name',)
+
+    def get_changelist(self, request, **kwargs):
+        """
+        Returns the ChangeList class for use on the changelist page.
+        """
+        return ServiceChangeList
+
+
 class BookingServiceSiteModel(SiteModel):
     model_order = 1260
     menu_label = MENU_LABEL_BOOKING
@@ -1131,31 +1199,6 @@ class BookingServiceSiteModel(SiteModel):
         """
         Returns the ChangeList class for use on the changelist page.
         """
-        class ServiceChangeList(CommonChangeList):
-            def row_classes_for_result(self, result):
-                return BOOTSTRAP_STYLE_STATUS_MAPPING[result.status]
-
-            def url_for_result(self, result):
-                pk = getattr(result, self.pk_attname)
-                service_type = getattr(result, 'service_type')
-                if service_type == 'A':
-                    model_name = 'bookingallotment'
-                elif service_type == 'T':
-                    model_name = 'bookingtransfer'
-                elif service_type == 'E':
-                    model_name = 'bookingextra'
-                elif service_type == 'P':
-                    model_name = 'bookingpackage'
-                else:
-                    model_name = self.opts.app_label.model_name
-                return reverse(
-                    '%s:%s_%s_change' % (
-                        self.model_admin.admin_site.site_namespace,
-                        self.opts.app_label,
-                        model_name),
-                    args=(quote(pk),),
-                    current_app=self.model_admin.admin_site.name)
-
         return ServiceChangeList
 
 
@@ -1893,6 +1936,8 @@ bookings_site.register(QuotePackageExtra, QuotePackageExtraSiteModel)
 
 
 bookings_site.register(Booking, BookingSiteModel)
+
+bookings_site.register(BaseBookingService, BookingBaseServiceSiteModel)
 
 bookings_site.register(BookingService, BookingServiceSiteModel)
 
