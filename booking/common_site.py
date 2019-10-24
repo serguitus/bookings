@@ -1781,7 +1781,12 @@ def default_requests_mail_bcc(request, provider=None, booking=None):
 
 
 def default_requests_mail_subject(request, provider=None, booking=None):
-    return 'Solicitud de Reserva'
+    subject_ref = ''
+    if booking:
+        subject_ref = booking.name or ''
+        if booking.reference:
+            subject_ref += ' (%s)' % booking.reference
+    return 'Solicitud de Reserva %s' % subject_ref
 
 
 def default_requests_mail_body(request, provider=None, booking=None):
