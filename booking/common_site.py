@@ -845,12 +845,7 @@ class BookingSiteModel(SiteModel):
         """
         Returns the ChangeList class for use on the changelist page.
         """
-
-        class BookingChangeList(CommonChangeList):
-            def row_classes_for_result(self, result):
-                return BOOTSTRAP_STYLE_STATUS_MAPPING[result.status]
-
-        return BookingChangeList
+        return StatusChangeList
 
     def get_urls(self):
 
@@ -1097,6 +1092,12 @@ def _build_mail_address_list(addresses):
     mail_address_list = [mail_address for mail_address in mail_address_list if mail_address]
     return mail_address_list
 
+
+class StatusChangeList(CommonChangeList):
+    def row_classes_for_result(self, result):
+        return BOOTSTRAP_STYLE_STATUS_MAPPING[result.status]
+
+
 class BookingServiceSiteModel(SiteModel):
     model_order = 1260
     menu_label = MENU_LABEL_BOOKING
@@ -1131,6 +1132,9 @@ class BookingServiceSiteModel(SiteModel):
         Returns the ChangeList class for use on the changelist page.
         """
         class ServiceChangeList(CommonChangeList):
+            def row_classes_for_result(self, result):
+                return BOOTSTRAP_STYLE_STATUS_MAPPING[result.status]
+
             def url_for_result(self, result):
                 pk = getattr(result, self.pk_attname)
                 service_type = getattr(result, 'service_type')
@@ -1158,6 +1162,12 @@ class BookingServiceSiteModel(SiteModel):
 class BaseBookingServiceSiteModel(SiteModel):
 
     custom_actions_template = 'booking/emails/email_button.html'
+
+    def get_changelist(self, request, **kwargs):
+        """
+        Returns the ChangeList class for use on the changelist page.
+        """
+        return StatusChangeList
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super(BaseBookingServiceSiteModel, self).get_readonly_fields(request, obj) or []
@@ -1261,7 +1271,13 @@ class BaseBookingServiceSiteModel(SiteModel):
 class BookingPackageServiceSiteModel(SiteModel):
 
     custom_actions_template = 'booking/emails/email_button.html'
-    
+
+    def get_changelist(self, request, **kwargs):
+        """
+        Returns the ChangeList class for use on the changelist page.
+        """
+        return StatusChangeList
+
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super(BookingPackageServiceSiteModel, self).get_readonly_fields(request, obj) or []
 
