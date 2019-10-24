@@ -120,10 +120,17 @@ class BookingTable(tables.Table):
 
 
 class BookingServiceTable(tables.Table):
+    check = tables.CheckBoxColumn(
+                               attrs={
+                                   'th__input': {
+                                       'id': 'action-toggle'},
+                                   'td__input': {
+                                       'class': 'action-select'},
+                               })
     class Meta:
         model = BookingService
         template_name = 'booking/bookingservice_list.html'
-        fields = ['name', 'service_location', 'datetime_from',
+        fields = ['check', 'name', 'service_location', 'datetime_from',
                   'datetime_to', 'description',
                   'cost_amount', 'price_amount', 'utility_percent', 'utility',
                   'provider', 'conf_number', 'service_type', 'status']
