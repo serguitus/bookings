@@ -10,7 +10,7 @@ function addForm(btn, prefix) {
     var formCount = parseInt($('#id_' + prefix + '-TOTAL_FORMS').val());
     var row = $('.dynamic-row:first').clone(true).get(0);
     $(row).removeAttr('id').insertAfter($('.dynamic-row:last')).children('.hidden').removeClass('hidden');
-    $(row).children().each(function() {
+    $(row).find('input').each(function() {
         updateElementIndex(this, prefix, formCount);
         $(this).val('');
     });
