@@ -524,7 +524,7 @@ class QuoteAllotmentSiteModel(QuoteServiceSiteModel):
     menu_group = MENU_GROUP_LABEL_SERVICES
 
     fields = (
-        'quote', ('service', 'status'), ('datetime_from', 'datetime_to'),
+        'quote', ('service', 'status'), ('datetime_from', 'nights', 'datetime_to'),
         'room_type', 'board_type', 'service_addon', 'provider', 'id')
     list_display = ('quote', 'service', 'service_addon', 'datetime_from', 'datetime_to', 'status',)
     top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)

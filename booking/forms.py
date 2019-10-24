@@ -354,6 +354,7 @@ class QuoteAllotmentForm(forms.ModelForm):
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
+    nights = forms.IntegerField(initial=0)
 
 
 class QuoteTransferInlineForm(forms.ModelForm):
