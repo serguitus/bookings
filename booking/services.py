@@ -27,7 +27,8 @@ from booking.models import (
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
     BookingPackageService, BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
     BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine, BookingInvoicePartial,
-    ProviderBookingPayment, ProviderBookingPaymentService)
+    ProviderBookingPayment, ProviderBookingPaymentService,
+)
 
 from config.constants import AMOUNTS_FIXED
 from config.models import ProviderAllotmentDetail, ProviderTransferDetail, ProviderExtraDetail
@@ -35,7 +36,7 @@ from config.services import ConfigServices
 from config.views import (
     provider_allotment_queryset, provider_transfer_queryset, provider_extra_queryset)
 
-from finance.constants import STATUS_CANCELLED, STATUS_READY
+from finance.constants import STATUS_DRAFT, STATUS_READY, STATUS_CANCELLED
 from finance.services import FinanceServices
 from finance.models import Agency
 
@@ -4757,13 +4758,16 @@ class BookingServices(object):
 
 
     @classmethod
-    def booking_provider_payment_services(cls, payment):
+    def booking_provider_payment_services(cls, payment_id):
+        db_payment = ProviderBookingPayment.objects.get(pk=payment_id)
         payment_services = ProviderBookingPaymentService.objects.filter(
-            provider_payment=payment)
-        booking_services = BaseBookingService.objects.filter(
-            provider=payment.provider).exclude(
-                cost_amount_to_pay=F('cost_amount_paid')).exclude(
-                    providerbookingpaymentservice__provider_payment=payment)
+            provider_payment=db_payment)
+        booking_services = list()
+        if db_payment.status == STATUS_DRAFT:
+            booking_services = BaseBookingService.objects.filter(
+                provider=db_payment.provider).exclude(
+                    cost_amount_to_pay=F('cost_amount_paid')).exclude(
+                        providerbookingpaymentservice__provider_payment=db_payment)
 
         services = list()
         for payment_service in list(payment_services):
@@ -4803,144 +4807,135 @@ class BookingServices(object):
             service_data_list.append(service_data)
 
         db_payment = ProviderBookingPayment.objects.select_for_update().get(pk=payment.pk)
-        action = "Nothing"
-        if payment.status is STATUS_READY:
-            if db_payment.status is STATUS_READY:
-                action = "KeepReady"
-            else:
-                action = "EnterReady"
-        elif db_payment.status is STATUS_READY:
-            action = "LeaveReady"
 
-        db_payment_services = ProviderBookingPaymentService.objects.select_for_update().filter(
-            provider_payment_id=payment.id)
+        # provider remains the same
+        payment.provider = db_payment.provider
 
-        payment_services = list()
-        for db_payment_service in db_payment_services:
-            if cls._manage_db_payment_service(db_payment_service, service_data_list, action):
-                payment_services.append(db_payment_service)
+        if db_payment.status == STATUS_DRAFT:
+            if payment.status == STATUS_DRAFT or payment.status == STATUS_READY:
 
-        for service_data in service_data_list:
-            if not service_data['is_selected']:
-                continue
+                db_payment_services = ProviderBookingPaymentService.objects.select_for_update().filter(
+                    provider_payment_id=payment.id)
 
-            booking_service = load_locked_model_object(
-                pk=service_data['service_id'],
-                model_class=BaseBookingService, allow_empty_pk=False)
-            # verify provider
-            if booking_service.provider.id != payment.provider.id:
-                continue
+                payment_services = list()
+                # process db payment services
+                for db_payment_service in db_payment_services:
+                    found = False
+                    for service_data in service_data_list:
+                        if int(service_data['service_payment_id']) == db_payment_service.id:
+                            found = True
+                            if not service_data['is_selected']:
+                                # removed
+                                # remove from payment
+                                db_payment_service.delete()
+                                service_data_list.remove(service_data)
+                                break
 
-            payment_service, created = ProviderBookingPaymentService.objects.get_or_create(
-                provider_payment_id=payment.id,
-                provider_service_id=booking_service.id)
-
-            payment_service.service_cost_amount_to_pay = booking_service.cost_amount_to_pay
-            payment_service.service_cost_amount_paid = booking_service.cost_amount_paid
-            payment_service.amount_paid = float(service_data['amount_paid'])
-            payment_service.save()
-
-            booking_service.cost_amount_paid = float(booking_service.cost_amount_paid) - float(payment_service.amount_paid)
-            booking_service.has_payment = True
-            booking_service.save(update_fields=['cost_amount_paid', 'has_payment'])
-
-            payment_services.append(payment_service)
-
-        payment_amount = 0.00
-        for payment_service in payment_services:
-            payment_amount += float(payment_service.amount_paid)
-
-        if payment_amount < 0:
-            raise ValidationError('Invalid Payment Negative Amount')
-
-        payment.amount = payment_amount
-
-        # load and lock account
-        account = load_locked_model_object(
-            pk=payment.account_id, model_class=Account, allow_empty_pk=False)
-        # load and lock payment
-        db_payment = load_locked_model_object(
-            pk=payment.pk, model_class=ProviderBookingPayment)
-        # verify provider
-        
-        # manage saving
-        return FinanceServices.document_save(
-            user=user,
-            document=payment,
-            db_document=db_payment,
-            account=account,
-            movement_type=MOVEMENT_TYPE_OUTPUT)
+                            if payment.status == STATUS_READY:
+                                # update booking service adding paid amount
+                                booking_service = load_locked_model_object(
+                                    pk=db_payment_service.provider_service.pk,
+                                    model_class=BaseBookingService, allow_empty_pk=False)
+                                booking_service.cost_amount_paid = float(booking_service.cost_amount_paid) + float(service_data['amount_paid'])
+                                booking_service.has_payment = True
+                                booking_service.save(update_fields=['cost_amount_paid', 'has_payment'])
 
 
+                            if round(float(service_data['amount_paid']), 2) != round(float(db_payment_service.amount_paid), 2):
+                                db_payment_service.amount_paid = round(float(service_data['amount_paid']), 2)
+                                db_payment_service.save(update_fields=['amount_paid'])
 
-    @classmethod
-    def _manage_db_payment_service(cls, db_payment_service, service_data_list, action):
-        for service_data in service_data_list:
-            if int(service_data['service_payment_id']) == db_payment_service.id:
-                if not service_data['is_selected']:
-                    # removed
-                    if action == "LeaveReady" or action == "KeepReady":
-                        # update booking service removing paid amount
-                        booking_service = load_locked_model_object(
-                            pk=db_payment_service.provider_service.pk,
-                            model_class=BaseBookingService, allow_empty_pk=False)
-                        booking_service.cost_amount_paid -= db_payment_service.amount_paid
+                            service_data_list.remove(service_data)
+                            payment_services.append(db_payment_service)
+                            break
+                    if not found:
+                        # removed
+                        # remove from payment
+                        db_payment_service.delete()
+
+                # processing service data not related db payment services
+                for service_data in service_data_list:
+                    if not service_data['is_selected']:
+                        continue
+
+                    booking_service = BaseBookingService.objects.select_for_update().get(
+                        pk=service_data['service_id'])
+                    # verify provider
+                    if booking_service.provider.id != payment.provider.id:
+                        continue
+
+                    payment_service, created = ProviderBookingPaymentService.objects.update_or_create(
+                        provider_payment_id=payment.id,
+                        provider_service_id=booking_service.id,
+                        defaults={
+                            'service_cost_amount_to_pay': booking_service.cost_amount_to_pay,
+                            'service_cost_amount_paid': booking_service.cost_amount_paid,
+                            'amount_paid': float(service_data['amount_paid']),
+                        })
+
+                    payment_services.append(payment_service)
+
+                    if payment.status == STATUS_READY:
+                        booking_service.cost_amount_paid = float(booking_service.cost_amount_paid) + float(payment_service.amount_paid)
                         booking_service.has_payment = True
-                        booking_service.save(update_fields=['cost_amount_paid', 'has_payment'])
+                        booking_service.svae(update_fields=['cost_amount_paid', 'has_payment'])
 
-                    # remove from payment
-                    db_payment_service.delete()
-                    service_data_list.remove(service_data)
-                    return False
+                payment_amount = 0.00
+                for payment_service in payment_services:
+                    payment_amount += float(payment_service.amount_paid)
 
-                if action == "EnterReady":
-                    # update booking service adding paid amount
-                    booking_service = load_locked_model_object(
-                        pk=db_payment_service.provider_service.pk,
-                        model_class=BaseBookingService, allow_empty_pk=False)
-                    booking_service.cost_amount_paid = float(booking_service.cost_amount_paid) + float(service_data['amount_paid'])
-                    booking_service.has_payment = True
-                    booking_service.save(update_fields=['cost_amount_paid', 'has_payment'])
+                if payment_amount < 0:
+                    raise ValidationError('Invalid Payment Negative Amount')
 
-                elif action == "LeaveReady":
+                payment.amount = payment_amount
+
+                # load and lock account
+                account = load_locked_model_object(
+                    pk=payment.account_id, model_class=Account, allow_empty_pk=False)
+                
+                # manage saving
+                return FinanceServices.document_save(
+                    user=user,
+                    document=payment,
+                    db_document=db_payment,
+                    account=account,
+                    movement_type=MOVEMENT_TYPE_OUTPUT)
+
+            elif payment.status == STATUS_CANCELLED:
+                db_payment.status = STATUS_CANCELLED
+                db_payment.save(update_fields=['status'])
+                return db_payment
+            else:
+                payment.status = db_payment.status
+                raise ValidationError('Payment can not be modified')
+
+        elif db_payment.status == STATUS_READY:
+            if payment.status == STATUS_CANCELLED:
+                db_payment_services = ProviderBookingPaymentService.objects.select_for_update().filter(
+                    provider_payment_id=db_payment.id)
+                for db_payment_service in db_payment_services:
                     # update booking service removing paid amount
                     booking_service = load_locked_model_object(
                         pk=db_payment_service.provider_service.pk,
                         model_class=BaseBookingService, allow_empty_pk=False)
-                    booking_service.cost_amount_paid = float(booking_service.cost_amount_paid) - float(service_data['amount_paid'])
-                    booking_service.has_payment = True
-                    booking_service.save(update_fields=['cost_amount_paid', 'has_payment'])
+                    booking_service.cost_amount_paid -= db_payment_service.amount_paid
+                    booking_service.save(update_fields=['cost_amount_paid'])
 
-                elif action == "KeepReady":
-                    if round(float(service_data['amount_paid']), 2) != round(float(db_payment_service.amount_paid), 2):
-                        # update booking service removing paid amount
-                        booking_service = load_locked_model_object(
-                            pk=db_payment_service.provider_service.pk,
-                            model_class=BaseBookingService, allow_empty_pk=False)
-                        booking_service.cost_amount_paid = float(booking_service.cost_amount_paid) + float(service_data['amount_paid']) - float(db_payment_service.amount_paid)
-                        booking_service.has_payment = True
-                        booking_service.save(update_fields=['cost_amount_paid', 'has_payment'])
+                payment.amount = db_payment.amount
+                payment.account = db_payment.account
+                # load and lock account
+                account = load_locked_model_object(
+                    pk=db_payment.account_id, model_class=Account, allow_empty_pk=False)
+                # manage saving
+                return FinanceServices.document_save(
+                    user=user,
+                    document=payment,
+                    db_document=db_payment,
+                    account=account,
+                    movement_type=MOVEMENT_TYPE_OUTPUT)
 
-                if round(float(service_data['amount_paid']), 2) != round(float(db_payment_service.amount_paid), 2):
-                    db_payment_service.amount_paid = round(float(service_data['amount_paid']), 2)
-                    db_payment_service.save(update_fields=['amount_paid'])
-
-                service_data_list.remove(service_data)
-                return True
-
-        # removed
-        if action == "LeaveReady" or action == "KeepReady":
-            # update booking service removing paid amount
-            booking_service = load_locked_model_object(
-                pk=db_payment_service.provider_service.pk,
-                model_class=BaseBookingService, allow_empty_pk=False)
-            booking_service.cost_amount_paid -= db_payment_service.amount_paid
-            booking_service.has_payment = True
-            booking_service.save(update_fields=['cost_amount_paid', 'has_payment'])
-
-        # remove from payment
-        db_payment_service.delete()
-        return False
+        payment.status = db_payment.status
+        raise ValidationError('Payment can not be modified')
 
 
 def details_allotment_queryset(

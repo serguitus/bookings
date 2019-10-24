@@ -42,7 +42,7 @@ from config.models import (
     AmountDetail, AgencyCatalogue, ProviderCatalogue,
 )
 
-from finance.constants import DOC_TYPE_PROVIDER_PAYMENT_WITHDRAW
+from finance.constants import DOC_TYPE_PROVIDER_PAYMENT_WITHDRAW, STATUS_DRAFT
 from finance.models import (
     Office, Agency, AgencyInvoice,
     Provider, ProviderInvoice, Withdraw)
@@ -1294,6 +1294,9 @@ class ProviderBookingPayment(Withdraw):
             self.date, self.provider, account, self.amount, account.get_currency_display())
         return self.name
 
+    def delete(self, using=None, keep_parents=False):
+        if self.status != STATUS_DRAFT:
+            raise ValidationError('Can not delete Payments')
 
     def __str__(self):
         return 'Prov. - %s : %s' % (self.provider, self.amount)
@@ -1315,4 +1318,4 @@ class ProviderBookingPaymentService(models.Model):
 
     def __str__(self):
         return '%s : %s (%s)' % (
-            self.provider_payment, self.provider_service, self.cost_amount_paid)
+            self.provider_payment, self.provider_service, self.amount_paid)

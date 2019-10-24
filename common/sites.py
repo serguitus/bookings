@@ -400,13 +400,20 @@ class SiteModel(TotalsumAdmin):
         return db_field.formfield(**kwargs)
 
     def has_add_permission(self, request):
-        return (not self.readonly_model) \
+        return (not self.is_readonly_model(request)) \
             and super(SiteModel, self).has_add_permission(request)
+
+    def has_change_permission(self, request, obj=None):
+        return (not self.is_readonly_model(request, obj)) \
+            and super(SiteModel, self).has_change_permission(request, obj)
 
     def has_delete_permission(self, request, obj=None):
         return self.delete_allowed \
-            and (not self.readonly_model) \
+            and (not self.is_readonly_model(request, obj)) \
             and super(SiteModel, self).has_delete_permission(request, obj)
+
+    def is_readonly_model(self, request, obj=None):
+        return self.readonly_model
 
     def get_readonly_fields(self, request, obj=None):
         """
@@ -628,7 +635,7 @@ class SiteModel(TotalsumAdmin):
 
     def changeform_context(
             self, request, form, obj, formsets, inline_instances,
-            add, opts, object_id, to_field, form_validated=None):
+            add, opts, object_id, to_field, form_validated=None, extra_context=None):
 
         adminForm = helpers.AdminForm(
             form,
@@ -665,12 +672,14 @@ class SiteModel(TotalsumAdmin):
 
         # Hide the "Save" and "Save and continue" buttons if "Save as New" was
         # previously chosen to prevent the interface from getting confusing.
-        if (self.readonly_model or (
+        if (self.is_readonly_model(request, obj) or (
                 request.method == 'POST' and not form_validated and "_saveasnew" in request.POST)):
             context['show_save'] = False
             context['show_save_and_continue'] = False
             # Use the change template instead of the add template.
             add = False
+
+        context.update(extra_context or {})
 
         return context
 
@@ -1008,6 +1017,10 @@ class SiteModel(TotalsumAdmin):
             redirect_url = request.path
             redirect_url = common_add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
             return HttpResponseRedirect(redirect_url)
+        except Exception as ex:
+            print(ex)
+            self.message_user(request, ex, messages.ERROR)
+            return False
 
     @csrf_protect_m
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
@@ -1075,6 +1088,11 @@ class SiteModel(TotalsumAdmin):
                 formsets, inline_instances = self._create_formsets(
                     request, new_object, change=not add)
                 if all_valid(formsets) and form_validated:
+
+                    extra_context = extra_context or {}
+                    extra_context.update(self.custom_context(
+                        request, form, new_object, formsets, inline_instances, add, opts, object_id, to_field))
+
                     response = self.changeform_do_saving(
                         request=request, new_object=new_object, form=form, formsets=formsets,
                         add=add, inlines=inline_instances)
@@ -1101,15 +1119,20 @@ class SiteModel(TotalsumAdmin):
         if request.method == 'POST':
             context = self.changeform_context(
                 request, form, obj, formsets, inline_instances, add, opts, object_id, to_field,
-                form_validated)
+                form_validated, extra_context)
         else:
             context = self.changeform_context(
-                request, form, obj, formsets, inline_instances, add, opts, object_id, to_field)
-        context.update(extra_context or {})
+                request, form, obj, formsets, inline_instances, add, opts, object_id, to_field,
+                None, extra_context)
 
         return self.render_change_form(
             request, context, add=add, change=not add, obj=obj, form_url=form_url)
 
+    def custom_context(
+            self, request, form=None, obj=None, formsets=None, inline_instances=None,
+            add=None, opts=None, object_id=None, to_field=None):
+        return {}
+    
     def do_deleting(self, request, obj, obj_display, obj_id):
         """
         Hook for custom deleting actions.

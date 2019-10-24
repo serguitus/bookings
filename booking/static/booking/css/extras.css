@@ -171,3 +171,8 @@ div.readonly {
 .modal-dialog{
     margin-top: 80px;
 }
+
+#providerbookingpayment_form div.field-name div.field-name div.readonly {
+    max-width: 40em;
+    width: 40em;
+}

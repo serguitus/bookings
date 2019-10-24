@@ -39,8 +39,8 @@ from django.utils.functional import curry
 from django.utils.six import PY2
 # from django_tables2 import RequestConfig
 
-from finance.top_filters import ProviderTopFilter, AgencyTopFilter
 from finance.models import Office
+from finance.top_filters import ProviderTopFilter, AgencyTopFilter
 
 from booking.constants import SERVICE_STATUS_PENDING
 from booking.forms import (
@@ -65,7 +65,8 @@ from booking.forms import (
     BookingPackageTransferForm,
     BookingPackageExtraForm,
     VouchersConfigForm,
-    ProviderBookingPaymentForm, ProviderBookingPaymentServiceForm,
+    ProviderBookingPaymentForm,
+    ProviderBookingPaymentServiceForm, ProviderBookingPaymentServiceReadonlyForm,
 )
 from booking.models import (
     BaseBookingService,
@@ -92,7 +93,7 @@ from common.sites import CommonStackedInline, CommonTabularInline
 
 from config.services import ConfigServices
 
-from finance.constants import STATUS_DRAFT
+from finance.constants import STATUS_DRAFT, STATUS_READY, STATUS_CANCELLED
 
 from reservas.admin import bookings_site
 
@@ -1722,29 +1723,50 @@ class ProviderBookingPaymentSiteModel(SiteModel):
     form = ProviderBookingPaymentForm
     change_form_template = 'booking/providerbookingpayment_change_form.html'
 
+    def is_readonly_model(self, request, obj=None):
+        return obj and obj.status == STATUS_CANCELLED
+
     def has_delete_permission(self, request, obj=None):
         if obj is not None and obj.status != STATUS_DRAFT:
             return False
         return super(ProviderBookingPaymentSiteModel, self).has_delete_permission(request, obj)
 
     def get_change_readonly_fields(self, request, obj=None):
-        if obj is not None and obj.status != STATUS_DRAFT:
-            return ['provider', 'account']
+        if obj is not None:
+            if obj.status == STATUS_CANCELLED:
+                return ['provider', 'name', 'date', 'status', 'account', 'amount']
+            elif obj.status == STATUS_READY:
+                return ['provider', 'name', 'date', 'account', 'amount']
+            else:
+                return ['provider']
         return []
+
+    def custom_context(
+            self, request, form=None, obj=None, formsets=None, inline_instances=None,
+            add=None, opts=None, object_id=None, to_field=None):
+        if object_id:
+            formset_services = BookingServices.booking_provider_payment_services(obj)
+            return dict(formset_services=formset_services)
+
+        return {}
+
 
     def changeform_context(
             self, request, form, obj, formsets, inline_instances,
-            add, opts, object_id, to_field, form_validated=None):
+            add, opts, object_id, to_field, form_validated=None, extra_context=None):
 
         context = super(ProviderBookingPaymentSiteModel, self).changeform_context(
             request, form, obj, formsets, inline_instances, add, opts, object_id, to_field,
-            form_validated)
+            form_validated, extra_context)
 
         if object_id:
-            services = BookingServices.booking_provider_payment_services(obj)
-
-            ServicesFormSet = formset_factory(ProviderBookingPaymentServiceForm, extra=0)
-            services_formset = ServicesFormSet(initial=list(services))
+            if 'formset_services' not in context:
+                context['formset_services'] = BookingServices.booking_provider_payment_services(obj)
+            if obj.status == STATUS_DRAFT:
+                ServicesFormSet = formset_factory(ProviderBookingPaymentServiceForm, extra=0)
+            else:
+                ServicesFormSet = formset_factory(ProviderBookingPaymentServiceReadonlyForm, extra=0)
+            services_formset = ServicesFormSet(initial=list(context['formset_services']))
 
             context.update(dict(services_formset=services_formset))
 
@@ -1754,7 +1776,7 @@ class ProviderBookingPaymentSiteModel(SiteModel):
         if obj. pk:
             # disable save of agencyinvoice object
             ServicesFormSet = formset_factory(ProviderBookingPaymentServiceForm)
-            services_formset = ServicesFormSet(request.POST, request.FILES)
+            services_formset = ServicesFormSet(request.POST)
             if services_formset.is_valid():
                 BookingServices.save_payment(
                     request.user, obj, services_formset.cleaned_data)

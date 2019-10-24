@@ -818,3 +818,32 @@ class ProviderBookingPaymentServiceForm(forms.Form):
         label='Paid', required=False,
         decimal_places=2, widget=forms.NumberInput(
             attrs={'style':'text-align: right; width: 100px;'}))
+
+class ProviderBookingPaymentServiceReadonlyForm(forms.Form):
+    service_payment_id = forms.CharField(required=False, widget=forms.HiddenInput())
+    service_id = forms.CharField(required=False, widget=forms.HiddenInput())
+    service_name = forms.CharField(disabled=True, required=False)
+    saved_amount_to_pay = forms.DecimalField(
+        label='Saved To Pay', required=False,
+        disabled=True, widget=forms.TextInput(
+            attrs={'readonly':'readonly', 'style':'text-align: right; width: 100px;'}))
+    saved_amount_paid = forms.DecimalField(
+        label='Saved Paid', required=False,
+        disabled=True, widget=forms.TextInput(
+            attrs={'readonly':'readonly', 'style':'text-align: right; width: 100px;'}))
+    service_amount_to_pay = forms.DecimalField(
+        label='Serv.To Pay', required=False,
+        disabled=True, widget=forms.TextInput(
+            attrs={'readonly':'readonly', 'style':'text-align: right; width: 100px;'}))
+    service_amount_paid = forms.DecimalField(
+        label='Serv.Paid', required=False,
+        disabled=True, widget=forms.TextInput(
+            attrs={'readonly':'readonly', 'style':'text-align: right; width: 100px;'}))
+    is_selected = forms.BooleanField(label='sel', required=False,
+        disabled=True, widget=forms.CheckboxInput(
+            attrs={'style':'text-align: center; width: 40px;'}
+        ))
+    amount_paid = forms.DecimalField(
+        label='Paid', required=False,
+        decimal_places=2, disabled=True, widget=forms.NumberInput(
+            attrs={'style':'text-align: right; width: 100px;'}))
