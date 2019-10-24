@@ -881,7 +881,7 @@ class ConfigServices(object):
             cost = None
             cost_message = 'Provider Not Found'
         else:
-            if service.has_pax_range:
+            if service.pax_range:
                 cost = 0
                 cost_message = ''
                 # each group can have different details
@@ -967,7 +967,7 @@ class ConfigServices(object):
             price = None
             price_message = 'Agency Not Found'
         else:
-            if service.has_pax_range:
+            if service.pax_range:
                 price = 0
                 price_message = ''
                 # each group can have different details

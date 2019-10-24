@@ -183,13 +183,13 @@ class PackageSiteModel(SiteModel):
     menu_label = MENU_LABEL_PACKAGE
     fields = (
         ('name', 'service_category', 'enabled'), 
-        ('amounts_type', 'pax_range', 'has_pax_range'),
+        ('amounts_type', 'pax_range'),
         'time', 'description'
     )
     list_display = (
-        'name', 'service_category', 'amounts_type', 'pax_range', 'has_pax_range', 'time', 'enabled')
+        'name', 'service_category', 'amounts_type', 'pax_range', 'time', 'enabled')
     list_editable = ('enabled',)
-    top_filters = ('name', 'amounts_type', 'pax_range', 'has_pax_range', 'enabled')
+    top_filters = ('name', 'amounts_type', 'pax_range', 'enabled')
     ordering = ('enabled', 'name',)
     details_template = 'booking/package_details.html'
     form = PackageForm
@@ -1803,7 +1803,12 @@ def default_requests_mail_bcc(request, provider=None, booking=None):
 
 
 def default_requests_mail_subject(request, provider=None, booking=None):
-    return 'Solicitud de Reserva'
+    subject_ref = ''
+    if booking:
+        subject_ref = booking.name or ''
+        if booking.reference:
+            subject_ref += ' (%s)' % booking.reference
+    return 'Solicitud de Reserva %s' % subject_ref
 
 
 def default_requests_mail_body(request, provider=None, booking=None):
