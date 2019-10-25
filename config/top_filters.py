@@ -27,6 +27,11 @@ class LocationTopFilter(filters.ForeignKeyFilter):
     autocomplete_url = 'location-autocomplete'
 
 
+class ZoneTopFilter(filters.ForeignKeyFilter):
+    filter_title = 'Select Zones'
+    autocomplete_url = 'zone-autocomplete'
+
+
 class AllotmentTopFilter(filters.ForeignKeyFilter):
     filter_title = 'Select Accomodations'
     autocomplete_url = 'allotment-autocomplete'

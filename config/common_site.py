@@ -27,11 +27,12 @@ from config.forms import (
     AgencyAllotmentDetailInlineForm, AgencyTransferDetailInlineForm,
     AgencyExtraDetailInlineForm,
     AllotmentRoomTypeInlineForm, ExtraAddonInlineForm,
-    LocationTransferIntervalInlineForm, ServiceAddonInlineForm,
+    LocationTransferIntervalInlineForm, ServiceAddonInlineForm, PickupTimeInlineForm,
     PricesExportForm,
 )
 from config.models import (
-    ServiceCategory, Location, Place, TransferInterval, Schedule, RoomType, Addon,
+    ServiceCategory, Location, Place, TransferInterval, Schedule,
+    Zone, PickupTime, RoomType, Addon,
     Service,
     Allotment, AllotmentRoomType, AllotmentBoardType, AllotmentSupplement,
     Transfer, TransferSupplement,
@@ -45,7 +46,7 @@ from config.models import (
 )
 from config.services import ConfigServices
 from config.top_filters import (
-    RoomTypeTopFilter, LocationTopFilter, ServiceCategoryTopFilter,
+    RoomTypeTopFilter, LocationTopFilter, ZoneTopFilter, ServiceCategoryTopFilter,
     AddonTopFilter,
     AllotmentTopFilter, TransferTopFilter, ExtraTopFilter,
     LocationForProviderTransferTopFilter, ExtraLocationForProviderTransferTopFilter,
@@ -97,6 +98,24 @@ class LocationSiteModel(SiteModel):
     list_display = ('name', 'enabled',)
     top_filters = ('name', 'enabled',)
     inlines = [LocationPlaceInline, LocationTransferIntervalInline, LocationScheduleInline]
+    save_as = True
+
+
+class PickupTimeInline(CommonTabularInline):
+    model = PickupTime
+    fields = [('location', 'pickup_time'),]
+    ordering = ['location',]
+    extra = 0
+    form = PickupTimeInlineForm
+
+
+class ZoneSiteModel(SiteModel):
+    model_order = 6010
+    menu_label = MENU_LABEL_CONFIG_BASIC
+    fields = ('name',)
+    list_display = ('name',)
+    top_filters = ('name',)
+    inlines = [PickupTimeInline]
     save_as = True
 
 
@@ -227,15 +246,15 @@ class AllotmentSiteModel(SiteModel):
     model_order = 6110
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
-    fields = (('name', 'location', 'is_shared_point'),
-              ('service_category', 'cost_type'),
+    fields = (('name', 'location', 'zone'),
+              ('service_category', 'cost_type', 'is_shared_point'),
               ('phone', 'address'),
               ('time_from', 'time_to'),
               ('pax_range', 'enabled'),
               ('child_age', 'infant_age'))
     list_display = ('name', 'service_category', 'phone',
                     'location', 'is_shared_point', 'enabled',)
-    top_filters = ('name', ('location', LocationTopFilter),
+    top_filters = ('name', ('location', LocationTopFilter), ('zone', ZoneTopFilter),
                    ('service_category', ServiceCategoryTopFilter),
                    'is_shared_point', 'enabled')
     ordering = ['enabled', 'name']
@@ -538,6 +557,7 @@ class AgencyExtraServiceSiteModel(SiteModel):
 
 bookings_site.register(ServiceCategory, ServiceCategorySiteModel)
 bookings_site.register(Location, LocationSiteModel)
+bookings_site.register(Zone, ZoneSiteModel)
 bookings_site.register(RoomType, RoomTypeSiteModel)
 bookings_site.register(Addon, AddonSiteModel)
 

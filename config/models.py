@@ -54,11 +54,11 @@ class Location(models.Model):
 
 class PickupTime(models.Model):
     """
-    TransferInterval
+    Pickup Time
     """
     class Meta:
-        verbose_name = 'Transfer Interval'
-        verbose_name_plural = 'Transfers Intervals'
+        verbose_name = 'Pickup Time'
+        verbose_name_plural = 'Pickups Times'
         unique_together = (('zone', 'location',),)
     zone = models.ForeignKey(Zone, verbose_name='Pickup Zone')
     location = models.ForeignKey(Location, verbose_name='Dropoff Location')
