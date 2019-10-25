@@ -93,7 +93,8 @@ from booking.models import (
 )
 from booking.services import BookingServices
 from booking.top_filters import (
-    DateTopFilter, PackageTopFilter, CancelledTopFilter, InternalReferenceTopFilter)
+    DateTopFilter, PackageTopFilter, CancelledTopFilter, InternalReferenceTopFilter,
+    SellerTopFilter)
 
 from common.sites import CommonStackedInline, CommonTabularInline
 
@@ -420,7 +421,7 @@ class QuoteSiteModel(SiteModel):
     )
     list_display = ('reference', 'agency', 'date_from',
                     'date_to', 'status', 'currency', 'seller')
-    top_filters = ('reference', ('date_from', DateTopFilter), 'status')
+    top_filters = ('reference', ('date_from', DateTopFilter), 'status', ('seller', SellerTopFilter))
     ordering = ('date_from', 'reference',)
     readonly_fields = ('date_from', 'date_to', 'status')
     details_template = 'booking/quote_details.html'
