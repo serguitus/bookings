@@ -281,7 +281,9 @@ class TransferSiteModel(SiteModel):
     model_order = 6120
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
-    fields = ('name', 'service_category', 'cost_type', 'max_capacity', 'is_shared', 'pax_range', 'enabled',)
+    fields = (
+        ('name', 'service_category'), ('cost_type', 'max_capacity', 'is_shared'),
+        ('pax_range', 'has_pickup_time'), 'enabled',)
     list_display = ('name', 'cost_type', 'max_capacity', 'is_shared', 'enabled',)
     top_filters = ('name', ('service_category', ServiceCategoryTopFilter), 'is_shared', 'enabled',)
     ordering = ['enabled', 'name']

@@ -184,7 +184,7 @@ $(document).ready(function(){
     get_computed_time(evt);
   });
 
-  $(bookingservice_form_selector + ' input[name*="schedule_time"]').on('change', function(evt){
+  $(bookingservice_form_selector + ' input, ' + bookingservice_form_selector + ' select').on('change', function(evt){
     get_computed_time(evt);
   });
 

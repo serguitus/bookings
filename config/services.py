@@ -24,7 +24,7 @@ from config.models import (
     Extra,
     ProviderExtraService, ProviderExtraDetail,
     AgencyExtraService, AgencyExtraDetail,
-    Schedule, TransferInterval,
+    Schedule, TransferInterval, PickupTime,
 )
 from finance.models import Agency
 
@@ -1307,7 +1307,26 @@ class ConfigServices(object):
     @classmethod
     def transfer_time(
             cls, schedule_from_id, schedule_to_id, location_from_id, location_to_id,
-            time_from, time_to):
+            time_from, time_to, transfer_id=None, allotment_from_id=None):
+        if transfer_id:
+            transfer = Transfer.objects.get(pk=transfer_id)
+            if transfer.has_pickup_time:
+                if allotment_from_id and location_to_id:
+                    allotment = Allotment.objects.get(pk=allotment_from_id)
+                    if allotment.zone:
+                        pickup_times = list(PickupTime.objects.filter(
+                            zone = allotment.zone,
+                            location = location_to_id
+                        ))
+                        if pickup_times:
+                            return pickup_times[0].pickup_time, None
+                        else:
+                            return None, 'Pickup Time Missing for Pickup and Location to'
+                    else:
+                        return None, 'Pickup Time Missing - Pickup Zone Not defined'
+                else:
+                    return None, 'Pickup Time Missing - Pickup and Locationto are required'
+
         if (time_from):
             return time_from, 'Scheduled time From'
         if (schedule_from_id and schedule_from_id != ''):

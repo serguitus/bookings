@@ -468,15 +468,18 @@ class BookingTransferTimeView(ModelChangeFormProcessorView):
 
     def post(self, request, *args, **kwargs):
 
+        transfer_id = request.POST.get('service')
         schedule_from_id = request.POST.get('schedule_from')
         schedule_to_id = request.POST.get('schedule_to')
         location_from_id = request.POST.get('location_from')
+        allotment_from_id = request.POST.get('pickup')
         location_to_id = request.POST.get('location_to')
         time_from = request.POST.get('schedule_time_from')
         time_to = request.POST.get('schedule_time_to')
 
         pickup_time, pickup_time_msg = ConfigServices.transfer_time(
-            schedule_from_id, schedule_to_id, location_from_id, location_to_id, time_from, time_to)
+            schedule_from_id, schedule_to_id, location_from_id, location_to_id, time_from, time_to,
+            transfer_id, allotment_from_id)
 
         return JsonResponse({
             'time': pickup_time,
