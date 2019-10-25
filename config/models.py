@@ -20,6 +20,21 @@ from finance.models import Agency, Provider
 from reservas.custom_settings import ADDON_FOR_NO_ADDON
 
 
+class Zone(models.Model):
+    """
+    Zone
+    """
+    class Meta:
+        verbose_name = 'Zone'
+        verbose_name_plural = 'Zones'
+        unique_together = (('name',),)
+    name = models.CharField(max_length=50)
+    ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
 class Location(models.Model):
     """
     Location
@@ -35,6 +50,19 @@ class Location(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class PickupTime(models.Model):
+    """
+    TransferInterval
+    """
+    class Meta:
+        verbose_name = 'Transfer Interval'
+        verbose_name_plural = 'Transfers Intervals'
+        unique_together = (('zone', 'location',),)
+    zone = models.ForeignKey(Zone, verbose_name='Pickup Zone')
+    location = models.ForeignKey(Location, verbose_name='Dropoff Location')
+    pickup_time = models.TimeField()
 
 
 class Place(models.Model):
@@ -139,7 +167,8 @@ class Service(models.Model):
         unique_together = (('category', 'name'),)
     name = models.CharField(max_length=150)
     description = models.CharField(max_length=1000, blank=True, null=True)
-    service_category = models.ForeignKey(ServiceCategory, blank=True, null=True, verbose_name='Category')
+    service_category = models.ForeignKey(
+        ServiceCategory, blank=True, null=True, verbose_name='Category')
     category = models.CharField(max_length=5, choices=SERVICE_CATEGORIES)
     grouping = models.BooleanField(default=False)
     pax_range = models.BooleanField(default=False)
@@ -392,6 +421,7 @@ class Allotment(Service):
     cost_type = models.CharField(
         max_length=5, choices=ALLOTMENT_COST_TYPES, default=AMOUNTS_BY_PAX)
     location = models.ForeignKey(Location)
+    zone = models.ForeignKey(Zone, blank=True, null=True)
     time_from = models.TimeField(default='16:00')
     time_to = models.TimeField(default='12:00')
     address = models.CharField(max_length=500, blank=True, null=True)
@@ -535,6 +565,7 @@ class Transfer(Service):
     cost_type = models.CharField(max_length=5, choices=TRANSFER_COST_TYPES)
     max_capacity = models.IntegerField(blank=True, null=True)
     is_shared = models.BooleanField(default=False)
+    has_pickup_time = models.BooleanField(default=False)
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_TRANSFER
