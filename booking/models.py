@@ -5,6 +5,7 @@ Booking models
 """
 from concurrency.fields import AutoIncVersionField
 
+from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models.query_utils import Q
 from django.contrib.auth.models import User
@@ -62,6 +63,10 @@ class DateInterval(models.Model):
         abstract = True
     datetime_from = models.DateField(blank=True, null=True, verbose_name='Date From')
     datetime_to = models.DateField(blank=True, null=True, verbose_name='Date To')
+
+    def validate_date_interval(self):
+        if self.datetime_from and self.datetime_to and self.datetime_from > self.datetime_to:
+            raise ValidationError('Date From can not be after Date To')
 
 
 def utility(cost, price):
@@ -350,6 +355,7 @@ class QuoteService(BaseService, DateInterval):
     quote = models.ForeignKey(Quote, related_name='quote_services')
 
     def save(self, *args, **kwargs):
+        self.validate_date_interval()
         self.fill_data()
         # Call the "real" save() method.
         super(QuoteService, self).save(*args, **kwargs)
@@ -462,6 +468,7 @@ class QuotePackageService(BaseService, DateInterval):
         pass
 
     def save(self, *args, **kwargs):
+        self.validate_date_interval()
         self.fill_data()
         # Call the "real" save() method.
         super(QuotePackageService, self).save(*args, **kwargs)
@@ -762,6 +769,7 @@ class BookingService(BaseBookingService, DateInterval):
         pass
 
     def save(self, *args, **kwargs):
+        self.validate_date_interval()
         self.fill_data()
         # Call the "real" save() method.
         super(BookingService, self).save(*args, **kwargs)
@@ -921,6 +929,7 @@ class BookingAllotment(BookingService, BaseAllotment):
         return dist
 
     def fill_data(self):
+        super(BookingAllotment, self).fill_data()
         self.name = '%s' % (self.service,)
         self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT
         self.service_type = SERVICE_CATEGORY_ALLOTMENT
@@ -974,6 +983,7 @@ class BookingTransfer(BookingService, BaseTransfer):
         return '%s pax' % self.rooming_list.count()
 
     def fill_data(self):
+        super(BookingTransfer, self).fill_data()
         # setting name for this booking_service
         self.name = '%s (%s -> %s)' % (
             self.service,
@@ -1014,6 +1024,7 @@ class BookingExtra(BookingService, BaseExtra):
         return '%s pax' % self.rooming_list.count()
 
     def fill_data(self):
+        super(BookingExtra, self).fill_data()
         # setting name for this booking_service
         self.name = self.service.name
         self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA
@@ -1047,6 +1058,7 @@ class BookingPackage(BookingService):
         return '%s pax' % self.rooming_list.count()
 
     def fill_data(self):
+        super(BookingPackage, self).fill_data()
         # setting name for this booking_service
         self.name = self.service.name
         self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE
@@ -1080,6 +1092,7 @@ class BookingPackageService(BaseBookingService, DateInterval):
         pass
 
     def save(self, *args, **kwargs):
+        self.validate_date_interval()
         self.fill_data()
         # Call the "real" save() method.
         super(BookingPackageService, self).save(*args, **kwargs)
@@ -1143,6 +1156,7 @@ class BookingPackageAllotment(BookingPackageService, BaseAllotment):
         return dist
 
     def fill_data(self):
+        super(BookingPackageAllotment, self).fill_data()
         self.name = '%s' % (self.service,)
         self.base_category = BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_ALLOTMENT
         self.service_type = SERVICE_CATEGORY_ALLOTMENT
@@ -1194,6 +1208,7 @@ class BookingPackageTransfer(BookingPackageService, BaseTransfer):
         return '%s pax' % self.booking_package.rooming_list.count()
 
     def fill_data(self):
+        super(BookingPackageTransfer, self).fill_data()
         # setting name for this booking_service
         self.name = '%s (%s -> %s)' % (
             self.service,
@@ -1217,6 +1232,7 @@ class BookingPackageExtra(BookingPackageService, BaseExtra):
         return '%s pax' % self.booking_package.rooming_list.count()
 
     def fill_data(self):
+        super(BookingPackageExtra, self).fill_data()
         # setting name for this booking_service
         self.name = self.service.name
         self.base_category = BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_EXTRA
