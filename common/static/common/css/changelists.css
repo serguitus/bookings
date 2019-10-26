@@ -387,3 +387,16 @@ tr.totals{
 tr.totals td{
     padding-top: 15px;
 }
+#page_content_container>h1, #btn_topfilters_collapse, ul.object-tools {
+    display: inline-block;
+}
+
+ul.object-tools {
+    margin-top: auto;
+}
+#btn_topfilters_collapse span.glyphicon:before {
+    content: "\e083";
+}
+#btn_topfilters_collapse.collapsed  span.glyphicon:before {
+    content: "\e084";
+}
