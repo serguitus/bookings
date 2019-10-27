@@ -42,7 +42,7 @@ from booking.views import (
     PackageAutocompleteView, ProviderPackageAutocompleteView,
     PickUpAutocompleteView, DropOffAutocompleteView, PlaceAutocompleteView,
     ScheduleArrivalAutocompleteView, ScheduleDepartureAutocompleteView,
-    QuotePaxVariantAutocompleteView)
+    QuotePaxVariantAutocompleteView, SellerAutocompleteView)
 
 
 urlpatterns = [
@@ -58,6 +58,10 @@ urlpatterns = [
     url(r'^cuc-account-autocomplete/$',
         CUCAccountAutocompleteView.as_view(),
         name='cuc-account-autocomplete',
+    ),
+    url(r'^seller-autocomplete/$',
+        SellerAutocompleteView.as_view(),
+        name='seller-autocomplete',
     ),
     url(r'^agency-autocomplete/$',
         AgencyAutocompleteView.as_view(),

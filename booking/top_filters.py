@@ -11,6 +11,10 @@ class PackageTopFilter(filters.ForeignKeyFilter):
     filter_title = 'Select Packages'
     autocomplete_url = 'package-autocomplete'
 
+class SellerTopFilter(filters.ForeignKeyFilter):
+    filter_title = 'Select Sellers'
+    autocomplete_url = 'seller-autocomplete'
+
 class CancelledTopFilter(filters.BooleanFilter):
     default_value = ["False"]
     filter_title = 'Cancelled'

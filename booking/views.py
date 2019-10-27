@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import os
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.db.models import Q
 from django.forms.formsets import all_valid, DELETION_FIELD_NAME
 from django.http import JsonResponse, HttpResponse
@@ -895,6 +896,19 @@ def booking_actions(request, id):
     # here show some error message for unknown action
     return redirect(reverse('common:booking_booking_change',
                                         args=(id,)))
+
+
+class SellerAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return User.objects.none()
+        qs = User.objects.filter(
+            is_staff=True,
+            is_active=True)
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs[:20]
 
 
 class PackageAutocompleteView(autocomplete.Select2QuerySetView):

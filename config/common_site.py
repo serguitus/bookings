@@ -1,23 +1,28 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from common.sites import SiteModel, CommonTabularInline, CommonStackedInline
 
 from django.conf.urls import url
 from django.contrib import admin, messages
 from django.contrib.admin.options import csrf_protect_m, IS_POPUP_VAR, TO_FIELD_VAR
 from django.contrib.admin import helpers
 from django.contrib.admin.checks import ModelAdminChecks
-from django.contrib.admin.utils import unquote
+from django.contrib.admin.utils import unquote, quote
 from django.core import checks
 from django.core.exceptions import FieldDoesNotExist, ValidationError, PermissionDenied
 from django.db import router, transaction
 from django import forms
 from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, reverse
 from django.template.response import SimpleTemplateResponse, TemplateResponse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext as _, ungettext
+
+from common.sites import SiteModel, CommonTabularInline, CommonStackedInline, CommonChangeList
+
+from config.constants import (
+    SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER, SERVICE_CATEGORY_EXTRA,
+    SERVICE_CATEGORY_PACKAGE)
 
 from config.forms import (
     ProviderAllotmentServiceForm, ProviderTransferServiceForm, ProviderExtraServiceForm,
@@ -135,6 +140,35 @@ class ServiceCategorySiteModel(SiteModel):
     top_filters = ('name',)
 
 
+class ServiceChangeList(CommonChangeList):
+    def url_for_result(self, result):
+        pk = getattr(result, self.pk_attname)
+        category = getattr(result, 'category')
+        if category == SERVICE_CATEGORY_ALLOTMENT:
+            model_name = 'allotment'
+        elif category == SERVICE_CATEGORY_TRANSFER:
+            model_name = 'transfer'
+        elif category == SERVICE_CATEGORY_EXTRA:
+            model_name = 'extra'
+        elif category == SERVICE_CATEGORY_PACKAGE:
+            return reverse(
+                '%s:%s_%s_change' % (
+                    self.model_admin.admin_site.site_namespace,
+                    'booking',
+                    'package'),
+                args=(quote(pk),),
+                current_app=self.model_admin.admin_site.name)
+        else:
+            model_name = self.opts.app_label.model_name
+        return reverse(
+            '%s:%s_%s_change' % (
+                self.model_admin.admin_site.site_namespace,
+                self.opts.app_label,
+                model_name),
+            args=(quote(pk),),
+            current_app=self.model_admin.admin_site.name)
+
+
 class ServiceSiteModel(SiteModel):
     model_order = 6100
     menu_label = MENU_LABEL_CONFIG_BASIC
@@ -144,6 +178,12 @@ class ServiceSiteModel(SiteModel):
     top_filters = ('name', ('service_category', ServiceCategoryTopFilter), 'category', 'enabled')
     ordering = ['enabled', 'category', 'name']
     actions = ['export_prices']
+
+    def get_changelist(self, request, **kwargs):
+        """
+        Returns the ChangeList class for use on the changelist page.
+        """
+        return ServiceChangeList
 
     def export_prices(self, request, queryset, extra_context=None):
         """
