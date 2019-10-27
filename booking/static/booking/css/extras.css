@@ -176,3 +176,7 @@ div.readonly {
     max-width: 40em;
     width: 40em;
 }
+
+#btn-booking-services-summary, #btn-bookingpackage-services-summary {
+    padding: 0px 2px 4px 2px;
+}

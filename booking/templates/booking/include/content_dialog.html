@@ -1,0 +1,15 @@
+<div id="{% block dialog_id %}dialog_id{% endblock dialog_id %}"
+        class="modal fade" tabindex="-1" role="dialog" aria-labelledby="dialogModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h5 id="dialogModalLabel" class="modal-title">{% block dialog_title %}dialog_title{% endblock dialog_title %}</h5>
+            </div>
+            <div class="modal-body">
+                {% block dialog_content %}
+                {% endblock dialog_content %}
+            </div>
+        </div>
+    </div>
+</div>    

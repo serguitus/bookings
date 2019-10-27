@@ -1,0 +1,12 @@
+{% extends "booking/include/content_dialog.html" %}
+
+{% load django_tables2 booking_tags %}
+
+{% block dialog_id %}bookingpackage_services_summary{% endblock dialog_id %}
+
+{% block dialog_title %}Booking Package Services Summary{% endblock dialog_title %}
+
+{% block dialog_content %}
+    {% bookingpackage_services_summary_table original.booking_package as table %}
+    {% render_table table %}
+{% endblock dialog_content %}

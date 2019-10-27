@@ -395,8 +395,8 @@ ul.object-tools {
     margin-top: auto;
 }
 #btn_topfilters_collapse span.glyphicon:before {
-    content: "\e083";
+    content: "\e113";
 }
 #btn_topfilters_collapse.collapsed  span.glyphicon:before {
-    content: "\e084";
+    content: "\e114";
 }

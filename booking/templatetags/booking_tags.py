@@ -13,10 +13,11 @@ from booking.tables import (
     PackageServiceTable,
     QuoteServiceTable, QuotePaxVariantTable,
     QuotePackageServiceTable,
-    BookingServiceTable, BookingPaxTable,
+    BookingServiceTable, BookingServiceSummaryTable, BookingPaxTable,
     BookingVouchersTable,
     BookingServiceUpdateTable,
     BookingPackageServiceTable,
+    BookingPackageServiceSummaryTable,
     AddPaxBookingServicesTable)
 from booking.services import BookingServices
 
@@ -66,6 +67,14 @@ def bookingservice_table(booking):
 
 
 @register.simple_tag
+def booking_services_summary_table(booking):
+    table = BookingServiceSummaryTable(
+        booking.booking_services.all(),
+        order_by=('datetime_from', 'datetime_to'))
+    return table
+
+
+@register.simple_tag
 def vouchers_table(booking):
     table = BookingVouchersTable(
         booking.booking_services.all(),
@@ -98,6 +107,14 @@ def booking_pax_table(booking):
 @register.simple_tag
 def bookingpackage_table(bookingpackage):
     table = BookingPackageServiceTable(
+        bookingpackage.booking_package_services.all(),
+        order_by=('datetime_from', 'datetime_to'))
+    return table
+
+
+@register.simple_tag
+def bookingpackage_services_summary_table(bookingpackage):
+    table = BookingPackageServiceSummaryTable(
         bookingpackage.booking_package_services.all(),
         order_by=('datetime_from', 'datetime_to'))
     return table

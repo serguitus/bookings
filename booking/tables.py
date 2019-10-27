@@ -163,6 +163,17 @@ class BookingServiceTable(tables.Table):
     #        self.columns.hide('service_type')
 
 
+class BookingServiceSummaryTable(tables.Table):
+    class Meta:
+        model = BookingService
+        template_name = 'booking/include/base_table.html'
+        fields = ['name', 'datetime_from', 'datetime_to', 'provider', 'status']
+        attrs = {'class': 'table table-hover table-condensed'}
+        row_attrs = {
+            'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_STATUS_MAPPING[record.status]),
+        }
+
+
 class BookingPaxTable(tables.Table):
     class Meta:
         model = BookingPax
@@ -226,6 +237,18 @@ class BookingPackageServiceTable(tables.Table):
 
     #def before_render(self, request):
     #    self.columns.hide('service_type')
+
+
+class BookingPackageServiceSummaryTable(tables.Table):
+    class Meta:
+        model = BookingPackageService
+        template_name = 'booking/include/base_table.html'
+        fields = [
+            'name', 'datetime_from', 'datetime_to', 'provider', 'status']
+        attrs = {'class': 'table table-hover table-condensed'}
+        row_attrs = {
+            'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_STATUS_MAPPING[record.status]),
+        }
 
 
 class BookingServiceUpdateTable(tables.Table):

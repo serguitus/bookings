@@ -6,13 +6,13 @@ OK - Incorporar barra de navegacion en barra principal o eliminarla y señalizar
 Filtros
 OK - Filtros de choices no exclusivos, que sean checkboxes que se marcan y desmarcan permitiendo filtrar por mas de un elemento.
 OK - Filtros de fechas personalizable a poder especificar anterior a y posterior a
-- Filtros replegables
+OK - Filtros replegables
 
 Vista de Edicion
 OK - Paneles con listados relacionados
 
 
 ### TODO #####
-- Validar en BookingServices que fecha FROM sea menor que fecha TO
+OK - Validar en BookingServices que fecha FROM sea menor que fecha TO
 OK - En ProviderTransferService change_list mostrar filtros por location_from y location_to
 OK - No se pueden salvar bookingservices nuevos desde el form_add (al parecer el id no esta tomando valor)

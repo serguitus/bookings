@@ -1,6 +1,11 @@
 $(document).ready(function(){
 
-  $('div.field-box.field-provider>div.related-widget-wrapper').after('<a id="btn-costs" data-toggle="modal" data-target="#popup-costs" class="btn btn-costs" href="#">Costs</a>');
+  $('div.field-box.field-provider>div.related-widget-wrapper').after('<a id="btn-costs" title="Costs" data-toggle="modal" data-target="#popup-costs" class="btn btn-costs glyphicon glyphicon-usd" href="#"></a>');
+
+  label = $('div.field-booking label');
+  label.html(label.html() + '<a id="btn-booking-services-summary" title="Booking Services Summary" data-toggle="modal" data-target="#booking_services_summary" class="btn btn-booking-services-summary glyphicon glyphicon-eye-open" href="#"></a>');
+  label = $('div.field-booking_package label');
+  label.html(label.html() + '<a id="btn-bookingpackage-services-summary" title="Booking Package Services Summary" data-toggle="modal" data-target="#bookingpackage_services_summary" class="btn btn-bookingpackage-services-summary glyphicon glyphicon-eye-open" href="#"></a>');
 
   $('#btn-costs').on('click', function (e) {
     get_providers_costs();
