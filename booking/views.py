@@ -703,6 +703,9 @@ class EmailConfirmationView(View):
             client_name = bk.agency.name
         rooming = bk.rooming_list.all()
         objs = _get_child_objects(services)
+        subj = 'Service Confirmation %s' % bk.name
+        if bk.reference:
+            subj += ' (%s)' % bk.reference
         initial = {
             'booking': bk,
             'services': objs,
@@ -713,7 +716,7 @@ class EmailConfirmationView(View):
         t = get_template('booking/emails/confirmation_email.html')
         form = EmailProviderForm(request.user,
                                  initial={
-                                     'subject': 'Solicitud de Confirmacion',
+                                     'subject': subj,
                                      'body': t.render(initial)
                                  })
         context = dict()
