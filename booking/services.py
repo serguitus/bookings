@@ -4643,6 +4643,8 @@ class BookingServices(object):
                 'provider_name': detail.provider_service.provider.name,
                 'date_from': detail.provider_service.date_from,
                 'date_to': detail.provider_service.date_to,
+                'pax_range_min': detail.pax_range_min,
+                'pax_range_max': detail.pax_range_max,
                 'sgl_cost': detail.ad_1_amount,
                 'dbl_cost': detail.ad_2_amount,
                 'tpl_cost': detail.ad_3_amount,})
@@ -4963,7 +4965,8 @@ def details_allotment_queryset(
         'provider_service__provider',
         'provider_service__date_from',
         'provider_service__date_to',
-        'board_type', 'room_type', 'addon')
+        'board_type', 'room_type', 'addon',
+        'pax_range_min')
     return qs[:50]
 
 def details_transfer_queryset(
@@ -5006,7 +5009,8 @@ def details_transfer_queryset(
         'provider_service__provider',
         'provider_service__date_from',
         'provider_service__date_to',
-        'p_location_from', 'p_location_to', 'addon')
+        'p_location_from', 'p_location_to', 'addon',
+        'pax_range_min')
     return qs[:50]
 
 
@@ -5030,5 +5034,6 @@ def details_extra_queryset(service, date_from=None, date_to=None, addon=None):
         'provider_service__provider',
         'provider_service__date_from',
         'provider_service__date_to',
-        'addon')
+        'addon',
+        'pax_range_min')
     return qs[:50]
