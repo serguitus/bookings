@@ -323,8 +323,9 @@ class TransferSiteModel(SiteModel):
     menu_group = 'Configuration Services'
     fields = (
         ('name', 'service_category'), ('cost_type', 'max_capacity', 'is_shared'),
-        ('pax_range', 'has_pickup_time'), 'enabled',)
-    list_display = ('name', 'cost_type', 'max_capacity', 'is_shared', 'enabled',)
+        ('pax_range', 'has_pickup_time'), ('child_age', 'infant_age'), 'enabled',)
+    list_display = ('name', 'cost_type', 'max_capacity', 'is_shared', 'enabled',
+                    'infant_age', 'child_age')
     top_filters = ('name', ('service_category', ServiceCategoryTopFilter), 'is_shared', 'enabled',)
     ordering = ['enabled', 'name']
     inlines = [ServiceAddonInline]
@@ -369,9 +370,10 @@ class ExtraSiteModel(SiteModel):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
     fields = ('name', 'service_category', 'location', 'cost_type', 'parameter_type',
-              'pax_range', 'enabled',)
+              'pax_range', ('infant_age', 'child_age'), 'enabled',)
     list_display = ('name', 'service_category', 'location', 'cost_type',
-                    'parameter_type', 'enabled', 'pax_range', 'has_pax_range')
+                    'parameter_type', 'enabled', 'pax_range', 'has_pax_range',
+                    'infant_age', 'child_age')
     top_filters = (('service_category', ServiceCategoryTopFilter), 'name',)
     ordering = ['enabled', 'name']
     inlines = [ServiceAddonInline]
