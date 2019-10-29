@@ -30,7 +30,7 @@ from finance.views import (
 )
 from config import urls as config_urls
 from config.views import (
-    LocationAutocompleteView, ZoneAutocompleteView, ServiceCategoryAutocompleteView,
+    LocationAutocompleteView, ZoneTransferAutocompleteView, ServiceCategoryAutocompleteView,
     RoomTypeAutocompleteView, BoardTypeAutocompleteView,
     AllotmentAutocompleteView, ProviderAllotmentAutocompleteView,
     TransferAutocompleteView, ProviderTransferAutocompleteView,
@@ -103,9 +103,9 @@ urlpatterns = [
         LocationAutocompleteView.as_view(),
         name='location-autocomplete',
     ),
-    url(r'^zone-autocomplete/$',
-        ZoneAutocompleteView.as_view(),
-        name='zone-autocomplete',
+    url(r'^zonetransfer-autocomplete/$',
+        ZoneTransferAutocompleteView.as_view(),
+        name='zonetransfer-autocomplete',
     ),
     url(r'^servicecategory-autocomplete/$',
         ServiceCategoryAutocompleteView.as_view(),

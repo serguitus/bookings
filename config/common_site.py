@@ -31,13 +31,13 @@ from config.forms import (
     AgencyAllotmentServiceForm, AgencyTransferServiceForm, AgencyExtraServiceForm,
     AgencyAllotmentDetailInlineForm, AgencyTransferDetailInlineForm,
     AgencyExtraDetailInlineForm,
-    AllotmentRoomTypeInlineForm, ExtraAddonInlineForm,
-    LocationTransferIntervalInlineForm, ServiceAddonInlineForm, PickupTimeInlineForm,
+    AllotmentRoomTypeInlineForm, ExtraAddonInlineForm, TransferZoneForm,
+    LocationTransferIntervalInlineForm, ServiceAddonInlineForm, TransferPickupTimeInlineForm,
     PricesExportForm,
 )
 from config.models import (
     ServiceCategory, Location, Place, TransferInterval, Schedule,
-    Zone, PickupTime, RoomType, Addon,
+    TransferZone, TransferPickupTime, AllotmentTransferZone, RoomType, Addon,
     Service,
     Allotment, AllotmentRoomType, AllotmentBoardType, AllotmentSupplement,
     Transfer, TransferSupplement,
@@ -51,7 +51,7 @@ from config.models import (
 )
 from config.services import ConfigServices
 from config.top_filters import (
-    RoomTypeTopFilter, LocationTopFilter, ZoneTopFilter, ServiceCategoryTopFilter,
+    RoomTypeTopFilter, LocationTopFilter, ServiceCategoryTopFilter,
     AddonTopFilter,
     AllotmentTopFilter, TransferTopFilter, ExtraTopFilter,
     LocationForProviderTransferTopFilter, ExtraLocationForProviderTransferTopFilter,
@@ -106,21 +106,23 @@ class LocationSiteModel(SiteModel):
     save_as = True
 
 
-class PickupTimeInline(CommonTabularInline):
-    model = PickupTime
+class TransferPickupTimeInline(CommonTabularInline):
+    model = TransferPickupTime
     fields = [('location', 'pickup_time'),]
     ordering = ['location',]
     extra = 0
-    form = PickupTimeInlineForm
+    form = TransferPickupTimeInlineForm
 
 
-class ZoneSiteModel(SiteModel):
+class TransferZoneSiteModel(SiteModel):
     model_order = 6010
     menu_label = MENU_LABEL_CONFIG_BASIC
-    fields = ('name',)
-    list_display = ('name',)
-    top_filters = ('name',)
-    inlines = [PickupTimeInline]
+    fields = ('transfer', 'name',)
+    list_display = ('transfer', 'name',)
+    top_filters = ('transfer', 'name',)
+    ordering = ('transfer', 'name',)
+    form = TransferZoneForm
+    inlines = [TransferPickupTimeInline]
     save_as = True
 
 
@@ -251,6 +253,11 @@ class AllotmentSupplementInline(CommonTabularInline):
     extra = 0
 
 
+class AllotmentTransferZoneInline(CommonTabularInline):
+    model = AllotmentTransferZone
+    extra = 0
+
+
 def export_prices(request, queryset, extra_context=None):
     """
     This allows exporting service prices for certain agency and dates
@@ -286,7 +293,7 @@ class AllotmentSiteModel(SiteModel):
     model_order = 6110
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
-    fields = (('name', 'location', 'zone'),
+    fields = (('name', 'location'),
               ('service_category', 'cost_type', 'is_shared_point'),
               ('phone', 'address'),
               ('time_from', 'time_to'),
@@ -294,12 +301,12 @@ class AllotmentSiteModel(SiteModel):
               ('child_age', 'infant_age'))
     list_display = ('name', 'service_category', 'phone',
                     'location', 'is_shared_point', 'enabled',)
-    top_filters = ('name', ('location', LocationTopFilter), ('zone', ZoneTopFilter),
+    top_filters = ('name', ('location', LocationTopFilter),
                    ('service_category', ServiceCategoryTopFilter),
                    'is_shared_point', 'enabled')
     ordering = ['enabled', 'name']
     inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline,
-               ServiceAddonInline]
+               ServiceAddonInline, AllotmentTransferZoneInline]
     actions = ['export_prices']
 
     def export_prices(self, request, queryset, extra_context=None):
@@ -599,7 +606,7 @@ class AgencyExtraServiceSiteModel(SiteModel):
 
 bookings_site.register(ServiceCategory, ServiceCategorySiteModel)
 bookings_site.register(Location, LocationSiteModel)
-bookings_site.register(Zone, ZoneSiteModel)
+bookings_site.register(TransferZone, TransferZoneSiteModel)
 bookings_site.register(RoomType, RoomTypeSiteModel)
 bookings_site.register(Addon, AddonSiteModel)
 

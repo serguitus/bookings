@@ -20,21 +20,6 @@ from finance.models import Agency, Provider
 from reservas.custom_settings import ADDON_FOR_NO_ADDON
 
 
-class Zone(models.Model):
-    """
-    Zone
-    """
-    class Meta:
-        verbose_name = 'Zone'
-        verbose_name_plural = 'Zones'
-        unique_together = (('name',),)
-    name = models.CharField(max_length=50)
-    ordering = ['name']
-
-    def __str__(self):
-        return self.name
-
-
 class Location(models.Model):
     """
     Location
@@ -50,19 +35,6 @@ class Location(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class PickupTime(models.Model):
-    """
-    Pickup Time
-    """
-    class Meta:
-        verbose_name = 'Pickup Time'
-        verbose_name_plural = 'Pickups Times'
-        unique_together = (('zone', 'location',),)
-    zone = models.ForeignKey(Zone, verbose_name='Pickup Zone')
-    location = models.ForeignKey(Location, verbose_name='Dropoff Location')
-    pickup_time = models.TimeField()
 
 
 class Place(models.Model):
@@ -174,6 +146,7 @@ class Service(models.Model):
     pax_range = models.BooleanField(default=False)
     child_age = models.IntegerField(blank=True, null=True)
     infant_age = models.IntegerField(default=2, blank=True, null=True)
+    location = models.ForeignKey(Location, blank=True, null=True)
     enabled = models.BooleanField(default=True)
 
     def __init__(self, *args, **kwargs):
@@ -311,7 +284,6 @@ class Extra(Service):
         max_length=5, choices=EXTRA_PARAMETER_TYPES)
     has_pax_range = models.BooleanField(default=False)
     max_capacity = models.IntegerField(blank=True, null=True)
-    location = models.ForeignKey(Location, blank=True, null=True)
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_EXTRA
@@ -420,8 +392,6 @@ class Allotment(Service):
         verbose_name_plural = 'Accomodation'
     cost_type = models.CharField(
         max_length=5, choices=ALLOTMENT_COST_TYPES, default=AMOUNTS_BY_PAX)
-    location = models.ForeignKey(Location)
-    zone = models.ForeignKey(Zone, blank=True, null=True)
     time_from = models.TimeField(default='16:00')
     time_to = models.TimeField(default='12:00')
     address = models.CharField(max_length=500, blank=True, null=True)
@@ -570,6 +540,47 @@ class Transfer(Service):
     def fill_data(self):
         self.category = SERVICE_CATEGORY_TRANSFER
         self.grouping = False
+
+
+class TransferZone(models.Model):
+    """
+    Transfer Zone
+    """
+    class Meta:
+        verbose_name = 'Transfer Zone'
+        verbose_name_plural = 'Transfers Zones'
+        unique_together = (('transfer', 'name',),)
+    name = models.CharField(max_length=50)
+    transfer = models.ForeignKey(Transfer)
+    ordering = ['transfer', 'name']
+
+    def __str__(self):
+        return '%s - %s' % (self.transfer, self.name)
+
+
+class TransferPickupTime(models.Model):
+    """
+    Transfer Pickup Time
+    """
+    class Meta:
+        verbose_name = 'Transfer Pickup Time'
+        verbose_name_plural = 'Transfer Pickups Times'
+        unique_together = (('transfer_zone', 'location',),)
+    transfer_zone = models.ForeignKey(TransferZone, verbose_name='Pickup Zone')
+    location = models.ForeignKey(Location, verbose_name='Dropoff Location')
+    pickup_time = models.TimeField()
+
+
+class AllotmentTransferZone(models.Model):
+    """
+    Allotment Transfer Zone
+    """
+    class Meta:
+        verbose_name = 'Allotment Transfer Zone'
+        verbose_name_plural = 'Allotments Transfers Zones'
+        unique_together = (('allotment', 'transfer_zone'),)
+    allotment = models.ForeignKey(Allotment)
+    transfer_zone = models.ForeignKey(TransferZone)
 
 
 class TransferSupplement(ServiceSupplement):

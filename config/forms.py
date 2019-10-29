@@ -20,7 +20,15 @@ class LocationTransferIntervalInlineForm(forms.ModelForm):
         }
 
 
-class PickupTimeInlineForm(forms.ModelForm):
+class TransferZoneForm(forms.ModelForm):
+    class Meta:
+        fields = ('__all__')
+        widgets = {
+            'transfer': autocomplete.ModelSelect2(url='zonetransfer-autocomplete'),
+        }
+
+
+class TransferPickupTimeInlineForm(forms.ModelForm):
     class Meta:
         fields = ('__all__')
         widgets = {

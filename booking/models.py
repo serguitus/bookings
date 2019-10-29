@@ -715,7 +715,7 @@ class BookingPax(models.Model):
             return '%s' % (self.pax_name)
 
 
-class BaseBookingService(BaseService):
+class BaseBookingService(BaseService, DateInterval):
     """
     Base Booking Service
     """
@@ -725,6 +725,7 @@ class BaseBookingService(BaseService):
         verbose_name_plural = 'Base Bookings Services'
         ordering = ['provider', 'service_type']
     # This holds the confirmation number when it exists
+
     conf_number = models.CharField(max_length=20, blank=True, null=True)
     cost_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     cost_comments = models.CharField(max_length=1000, blank=True, null=True)
@@ -752,8 +753,14 @@ class BaseBookingService(BaseService):
         return utility_percent(self.cost_amount, self.price_amount)
     utility_percent.fget.short_description = 'Util.%'
 
+    def save(self, *args, **kwargs):
+        self.validate_date_interval()
+        # Call the "real" save() method.
+        super(BaseBookingService, self).save(*args, **kwargs)
 
-class BookingService(BaseBookingService, DateInterval):
+
+
+class BookingService(BaseBookingService):
     """
     Booking Service
     """
@@ -769,7 +776,6 @@ class BookingService(BaseBookingService, DateInterval):
         pass
 
     def save(self, *args, **kwargs):
-        self.validate_date_interval()
         self.fill_data()
         # Call the "real" save() method.
         super(BookingService, self).save(*args, **kwargs)
@@ -1079,20 +1085,20 @@ class BookingPackage(BookingService):
         return '%s : %s' % (self.name, self.booking)
 
 
-class BookingPackageService(BaseBookingService, DateInterval):
+class BookingPackageService(BaseBookingService):
     """
     Booking Package Service
     """
     class Meta:
         verbose_name = 'Booking Package Service'
-        verbose_name_plural = 'Bookingss Packages Services'
+        verbose_name_plural = 'Bookings Packages Services'
+        ordering = ['datetime_from']
     booking_package = models.ForeignKey(BookingPackage, related_name='booking_package_services')
 
     def fill_data(self):
         pass
 
     def save(self, *args, **kwargs):
-        self.validate_date_interval()
         self.fill_data()
         # Call the "real" save() method.
         super(BookingPackageService, self).save(*args, **kwargs)

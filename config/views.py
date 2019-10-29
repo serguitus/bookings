@@ -10,7 +10,7 @@ from django.conf import settings
 from dal import autocomplete
 
 from config.models import (
-    Location, Zone, ServiceCategory, RoomType, Addon, AllotmentBoardType,
+    Location, TransferZone, ServiceCategory, RoomType, Addon, AllotmentBoardType,
     Service,
     Allotment, Transfer, Extra
 )
@@ -46,12 +46,12 @@ class LocationAutocompleteView(autocomplete.Select2QuerySetView):
         return qs[:20]
 
 
-class ZoneAutocompleteView(autocomplete.Select2QuerySetView):
+class ZoneTransferAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
         if not self.request.user.is_authenticated():
-            return Zone.objects.none()
-        qs = Zone.objects.all()
+            return Transfer.objects.none()
+        qs = Transfer.objects.filter(has_pickup_time=True)
         if self.q:
             qs = qs.filter(name__icontains=self.q)
         return qs[:20]
