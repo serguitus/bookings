@@ -71,4 +71,11 @@ $(document).ready(function(){
     $('#fieldsetcollapser0.collapse-toggle').click()
   }
 
+  // for agency changed
+  $('#id_agency').change(function (e) {
+    e.preventDefault();
+    // clear data
+    $('#id_agency_contact').val(null).trigger('change');
+  });
+
 });

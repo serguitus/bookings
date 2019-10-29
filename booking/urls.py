@@ -25,7 +25,7 @@ urlpatterns = [
     url(r'^bookingtransfer-schedule-from/?', views.BookingTransferScheduleFromView.as_view(), name='bookingtransfer_schedule_from'),
     url(r'^bookingtransfer-schedule-to/?', views.BookingTransferScheduleToView.as_view(), name='bookingtransfer_schedule_to'),
 
-    url(r'^voucher/(?P<id>\d+)/print/?', views.build_voucher, name='build_voucher'),
+    # url(r'^voucher/(?P<id>\d+)/print/?', views.build_voucher, name='build_voucher'),
     # url(r'^actions/(?P<id>\d+)/?', views.booking_actions, name='exec_action'),
     # url(r'^requests/(?P<id>\d+)/?', views.send_service_request, name='send_service_request'),
     url(r'^requests/(?P<id>\d+)/?', views.EmailProviderView.as_view(), name='send_service_request'),

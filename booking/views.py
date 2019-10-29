@@ -524,35 +524,35 @@ def booking_list(request, instance):
     context.update(instance.get_model_extra_context(request))
     return render(request, 'booking/booking_list.html', context)
 
+# Just commenting the view below. if system doesn't explotes we are save
+# def build_voucher(request, id):
+#     # TODO we can probably remove this method and the corresponding URL
+#     template = get_template("booking/pdf/voucher.html")
+#     booking = Booking.objects.get(id=id)
+#     services = BookingService.objects.filter(id__in=[2, 1, 3, 4, 9, 10])
+#     objs = _get_child_objects(services)
+#     context = {'pagesize': 'Letter',
+#                'booking': booking,
+#                'office': Office.objects.get(id=1),
+#                'services': objs}
+#     html = template.render(context)
+#     if PY2:
+#         html = html.encode('UTF-8')
+#     result = StringIO()
+#     pdf = pisa.pisaDocument(StringIO(html), dest=result,
+#                             link_callback=_fetch_resources)
+#     if not pdf.err:
+#         return HttpResponse(result.getvalue(),content_type='application/pdf')
+#     else:
+#         return HttpResponse('Errors')
+#     # return render(request, 'booking/pdf/voucher.html', context)
 
-def build_voucher(request, id):
-    # TODO we can probably remove this method and the corresponding URL
-    template = get_template("booking/pdf/voucher.html")
-    booking = Booking.objects.get(id=id)
-    services = BookingService.objects.filter(id__in=[2, 1, 3, 4, 9, 10, 15, 18])
-    objs = _get_child_objects(services)
-    context = {'pagesize': 'Letter',
-               'booking': booking,
-               'office': Office.objects.get(id=1),
-               'services': objs}
-    html = template.render(context)
-    if PY2:
-        html = html.encode('UTF-8')
-    result = StringIO()
-    pdf = pisa.pisaDocument(StringIO(html), dest=result,
-                            link_callback=_fetch_resources)
-    if not pdf.err:
-        return HttpResponse(result.getvalue(), content_type='application/pdf')
-    else:
-        return HttpResponse('Errors')
-    # return render(request, 'booking/pdf/voucher.html', context)
 
-
-# helper method for build_voucher view. Remove once removed that view
-def _fetch_resources(uri, rel):
-    path = os.path.join(settings.MEDIA_ROOT,
-                        uri.replace(settings.MEDIA_URL, ""))
-    return path
+# # helper method for build_voucher view. Remove once removed that view
+# def _fetch_resources(uri, rel):
+#     path = os.path.join(settings.MEDIA_ROOT,
+#                         uri.replace(settings.MEDIA_URL, ""))
+#     return path
 
 
 class BookingServiceUpdateView(View):
@@ -700,8 +700,13 @@ class EmailConfirmationView(View):
             booking=bk.pk).exclude(status='CN')
         # this is for the agency seller name (add also variable for email)
         client_name = ''
-        if bk.agency:
-            client_name = bk.agency.name
+        if bk.agency_contact:
+            client_name = bk.agency_contact.name
+        elif bk.agency:
+            client_name = 'customer'
+        client_email = ''
+        if bk.agency_contact:
+            client_email = bk.agency_contact.email or ''
         rooming = bk.rooming_list.all()
         objs = _get_child_objects(services)
         subj = 'Service Confirmation %s' % bk.name
@@ -718,6 +723,8 @@ class EmailConfirmationView(View):
         form = EmailProviderForm(request.user,
                                  initial={
                                      'subject': subj,
+                                     'to_address': client_email,
+                                     'bcc_address': request.user.email,
                                      'body': t.render(initial)
                                  })
         context = dict()
