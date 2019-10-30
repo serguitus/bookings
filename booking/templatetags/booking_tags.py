@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 from django import template
 
 from booking.models import (
+    BookingService,
     BookingTransfer,
     BookingAllotment,
     BookingExtra,
@@ -68,9 +69,13 @@ def bookingservice_table(booking):
 
 @register.simple_tag
 def booking_services_summary_table(booking):
-    table = BookingServiceSummaryTable(
-        booking.booking_services.all(),
-        order_by=('datetime_from', 'datetime_to'))
+    if booking:
+        table = BookingServiceSummaryTable(
+            booking.booking_services.all(),
+            order_by=('datetime_from', 'datetime_to'))
+    else:
+        table = BookingServiceSummaryTable(
+            BookingService.objects.none())
     return table
 
 
