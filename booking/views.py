@@ -548,11 +548,12 @@ def booking_list(request, instance):
 #     # return render(request, 'booking/pdf/voucher.html', context)
 
 
-# # helper method for build_voucher view. Remove once removed that view
-# def _fetch_resources(uri, rel):
-#     path = os.path.join(settings.MEDIA_ROOT,
-#                         uri.replace(settings.MEDIA_URL, ""))
-#     return path
+# helper method for build_voucher view.
+# TODO. move this method to utils file so it is imported here and at common_site
+def _fetch_resources(uri, rel):
+    path = os.path.join(settings.MEDIA_ROOT,
+                        uri.replace(settings.MEDIA_URL, ""))
+    return path
 
 
 class BookingServiceUpdateView(View):
