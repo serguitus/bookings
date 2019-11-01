@@ -89,7 +89,7 @@ from booking.models import (
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
     BookingPackageService, BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
     BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine, BookingInvoicePartial,
-    ProviderBookingPayment,
+    ProviderBookingPayment, _get_child_objects,
 )
 from booking.services import BookingServices
 from booking.top_filters import (
@@ -115,20 +115,21 @@ MENU_GROUP_LABEL_PACKAGE_SERVICES = 'Package Services By Type'
 
 # Starts Package Section
 
-# Utility method to get a list of
-# BookingService child objects from a BookingService list
-def _get_child_objects(services):
-    TYPE_MODELS = {
-        'T': BookingTransfer,
-        'E': BookingExtra,
-        'A': BookingAllotment,
-        'P': BookingPackage,
-    }
-    objs = []
-    for service in services:
-        obj = TYPE_MODELS[service.service_type].objects.get(id=service.id)
-        objs.append(obj)
-    return objs
+# # Utility method to get a list of
+# # BookingService child objects from a BookingService list
+# # TODO. remove this once we check everything goes fine
+# def _get_child_objects(services):
+#     TYPE_MODELS = {
+#         'T': BookingTransfer,
+#         'E': BookingExtra,
+#         'A': BookingAllotment,
+#         'P': BookingPackage,
+#     }
+#     objs = []
+#     for service in services:
+#         obj = TYPE_MODELS[service.service_type].objects.get(id=service.id)
+#         objs.append(obj)
+#     return objs
 
 
 def _get_voucher_services(services):
@@ -1187,9 +1188,10 @@ class BookingServiceSiteModel(SiteModel):
                    'classes': ('collapse', 'wide')})
     )
 
-    list_display = ('booking', 'name', 'service_addon', 'datetime_from',
-                    'datetime_to', 'cost_amount', 'manual_cost',
-                    'price_amount', 'manual_price', 'utility_percent', 'utility', 'status',)
+    list_display = ('name', 'datetime_from', 'datetime_to',
+                    'service_provider', 'conf_number', 'booking_name',
+                    'service_addon', 'cost_amount',
+                    'price_amount', 'utility_percent', 'status',)
     top_filters = (('booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking__reference', 'conf_number',

@@ -49,6 +49,22 @@ from finance.models import (
     Provider, ProviderInvoice, Withdraw)
 
 
+# Utility method to get a list of
+# BookingService child objects from a BookingService list
+def _get_child_objects(services):
+    TYPE_MODELS = {
+        'T': BookingTransfer,
+        'E': BookingExtra,
+        'A': BookingAllotment,
+        'P': BookingPackage,
+    }
+    objs = []
+    for service in services:
+        obj = TYPE_MODELS[service.service_type].objects.get(id=service.id)
+        objs.append(obj)
+    return objs
+
+
 class RelativeInterval(models.Model):
     class Meta:
         abstract = True
@@ -758,6 +774,20 @@ class BaseBookingService(BaseService, DateInterval):
         # Call the "real" save() method.
         super(BaseBookingService, self).save(*args, **kwargs)
 
+    def booking_name(self):
+        # gets booking.name for this bookingservice
+        child_service = _get_child_objects([self])[0]
+        if child_service.base_category in ['PA', 'PE', 'PT']:
+            return child_service.booking_package.booking.name
+        return child_service.booking.name
+
+    def service_provider(self):
+        provider = ''
+        if self.provider:
+            provider = self.provider.name
+            if self.provider.phone:
+                provider += ' %s' % self.provider.phone
+        return provider
 
 
 class BookingService(BaseBookingService):
