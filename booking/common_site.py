@@ -1156,7 +1156,7 @@ class BookingBaseServiceSiteModel(SiteModel):
     list_display = ('name', 'service_addon', 'cost_amount', 'manual_cost',
                     'price_amount', 'manual_price', 'utility_percent', 'utility', 'status',)
     top_filters = (('name', 'Service'), 'conf_number',
-                   'status', 'provider',
+                   'status', 'provider', (CancelledTopFilter),
                    ('provider__is_private', 'Private'))
     ordering = ('name',)
 
