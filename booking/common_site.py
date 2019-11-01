@@ -130,6 +130,7 @@ def _get_child_objects(services):
         objs.append(obj)
     return objs
 
+
 def _get_voucher_services(services):
     objs = []
     booking_services = _get_child_objects(services)
