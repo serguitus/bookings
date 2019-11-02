@@ -58,6 +58,7 @@ class Operation(models.Model):
     class Meta:
         verbose_name = 'Operation'
         verbose_name_plural = 'Operations'
+        default_permissions = ('view',)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -79,6 +80,7 @@ class OperationMovement(models.Model):
     class Meta:
         verbose_name = 'Operation Movement'
         verbose_name_plural = 'Operations Movements'
+        default_permissions = ('view',)
         indexes = [
             models.Index(fields=['account']),
         ]

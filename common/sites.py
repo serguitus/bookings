@@ -412,6 +412,21 @@ class SiteModel(TotalsumAdmin):
             and (not self.is_readonly_model(request, obj)) \
             and super(SiteModel, self).has_delete_permission(request, obj)
 
+    def has_view_permission(self, request, obj=None):
+        opts = self.opts
+        codename = get_permission_codename('view', opts)
+        return request.user.has_perm("%s.%s" % (opts.app_label, codename))
+
+    def get_model_perms(self, request):
+        """
+        Returns a dict of all perms for this model. This dict has the keys
+        ``add``, ``change``, ``delete`` and ``view`` mapping to the True/False for each
+        of those actions.
+        """
+        perms = super(SiteModel, self).get_model_perms(request)
+        perms.update({'view': self.has_view_permission(request),})
+        return perms
+
     def is_readonly_model(self, request, obj=None):
         return self.readonly_model
 
@@ -1241,7 +1256,7 @@ class SiteModel(TotalsumAdmin):
         from django.contrib.admin.views.main import ERROR_FLAG
         opts = self.model._meta
         app_label = opts.app_label
-        if not self.has_change_permission(request, None):
+        if not self.has_view_permission(request, None) and not self.has_change_permission(request, None):
             raise PermissionDenied
 
         list_display = self.get_list_display(request)
