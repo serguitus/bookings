@@ -1083,7 +1083,7 @@ class BookingPackage(BookingService):
     class Meta:
         verbose_name = 'Booking Package'
         verbose_name_plural = 'Bookings Packages'
-    version = AutoIncVersionField( )
+    version = AutoIncVersionField()
     service = models.ForeignKey(Package)
     price_by_package_catalogue = models.BooleanField(
         default=True, verbose_name='Use Catalogue Price')
