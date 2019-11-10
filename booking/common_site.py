@@ -1748,7 +1748,7 @@ class BookingInvoiceSiteModel(SiteModel):
             'fields': (
                 ('booking_name', 'reference'),
                 ('date_from', 'date_to'),
-                ('issued_name', 'cash_amount'),
+                ('issued_name', 'cash_amount', 'currency'),
                 ('status', 'amount', 'matched_amount')
             )
         }),
