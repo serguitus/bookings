@@ -758,8 +758,7 @@ class BaseBookingService(BaseService, DateInterval):
     cost_amount_to_pay = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     cost_amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     has_payment = models.BooleanField(default=False)
-    booking_temp = models.IntegerField(blank=True, null=True)
-    booking = models.ForeignKey(Booking, related_name='booking_services', blank=True, null=True)
+    booking = models.ForeignKey(Booking, related_name='booking_services')
 
     @property
     def utility(self):
