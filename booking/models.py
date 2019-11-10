@@ -759,6 +759,7 @@ class BaseBookingService(BaseService, DateInterval):
     cost_amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     has_payment = models.BooleanField(default=False)
     booking_temp = models.IntegerField(blank=True, null=True)
+    booking = models.ForeignKey(Booking, related_name='booking_services', blank=True, null=True)
 
     @property
     def utility(self):
@@ -799,7 +800,6 @@ class BookingService(BaseBookingService):
         verbose_name = 'Booking Service'
         verbose_name_plural = 'Booking Services'
         ordering = ['datetime_from']
-    booking = models.ForeignKey(Booking, related_name='booking_services')
     v_notes = models.CharField(
         max_length=1000, blank=True, null=True, verbose_name='Voucher Notes')
 
@@ -1127,7 +1127,7 @@ class BookingPackageService(BaseBookingService):
     booking_package = models.ForeignKey(BookingPackage, related_name='booking_package_services')
 
     def fill_data(self):
-        pass
+        self.booking = self.booking_package.booking
 
     def save(self, *args, **kwargs):
         self.fill_data()
