@@ -7,6 +7,6 @@
 {% block dialog_title %}Booking Services Summary{% endblock dialog_title %}
 
 {% block dialog_content %}
-    {% booking_services_summary_table original.booking as table %}
+    {% booking_services_summary_table original.booking request as table %}
     {% render_table table %}
 {% endblock dialog_content %}

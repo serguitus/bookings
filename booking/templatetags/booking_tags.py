@@ -2,10 +2,12 @@ from __future__ import unicode_literals
 from django import template
 
 from booking.models import (
+    Booking,
     BookingService,
     BookingTransfer,
     BookingAllotment,
     BookingExtra,
+    BookingPackage,
     BookingPackageTransfer,
     BookingPackageAllotment,
     BookingPackageExtra,
@@ -68,8 +70,14 @@ def bookingservice_table(booking):
 
 
 @register.simple_tag
-def booking_services_summary_table(booking):
+def booking_services_summary_table(booking, request):
+    b_id = request.GET.get('booking')
     if booking:
+        table = BookingServiceSummaryTable(
+            booking.booking_services.all(),
+            order_by=('datetime_from', 'datetime_to'))
+    elif b_id:
+        booking = Booking.objects.get(id=b_id)
         table = BookingServiceSummaryTable(
             booking.booking_services.all(),
             order_by=('datetime_from', 'datetime_to'))
@@ -118,10 +126,20 @@ def bookingpackage_table(bookingpackage):
 
 
 @register.simple_tag
-def bookingpackage_services_summary_table(bookingpackage):
-    table = BookingPackageServiceSummaryTable(
-        bookingpackage.booking_package_services.all(),
-        order_by=('datetime_from', 'datetime_to'))
+def bookingpackage_services_summary_table(bookingpackage, request):
+    bp_id = request.GET.get('booking_package')
+    if bookingpackage:
+        table = BookingPackageServiceSummaryTable(
+            bookingpackage.booking_package_services.all(),
+            order_by=('datetime_from', 'datetime_to'))
+    elif bp_id:
+        bookingpackage = BookingPackage.objects.get(id=bp_id)
+        table = BookingPackageServiceSummaryTable(
+            bookingpackage.booking_package_services.all(),
+            order_by=('datetime_from', 'datetime_to'))
+    else:
+        table = BookingServiceSummaryTable(
+            BookingService.objects.none())
     return table
 
 
