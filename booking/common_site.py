@@ -423,7 +423,9 @@ class QuoteSiteModel(SiteModel):
     )
     list_display = ('reference', 'agency', 'date_from',
                     'date_to', 'status', 'currency', 'seller')
-    top_filters = ('reference', ('date_from', DateTopFilter), 'status', ('seller', SellerTopFilter))
+    top_filters = ('reference', ('date_from', DateTopFilter),
+                   'status', ('seller', SellerTopFilter),
+                   'agency')
     ordering = ('date_from', 'reference',)
     readonly_fields = ('date_from', 'date_to', 'status')
     details_template = 'booking/quote_details.html'
