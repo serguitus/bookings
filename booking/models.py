@@ -1126,6 +1126,7 @@ class BookingPackageService(BaseBookingService):
     booking_package = models.ForeignKey(BookingPackage, related_name='booking_package_services')
 
     def fill_data(self):
+        self.booking_id = self.booking_package.booking_id
         self.booking = self.booking_package.booking
 
     def save(self, *args, **kwargs):

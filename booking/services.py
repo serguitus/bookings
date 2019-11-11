@@ -4880,7 +4880,7 @@ class BookingServices(object):
                     if payment.status == STATUS_READY:
                         booking_service.cost_amount_paid = float(booking_service.cost_amount_paid) + float(payment_service.amount_paid)
                         booking_service.has_payment = True
-                        booking_service.svae(update_fields=['cost_amount_paid', 'has_payment'])
+                        booking_service.save(update_fields=['cost_amount_paid', 'has_payment'])
 
                 payment_amount = 0.00
                 for payment_service in payment_services:
