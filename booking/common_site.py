@@ -1158,12 +1158,17 @@ class BookingBaseServiceSiteModel(SiteModel):
                    'classes': ('collapse', 'wide')})
     )
 
-    list_display = ('name', 'service_addon', 'cost_amount', 'manual_cost',
-                    'price_amount', 'manual_price', 'utility_percent', 'utility', 'status',)
-    top_filters = (('name', 'Service'), 'conf_number',
-                   'status', 'provider', (CancelledTopFilter),
+    list_display = ('name', 'datetime_from', 'datetime_to',
+                    'service_provider', 'conf_number', 'booking_name',
+                    'service_addon', 'cost_amount',
+                    'price_amount', 'utility_percent', 'status',)
+    top_filters = (('booking__name', 'Booking'),
+                   ('name', 'Service'),
+                   'booking__reference', 'conf_number',
+                   ('datetime_from', DateTopFilter), 'status', 'provider',
+                   (CancelledTopFilter),
                    ('provider__is_private', 'Private'))
-    ordering = ('name',)
+    ordering = ('datetime_from', 'booking__reference', 'name',)
 
     def get_changelist(self, request, **kwargs):
         """
