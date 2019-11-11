@@ -62,11 +62,9 @@ def quotepaxvariant_table(quote):
 @register.simple_tag
 def bookingservice_table(booking):
     table = BookingServiceTable(
-        booking.booking_services.all(),
+        BookingService.objects.filter(booking=booking),
         order_by=('datetime_from', 'datetime_to'))
     return table
-    # table = BookingServiceTable(bs)
-    # return {'table': bs}
 
 
 @register.simple_tag
