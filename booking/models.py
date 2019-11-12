@@ -800,7 +800,7 @@ class BookingService(BaseBookingService):
         verbose_name_plural = 'Booking Services'
         ordering = ['datetime_from']
     v_notes = models.CharField(
-        max_length=1000, blank=True, null=True, verbose_name='Voucher Notes')
+        max_length=200, blank=True, null=True, verbose_name='Voucher Notes')
 
     def fill_data(self):
         pass

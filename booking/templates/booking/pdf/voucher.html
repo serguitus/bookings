@@ -12,24 +12,43 @@
              border-right: 1px solid black;
          }
          .voucher-header td{
-             padding: 5px;
+             padding: 2px 0 2px 5px;
              text-align: center;
          }
          .voucher-title, .voucher-content, .voucher-notes-label{
-             padding-top: 5px;
              padding-left: 5px;
              border-left: 1px solid black;
              border-right: 1px solid black;
+         }
+         .voucher-title{
+             padding-top: 2px;
+             border-top: 1px solid black;
+         }
+         .content-div{
+             padding-top: 5px;
+         }
+         .voucher-content-2 td{
+             padding-top: 5px;
+             height: 30px;
+         }
+         .voucher-content-3{
+             padding-top: 5px;
+             height: 70px;
          }
          .voucher-content, .voucher-notes-label{
              border-top: 1px solid black;
          }
+         .voucher-notes-label{
+             padding-top: 3px;
+         }
          .voucher-notes{
-             padding-left: 5px;
-             height: 50px;
              border-left: 1px solid black;
              border-right: 1px solid black;
              border-bottom: 1px solid black;
+         }
+         .voucher-notes td{
+             padding-left: 5px;
+             height: 30px;
          }
          .voucher-footer{
              padding-top: 2px;
@@ -55,7 +74,7 @@
             {% cycle 3 1 2 as counter silent %}
             {% for service in services %}
                 <table class="voucher">
-                    <tr class="voucher-header" height="100px">
+                    <tr class="voucher-header">
                         <td class="voucher-head-1" width="35%">
                             {% if office.logo %}
                                 <img src="{{ office.logo.url }}"
@@ -72,20 +91,8 @@
                     <tr class="voucher-title">
                         <td colspan="3">
                             <table width="100%">
-                                <tr>
-                                    <td class="voucher-title-1" width="40%"><b>Ref. </b>{{ service.booking.internal_reference }}</td>
-                                    <td class="voucher-title-2" width="20%"><b>From: </b>{{ service.datetime_from }}</td>
-                                    <td class="voucher-title-3" width="20%">{% if service.datetime_to %}<b>To: </b>{{ service.datetime_to }}{% endif %}</td>
-                                    <td class="voucher-title-4" width="20%"><b>Confirm. </b>{% if service.conf_number %}{{ service.conf_number }}{% else %}OK{% endif %}</td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                    <tr class="voucher-content">
-                        <td colspan="3">
-                            <table width="100%">
-                                <tr>
-                                    <td width="60%"><b>Client:</b> {{ service.booking.name }} {% if service.booking.reference %}({{ service.booking.reference }}){% endif %}</td>
+                                <tr class="voucher-title-1">
+                                    <td width="40%"><b>Client:</b> {{ service.booking.name }} {% if service.booking.reference %}({{ service.booking.reference }}){% endif %}</td>
                                     <td width="20%">
                                     {% if service.service_type == 'A' %}
                                         <b>Adults:</b> {{ service.adult_quantity }}
@@ -98,32 +105,37 @@
                                         <b>Children:</b> {{ service.child_quantity }}
                                     {% endif %}
                                     </td>
+                                    <td width="20%"><b>Ref. </b>{{ service.booking.internal_reference }}</td>
                                 </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr class="voucher-content">
+                        <td colspan="3"><div class="content-div">
+                            <table width="100%">
                                 <tr>
+                                    <td class="voucher-content-1"" width="25%"><b>From: </b>{{ service.datetime_from }}</td>
+                                    <td class="voucher-content-1"" width="25%">{% if service.datetime_to %}<b>To: </b>{{ service.datetime_to }}{% endif %}</td>
+                                    <td class="voucher-content-1"" width="25%">{% if service.time %}<b>Time:</b> {{ service.time|time:"H:i" }}{% elif service.booking_package.time %}<b>Time:</b> {{ service.booking_package.time|time:"H:i" }}{% endif %}</td>
+                                    <td class="voucher-content-1" width="25%"><b>Confirm. </b>{% if service.conf_number %}{{ service.conf_number }}{% else %}OK{% endif %}</td>
+                                </tr>
+                                <tr class="voucher-content-2">
                                     <td colspan="3">
                                         <b>Service:</b> {{ service.name }} [{{ service.description }}]
                                     </td>
                                 </tr>
                                 {% if service.service_type == 'A' and service.service.address %}
                                 <tr>
-                                    <td colspan="3">
+                                    <td class="voucher-content-3" colspan="4">
                                         <b>Address:</b> {{ service.service.address }}
                                     </td>
                                 </tr>
-                                {% endif %}
-                                {% if service.time or service.booking_package.time or service.pickup or service.dropoff %}
+                                {% elif service.time or service.booking_package.time or service.pickup or service.dropoff %}
                                 <tr>
-                                    <td colspan="3">
+                                    <td class="voucher-content-3" colspan="4">
                                         <table>
                                             <tr>
-                                                <td width="20%">
-                                                {% if service.time %}
-                                                    <b>Time:</b> {{ service.time|time:"H:i" }}
-                                                {% elif service.booking_package.time %}
-                                                    <b>Time:</b> {{ service.booking_package.time|time:"H:i" }}
-                                                {% endif %}
-                                                </td>
-                                                <td width="40%">
+                                                <td width="50%">
                                                 {% if service.pickup %}
                                                     <b>Pickup:</b> {{ service.pickup }}<br>
                                                     <b>Address:</b> {{ service.pickup.address }}
@@ -132,7 +144,7 @@
                                                     {% if service.schedule_from %}<b>Flight:</b> {{ service.schedule_from }}@{{ service.schedule_time_from|time:"H:i" }}{% endif %}
                                                 {% endif %}
                                                 </td>
-                                                <td width="40%">
+                                                <td width="50%">
                                                 {% if service.dropoff %}
                                                     <b>Drop-off:</b> {{ service.dropoff }}<br>
                                                     <b>Address:</b> {{ service.dropoff.address }}
@@ -145,14 +157,19 @@
                                         </table>
                                     </td>
                                 </tr>
+                                {% else %}
+                                <tr>
+                                    <td class="voucher-content-3" colspan="4">
+                                    </td>
+                                </tr>
                                 {% endif %}
-                            </table>
+                            </table></div>
                         </td>
                     </tr>
                     <tr class="voucher-notes-label">
                         <td colspan="3"><b>Notes:</b></td>
                     </tr>
-                    <tr class="voucher-notes" height="400px">
+                    <tr class="voucher-notes">
                         <td colspan="3">{% if service.v_notes %}{{ service.v_notes }}{% endif %}</td>
                     </tr>
                     <tr class="voucher-footer">
