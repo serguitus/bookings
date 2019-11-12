@@ -1440,12 +1440,13 @@ class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
 
-    readonly_fields = ['utility_percent', 'utility']
+    readonly_fields = ['utility_percent', 'utility', 'details']
 
     fieldsets = (
         (None, {
             'fields': (
-                'booking', ('service', 'status', 'conf_number'),
+                ('booking', 'details'),
+                ('service', 'status', 'conf_number'),
                 ('datetime_from', 'nights', 'datetime_to'),
                 ('room_type', 'board_type', 'service_addon'),
                 ('manual_cost', 'provider'),
@@ -1472,6 +1473,9 @@ class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):
     add_form_template = 'booking/bookingallotment_change_form.html'
     change_form_template = 'booking/bookingallotment_change_form.html'
     inlines = [BookingServicePaxInline]
+
+    def details(self, obj):
+        return obj.description + ' [%s pax]' % obj.rooming_list.count()
 
 
 class BookingPackageAllotmentSiteModel(BookingPackageServiceSiteModel):
