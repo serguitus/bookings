@@ -131,8 +131,8 @@ class BookingServiceTable(tables.Table):
         model = BookingService
         template_name = 'booking/bookingservice_list.html'
         fields = ['check', 'name', 'service_location', 'datetime_from',
-                  'datetime_to', 'description',
-                  'cost_amount', 'price_amount', 'utility_percent', 'utility',
+                  'datetime_to', 'nights', 'description',
+                  'cost_amount', 'price_amount',
                   'provider', 'conf_number', 'status']
         attrs = {'class': 'table table-hover table-condensed'}
         row_attrs = {
@@ -141,8 +141,15 @@ class BookingServiceTable(tables.Table):
 
     def __init__(self, *args, **kwargs):
         # self.base_columns['service_type'].verbose_name='Request emails'
-        self.base_columns['utility_percent'].verbose_name='Util.%'
-        self.base_columns['utility'].verbose_name='Util.'
+        # self.base_columns['utility_percent'].verbose_name='Util.%'
+        # self.base_columns['utility'].verbose_name='Util.'
+        self.base_columns['nights'].verbose_name='N'
+        self.base_columns['datetime_from'].verbose_name='FROM'
+        self.base_columns['datetime_to'].verbose_name='TO'
+        self.base_columns['description'].verbose_name='Pax'
+        self.base_columns['cost_amount'].verbose_name='Cost'
+        self.base_columns['price_amount'].verbose_name='Price'
+        self.base_columns['conf_number'].verbose_name='Conf.'
         super(BookingServiceTable, self).__init__(*args, **kwargs)
 
     def render_name(self, value, record):

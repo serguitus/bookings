@@ -84,6 +84,12 @@ class DateInterval(models.Model):
         if self.datetime_from and self.datetime_to and self.datetime_from > self.datetime_to:
             raise ValidationError('Date From can not be after Date To')
 
+    def nights(self):
+        if self.datetime_from:
+            if self.datetime_to:
+                return (self.datetime_to - self.datetime_from).days
+        return 0
+
 
 def utility(cost, price):
     if not price is None and not cost is None:
@@ -798,7 +804,7 @@ class BookingService(BaseBookingService):
     class Meta:
         verbose_name = 'Booking Service'
         verbose_name_plural = 'Booking Services'
-        ordering = ['datetime_from']
+        ordering = ['datetime_from', 'datetime_to']
     v_notes = models.CharField(
         max_length=200, blank=True, null=True, verbose_name='Voucher Notes')
 
