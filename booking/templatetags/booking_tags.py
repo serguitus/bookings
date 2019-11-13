@@ -72,12 +72,12 @@ def booking_services_summary_table(booking, request):
     b_id = request.GET.get('booking')
     if booking:
         table = BookingServiceSummaryTable(
-            booking.booking_services.all(),
+            BookingService.objects.filter(booking=booking),
             order_by=('datetime_from', 'datetime_to'))
     elif b_id:
         booking = Booking.objects.get(id=b_id)
         table = BookingServiceSummaryTable(
-            booking.booking_services.all(),
+            BookingService.objects.filter(booking=booking),
             order_by=('datetime_from', 'datetime_to'))
     else:
         table = BookingServiceSummaryTable(
@@ -88,7 +88,7 @@ def booking_services_summary_table(booking, request):
 @register.simple_tag
 def vouchers_table(booking):
     table = BookingVouchersTable(
-        booking.booking_services.all(),
+        BookingService.objects.filter(booking=booking),
         order_by=('datetime_from', 'datetime_to'))
     return table
 
