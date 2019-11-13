@@ -133,7 +133,7 @@ class BookingServices(object):
             invoice.booking_amount = booking.price_amount
             invoice.agency = booking.agency
             invoice.currency = booking.agency.currency
-            invoice.amount = Decimal.from_float(float(invoice.currency_rate) * float(booking.price_amount)).quantize('1.00')
+            invoice.amount = Decimal.from_float(float(invoice.currency_rate) * float(booking.price_amount)).quantize(Decimal('1.00'))
             invoice.status = STATUS_READY
 
             invoice.booking_name = booking.name
@@ -195,7 +195,7 @@ class BookingServices(object):
                 invoice_line.date_to = booking_service.datetime_to
                 invoice_line.bookingservice_name = booking_service.name
                 invoice_line.price = booking_service.price_amount
-                invoice_line.price = Decimal.from_float(float(invoice.currency_rate) * float(booking_service.price_amount)).quantize('1.00')
+                invoice_line.price = Decimal.from_float(float(invoice.currency_rate) * float(booking_service.price_amount)).quantize(Decimal('1.00'))
 
                 invoice_line.save()
 
