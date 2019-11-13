@@ -1753,15 +1753,16 @@ class BookingInvoiceSiteModel(SiteModel):
             'fields': (
                 ('booking_name', 'reference'),
                 ('date_from', 'date_to'),
-                ('issued_name', 'cash_amount', 'currency'),
-                ('status', 'amount', 'matched_amount')
+                ('issued_name', 'status',),
+                ('booking_amount', 'currency', 'currency_rate'),
+                ('amount', 'matched_amount', 'cash_amount', )
             )
         }),
         ('Configuration', {
             'fields': ('office', 'content_format', 'date_issued'),
         })
     )
-    readonly_fields = ('status', 'amount', 'matched_amount')
+    readonly_fields = ('status', 'booking_amount', 'currency', 'currency_rate', 'amount', 'matched_amount')
 
     inlines = [BookingInvoiceDetailInline, BookingInvoiceLineInline, BookingInvoicePartialInline]
 
