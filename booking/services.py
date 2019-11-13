@@ -36,6 +36,8 @@ from config.services import ConfigServices
 from config.views import (
     provider_allotment_queryset, provider_transfer_queryset, provider_extra_queryset)
 
+from decimal import Decimal
+
 from finance.constants import STATUS_DRAFT, STATUS_READY, STATUS_CANCELLED
 from finance.services import FinanceServices
 from finance.models import Agency
@@ -128,9 +130,10 @@ class BookingServices(object):
             invoice = BookingInvoice()
             invoice.invoice_booking = booking
 
+            invoice.booking_amount = booking.price_amount
             invoice.agency = booking.agency
-            invoice.currency = booking.currency
-            invoice.amount = booking.price_amount
+            invoice.currency = booking.agency.currency
+            invoice.amount = Decimal.from_float(float(invoice.currency_rate) * float(booking.price_amount)).quantize('1.00')
             invoice.status = STATUS_READY
 
             invoice.booking_name = booking.name
@@ -192,6 +195,7 @@ class BookingServices(object):
                 invoice_line.date_to = booking_service.datetime_to
                 invoice_line.bookingservice_name = booking_service.name
                 invoice_line.price = booking_service.price_amount
+                invoice_line.price = Decimal.from_float(float(invoice.currency_rate) * float(booking_service.price_amount)).quantize('1.00')
 
                 invoice_line.save()
 
@@ -984,7 +988,7 @@ class BookingServices(object):
         status = constants.BOOKING_STATUS_COORDINATED
         services = False
         cancelled = True
-        for service in booking.booking_services.all():
+        for service in BookingService.objects.filter(booking=booking):
             services = True
             # process only non cancelled services
             if service.status != constants.SERVICE_STATUS_CANCELLED:
@@ -1873,7 +1877,7 @@ class BookingServices(object):
         elif price is None:
             return None, msg
         else:
-            return cls._round_price(float(prev_price) + float(price)), msg
+            return cls._round_cost(float(prev_price) + float(price)), msg
 
 
     @classmethod
@@ -3850,7 +3854,7 @@ class BookingServices(object):
                     cls.update_bookingservice_amounts(service)
                 cost = cls.totalize(cost, service.cost_amount)
                 price = cls.totalize(price, service.price_amount)
-            return  cls._round_cost(cost), cls._round_price(price)
+            return  cls._round_cost(cost), cls._round_cost(price)
         return None, None
 
 
@@ -4202,7 +4206,7 @@ class BookingServices(object):
         status = constants.BOOKING_STATUS_COORDINATED
         services = False
         cancelled = True
-        for service in booking.booking_services.all():
+        for service in BookingService.objects.filter(booking=booking):
             services = True
             # process only non cancelled services
             if service.status != constants.SERVICE_STATUS_CANCELLED:

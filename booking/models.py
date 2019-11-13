@@ -565,6 +565,8 @@ class BookingInvoice(AgencyInvoice):
         verbose_name = 'Booking Invoice'
         verbose_name_plural = 'Bookings Invoices'
     invoice_booking = models.ForeignKey('Booking')
+    booking_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    currency_rate = models.DecimalField(max_digits=10, decimal_places=4, default=1.00)
     booking_name = models.CharField(max_length=100, blank=True, null=True)
     reference = models.CharField(max_length=25, blank=True, null=True)
     date_from = models.DateField(blank=True, null=True)
