@@ -127,6 +127,7 @@ class BookingServiceTable(tables.Table):
                                    'td__input': {
                                        'class': 'action-select'},
                                })
+
     class Meta:
         model = BookingService
         template_name = 'booking/bookingservice_list.html'
