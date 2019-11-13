@@ -6,6 +6,7 @@ Django==1.11.23
 django-autocomplete-light==3.2.10
 django-bootstrap-themes==3.3.6
 django-bootstrap3==10.0.1
+django-ckeditor==5.8.0
 django-concurrency>=2.0.0
 django-mail-templated==2.6.5
 django-fontawesome==0.2.2

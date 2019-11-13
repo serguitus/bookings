@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+from ckeditor.widgets import CKEditorWidget
 from dal import autocomplete
 from django.forms import widgets
 
@@ -731,12 +732,12 @@ class AgencyPackageServiceForm(forms.ModelForm):
 
 class EmailProviderForm(forms.Form):
     from_address = forms.EmailField(
-        label='From',
+        label='FROM',
         widget=widgets.TextInput(
             attrs={'class': 'form-control'})
     )
     to_address = forms.EmailField(
-        label='To',
+        label='TO',
         widget=widgets.TextInput(
             attrs={'class': 'form-control'})
     )
@@ -756,9 +757,8 @@ class EmailProviderForm(forms.Form):
         widget=widgets.TextInput(
             attrs={'class': 'form-control'}))
     body = forms.CharField(
-        max_length=1000,
         label='Body',
-        widget=widgets.Textarea(
+        widget=CKEditorWidget(
             attrs={'class': 'form-control'}))
 
     def __init__(self, user, *args, **kwargs):

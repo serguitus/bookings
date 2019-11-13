@@ -35,7 +35,6 @@ INSTALLED_APPS = [
 #    'admin_tools.theming',
 #    'admin_tools.menu',
 #    'admin_tools.dashboard',
-
     'dal',
     'dal_select2',
     'django_tables2',
@@ -54,6 +53,10 @@ INSTALLED_APPS = [
     'config',
     'booking',
     'hello',
+
+    # 3rd party
+    # Intentionally at bottom to override their templates
+    'ckeditor',
 
 ]
 
@@ -125,3 +128,20 @@ FORMAT_MODULE_PATH = [
     # 'some_app.formats',
 ]
 DEFAULT_FROM_EMAIL = 'sales@thenaturexperts.com'
+
+CKEDITOR_CONFIGS = {
+    'default': {
+        'skin': 'moono',
+        'toolbar': 'Custom',
+        'toolbar_Custom': [
+            ['Bold', 'Italic', 'Underline', 'JustifyLeft',
+             'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
+            ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-'],
+            ['TextColor', 'BGColor', 'FontSize'],
+            ['Table', 'HorizontalRule', 'Smiley', 'SpecialChar',
+             'PageBreak', 'RemoveFormat', 'Source']
+        ],
+        'height': 400,
+        'width': '100%',
+    },
+}
