@@ -820,7 +820,7 @@ class BookingSiteModel(SiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                ('seller', 'internal_reference'),
+                ('seller', 'internal_reference', 'details'),
                 ('name', 'reference', 'status'),
                 ('agency', 'agency_contact'),
                 ('date_from', 'date_to'),
@@ -843,7 +843,7 @@ class BookingSiteModel(SiteModel):
     ordering = ['date_from', 'reference']
     readonly_fields = ('date_from', 'date_to', 'status',
                        'cost_amount', 'price_amount', 'utility_percent', 'utility',
-                       'internal_reference')
+                       'internal_reference', 'details')
     details_template = 'booking/booking_details.html'
     inlines = [BookingPaxInline]
     form = BookingForm
@@ -851,6 +851,9 @@ class BookingSiteModel(SiteModel):
     change_form_template = 'booking/booking_change_form.html'
     totalsum_list = ['cost_amount', 'price_amount']
     save_as = False
+
+    def details(self, obj):
+        return '[%s pax]' % obj.rooming_list.count()
 
     def get_changelist(self, request, **kwargs):
         """
@@ -1440,12 +1443,13 @@ class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
 
-    readonly_fields = ['utility_percent', 'utility']
+    readonly_fields = ['utility_percent', 'utility', 'details']
 
     fieldsets = (
         (None, {
             'fields': (
-                'booking', ('service', 'status', 'conf_number'),
+                ('booking', 'details'),
+                ('service', 'status', 'conf_number'),
                 ('datetime_from', 'nights', 'datetime_to'),
                 ('room_type', 'board_type', 'service_addon'),
                 ('manual_cost', 'provider'),
@@ -1472,6 +1476,11 @@ class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):
     add_form_template = 'booking/bookingallotment_change_form.html'
     change_form_template = 'booking/bookingallotment_change_form.html'
     inlines = [BookingServicePaxInline]
+
+    def details(self, obj):
+        if obj.description:
+            return obj.description + ' [%s pax]' % obj.rooming_list.count()
+        return ''
 
 
 class BookingPackageAllotmentSiteModel(BookingPackageServiceSiteModel):

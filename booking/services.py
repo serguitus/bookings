@@ -4044,7 +4044,8 @@ class BookingServices(object):
         for package_allotment in PackageAllotment.objects.filter(package_id=package.id).all():
             booking_package_allotment = BookingPackageAllotment()
             booking_package_allotment.booking_package = bookingpackage
-            booking_package_allotment.conf_number = '< confirm number >'
+            # TODO see if we can automate confirmation numbers some way
+            # booking_package_allotment.conf_number = ''
             cls._copy_package_info(
                 dst_package=booking_package_allotment, src_package=package_allotment)
             booking_package_allotment.room_type = package_allotment.room_type
