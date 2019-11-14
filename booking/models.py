@@ -633,6 +633,7 @@ class Booking(models.Model):
         default_permissions = ('add', 'change',)
         permissions = (
             ("change_amounts", "Can change amounts of Booking"),
+            ("change_services_amounts", "Can select services to change amounts"),
         )
         unique_together = (('invoice',),)
 
