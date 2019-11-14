@@ -1808,11 +1808,12 @@ class ProviderBookingPaymentSiteModel(SiteModel):
             'fields': (
                 ('provider', 'name'),
                 ('date', 'status'),
-                ('account', 'amount')
+                ('account', 'services_amount'),
+                ('currency_rate', 'amount'),
             )
         }),
     )
-    readonly_fields = ['amount']
+    readonly_fields = ['services_amount', 'amount']
     add_readonly_fields = ['status']
 
     recent_allowed = True
