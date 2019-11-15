@@ -1162,9 +1162,10 @@ class BookingBaseServiceSiteModel(SiteModel):
     )
 
     list_display = ('name', 'datetime_from', 'datetime_to',
-                    'service_provider', 'conf_number', 'booking_name',
+                    'service_provider', 'conf_number', 'full_booking_name',
+                    'service_pax_count', 'booking_internal_reference',
                     'service_addon', 'cost_amount',
-                    'price_amount', 'utility_percent', 'status',)
+                    'price_amount', 'status',)
     top_filters = (('booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking__reference', 'conf_number',
