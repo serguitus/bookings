@@ -138,7 +138,7 @@ CKEDITOR_CONFIGS = {
              'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
             ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-'],
             ['TextColor', 'BGColor', 'FontSize'],
-            ['Table', 'HorizontalRule', 'Smiley', 'SpecialChar',
+            ['Styles', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar',
              'PageBreak', 'RemoveFormat', 'Source']
         ],
         'height': 400,

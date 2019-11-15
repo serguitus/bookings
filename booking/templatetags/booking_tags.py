@@ -16,7 +16,8 @@ from booking.tables import (
     PackageServiceTable,
     QuoteServiceTable, QuotePaxVariantTable,
     QuotePackageServiceTable,
-    BookingServiceTable, BookingServiceSummaryTable, BookingPaxTable,
+    BookingServiceTable,
+    BookingConfirmationTable, BookingServiceSummaryTable, BookingPaxTable,
     BookingVouchersTable,
     BookingServiceUpdateTable,
     BookingPackageServiceTable,
@@ -62,6 +63,14 @@ def quotepaxvariant_table(quote):
 @register.simple_tag
 def bookingservice_table(booking):
     table = BookingServiceTable(
+        BookingService.objects.filter(booking=booking),
+        order_by=('datetime_from', 'datetime_to'))
+    return table
+
+
+@register.simple_tag
+def bookingconfirmation_table(booking):
+    table = BookingConfirmationTable(
         BookingService.objects.filter(booking=booking),
         order_by=('datetime_from', 'datetime_to'))
     return table

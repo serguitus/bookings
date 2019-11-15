@@ -171,6 +171,30 @@ class BookingServiceTable(tables.Table):
     #        self.columns.hide('service_type')
 
 
+class BookingConfirmationTable(tables.Table):
+    class Meta:
+        model = BookingService
+        template_name = 'booking/bookingservice_list.html'
+        fields = ['name', 'service_location', 'datetime_from',
+                  'datetime_to', 'nights', 'description',
+                  'conf_number', 'status']
+        attrs = {'class': 'table'}
+        row_attrs = {
+            'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_STATUS_MAPPING[record.status]),
+        }
+
+    def __init__(self, *args, **kwargs):
+        # self.base_columns['service_type'].verbose_name='Request emails'
+        # self.base_columns['utility_percent'].verbose_name='Util.%'
+        # self.base_columns['utility'].verbose_name='Util.'
+        self.base_columns['nights'].verbose_name='N'
+        self.base_columns['datetime_from'].verbose_name='FROM'
+        self.base_columns['datetime_to'].verbose_name='TO'
+        self.base_columns['description'].verbose_name='Pax'
+        self.base_columns['conf_number'].verbose_name='Conf.'
+        super(BookingConfirmationTable, self).__init__(*args, **kwargs)
+
+
 class BookingServiceSummaryTable(tables.Table):
     class Meta:
         model = BookingService
