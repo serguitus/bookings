@@ -315,10 +315,10 @@ function get_date_from_string(date_str){
   if(parts[0].length == 6){
     // working with date format DDMMYY
     var date_list = parts[0].match(/.{1,2}/g);
-    var result_date = new Date(date_list[2].padStart(4, '20'), date_list[1], date_list[0])
+    var result_date = new Date(date_list[2].padStart(4, '20'), date_list[1]-1, date_list[0])
     return result_date;
   }else if(parts[0].length == 2){
-    var result_date = new Date(parts[2].padStart(4, '20'), parts[1] - 1, parts[0]);
+    var result_date = new Date(parts[2].padStart(4, '20'), parts[1]-1, parts[0]);
     return result_date;
   }else{
     // unknown format. Do nothing
