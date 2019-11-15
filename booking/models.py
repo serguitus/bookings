@@ -810,7 +810,7 @@ class BaseBookingService(BaseService, DateInterval):
         if child_service.base_category in ['PA', 'PE', 'PT']:
             pax_count = child_service.booking_package.rooming_list.count()
         pax_count = child_service.rooming_list.count()
-        return '{} pax'.format(pax_count)
+        return '{}'.format(pax_count)
     service_pax_count.short_description = 'Pax'
 
     def full_booking_name(self):
