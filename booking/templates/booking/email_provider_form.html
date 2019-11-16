@@ -1,7 +1,16 @@
 {% extends "common/base_site.html" %}
+
 {% block content %}
-  <form method="post" novalidate>{% csrf_token %}
-    {{ form }}
+    <form method="post" novalidate>{% csrf_token %}
+        {{ form.media }}
+        <h2>Confirmation Email</h2>
+        <br>
+        {% for field in form %}
+            <div class="form-group row">
+                <div class ="col-sm-1 col-form-label">{{ field.label_tag }}</div>
+                <div class="col-sm-10">{{ field }}</div>
+            </div>
+        {% endfor %}
     <button class="btn btn-primary" id="btn-solicitar" type="submit">Solicitar</button>
   </form>
 {% endblock content %}

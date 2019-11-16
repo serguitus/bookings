@@ -77,8 +77,10 @@ class RelativeInterval(models.Model):
 class DateInterval(models.Model):
     class Meta:
         abstract = True
-    datetime_from = models.DateField(blank=True, null=True, verbose_name='Date From')
-    datetime_to = models.DateField(blank=True, null=True, verbose_name='Date To')
+    datetime_from = models.DateField(blank=True, null=True,
+                                     verbose_name='From')
+    datetime_to = models.DateField(blank=True, null=True,
+                                   verbose_name='To')
 
     def validate_date_interval(self):
         if self.datetime_from and self.datetime_to and self.datetime_from > self.datetime_to:
@@ -167,7 +169,8 @@ class BaseService(models.Model):
     service_location = models.CharField(max_length=50, blank=True, null=True,
                                         verbose_name='Location')
     description = models.CharField(max_length=1000, blank=True, null=True)
-    service_addon = models.ForeignKey(Addon, blank=True, null=True)
+    service_addon = models.ForeignKey(Addon, blank=True, null=True,
+                                      verbose_name='Addon')
     status = models.CharField(
         max_length=5, choices=SERVICE_STATUS_LIST,
         default=SERVICE_STATUS_PENDING)
@@ -752,9 +755,13 @@ class BaseBookingService(BaseService, DateInterval):
     # This holds the confirmation number when it exists
 
     conf_number = models.CharField(max_length=20, blank=True, null=True)
-    cost_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    cost_amount = models.DecimalField(max_digits=10,
+                                      decimal_places=2, blank=True, null=True,
+                                      verbose_name='Cost')
     cost_comments = models.CharField(max_length=1000, blank=True, null=True)
-    price_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    price_amount = models.DecimalField(max_digits=10, decimal_places=2,
+                                       blank=True, null=True,
+                                       verbose_name='Price')
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
     p_notes = models.CharField(
         max_length=1000, blank=True, null=True, verbose_name='Private Notes')
@@ -767,7 +774,7 @@ class BaseBookingService(BaseService, DateInterval):
     cost_amount_to_pay = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     cost_amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     has_payment = models.BooleanField(default=False)
-    booking = models.ForeignKey(Booking, related_name='booking_services')
+    booking = models.ForeignKey(Booking, related_name='base_booking_services')
 
     @property
     def utility(self):
@@ -791,6 +798,30 @@ class BaseBookingService(BaseService, DateInterval):
             return child_service.booking_package.booking.name
         return child_service.booking.name
 
+    def booking_agency_ref(self):
+        # gets booking.reference for this bookingservice
+        child_service = _get_child_objects([self])[0]
+        if child_service.base_category in ['PA', 'PE', 'PT']:
+            return child_service.booking_package.booking.reference
+        return child_service.booking.reference
+
+    def service_pax_count(self):
+        # gets rooming_list count for this bookingservice
+        child_service = _get_child_objects([self])[0]
+        if child_service.base_category in ['PA', 'PE', 'PT']:
+            pax_count = child_service.booking_package.rooming_list.count()
+        pax_count = child_service.rooming_list.count()
+        return '{}'.format(pax_count)
+    service_pax_count.short_description = 'Pax'
+
+    def full_booking_name(self):
+        ref = self.booking_agency_ref()
+        full_name = self.booking_name()
+        if ref:
+            full_name += ' ({})'.format(ref)
+        return full_name
+    full_booking_name.short_description = 'Booking'
+
     def service_provider(self):
         provider = ''
         if self.provider:
@@ -798,6 +829,10 @@ class BaseBookingService(BaseService, DateInterval):
             if self.provider.phone:
                 provider += ' %s' % self.provider.phone
         return provider
+
+    def booking_internal_reference(self):
+        return self.booking.internal_reference()
+    booking_internal_reference.short_description = 'Ref.'
 
 
 class BookingService(BaseBookingService):

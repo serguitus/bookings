@@ -1,9 +1,32 @@
-{% load booking_tags %}Dear {{ client }}:
+{% load booking_tags %}
+{% load render_table from django_tables2 %}
 
-Bellow, confirmation details:
+<style>
+ .table {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 20px;
+}
+</style>
+<div>Dear {{ client }}:</div>
+<div>Bellow, confirmation details as per your request:</div>
 
 Booking: {{ booking.name }} [Reference: {{ booking.internal_reference }}]
-{% if booking.reference %}Client Reference. {{ booking.reference }}
+{% if booking.reference %}Client Reference. {{ booking.reference }}{% endif %}
 
-{% endif %}CONFIRMED SERVICES
+{% bookingconfirmation_table booking as table %}
+<div class="bookingservices-container">
+    {% render_table table %}
+</div>
+
+
+
+
+CONFIRMED SERVICES
+<table class="table">
+    {% for booking_service in services %}
+        <tr><td>{{ booking_service }}</td></tr>
+    {% endfor %}
+</table>
+    
 {% for booking_service in services %}{% with bs=booking_service %}{% include 'booking/emails/confirmation_service.html' %}{% endwith %}{% endfor %}

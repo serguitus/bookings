@@ -116,7 +116,7 @@
                                 <tr>
                                     <td class="voucher-content-1"" width="25%"><b>From: </b>{{ service.datetime_from }}</td>
                                     <td class="voucher-content-1"" width="25%">{% if service.datetime_to %}<b>To: </b>{{ service.datetime_to }}{% endif %}</td>
-                                    <td class="voucher-content-1"" width="25%">{% if service.time %}<b>Time:</b> {{ service.time|time:"H:i" }}{% elif service.booking_package.time %}<b>Time:</b> {{ service.booking_package.time|time:"H:i" }}{% endif %}</td>
+                                    <td class="voucher-content-1"" width="25%">{% if service.time %}<b>Pickup Time:</b> {{ service.time|time:"H:i" }}{% elif service.booking_package.time %}<b>Pickup Time:</b> {{ service.booking_package.time|time:"H:i" }}{% endif %}</td>
                                     <td class="voucher-content-1" width="25%"><b>Confirm. </b>{% if service.conf_number %}{{ service.conf_number }}{% else %}OK{% endif %}</td>
                                 </tr>
                                 <tr class="voucher-content-2">

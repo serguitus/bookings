@@ -725,7 +725,7 @@ class EmailConfirmationView(View):
         }
         t = get_template('booking/emails/confirmation_email.html')
         form = EmailProviderForm(request.user,
-                                 initial={
+                                 {
                                      'subject': subj,
                                      'to_address': client_email,
                                      'bcc_address': request.user.email,
@@ -770,6 +770,7 @@ def _send_service_request(
         cc=_find_address_list(cc_address),
         bcc=_find_address_list(bcc_address),
         reply_to=_find_address_list(reply_address))
+    email.content_subtype = "html"
     email.send()
 
 
