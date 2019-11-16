@@ -4945,6 +4945,42 @@ class BookingServices(object):
         raise ValidationError('Payment can not be modified')
 
 
+    @classmethod
+    def save_booking_invoice(cls, request, obj, form, change):
+
+        user = request.user
+        db_invoice = BookingInvoice.objects.get(pk=obj)
+        obj.booking_amount = db_invoice.booking_amount
+
+        if obj.status != STATUS_CANCELLED:
+            obj.currency_rate = Decimal(float(obj.amount) / float(obj.booking_amount)).quantize(Decimal("1.0000"))
+
+        FinanceServices.save_agency_invoice(user, obj, BookingInvoice)
+
+        LogEntry.objects.log_action(
+            user_id=user.pk,
+            content_type_id=get_content_type_for_model(obj).pk,
+            object_id=obj.pk,
+            object_repr=force_text(obj),
+            action_flag=CHANGE,
+            change_message="Booking Invoice Changed",
+        )
+
+        if obj.status == STATUS_CANCELLED:
+            booking = db_invoice.invoice_booking
+            if booking.invoice_id == obj.id:
+                booking.invoice = None
+                booking.save(update_fields=['invoice'])
+                LogEntry.objects.log_action(
+                    user_id=user.pk,
+                    content_type_id=get_content_type_for_model(booking).pk,
+                    object_id=booking.pk,
+                    object_repr=force_text(booking),
+                    action_flag=CHANGE,
+                    change_message="Booking Invoice Cancelled",
+                )
+
+
 def details_allotment_queryset(
         service, date_from=None, date_to=None, room_type=None, board_type=None, addon=None):
     if not service:

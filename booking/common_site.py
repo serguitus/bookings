@@ -1772,15 +1772,14 @@ class BookingInvoiceSiteModel(SiteModel):
             'fields': ('office', 'content_format', 'date_issued'),
         })
     )
-    readonly_fields = ('status', 'booking_amount', 'currency', 'currency_rate', 'amount', 'matched_amount')
+    readonly_fields = ('booking_amount', 'currency_rate', 'matched_amount')
+
+    change_form_template = 'booking/bookinginvoice_change_form.html'
 
     inlines = [BookingInvoiceDetailInline, BookingInvoiceLineInline, BookingInvoicePartialInline]
 
     def save_model(self, request, obj, form, change):
-        # disable save of agencyinvoice object
-        obj.save(
-            update_fields=[
-                'booking_name', 'reference', 'date_from', 'date_to', 'cash_amount', 'office', 'content_format'])
+        BookingServices.save_booking_invoice(request, obj, form, change)
 
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'invoice_booking') and obj.invoice_booking:
