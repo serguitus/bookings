@@ -1004,7 +1004,7 @@ class BookingAllotment(BookingService, BaseAllotment):
                     dist += ' + '
                 dist += '%d %s' % (room_count[k],
                                    room_types[k])
-        dist += ' (%s)' % self.board_type
+        dist += ' (%s %s)' % (self.room_type, self.board_type)
         return dist
 
     def fill_data(self):
