@@ -406,6 +406,7 @@ class ProviderAllotmentDetailInline(CommonStackedInline):
         ('ad_1_amount', 'ch_1_ad_1_amount', 'ch_2_ad_1_amount',), # 'ch_3_ad_1_amount',),
         ('ad_2_amount', 'ch_1_ad_2_amount', 'ch_2_ad_2_amount',), # 'ch_3_ad_2_amount',),
         ('ad_3_amount', 'ch_1_ad_3_amount', 'ch_2_ad_3_amount',), # 'ch_3_ad_3_amount',),
+        ('ad_4_amount', 'ch_1_ad_4_amount',), # 'ch_2_ad_3_amount',), # 'ch_3_ad_3_amount',),
     )
     ordering = ['id', 'room_type', 'board_type']
     form = ProviderAllotmentDetailInlineForm
@@ -526,10 +527,11 @@ class AgencyAllotmentDetailInline(CommonStackedInline):
     fields = (
         ('room_type', 'board_type', 'addon'),
         ('pax_range_min', 'pax_range_max'),
-        ('ad_1_amount', 'ch_1_ad_1_amount', 'ch_2_ad_1_amount', 'ch_3_ad_1_amount',),
-        ('ad_2_amount', 'ch_1_ad_2_amount', 'ch_2_ad_2_amount', 'ch_3_ad_2_amount',),
-        ('ad_3_amount', 'ch_1_ad_3_amount', 'ch_2_ad_3_amount', 'ch_3_ad_3_amount',),
-        ('ch_1_ad_0_amount', 'ch_2_ad_0_amount', 'ch_3_ad_0_amount',),
+        ('ad_1_amount', 'ch_1_ad_1_amount', 'ch_2_ad_1_amount'), #, 'ch_3_ad_1_amount',),
+        ('ad_2_amount', 'ch_1_ad_2_amount', 'ch_2_ad_2_amount',), # 'ch_3_ad_2_amount',),
+        ('ad_3_amount', 'ch_1_ad_3_amount', 'ch_2_ad_3_amount',), # 'ch_3_ad_3_amount',),
+        ('ad_4_amount', 'ch_1_ad_4_amount',), # 'ch_2_ad_3_amount',), # 'ch_3_ad_3_amount',),
+        # ('ch_1_ad_0_amount', 'ch_2_ad_0_amount', 'ch_3_ad_0_amount',),
     )
     ordering = ['room_type', 'board_type']
     form = AgencyAllotmentDetailInlineForm
