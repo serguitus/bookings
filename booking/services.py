@@ -4894,7 +4894,7 @@ class BookingServices(object):
                 if payment_amount < 0:
                     raise ValidationError('Invalid Payment Negative Amount')
 
-                payment.amount = payment_amount
+                payment.services_amount = payment_amount
 
                 # load and lock account
                 account = load_locked_model_object(

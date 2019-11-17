@@ -1813,7 +1813,7 @@ class ProviderBookingPaymentSiteModel(SiteModel):
             )
         }),
     )
-    readonly_fields = ['services_amount', 'amount']
+    readonly_fields = ['services_amount']
     add_readonly_fields = ['status']
 
     recent_allowed = True
@@ -1831,9 +1831,9 @@ class ProviderBookingPaymentSiteModel(SiteModel):
     def get_change_readonly_fields(self, request, obj=None):
         if obj is not None:
             if obj.status == STATUS_CANCELLED:
-                return ['provider', 'name', 'date', 'status', 'account', 'amount']
+                return ['provider', 'name', 'date', 'services_amount', 'currency_rate', 'status', 'account', 'amount']
             elif obj.status == STATUS_READY:
-                return ['provider', 'name', 'date', 'account', 'amount']
+                return ['provider', 'name', 'date', 'services_amount', 'currency_rate', 'account', 'amount']
             else:
                 return ['provider']
         return []

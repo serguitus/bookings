@@ -792,7 +792,7 @@ class ProviderBookingPaymentForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
-            'account': autocomplete.ModelSelect2(url='cuc-account-autocomplete'),
+            'account': autocomplete.ModelSelect2(url='account-autocomplete'),
         }
 
 
