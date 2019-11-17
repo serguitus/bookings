@@ -68,7 +68,7 @@ class FinantialDocument(models.Model):
         return self.name
 
     def fill_data(self):
-        pass
+        raise ValidationError('Finantial Document can not be saved')
 
     def save(self, *args, **kwargs):
         self.fill_data()
@@ -144,11 +144,18 @@ class Withdraw(FinantialDocument, AccountingDocument):
         verbose_name_plural = 'Withdraws'
 
     def fill_data(self):
+        if self.pk:
+            if self.document_type != DOC_TYPE_WITHDRAW:
+                raise ValidationError('Only Withdraws can be Saved')
         self.document_type = DOC_TYPE_WITHDRAW
         account = Account.objects.get(pk=self.account_id)
         self.name = '%s - Withdraw from %s of %s %s ' % (
             self.date, account, self.amount, account.get_currency_display())
-        return self.name
+
+    def save(self, *args, **kwargs):
+        self.fill_data()
+        # Call the "real" save() method.
+        super(Withdraw, self).save(*args, **kwargs)
 
 
 class CurrencyExchange(FinantialDocument, AccountingDocument):

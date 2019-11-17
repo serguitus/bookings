@@ -1390,16 +1390,18 @@ class ProviderBookingPayment(Withdraw):
     def fill_data(self):
         self.document_type = DOC_TYPE_PROVIDER_PAYMENT_WITHDRAW
         account = Account.objects.get(pk=self.account_id)
-        self.name = '%s - Prov. (%s) Payment Withdraw from %s of %s %s ' % (
+        self.name = '%s - Prov. (%s) Payment from %s of %s %s ' % (
             self.date, self.provider, account, self.amount, account.get_currency_display())
-        return self.name
+
+    def save(self, *args, **kwargs):
+        self.fill_data()
+        # Call the "real" save() method.
+        super(ProviderBookingPayment, self).save(*args, **kwargs)
+
 
     def delete(self, using=None, keep_parents=False):
         if self.status != STATUS_DRAFT:
             raise ValidationError('Can not delete Payments')
-
-    def __str__(self):
-        return 'Prov. - %s : %s' % (self.provider, self.amount)
 
 
 class ProviderBookingPaymentService(models.Model):
