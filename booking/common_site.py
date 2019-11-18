@@ -824,10 +824,12 @@ class BookingSiteModel(SiteModel):
                 ('name', 'reference', 'status'),
                 ('agency', 'agency_contact'),
                 ('date_from', 'date_to'),
-                ('is_package_price', 'price_amount', 'cost_amount', 'utility_percent', 'utility'),
+                ('is_package_price',),
                 ('package_sgl_price_amount', 'package_dbl_price_amount',
-                 'package_tpl_price_amount'), 'id', 'version',
-                 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body', 'submit_action')
+                 'package_tpl_price_amount'),
+                ('cost_amount', 'price_amount', 'utility_percent', 'utility'),
+                'id', 'version',
+                'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body', 'submit_action')
         }),
         ('General Notes', {'fields': ('p_notes',),
                            'classes': ('collapse', 'wide')})

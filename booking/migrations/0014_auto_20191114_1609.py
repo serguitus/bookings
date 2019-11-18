@@ -23,6 +23,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='bookingservice',
             name='v_notes',
-            field=models.CharField(blank=True, max_length=200, null=True, verbose_name='Voucher Notes'),
+            field=models.CharField(blank=True, max_length=300, null=True, verbose_name='Voucher Notes'),
         ),
     ]

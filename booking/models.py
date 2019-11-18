@@ -651,9 +651,14 @@ class Booking(models.Model):
     currency = models.CharField(
         max_length=5, choices=CURRENCIES, default=CURRENCY_CUC)
     currency_factor = models.DecimalField(max_digits=12, decimal_places=6, default=1.0)
-    cost_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    cost_amount = models.DecimalField(max_digits=10, decimal_places=2,
+                                      blank=True, null=True,
+                                      verbose_name='Cost')
     cost_comments = models.CharField(max_length=1000, blank=True, null=True)
-    price_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    price_amount = models.DecimalField(max_digits=10,
+                                       decimal_places=2, blank=True,
+                                       null=True,
+                                       verbose_name='Price')
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
     invoice = models.ForeignKey(BookingInvoice, blank=True, null=True)
     is_package_price = models.BooleanField(default=False, verbose_name='Package Price')
