@@ -576,16 +576,13 @@ class BookingServiceUpdateView(View):
         return redirect(reverse('common:booking_booking_change', args=[id]))
 
     def post(self, request, id, *args, **kwargs):
-        if not request.user.has_perm("booking.change_services_amounts"):
+        services = request.POST.getlist('pk', None)
+        if not services:
             messages.info(request, 'Booking Saved and no Service Updated')
         else:
-            services = request.POST.getlist('pk', None)
-            if not services:
-                messages.info(request, 'Booking Saved and no Service Updated')
-            else:
-                booking_services = BookingService.objects.filter(pk__in=services)
-                BookingServices.update_bookingservices_amounts(booking_services)
-                messages.info(request, 'Booking Saved and %s services updated' % len(services))
+            booking_services = BookingService.objects.filter(pk__in=services)
+            BookingServices.update_bookingservices_amounts(booking_services)
+            messages.info(request, 'Booking Saved and %s services updated' % len(services))
         stay_on_booking = request.GET.get('stay_on_booking', False)
         if stay_on_booking:
             return redirect(reverse('common:booking_booking_change', args=[id]))
@@ -723,14 +720,15 @@ class EmailConfirmationView(View):
             'rooming': rooming,
             'user': request.user,
         }
+        bcc_list = '%s, %s' % (request.user.email,
+                               settings.DEFAULT_CONFIRMATION_BCC)
         t = get_template('booking/emails/confirmation_email.html')
         form = EmailProviderForm(request.user,
-                                 {
-                                     'subject': subj,
-                                     'to_address': client_email,
-                                     'bcc_address': request.user.email,
-                                     'body': t.render(initial)
-                                 })
+                                 {'from': request.user.email,
+                                  'subject': subj,
+                                  'to_address': client_email,
+                                  'bcc_address': bcc_list,
+                                  'body': t.render(initial)})
         context = dict()
         context.update(bookings_site.get_site_extra_context(request))
         request.current_app = bookings_site.name

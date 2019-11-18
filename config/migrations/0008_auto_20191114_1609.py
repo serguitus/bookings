@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='allotment',
             name='address',
-            field=models.CharField(blank=True, max_length=60, null=True),
+            field=models.CharField(blank=True, max_length=75, null=True),
         ),
     ]
