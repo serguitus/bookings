@@ -233,11 +233,9 @@ $(document).ready(function(){
     // clear data
     $('#id_room_type').val(null).trigger('change');
     $('#id_board_type').val(null).trigger('change');
-    $('#id_provider').val(null).trigger('change');
     $('#id_location_from').val(null).trigger('change');
     $('#id_location_to').val(null).trigger('change');
     $('#id_addon').val(null).trigger('change');
-    $('#id_provider').val(null).trigger('change');
   });
 
   // for location from changed

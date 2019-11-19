@@ -115,7 +115,6 @@ $(document).ready(function(){
   $('#id_service').change(function (e) {
     e.preventDefault();
     // clear data
-    $('#id_provider').select();
     get_computed_amounts();
   });
 
