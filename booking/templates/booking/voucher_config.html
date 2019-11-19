@@ -8,6 +8,8 @@
     <script type="text/javascript" src="{% static 'booking/js/mail_popup.js' %}"></script>
 {% endblock head_extra %}
 {% block content %}
+    <h1>Vouchers Configuration</h1>
+    <h2>Please choose services to build vouchers to</h2>
   <form method="post" novalidate>{% csrf_token %}
     {% vouchers_table current as table %}
     <div class="bookingvouchers-container">

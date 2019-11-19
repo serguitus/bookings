@@ -368,7 +368,7 @@ class BookingServiceAmountsView(ModelChangeFormProcessorView):
         return None, pax_list
 
     def process_data(self, bookingservice, inlines):
-    
+
         response, pax_list = self.verify(bookingservice, inlines)
         if response:
             return response
@@ -413,7 +413,7 @@ class BookingPackageServiceAmountsView(ModelChangeFormProcessorView):
         return None, pax_list
 
     def process_data(self, bookingpackageservice, inlines):
-        
+
         response, pax_list = self.verify(bookingpackageservice)
         if response:
             return response
@@ -730,6 +730,7 @@ class EmailConfirmationView(View):
                                   'bcc_address': bcc_list,
                                   'body': t.render(initial)})
         context = dict()
+        context.update({'title': 'Confirmation Email'})
         context.update(bookings_site.get_site_extra_context(request))
         request.current_app = bookings_site.name
         context.update({'form': form})

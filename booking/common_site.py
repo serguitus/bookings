@@ -475,6 +475,7 @@ class QuoteSiteModel(SiteModel):
         context = {}
         context.update(self.get_model_extra_context(request))
         context.update(extra_context or {})
+        context.update({'title': 'Build Booking'})
         context.update({'quote_id': id})
         context.update({'formset': formset})
         return render(request, 'booking/quote_booking_build.html', context)
@@ -880,6 +881,7 @@ class BookingSiteModel(SiteModel):
     def config_vouchers(self, request, id, extra_context=None):
         # this handles configuration form to build vouchers
         context = {}
+        context.update({'title': 'Vouchers Booking'})
         if request.method == 'GET':
             form = VouchersConfigForm()
             context.update(self.get_model_extra_context(request))
@@ -965,6 +967,7 @@ class BookingSiteModel(SiteModel):
             current_rooming = BookingPax.objects.filter(booking=id)
 
         context = {}
+        context.update({'title': 'Add Pax to Rooming'})
         context.update(self.get_model_extra_context(request))
         context.update(extra_context or {})
         context.update({'booking_id': id})

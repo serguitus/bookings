@@ -3,7 +3,7 @@
 {% load i18n static common_utils %}
 
 {% block head_title %}
-    {{ site_title|default:_('Application Site') }} | {{ title }}
+    {{ title }} | {{ site_title|default:_('Application Site') }}
 {% endblock head_title %}
 
 {% block navbar %}
