@@ -36,13 +36,17 @@ from config.views import (
     TransferAutocompleteView, ProviderTransferAutocompleteView,
     AddonAutocompleteView,
     ExtraAutocompleteView, ProviderExtraAutocompleteView,
+    ServiceAllotmentAutocompleteView, ServiceTransferAutocompleteView,
+    ServiceExtraAutocompleteView,
 )
 from booking import urls as booking_urls
 from booking.views import (
     PackageAutocompleteView, ProviderPackageAutocompleteView,
     PickUpAutocompleteView, DropOffAutocompleteView, PlaceAutocompleteView,
     ScheduleArrivalAutocompleteView, ScheduleDepartureAutocompleteView,
-    QuotePaxVariantAutocompleteView, SellerAutocompleteView)
+    QuotePaxVariantAutocompleteView, SellerAutocompleteView,
+    ServicePackageAutocompleteView,
+)
 
 
 urlpatterns = [
@@ -75,6 +79,10 @@ urlpatterns = [
         AllotmentAutocompleteView.as_view(),
         name='allotment-autocomplete',
     ),
+    url(r'^serviceallotment-autocomplete/$',
+        ServiceAllotmentAutocompleteView.as_view(),
+        name='serviceallotment-autocomplete',
+    ),
     url(r'^boardtype-autocomplete/$',
         BoardTypeAutocompleteView.as_view(),
         name='boardtype-autocomplete',
@@ -87,9 +95,17 @@ urlpatterns = [
         ExtraAutocompleteView.as_view(),
         name='extra-autocomplete',
     ),
+    url(r'^serviceextra-autocomplete/$',
+        ServiceExtraAutocompleteView.as_view(),
+        name='serviceextra-autocomplete',
+    ),
     url(r'^package-autocomplete/$',
         PackageAutocompleteView.as_view(),
         name='package-autocomplete',
+    ),
+    url(r'^servicepackage-autocomplete/$',
+        ServicePackageAutocompleteView.as_view(),
+        name='servicepackage-autocomplete',
     ),
     url(r'^loanentity-autocomplete/$',
         LoanEntityAutocompleteView.as_view(),
@@ -138,6 +154,10 @@ urlpatterns = [
     url(r'^transfer-autocomplete/$',
         TransferAutocompleteView.as_view(),
         name='transfer-autocomplete',
+    ),
+    url(r'^servicetransfer-autocomplete/$',
+        ServiceTransferAutocompleteView.as_view(),
+        name='servicetransfer-autocomplete',
     ),
     url(r'^bookings/booking/',
         include(booking_urls)

@@ -20,6 +20,7 @@ from dal import autocomplete
 
 # from dateutil.parser import parse
 
+from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
@@ -940,12 +941,10 @@ class ProviderPackageAutocompleteView(autocomplete.Select2QuerySetView):
         qs = Provider.objects.filter(enabled=True).all().distinct()
 
         service = self.forwarded.get('service', None)
-        if not service:
-            return Provider.objects.none()
-
-        qs = qs.filter(
-            packageprovider__service=service,
-        )
+        if service:
+            qs = qs.filter(
+                packageprovider__service=service,
+            )
 
         if self.q:
             qs = qs.filter(name__icontains=self.q)
@@ -986,10 +985,14 @@ class BookingInvoiceView(View):
         """
         booking = Booking.objects.get(id=id)
         if not booking.invoice:
-            if not BookingServices.create_bookinginvoice(request.user, booking):
-                messages.add_message(request, messages.ERROR , "Failed Booking Invoice Creation")
+            try:
+                if not BookingServices.create_bookinginvoice(request.user, booking):
+                    messages.add_message(request, messages.ERROR , "Failed Booking Invoice Creation")
+                    return HttpResponseRedirect(reverse('common:booking_booking_change', args=[id]))
+                messages.add_message(request, messages.SUCCESS , "Successful Booking Invoice Creation")
+            except ValidationError as error:
+                messages.add_message(request, messages.ERROR , error.message)
                 return HttpResponseRedirect(reverse('common:booking_booking_change', args=[id]))
-            messages.add_message(request, messages.SUCCESS , "Successful Booking Invoice Creation")
         return HttpResponseRedirect(reverse('common:booking_bookinginvoice_change', args=[booking.invoice_id]))
 
 
@@ -1155,3 +1158,21 @@ class BookingPackageTransferProvidersCostsView(BookingPackageServiceProvidersCos
 class BookingPackageExtraProvidersCostsView(BookingPackageServiceProvidersCostsView):
     model = BookingPackageExtra
     common_sitemodel = BookingPackageExtraSiteModel
+
+
+class ServicePackageAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return Package.objects.none()
+        provider = self.forwarded.get('provider', None)
+        qs = Package.objects.filter(enabled=True).distinct()
+        if provider:
+            qs = qs.filter(
+                packageprovider__provider=provider,
+            )
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs[:20]
+
+

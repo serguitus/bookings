@@ -123,6 +123,8 @@ class BookingServices(object):
 
     @classmethod
     def create_bookinginvoice(cls, user, booking):
+        if booking.price_amount is None:
+            raise ValidationError('Booking must have Price Amount to be invoiced')
         with transaction.atomic(savepoint=False):
             if booking.invoice:
                 return False

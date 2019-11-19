@@ -260,7 +260,6 @@ $(document).ready(function(){
 
     $('#id_addon').select();
 
-    $('#id_provider').select();
     get_computed_amounts();
   });
 
