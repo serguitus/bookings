@@ -245,7 +245,7 @@ class BookingServices(object):
                 booking = Booking()
                 booking.name = quote.reference
                 booking.agency = quote.agency
-                booking.reference = '< reference> '
+                # booking.reference = '< reference> '
                 booking.seller = quote.seller or user
                 # date_from auto
                 # date_to auto
