@@ -20,6 +20,7 @@ from dal import autocomplete
 
 # from dateutil.parser import parse
 
+from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
@@ -985,10 +986,14 @@ class BookingInvoiceView(View):
         """
         booking = Booking.objects.get(id=id)
         if not booking.invoice:
-            if not BookingServices.create_bookinginvoice(request.user, booking):
-                messages.add_message(request, messages.ERROR , "Failed Booking Invoice Creation")
+            try:
+                if not BookingServices.create_bookinginvoice(request.user, booking):
+                    messages.add_message(request, messages.ERROR , "Failed Booking Invoice Creation")
+                    return HttpResponseRedirect(reverse('common:booking_booking_change', args=[id]))
+                messages.add_message(request, messages.SUCCESS , "Successful Booking Invoice Creation")
+            except ValidationError as error:
+                messages.add_message(request, messages.ERROR , error.message)
                 return HttpResponseRedirect(reverse('common:booking_booking_change', args=[id]))
-            messages.add_message(request, messages.SUCCESS , "Successful Booking Invoice Creation")
         return HttpResponseRedirect(reverse('common:booking_bookinginvoice_change', args=[booking.invoice_id]))
 
 
