@@ -192,7 +192,7 @@ class PackageSiteModel(SiteModel):
     menu_label = MENU_LABEL_PACKAGE
     fields = (
         ('name', 'service_category', 'enabled'), 
-        ('amounts_type', 'pax_range'),
+        ('location', 'amounts_type', 'pax_range'),
         'time', 'description'
     )
     list_display = (

@@ -863,6 +863,7 @@ class PackageForm(forms.ModelForm):
         model = Package
         fields = ('__all__')
         widgets = {
+            'location': autocomplete.ModelSelect2(url='location-autocomplete'),
             'description': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
         }
 
