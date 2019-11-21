@@ -31,7 +31,7 @@ from finance.models import (
     Deposit, Withdraw, CurrencyExchange, Transfer,
     LoanAccount, LoanAccountDeposit, LoanAccountWithdraw, LoanAccountMatch,
     LoanEntity, LoanEntityDeposit, LoanEntityWithdraw, LoanEntityMatch,
-    Agency, AgencyContact,
+    Agency, AgencyContact, AgencyBillingContact,
     AgencyDocumentMatch, AgencyCreditDocument, AgencyDebitDocument,
     AgencyInvoice, AgencyPayment,
     Provider, ProviderDocumentMatch, ProviderCreditDocument, ProviderDebitDocument,
@@ -666,12 +666,20 @@ class ProviderPaymentSiteModel(ProviderCreditDocumentSiteModel):
 
 class AgencyContactInline(TabularInline):
     model = AgencyContact
-    fields = ['name', 'email',]
+    fields = ['name', 'email']
     verbose_name_plural = 'Agency Contact List'
     extra = 0
     ordering = ('name',)
 
-        
+
+class AgencyBillingContactInline(TabularInline):
+    model = AgencyBillingContact
+    fields = ['name', 'email']
+    verbose_name_plural = 'Agency Billing Contacts'
+    extra = 0
+    ordering = ('name',)
+
+
 class AgencySiteModel(SiteModel):
     model_order = 4210
     menu_label = MENU_LABEL_FINANCE_ADVANCED
@@ -683,7 +691,7 @@ class AgencySiteModel(SiteModel):
 
     actions = ['rewrite_agency_amounts', 'update_agency_amounts']
 
-    inlines = [AgencyContactInline]
+    inlines = [AgencyContactInline, AgencyBillingContactInline]
 
     def rewrite_agency_amounts(self, request, queryset):
 

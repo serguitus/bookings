@@ -192,7 +192,7 @@ class PackageSiteModel(SiteModel):
     model_order = 1010
     menu_label = MENU_LABEL_PACKAGE
     fields = (
-        ('name', 'service_category', 'enabled'), 
+        ('name', 'service_category', 'enabled'),
         ('location', 'amounts_type', 'pax_range'),
         'time', 'description'
     )

@@ -177,7 +177,7 @@ class ServiceSiteModel(SiteModel):
     menu_group = 'Configuration Services'
     fields = (('name', 'enabled'), ('service_category', 'category'),)
     list_display = ('name', 'service_category', 'category', 'enabled')
-    top_filters = ('name', ('service_category', ServiceCategoryTopFilter), 'category', 'enabled')
+    top_filters = ('name', ('service_category', ServiceCategoryTopFilter), 'location', 'category', 'enabled')
     ordering = ['enabled', 'category', 'name']
     actions = ['export_prices']
 
