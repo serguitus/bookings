@@ -43,7 +43,9 @@ from config.models import (
     AmountDetail, AgencyCatalogue, ProviderCatalogue,
 )
 
-from finance.constants import DOC_TYPE_PROVIDER_PAYMENT_WITHDRAW, STATUS_DRAFT
+from finance.constants import (
+    DOC_TYPE_AGENCY_BOOKING_INVOICE, DOC_TYPE_PROVIDER_PAYMENT_WITHDRAW, STATUS_DRAFT,
+)
 from finance.models import (
     Office, Agency, AgencyInvoice, AgencyContact,
     Provider, ProviderInvoice, Withdraw)
@@ -584,6 +586,7 @@ class BookingInvoice(AgencyInvoice):
 
     def fill_data(self):
         super(BookingInvoice, self).fill_data()
+        self.document_type = DOC_TYPE_AGENCY_BOOKING_INVOICE
         self.name = 'Booking Invoice to %s - %s Price %s %s' % (
             self.agency, self.date, self.amount, self.get_currency_display())
 

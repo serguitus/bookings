@@ -912,6 +912,9 @@ class AgencyInvoice(AgencyDebitDocument):
         verbose_name_plural = 'TTOO Invoices'
 
     def fill_data(self):
+        if self.pk:
+            if self.document_type != DOC_TYPE_AGENCY_INVOICE:
+                raise ValidationError('Only Agency Invoices can be Saved')
         self.document_type = DOC_TYPE_AGENCY_INVOICE
         agency = Agency.objects.get(pk=self.agency_id)
         self.name = '%s - Agency Invoice to %s for %s %s' % (
