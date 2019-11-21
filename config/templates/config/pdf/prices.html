@@ -15,6 +15,7 @@
             td.top-line {
                 border-top: 1px solid black;
                 padding-top: 2px;
+                border-bottom: 1px solid black;
             }
             td.addon-content {
                 width: 25%;
@@ -41,12 +42,19 @@
             td.amount {
                 text-align: right;
             }
+            div.location {
+                margin-top: 15px;
+            }
         </style>
     </head>
     <body>
     <b>Agency:</b> {{ agency.name }}<br>
-    {% for service in services %}
-        {% service_prices service agency date_from date_to %}
+    {% regroup services by location.name as location_list %}
+    {% for location in location_list %}
+        <div class="location"><b>Location:</b> {{ location.grouper }}</div>
+        {% for service in location.list %}
+            {% service_prices service agency date_from date_to %}
+        {% endfor %}
     {% endfor %}
     </table>
     </body>

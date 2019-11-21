@@ -279,7 +279,7 @@ def export_prices(request, queryset, extra_context=None):
                 'agency': Agency.objects.get(id=agency),
                 'date_from': date_from,
                 'date_to': date_to,
-                'services': Service.objects.filter(id__in=services)
+                'services': Service.objects.filter(id__in=services).order_by('location__name')
             })
     context.update({'services': queryset})
     context.update({'form': PricesExportForm()})

@@ -99,6 +99,7 @@ from booking.top_filters import (
 from common.sites import CommonStackedInline, CommonTabularInline
 
 from config.services import ConfigServices
+from config.top_filters import LocationTopFilter
 
 from finance.constants import STATUS_DRAFT, STATUS_READY, STATUS_CANCELLED
 
@@ -192,13 +193,13 @@ class PackageSiteModel(SiteModel):
     menu_label = MENU_LABEL_PACKAGE
     fields = (
         ('name', 'service_category', 'enabled'), 
-        ('amounts_type', 'pax_range'),
+        ('location', 'amounts_type', 'pax_range'),
         'time', 'description'
     )
     list_display = (
-        'name', 'service_category', 'amounts_type', 'pax_range', 'time', 'enabled')
+        'name', 'service_category', 'location', 'amounts_type', 'pax_range', 'time', 'enabled')
     list_editable = ('enabled',)
-    top_filters = ('name', 'amounts_type', 'pax_range', 'enabled')
+    top_filters = ('name', ('location', LocationTopFilter), 'amounts_type', 'pax_range', 'enabled')
     ordering = ('enabled', 'name',)
     details_template = 'booking/package_details.html'
     form = PackageForm
