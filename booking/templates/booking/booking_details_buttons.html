@@ -17,7 +17,7 @@
         <a class="btn btn-primary" href="{% url 'booking_invoice' current.id %}">Invoice</a>
         {% if current.invoice %}
             <a class="btn btn-primary" href="{% url 'booking_invoice_pdf' current.id %}">PDF</a>
-            {% include "booking/emails/popup_button.html" with btn_label='Send Invoice' only %}
+            {% include "booking/emails/popup_button.html" with btn_label='Send Invoice' %}
             <a class="btn btn-danger" data-toggle="modal" data-target="#myModal" href="#">Cancel Invoice</a>
             {% endif %}
     </span>

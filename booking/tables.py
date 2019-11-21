@@ -178,7 +178,9 @@ class BookingConfirmationTable(tables.Table):
         fields = ['name', 'service_location', 'datetime_from',
                   'datetime_to', 'nights', 'description',
                   'conf_number', 'status']
-        attrs = {'class': 'table'}
+        attrs = {'class': 'table',
+                 'style': 'width:100%',
+                 'border': '1',}
         row_attrs = {
             'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_STATUS_MAPPING[record.status]),
         }
