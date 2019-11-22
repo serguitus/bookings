@@ -2,70 +2,18 @@ $(document).ready(function(){
 
   $('div.field-box.field-provider>div.related-widget-wrapper').after('<a id="btn-costs" title="Costs" data-toggle="modal" data-target="#popup-costs" class="btn btn-costs glyphicon glyphicon-usd" href="#"></a>');
 
+  $('#btn-costs').on('click', function (e) {
+    get_providers_costs();
+  });
+
   label = $('div.field-booking div label.required');
   label.html(label.html() + '<a id="btn-booking-services-summary" title="Booking Services Summary" data-toggle="modal" data-target="#booking_services_summary" class="btn btn-booking-services-summary glyphicon glyphicon-eye-open" href="#"></a>');
   label = $('div.field-booking_package div label.required');
   label.html(label.html() + '<a id="btn-bookingpackage-services-summary" title="Booking Package Services Summary" data-toggle="modal" data-target="#bookingpackage_services_summary" class="btn btn-bookingpackage-services-summary glyphicon glyphicon-eye-open" href="#"></a>');
 
-  $('#btn-costs').on('click', function (e) {
-    get_providers_costs();
-  });
   // check if there are notes on bookingServices to Expand collapsed notes
   if($('#id_v_notes').val() || $('#id_p_notes').val() || $('#id_provider_notes').val()){
     $('#fieldsetcollapser0.collapse-toggle').click()
-  }
-
-  function get_providers_costs(){
-    // sending a request to get computed numbers
-    $.ajax({
-      'url': bookingservice_providers_costs_url,
-      'async': true,
-      'datatype': 'json',
-      'type': 'POST',
-      'data': $(bookingservice_form_selector).serialize(),
-    }).done(function(data){
-      update_providers_costs(data);
-    }).fail(function(){
-      update_providers_costs(null);
-    })
-  }
-
-  function update_providers_costs(data){
-    content = $('#providers-costs-content');
-    has_costs = false;
-    if (data && data.costs) {
-      html = "<table>";
-      html += "<tr>";
-      html += "<th>Provider</th>";
-      html += "<th style='padding-left: 20px; text-align: center;'>From</th>";
-      html += "<th style='padding-left: 20px; text-align: center;'>To</th>";
-      html += "<th style='padding-left: 20px; text-align: center;'>Pax Min</th>";
-      html += "<th style='padding-left: 20px; text-align: center;'>Pax Max</th>";
-      html += "<th style='padding-left: 20px; text-align: right;'>SGL</th>";
-      html += "<th style='padding-left: 20px; text-align: right;'>DBL</th>";
-      html += "<th style='padding-left: 20px; text-align: right;'>TPL</th>";
-      html += "</tr>";
-      for (let index = 0; index < data.costs.length; index++) {
-        has_costs = true;
-        const line = data.costs[index];
-        html += "<tr>";
-        html += "<td>" + line.provider_name + "</td>";
-        html += "<td style='padding-left: 20px; text-align: center;'>" + line.date_from + "</td>";
-        html += "<td style='padding-left: 20px; text-align: center;'>" + line.date_to + "</td>";
-        html += "<td style='padding-left: 20px; text-align: center;'>" + line.pax_range_min + "</td>";
-        html += "<td style='padding-left: 20px; text-align: center;'>" + line.pax_range_max + "</td>";
-        html += "<td style='padding-left: 20px; text-align: right;'>" + (line.sgl_cost ? line.sgl_cost : '') + "</td>";
-        html += "<td style='padding-left: 20px; text-align: right;'>" + (line.dbl_cost ? line.dbl_cost : '') + "</td>";
-        html += "<td style='padding-left: 20px; text-align: right;'>" + (line.tpl_cost ? line.tpl_cost : '') + "</td>";
-        html += "</tr>";
-      }
-      html += "</table>";
-    }
-    if (has_costs) {
-      content.html(html);
-    } else {
-      content.html('No Providres Costs Are Available');
-    }
   }
 
   function get_computed_amounts(){
@@ -75,7 +23,7 @@ $(document).ready(function(){
       'async': true,
       'datatype': 'json',
       'type': 'POST',
-      'data': $(bookingservice_form_selector).serialize(),
+      'data': $(service_form_selector).serialize(),
     }).done(function(data){
       update_amounts(false, data['cost'], data['cost_message']);
       update_amounts(true, data['price'], data['price_message']);
@@ -207,12 +155,12 @@ $(document).ready(function(){
   show_buttons();
   get_computed_amounts();
 
-  $(bookingservice_form_selector + ' input, ' + bookingservice_form_selector + ' select').on('change', function(){
+  $(service_form_selector + ' input, ' + service_form_selector + ' select').on('change', function(){
     get_computed_amounts();
   });
 
   // for dates changed by calendar
-  $(bookingservice_form_selector + ' input[name*="datetime"]').focusout(function (e) {
+  $(service_form_selector + ' input[name*="datetime"]').focusout(function (e) {
     e.preventDefault();
     get_computed_amounts();
   });
@@ -236,6 +184,8 @@ $(document).ready(function(){
     $('#id_location_from').val(null).trigger('change');
     $('#id_location_to').val(null).trigger('change');
     $('#id_addon').val(null).trigger('change');
+    $('#id_pickup_office').val(null).trigger('change');
+    $('#id_dropoff_office').val(null).trigger('change');
   });
 
   // for location from changed

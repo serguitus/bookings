@@ -4614,32 +4614,30 @@ class BookingServices(object):
 
 
     @classmethod
-    def find_bookingservice_providers_costs(cls, bookingservice, pax_list=None):
-        if not pax_list:
-            pax_list = cls._find_bookingservice_pax_list(bookingservice)
+    def find_service_providers_costs(cls, service):
 
-        if isinstance(bookingservice, (BookingAllotment, BookingPackageAllotment)):
+        if isinstance(service, (QuoteAllotment, QuotePackageAllotment, BookingAllotment, BookingPackageAllotment)):
             detail_list = list(details_allotment_queryset(
-                bookingservice.service,
-                bookingservice.datetime_from,
-                bookingservice.datetime_to,
-                bookingservice.room_type,
-                bookingservice.board_type,
-                bookingservice.service_addon))
-        elif isinstance(bookingservice, (BookingTransfer, BookingPackageTransfer)):
+                service.service,
+                service.datetime_from,
+                service.datetime_to,
+                service.room_type,
+                service.board_type,
+                service.service_addon))
+        elif isinstance(service, (QuoteTransfer, QuotePackageTransfer, BookingTransfer, BookingPackageTransfer)):
             detail_list = list(details_transfer_queryset(
-                bookingservice.service,
-                bookingservice.datetime_from,
-                bookingservice.datetime_to,
-                bookingservice.location_from,
-                bookingservice.location_to,
-                bookingservice.service_addon))
-        elif isinstance(bookingservice, (BookingExtra, BookingPackageExtra)):
+                service.service,
+                service.datetime_from,
+                service.datetime_to,
+                service.location_from,
+                service.location_to,
+                service.service_addon))
+        elif isinstance(service, (QuoteExtra, QuotePackageExtra, BookingExtra, BookingPackageExtra)):
             detail_list = list(details_extra_queryset(
-                bookingservice.service,
-                bookingservice.datetime_from,
-                bookingservice.datetime_to,
-                bookingservice.service_addon))
+                service.service,
+                service.datetime_from,
+                service.datetime_to,
+                service.service_addon))
         else:
             return list()
 

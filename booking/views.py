@@ -1047,115 +1047,55 @@ class BookingInvoiceCancelView(View):
         return HttpResponseRedirect(reverse('common:booking_booking_change', args=[id]))
 
 
-class BookingServiceProvidersCostsView(ModelChangeFormProcessorView):
+class ServiceProvidersCostsView(ModelChangeFormProcessorView):
     common_site = bookings_site
 
-    def verify(self, bookingservice, inlines):
-        if not hasattr(bookingservice, 'booking') or not bookingservice.booking:
-            return JsonResponse({
-                'cost': None,
-                'cost_message': 'Booking Id Missing',
-                'price': None,
-                'price_message': 'Booking Id Missing',
-            }), None
-        if not hasattr(bookingservice, 'service') or not bookingservice.service:
+    def verify(self, service):
+        if not hasattr(service, 'service') or not service.service:
             return JsonResponse({
                 'cost': None,
                 'cost_message': 'Service Id Missing',
-                'price': None,
-                'price_message': 'Service Id Missing',
-            }), None
-        pax_list = inlines[0]
-        if not pax_list:
-            return JsonResponse({
-                'cost': None,
-                'cost_message': 'Paxes Missing',
-                'price': None,
-                'price_message': 'Paxes Missing',
-            }), pax_list
-        return None, pax_list
+            })
+        return None
 
-    def process_data(self, bookingservice, inlines):
+    def process_data(self, service, inlines):
     
-        response, pax_list = self.verify(bookingservice, inlines)
+        response = self.verify(service)
         if response:
             return response
 
-        costs = BookingServices.find_bookingservice_providers_costs(
-            bookingservice, pax_list)
+        costs = BookingServices.find_service_providers_costs(service)
         return JsonResponse({
             'costs': costs,
         })
 
 
-class BookingPackageServiceProvidersCostsView(ModelChangeFormProcessorView):
-    common_site = bookings_site
-
-    def verify(self, bookingpackageservice):
-        if not hasattr(bookingpackageservice, 'booking_package') or not bookingpackageservice.booking_package:
-            return JsonResponse({
-                'cost': None,
-                'cost_message': 'BookingPackage Id Missing',
-                'price': None,
-                'price_message': 'BookingPackage Id Missing',
-            }), None
-        if not hasattr(bookingpackageservice, 'service') or not bookingpackageservice.service:
-            return JsonResponse({
-                'cost': None,
-                'cost_message': 'Service Id Missing',
-                'price': None,
-                'price_message': 'Service Id Missing',
-            }), None
-        pax_list = list(BookingServicePax.objects.filter(
-            booking_service=bookingpackageservice.booking_package_id).all())
-        if not pax_list:
-            return JsonResponse({
-                'cost': None,
-                'cost_message': 'Paxes Missing',
-                'price': None,
-                'price_message': 'Paxes Missing',
-            }), pax_list
-        return None, pax_list
-
-    def process_data(self, bookingpackageservice, inlines):
-        
-        response, pax_list = self.verify(bookingpackageservice)
-        if response:
-            return response
-
-        costs = BookingServices.find_bookingservice_providers_costs(
-            bookingpackageservice, pax_list)
-        return JsonResponse({
-            'costs': costs,
-        })
-
-
-class BookingAllotmentProvidersCostsView(BookingServiceProvidersCostsView):
+class BookingAllotmentProvidersCostsView(ServiceProvidersCostsView):
     model = BookingAllotment
     common_sitemodel = BookingAllotmentSiteModel
 
 
-class BookingTransferProvidersCostsView(BookingServiceProvidersCostsView):
+class BookingTransferProvidersCostsView(ServiceProvidersCostsView):
     model = BookingTransfer
     common_sitemodel = BookingTransferSiteModel
 
 
-class BookingExtraProvidersCostsView(BookingServiceProvidersCostsView):
+class BookingExtraProvidersCostsView(ServiceProvidersCostsView):
     model = BookingExtra
     common_sitemodel = BookingExtraSiteModel
 
 
-class BookingPackageAllotmentProvidersCostsView(BookingPackageServiceProvidersCostsView):
+class BookingPackageAllotmentProvidersCostsView(ServiceProvidersCostsView):
     model = BookingPackageAllotment
     common_sitemodel = BookingPackageAllotmentSiteModel
 
 
-class BookingPackageTransferProvidersCostsView(BookingPackageServiceProvidersCostsView):
+class BookingPackageTransferProvidersCostsView(ServiceProvidersCostsView):
     model = BookingPackageTransfer
     common_sitemodel = BookingPackageTransferSiteModel
 
 
-class BookingPackageExtraProvidersCostsView(BookingPackageServiceProvidersCostsView):
+class BookingPackageExtraProvidersCostsView(ServiceProvidersCostsView):
     model = BookingPackageExtra
     common_sitemodel = BookingPackageExtraSiteModel
 
@@ -1175,4 +1115,33 @@ class ServicePackageAutocompleteView(autocomplete.Select2QuerySetView):
             qs = qs.filter(name__icontains=self.q)
         return qs[:20]
 
+
+class QuoteAllotmentProvidersCostsView(ServiceProvidersCostsView):
+    model = QuoteAllotment
+    common_sitemodel = QuoteAllotmentSiteModel
+
+
+class QuoteTransferProvidersCostsView(ServiceProvidersCostsView):
+    model = QuoteTransfer
+    common_sitemodel = QuoteTransferSiteModel
+
+
+class QuoteExtraProvidersCostsView(ServiceProvidersCostsView):
+    model = QuoteExtra
+    common_sitemodel = QuoteExtraSiteModel
+
+
+class QuotePackageAllotmentProvidersCostsView(ServiceProvidersCostsView):
+    model = QuotePackageAllotment
+    common_sitemodel = QuotePackageAllotmentSiteModel
+
+
+class QuotePackageTransferProvidersCostsView(ServiceProvidersCostsView):
+    model = QuotePackageTransfer
+    common_sitemodel = QuotePackageTransferSiteModel
+
+
+class QuotePackageExtraProvidersCostsView(ServiceProvidersCostsView):
+    model = QuotePackageExtra
+    common_sitemodel = QuotePackageExtraSiteModel
 

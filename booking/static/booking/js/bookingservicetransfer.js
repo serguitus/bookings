@@ -1,7 +1,7 @@
 var time_autofilled = false;
 
 $(document).ready(function(){
-  $( bookingservice_form_selector + ' #id_time').after("<button class='btn btn-success btn-copy btn-copy-time'><<</button><span class='computed-value'>Calculated: <b data-computed=time>N/A</b></span>");
+  $( service_form_selector + ' #id_time').after("<button class='btn btn-success btn-copy btn-copy-time'><<</button><span class='computed-value'>Calculated: <b data-computed=time>N/A</b></span>");
   var computedTime = $('b[data-computed=time]');
   var timeInput = $('#id_time')[0];
   var timeFromInput = $('#id_schedule_time_from');
@@ -128,7 +128,7 @@ $(document).ready(function(){
       'async': true,
       'datatype': 'json',
       'type': 'POST',
-      'data': $(bookingservice_form_selector).serialize(),
+      'data': $(service_form_selector).serialize(),
     }).done(function(data){
       if(data['time']){
         computedTime.html(data['time']);
@@ -149,7 +149,7 @@ $(document).ready(function(){
       'async': true,
       'datatype': 'json',
       'type': 'POST',
-      'data': $(bookingservice_form_selector).serialize(),
+      'data': $(service_form_selector).serialize(),
     }).done(function(data){
       if(data['time']){
         timeFromInput.val(data['time']).trigger('change');
@@ -164,7 +164,7 @@ $(document).ready(function(){
       'async': true,
       'datatype': 'json',
       'type': 'POST',
-      'data': $(bookingservice_form_selector).serialize(),
+      'data': $(service_form_selector).serialize(),
     }).done(function(data){
       if(data['time']){
         timeToInput.val(data['time']).trigger('change');
@@ -184,7 +184,7 @@ $(document).ready(function(){
     get_computed_time(evt);
   });
 
-  $(bookingservice_form_selector + ' input, ' + bookingservice_form_selector + ' select').on('change', function(evt){
+  $(service_form_selector + ' input, ' + service_form_selector + ' select').on('change', function(evt){
     get_computed_time(evt);
   });
 
