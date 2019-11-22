@@ -40,7 +40,7 @@ from config.models import (
     RoomType, Allotment,
     Transfer, Location, Place, Schedule,
     Extra, Addon,
-    AmountDetail, AgencyCatalogue, ProviderCatalogue,
+    AmountDetail, AgencyCatalogue, ProviderCatalogue, CarRentalOffice,
 )
 
 from finance.constants import (
@@ -304,6 +304,10 @@ class PackageExtra(PackageService, BaseExtra):
     class Meta:
         verbose_name = 'Package Extra'
         verbose_name_plural = 'Packages Extras'
+    pickup_office = models.ForeignKey(
+        CarRentalOffice, related_name='package_pickup_office', blank=True, null=True)
+    dropoff_office = models.ForeignKey(
+        CarRentalOffice, related_name='package_dropoff_office', blank=True, null=True)
 
     def fill_data(self):
         # setting name for this booking_service
@@ -448,6 +452,10 @@ class QuoteExtra(QuoteService, BaseExtra):
         verbose_name = 'Quote Extra'
         verbose_name_plural = 'Quotes Extras'
         default_permissions = ('add', 'change',)
+    pickup_office = models.ForeignKey(
+        CarRentalOffice, related_name='quote_pickup_office', blank=True, null=True)
+    dropoff_office = models.ForeignKey(
+        CarRentalOffice, related_name='quote_dropoff_office', blank=True, null=True)
 
     def fill_data(self):
         # setting name for this booking_service
@@ -558,6 +566,10 @@ class QuotePackageExtra(QuotePackageService, BaseExtra):
         verbose_name = 'Quote Package Extra'
         verbose_name_plural = 'Quotes Packages Extras'
         default_permissions = ('add', 'change',)
+    pickup_office = models.ForeignKey(
+        CarRentalOffice, related_name='quotepackage_pickup_office', blank=True, null=True)
+    dropoff_office = models.ForeignKey(
+        CarRentalOffice, related_name='quotepackage_dropoff_office', blank=True, null=True)
 
     def fill_data(self):
         # setting name for this quote_service
@@ -1107,6 +1119,10 @@ class BookingExtra(BookingService, BaseExtra):
         verbose_name = 'Booking Extra'
         verbose_name_plural = 'Booking Extras'
     version = AutoIncVersionField( )
+    pickup_office = models.ForeignKey(
+        CarRentalOffice, related_name='booking_pickup_office', blank=True, null=True)
+    dropoff_office = models.ForeignKey(
+        CarRentalOffice, related_name='booking_dropoff_office', blank=True, null=True)
 
     def build_description(self):
         return '%s pax' % self.rooming_list.count()
@@ -1316,6 +1332,10 @@ class BookingPackageExtra(BookingPackageService, BaseExtra):
         verbose_name = 'Booking Package Extra'
         verbose_name_plural = 'Bookings Packages Extras'
     version = AutoIncVersionField( )
+    pickup_office = models.ForeignKey(
+        CarRentalOffice, related_name='bookingpackage_pickup_office', blank=True, null=True)
+    dropoff_office = models.ForeignKey(
+        CarRentalOffice, related_name='bookingpackage_dropoff_office', blank=True, null=True)
 
     def build_description(self):
         return '%s pax' % self.booking_package.rooming_list.count()

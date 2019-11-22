@@ -271,6 +271,20 @@ class AmountDetail(models.Model):
 #===============================================================================
 # Extra
 #===============================================================================
+class CarRental(models.Model):
+    """
+    CarRental
+    """
+    class Meta:
+        verbose_name = 'Car Rental'
+        verbose_name_plural = 'Cars Rentals'
+        unique_together = (('name',),)
+    name = models.CharField(max_length=30)
+
+    def __str__(self):
+        return '%s' % (self.name)
+
+
 class Extra(Service):
     """
     Extra
@@ -284,6 +298,7 @@ class Extra(Service):
         max_length=5, choices=EXTRA_PARAMETER_TYPES)
     has_pax_range = models.BooleanField(default=False)
     max_capacity = models.IntegerField(blank=True, null=True)
+    car_rental = models.ForeignKey(CarRental, blank=True, null=True)
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_EXTRA
@@ -378,6 +393,21 @@ class AgencyExtraDetail(AmountDetail):
     addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
     pax_range_min = models.SmallIntegerField(default=0)
     pax_range_max = models.SmallIntegerField(default=0)
+
+
+class CarRentalOffice(models.Model):
+    """
+    CarRentalOffice
+    """
+    class Meta:
+        verbose_name = 'Car Rental Office'
+        verbose_name_plural = 'Cars Rentals Offices'
+        unique_together = (('car_rental', 'office',),)
+    car_rental = models.ForeignKey(CarRental)
+    office = models.CharField(max_length=30)
+
+    def __str__(self):
+        return '%s - %s' % (self.car_rental, self.office)
 
 
 #===============================================================================
