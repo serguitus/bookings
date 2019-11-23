@@ -1,16 +1,8 @@
-{% extends "common/change_form.html" %}
+{% extends "booking/quoteservice_change_form.html" %}
 
 {% load static %}
 
 {% block head_extra %}
-  {{ block.super }}
   <script type="text/javascript" src="{% static 'booking/js/quotetransfer.js' %}"></script>
-  <script type="text/javascript" src="{% static 'booking/js/provider_costs.js' %}"></script>
-  <script type="text/javascript" src="{% static 'booking/js/quoteservice.js' %}"></script>
-{% endblock head_extra %}
-
-{% block content %}
   {{ block.super }}
-  {% include "booking/popup_providers_costs.html" %}
-{% endblock content %}
-
+{% endblock head_extra %}

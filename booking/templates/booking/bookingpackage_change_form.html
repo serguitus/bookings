@@ -1,21 +1,8 @@
-{% extends "common/change_form.html" %}
+{% extends "booking/bookingservice_change_form.html" %}
 
 {% load static %}
 
 {% block head_extra %}
-  {{ block.super }}
   <script type="text/javascript" src="{% static 'booking/js/bookingpackage.js' %}"></script>
-  <script type="text/javascript" src="{% static 'booking/js/provider_costs.js' %}"></script>
-  <script type="text/javascript" src="{% static 'booking/js/bookingservice.js' %}"></script>
-  <script type="text/javascript" src="{% static 'booking/js/mail_popup.js' %}"></script>
+  {{ block.super }}
 {% endblock head_extra %}
-
-{% block content %}
-  {{ block.super }}
-  {% include "booking/include/dialog_booking_services_summary.html" %}
-{% endblock content %}
-
-{% block admin_change_form_document_ready %}
-  {{ block.super }}
-  {% include "booking/emails/popup_modal.html" %}
-{% endblock admin_change_form_document_ready %}

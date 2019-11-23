@@ -1,0 +1,8 @@
+{% extends "booking/bookingservice_change_form.html" %}
+
+{% load static %}
+
+{% block content %}
+  {{ block.super }}
+  {% include "booking/include/dialog_bookingpackage_services_summary.html" %}
+{% endblock content %}

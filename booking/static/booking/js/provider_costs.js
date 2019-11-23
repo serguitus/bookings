@@ -1,17 +1,18 @@
 
 function get_providers_costs(){
-  // sending a request to get computed numbers
-  $.ajax({
-    'url': providers_costs_url,
-    'async': true,
-    'datatype': 'json',
-    'type': 'POST',
-    'data': $(service_form_selector).serialize(),
-  }).done(function(data){
-    update_providers_costs(data);
-  }).fail(function(){
-    update_providers_costs(null);
-  })
+  if (providers_costs_url) {
+    $.ajax({
+      'url': providers_costs_url,
+      'async': true,
+      'datatype': 'json',
+      'type': 'POST',
+      'data': $(service_form_selector).serialize(),
+    }).done(function(data){
+      update_providers_costs(data);
+    }).fail(function(){
+      update_providers_costs(null);
+    })
+  }
 }
 
 function update_providers_costs(data){

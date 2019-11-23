@@ -63,7 +63,7 @@ from config.constants import (
     SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER,
     SERVICE_CATEGORY_EXTRA
 )
-from config.models import Service, Allotment, Place, Schedule, Transfer
+from config.models import Service, Allotment, Place, Schedule, Transfer, Extra
 from config.services import ConfigServices
 
 from finance.models import Provider, Office
@@ -1144,4 +1144,29 @@ class QuotePackageTransferProvidersCostsView(ServiceProvidersCostsView):
 class QuotePackageExtraProvidersCostsView(ServiceProvidersCostsView):
     model = QuotePackageExtra
     common_sitemodel = QuotePackageExtraSiteModel
+
+
+class ServiceDetailsView(View):
+
+    def post(self, request, *args, **kwargs):
+        service_id = request.POST.get('service', None)
+        if 'service' in request.POST and request.POST['service']:
+            service_id = request.POST['service']
+        return self.process_data(service_id)
+
+
+    def process_data(self, service_id):
+        return JsonResponse({
+            'service_id': service_id,
+        })
+
+
+class ExtraServiceDetailsView(ServiceDetailsView):
+
+    def process_data(self, service_id):
+        extra = Extra.objects.get(pk=service_id)
+        return JsonResponse({
+            'service_id': service_id,
+            'car_rental': extra.car_rental is not None,
+        })
 
