@@ -1,6 +1,6 @@
 
 function get_service_details(){
-  if (service_details_url) {
+  if (typeof service_details_url !== 'undefined') {
     $.ajax({
       'url': service_details_url,
       'async': true,

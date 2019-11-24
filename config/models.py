@@ -566,6 +566,7 @@ class Transfer(Service):
     max_capacity = models.IntegerField(blank=True, null=True)
     is_shared = models.BooleanField(default=False)
     has_pickup_time = models.BooleanField(default=False)
+    is_ticket = models.BooleanField(default=False)
 
     def fill_data(self):
         self.category = SERVICE_CATEGORY_TRANSFER

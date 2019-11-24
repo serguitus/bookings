@@ -860,8 +860,20 @@ class ScheduleArrivalAutocompleteView(autocomplete.Select2QuerySetView):
         # Don't forget to filter out results depending on the visitor !
         if not self.request.user.is_authenticated():
             return Schedule.objects.none()
-        qs = Schedule.objects.filter(is_arrival=True).all()
 
+        service = self.forwarded.get('service', None)
+        if service is None:
+            return Schedule.objects.none()
+
+        transfer = Transfer.objects.get(pk=service)
+
+        qs = Schedule.objects.all()
+
+        if transfer.is_ticket:
+            qs = qs.filter(is_arrival=False)
+        else:
+            qs = qs.filter(is_arrival=True)
+ 
         location = self.forwarded.get('location_from', None)
 
         if location:

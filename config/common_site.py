@@ -333,8 +333,8 @@ class TransferSiteModel(SiteModel):
     menu_group = 'Configuration Services'
     fields = (
         ('name', 'service_category'), ('cost_type', 'max_capacity', 'is_shared'),
-        ('pax_range', 'has_pickup_time'), ('child_age', 'infant_age'), 'enabled',)
-    list_display = ('name', 'cost_type', 'max_capacity', 'is_shared', 'enabled',
+        ('pax_range', 'has_pickup_time', 'is_ticket'), ('child_age', 'infant_age'), 'enabled',)
+    list_display = ('name', 'cost_type', 'max_capacity', 'is_shared', 'is_ticket', 'enabled',
                     'infant_age', 'child_age')
     top_filters = ('name', ('service_category', ServiceCategoryTopFilter), 'is_shared', 'enabled',)
     ordering = ['enabled', 'name']
