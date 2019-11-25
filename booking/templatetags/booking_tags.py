@@ -243,4 +243,5 @@ def get_distribution(booking_service):
             if dist:
                 dist += ' + '
             dist += '%d %s' % (room_count[k], room_types[k])
+    dist += ' ({} {})'.format(booking_service.room_type, booking_service.board_type)
     return dist
