@@ -850,7 +850,7 @@ class BookingSiteModel(SiteModel):
     top_filters = (('name', 'Booking Name'), 'reference', 'agency',
                    ('date_from', DateTopFilter), 'rooming_list__pax_name',
                    (InternalReferenceTopFilter),
-                   (CancelledTopFilter), 'seller')
+                   (CancelledTopFilter), 'seller', 'invoice__document_number')
     ordering = ['date_from', 'reference']
     readonly_fields = ('date_from', 'date_to', 'status',
                        'cost_amount', 'price_amount', 'utility_percent', 'utility',
@@ -1795,7 +1795,7 @@ class BookingInvoiceSiteModel(SiteModel):
         (None, {
             'fields': (
                 ('booking_name', 'reference'),
-                ('date_from', 'date_to'),
+                ('document_number', 'date_from', 'date_to'),
                 ('issued_name', 'status',),
                 ('booking_amount', 'currency', 'currency_rate'),
                 ('amount', 'matched_amount', 'cash_amount', )
