@@ -601,6 +601,7 @@ class BookingInvoice(AgencyInvoice):
         self.document_type = DOC_TYPE_AGENCY_BOOKING_INVOICE
         self.name = 'Booking Invoice to %s - %s Price %s %s' % (
             self.agency, self.date, self.amount, self.get_currency_display())
+        self.document_number = '{}-{}'.format(self.invoice_booking.id, self.id)
 
 
 class BookingInvoiceLine(models.Model):
