@@ -2002,7 +2002,7 @@ def default_invoice_mail_subject(request, booking=None):
 
 def default_invoice_mail_body(request, booking=None):
     dest = 'Customer'
-    if booking:
+    if booking and booking.agency_contact:
         dest = booking.agency_contact.name
     context = {
             'user': request.user,
