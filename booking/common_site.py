@@ -50,6 +50,7 @@ from booking.constants import (
     BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_EXTRA
 )
 from booking.forms import (
+    EmailPopupForm,
     PackageForm,
     PackageAllotmentInlineForm, PackageTransferInlineForm,
     PackageExtraInlineForm, PackageAllotmentForm,
@@ -1079,18 +1080,20 @@ class BookingSiteModel(SiteModel):
                 extra_tags='', fail_silently=False)
             return redirect(reverse('common:booking_booking_change', args=[object_id]))
         else:
-            booking = Booking.objects.get(id=object_id)
-            from booking.forms import EmailPopupForm
             if not extra_context:
                 extra_context = dict()
-            form = EmailPopupForm(
-                initial={'mail_from': default_requests_mail_from(request),
-                         'mail_to': default_invoice_mail_to(request, booking),
-                         'mail_cc': '',
-                         'mail_bcc': default_invoice_mail_bcc(request),
-                         'mail_subject': default_invoice_mail_subject(request, booking),
-                         'mail_body': default_invoice_mail_body(request, booking),
-                })
+            if object_id:
+                booking = Booking.objects.get(id=object_id)
+                form = EmailPopupForm(
+                    initial={'mail_from': default_requests_mail_from(request),
+                             'mail_to': default_invoice_mail_to(request, booking),
+                             'mail_cc': '',
+                             'mail_bcc': default_invoice_mail_bcc(request),
+                             'mail_subject': default_invoice_mail_subject(request, booking),
+                             'mail_body': default_invoice_mail_body(request, booking),
+                    })
+            else:
+                form = EmailPopupForm()
             extra_context.update({
                 'modal_title': 'Provider Requests Mail',
                 'form': form,
