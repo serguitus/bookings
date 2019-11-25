@@ -848,6 +848,44 @@ class EmailProviderForm(forms.Form):
         self.initial['from_address'] = self.user.email
 
 
+class EmailPopupForm(forms.Form):
+    mail_from = forms.EmailField(
+        label='FROM',
+        widget=widgets.TextInput(
+            attrs={'class': 'form-control',
+                   'id': 'm_from'})
+    )
+    mail_to = forms.EmailField(
+        label='TO',
+        widget=widgets.TextInput(
+            attrs={'class': 'form-control',
+                   'id': 'm_to'})
+    )
+    mail_cc = forms.EmailField(
+        label='CC',
+        widget=widgets.TextInput(
+            attrs={'class': 'form-control',
+                   'id': 'm_cc'})
+    )
+    mail_bcc = forms.EmailField(
+        label='BCC',
+        widget=widgets.TextInput(
+            attrs={'class': 'form-control',
+                   'id': 'm_bcc'})
+    )
+    mail_subject = forms.CharField(
+        max_length=100,
+        label='Subject',
+        widget=widgets.TextInput(
+            attrs={'class': 'form-control',
+                   'id': 'm_subject'}))
+    mail_body = forms.CharField(
+        label='Body',
+        widget=CKEditorWidget(
+            attrs={'class': 'form-control',
+                   'id': 'm_body'}))
+
+
 class VouchersConfigForm(MailForm):
     # states = forms.ChoiceField(settings.ESTADOS)
     # this helps to point back to current booking

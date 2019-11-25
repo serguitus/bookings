@@ -722,7 +722,7 @@ class EmailConfirmationView(View):
             'user': request.user,
         }
         bcc_list = '%s, %s' % (request.user.email,
-                               settings.DEFAULT_CONFIRMATION_BCC)
+                               settings.DEFAULT_BCC)
         t = get_template('booking/emails/confirmation_email.html')
         form = EmailProviderForm(request.user,
                                  {'from': request.user.email,

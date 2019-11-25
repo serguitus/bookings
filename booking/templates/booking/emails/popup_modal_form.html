@@ -1,0 +1,43 @@
+<div id="mailModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mailModalLabel" aria-hidden="true">
+    {{ form.media }}
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="mailModalLabel" class="modal-title">{{ modal_title }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="m_from" class="col-form-label">From:</label>
+                    {{ form.mail_from }}
+                </div>
+                <div class="form-group">
+                    <label for="m_to" class="col-form-label">To:</label>
+                    {{ form.mail_to }}
+                </div>
+                <div class="form-group">
+                    <label for="m_cc" class="col-form-label">Cc:</label>
+                    {{ form.mail_cc }}
+                </div>
+                <div class="form-group">
+                    <label for="m_bcc" class="col-form-label">Bcc:</label>
+                    {{ form.mail_bcc }}
+                </div>
+                <div class="form-group">
+                    <label for="m_subject" class="col-form-label">Subject:</label>
+                    {{ form.mail_subject }}
+                </div>
+                <div class="form-group">
+                    <label for="m_body" class="col-form-label">Message:</label>
+                    {{ form.mail_body }}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id="send_btn" type="button" class="btn btn-primary">Send</button>
+            </div>
+        </div>
+    </div>
+</div>    

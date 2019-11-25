@@ -1,0 +1,10 @@
+{% load booking_tags %}
+{% load render_table from django_tables2 %}
+
+<div>Dear {{ client }},</div>
+<div>Please find attached invoice for referenced clients</div>
+
+<div>
+Best Regards
+</div>
+{{ user.first_name }}

@@ -7,4 +7,5 @@
 <div class="bookingservices-container">
     {% render_table table %}
     {% include 'booking/booking_details_buttons.html' %}
+    {% include 'booking/emails/popup_modal_form.html' with modal_title='Invoice Mail' %}
 </div>

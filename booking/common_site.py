@@ -1041,7 +1041,7 @@ class BookingSiteModel(SiteModel):
 
     @csrf_protect_m
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
-        if 'submit_action' in request.POST and request.POST['submit_action'] == '_send_mail':
+        if request.method == 'POST' and 'submit_action' in request.POST and request.POST['submit_action'] == '_send_mail':
             booking = Booking.objects.get(id=object_id)
             if not booking.invoice:
                 messages.add_message(request, messages.ERROR , "Error Booking without Invoice")
@@ -1073,6 +1073,22 @@ class BookingSiteModel(SiteModel):
                 extra_tags='', fail_silently=False)
             return redirect(reverse('common:booking_booking_change', args=[object_id]))
         else:
+            booking = Booking.objects.get(id=object_id)
+            from booking.forms import EmailPopupForm
+            if not extra_context:
+                extra_context = dict()
+            form = EmailPopupForm(
+                initial={'mail_from': default_requests_mail_from(request),
+                         'mail_to': default_invoice_mail_to(request, booking),
+                         'mail_cc': '',
+                         'mail_bcc': default_invoice_mail_bcc(request),
+                         'mail_subject': default_invoice_mail_subject(request, booking),
+                         'mail_body': default_invoice_mail_body(request, booking),
+                })
+            extra_context.update({
+                'modal_title': 'Provider Requests Mail',
+                'form': form,
+            })
             return super(BookingSiteModel, self).changeform_view(
                 request=request,
                 object_id=object_id,
@@ -1307,15 +1323,15 @@ class BaseBookingServiceSiteModel(SiteModel):
                 bs = BookingService.objects.get(pk=object_id)
                 if not extra_context:
                     extra_context = dict()
-                    extra_context.update({
-                        'modal_title': 'Provider Requests Mail',
-                        'default_mail_from': default_requests_mail_from(request, bs.provider, bs.booking),
-                        'default_mail_to': default_requests_mail_to(request, bs.provider, bs.booking),
-                        'default_mail_cc': '',
-                        'default_mail_bcc': default_requests_mail_bcc(request, bs.provider, bs.booking),
-                        'default_mail_subject': default_requests_mail_subject(request, bs.provider, bs.booking),
-                        'default_mail_body': default_requests_mail_body(request, bs.provider, bs.booking),
-                    })
+                extra_context.update({
+                    'modal_title': 'Provider Requests Mail',
+                    'default_mail_from': default_requests_mail_from(request, bs.provider, bs.booking),
+                    'default_mail_to': default_requests_mail_to(request, bs.provider, bs.booking),
+                    'default_mail_cc': '',
+                    'default_mail_bcc': default_requests_mail_bcc(request, bs.provider, bs.booking),
+                    'default_mail_subject': default_requests_mail_subject(request, bs.provider, bs.booking),
+                    'default_mail_body': default_requests_mail_body(request, bs.provider, bs.booking),
+                })
 
             return super(BaseBookingServiceSiteModel, self).changeform_view(request, object_id, form_url, extra_context)
 
@@ -1944,6 +1960,43 @@ def default_requests_mail_body(request, provider=None, booking=None):
             'services': services,
     }
     return get_template('booking/emails/provider_email.html').render(initial)
+
+
+def default_invoice_mail_to(request, booking=None):
+    email_list = ''
+    if booking and booking.agency:
+        for invoice_contact in booking.agency.agencybillingcontact_set.all():
+            email_list += '{}, '.format(invoice_contact.email)
+    if not email_list:
+        # there is no billing_contacts for this agency.
+        # sending to agency_contact
+        if booking and booking.agency_contact:
+            email_list += '{}'.format(booking.agency_contact.email)
+    return email_list
+
+
+def default_invoice_mail_bcc(request, booking=None):
+    return settings.DEFAULT_BCC
+
+
+def default_invoice_mail_subject(request, booking=None):
+    subject_ref = ''
+    if booking:
+        subject_ref = booking.name or ''
+        if booking.reference:
+            subject_ref += ' (%s)' % booking.reference
+    return 'Invoice for %s' % subject_ref
+
+
+def default_invoice_mail_body(request, booking=None):
+    dest = 'Customer'
+    if booking:
+        dest = booking.agency_contact.name
+    context = {
+            'user': request.user,
+            'client': dest,
+    }
+    return get_template('booking/emails/invoice_email.html').render(context)
 
 
 # Starts Registration Section

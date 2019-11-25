@@ -128,7 +128,7 @@ FORMAT_MODULE_PATH = [
     # 'some_app.formats',
 ]
 DEFAULT_FROM_EMAIL = 'sales@thenaturexperts.com'
-DEFAULT_CONFIRMATION_BCC = 'sales@thenaturexperts.com'
+DEFAULT_BCC = 'sales@thenaturexperts.com'
 
 CKEDITOR_CONFIGS = {
     'default': {
