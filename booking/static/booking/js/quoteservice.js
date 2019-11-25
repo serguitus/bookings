@@ -2,10 +2,16 @@ $(document).ready(function(){
 
   $('select[name^="quoteservice_paxvariants-"][name$="-quote_pax_variant"]').attr('disabled', true);
 
+  $('div.form-row.field-provider>div>div.related-widget-wrapper').after('<a id="btn-costs" title="Costs" data-toggle="modal" data-target="#popup-costs" class="btn btn-costs glyphicon glyphicon-usd" href="#"></a>');
+
+  $('#btn-costs').on('click', function (e) {
+    get_providers_costs();
+  });
+
   function get_computed_amounts() {
-    if($(quoteservice_form_selector).length){
+    if($(service_form_selector).length){
       $('select[name^="quoteservice_paxvariants-"][name$="-quote_pax_variant"]').attr('disabled', false);
-      data = $(quoteservice_form_selector).serialize();
+      data = $(service_form_selector).serialize();
       $('select[name^="quoteservice_paxvariants-"][name$="-quote_pax_variant"]').attr('disabled', true);
     }
     $.ajax({
@@ -217,21 +223,21 @@ $(document).ready(function(){
   show_buttons();
   get_computed_amounts();
 
-  $(quoteservice_form_selector).submit(function () {
+  $(service_form_selector).submit(function () {
     $('select[name^="quoteservice_paxvariants-"][name$="-quote_pax_variant"]').attr('disabled', false);
   });
 
-  $(quoteservice_form_selector).change(function (e) {
+  $(service_form_selector).change(function (e) {
     e.preventDefault();
     get_computed_amounts();
   });
   // for dates changed by calendar
-  $(quoteservice_form_selector + ' input[name*="date"]').focusout(function (e) {
+  $(service_form_selector + ' input[name*="date"]').focusout(function (e) {
     e.preventDefault();
     get_computed_amounts();
   });
   // for times changed by calendar
-  $(quoteservice_form_selector + ' input[name*="time"]').focusout(function (e) {
+  $(service_form_selector + ' input[name*="time"]').focusout(function (e) {
     e.preventDefault();
     get_computed_amounts();
   });

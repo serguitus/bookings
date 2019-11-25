@@ -95,6 +95,14 @@ class PackageExtraInlineForm(forms.ModelForm):
                 url='providerextra-autocomplete',
                 forward=['service', 'service_addon'],
                 ),
+            'pickup_office': autocomplete.ModelSelect2(
+                url='carrentaloffice-autocomplete',
+                forward=['service',],
+                ),
+            'dropoff_office': autocomplete.ModelSelect2(
+                url='carrentaloffice-autocomplete',
+                forward=['service',],
+                ),
         }
 
 
@@ -146,7 +154,7 @@ class PackageTransferForm(forms.ModelForm):
                 ),
             'schedule_from': autocomplete.ModelSelect2(
                 url='arrival-autocomplete',
-                forward=['location_from'],
+                forward=['service', 'location_from'],
                 ),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
             'place_to': autocomplete.ModelSelect2(
@@ -194,6 +202,14 @@ class PackageExtraForm(forms.ModelForm):
             'provider': autocomplete.ModelSelect2(
                 url='providerextra-autocomplete',
                 forward=['service', 'service_addon'],
+                ),
+            'pickup_office': autocomplete.ModelSelect2(
+                url='carrentaloffice-autocomplete',
+                forward=['service',],
+                ),
+            'dropoff_office': autocomplete.ModelSelect2(
+                url='carrentaloffice-autocomplete',
+                forward=['service',],
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
@@ -317,6 +333,14 @@ class QuotePackageExtraInlineForm(forms.ModelForm):
                 url='providerextra-autocomplete',
                 forward=['service', 'service_addon'],
                 ),
+            'pickup_office': autocomplete.ModelSelect2(
+                url='carrentaloffice-autocomplete',
+                forward=['service',],
+                ),
+            'dropoff_office': autocomplete.ModelSelect2(
+                url='carrentaloffice-autocomplete',
+                forward=['service',],
+                ),
         }
 
 
@@ -340,6 +364,14 @@ class QuotePackageExtraForm(forms.ModelForm):
             'provider': autocomplete.ModelSelect2(
                 url='providerextra-autocomplete',
                 forward=['service', 'service_addon'],
+                ),
+            'pickup_office': autocomplete.ModelSelect2(
+                url='carrentaloffice-autocomplete',
+                forward=['service',],
+                ),
+            'dropoff_office': autocomplete.ModelSelect2(
+                url='carrentaloffice-autocomplete',
+                forward=['service',],
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
@@ -464,6 +496,14 @@ class QuoteExtraInlineForm(forms.ModelForm):
                 url='providerextra-autocomplete',
                 forward=['service', 'service_addon'],
                 ),
+            'pickup_office': autocomplete.ModelSelect2(
+                url='carrentaloffice-autocomplete',
+                forward=['service',],
+                ),
+            'dropoff_office': autocomplete.ModelSelect2(
+                url='carrentaloffice-autocomplete',
+                forward=['service',],
+                ),
         }
 
 
@@ -489,6 +529,14 @@ class QuoteExtraForm(forms.ModelForm):
                 forward=['service', 'service_addon'],
                 ),
             'description': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
+            'pickup_office': autocomplete.ModelSelect2(
+                url='carrentaloffice-autocomplete',
+                forward=['service',],
+                ),
+            'dropoff_office': autocomplete.ModelSelect2(
+                url='carrentaloffice-autocomplete',
+                forward=['service',],
+                ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
@@ -612,7 +660,7 @@ class BookingTransferForm(forms.ModelForm, MailForm):
                 ),
             'schedule_from': autocomplete.ModelSelect2(
                 url='arrival-autocomplete',
-                forward=['location_from'],
+                forward=['service', 'location_from'],
                 ),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
             'place_to': autocomplete.ModelSelect2(
@@ -666,6 +714,14 @@ class BookingExtraForm(forms.ModelForm, MailForm):
             'p_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
             'v_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
             'provider_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
+            'pickup_office': autocomplete.ModelSelect2(
+                url='carrentaloffice-autocomplete',
+                forward=['service',],
+                ),
+            'dropoff_office': autocomplete.ModelSelect2(
+                url='carrentaloffice-autocomplete',
+                forward=['service',],
+                ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
     nights = forms.IntegerField(initial=0)
@@ -739,7 +795,7 @@ class BookingPackageTransferForm(forms.ModelForm, MailForm):
                 ),
             'schedule_from': autocomplete.ModelSelect2(
                 url='arrival-autocomplete',
-                forward=['location_from'],
+                forward=['service', 'location_from'],
                 ),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
             'place_to': autocomplete.ModelSelect2(
@@ -786,6 +842,14 @@ class BookingPackageExtraForm(forms.ModelForm, MailForm):
             'provider': autocomplete.ModelSelect2(
                 url='providerextra-autocomplete',
                 forward=['service', 'service_addon'],
+                ),
+            'pickup_office': autocomplete.ModelSelect2(
+                url='carrentaloffice-autocomplete',
+                forward=['service',],
+                ),
+            'dropoff_office': autocomplete.ModelSelect2(
+                url='carrentaloffice-autocomplete',
+                forward=['service',],
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())

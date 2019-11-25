@@ -372,8 +372,8 @@ class DepositSiteModel(BaseFinantialDocumentSiteModel):
     menu_label = MENU_LABEL_ACCOUNTING
     menu_group = MENU_GROUP_LABEL_FINANCE_BASIC
     fields = ('name', 'account', 'amount', 'date', 'status', 'details')
-    list_display = ('details', 'account', 'amount', 'date', 'status')
-    top_filters = ('details', 'account', 'status', 'date',
+    list_display = ('name', 'details', 'account', 'amount', 'date', 'status')
+    top_filters = ('name', 'details', 'account', 'status', 'date',
                    ('amount', AmountTopFilter))
     form = AccountingForm
     totalsum_list = ['amount']

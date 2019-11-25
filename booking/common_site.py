@@ -183,7 +183,8 @@ class PackageExtraInLine(CommonStackedInline):
     fields = [
         ('service', 'time'),
         ('service_addon', 'quantity', 'parameter'),
-        ('days_after', 'days_duration', 'provider')]
+        ('days_after', 'days_duration', 'provider'),
+        ('pickup_office', 'dropoff_office',)]
     ordering = ['days_after']
     form = PackageExtraInlineForm
 
@@ -272,6 +273,7 @@ class PackageExtraSiteModel(PackageServiceSiteModel):
     fields = ['package', ('service'),
               ('days_after', 'days_duration', 'time'),
               ('service_addon', 'quantity', 'parameter'),
+              ('pickup_office', 'dropoff_office',),
               'provider', 'id']
     list_display = ('package', 'service', 'service_addon', 'quantity', 'parameter',
                     'days_after', 'time',)
@@ -363,6 +365,7 @@ class QuotePackageExtraInLine(CommonStackedInline):
     fields = [
         ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
         ('quantity', 'parameter'),
+        ('pickup_office', 'dropoff_office',),
         'provider']
     ordering = ['datetime_from']
     form = QuotePackageExtraInlineForm
@@ -396,6 +399,7 @@ class QuoteExtraInLine(CommonStackedInline):
     fields = [
         ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
         ('quantity', 'parameter'),
+        ('pickup_office', 'dropoff_office',),
         'provider']
     ordering = ['datetime_from']
     form = QuoteExtraInlineForm
@@ -575,6 +579,7 @@ class QuoteExtraSiteModel(QuoteServiceSiteModel):
         'quote',
         ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
         ('service_addon'), ('quantity', 'parameter'),
+        ('pickup_office', 'dropoff_office',),
         'provider', 'description', 'id')
     list_display = (
         'quote', 'service', 'service_addon', 'quantity', 'parameter',
@@ -755,6 +760,7 @@ class QuotePackageExtraSiteModel(QuotePackageServiceSiteModel):
         'quote_package',
         ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
         ('service_addon'), ('quantity', 'parameter'),
+        ('pickup_office', 'dropoff_office',),
         'provider', 'id')
     list_display = (
         'quote_package', 'service', 'service_addon', 'quantity', 'parameter',
@@ -1629,6 +1635,7 @@ class BookingExtraSiteModel(BaseBookingServiceSiteModel):
                 ('datetime_from', 'nights', 'datetime_to', 'time'),
                 'service_addon',
                 ('quantity', 'parameter'),
+                ('pickup_office', 'dropoff_office',),
                 ('manual_cost', 'provider'),
                 'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility', 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
@@ -1663,6 +1670,7 @@ class BookingPackageExtraSiteModel(BookingPackageServiceSiteModel):
                 ('datetime_from', 'datetime_to', 'time'),
                 'service_addon',
                 ('quantity', 'parameter'),
+                ('pickup_office', 'dropoff_office',),
                 ('manual_cost', 'provider'),
                 'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility', 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
@@ -1832,11 +1840,15 @@ class ProviderBookingPaymentSiteModel(SiteModel):
                 ('date', 'status'),
                 ('account', 'services_amount'),
                 ('currency_rate', 'amount'),
+                ('details',),
             )
         }),
     )
+    list_display = ('name', 'details', 'account', 'services_amount', 'amount', 'date', 'status')
     readonly_fields = ['services_amount']
     add_readonly_fields = ['status']
+
+    top_filters = ('name', 'details', 'account', 'status', 'date',)
 
     recent_allowed = True
     form = ProviderBookingPaymentForm

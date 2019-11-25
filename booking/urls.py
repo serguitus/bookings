@@ -43,4 +43,14 @@ urlpatterns = [
     url(r'^bookingpackageallotment-providers-costs/?', views.BookingPackageAllotmentProvidersCostsView.as_view(), name='bookingpackageallotment_providers_costs'),
     url(r'^bookingpackagetransfer-providers-costs/?', views.BookingPackageTransferProvidersCostsView.as_view(), name='bookingpackagetransfer_providers_costs'),
     url(r'^bookingpackageextra-providers-costs/?', views.BookingPackageExtraProvidersCostsView.as_view(), name='bookingpackageextra_providers_costs'),
+
+    url(r'^quoteallotment-providers-costs/?', views.QuoteAllotmentProvidersCostsView.as_view(), name='quoteallotment_providers_costs'),
+    url(r'^quotetransfer-providers-costs/?', views.QuoteTransferProvidersCostsView.as_view(), name='quotetransfer_providers_costs'),
+    url(r'^quoteextra-providers-costs/?', views.QuoteExtraProvidersCostsView.as_view(), name='quoteextra_providers_costs'),
+    url(r'^quotepackageallotment-providers-costs/?', views.QuotePackageAllotmentProvidersCostsView.as_view(), name='quotepackageallotment_providers_costs'),
+    url(r'^quotepackagetransfer-providers-costs/?', views.QuotePackageTransferProvidersCostsView.as_view(), name='quotepackagetransfer_providers_costs'),
+    url(r'^quotepackageextra-providers-costs/?', views.QuotePackageExtraProvidersCostsView.as_view(), name='quotepackageextra_providers_costs'),
+
+    url(r'^extra-service-details/?', views.ExtraServiceDetailsView.as_view(), name='extra-service-details'),
+
 ]

@@ -12,7 +12,7 @@ from dal import autocomplete
 from config.models import (
     Location, TransferZone, ServiceCategory, RoomType, Addon, AllotmentBoardType,
     Service,
-    Allotment, Transfer, Extra
+    Allotment, Transfer, Extra, CarRental, CarRentalOffice,
 )
 
 from django.contrib import messages
@@ -479,5 +479,33 @@ class ServiceExtraAutocompleteView(autocomplete.Select2QuerySetView):
             )
         if self.q:
             qs = qs.filter(name__icontains=self.q)
+        return qs[:20]
+
+
+class CarRentalAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return CarRental.objects.none()
+        qs = CarRental.objects.all()
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs[:20]
+
+
+class CarRentalOfficeAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return CarRentalOffice.objects.none()
+
+        service_id = self.forwarded.get('service', None)
+        extra = Extra.objects.get(pk=service_id)
+        if extra.car_rental is None:
+            return CarRentalOffice.objects.none()
+
+        qs = CarRentalOffice.objects.filter(car_rental=extra.car_rental)
+        if self.q:
+            qs = qs.filter(office__icontains=self.q)
         return qs[:20]
 

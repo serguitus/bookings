@@ -33,7 +33,7 @@ from config.forms import (
     AgencyExtraDetailInlineForm,
     AllotmentRoomTypeInlineForm, ExtraAddonInlineForm, TransferZoneForm,
     LocationTransferIntervalInlineForm, ServiceAddonInlineForm, TransferPickupTimeInlineForm,
-    PricesExportForm,
+    PricesExportForm, ExtraForm,
 )
 from config.models import (
     ServiceCategory, Location, Place, TransferInterval, Schedule,
@@ -47,7 +47,8 @@ from config.models import (
     AgencyExtraService, AgencyExtraDetail,
     ProviderAllotmentService, ProviderAllotmentDetail,
     ProviderTransferService, ProviderTransferDetail,
-    ProviderExtraService, ProviderExtraDetail, ServiceAddon
+    ProviderExtraService, ProviderExtraDetail, ServiceAddon,
+    CarRental, CarRentalOffice,
 )
 from config.services import ConfigServices
 from config.top_filters import (
@@ -332,8 +333,8 @@ class TransferSiteModel(SiteModel):
     menu_group = 'Configuration Services'
     fields = (
         ('name', 'service_category'), ('cost_type', 'max_capacity', 'is_shared'),
-        ('pax_range', 'has_pickup_time'), ('child_age', 'infant_age'), 'enabled',)
-    list_display = ('name', 'cost_type', 'max_capacity', 'is_shared', 'enabled',
+        ('pax_range', 'has_pickup_time', 'is_ticket'), ('child_age', 'infant_age'), 'enabled',)
+    list_display = ('name', 'cost_type', 'max_capacity', 'is_shared', 'is_ticket', 'enabled',
                     'infant_age', 'child_age')
     top_filters = ('name', ('service_category', ServiceCategoryTopFilter), 'is_shared', 'enabled',)
     ordering = ['enabled', 'name']
@@ -379,7 +380,7 @@ class ExtraSiteModel(SiteModel):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
     fields = ('name', 'service_category', 'location', 'cost_type', 'parameter_type',
-              'pax_range', ('infant_age', 'child_age'), 'enabled',)
+              'pax_range', ('infant_age', 'child_age'), ('car_rental', 'enabled'),)
     list_display = ('name', 'service_category', 'location', 'cost_type',
                     'parameter_type', 'enabled', 'pax_range', 'has_pax_range',
                     'infant_age', 'child_age')
@@ -387,6 +388,7 @@ class ExtraSiteModel(SiteModel):
     ordering = ['enabled', 'name']
     inlines = [ServiceAddonInline]
     actions = ['export_prices']
+    form = ExtraForm
 
     def export_prices(self, request, queryset, extra_context=None):
         """
@@ -610,11 +612,29 @@ class AgencyExtraServiceSiteModel(SiteModel):
     save_as = True
 
 
+class CarRentalOfficeInline(CommonStackedInline):
+    model = CarRentalOffice
+    extra = 0
+    fields = ('office',)
+    ordering = ['office']
+
+
+class CarRentalSiteModel(SiteModel):
+    model_order = 6050
+    menu_label = MENU_LABEL_CONFIG_BASIC
+    fields = ('name',)
+    list_display = ('name',)
+    top_filters = ('name',)
+    inlines = [CarRentalOfficeInline]
+    ordering = ['name',]
+
+
 bookings_site.register(ServiceCategory, ServiceCategorySiteModel)
 bookings_site.register(Location, LocationSiteModel)
 bookings_site.register(TransferZone, TransferZoneSiteModel)
 bookings_site.register(RoomType, RoomTypeSiteModel)
 bookings_site.register(Addon, AddonSiteModel)
+bookings_site.register(CarRental, CarRentalSiteModel)
 
 bookings_site.register(AllotmentRoomType, AllotmentRoomTypeSiteModel)
 bookings_site.register(AllotmentBoardType, AllotmentBoardTypeSiteModel)

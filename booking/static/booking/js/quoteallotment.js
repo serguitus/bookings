@@ -1,5 +1,6 @@
 var quoteservice_amounts_url = base_url + 'booking/quoteallotment-amounts/';
-var quoteservice_form_selector = '#quoteallotment_form';
+var service_form_selector = '#quoteallotment_form';
+var providers_costs_url = base_url + 'booking/quoteallotment-providers-costs/';
 
 $(document).ready(function(){
   var nights_selector = $('#id_nights');

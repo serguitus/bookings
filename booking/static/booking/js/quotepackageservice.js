@@ -3,9 +3,9 @@ $(document).ready(function(){
   $('select[name^="quotepackageservice_paxvariants-"][name$="-quotepackage_pax_variant"]').attr('disabled', true);
 
   function get_computed_amounts() {
-    if($(quotepackageservice_form_selector).length){
+    if($(service_form_selector).length){
       $('select[name^="quotepackageservice_paxvariants-"][name$="-quotepackage_pax_variant"]').attr('disabled', false);
-      data = $(quotepackageservice_form_selector).serialize();
+      data = $(service_form_selector).serialize();
       $('select[name^="quotepackageservice_paxvariants-"][name$="-quotepackage_pax_variant"]').attr('disabled', true);
     }
     $.ajax({
@@ -220,20 +220,20 @@ $(document).ready(function(){
   show_buttons();
   get_computed_amounts();
 
-  $(quotepackageservice_form_selector).submit(function () {
+  $(service_form_selector).submit(function () {
     $('select[name^="quotepackageservice_paxvariants-"][name$="-quotepackage_pax_variant"]').attr('disabled', false);
   });
 
-  $(quotepackageservice_form_selector).change(function () {
+  $(service_form_selector).change(function () {
     get_computed_amounts();
   });
   // for dates changed by calendar
-  $(quotepackageservice_form_selector + ' input[name*="date"]').focusout(function (e) {
+  $(service_form_selector + ' input[name*="date"]').focusout(function (e) {
     e.preventDefault();
     get_computed_amounts();
   });
   // for times changed by calendar
-  $(quotepackageservice_form_selector + ' input[name*="time"]').focusout(function (e) {
+  $(service_form_selector + ' input[name*="time"]').focusout(function (e) {
     e.preventDefault();
     get_computed_amounts();
   });

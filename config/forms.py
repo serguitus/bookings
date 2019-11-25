@@ -191,3 +191,12 @@ class PricesExportForm(forms.Form):
                                  widget=AdminDateWidget())
     end_date = forms.DateField(label='End Date', required=False,
                                widget=AdminDateWidget())
+
+
+class ExtraForm(forms.ModelForm):
+    class Meta:
+        fields = ('__all__')
+        widgets = {
+            'car_rental': autocomplete.ModelSelect2(url='carrental-autocomplete'),
+        }
+
