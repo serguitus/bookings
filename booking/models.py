@@ -597,7 +597,7 @@ class BookingInvoice(AgencyInvoice):
         max_length=1, choices=INVOICE_FORMATS, default=INVOICE_FORMAT_COMPACT)
 
     def fill_data(self):
-        super(BookingInvoice, self).fill_data()
+        agency = Agency.objects.get(pk=self.agency_id)
         self.document_type = DOC_TYPE_AGENCY_BOOKING_INVOICE
         self.name = 'Booking Invoice to %s - %s Price %s %s' % (
             self.agency, self.date, self.amount, self.get_currency_display())
