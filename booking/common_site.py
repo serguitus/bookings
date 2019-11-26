@@ -1173,6 +1173,13 @@ class ServiceChangeList(StatusChangeList):
             current_app=self.model_admin.admin_site.name)
 
 
+class BaseServiceChangeList(ServiceChangeList):
+    def get_queryset(self, request):
+        # custom queryset to strip BookingPackageServices from list
+        qs = super(BaseServiceChangeList, self).get_queryset(request)
+        return qs.exclude(base_category=BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE)
+
+
 class BookingBaseServiceSiteModel(SiteModel):
     model_order = 1260
     menu_label = MENU_LABEL_BOOKING
@@ -1186,7 +1193,8 @@ class BookingBaseServiceSiteModel(SiteModel):
                 ('name', 'status', 'conf_number'),
                 ('service_addon'),
                 ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility')
+                'cost_amount', 'manual_price', 'price_amount',
+                'utility_percent', 'utility')
         }),
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -1209,7 +1217,7 @@ class BookingBaseServiceSiteModel(SiteModel):
         """
         Returns the ChangeList class for use on the changelist page.
         """
-        return ServiceChangeList
+        return BaseServiceChangeList
 
 
 class BookingServiceSiteModel(SiteModel):

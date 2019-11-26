@@ -55,14 +55,17 @@ from finance.models import (
 # BookingService child objects from a BookingService list
 def _get_child_objects(services):
     TYPE_MODELS = {
-        'T': BookingTransfer,
-        'E': BookingExtra,
-        'A': BookingAllotment,
-        'P': BookingPackage,
+        'BT': BookingTransfer,
+        'BE': BookingExtra,
+        'BA': BookingAllotment,
+        'BP': BookingPackage,
+        'PA': BookingPackageAllotment,
+        'PT': BookingPackageTransfer,
+        'PE': BookingPackageExtra,
     }
     objs = []
     for service in services:
-        obj = TYPE_MODELS[service.service_type].objects.get(id=service.id)
+        obj = TYPE_MODELS[service.base_category].objects.get(id=service.id)
         objs.append(obj)
     return objs
 
@@ -833,7 +836,8 @@ class BaseBookingService(BaseService, DateInterval):
         child_service = _get_child_objects([self])[0]
         if child_service.base_category in ['PA', 'PE', 'PT']:
             pax_count = child_service.booking_package.rooming_list.count()
-        pax_count = child_service.rooming_list.count()
+        else:
+            pax_count = child_service.rooming_list.count()
         return '{}'.format(pax_count)
     service_pax_count.short_description = 'Pax'
 
