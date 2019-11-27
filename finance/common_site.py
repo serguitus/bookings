@@ -773,9 +773,10 @@ class AgencyInvoiceSiteModel(AgencyDebitDocumentSiteModel):
     model_order = 4220
     menu_label = MENU_LABEL_FINANCE_ADVANCED
 
-    fields = ('name', 'agency', 'currency','amount', 'matched_amount', 'date', 'status')
+    fields = ('name', 'agency', 'document_number', 'currency', 'amount', 'matched_amount', 'date', 'status')
     list_display = ['name', 'agency', 'currency', 'amount', 'matched_amount', 'date', 'status']
-    top_filters = ('currency', 'agency', 'status', 'date')
+    top_filters = ('currency', 'agency', 'status', 'date', 'document_number')
+    readonly_fields = ['document_number',]
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
