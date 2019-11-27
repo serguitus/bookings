@@ -1053,8 +1053,11 @@ class BookingInvoiceCancelView(View):
         This will cancel the booking invoice
         """
         booking = Booking.objects.get(id=id)
-        BookingServices.cancel_bookinginvoice(request.user, booking)
-        messages.add_message(request, messages.SUCCESS , "Successful Booking Invoice Cancellation")
+        try:
+            BookingServices.cancel_bookinginvoice(request.user, booking)
+            messages.add_message(request, messages.SUCCESS , "Successful Booking Invoice Cancellation")
+        except ValidationError as error:
+            messages.add_message(request, messages.ERROR , error.message)
 
         return HttpResponseRedirect(reverse('common:booking_booking_change', args=[id]))
 
