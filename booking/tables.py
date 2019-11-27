@@ -134,7 +134,7 @@ class BookingServiceTable(tables.Table):
         fields = ['check', 'name', 'service_location', 'datetime_from',
                   'datetime_to', 'nights', 'description',
                   'cost_amount', 'price_amount',
-                  'provider', 'conf_number', 'status']
+                  'provider', 'conf_number', 'status', 'cost_amount_paid']
         attrs = {'class': 'table table-hover table-condensed'}
         row_attrs = {
             'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_STATUS_MAPPING[record.status]),
@@ -248,7 +248,7 @@ class BookingPackageServiceTable(tables.Table):
         fields = [
             'name', 'datetime_from', 'datetime_to',
             'cost_amount', 'price_amount', 'utility_percent', 'utility',
-            'provider', 'status', 'service_type']
+            'provider', 'status', 'cost_amount_paid']
 
     def __init__(self, *args, **kwargs):
         self.base_columns['utility_percent'].verbose_name='Util.%'
@@ -261,16 +261,6 @@ class BookingPackageServiceTable(tables.Table):
             args=(quote(record.pk),)
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
-
-    def render_service_type(self, value, record):
-        email_url = reverse(
-            'send_package_service_request',
-            args=(record.pk,)
-        )
-        return format_html('<a class="btn btn-primary" href="%s">Request</a>' % (email_url))
-
-    #def before_render(self, request):
-    #    self.columns.hide('service_type')
 
 
 class BookingPackageServiceSummaryTable(tables.Table):
