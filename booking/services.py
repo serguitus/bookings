@@ -4760,7 +4760,7 @@ class BookingServices(object):
             basebookingservice.cost_amount_to_pay = 0.00
         elif basebookingservice.pk and basebookingservice.cost_amount is None:
             raise ValidationError('Current Service Status requires a Cost')
-        else:
+        elif basebookingservice.cost_amount is not None:
             basebookingservice.cost_amount_to_pay = basebookingservice.cost_amount
 
 
