@@ -10,11 +10,13 @@ from booking.models import (
     QuoteServicePaxVariant,
     QuoteAllotment, QuoteTransfer, QuoteExtra,
     QuotePackageServicePaxVariant,
-    QuotePackage, QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
-    Booking, BookingPax,
+    QuotePackage, QuotePackageAllotment,
+    QuotePackageTransfer, QuotePackageExtra,
+    Booking, BookingPax, BookingInvoice,
     BaseBookingService, BookingService, BookingServicePax,
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
-    BookingPackageService, BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
+    BookingPackageService, BookingPackageAllotment,
+    BookingPackageTransfer, BookingPackageExtra,
     ProviderBookingPayment, ProviderBookingPaymentService,
 )
 from booking.services import BookingServices
@@ -42,7 +44,7 @@ def pre_save_quoteservice_paxvariant_setup_amounts(sender, instance, **kwargs):
         BookingServices.setup_paxvariant_amounts(instance)
 
 
-receiver(post_save, sender=QuoteServicePaxVariant)
+@receiver(post_save, sender=QuoteServicePaxVariant)
 def post_save_quoteservice_paxvariant(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all'):
         with transaction.atomic(savepoint=False):
@@ -50,7 +52,7 @@ def post_save_quoteservice_paxvariant(sender, instance, **kwargs):
             BookingServices.update_quote_paxvariant_amounts(instance)
 
 
-receiver(post_delete, sender=QuoteServicePaxVariant)
+@receiver(post_delete, sender=QuoteServicePaxVariant)
 def post_delete_quoteservice_paxvariant(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all'):
         with transaction.atomic(savepoint=False):
@@ -280,8 +282,17 @@ def post_save_post_delete_bookingpackagetransfer(sender, instance, **kwargs):
         with transaction.atomic(savepoint=False):
             BookingServices.update_bookingpackage(instance)
 
+
 @receiver((post_save, post_delete), sender=BookingPackageExtra)
 def post_save_post_delete_bookingpackageextra(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_bookingpackage_update'):
         with transaction.atomic(savepoint=False):
             BookingServices.update_bookingpackage(instance)
+
+
+@receiver((post_save), sender=BookingInvoice)
+def post_save_bookinginvoice(sender, instance, **kwargs):
+    if not instance.document_number:
+        instance.document_number = '{}-{}'.format(instance.invoice_booking.id,
+                                                  instance.id)
+        instance.save()

@@ -1173,6 +1173,13 @@ class ServiceChangeList(StatusChangeList):
             current_app=self.model_admin.admin_site.name)
 
 
+class BaseServiceChangeList(ServiceChangeList):
+    def get_queryset(self, request):
+        # custom queryset to strip BookingPackageServices from list
+        qs = super(BaseServiceChangeList, self).get_queryset(request)
+        return qs.exclude(base_category=BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE)
+
+
 class BookingBaseServiceSiteModel(SiteModel):
     model_order = 1260
     menu_label = MENU_LABEL_BOOKING
@@ -1186,7 +1193,8 @@ class BookingBaseServiceSiteModel(SiteModel):
                 ('name', 'status', 'conf_number'),
                 ('service_addon'),
                 ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility')
+                'cost_amount', 'manual_price', 'price_amount',
+                'utility_percent', 'utility')
         }),
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -1209,7 +1217,7 @@ class BookingBaseServiceSiteModel(SiteModel):
         """
         Returns the ChangeList class for use on the changelist page.
         """
-        return ServiceChangeList
+        return BaseServiceChangeList
 
 
 class BookingServiceSiteModel(SiteModel):
@@ -1794,8 +1802,8 @@ class BookingInvoiceSiteModel(SiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                ('booking_name', 'reference'),
-                ('document_number', 'date_from', 'date_to'),
+                ('booking_name', 'reference', 'document_number'),
+                ('date_from', 'date_to'),
                 ('issued_name', 'status',),
                 ('booking_amount', 'currency', 'currency_rate'),
                 ('amount', 'matched_amount', 'cash_amount', )
@@ -1805,7 +1813,8 @@ class BookingInvoiceSiteModel(SiteModel):
             'fields': ('office', 'content_format', 'date_issued'),
         })
     )
-    readonly_fields = ('booking_amount', 'currency_rate', 'matched_amount')
+    readonly_fields = ('booking_amount', 'currency_rate', 'matched_amount',
+                       'document_number')
 
     change_form_template = 'booking/bookinginvoice_change_form.html'
 
@@ -1868,9 +1877,11 @@ class ProviderBookingPaymentSiteModel(SiteModel):
     def get_change_readonly_fields(self, request, obj=None):
         if obj is not None:
             if obj.status == STATUS_CANCELLED:
-                return ['provider', 'name', 'date', 'services_amount', 'currency_rate', 'status', 'account', 'amount']
+                return ['provider', 'name', 'date', 'services_amount',
+                        'currency_rate', 'status', 'account', 'amount']
             elif obj.status == STATUS_READY:
-                return ['provider', 'name', 'date', 'services_amount', 'currency_rate', 'account', 'amount']
+                return ['provider', 'name', 'date', 'services_amount',
+                        'currency_rate', 'account', 'amount']
             else:
                 return ['provider']
         return []
