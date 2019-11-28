@@ -766,6 +766,7 @@ class AgencyCreditDocumentSiteModel(AgencyDocumentSiteModel):
         'name', 'included', 'match_amount'
     ]
 
+
 class AgencyInvoiceSiteModel(AgencyDebitDocumentSiteModel):
     """
     class for agency invoices

@@ -71,7 +71,7 @@ form ul.inline li {
     display: block;
     padding: 4px 10px 0 0;
     float: left;
-    width: 100px;
+    width: 150px;
     word-wrap: break-word;
     line-height: 1;
     text-align: right;
@@ -343,7 +343,12 @@ body.popup .submit-row {
 }
 
 .vTextField {
-    width: 40em;
+    width: 25em;
+}
+
+/* address fields for accommodation services */
+#id_address {
+    width: 36em;
 }
 
 .vIntegerField {

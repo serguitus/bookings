@@ -1802,8 +1802,8 @@ class BookingInvoiceSiteModel(SiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                ('booking_name', 'reference'),
-                ('document_number', 'date_from', 'date_to'),
+                ('booking_name', 'reference', 'document_number'),
+                ('date_from', 'date_to'),
                 ('issued_name', 'status',),
                 ('booking_amount', 'currency', 'currency_rate'),
                 ('amount', 'matched_amount', 'cash_amount', )
@@ -1813,7 +1813,8 @@ class BookingInvoiceSiteModel(SiteModel):
             'fields': ('office', 'content_format', 'date_issued'),
         })
     )
-    readonly_fields = ('booking_amount', 'currency_rate', 'matched_amount')
+    readonly_fields = ('booking_amount', 'currency_rate', 'matched_amount',
+                       'document_number')
 
     change_form_template = 'booking/bookinginvoice_change_form.html'
 
