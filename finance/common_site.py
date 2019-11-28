@@ -775,7 +775,7 @@ class AgencyInvoiceSiteModel(AgencyDebitDocumentSiteModel):
     menu_label = MENU_LABEL_FINANCE_ADVANCED
 
     fields = ('name', 'agency', 'document_number', 'currency', 'amount', 'matched_amount', 'date', 'status')
-    list_display = ['name', 'agency', 'currency', 'amount', 'matched_amount', 'date', 'status']
+    list_display = ['name', 'invoice_number', 'agency', 'currency', 'amount', 'matched_amount', 'date', 'status']
     top_filters = ('currency', 'agency', 'status', 'date', 'document_number')
     readonly_fields = ['document_number',]
 

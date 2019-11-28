@@ -1877,9 +1877,11 @@ class ProviderBookingPaymentSiteModel(SiteModel):
     def get_change_readonly_fields(self, request, obj=None):
         if obj is not None:
             if obj.status == STATUS_CANCELLED:
-                return ['provider', 'name', 'date', 'services_amount', 'currency_rate', 'status', 'account', 'amount']
+                return ['provider', 'name', 'date', 'services_amount',
+                        'currency_rate', 'status', 'account', 'amount']
             elif obj.status == STATUS_READY:
-                return ['provider', 'name', 'date', 'services_amount', 'currency_rate', 'account', 'amount']
+                return ['provider', 'name', 'date', 'services_amount',
+                        'currency_rate', 'account', 'amount']
             else:
                 return ['provider']
         return []

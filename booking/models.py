@@ -604,7 +604,8 @@ class BookingInvoice(AgencyInvoice):
         self.document_type = DOC_TYPE_AGENCY_BOOKING_INVOICE
         self.name = '%s - %s ($%s %s)' % (
             self.invoice_booking, self.date, self.amount, self.get_currency_display())
-        # self.document_number = '{}-{}'.format(self.invoice_booking.id, self.id)
+        # TODO. remove line below after ensuring all invoice numbers are correct
+        self.document_number = '{}-{}'.format(self.invoice_booking.id, self.id)
 
 
 class BookingInvoiceLine(models.Model):
@@ -1410,6 +1411,7 @@ class PackageProvider(models.Model):
 
     def __str__(self):
         return 'Package Prov. - %s : %s' % (self.service, self.provider)
+
 
 class ProviderBookingPayment(Withdraw):
     """

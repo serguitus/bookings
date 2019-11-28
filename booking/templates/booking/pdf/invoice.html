@@ -53,10 +53,10 @@
         <table style="border: 1px solid black;">
             <tr>
                 <td width="15%" class="label">
-                    CLIENT
+                    INVOICE NO.
                 </td>
                 <td width="55%" class="content">
-                    {{ invoice.agency }}
+                    {{ invoice.document_number }}
                 </td>
                 <td width="15%" class="label">
                     CURRENCY
@@ -81,10 +81,10 @@
             </tr>
             <tr>
                 <td class="label">
-                    COUNTRY
+                    COMPANY
                 </td>
                 <td class="content">
-                    {{ invoice.agency.country|default:'' }}
+                    {{ invoice.agency }}
                 </td>
                 <td class="label">
                     TO

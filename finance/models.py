@@ -934,6 +934,11 @@ class AgencyInvoice(AgencyDebitDocument):
         self.name = '%s - Agency Invoice to %s for %s %s' % (
             self.date, agency, self.amount, self.get_currency_display())
 
+    @property
+    def invoice_number(self):
+        return self.document_number
+    invoice_number.fget.short_description = 'Invoice Id'
+
 
 class AgencyPayment(AgencyCreditDocument, AccountingDocument):
     class Meta:
