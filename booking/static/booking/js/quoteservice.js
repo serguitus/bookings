@@ -9,6 +9,9 @@ $(document).ready(function(){
   });
 
   function get_computed_amounts() {
+    if (typeof quoteservice_amounts_url == 'undefined') {
+      return;
+    }
     if($(service_form_selector).length){
       $('select[name^="quoteservice_paxvariants-"][name$="-quote_pax_variant"]').attr('disabled', false);
       data = $(service_form_selector).serialize();
