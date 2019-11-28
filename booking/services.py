@@ -4758,7 +4758,7 @@ class BookingServices(object):
                 constants.SERVICE_STATUS_PENDING, constants.SERVICE_STATUS_REQUEST,
                 constants.SERVICE_STATUS_CANCELLED]:
             basebookingservice.cost_amount_to_pay = 0.00
-        elif basebookingservice.cost_amount is None:
+        elif basebookingservice.pk and basebookingservice.cost_amount is None:
             raise ValidationError('Current Service Status requires a Cost')
         else:
             basebookingservice.cost_amount_to_pay = basebookingservice.cost_amount
