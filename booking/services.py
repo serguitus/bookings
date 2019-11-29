@@ -303,6 +303,7 @@ class BookingServices(object):
                     booking_allotment.room_type = quote_allotment.room_type
                     booking_allotment.board_type = quote_allotment.board_type
                     booking_allotment.service_addon = quote_allotment.service_addon
+                    booking_allotment.p_notes = quote_allotment.description
 
                     # find service variant
                     service_pax_variant = cls._find_quoteservice_paxvariant_for_bookingservice(
@@ -342,6 +343,7 @@ class BookingServices(object):
                     # place_to
                     # schedule_to
                     # dropoff
+                    booking_transfer.p_notes = quote_transfer.description
 
                     # find service variant
                     service_pax_variant = cls._find_quoteservice_paxvariant_for_bookingservice(
@@ -373,6 +375,7 @@ class BookingServices(object):
                     booking_extra.time = quote_extra.time
                     booking_extra.quantity = quote_extra.quantity
                     booking_extra.parameter = quote_extra.parameter
+                    booking_extra.p_notes = quote_extra.description
 
                     # find service variant
                     service_pax_variant = cls._find_quoteservice_paxvariant_for_bookingservice(
@@ -400,6 +403,8 @@ class BookingServices(object):
                     booking_package.name = quote_package.name
                     cls._copy_service_info(
                         dst_service=booking_package, src_service=quote_package)
+
+                    booking_package.p_notes = quote_package.description
 
                     # find service variant
                     service_pax_variant = cls._find_quoteservice_paxvariant_for_bookingservice(
@@ -433,6 +438,7 @@ class BookingServices(object):
                         bookingpackage_allotment.room_type = quotepackage_allotment.room_type
                         bookingpackage_allotment.board_type = quotepackage_allotment.board_type
                         bookingpackage_allotment.service_addon = quotepackage_allotment.service_addon
+                        bookingpackage_allotment.p_notes = quotepackage_allotment.description
 
                         if service_pax_variant:
                             cls.setup_bookingservice_amounts_from_quote(
@@ -466,6 +472,7 @@ class BookingServices(object):
                         # place_to
                         # schedule_to
                         # dropoff
+                        bookingpackage_transfer.p_notes = quotepackage_transfer.description
 
                         if service_pax_variant:
                             cls.setup_bookingservice_amounts_from_quote(
@@ -491,6 +498,7 @@ class BookingServices(object):
                         bookingpackage_extra.time = quotepackage_extra.time
                         bookingpackage_extra.quantity = quotepackage_extra.quantity
                         bookingpackage_extra.parameter = quotepackage_extra.parameter
+                        bookingpackage_extra.p_notes = quotepackage_extra.description
 
                         if service_pax_variant:
                             cls.setup_bookingservice_amounts_from_quote(
