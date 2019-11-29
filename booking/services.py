@@ -4790,6 +4790,9 @@ class BookingServices(object):
             service['service_id'] = payment_service.provider_service.pk
             service['service_payment_id'] = payment_service.pk
             service['is_selected'] = True
+            service['service_booking'] = payment_service.provider_service.full_booking_name()
+            service['service_from'] = payment_service.provider_service.datetime_from
+            service['service_to'] = payment_service.provider_service.datetime_to or ''
             service['service_name'] = payment_service.provider_service.name
             service['service_amount_to_pay'] = payment_service.provider_service.cost_amount_to_pay
             service['service_amount_paid'] = payment_service.provider_service.cost_amount_paid
@@ -4802,6 +4805,9 @@ class BookingServices(object):
             service['service_id'] = booking_service.pk
             service['service_payment_id'] = None
             service['is_selected'] = False
+            service['service_booking'] = booking_service.full_booking_name()
+            service['service_from'] = booking_service.datetime_from
+            service['service_to'] = booking_service.datetime_to or ''
             service['service_name'] = booking_service.name
             service['service_amount_to_pay'] = booking_service.cost_amount_to_pay
             service['service_amount_paid'] = booking_service.cost_amount_paid
