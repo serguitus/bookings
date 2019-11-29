@@ -21,7 +21,7 @@
       {{ field.errors.as_ul }}
 
       {% if field.field.disabled and field.label != 'sel' %}
-        {% if field.label == 'Service name' %}
+        {% if field.label == 'Service booking' %}
           <div id="{{ field.id_for_label }}" style="text-align: left;">{{ field.value }}</div>
         {% else %}
           <div id="{{ field.id_for_label }}" style="text-align: right;">{{ field.value }}</div>
