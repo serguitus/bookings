@@ -985,6 +985,7 @@ class ProviderBookingPaymentServiceForm(forms.Form):
                                          widget=forms.HiddenInput())
     service_id = forms.CharField(required=False, widget=forms.HiddenInput())
     service_booking = forms.CharField(disabled=True, required=False)
+    service_booking_ref = forms.CharField(disabled=True, required=False, label='Ref.')
     service_from = forms.CharField(disabled=True, required=False)
     service_to = forms.CharField(disabled=True, required=False)
     service_name = forms.CharField(disabled=True, required=False)
@@ -1020,6 +1021,7 @@ class ProviderBookingPaymentServiceReadonlyForm(forms.Form):
     service_id = forms.CharField(required=False, widget=forms.HiddenInput())
     service_name = forms.CharField(disabled=True, required=False)
     service_booking = forms.CharField(disabled=True, required=False)
+    service_booking_ref = forms.CharField(disabled=True, required=False, label='Ref.')
     service_from = forms.CharField(disabled=True, required=False)
     service_to = forms.CharField(disabled=True, required=False)
     saved_amount_to_pay = forms.DecimalField(
