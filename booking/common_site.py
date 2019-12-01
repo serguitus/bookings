@@ -203,7 +203,8 @@ class PackageSiteModel(SiteModel):
     list_editable = ('enabled',)
     top_filters = ('name', ('location', LocationTopFilter), 'amounts_type', 'pax_range', 'enabled')
     ordering = ('enabled', 'name',)
-    details_template = 'booking/package_details.html'
+    list_details_template = 'booking/package_details.html'
+    change_details_template = 'booking/package_details.html'
     form = PackageForm
     inlines = [
         PackageAllotmentInLine, PackageTransferInLine, PackageExtraInLine]
@@ -434,7 +435,8 @@ class QuoteSiteModel(SiteModel):
                    'agency')
     ordering = ('date_from', 'reference',)
     readonly_fields = ('date_from', 'date_to', 'status')
-    details_template = 'booking/quote_details.html'
+    list_details_template = 'booking/quote_details.html'
+    change_details_template = 'booking/quote_details.html'
     inlines = [QuotePaxVariantInline]
     form = QuoteForm
     add_form_template = 'booking/quote_change_form.html'
@@ -634,7 +636,8 @@ class QuotePackageSiteModel(QuoteServiceSiteModel):
     add_form_template = 'booking/quotepackage_change_form.html'
     change_form_template = 'booking/quotepackage_change_form.html'
     readonly_fields = ['datetime_to', 'status']
-    details_template = 'booking/quotepackage_details.html'
+    list_details_template = 'booking/quotepackage_details.html'
+    change_details_template = 'booking/quotepackage_details.html'
     inlines = [QuotePackagePaxVariantInline]
 
     def save_related(self, request, form, formsets, change):
@@ -855,7 +858,8 @@ class BookingSiteModel(SiteModel):
     readonly_fields = ('date_from', 'date_to', 'status',
                        'cost_amount', 'price_amount', 'utility_percent', 'utility',
                        'internal_reference', 'details')
-    details_template = 'booking/booking_details.html'
+    list_details_template = 'booking/booking_details.html'
+    change_details_template = 'booking/booking_details.html'
     inlines = [BookingPaxInline]
     form = BookingForm
     add_form_template = 'booking/booking_change_form.html'
@@ -1212,6 +1216,8 @@ class BookingBaseServiceSiteModel(SiteModel):
                    (CancelledTopFilter),
                    ('provider__is_private', 'Private'))
     ordering = ('datetime_from', 'booking__reference', 'name',)
+    list_details_template = 'booking/basebookingservice_details.html'
+    change_details_template = 'booking/basebookingservice_details.html'
 
     def get_changelist(self, request, **kwargs):
         """
@@ -1249,6 +1255,8 @@ class BookingServiceSiteModel(SiteModel):
                    ('datetime_from', DateTopFilter), 'status', 'provider',
                    ('provider__is_private', 'Private'))
     ordering = ('datetime_from', 'booking__reference', 'name',)
+    list_details_template = 'booking/bookingservice_details.html'
+    change_details_template = 'booking/bookingservice_details.html'
 
     def get_changelist(self, request, **kwargs):
         """
@@ -1516,6 +1524,8 @@ class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):
     add_form_template = 'booking/bookingallotment_change_form.html'
     change_form_template = 'booking/bookingallotment_change_form.html'
     inlines = [BookingServicePaxInline]
+    list_details_template = 'booking/bookingallotment_details.html'
+    change_details_template = 'booking/bookingallotment_details.html'
 
     def details(self, obj):
         if obj.description:
@@ -1554,6 +1564,8 @@ class BookingPackageAllotmentSiteModel(BookingPackageServiceSiteModel):
     form = BookingPackageAllotmentForm
     add_form_template = 'booking/bookingpackageallotment_change_form.html'
     change_form_template = 'booking/bookingpackageallotment_change_form.html'
+    list_details_template = 'booking/bookingpackageallotment_details.html'
+    change_details_template = 'booking/bookingpackageallotment_details.html'
 
 
 class BookingTransferSiteModel(BaseBookingServiceSiteModel):
@@ -1593,6 +1605,8 @@ class BookingTransferSiteModel(BaseBookingServiceSiteModel):
     add_form_template = 'booking/bookingtransfer_change_form.html'
     change_form_template = 'booking/bookingtransfer_change_form.html'
     inlines = [BookingServicePaxInline]
+    list_details_template = 'booking/bookingtransfer_details.html'
+    change_details_template = 'booking/bookingtransfer_details.html'
 
 
 class BookingPackageTransferSiteModel(BookingPackageServiceSiteModel):
@@ -1630,6 +1644,8 @@ class BookingPackageTransferSiteModel(BookingPackageServiceSiteModel):
     form = BookingPackageTransferForm
     add_form_template = 'booking/bookingpackagetransfer_change_form.html'
     change_form_template = 'booking/bookingpackagetransfer_change_form.html'
+    list_details_template = 'booking/bookingpackagetransfer_details.html'
+    change_details_template = 'booking/bookingpackagetransfer_details.html'
 
 
 class BookingExtraSiteModel(BaseBookingServiceSiteModel):
@@ -1665,6 +1681,8 @@ class BookingExtraSiteModel(BaseBookingServiceSiteModel):
     add_form_template = 'booking/bookingextra_change_form.html'
     change_form_template = 'booking/bookingextra_change_form.html'
     inlines = [BookingServicePaxInline]
+    list_details_template = 'booking/bookingextra_details.html'
+    change_details_template = 'booking/bookingextra_details.html'
 
 
 class BookingPackageExtraSiteModel(BookingPackageServiceSiteModel):
@@ -1702,6 +1720,8 @@ class BookingPackageExtraSiteModel(BookingPackageServiceSiteModel):
     form = BookingPackageExtraForm
     add_form_template = 'booking/bookingpackageextra_change_form.html'
     change_form_template = 'booking/bookingpackageextra_change_form.html'
+    list_details_template = 'booking/bookingpackageextra_details.html'
+    change_details_template = 'booking/bookingpackageextra_details.html'
 
 
 class BookingPackageSiteModel(BaseBookingServiceSiteModel):
@@ -1729,7 +1749,8 @@ class BookingPackageSiteModel(BaseBookingServiceSiteModel):
     top_filters = ['booking__name', 'service', 'booking__reference',
                    ('datetime_from', DateTopFilter), 'status']
     ordering = ['datetime_from', 'booking__reference', 'service__name']
-    details_template = 'booking/bookingpackage_details.html'
+    list_details_template = 'booking/bookingpackage_details.html'
+    change_details_template = 'booking/bookingpackage_details.html'
     inlines = [BookingServicePaxInline]
     form = BookingPackageForm
     add_form_template = 'booking/bookingpackage_change_form.html'
@@ -1819,6 +1840,8 @@ class BookingInvoiceSiteModel(SiteModel):
     change_form_template = 'booking/bookinginvoice_change_form.html'
 
     inlines = [BookingInvoiceDetailInline, BookingInvoiceLineInline, BookingInvoicePartialInline]
+    list_details_template = 'booking/bookinginvoice_details.html'
+    change_details_template = 'booking/bookinginvoice_details.html'
 
     def save_model(self, request, obj, form, change):
         BookingServices.save_booking_invoice(request, obj, form, change)
@@ -1865,6 +1888,8 @@ class ProviderBookingPaymentSiteModel(SiteModel):
     recent_allowed = True
     form = ProviderBookingPaymentForm
     change_form_template = 'booking/providerbookingpayment_change_form.html'
+    list_details_template = 'booking/providerbookingpayment_details.html'
+    change_details_template = 'booking/providerbookingpayment_details.html'
 
     def is_readonly_model(self, request, obj=None):
         return obj and obj.status == STATUS_CANCELLED

@@ -11,7 +11,8 @@ from booking.models import (
     BookingPackageTransfer,
     BookingPackageAllotment,
     BookingPackageExtra,
-    BookingPackage)
+    BookingPackage, ProviderBookingPayment,
+)
 from booking.tables import (
     PackageServiceTable,
     QuoteServiceTable, QuotePaxVariantTable,
@@ -22,7 +23,8 @@ from booking.tables import (
     BookingServiceUpdateTable,
     BookingPackageServiceTable,
     BookingPackageServiceSummaryTable,
-    AddPaxBookingServicesTable)
+    AddPaxBookingServicesTable, ProviderBookingPaymentTable,
+)
 from booking.services import BookingServices
 
 register = template.Library()
@@ -65,6 +67,15 @@ def bookingservice_table(booking):
     table = BookingServiceTable(
         BookingService.objects.filter(booking=booking),
         order_by=('datetime_from', 'datetime_to'))
+    return table
+
+
+@register.simple_tag
+def providerbookingpayment_table(service):
+    table = ProviderBookingPaymentTable(
+        ProviderBookingPayment.objects.filter(providerbookingpaymentservice__provider_service=service),
+        order_by=('date',),
+    )
     return table
 
 

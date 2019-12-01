@@ -778,6 +778,8 @@ class AgencyInvoiceSiteModel(AgencyDebitDocumentSiteModel):
     list_display = ['name', 'invoice_number', 'agency', 'currency', 'amount', 'matched_amount', 'date', 'status']
     top_filters = ('currency', 'agency', 'status', 'date', 'document_number')
     readonly_fields = ['document_number',]
+    list_details_template = 'finance/agencyinvoice_details.html'
+    change_details_template = 'finance/agencyinvoice_details.html'
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
@@ -798,6 +800,8 @@ class AgencyPaymentSiteModel(AgencyCreditDocumentSiteModel):
     fields = ('name', 'agency', 'account','amount', 'matched_amount', 'date', 'status')
     list_display = ['name', 'agency', 'account', 'amount', 'matched_amount', 'date', 'status']
     top_filters = ('account', 'agency', 'status', 'date')
+    list_details_template = 'finance/agencypayment_details.html'
+    change_details_template = 'finance/agencypayment_details.html'
 
     def save_model(self, request, obj, form, change):
         # overrides base class method

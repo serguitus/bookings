@@ -311,7 +311,8 @@ class SiteModel(TotalsumAdmin):
     add_readonly_fields = ()
     change_readonly_fields = ()
     top_filters = ()
-    details_template = None
+    list_details_template = None
+    change_details_template = None
     readonly_model = False
     delete_allowed = True
     self_inlines = []
@@ -1049,7 +1050,7 @@ class SiteModel(TotalsumAdmin):
 
         model = self.model
         opts = model._meta
-        opts.details_template = self.details_template
+        opts.change_details_template = self.change_details_template
 
         if request.method == 'POST' and '_saveasnew' in request.POST:
             object_id = None
@@ -1267,7 +1268,7 @@ class SiteModel(TotalsumAdmin):
         list_select_related = self.get_list_select_related(request)
 
         # Check details to see if any are available on this changelist
-        if self.details_template:
+        if self.list_details_template:
             # Add the details expand/collapse button.
             list_display = ['details_button'] + list(list_display)
 
@@ -1285,7 +1286,7 @@ class SiteModel(TotalsumAdmin):
                 search_fields, list_select_related, self.list_per_page,
                 self.list_max_show_all, self.list_editable, self
             )
-            cl.details_template = self.details_template
+            cl.list_details_template = self.list_details_template
 
         except IncorrectLookupParameters:
             # Wacky lookup parameters were given, so redirect to the main
@@ -1503,7 +1504,7 @@ class SiteModel(TotalsumAdmin):
 
 
 class CommonChangeList(ChangeList):
-    details_template = None
+    list_details_template = None
 
     def __init__(self, request, model, list_display, list_display_links,
                  list_filter, top_filters, date_hierarchy, search_fields, list_select_related,

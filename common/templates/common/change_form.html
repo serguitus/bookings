@@ -57,12 +57,12 @@
         {% endblock field_sets %}
 
         {% block after_field_sets %}
-            {% if object_id and opts.details_template %}
+            {% if object_id and opts.change_details_template %}
                 <table style="width: 100%;">
                   <tr>
                     <td>
                       <div class="details" id="div_{{ object_id }}">
-                        {% include opts.details_template with current=original %}
+                        {% include opts.change_details_template with current=original %}
                       </div>
                     </td>
                   </tr>

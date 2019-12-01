@@ -6,7 +6,9 @@ from django.utils.html import format_html
 from booking.models import (
     PackageService,
     Quote, QuoteService, QuotePaxVariant, QuotePackageService,
-    Booking, BookingService, BookingPax, BookingPackageService)
+    Booking, BookingService, BookingPax, BookingPackageService,
+    ProviderBookingPayment,
+)
 from booking.constants import (
     PACKAGESERVICE_TYPES, QUOTESERVICE_TYPES, QUOTEPACKAGESERVICE_TYPES,
     BOOKINGSERVICE_TYPES, BOOKINGPACKAGESERVICE_TYPES, BOOTSTRAP_STYLE_STATUS_MAPPING)
@@ -169,6 +171,27 @@ class BookingServiceTable(tables.Table):
 
     #    def before_render(self, request):
     #        self.columns.hide('service_type')
+
+
+class ProviderBookingPaymentTable(tables.Table):
+    class Meta:
+        model = ProviderBookingPayment
+        template_name = 'booking/providerbookingpayment_table.html'
+        fields = ['name', 'date', 'status', 'account', 'services_amount',
+                'currency_rate', 'amount''details']
+        attrs = {'class': 'table table-hover table-condensed'}
+
+    def __init__(self, *args, **kwargs):
+        self.base_columns['services_amount'].verbose_name='Serv.Amount'
+        self.base_columns['currency_rate'].verbose_name='Rate'
+        super(ProviderBookingPaymentTable, self).__init__(*args, **kwargs)
+
+    def render_name(self, value, record):
+        obj_url = reverse(
+            'common:booking_providerbookingpayment_change',
+            args=(quote(record.pk),)
+        )
+        return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
 
 class BookingConfirmationTable(tables.Table):
