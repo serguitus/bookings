@@ -1,6 +1,6 @@
 {{ services_formset.management_form }}
 {{ services_formset.non_form_errors.as_ul }}
-<table id="services_formset" class="form table">
+<table id="services_formset" class="form table table-hover">
 {% for form in services_formset.forms %}
   {% if forloop.first %}
   <thead><tr>

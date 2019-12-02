@@ -1023,17 +1023,15 @@ class ProviderBookingPaymentServiceReadonlyForm(forms.Form):
     service_name = forms.CharField(disabled=True, required=False)
     service_conf = forms.CharField(disabled=True, required=True, label='Conf.')
     service_booking = forms.CharField(disabled=True, required=False)
-    service_booking_ref = forms.CharField(disabled=True, required=False, label='Ref.')
+    service_booking_ref = forms.CharField(disabled=True, required=False,
+                                          label='Ref.')
     service_from = forms.CharField(disabled=True, required=False, label='From')
     service_to = forms.CharField(disabled=True, required=False, label='To')
-    saved_amount_to_pay = forms.DecimalField(
-        label='Saved To Pay', required=False,
-        disabled=True, widget=forms.TextInput(
-            attrs={'readonly':'readonly', 'style':'text-align: right; width: 100px;'}))
-    saved_amount_paid = forms.DecimalField(
-        label='Saved Paid', required=False,
-        disabled=True, widget=forms.TextInput(
-            attrs={'readonly':'readonly', 'style':'text-align: right; width: 100px;'}))
+    saved_amount_to_pay = forms.DecimalField(label='Saved To Pay',
+                                             required=False,
+                                             disabled=True)
+    saved_amount_paid = forms.DecimalField(label='Saved Paid', required=False,
+                                           disabled=True)
     service_amount_to_pay = forms.DecimalField(
         label='Serv.To Pay', required=False,
         disabled=True, widget=forms.TextInput(
