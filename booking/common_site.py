@@ -241,7 +241,7 @@ class PackageAllotmentSiteModel(PackageServiceSiteModel):
     fields = (
         'package', ('service'),
         ('days_after', 'days_duration'),
-        ('room_type', 'board_type', 'service_addon'), 'provider', 'id')
+        ('room_type', 'board_type'), 'provider', 'id')
     list_display = ('package', 'service', 'days_after', 'days_duration',)
     top_filters = ('package__name', 'service',)
     ordering = ('package__name', 'days_after', 'service__name',)
@@ -545,8 +545,8 @@ class QuoteAllotmentSiteModel(QuoteServiceSiteModel):
 
     fields = (
         'quote', ('service', 'status'), ('datetime_from', 'nights', 'datetime_to'),
-        'room_type', 'board_type', 'service_addon', 'provider', 'id')
-    list_display = ('quote', 'service', 'service_addon', 'datetime_from', 'datetime_to', 'status',)
+        'room_type', 'board_type', 'provider', 'id')
+    list_display = ('quote', 'service', 'datetime_from', 'datetime_to', 'status',)
     top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote__reference', 'service__name',)
     form = QuoteAllotmentForm
@@ -727,8 +727,8 @@ class QuotePackageAllotmentSiteModel(QuotePackageServiceSiteModel):
 
     fields = (
         'quote_package', ('service', 'status'), ('datetime_from', 'datetime_to'),
-        'room_type', 'board_type', 'service_addon', 'provider', 'id')
-    list_display = ('quote_package', 'service', 'service_addon', 'datetime_from', 'datetime_to', 'status',)
+        'room_type', 'board_type', 'provider', 'id')
+    list_display = ('quote_package', 'service', 'datetime_from', 'datetime_to', 'status',)
     top_filters = ('service', 'quote_package__quote__reference', ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote_package__quote__reference', 'service__name',)
     form = QuotePackageAllotmentForm
@@ -1499,7 +1499,7 @@ class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):
                 ('booking', 'details'),
                 ('service', 'status', 'conf_number'),
                 ('datetime_from', 'nights', 'datetime_to'),
-                ('room_type', 'board_type', 'service_addon'),
+                ('room_type', 'board_type',),
                 ('manual_cost', 'provider'),
                 'cost_amount', 'manual_price', 'price_amount',
                 'utility_percent', 'utility', 'id', 'version',
@@ -1510,7 +1510,7 @@ class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):
                    'classes': ('collapse', 'wide')})
     )
 
-    list_display = ('booking', 'name', 'service_addon', 'datetime_from',
+    list_display = ('booking', 'name', 'datetime_from',
                     'datetime_to', 'cost_amount', 'manual_cost',
                     'price_amount', 'manual_price', 'utility_percent',
                     'utility', 'status')
@@ -1545,7 +1545,7 @@ class BookingPackageAllotmentSiteModel(BookingPackageServiceSiteModel):
             'fields': (
                 'booking_package', ('service', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to'),
-                ('room_type', 'board_type', 'service_addon'),
+                ('room_type', 'board_type'),
                 ('manual_cost', 'provider'),
                 'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility', 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
@@ -1553,7 +1553,7 @@ class BookingPackageAllotmentSiteModel(BookingPackageServiceSiteModel):
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
     )
-    list_display = ('booking_package', 'name', 'service_addon', 'datetime_from',
+    list_display = ('booking_package', 'name', 'datetime_from',
                     'datetime_to', 'cost_amount', 'manual_cost',
                     'price_amount', 'manual_price', 'utility_percent', 'utility', 'status',)
     top_filters = (('booking_package__booking__name', 'Booking'),
