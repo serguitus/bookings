@@ -9,3 +9,7 @@
     {% include 'booking/booking_details_buttons.html' %}
     {% include 'booking/emails/popup_modal_form.html' with modal_title='Invoice Mail' %}
 </div>
+{% agencypayment_table current as table %}
+<div class="agencypayment-container">
+    {% render_table table %}
+</div>
