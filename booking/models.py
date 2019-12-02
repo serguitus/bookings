@@ -605,7 +605,7 @@ class BookingInvoice(AgencyInvoice):
         self.name = '%s - %s ($%s %s)' % (
             self.invoice_booking, self.date, self.amount, self.get_currency_display())
         # TODO. remove line below after ensuring all invoice numbers are correct
-        self.document_number = '{}-{}'.format(self.invoice_booking.id, self.id)
+        # self.document_number = '{}-{}'.format(self.invoice_booking.id, self.id)
 
 
 class BookingInvoiceLine(models.Model):
@@ -1427,7 +1427,7 @@ class ProviderBookingPayment(Withdraw):
     def fill_data(self):
         self.document_type = DOC_TYPE_PROVIDER_PAYMENT_WITHDRAW
         account = Account.objects.get(pk=self.account_id)
-        self.name = '%s - Prov. (%s) Payment from %s of %s %s ' % (
+        self.name = '%s-(%s) Payment - %s  (%s %s)' % (
             self.date, self.provider, account, self.amount, account.get_currency_display())
 
     def save(self, *args, **kwargs):

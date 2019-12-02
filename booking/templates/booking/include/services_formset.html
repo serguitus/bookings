@@ -1,6 +1,6 @@
 {{ services_formset.management_form }}
 {{ services_formset.non_form_errors.as_ul }}
-<table id="services_formset" class="form">
+<table id="services_formset" class="form table table-hover">
 {% for form in services_formset.forms %}
   {% if forloop.first %}
   <thead><tr>
@@ -20,11 +20,11 @@
     {% endif %}
       {{ field.errors.as_ul }}
 
-      {% if field.field.disabled and field.label != 'sel' %}
-        {% if field.label == 'Service booking' %}
-          <div id="{{ field.id_for_label }}" style="text-align: left;">{{ field.value }}</div>
+    {% if field.field.disabled and field.label != 'sel' %}
+        {% if field.label == 'From' or field.label == 'To' %}
+            <div id="{{ field.id_for_label }}">{{ field.value|date:"d-M-y" }}</div>
         {% else %}
-          <div id="{{ field.id_for_label }}" style="text-align: right;">{{ field.value }}</div>
+            <div id="{{ field.id_for_label }}">{{ field.value }}</div>
         {% endif %}
       {% else %}
         {{ field }}
