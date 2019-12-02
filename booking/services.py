@@ -4776,13 +4776,15 @@ class BookingServices(object):
     def booking_provider_payment_services(cls, payment_id):
         db_payment = ProviderBookingPayment.objects.get(pk=payment_id)
         payment_services = ProviderBookingPaymentService.objects.filter(
-            provider_payment=db_payment)
+            provider_payment=db_payment).order_by('provider_service__datetime_from')
         booking_services = list()
         if db_payment.status == STATUS_DRAFT:
             booking_services = BaseBookingService.objects.filter(
                 provider=db_payment.provider).exclude(
                     cost_amount_to_pay=F('cost_amount_paid')).exclude(
-                        providerbookingpaymentservice__provider_payment=db_payment)
+                        providerbookingpaymentservice__provider_payment=db_payment
+                    ).order_by(
+                        'datetime_from', 'datetime_to')
 
         services = list()
         for payment_service in list(payment_services):
