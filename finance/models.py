@@ -796,6 +796,19 @@ class AgencyContact(models.Model):
         return '%s - %s' % (self.name, self.email)
 
 
+class AgencyCopyContact(models.Model):
+    class Meta:
+        verbose_name = 'Agency Copy Contact'
+        verbose_name_plural = 'Agency CC Contacts'
+        unique_together = (('agency', 'name',),)
+    agency = models.ForeignKey(Agency)
+    name = models.CharField(max_length=50)
+    email = models.EmailField()
+
+    def __str__(self):
+        return '%s - %s' % (self.name, self.email)
+
+
 class AgencyBillingContact(models.Model):
     class Meta:
         verbose_name = 'Agency Billing Contact'
