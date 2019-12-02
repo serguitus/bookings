@@ -787,14 +787,11 @@ class BookingPaxInline(TabularInline):
     ordering = ('pax_group', 'pax_name')
 
     def get_max_num(self, request, obj=None, **kwargs):
-        # TODO poner 0 cuando se implemente agregar booking pax
-        #adding = obj is None or obj.id is None
-        adding = True;
+        adding = obj is None or obj.id is None
         if adding:
             return super(BookingPaxInline, self).get_max_num(request, obj, **kwargs)
         else:
-            # TODO poner 0 cuando se implemente agregar booking pax
-            return 1
+            return 0
 
 
 class BookingServicePaxInline(TabularInline):
@@ -1889,7 +1886,6 @@ class ProviderBookingPaymentSiteModel(SiteModel):
     form = ProviderBookingPaymentForm
     change_form_template = 'booking/providerbookingpayment_change_form.html'
     list_details_template = 'booking/providerbookingpayment_details.html'
-    change_details_template = 'booking/providerbookingpayment_details.html'
 
     def is_readonly_model(self, request, obj=None):
         return obj and obj.status == STATUS_CANCELLED
