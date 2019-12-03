@@ -933,6 +933,7 @@ class BookingSiteModel(SiteModel):
                     body=request.POST.get('mail_body'))
 
                 email.attach('vouchers.pdf', pdf.getvalue(), 'application/pdf')
+                email.content_subtype = "html"
                 email.send()
 
                 messages.add_message(
@@ -1072,6 +1073,7 @@ class BookingSiteModel(SiteModel):
                 body=request.POST.get('mail_body'))
 
             email.attach('invoice.pdf', pdf.getvalue(), 'application/pdf')
+            email.content_subtype = "html"
             email.send()
 
             messages.add_message(
