@@ -2,8 +2,12 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <style>
+         body{
+             font-size: 12px;
+         }
          .voucher-header{
              border-top: 1px solid black;
+             font-size: 10px;
          }
          .voucher-head-1{
              border-left: 1px solid black;
@@ -56,6 +60,7 @@
              border-left: 1px solid black;
              border-right: 1px solid black;
              border-bottom: 1px solid black;
+             font-size: 10px;
          }
          .voucher-delimiter{
              border-bottom: 1px dashed black;
@@ -128,6 +133,25 @@
                                 <tr>
                                     <td class="voucher-content-3" colspan="4">
                                         <b>Address:</b> {{ service.service.address }}
+                                    </td>
+                                </tr>
+                                {% elif service.service_type == 'E' and service.pickup_office %}
+                                <tr>
+                                    <td class="voucher-content-3" colspan="4">
+                                        <table>
+                                            <tr>
+                                                <td width="50%">
+                                                {% if service.pickup_office %}
+                                                    <b>Pickup:</b> {{ service.pickup_office.office }}<br>
+                                                {% endif %}
+                                                </td>
+                                                <td width="50%">
+                                                {% if service.dropoff_office %}
+                                                    <b>Drop-off:</b> {{ service.dropoff_office.office }}<br>
+                                                {% endif %}
+                                                </td>
+                                            </tr>
+                                        </table>
                                     </td>
                                 </tr>
                                 {% elif service.time or service.booking_package.time or service.pickup or service.dropoff %}
