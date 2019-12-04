@@ -37,6 +37,10 @@ OK - eliminar el link de "add_booking_pax" del inline de pax del booking. para e
 
 - segun conversamos, replantearnos el tema de los paquetes de servicios y valorar si debemos distinguir entre los paquetes que tienen un mismo proveedor y los que tienen dentro servicios de diferentes proveedores. hoy en dia se hace tedioso trabajar con un paquete con un grupo de servicios que todos son del mismo proveedor. en esos casos es importante mantener los servicios por separado pues tienen diferentes formas de calculo de precio
 
-- services de provider payment ordenados por fecha
+OK - services de provider payment ordenados por fecha
 
 - emplear urls de retorno donde sea factible.
+
+- agregar el campo location a los forms de los booking services para usarlo como forward al filtrar la lista de servicios segun location como mismo se hace ya con el provider
+
+- pasar campo time a basebookingservice y oredenar por datetime_from y luego time
