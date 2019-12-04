@@ -11,7 +11,8 @@ from booking.models import (
     BookingPackageTransfer,
     BookingPackageAllotment,
     BookingPackageExtra,
-    BookingPackage)
+    BookingPackage, ProviderBookingPayment, ProviderBookingPaymentService,
+)
 from booking.tables import (
     PackageServiceTable,
     QuoteServiceTable, QuotePaxVariantTable,
@@ -22,8 +23,12 @@ from booking.tables import (
     BookingServiceUpdateTable,
     BookingPackageServiceTable,
     BookingPackageServiceSummaryTable,
-    AddPaxBookingServicesTable)
+    AddPaxBookingServicesTable, ProviderBookingPaymentTable, ProviderBookingPaymentServiceTable,
+    AgencyPaymentTable,
+)
 from booking.services import BookingServices
+
+from finance.models import AgencyPayment;
 
 register = template.Library()
 
@@ -65,6 +70,33 @@ def bookingservice_table(booking):
     table = BookingServiceTable(
         BookingService.objects.filter(booking=booking),
         order_by=('datetime_from', 'datetime_to'))
+    return table
+
+
+@register.simple_tag
+def agencypayment_table(booking):
+    table = AgencyPaymentTable(
+        AgencyPayment.objects.filter(agencydocumentmatch__debit_document=booking.invoice),
+        order_by=('date',),
+    )
+    return table
+
+
+@register.simple_tag
+def providerbookingpayment_table(service):
+    table = ProviderBookingPaymentTable(
+        ProviderBookingPayment.objects.filter(providerbookingpaymentservice__provider_service=service),
+        order_by=('date',),
+    )
+    return table
+
+
+@register.simple_tag
+def providerbookingpaymentservice_table(payment):
+    table = ProviderBookingPaymentServiceTable(
+        ProviderBookingPaymentService.objects.filter(provider_payment=payment),
+        order_by=('datetime_from','datetime_to',),
+    )
     return table
 
 
