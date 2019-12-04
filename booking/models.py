@@ -660,7 +660,7 @@ class Booking(models.Model):
         )
         unique_together = (('invoice',),)
 
-    version = AutoIncVersionField( )
+    version = AutoIncVersionField()
     name = models.CharField(max_length=100)
     agency = models.ForeignKey(Agency)
     reference = models.CharField(max_length=25, blank=True, null=True, verbose_name='TTOO Ref')
