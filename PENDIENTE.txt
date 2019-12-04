@@ -11,6 +11,8 @@ datetime_from, datetime_to, confirmation_number)
 
 OK - agregar tabla de providerPayment a los BaseBookingServices (supongo que sea en el change_form)
 
+- agregar permiso para condicionar la visualizacion de la tabla de providerPayment en BaseBookingServices 
+
 - agregar tabla de AgencyPayment a los Booking (supongo que en el change_form del booking)
 
 - opciones dentro de un pago ya realizado de visualizar un pdf o adjuntarlo y enviarlo por email al proveedor
