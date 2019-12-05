@@ -851,7 +851,7 @@ class BookingSiteModel(SiteModel):
                    ('date_from', DateTopFilter), 'rooming_list__pax_name',
                    (InternalReferenceTopFilter),
                    (CancelledTopFilter), 'seller', 'invoice__document_number')
-    ordering = ['date_from', 'reference']
+    ordering = ['date_from', 'date_to', 'reference']
     readonly_fields = ('date_from', 'date_to', 'status',
                        'cost_amount', 'price_amount', 'utility_percent', 'utility',
                        'internal_reference', 'details')
@@ -888,19 +888,57 @@ class BookingSiteModel(SiteModel):
         return urlpatterns + urls
 
     def config_vouchers(self, request, id, extra_context=None):
-        # this handles configuration form to build vouchers
+        """ this handles configuration form to build vouchers"""
+
+        def _add_initial_email_form(request, booking, context):
+            """ helper method to add initial email form to context"""
+            contact_email = ''
+            if booking.agency_contact:
+                contact_email = booking.agency_contact.email
+            email_form = EmailPopupForm(
+                initial={'mail_from': request.user.email,
+                         'mail_to': contact_email,
+                         'mail_cc': default_mail_cc(request, booking),
+                         'mail_bcc': default_vouchers_mail_bcc(request),
+                         'mail_subject': default_vouchers_mail_subject(
+                             request, booking),
+                         'mail_body': default_vouchers_mail_body(
+                             request, booking)})
+            context.update({
+                'email_form': email_form,
+            })
         context = {}
         context.update({'title': 'Vouchers Booking'})
+        bk = Booking.objects.get(id=id)
         if request.method == 'GET':
             form = VouchersConfigForm()
             context.update(self.get_model_extra_context(request))
             context.update(extra_context or {})
-            context.update({'current': Booking.objects.get(id=id)})
+            context.update({'current': bk})
             context.update({'form': form})
+            _add_initial_email_form(request, bk, context)
+            context.update({
+                'modal_title': 'Vouchers Email',
+            })
             return render(request, 'booking/voucher_config.html', context)
         else:
             ids = request.POST.getlist('pk', [])
+            if not ids:
+                messages.add_message(request, level=messages.ERROR,
+                                     message='You havent choose any service')
             office = request.POST.get('office', None)
+            if not office:
+                messages.add_message(request, level=messages.ERROR,
+                                     message='Please specify Office')
+            if not office or not ids:
+                form = VouchersConfigForm()
+                context.update(self.get_model_extra_context(request))
+                context.update(extra_context or {})
+                context.update({'current': bk})
+                context.update({'form': form})
+                _add_initial_email_form(request, bk, context)
+                return render(request, 'booking/voucher_config.html', context)
+
             context.update({
                 'uid': request.user.pk,
                 'office': Office.objects.get(id=office)
@@ -2046,6 +2084,47 @@ def default_invoice_mail_body(request, booking=None):
             'client': dest,
     }
     return get_template('booking/emails/invoice_email.html').render(context)
+
+
+def default_mail_cc(request, booking):
+    if booking.agency:
+        cc_list = ''
+        for contact in booking.agency.agencycopycontact_set.all():
+            name, domain = contact.email.split('@')
+            if name in [f.name for f in Booking._meta.get_fields()]:
+                attr = getattr(booking, name)
+                if attr:
+                    cc_list += '%s@%s, ' % (attr, domain)
+            else:
+                cc_list += '%s, ' % contact.email
+        return cc_list
+
+
+def default_vouchers_mail_bcc(request):
+    if request.user.email == settings.DEFAULT_BCC:
+        return settings.DEFAULT_BCC
+    else:
+        return '%s, %s' % (request.user.email, settings.DEFAULT_BCC)
+
+
+def default_vouchers_mail_subject(request, booking):
+    ref = ''
+    if booking.reference:
+        ref = '(%s)' % booking.reference
+    return 'Vouchers for %s x%s %s' % (booking.name,
+                                       booking.rooming_list.count(),
+                                       ref)
+
+
+def default_vouchers_mail_body(request, booking=None):
+    dest = 'Customer'
+    if booking and booking.agency_contact:
+        dest = booking.agency_contact.name
+    context = {
+            'user': request.user,
+            'client': dest,
+    }
+    return get_template('booking/emails/vouchers_email.html').render(context)
 
 
 # Starts Registration Section

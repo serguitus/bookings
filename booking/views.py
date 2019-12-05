@@ -39,8 +39,9 @@ from booking.common_site import (
     BookingPackageSiteModel,
     BookingPackageAllotmentSiteModel, BookingPackageTransferSiteModel,
     BookingPackageExtraSiteModel,
-    default_requests_mail_from, default_requests_mail_to, default_requests_mail_bcc,
-    default_requests_mail_subject, default_requests_mail_body,
+    default_requests_mail_from, default_requests_mail_to,
+    default_requests_mail_bcc, default_requests_mail_subject,
+    default_requests_mail_body, default_mail_cc
 )
 from booking.constants import ACTIONS
 from booking.models import (
@@ -721,13 +722,17 @@ class EmailConfirmationView(View):
             'rooming': rooming,
             'user': request.user,
         }
-        bcc_list = '%s, %s' % (request.user.email,
-                               settings.DEFAULT_BCC)
+        if request.user.email == settings.DEFAULT_BCC:
+            bcc_list = settings.DEFAULT_BCC
+        else:
+            bcc_list = '%s, %s' % (request.user.email,
+                                   settings.DEFAULT_BCC)
         t = get_template('booking/emails/confirmation_email.html')
         form = EmailProviderForm(request.user,
-                                 {'from': request.user.email,
+                                 {'from_address': request.user.email,
                                   'subject': subj,
                                   'to_address': client_email,
+                                  'cc_address': default_mail_cc(request, bk),
                                   'bcc_address': bcc_list,
                                   'body': t.render(initial)})
         context = dict()

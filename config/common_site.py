@@ -493,7 +493,7 @@ class ProviderExtraDetailInline(CommonStackedInline):
     fields = (
         ('pax_range_min', 'pax_range_max'),
         ('addon','ad_1_amount'))
-    ordering = ['addon']
+    ordering = ['addon', 'pax_range_min', 'id']
     form = ProviderExtraDetailInlineForm
 
 
