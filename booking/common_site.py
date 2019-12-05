@@ -898,7 +898,7 @@ class BookingSiteModel(SiteModel):
             email_form = EmailPopupForm(
                 initial={'mail_from': request.user.email,
                          'mail_to': contact_email,
-                         'mail_cc': default_vouchers_mail_cc(request, booking),
+                         'mail_cc': default_mail_cc(request, booking),
                          'mail_bcc': default_vouchers_mail_bcc(request),
                          'mail_subject': default_vouchers_mail_subject(
                              request, booking),
@@ -2086,7 +2086,7 @@ def default_invoice_mail_body(request, booking=None):
     return get_template('booking/emails/invoice_email.html').render(context)
 
 
-def default_vouchers_mail_cc(request, booking):
+def default_mail_cc(request, booking):
     if booking.agency:
         cc_list = ''
         for contact in booking.agency.agencycopycontact_set.all():
