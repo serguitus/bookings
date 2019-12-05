@@ -6,8 +6,6 @@
 
 
 ### TODO #####
-- pasar campo time a basebookingservice y oredenar por datetime_from y luego time
-
 - agregar filtros en la vista de marcar pagos de proveedor. (booking_ref, internal_ref, booking_name,
 datetime_from, datetime_to, confirmation_number)
 
@@ -30,6 +28,8 @@ datetime_from, datetime_to, confirmation_number)
 - incorporar un nuevo tipo a las facturas que muestre, por servicios, el precio por pax para los diferentes tipos de hab. (ver como ejemplo la factura hecha a mano para el booking 20640 de produccion)
 
 - segun conversamos, replantearnos el tema de los paquetes de servicios y valorar si debemos distinguir entre los paquetes que tienen un mismo proveedor y los que tienen dentro servicios de diferentes proveedores. hoy en dia se hace tedioso trabajar con un paquete con un grupo de servicios que todos son del mismo proveedor. en esos casos es importante mantener los servicios por separado pues tienen diferentes formas de calculo de precio
+
+OK - pasar campo time a basebookingservice y oredenar por datetime_from y luego time
 
 OK - accesso a los diferentes modelos sin permiso de edicion. (creo que sobre eso ya habias hecho algo pero no estoy claro) el asunto es permitir acceso a los datos, tanto de proveedores como de servicios en el change_from de cierto servicio, similar al link de editar que hoy sale pero haciendo que sea solo lectura sin permiso de editar
 
