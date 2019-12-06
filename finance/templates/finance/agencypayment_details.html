@@ -1,5 +1,7 @@
-{% load booking_tags %}
+{% load finance_tags %}
 {% load render_table from django_tables2 %}
 
-<div class="provider_payments-container">
+{% agencyinvoice_table current as table %}
+<div class="agency_invoices-container">
+    {% render_table table %}
 </div>

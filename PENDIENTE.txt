@@ -9,40 +9,39 @@
 - agregar filtros en la vista de marcar pagos de proveedor. (booking_ref, internal_ref, booking_name,
 datetime_from, datetime_to, confirmation_number)
 
-OK - agregar tabla de providerPayment a los BaseBookingServices (supongo que sea en el change_form)
-
-- agregar permiso para condicionar la visualizacion de la tabla de providerPayment en BaseBookingServices 
-
-- agregar tabla de AgencyPayment a los Booking (supongo que en el change_form del booking)
-
 - opciones dentro de un pago ya realizado de visualizar un pdf o adjuntarlo y enviarlo por email al proveedor
-
-- accesso a los diferentes modelos sin permiso de edicion. (creo que sobre eso ya habias hecho algo pero no estoy claro) el asunto es permitir acceso a los datos, tanto de proveedores como de servicios en el change_from de cierto servicio, similar al link de editar que hoy sale pero haciendo que sea solo lectura sin permiso de editar
 
 - opcion para cambiar estado de servicios desde la lista de servicios de un booking y desde el change_list de bookingServices y BaseBookingServices, de manera que se pueda seleccionar varios servicios y cambiarles el estado de una vez (se me ocurre un action en los change_list respectivos. hay que ver que hacer con la tabla de bookingServices dentro de un booking)
 
 - hacer un js simple que haga que cuando se llena el campo de confirmation_number, el estado del servicio pase a "Confirmed" (supongo que sea en el onChange del campo confirmation_number)
 
-OK - quitar el campo addon del BookingAllotmentSiteModel para que no salga en la vista. ese campo actualmente no se usa para los alojamientos. ya se verá luego se se vuelve a mostrar
-
 - mostrar el campo "Place" solo para aquellos servicios que tengan "places"
 
-OK - eliminar el link de "add_booking_pax" del inline de pax del booking. para eso ya tenemos el boton funcionando
-
 - agregar unos detalles desplegables a la tabla de los servicios de un booking (similar al desplegable de la lista de bookings que muestra sus servicios). Ese desplegable servirá para mostrar los detalles demás detalles de ese servicio que no se muestran en la tabla (pickup, dropOff, hora, notas, addon, etc) en funcion del tipo de servicio. eso servirá para poder revisar todo lo referido a cada servicio sin tener que ir a otra página
-
-- pensar en una solucion para el problema de las ofertas que envian los hoteles y que incorporan el concepto de "booking window" además del de "travel window". me lo imagino como un campo mas en el change_form de un bookingAllotment donde se muestren códigos de ofertas y que el precio se calcule entonces en funcion de estas.
-
-- incorporar un nuevo tipo a las facturas que muestre, por servicios, el precio por pax para los diferentes tipos de hab. (ver como ejemplo la factura hecha a mano para el booking 20640 de produccion)
-
-- concebir el mecanismo para crear las reglas de negocio para asignar los colores a los bookingServices en las diferentes change_list. (Ej. los servicios que no estan coordinados y faltan menos de 3 dias para su ejecucion deben estar rojos, es posible que tengamos que agregar el estado "en espera" para asignarlo a ciertos servicios que no se piden hasta estar proximos a la fecha de ejecusion. en estos casos, tambien deben resaltar cuando esten proximos a la fecha del servicio)
-
-- segun conversamos, replantearnos el tema de los paquetes de servicios y valorar si debemos distinguir entre los paquetes que tienen un mismo proveedor y los que tienen dentro servicios de diferentes proveedores. hoy en dia se hace tedioso trabajar con un paquete con un grupo de servicios que todos son del mismo proveedor. en esos casos es importante mantener los servicios por separado pues tienen diferentes formas de calculo de precio
-
-OK - services de provider payment ordenados por fecha
 
 - emplear urls de retorno donde sea factible.
 
 - agregar el campo location a los forms de los booking services para usarlo como forward al filtrar la lista de servicios segun location como mismo se hace ya con el provider
 
-- pasar campo time a basebookingservice y oredenar por datetime_from y luego time
+- pensar en una solucion para el problema de las ofertas que envian los hoteles y que incorporan el concepto de "booking window" además del de "travel window". me lo imagino como un campo mas en el change_form de un bookingAllotment donde se muestren códigos de ofertas y que el precio se calcule entonces en funcion de estas.
+
+- incorporar un nuevo tipo a las facturas que muestre, por servicios, el precio por pax para los diferentes tipos de hab. (ver como ejemplo la factura hecha a mano para el booking 20640 de produccion)
+
+- segun conversamos, replantearnos el tema de los paquetes de servicios y valorar si debemos distinguir entre los paquetes que tienen un mismo proveedor y los que tienen dentro servicios de diferentes proveedores. hoy en dia se hace tedioso trabajar con un paquete con un grupo de servicios que todos son del mismo proveedor. en esos casos es importante mantener los servicios por separado pues tienen diferentes formas de calculo de precio
+
+OK - pasar campo time a basebookingservice y oredenar por datetime_from y luego time
+
+OK - accesso a los diferentes modelos sin permiso de edicion. (creo que sobre eso ya habias hecho algo pero no estoy claro) el asunto es permitir acceso a los datos, tanto de proveedores como de servicios en el change_from de cierto servicio, similar al link de editar que hoy sale pero haciendo que sea solo lectura sin permiso de editar
+
+OK - agregar tabla de AgencyPayment a los Booking (supongo que en el change_form del booking)
+
+OK - agregar tabla de providerPayment a los BaseBookingServices (supongo que sea en el change_form)
+
+OK - quitar el campo addon del BookingAllotmentSiteModel para que no salga en la vista. ese campo actualmente no se usa para los alojamientos. ya se verá luego se se vuelve a mostrar
+
+OK - eliminar el link de "add_booking_pax" del inline de pax del booking. para eso ya tenemos el boton funcionando
+
+OK - concebir el mecanismo para crear las reglas de negocio para asignar los colores a los bookingServices en las diferentes change_list. (Ej. los servicios que no estan coordinados y faltan menos de 3 dias para su ejecucion deben estar rojos, es posible que tengamos que agregar el estado "en espera" para asignarlo a ciertos servicios que no se piden hasta estar proximos a la fecha de ejecusion. en estos casos, tambien deben resaltar cuando esten proximos a la fecha del servicio)
+
+OK - services de provider payment ordenados por fecha
+

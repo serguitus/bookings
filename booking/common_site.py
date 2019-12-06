@@ -1034,7 +1034,7 @@ class BookingSiteModel(SiteModel):
         template = get_template("booking/pdf/voucher.html")
         booking = Booking.objects.get(id=bk)
         services = BookingService.objects.filter(id__in=service_ids). \
-                   order_by('datetime_from', 'datetime_to'). \
+                   order_by('datetime_from', 'time', 'datetime_to'). \
                    prefetch_related('rooming_list')
         objs = _get_voucher_services(services)
         context.update({'pagesize': 'Letter',

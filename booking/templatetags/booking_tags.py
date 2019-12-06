@@ -28,7 +28,7 @@ from booking.tables import (
 )
 from booking.services import BookingServices
 
-from finance.models import AgencyPayment;
+from finance.models import AgencyPayment
 
 register = template.Library()
 
@@ -45,7 +45,7 @@ def packageservice_table(package):
 def quotepackage_table(quotepackage):
     table = QuotePackageServiceTable(
         quotepackage.quotepackage_services.all(),
-        order_by=('datetime_from', 'datetime_to'))
+        order_by=('datetime_from', 'time', 'datetime_to'))
     return table
 
 
@@ -53,7 +53,7 @@ def quotepackage_table(quotepackage):
 def quoteservice_table(quote):
     table = QuoteServiceTable(
         quote.quote_services.all(),
-        order_by=('datetime_from', 'datetime_to'))
+        order_by=('datetime_from', 'time', 'datetime_to'))
     return table
 
 
@@ -69,16 +69,17 @@ def quotepaxvariant_table(quote):
 def bookingservice_table(booking):
     table = BookingServiceTable(
         BookingService.objects.filter(booking=booking),
-        order_by=('datetime_from', 'datetime_to'))
+        order_by=('datetime_from', 'time', 'datetime_to'))
     return table
 
 
 @register.simple_tag
 def agencypayment_table(booking):
-    table = AgencyPaymentTable(
-        AgencyPayment.objects.filter(agencydocumentmatch__debit_document=booking.invoice),
-        order_by=('date',),
-    )
+    if booking.invoice:
+        qs = AgencyPayment.objects.filter(agencydocumentmatch__debit_document=booking.invoice)
+    else:
+        qs = AgencyPayment.objects.none()
+    table = AgencyPaymentTable(qs, order_by=('date',),)
     return table
 
 
@@ -95,7 +96,7 @@ def providerbookingpayment_table(service):
 def providerbookingpaymentservice_table(payment):
     table = ProviderBookingPaymentServiceTable(
         ProviderBookingPaymentService.objects.filter(provider_payment=payment),
-        order_by=('datetime_from','datetime_to',),
+        order_by=('datetime_from', 'time','datetime_to',),
     )
     return table
 
@@ -104,7 +105,7 @@ def providerbookingpaymentservice_table(payment):
 def bookingconfirmation_table(booking):
     table = BookingConfirmationTable(
         BookingService.objects.filter(booking=booking),
-        order_by=('datetime_from', 'datetime_to'))
+        order_by=('datetime_from', 'time', 'datetime_to'))
     return table
 
 
@@ -114,12 +115,12 @@ def booking_services_summary_table(booking, request):
     if booking:
         table = BookingServiceSummaryTable(
             BookingService.objects.filter(booking=booking),
-            order_by=('datetime_from', 'datetime_to'))
+            order_by=('datetime_from', 'time', 'datetime_to'))
     elif b_id:
         booking = Booking.objects.get(id=b_id)
         table = BookingServiceSummaryTable(
             BookingService.objects.filter(booking=booking),
-            order_by=('datetime_from', 'datetime_to'))
+            order_by=('datetime_from', 'time', 'datetime_to'))
     else:
         table = BookingServiceSummaryTable(
             BookingService.objects.none())
@@ -130,7 +131,7 @@ def booking_services_summary_table(booking, request):
 def vouchers_table(booking):
     table = BookingVouchersTable(
         BookingService.objects.filter(booking=booking),
-        order_by=('datetime_from', 'datetime_to'))
+        order_by=('datetime_from', 'time', 'datetime_to'))
     return table
 
 
@@ -138,7 +139,7 @@ def vouchers_table(booking):
 def bookingservice_update_table(services):
     table = BookingServiceUpdateTable(
         services,
-        order_by=('datetime_from', 'datetime_to'))
+        order_by=('datetime_from', 'time', 'datetime_to'))
     return table
 
 
@@ -146,7 +147,7 @@ def bookingservice_update_table(services):
 def add_pax_bookingservices_table(services):
     table = AddPaxBookingServicesTable(
         services,
-        order_by=('datetime_from', 'datetime_to'))
+        order_by=('datetime_from', 'time', 'datetime_to'))
     return table
 
 
@@ -160,7 +161,7 @@ def booking_pax_table(booking):
 def bookingpackage_table(bookingpackage):
     table = BookingPackageServiceTable(
         bookingpackage.booking_package_services.all(),
-        order_by=('datetime_from', 'datetime_to'))
+        order_by=('datetime_from', 'time', 'datetime_to'))
     return table
 
 
@@ -170,12 +171,12 @@ def bookingpackage_services_summary_table(bookingpackage, request):
     if bookingpackage:
         table = BookingPackageServiceSummaryTable(
             bookingpackage.booking_package_services.all(),
-            order_by=('datetime_from', 'datetime_to'))
+            order_by=('datetime_from', 'time', 'datetime_to'))
     elif bp_id:
         bookingpackage = BookingPackage.objects.get(id=bp_id)
         table = BookingPackageServiceSummaryTable(
             bookingpackage.booking_package_services.all(),
-            order_by=('datetime_from', 'datetime_to'))
+            order_by=('datetime_from', 'time', 'datetime_to'))
     else:
         table = BookingServiceSummaryTable(
             BookingService.objects.none())

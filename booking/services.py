@@ -4379,7 +4379,8 @@ class BookingServices(object):
         agency = booking.agency
         bookingservices = list(BookingService.objects.all().filter(
             booking=booking.id).exclude(
-                status=constants.SERVICE_STATUS_CANCELLED).order_by('datetime_from', 'datetime_to'))
+                status=constants.SERVICE_STATUS_CANCELLED).order_by(
+                    'datetime_from', 'time', 'datetime_to'))
         services = list()
         for bookingservice in bookingservices:
             cost, c_msg, price, p_msg = cls._find_bookingservice_update_amounts(
@@ -4776,7 +4777,8 @@ class BookingServices(object):
     def booking_provider_payment_services(cls, payment_id):
         db_payment = ProviderBookingPayment.objects.get(pk=payment_id)
         payment_services = ProviderBookingPaymentService.objects.filter(
-            provider_payment=db_payment).order_by('provider_service__datetime_from')
+            provider_payment=db_payment).order_by(
+                'provider_service__datetime_from', 'provider_service__time')
         booking_services = list()
         if db_payment.status == STATUS_DRAFT:
             booking_services = BaseBookingService.objects.filter(
@@ -4784,7 +4786,7 @@ class BookingServices(object):
                     cost_amount_to_pay=F('cost_amount_paid')).exclude(
                         providerbookingpaymentservice__provider_payment=db_payment
                     ).order_by(
-                        'datetime_from', 'datetime_to')
+                        'datetime_from', 'time', 'datetime_to')
 
         services = list()
         for payment_service in list(payment_services):

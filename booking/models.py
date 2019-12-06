@@ -43,6 +43,8 @@ from config.models import (
     AmountDetail, AgencyCatalogue, ProviderCatalogue, CarRentalOffice,
 )
 
+from datetime import time
+
 from finance.constants import (
     DOC_TYPE_AGENCY_BOOKING_INVOICE, DOC_TYPE_PROVIDER_PAYMENT_WITHDRAW, STATUS_DRAFT,
 )
@@ -180,6 +182,7 @@ class BaseService(models.Model):
         max_length=5, choices=SERVICE_STATUS_LIST,
         default=SERVICE_STATUS_PENDING)
     provider = models.ForeignKey(Provider, blank=True, null=True)
+    time = models.TimeField(blank=True, null=True)
 
 
 class BaseAllotment(models.Model):
@@ -200,7 +203,6 @@ class BaseTransfer(models.Model):
     class Meta:
         abstract = True
     service = models.ForeignKey(Transfer)
-    time = models.TimeField(blank=True, null=True)
     quantity = models.SmallIntegerField(default=1)
 
 
@@ -212,7 +214,6 @@ class BaseExtra(models.Model):
         abstract = True
     service = models.ForeignKey(Extra)
     addon = models.ForeignKey(Addon, blank=True, null=True)
-    time = models.TimeField(blank=True, null=True)
     quantity = models.SmallIntegerField(default=1)
     parameter = models.SmallIntegerField(default=0, verbose_name='Hours')
 
@@ -265,6 +266,7 @@ class PackageAllotment(PackageService, BaseAllotment):
 
     def fill_data(self):
         self.name = '%s' % (self.service,)
+        self.time = time(23, 59, 59)
         self.service_type = SERVICE_CATEGORY_ALLOTMENT
 
 
@@ -424,6 +426,7 @@ class QuoteAllotment(QuoteService, BaseAllotment):
     def fill_data(self):
         self.name = '%s' % (self.service,)
         self.service_type = SERVICE_CATEGORY_ALLOTMENT
+        self.time = time(23, 59, 59)
 
 
 class QuoteTransfer(QuoteService, BaseTransfer):
@@ -477,7 +480,6 @@ class QuotePackage(QuoteService):
     service = models.ForeignKey(Package)
     price_by_package_catalogue = models.BooleanField(
         default=False, verbose_name='Prices By Catalogue')
-    time = models.TimeField(blank=True, null=True)
 
     def fill_data(self):
         # setting name for this quote_service
@@ -538,6 +540,7 @@ class QuotePackageAllotment(QuotePackageService, BaseAllotment):
     def fill_data(self):
         self.name = '%s' % (self.service,)
         self.service_type = SERVICE_CATEGORY_ALLOTMENT
+        self.time = time(23, 59, 59)
 
 
 class QuotePackageTransfer(QuotePackageService, BaseTransfer):
@@ -1044,6 +1047,7 @@ class BookingAllotment(BookingService, BaseAllotment):
         self.description = self.build_description()
         if self.service.location:
             self.service_location = self.service.location.name
+        self.time = time(23, 59, 59)
 
     def adult_quantity(self):
         if self.service.child_age:
@@ -1163,7 +1167,6 @@ class BookingPackage(BookingService):
     service = models.ForeignKey(Package)
     price_by_package_catalogue = models.BooleanField(
         default=True, verbose_name='Use Catalogue Price')
-    time = models.TimeField(blank=True, null=True)
     voucher_detail = models.BooleanField(default=False)
 
     def build_description(self):
@@ -1274,6 +1277,7 @@ class BookingPackageAllotment(BookingPackageService, BaseAllotment):
         self.base_category = BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_ALLOTMENT
         self.service_type = SERVICE_CATEGORY_ALLOTMENT
         self.description = self.build_description()
+        self.time = time(23, 59, 59)
 
     def adult_quantity(self):
         if self.service.child_age:
