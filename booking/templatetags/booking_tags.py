@@ -75,10 +75,11 @@ def bookingservice_table(booking):
 
 @register.simple_tag
 def agencypayment_table(booking):
-    table = AgencyPaymentTable(
-        AgencyPayment.objects.filter(agencydocumentmatch__debit_document=booking.invoice),
-        order_by=('date',),
-    )
+    if booking.invoice:
+        qs = AgencyPayment.objects.filter(agencydocumentmatch__debit_document=booking.invoice)
+    else:
+        qs = AgencyPayment.objects.none()
+    table = AgencyPaymentTable(qs, order_by=('date',),)
     return table
 
 
