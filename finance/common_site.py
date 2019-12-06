@@ -786,7 +786,7 @@ class AgencyInvoiceSiteModel(AgencyDebitDocumentSiteModel):
     fields = ('name', 'agency', 'document_number', 'currency', 'amount', 'matched_amount', 'date', 'status')
     list_display = ['name', 'invoice_number', 'agency', 'currency', 'amount', 'matched_amount', 'date', 'status']
     top_filters = ('currency', 'agency', 'status', 'date', 'document_number')
-    readonly_fields = ['document_number',]
+    readonly_fields = ['name', 'matched_amount', 'document_number',]
     list_details_template = 'finance/agencyinvoice_details.html'
     change_details_template = 'finance/agencyinvoice_details.html'
 

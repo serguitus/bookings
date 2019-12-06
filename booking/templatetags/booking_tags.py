@@ -28,7 +28,7 @@ from booking.tables import (
 )
 from booking.services import BookingServices
 
-from finance.models import AgencyPayment;
+from finance.models import AgencyPayment
 
 register = template.Library()
 
