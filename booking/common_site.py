@@ -1933,6 +1933,12 @@ class ProviderBookingPaymentSiteModel(SiteModel):
     change_form_template = 'booking/providerbookingpayment_change_form.html'
     list_details_template = 'booking/providerbookingpayment_details.html'
 
+    def get_changelist(self, request, **kwargs):
+        """
+        Returns the ChangeList class for use on the changelist page.
+        """
+        return StatusChangeList
+
     def is_readonly_model(self, request, obj=None):
         return obj and obj.status == STATUS_CANCELLED
 

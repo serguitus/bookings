@@ -42,7 +42,8 @@ from finance.top_filters import LoanEntityTopFilter, LoanAccountTopFilter
 from accounting.top_filters import AccountTopFilter, AmountTopFilter
 from accounting.common_site import MENU_LABEL_ACCOUNTING
 from booking.services import BookingServices
-from common.sites import SiteModel
+from booking.constants import BOOTSTRAP_STYLE_STATUS_MAPPING
+from common.sites import SiteModel, CommonChangeList
 from reservas.admin import bookings_site
 
 MENU_LABEL_FINANCE_BASIC = 'Finance Basic'
@@ -56,6 +57,11 @@ class IncorrectLookupParameters(Exception):
     pass
 
 
+class StatusChangeList(CommonChangeList):
+    def row_classes_for_result(self, result):
+        return BOOTSTRAP_STYLE_STATUS_MAPPING[result.status]
+
+
 class FinantialDocumentSiteModel(SiteModel):
     readonly_model = True
     delete_allowed = False
@@ -64,6 +70,12 @@ class FinantialDocumentSiteModel(SiteModel):
     list_display = ('name', 'currency', 'amount', 'date', 'status')
     top_filters = ('name', 'currency', 'status', 'date')
     ordering = ['-date', 'currency', 'status']
+
+    def get_changelist(self, request, **kwargs):
+        """
+        Returns the ChangeList class for use on the changelist page.
+        """
+        return StatusChangeList
 
 
 class BaseFinantialDocumentSiteModel(FinantialDocumentSiteModel):
