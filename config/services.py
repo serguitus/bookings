@@ -1376,11 +1376,11 @@ class ConfigServices(object):
                     cls.generate_agency_allotment_amounts_from_provider_allotment(
                         provider_allotment, dst_agency, is_update)
                 except Exception as ex:
-                    print(ex)
+                    print('EXCEPTION config services - generate_agency_allotments_amounts_from_providers_allotments : ' + ex.__str__())
 
         except Agency.DoesNotExist as ex:
             # 'Destination Agency not Found'
-            print(ex)
+            print('EXCEPTION config services - generate_agency_allotments_amounts_from_providers_allotments : ' + ex.__str__())
             return
 
 
@@ -1398,11 +1398,11 @@ class ConfigServices(object):
                     cls.generate_agency_transfer_amounts_from_provider_transfer(
                         provider_transfer, dst_agency, is_update)
                 except Exception as ex:
-                    print(ex)
+                    print('EXCEPTION config services - generate_agency_transfers_amounts_from_providers_transfers : ' + ex.__str__())
 
         except Agency.DoesNotExist as ex:
             # 'Destination Agency not Found'
-            print(ex)
+            print('EXCEPTION config services - generate_agency_transfers_amounts_from_providers_transfers : ' + ex.__str__())
             return
 
 
@@ -1420,11 +1420,11 @@ class ConfigServices(object):
                     cls.generate_agency_extra_amounts_from_provider_extra(
                         provider_extra, dst_agency, is_update)
                 except Exception as ex:
-                    print(ex)
+                    print('EXCEPTION config services - generate_agency_extras_amounts_from_providers_extras : ' + ex.__str__())
 
         except Agency.DoesNotExist as ex:
             # 'Destination Agency not Found'
-            print(ex)
+            print('EXCEPTION config services - generate_agency_extras_amounts_from_providers_extras : ' + ex.__str__())
             return
 
 
@@ -1603,7 +1603,7 @@ class ConfigServices(object):
                 agency_service = AgencyAllotmentService.objects.get(agency_service_id)
                 cls.next_year_price(AgencyAllotmentDetail.objects, agency_service, percent, amount)
             except Error as ex:
-                print(ex)
+                print('EXCEPTION config services - next_year_allotment_prices : ' + ex.__str__())
 
 
     @classmethod
@@ -1613,7 +1613,7 @@ class ConfigServices(object):
                 agency_service = AgencyTransferService.objects.get(agency_service_id)
                 cls.next_year_price(AgencyTransferDetail.objects, agency_service, percent, amount)
             except Error as ex:
-                print(ex)
+                print('EXCEPTION config services - next_year_transfer_prices : ' + ex.__str__())
 
 
     @classmethod
@@ -1623,7 +1623,7 @@ class ConfigServices(object):
                 agency_service = AgencyExtraService.objects.get(agency_service_id)
                 cls.next_year_price(AgencyExtraDetail.objects, agency_service, percent, amount)
             except Error as ex:
-                print(ex)
+                print('EXCEPTION config services - next_year_extra_prices : ' + ex.__str__())
 
 
     @classmethod
