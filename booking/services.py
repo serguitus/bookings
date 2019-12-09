@@ -5004,6 +5004,19 @@ class BookingServices(object):
                 )
 
 
+    @classmethod
+    def delete_quotepackage_services(cls, package):
+        services = QuotePackageAllotment.objects.filter(quote_package=package);
+        for service in services:
+            service.delete()
+        services = QuotePackageTransfer.objects.filter(quote_package=package);
+        for service in services:
+            service.delete()
+        services = QuotePackageExtra.objects.filter(quote_package=package);
+        for service in services:
+            service.delete()
+
+
 def details_allotment_queryset(
         service, date_from=None, date_to=None, room_type=None, board_type=None, addon=None):
     if not service:

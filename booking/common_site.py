@@ -640,6 +640,10 @@ class QuotePackageSiteModel(QuoteServiceSiteModel):
     change_details_template = 'booking/quotepackage_details.html'
     inlines = [QuotePackagePaxVariantInline]
 
+    def delete_model(self, request, obj):
+        BookingServices.delete_quotepackage_services(obj)
+        super(QuotePackageSiteModel, self).delete_model(request, obj)
+
     def save_related(self, request, form, formsets, change):
         with transaction.atomic(savepoint=False):
             super(QuotePackageSiteModel, self).save_related(request, form, formsets, change)
