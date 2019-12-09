@@ -452,7 +452,7 @@ class ProviderTransferDetailInline(CommonStackedInline):
     fields = (
         ('p_location_from', 'p_location_to', 'addon'),
         ('pax_range_min', 'pax_range_max'),
-        'ad_1_amount',
+        ('ad_1_amount', 'ch_1_ad_1_amount'),
     )
     ordering = ['p_location_from', 'p_location_to']
     form = ProviderTransferDetailInlineForm
