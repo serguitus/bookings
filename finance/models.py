@@ -1015,6 +1015,7 @@ class Provider(models.Model):
     phone = models.CharField(max_length=30, blank=True, null=True)
     alias = models.CharField(max_length=30, blank=True, null=True)
     is_private = models.BooleanField(default=False)
+    notes = models.TextField(max_length=200, blank=True, null=True)
 
     def __unicode__(self):
         return self.name

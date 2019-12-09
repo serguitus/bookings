@@ -1880,7 +1880,8 @@ class BookingInvoiceSiteModel(SiteModel):
 
     change_form_template = 'booking/bookinginvoice_change_form.html'
 
-    inlines = [BookingInvoiceDetailInline, BookingInvoiceLineInline, BookingInvoicePartialInline]
+    inlines = [BookingInvoiceDetailInline, BookingInvoiceLineInline,
+               BookingInvoicePartialInline]
     list_details_template = 'booking/bookinginvoice_details.html'
     change_details_template = 'booking/bookinginvoice_details.html'
 
@@ -1889,16 +1890,20 @@ class BookingInvoiceSiteModel(SiteModel):
 
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'invoice_booking') and obj.invoice_booking:
-            return redirect(reverse('common:booking_booking_change', args=[obj.invoice_booking.pk]))
+            return redirect(reverse('common:booking_booking_change',
+                                    args=[obj.invoice_booking.pk]))
         if 'invoice_booking' in request.POST:
-            return redirect(reverse('common:booking_booking_change', args=[request.POST['invoice_booking']]))
+            return redirect(reverse('common:booking_booking_change',
+                                    args=[request.POST['invoice_booking']]))
         return super(BookingInvoiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
         if hasattr(obj, 'invoice_booking') and obj.invoice_booking:
-            return redirect(reverse('common:booking_booking_change', args=[obj.invoice_booking.pk]))
+            return redirect(reverse('common:booking_booking_change',
+                                    args=[obj.invoice_booking.pk]))
         if 'invoice_booking' in request.POST:
-            return redirect(reverse('common:booking_booking_change', args=[request.POST['invoice_booking']]))
+            return redirect(reverse('common:booking_booking_change',
+                                    args=[request.POST['invoice_booking']]))
         return super(BookingInvoiceSiteModel, self).response_post_save_change(request, obj)
 
 
@@ -1920,7 +1925,8 @@ class ProviderBookingPaymentSiteModel(SiteModel):
             )
         }),
     )
-    list_display = ('name', 'details', 'account', 'services_amount', 'amount', 'date', 'status')
+    list_display = ('name', 'details', 'account', 'services_amount',
+                    'amount', 'date', 'status')
     readonly_fields = ['services_amount']
     add_readonly_fields = ['status']
 
@@ -1930,6 +1936,12 @@ class ProviderBookingPaymentSiteModel(SiteModel):
     form = ProviderBookingPaymentForm
     change_form_template = 'booking/providerbookingpayment_change_form.html'
     list_details_template = 'booking/providerbookingpayment_details.html'
+
+    def get_changelist(self, request, **kwargs):
+        """
+        Returns the ChangeList class for use on the changelist page.
+        """
+        return StatusChangeList
 
     def is_readonly_model(self, request, obj=None):
         return obj and obj.status == STATUS_CANCELLED
