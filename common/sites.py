@@ -178,7 +178,7 @@ class CommonSite(AdminSite):
                         self.model_action_url_format(model_index_action) % (model._meta.app_label, model._meta.model_name),
                         current_app=self.name)
                 except Exception as ex:
-                    print(ex)
+                    print('EXCEPTION common sites - _build_menu_dict : ' + ex.__str__())
                     index_url = None
             if not index_url:
                 try:
@@ -186,7 +186,7 @@ class CommonSite(AdminSite):
                         self.model_action_url_format('changelist') % (model._meta.app_label, model._meta.model_name),
                         current_app=self.name)
                 except Exception as ex:
-                    print(ex)
+                    print('EXCEPTION common sites - _build_menu_dict : ' + ex.__str__())
                     index_url = None
 
             model_dict = {
@@ -624,7 +624,7 @@ class SiteModel(TotalsumAdmin):
                         'link_url': url,
                         'link_icon': icon,},)
         except Exception as ex:
-            print(ex)
+            print('EXCEPTION common sites - recent_link : ' + ex.__str__())
 
     def is_add_url(self, url):
         if url.find('/add') < 0:
@@ -666,7 +666,7 @@ class SiteModel(TotalsumAdmin):
             try:
                 media = media + inline_formset.media
             except Exception as ex:
-                print(ex)
+                print('EXCEPTION common sites - changeform_context : ' + ex.__str__())
 
         context = dict(
             self.admin_site.each_context(request),
@@ -1034,7 +1034,7 @@ class SiteModel(TotalsumAdmin):
             redirect_url = common_add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
             return HttpResponseRedirect(redirect_url)
         except Exception as ex:
-            print(ex)
+            print('EXCEPTION common sites - changeform_do_saving : ' + ex.__str__())
             self.message_user(request, ex, messages.ERROR)
             return False
 

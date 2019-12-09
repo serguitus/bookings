@@ -1340,7 +1340,7 @@ class BookingServices(object):
         try:
             src_agency = Agency.objects.get(id=AGENCY_FOR_AMOUNTS)
         except Agency.DoesNotExist as ex:
-            print(ex)
+            print('EXCEPTION booking services - generate_agencies_amounts : ' + ex.__str__())
             # 'Source Agency not Found'
             return
         for dst_agency in agencies:
@@ -2091,16 +2091,17 @@ class BookingServices(object):
         days_after = src_package.days_after
         if days_after is None:
             days_after = 0
-        if hasattr(dst_package, 'quote_package'):
+        if hasattr(dst_package, 'quote_package') and dst_package.quote_package.datetime_from:
             dst_package.datetime_from = dst_package.quote_package.datetime_from + timedelta(
                 days=days_after)
-        if hasattr(dst_package, 'booking_package'):
+        if hasattr(dst_package, 'booking_package') and dst_package.booking_package.datetime_from:
             dst_package.datetime_from = dst_package.booking_package.datetime_from + timedelta(
                 days=days_after)
         days_duration = src_package.days_duration
         if days_duration is None:
             days_duration = 0
-        dst_package.datetime_to = dst_package.datetime_from + timedelta(days=days_duration)
+        if dst_package.datetime_from:
+            dst_package.datetime_to = dst_package.datetime_from + timedelta(days=days_duration)
         dst_package.status = constants.SERVICE_STATUS_PENDING
         dst_package.provider = src_package.provider
         dst_package.service = src_package.service
@@ -2564,7 +2565,7 @@ class BookingServices(object):
                         cls.update_quote_paxvariant_amounts(quotepackage_service_pax_variant, user)
 
             except Exception as ex:
-                print('booking service 2660 : ' + ex.__str__())
+                print('EXCEPTION booking services - _sync_quote_children_paxvariants : ' + ex.__str__())
 
 
     @classmethod
@@ -2608,7 +2609,7 @@ class BookingServices(object):
                     cls.update_quotepackage_paxvariant_amounts(quotepackage_service_pax_variant)
 
             except Exception as ex:
-                print('booking service 2707 : ' + ex)
+                print('EXCEPTION booking services - _sync_quotepackage_children_paxvariants : ' + ex.__str__())
 
 
     @classmethod
@@ -2621,7 +2622,7 @@ class BookingServices(object):
             try:
                 cls.update_quotepackage_paxvariant_amounts(quotepackage_paxvariant)
             except Exception as ex:
-                print('booking service 2720 : ' + ex)
+                print('EXCEPTION booking services - update_quotepackage_paxvariants_amounts : ' + ex.__str__())
 
 
     @classmethod
@@ -4603,7 +4604,7 @@ class BookingServices(object):
                 ConfigServices.next_year_price(
                     AgencyPackageDetail.objects, agency_service, percent, amount)
             except Error as ex:
-                print(ex)
+                print('EXCEPTION booking services - next_year_package_prices : ' + ex.__str__())
 
 
     @classmethod
