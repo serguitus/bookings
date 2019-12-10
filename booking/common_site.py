@@ -1967,11 +1967,10 @@ class ProviderBookingPaymentSiteModel(SiteModel):
             self, request, form=None, obj=None, formsets=None, inline_instances=None,
             add=None, opts=None, object_id=None, to_field=None):
         if object_id:
-            formset_services = BookingServices.booking_provider_payment_services(obj)
+            formset_services = BookingServices.booking_provider_payment_services(request, form, object_id)
             return dict(formset_services=formset_services)
 
         return {}
-
 
     def changeform_context(
             self, request, form, obj, formsets, inline_instances,
@@ -1983,7 +1982,7 @@ class ProviderBookingPaymentSiteModel(SiteModel):
 
         if object_id:
             if 'formset_services' not in context:
-                context['formset_services'] = BookingServices.booking_provider_payment_services(obj)
+                context['formset_services'] = BookingServices.booking_provider_payment_services(request, form, object_id)
             if obj.status == STATUS_DRAFT:
                 ServicesFormSet = formset_factory(ProviderBookingPaymentServiceForm, extra=0)
             else:

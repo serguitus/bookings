@@ -2,6 +2,8 @@
 from __future__ import unicode_literals
 from ckeditor.widgets import CKEditorWidget
 from dal import autocomplete
+
+from django.contrib.admin.widgets import AdminDateWidget
 from django.forms import widgets
 
 from booking.models import (
@@ -971,6 +973,13 @@ class PackageForm(forms.ModelForm):
 
 
 class ProviderBookingPaymentForm(forms.ModelForm):
+    booking_ref_filter = forms.CharField(required=False)
+    internal_ref_filter = forms.CharField(required=False)
+    booking_name_filter = forms.CharField(required=False)
+    date_widget = AdminDateWidget()
+    date_from_filter = forms.CharField(required=False, widget=date_widget)
+    date_to_filter = forms.CharField(required=False, widget=date_widget)
+    confirm_number_filter = forms.CharField(required=False)
     class Meta:
         model = ProviderBookingPayment
         fields = ('__all__')

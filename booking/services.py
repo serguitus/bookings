@@ -12,6 +12,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import F, Q
 from django.utils.encoding import force_text
+from django.utils.six import text_type
 
 from accounting.constants import MOVEMENT_TYPE_OUTPUT
 from accounting.models import Account
@@ -29,6 +30,8 @@ from booking.models import (
     BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine, BookingInvoicePartial,
     ProviderBookingPayment, ProviderBookingPaymentService,
 )
+
+from common.filters import parse_date
 
 from config.constants import AMOUNTS_FIXED
 from config.models import ProviderAllotmentDetail, ProviderTransferDetail, ProviderExtraDetail
@@ -4775,7 +4778,7 @@ class BookingServices(object):
 
 
     @classmethod
-    def booking_provider_payment_services(cls, payment_id):
+    def booking_provider_payment_services(cls, request, form, payment_id):
         db_payment = ProviderBookingPayment.objects.get(pk=payment_id)
         payment_services = ProviderBookingPaymentService.objects.filter(
             provider_payment=db_payment).order_by(
@@ -4788,6 +4791,35 @@ class BookingServices(object):
                         providerbookingpaymentservice__provider_payment=db_payment
                     ).order_by(
                         'datetime_from', 'time', 'datetime_to')
+
+            booking_ref_filter = request.POST.get('booking_ref_filter')
+            if booking_ref_filter:
+                booking_services = booking_services.filter(booking__reference__icontains=booking_ref_filter)
+            booking_name_filter = request.POST.get('booking_name_filter')
+            if booking_name_filter:
+                booking_services = booking_services.filter(booking__name__icontains=booking_name_filter)
+            confirm_number_filter = request.POST.get('confirm_number_filter')
+            if confirm_number_filter:
+                booking_services = booking_services.filter(conf_number__icontains=confirm_number_filter)
+            internal_ref_filter = request.POST.get('internal_ref_filter')
+            if internal_ref_filter:
+                try:
+                    number = int(internal_ref_filter)
+                    booking_services = booking_services.filter(booking__id=number - 20000)
+                except:
+                    pass
+            date_from_filter = request.POST.get('date_from_filter')
+            if date_from_filter:
+                if isinstance(date_from_filter, text_type):
+                    date_from_filter = parse_date(date_from_filter)
+                if date_from_filter:
+                    booking_services = booking_services.filter(datetime_from__gte=date_from_filter)
+            date_to_filter = request.POST.get('date_to_filter')
+            if date_to_filter:
+                if isinstance(date_to_filter, text_type):
+                    date_to_filter = parse_date(date_to_filter)
+                if date_to_filter:
+                    booking_services = booking_services.filter(datetime_from__lte=date_to_filter)
 
         services = list()
         for payment_service in list(payment_services):

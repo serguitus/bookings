@@ -8,9 +8,9 @@
 ### TODO #####
 - booking permission to view booking payment details
 
-- booking payment details collapsed.
+OK - booking payment details collapsed.
 
-- agregar filtros en la vista de marcar pagos de proveedor. (booking_ref, internal_ref, booking_name,
+OK - agregar filtros en la vista de marcar pagos de proveedor. (booking_ref, internal_ref, booking_name,
 datetime_from, datetime_to, confirmation_number)
 
 - opciones dentro de un pago ya realizado de visualizar un pdf o adjuntarlo y enviarlo por email al proveedor

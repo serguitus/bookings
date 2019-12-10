@@ -184,3 +184,9 @@ div.field-name div.readonly {
 #btn-booking-services-summary, #btn-bookingpackage-services-summary {
     padding: 0px 2px 4px 2px;
 }
+button.booking_payments>span.booking_payments.glyphicon:before {
+    content: "\e113";
+}
+button.booking_payments.collapsed>span.booking_payments.glyphicon:before {
+    content: "\e114";
+}

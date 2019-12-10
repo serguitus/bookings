@@ -1094,7 +1094,7 @@ class SiteModel(TotalsumAdmin):
                 formsets, inline_instances = self._create_formsets(
                     request, new_object, change=not add)
                 return self.response_cancel(request, new_object, add)
-            else:
+            elif '_save' in request.POST or '_saveasnew' in request.POST or '_continue' in request.POST or '_addanother' in request.POST:
                 if form.is_valid():
                     form_validated = True
                     new_object = self.save_form(request, form, change=not add)
@@ -1118,6 +1118,11 @@ class SiteModel(TotalsumAdmin):
                         form_validated = False
                 else:
                     form_validated = False
+            else:
+                form_validated = False
+                new_object = form.instance
+                formsets, inline_instances = self._create_formsets(
+                    request, new_object, change=not add)
         else:
             if add:
                 initial = self.get_changeform_initial_data(request)
