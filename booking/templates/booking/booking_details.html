@@ -10,6 +10,11 @@
     {% include 'booking/emails/popup_modal_form.html' with modal_title='Invoice Mail' %}
 </div>
 {% agencypayment_table current as table %}
-<div class="agencypayment-container">
+<b>AGENCY PAYMENTS 
+    <button id="btn_payments_collapse_{{ current.pk }}" type="button" class="btn btn-default btn-xs left-bg-color booking_payments collapsed" data-toggle="collapse" data-target="#div_payments_{{ current.pk }}" aria-expanded="false">
+        <span class="booking_payments glyphicon"></span>
+    </button>
+</p>
+<div id="div_payments_{{ current.pk }}" class="agencypayment-container collapse">
     {% render_table table %}
 </div>
