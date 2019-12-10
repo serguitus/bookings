@@ -660,6 +660,7 @@ class Booking(models.Model):
         permissions = (
             ("change_amounts", "Can change amounts of Booking"),
             ("change_services_amounts", "Can select services to change amounts"),
+            ("view_agency_payments", "Can view agency payment details"),
         )
         unique_together = (('invoice',),)
 
