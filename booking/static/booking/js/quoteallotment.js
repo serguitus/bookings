@@ -19,13 +19,35 @@ $(document).ready(function(){
   });
 })
 
+
+/*
+This function converts string with format DDMMYY or format DD-MM-YY
+ to valid Date objects. Returns nothing on other formats
+*/
+/****** TODO unify this methods from bookingservice and quoteservices to avoid duplicates****/
+function get_date_from_string(date_str){
+  var parts =date_str.split('-');
+  if(parts[0].length == 6){
+    // working with date format DDMMYY
+    var date_list = parts[0].match(/.{1,2}/g);
+    var result_date = new Date(date_list[2].padStart(4, '20'), date_list[1]-1, date_list[0])
+    return result_date;
+  }else if(parts[0].length == 2){
+    var result_date = new Date(parts[2].padStart(4, '20'), parts[1]-1, parts[0]);
+    return result_date;
+  }else{
+    // unknown format. Do nothing
+    return
+  }
+}
+
+
 function update_end_date(){
   var nights = $('#id_nights');
   var start_selector = $('#id_datetime_from');
   var end_selector = $('#id_datetime_to');
   if(start_selector.val() && nights.val()){
-    var parts =start_selector.val().split('-');
-    var start_date = new Date(parts[2].padStart(4, '20'), parts[1] - 1, parts[0]);
+    var start_date = get_date_from_string(start_selector.val());
     var computed_end = addDays(start_date, Number(nights.val()));
     var curr_date = computed_end.getDate().toString().padStart(2, '0');
     var curr_month = (computed_end.getMonth() + 1).toString().padStart(2, '0'); //Months are zero based
