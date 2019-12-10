@@ -799,7 +799,9 @@ class BaseBookingService(BaseService, DateInterval):
     manual_price = models.BooleanField(default=False)
     base_category = models.CharField(max_length=5, choices=BASE_BOOKING_SERVICE_CATEGORIES, blank=True, null=True)
 
-    cost_amount_to_pay = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    cost_amount_to_pay = models.DecimalField(max_digits=10,
+                                             decimal_places=2,
+                                             default=0.00)
     cost_amount_paid = models.DecimalField(max_digits=10, decimal_places=2,
                                            default=0.00,
                                            verbose_name='Paid')

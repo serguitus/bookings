@@ -1249,7 +1249,7 @@ class BookingBaseServiceSiteModel(SiteModel):
                     'service_provider', 'conf_number', 'full_booking_name',
                     'service_pax_count', 'booking_internal_reference',
                     'service_addon', 'cost_amount',
-                    'price_amount', 'status',)
+                    'price_amount', 'status', 'cost_amount_paid')
     top_filters = (('booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking__reference', 'conf_number',
@@ -1280,7 +1280,8 @@ class BookingServiceSiteModel(SiteModel):
                 'booking', ('name', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'service_addon'),
                 ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility')
+                'cost_amount', 'manual_price', 'price_amount',
+                'utility_percent', 'utility')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -1289,7 +1290,8 @@ class BookingServiceSiteModel(SiteModel):
     list_display = ('name', 'datetime_from', 'datetime_to',
                     'service_provider', 'conf_number', 'booking_name',
                     'service_addon', 'cost_amount',
-                    'price_amount', 'utility_percent', 'status',)
+                    'price_amount', 'utility_percent', 'status',
+                    'cost_amount_paid')
     top_filters = (('booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking__reference', 'conf_number',
