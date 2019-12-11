@@ -11,3 +11,8 @@
   {{ block.super }}
   {% include "booking/include/services_formset.html" %}
 {% endblock after_related_objects %}
+
+{% block admin_change_form_document_ready %}
+  {{ block.super }}
+  {% include "booking/emails/popup_modal.html" %}
+{% endblock admin_change_form_document_ready %}
