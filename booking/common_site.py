@@ -216,22 +216,25 @@ class PackageServiceSiteModel(SiteModel):
     def response_post_delete(self, request, obj):
         if hasattr(obj, 'package') and obj.package:
             return redirect(reverse('common:booking_package_change', args=[obj.package.pk]))
-        if 'package' in request.POST:
-            return redirect(reverse('common:booking_package_change', args=[request.POST['package']]))
+        package = request.POST.get('package')
+        if package:
+            return redirect(reverse('common:booking_package_change', args=[package]))
         return super(PackageServiceSiteModel, self).response_post_delete(request, obj)
 
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'package') and obj.package:
             return redirect(reverse('common:booking_package_change', args=[obj.package.pk]))
-        if 'package' in request.POST:
-            return redirect(reverse('common:booking_package_change', args=[request.POST['package']]))
+        package = request.POST.get('package')
+        if package:
+            return redirect(reverse('common:booking_package_change', args=[package]))
         return super(PackageServiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
         if hasattr(obj, 'package') and obj.package:
             return redirect(reverse('common:booking_package_change', args=[obj.package.pk]))
-        if 'package' in request.POST:
-            return redirect(reverse('common:booking_package_change', args=[request.POST['package']]))
+        package = request.POST.get('package')
+        if package:
+            return redirect(reverse('common:booking_package_change', args=[package]))
         return super(PackageServiceSiteModel, self).response_post_save_change(request, obj)
 
 
@@ -501,8 +504,9 @@ class QuoteSiteModel(SiteModel):
 
     def response_add_saveasnew(
             self, request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue=None):
-        if 'id' in request.POST and request.POST['id'] and obj:
-            BookingServices.clone_quote_services(request.POST['id'], obj)
+        id = request.POST.get('id')
+        if id and obj:
+            BookingServices.clone_quote_services(id, obj)
 
         return super(QuoteSiteModel, self).response_add_saveasnew(
             request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue)
@@ -583,22 +587,25 @@ class QuoteServiceSiteModel(SiteModel):
     def response_post_delete(self, request, obj):
         if hasattr(obj, 'quote') and obj.quote:
             return redirect(reverse('common:booking_quote_change', args=[obj.quote.pk]))
-        if 'quote' in request.POST:
-            return redirect(reverse('common:booking_quote_change', args=[request.POST['quote']]))
+        quote = request.POST.get('quote')
+        if quote:
+            return redirect(reverse('common:booking_quote_change', args=[quote]))
         return super(QuoteServiceSiteModel, self).response_post_delete(request, obj)
 
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'quote') and obj.quote:
             return redirect(reverse('common:booking_quote_change', args=[obj.quote.pk]))
-        if 'quote' in request.POST:
-            return redirect(reverse('common:booking_quote_change', args=[request.POST['quote']]))
+        quote = request.POST.get('quote')
+        if quote:
+            return redirect(reverse('common:booking_quote_change', args=[quote]))
         return super(QuoteServiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
         if hasattr(obj, 'quote') and obj.quote:
             return redirect(reverse('common:booking_quote_change', args=[obj.quote.pk]))
-        if 'quote' in request.POST:
-            return redirect(reverse('common:booking_quote_change', args=[request.POST['quote']]))
+        quote = request.POST.get('quote')
+        if quote:
+            return redirect(reverse('common:booking_quote_change', args=[quote]))
         return super(QuoteServiceSiteModel, self).response_post_save_change(request, obj)
 
     def delete_model(self, request, obj):
@@ -732,27 +739,30 @@ class QuotePackageServiceSiteModel(SiteModel):
         if hasattr(obj, 'quote_package') and obj.quote_package:
             return redirect(
                 reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
-        if 'quote_package' in request.POST:
+        quote_package = request.POST.get('quote_package')
+        if quote_package:
             return redirect(
-                reverse('common:booking_quotepackage_change', args=[request.POST['quote_package']]))
+                reverse('common:booking_quotepackage_change', args=[quote_package]))
         return super(QuotePackageServiceSiteModel, self).response_post_delete(request, obj)
 
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'quote_package') and obj.quote_package:
             return redirect(
                 reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
-        if 'quote_package' in request.POST:
+        quote_package = request.POST.get('quote_package')
+        if quote_package:
             return redirect(
-                reverse('common:booking_quotepackage_change', args=[request.POST['quote_package']]))
+                reverse('common:booking_quotepackage_change', args=[quote_package]))
         return super(QuotePackageServiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
         if hasattr(obj, 'quote_package') and obj.quote_package:
             return redirect(
                 reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
-        if 'quote_package' in request.POST:
+        quote_package = request.POST.get('quote_package')
+        if quote_package:
             return redirect(
-                reverse('common:booking_quotepackage_change', args=[request.POST['quote_package']]))
+                reverse('common:booking_quotepackage_change', args=[quote_package]))
         return super(QuotePackageServiceSiteModel, self).response_post_save_change(request, obj)
 
     def delete_model(self, request, obj):
@@ -1039,7 +1049,8 @@ class BookingSiteModel(SiteModel):
                 context.update({'current': Booking.objects.get(id=id)})
                 context.update({'form': form})
                 return render(request, 'booking/voucher_config.html', context)
-            if request.POST['submit_action'] == '_send_mail':
+            submit_action = request.POST.get('submit_action')
+            if submit_action == '_send_mail':
                 mail_from = request.POST.get('mail_from')
                 to_list = _build_mail_address_list(request.POST.get('mail_to'))
                 cc_list = _build_mail_address_list(request.POST.get('mail_cc'))
@@ -1169,7 +1180,8 @@ class BookingSiteModel(SiteModel):
 
     @csrf_protect_m
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
-        if request.method == 'POST' and 'submit_action' in request.POST and request.POST['submit_action'] == '_send_mail':
+        submit_action = request.POST.get('submit_action')
+        if submit_action == '_send_mail':
             booking = Booking.objects.get(id=object_id)
             if not booking.invoice:
                 messages.add_message(request, messages.ERROR , "Error Booking without Invoice")
@@ -1248,8 +1260,9 @@ class BookingSiteModel(SiteModel):
 
     def response_add_saveasnew(
             self, request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue=None):
-        if 'id' in request.POST and request.POST['id'] and obj:
-            BookingServices.clone_booking_services(request.POST['id'], obj)
+        id = request.POST.get('id')
+        if id and obj:
+            BookingServices.clone_booking_services(id, obj)
 
         return super(BookingSiteModel, self).response_add_saveasnew(
             request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue)
@@ -1406,22 +1419,25 @@ class BaseBookingServiceSiteModel(SiteModel):
     def response_post_delete(self, request, obj):
         if hasattr(obj, 'booking') and obj.booking:
             return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
-        if 'booking' in request.POST:
-            return redirect(reverse('common:booking_booking_change', args=[request.POST['booking']]))
+        booking = request.POST.get('booking')
+        if booking:
+            return redirect(reverse('common:booking_booking_change', args=[booking]))
         return super(BaseBookingServiceSiteModel, self).response_post_delete(request, obj)
 
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'booking') and obj.booking:
             return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
-        if 'booking' in request.POST:
-            return redirect(reverse('common:booking_booking_change', args=[request.POST['booking']]))
+        booking = request.POST.get('booking')
+        if booking:
+            return redirect(reverse('common:booking_booking_change', args=[booking]))
         return super(BaseBookingServiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
         if hasattr(obj, 'booking') and obj.booking:
             return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
-        if 'booking' in request.POST:
-            return redirect(reverse('common:booking_booking_change', args=[request.POST['booking']]))
+        booking = request.POST.get('booking')
+        if booking:
+            return redirect(reverse('common:booking_booking_change', args=[booking]))
         return super(BaseBookingServiceSiteModel, self).response_post_save_change(request, obj)
 
     def delete_model(self, request, obj):
@@ -1445,7 +1461,8 @@ class BaseBookingServiceSiteModel(SiteModel):
 
     @csrf_protect_m
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
-        if request.method == 'POST' and 'submit_action' in request.POST and request.POST['submit_action'] == '_send_mail':
+        submit_action = request.POST.get('submit_action')
+        if submit_action == '_send_mail':
             mail_from = request.POST.get('mail_from')
             to_list = _build_mail_address_list(request.POST.get('mail_to'))
             cc_list = _build_mail_address_list(request.POST.get('mail_cc'))
@@ -1515,22 +1532,25 @@ class BookingPackageServiceSiteModel(SiteModel):
     def response_post_delete(self, request, obj):
         if hasattr(obj, 'booking_package') and obj.booking_package:
             return redirect(reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
-        if 'booking_package' in request.POST:
-            return redirect(reverse('common:booking_bookingpackage_change', args=[request.POST['booking_package']]))
+        booking_package = request.POST.get('booking_package')
+        if booking_package:
+            return redirect(reverse('common:booking_bookingpackage_change', args=[booking_package]))
         return super(BookingPackageServiceSiteModel, self).response_post_delete(request, obj)
 
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'booking_package') and obj.booking_package:
             return redirect(reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
-        if 'booking_package' in request.POST:
-            return redirect(reverse('common:booking_bookingpackage_change', args=[request.POST['booking_package']]))
+        booking_package = request.POST.get('booking_package')
+        if booking_package:
+            return redirect(reverse('common:booking_bookingpackage_change', args=[booking_package]))
         return super(BookingPackageServiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
         if hasattr(obj, 'booking_package') and obj.booking_package:
             return redirect(reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
-        if 'booking_package' in request.POST:
-            return redirect(reverse('common:booking_bookingpackage_change', args=[request.POST['booking_package']]))
+        booking_package = request.POST.get('booking_package')
+        if booking_package:
+            return redirect(reverse('common:booking_bookingpackage_change', args=[booking_package]))
         return super(BookingPackageServiceSiteModel, self).response_post_save_change(request, obj)
 
     def delete_model(self, request, obj):
@@ -1552,7 +1572,8 @@ class BookingPackageServiceSiteModel(SiteModel):
 
     @csrf_protect_m
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
-        if request.method == 'POST' and 'submit_action' in request.POST and request.POST['submit_action'] == '_send_mail':
+        submit_action = request.POST.get('submit_action')
+        if submit_action == '_send_mail':
             mail_from = request.POST.get('mail_from')
             to_list = _build_mail_address_list(request.POST.get('mail_to'))
             cc_list = _build_mail_address_list(request.POST.get('mail_cc'))
@@ -1971,18 +1992,20 @@ class BookingInvoiceSiteModel(SiteModel):
         if hasattr(obj, 'invoice_booking') and obj.invoice_booking:
             return redirect(reverse('common:booking_booking_change',
                                     args=[obj.invoice_booking.pk]))
-        if 'invoice_booking' in request.POST:
+        invoice_booking = request.POST.get('invoice_booking')
+        if invoice_booking:
             return redirect(reverse('common:booking_booking_change',
-                                    args=[request.POST['invoice_booking']]))
+                                    args=[invoice_booking]))
         return super(BookingInvoiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
         if hasattr(obj, 'invoice_booking') and obj.invoice_booking:
             return redirect(reverse('common:booking_booking_change',
                                     args=[obj.invoice_booking.pk]))
-        if 'invoice_booking' in request.POST:
+        invoice_booking = request.POST.get('invoice_booking')
+        if invoice_booking:
             return redirect(reverse('common:booking_booking_change',
-                                    args=[request.POST['invoice_booking']]))
+                                    args=[invoice_booking]))
         return super(BookingInvoiceSiteModel, self).response_post_save_change(request, obj)
 
 
@@ -2015,6 +2038,8 @@ class ProviderBookingPaymentSiteModel(SiteModel):
     form = ProviderBookingPaymentForm
     change_form_template = 'booking/providerbookingpayment_change_form.html'
     list_details_template = 'booking/providerbookingpayment_details.html'
+
+    custom_actions_template = 'booking/emails/send_email_button.html'
 
     def get_changelist(self, request, **kwargs):
         """

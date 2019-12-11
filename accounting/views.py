@@ -32,7 +32,8 @@ class DetailView(generic.DetailView):
 def report(request, account_id):
     p = get_object_or_404(Account, pk=account_id)
     try:
-        selected_choice = p.choice_set.get(pk=request.POST['choice'])
+        choice = request.POST.get('choice')
+        selected_choice = p.choice_set.get(pk=choice)
     except (KeyError, Account.DoesNotExist):
         # Redisplay the question voting form.
         return render(request, 'accounting/account/detail.html', {

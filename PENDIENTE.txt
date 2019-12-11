@@ -6,7 +6,7 @@
 
 
 ### TODO #####
-- booking permission to view booking payment details
+OK - booking permission to view booking payment details
 
 OK - booking payment details collapsed.
 
@@ -17,7 +17,7 @@ datetime_from, datetime_to, confirmation_number)
 
 - opcion para cambiar estado de servicios desde la lista de servicios de un booking y desde el change_list de bookingServices y BaseBookingServices, de manera que se pueda seleccionar varios servicios y cambiarles el estado de una vez (se me ocurre un action en los change_list respectivos. hay que ver que hacer con la tabla de bookingServices dentro de un booking)
 
-- hacer un js simple que haga que cuando se llena el campo de confirmation_number, el estado del servicio pase a "Confirmed" (supongo que sea en el onChange del campo confirmation_number)
+OK - hacer un js simple que haga que cuando se llena el campo de confirmation_number, el estado del servicio pase a "Confirmed" (supongo que sea en el onChange del campo confirmation_number)
 
 - mostrar el campo "Place" solo para aquellos servicios que tengan "places"
 

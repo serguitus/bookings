@@ -206,6 +206,15 @@ $(document).ready(function(){
     $('#id_schedule_to').val(null).trigger('change');
   });
 
+  // for conf_number changed
+  $('#id_conf_number').change(function (e) {
+    e.preventDefault();
+    // verify not empty to set confirmed status
+    if ($('#id_conf_number').val()) {
+      $('#id_status').val('OK').trigger('change');
+    }
+  });
+
   /* THIS IS FOR HANDLING NIGHTS LOGIC IN BOOKING SERVICES */
   var nights_selector = $('#id_nights');
   var start_selector = $('#id_datetime_from');

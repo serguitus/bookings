@@ -1170,8 +1170,6 @@ class ServiceDetailsView(View):
 
     def post(self, request, *args, **kwargs):
         service_id = request.POST.get('service', None)
-        if 'service' in request.POST and request.POST['service']:
-            service_id = request.POST['service']
         return self.process_data(service_id)
 
 
