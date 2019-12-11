@@ -4,6 +4,7 @@ from django import template
 from booking.models import (
     Booking,
     BookingService,
+    QuoteService,
     BookingTransfer,
     BookingAllotment,
     BookingExtra,
@@ -18,6 +19,7 @@ from booking.tables import (
     QuoteServiceTable, QuotePaxVariantTable,
     QuotePackageServiceTable,
     BookingServiceTable,
+    QuoteConfirmationTable,
     BookingConfirmationTable, BookingServiceSummaryTable, BookingPaxTable,
     BookingVouchersTable,
     BookingServiceUpdateTable,
@@ -105,6 +107,14 @@ def providerbookingpaymentservice_table(payment):
 def bookingconfirmation_table(booking):
     table = BookingConfirmationTable(
         BookingService.objects.filter(booking=booking),
+        order_by=('datetime_from', 'time', 'datetime_to'))
+    return table
+
+
+@register.simple_tag
+def quoteconfirmation_table(quote):
+    table = QuoteConfirmationTable(
+        QuoteService.objects.filter(quote=quote),
         order_by=('datetime_from', 'time', 'datetime_to'))
     return table
 

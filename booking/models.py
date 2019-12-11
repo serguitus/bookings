@@ -72,6 +72,25 @@ def _get_child_objects(services):
     return objs
 
 
+# Utility method to get a list of
+# QuoteService child objects from a QuoteService list
+def _get_quote_child_objects(services):
+    TYPE_MODELS = {
+        'T': QuoteTransfer,
+        'E': QuoteExtra,
+        'A': QuoteAllotment,
+        'P': QuotePackage,
+        #'PA': QuotePackageAllotment,
+        #'PT': QuotePackageTransfer,
+        #'PE': QuotePackageExtra,
+    }
+    objs = []
+    for service in services:
+        obj = TYPE_MODELS[service.service_type].objects.get(id=service.id)
+        objs.append(obj)
+    return objs
+
+
 class RelativeInterval(models.Model):
     class Meta:
         abstract = True
