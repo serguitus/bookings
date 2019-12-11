@@ -521,6 +521,7 @@ class QuoteServiceSiteModel(SiteModel):
             return redirect(reverse('common:booking_quote_change', args=[obj.quote.pk]))
         quote = request.POST.get('quote')
         if quote:
+            return redirect(reverse('common:booking_quote_change', args=[quote]))
         return super(QuoteServiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
