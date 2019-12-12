@@ -937,7 +937,8 @@ class BookingSiteModel(SiteModel):
     list_display = ('name', 'internal_reference', 'agency',
                     'reference', 'date_from',
                     'date_to', 'status', 'cost_amount',
-                    'price_amount', 'utility_percent', 'utility', 'has_notes')
+                    'price_amount', 'utility_percent', 'utility',
+                    'invoiced_amount', 'has_notes')
     top_filters = (('name', 'Booking Name'), 'reference', 'agency',
                    ('date_from', DateTopFilter), 'rooming_list__pax_name',
                    (InternalReferenceTopFilter),

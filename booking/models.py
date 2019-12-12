@@ -734,6 +734,18 @@ class Booking(models.Model):
         return ''
     internal_reference.short_description = 'TNX'
 
+    def invoice_number(self):
+        if self.invoice:
+            return self.invoice.document_number
+        return ''
+    invoice_number.short_description = 'Inv.'
+
+    def invoiced_amount(self):
+        if self.invoice:
+            return self.invoice.booking_amount
+        return ''
+    invoiced_amount.short_description = 'Invoiced'
+
     def fill_data(self):
         pass
 
