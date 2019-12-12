@@ -1,0 +1,22 @@
+{% load booking_tags %}
+{% load render_table from django_tables2 %}
+
+<div>Dear {{ client }},</div>
+<div>Please find bellow quoted services as per your request:</div>
+
+Booking: {{ quote.reference }}
+
+{% quoteconfirmation_table quote as table %}
+<div class="bookingservices-container">
+    {% render_table table %}
+</div>
+{% for min in minimums %}
+    <div>PACKAGE PRICE X PAX (minimum {{ min.pax_quantity }} pax)</div>
+    {% if min.price_single_amount %}<div>SGL ${{ min.price_single_amount }}</div>{% endif %}
+    {% if min.price_double_amount %}<div>DBL ${{ min.price_double_amount }}</div>{% endif %}
+    {% if min.price_triple_amount %}<div>TPL ${{ min.price_triple_amount }}</div>{% endif %}
+{% endfor %}
+<div>
+Best Regards
+</div>
+{{ user.first_name }}

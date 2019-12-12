@@ -20,7 +20,17 @@ from finance.models import Office
 from django import forms
 
 
-class QuoteForm(forms.ModelForm):
+class MailForm(forms.Form):
+    submit_action = forms.CharField(widget=forms.HiddenInput(), required=False)
+    mail_from = forms.CharField(widget=forms.HiddenInput(), required=False)
+    mail_to = forms.CharField(widget=forms.HiddenInput(), required=False)
+    mail_cc = forms.CharField(widget=forms.HiddenInput(), required=False)
+    mail_bcc = forms.CharField(widget=forms.HiddenInput(), required=False)
+    mail_subject = forms.CharField(widget=forms.HiddenInput(), required=False)
+    mail_body = forms.CharField(widget=forms.HiddenInput(), required=False)
+
+
+class QuoteForm(forms.ModelForm, MailForm):
     class Meta:
         model = Quote
         fields = ('__all__')
@@ -573,16 +583,6 @@ class QuotePackageForm(forms.ModelForm):
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
-
-
-class MailForm(forms.Form):
-    submit_action = forms.CharField(widget=forms.HiddenInput(), required=False)
-    mail_from = forms.CharField(widget=forms.HiddenInput(), required=False)
-    mail_to = forms.CharField(widget=forms.HiddenInput(), required=False)
-    mail_cc = forms.CharField(widget=forms.HiddenInput(), required=False)
-    mail_bcc = forms.CharField(widget=forms.HiddenInput(), required=False)
-    mail_subject = forms.CharField(widget=forms.HiddenInput(), required=False)
-    mail_body = forms.CharField(widget=forms.HiddenInput(), required=False)
 
 
 class BookingForm(forms.ModelForm, MailForm):

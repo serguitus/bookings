@@ -72,6 +72,25 @@ def _get_child_objects(services):
     return objs
 
 
+# Utility method to get a list of
+# QuoteService child objects from a QuoteService list
+def _get_quote_child_objects(services):
+    TYPE_MODELS = {
+        'T': QuoteTransfer,
+        'E': QuoteExtra,
+        'A': QuoteAllotment,
+        'P': QuotePackage,
+        #'PA': QuotePackageAllotment,
+        #'PT': QuotePackageTransfer,
+        #'PE': QuotePackageExtra,
+    }
+    objs = []
+    for service in services:
+        obj = TYPE_MODELS[service.service_type].objects.get(id=service.id)
+        objs.append(obj)
+    return objs
+
+
 class RelativeInterval(models.Model):
     class Meta:
         abstract = True
@@ -715,6 +734,18 @@ class Booking(models.Model):
         return ''
     internal_reference.short_description = 'TNX'
 
+    def invoice_number(self):
+        if self.invoice:
+            return self.invoice.document_number
+        return ''
+    invoice_number.short_description = 'Inv.'
+
+    def invoiced_amount(self):
+        if self.invoice:
+            return self.invoice.booking_amount
+        return ''
+    invoiced_amount.short_description = 'Invoiced'
+
     def fill_data(self):
         pass
 
@@ -803,7 +834,9 @@ class BaseBookingService(BaseService, DateInterval):
     manual_price = models.BooleanField(default=False)
     base_category = models.CharField(max_length=5, choices=BASE_BOOKING_SERVICE_CATEGORIES, blank=True, null=True)
 
-    cost_amount_to_pay = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    cost_amount_to_pay = models.DecimalField(max_digits=10,
+                                             decimal_places=2,
+                                             default=0.00)
     cost_amount_paid = models.DecimalField(max_digits=10, decimal_places=2,
                                            default=0.00,
                                            verbose_name='Paid')

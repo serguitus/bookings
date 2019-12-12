@@ -79,7 +79,7 @@ from booking.models import (
     BaseBookingService,
     Package, PackageAllotment, PackageTransfer, PackageExtra,
     AgencyPackageService, AgencyPackageDetail, PackageProvider,
-    Quote,
+    Quote, QuoteService,
     QuotePaxVariant, QuoteServicePaxVariant, QuotePackageServicePaxVariant,
     QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
     QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
@@ -88,9 +88,11 @@ from booking.models import (
     BookingServicePax,
     BookingService,
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
-    BookingPackageService, BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
-    BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine, BookingInvoicePartial,
-    ProviderBookingPayment, _get_child_objects,
+    BookingPackageService, BookingPackageAllotment,
+    BookingPackageTransfer, BookingPackageExtra,
+    BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine,
+    BookingInvoicePartial,
+    ProviderBookingPayment, _get_child_objects, _get_quote_child_objects,
 )
 from booking.services import BookingServices
 from booking.top_filters import (
@@ -429,7 +431,9 @@ class QuoteSiteModel(SiteModel):
     fields = (
         ('reference', 'agency', 'seller'),
         ('status', 'currency'),
-        ('date_from', 'date_to'), 'id'
+        ('date_from', 'date_to'), 'id',
+        'mail_from', 'mail_to', 'mail_cc',
+        'mail_bcc', 'mail_subject', 'mail_body', 'submit_action'
     )
     list_display = ('reference', 'agency', 'date_from',
                     'date_to', 'status', 'currency', 'seller')
@@ -506,6 +510,78 @@ class QuoteSiteModel(SiteModel):
 
         return super(QuoteSiteModel, self).response_add_saveasnew(
             request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue)
+
+
+    @csrf_protect_m
+    def changeform_view(self, request, object_id=None,
+                        form_url='', extra_context=None):
+        if request.method == 'POST':
+            if 'submit_action' in request.POST and request.POST['submit_action'] == '_send_mail':
+                quote = Quote.objects.get(id=object_id)
+                mail_from = request.POST.get('mail_from')
+                to_list = _build_mail_address_list(request.POST.get('mail_to'))
+                cc_list = _build_mail_address_list(request.POST.get('mail_cc'))
+                bcc_list = _build_mail_address_list(request.POST.get('mail_bcc'))
+                if not to_list or not mail_from:
+                    messages.add_message(request=request,
+                                         level=messages.ERROR,
+                                         message='missing Remitent or Destination address',
+                                         extra_tags='',
+                                         fail_silently=False)
+                    return redirect(reverse('common:booking_quote_change',
+                                            args=[object_id]))
+                email = EmailMessage(
+                    from_email=mail_from,
+                    to=to_list,
+                    cc=cc_list,
+                    bcc=bcc_list,
+                    subject=request.POST.get('mail_subject'),
+                    body=request.POST.get('mail_body'))
+
+                email.content_subtype = "html"
+                email.send()
+
+                messages.add_message(
+                    request=request, level=messages.SUCCESS,
+                    message='Quote sent successfully.',
+                    extra_tags='', fail_silently=False)
+                return redirect(reverse('common:booking_quote_change',
+                                        args=[object_id]))
+
+            else:
+                # default POST request. call Super
+                return super(QuoteSiteModel, self).changeform_view(
+                    request=request,
+                    object_id=object_id,
+                    form_url=form_url,
+                    extra_context=extra_context)
+        else:
+            # GET request
+            if not extra_context:
+                extra_context = dict()
+            if object_id:
+                quote = Quote.objects.get(id=object_id)
+                form = EmailPopupForm(
+                    initial={'mail_from': default_requests_mail_from(request),
+                             'mail_to': default_quote_mail_to(request, quote),
+                             'mail_cc': '',
+                             'mail_bcc': default_mail_bcc(request),
+                             'mail_subject': default_quote_mail_subject(
+                                 request, quote),
+                             'mail_body': default_quote_mail_body(request,
+                                                                  quote)})
+            else:
+                form = EmailPopupForm()
+            extra_context.update({
+                'modal_title': 'Send Quote Mail',
+                'form': form,
+            })
+            return super(QuoteSiteModel, self).changeform_view(
+                request=request,
+                object_id=object_id,
+                form_url=form_url,
+                extra_context=extra_context)
+
 
 class QuoteServiceSiteModel(SiteModel):
     def response_post_delete(self, request, obj):
@@ -852,7 +928,8 @@ class BookingSiteModel(SiteModel):
                  'package_tpl_price_amount'),
                 ('cost_amount', 'price_amount', 'utility_percent', 'utility'),
                 'id', 'version',
-                'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body', 'submit_action')
+                'mail_from', 'mail_to', 'mail_cc', 'mail_bcc',
+                'mail_subject', 'mail_body', 'submit_action')
         }),
         ('General Notes', {'fields': ('p_notes',),
                            'classes': ('collapse', 'wide')})
@@ -860,7 +937,8 @@ class BookingSiteModel(SiteModel):
     list_display = ('name', 'internal_reference', 'agency',
                     'reference', 'date_from',
                     'date_to', 'status', 'cost_amount',
-                    'price_amount', 'utility_percent', 'utility', 'has_notes')
+                    'price_amount', 'utility_percent', 'utility',
+                    'invoiced_amount', 'has_notes')
     top_filters = (('name', 'Booking Name'), 'reference', 'agency',
                    ('date_from', DateTopFilter), 'rooming_list__pax_name',
                    (InternalReferenceTopFilter),
@@ -1262,7 +1340,7 @@ class BookingBaseServiceSiteModel(SiteModel):
                     'service_provider', 'conf_number', 'full_booking_name',
                     'service_pax_count', 'booking_internal_reference',
                     'service_addon', 'cost_amount',
-                    'price_amount', 'status',)
+                    'price_amount', 'status', 'cost_amount_paid')
     top_filters = (('booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking__reference', 'conf_number',
@@ -1293,7 +1371,8 @@ class BookingServiceSiteModel(SiteModel):
                 'booking', ('name', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'service_addon'),
                 ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility')
+                'cost_amount', 'manual_price', 'price_amount',
+                'utility_percent', 'utility')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
@@ -1302,7 +1381,8 @@ class BookingServiceSiteModel(SiteModel):
     list_display = ('name', 'datetime_from', 'datetime_to',
                     'service_provider', 'conf_number', 'booking_name',
                     'service_addon', 'cost_amount',
-                    'price_amount', 'utility_percent', 'status',)
+                    'price_amount', 'utility_percent', 'status',
+                    'cost_amount_paid')
     top_filters = (('booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking__reference', 'conf_number',
@@ -1617,7 +1697,8 @@ class BookingPackageAllotmentSiteModel(BookingPackageServiceSiteModel):
     )
     list_display = ('booking_package', 'name', 'datetime_from',
                     'datetime_to', 'cost_amount', 'manual_cost',
-                    'price_amount', 'manual_price', 'utility_percent', 'utility', 'status',)
+                    'price_amount', 'manual_price', 'utility_percent',
+                    'utility', 'status', 'cost_amount_paid')
     top_filters = (('booking_package__booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking_package__booking__reference', 'conf_number',
@@ -1695,8 +1776,11 @@ class BookingPackageTransferSiteModel(BookingPackageServiceSiteModel):
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
     )
-    list_display = ('booking_package', 'name', 'service_addon', 'datetime_from', 'time',
-                'cost_amount', 'manual_cost', 'price_amount', 'manual_price', 'utility_percent', 'utility', 'status')
+    list_display = ('booking_package', 'name', 'service_addon',
+                    'datetime_from', 'time',
+                    'cost_amount', 'manual_cost', 'price_amount',
+                    'manual_price', 'utility_percent',
+                    'utility', 'status', 'cost_amount_paid')
     top_filters = (
         ('booking_package__booking__name', 'Booking'),
         ('name', 'Service'),
@@ -1769,10 +1853,13 @@ class BookingPackageExtraSiteModel(BookingPackageServiceSiteModel):
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
     )
-    list_display = ('booking_package', 'name', 'service_addon', 'quantity', 'parameter',
+    list_display = ('booking_package', 'name', 'service_addon',
+                    'quantity', 'parameter',
                     'datetime_from', 'datetime_to', 'time',
-                    'cost_amount', 'manual_cost', 'price_amount', 'manual_price', 'utility_percent', 'utility',
-                    'status',)
+                    'cost_amount', 'manual_cost',
+                    'price_amount', 'manual_price',
+                    'utility_percent', 'utility',
+                    'status', 'cost_amount_paid')
     top_filters = (
         ('booking_package__booking__name', 'Booking'),
         ('name', 'Service'),
@@ -2103,7 +2190,7 @@ def default_invoice_mail_to(request, booking=None):
 
 
 def default_invoice_mail_bcc(request, booking=None):
-    return settings.DEFAULT_BCC
+    return default_mail_bcc(request)
 
 
 def default_invoice_mail_subject(request, booking=None):
@@ -2141,6 +2228,10 @@ def default_mail_cc(request, booking):
 
 
 def default_vouchers_mail_bcc(request):
+    return default_mail_bcc(request)
+
+
+def default_mail_bcc(request):
     if request.user.email == settings.DEFAULT_BCC:
         return settings.DEFAULT_BCC
     else:
@@ -2165,6 +2256,35 @@ def default_vouchers_mail_body(request, booking=None):
             'client': dest,
     }
     return get_template('booking/emails/vouchers_email.html').render(context)
+
+
+def default_quote_mail_to(request, quote=None):
+    email_list = ''
+    # add here any logic to set default quote client email
+    return email_list
+
+
+def default_quote_mail_subject(request, quote=None):
+    subject_ref = ''
+    if quote:
+        subject_ref = quote.reference or ''
+
+    return 'Quote for %s' % subject_ref
+
+
+def default_quote_mail_body(request, quote=None):
+    dest = 'Customer'
+    # quote_services = QuoteService.objects.filter(id=quote.id)
+    # child_services = _get_quote_child_objects(quote_services)
+    pax_minimums = quote.quote_paxvariants.all()
+    context = {
+        'user': request.user,
+        'client': dest,
+        'quote': quote,
+        'minimums': pax_minimums,
+        # 'quote_services': child_services,
+    }
+    return get_template('booking/emails/quote_email.html').render(context)
 
 
 # Starts Registration Section

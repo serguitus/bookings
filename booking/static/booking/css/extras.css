@@ -7,6 +7,9 @@
 /*     width: 20%; */
 /*     float: right; */
 /* } */
+.payments-container{
+    margin: 20px 0 20px 0;
+}
 
 .field-conf_number .vTextField {
     width: 150px;

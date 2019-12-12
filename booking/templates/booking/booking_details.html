@@ -10,13 +10,14 @@
     {% include 'booking/emails/popup_modal_form.html' with modal_title='Invoice Mail' %}
 </div>
 {% if perms.booking.view_agency_payments %}
-    {% agencypayment_table current as table %}
-    <b>AGENCY PAYMENTS 
+    <div class="payments-container">
+        {% agencypayment_table current as table %}
+        <b>AGENCY PAYMENTS </b>
         <button id="btn_payments_collapse_{{ current.pk }}" type="button" class="btn btn-default btn-xs left-bg-color booking_payments collapsed" data-toggle="collapse" data-target="#div_payments_{{ current.pk }}" aria-expanded="false">
             <span class="booking_payments glyphicon"></span>
         </button>
-    </p>
-    <div id="div_payments_{{ current.pk }}" class="agencypayment-container collapse">
-        {% render_table table %}
+        <div id="div_payments_{{ current.pk }}" class="agencypayment-container collapse">
+            {% render_table table %}
+        </div>
     </div>
 {% endif %}
