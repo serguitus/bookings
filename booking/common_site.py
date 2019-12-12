@@ -1697,7 +1697,8 @@ class BookingPackageAllotmentSiteModel(BookingPackageServiceSiteModel):
     )
     list_display = ('booking_package', 'name', 'datetime_from',
                     'datetime_to', 'cost_amount', 'manual_cost',
-                    'price_amount', 'manual_price', 'utility_percent', 'utility', 'status',)
+                    'price_amount', 'manual_price', 'utility_percent',
+                    'utility', 'status', 'cost_amount_paid')
     top_filters = (('booking_package__booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking_package__booking__reference', 'conf_number',
@@ -1775,8 +1776,11 @@ class BookingPackageTransferSiteModel(BookingPackageServiceSiteModel):
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
     )
-    list_display = ('booking_package', 'name', 'service_addon', 'datetime_from', 'time',
-                'cost_amount', 'manual_cost', 'price_amount', 'manual_price', 'utility_percent', 'utility', 'status')
+    list_display = ('booking_package', 'name', 'service_addon',
+                    'datetime_from', 'time',
+                    'cost_amount', 'manual_cost', 'price_amount',
+                    'manual_price', 'utility_percent',
+                    'utility', 'status', 'cost_amount_paid')
     top_filters = (
         ('booking_package__booking__name', 'Booking'),
         ('name', 'Service'),
@@ -1849,10 +1853,13 @@ class BookingPackageExtraSiteModel(BookingPackageServiceSiteModel):
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide')})
     )
-    list_display = ('booking_package', 'name', 'service_addon', 'quantity', 'parameter',
+    list_display = ('booking_package', 'name', 'service_addon',
+                    'quantity', 'parameter',
                     'datetime_from', 'datetime_to', 'time',
-                    'cost_amount', 'manual_cost', 'price_amount', 'manual_price', 'utility_percent', 'utility',
-                    'status',)
+                    'cost_amount', 'manual_cost',
+                    'price_amount', 'manual_price',
+                    'utility_percent', 'utility',
+                    'status', 'cost_amount_paid')
     top_filters = (
         ('booking_package__booking__name', 'Booking'),
         ('name', 'Service'),
