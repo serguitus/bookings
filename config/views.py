@@ -440,10 +440,15 @@ class ServiceAllotmentAutocompleteView(autocomplete.Select2QuerySetView):
         if not self.request.user.is_authenticated():
             return Allotment.objects.none()
         provider = self.forwarded.get('provider', None)
+        location = self.forwarded.get('search_location', None)
         qs = Allotment.objects.filter(enabled=True).distinct()
         if provider:
             qs = qs.filter(
                 providerallotmentservice__provider=provider,
+            )
+        if location:
+            qs = qs.filter(
+                location=location,
             )
         if self.q:
             qs = qs.filter(name__icontains=self.q)
@@ -456,10 +461,15 @@ class ServiceTransferAutocompleteView(autocomplete.Select2QuerySetView):
         if not self.request.user.is_authenticated():
             return Transfer.objects.none()
         provider = self.forwarded.get('provider', None)
+        location = self.forwarded.get('search_location', None)
         qs = Transfer.objects.filter(enabled=True).distinct()
         if provider:
             qs = qs.filter(
                 providertransferservice__provider=provider,
+            )
+        if location:
+            qs = qs.filter(
+                location=location,
             )
         if self.q:
             qs = qs.filter(name__icontains=self.q)
@@ -472,10 +482,15 @@ class ServiceExtraAutocompleteView(autocomplete.Select2QuerySetView):
         if not self.request.user.is_authenticated():
             return Extra.objects.none()
         provider = self.forwarded.get('provider', None)
+        location = self.forwarded.get('search_location', None)
         qs = Extra.objects.filter(enabled=True).distinct()
         if provider:
             qs = qs.filter(
                 providerextraservice__provider=provider,
+            )
+        if location:
+            qs = qs.filter(
+                location=location,
             )
         if self.q:
             qs = qs.filter(name__icontains=self.q)

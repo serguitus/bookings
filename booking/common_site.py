@@ -161,7 +161,8 @@ class PackageAllotmentInLine(CommonStackedInline):
     model = PackageAllotment
     extra = 0
     fields = [
-        ('service', 'room_type', 'board_type'),
+        ('service', 'search_location'),
+        ('room_type', 'board_type'),
         ('days_after', 'days_duration', 'provider')]
     ordering = ['days_after']
     form = PackageAllotmentInlineForm
@@ -171,7 +172,7 @@ class PackageTransferInLine(CommonStackedInline):
     model = PackageTransfer
     extra = 0
     fields = [
-        ('service', 'time'),
+        ('service', 'search_location', 'time'),
         ('location_from', 'pickup', 'schedule_from'),
         ('place_from'),
         ('location_to', 'dropoff', 'schedule_to'),
@@ -185,7 +186,7 @@ class PackageExtraInLine(CommonStackedInline):
     model = PackageExtra
     extra = 0
     fields = [
-        ('service', 'time'),
+        ('service', 'search_location', 'time'),
         ('service_addon', 'quantity', 'parameter'),
         ('days_after', 'days_duration', 'provider'),
         ('pickup_office', 'dropoff_office',)]
@@ -245,7 +246,7 @@ class PackageAllotmentSiteModel(PackageServiceSiteModel):
     menu_group = MENU_GROUP_LABEL_SERVICES
 
     fields = (
-        'package', ('service'),
+        'package', ('service', 'search_location'),
         ('days_after', 'days_duration'),
         ('room_type', 'board_type'), 'provider', 'id')
     list_display = ('package', 'service', 'days_after', 'days_duration',)
@@ -260,7 +261,7 @@ class PackageTransferSiteModel(PackageServiceSiteModel):
     menu_group = MENU_GROUP_LABEL_SERVICES
 
     fields = (
-        'package', ('service'),
+        'package', ('service', 'search_location'),
         ('days_after', 'days_duration', 'time'),
         ('location_from', 'place_from'),
         ('pickup', 'schedule_from', 'schedule_time_from'),
@@ -278,7 +279,7 @@ class PackageExtraSiteModel(PackageServiceSiteModel):
     menu_label = MENU_LABEL_PACKAGE
     menu_group = MENU_GROUP_LABEL_SERVICES
 
-    fields = ['package', ('service'),
+    fields = ['package', ('service', 'search_location'),
               ('days_after', 'days_duration', 'time'),
               ('service_addon', 'quantity', 'parameter'),
               ('pickup_office', 'dropoff_office',),
@@ -351,7 +352,7 @@ class QuotePackageAllotmentInLine(CommonStackedInline):
     model = QuotePackageAllotment
     extra = 0
     fields = [
-        ('service', 'status'), ('datetime_from', 'datetime_to'),
+        ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to'),
         ('room_type', 'board_type'), 'provider']
     ordering = ['datetime_from']
     form = QuotePackageAllotmentInlineForm
@@ -361,7 +362,7 @@ class QuotePackageTransferInLine(CommonStackedInline):
     model = QuotePackageTransfer
     extra = 0
     fields = [
-        ('service', 'status'), ('datetime_from', 'datetime_to'),
+        ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to'),
         ('location_from', 'location_to'), 'provider']
     ordering = ['datetime_from']
     form = QuotePackageTransferInlineForm
@@ -371,7 +372,7 @@ class QuotePackageExtraInLine(CommonStackedInline):
     model = QuotePackageExtra
     extra = 0
     fields = [
-        ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
+        ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to', 'time'),
         ('quantity', 'parameter'),
         ('pickup_office', 'dropoff_office',),
         'provider']
@@ -385,7 +386,7 @@ class QuoteAllotmentInLine(CommonStackedInline):
     model = QuoteAllotment
     extra = 0
     fields = [
-        ('service', 'status'), ('datetime_from', 'datetime_to'),
+        ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to'),
         ('room_type', 'board_type'), 'provider']
     ordering = ['datetime_from']
     form = QuoteAllotmentInlineForm
@@ -395,7 +396,7 @@ class QuoteTransferInLine(CommonStackedInline):
     model = QuoteTransfer
     extra = 0
     fields = [
-        ('service', 'status'), ('datetime_from', 'datetime_to'),
+        ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to'),
         ('location_from', 'location_to'), 'provider']
     ordering = ['datetime_from']
     form = QuoteTransferInlineForm
@@ -405,7 +406,7 @@ class QuoteExtraInLine(CommonStackedInline):
     model = QuoteExtra
     extra = 0
     fields = [
-        ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
+        ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to', 'time'),
         ('quantity', 'parameter'),
         ('pickup_office', 'dropoff_office',),
         'provider']
@@ -418,7 +419,7 @@ class QuotePackageInLine(CommonStackedInline):
     model = QuotePackage
     extra = 0
     fields = [
-        ('service', 'status'), ('datetime_from', 'datetime_to'),
+        ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to'),
         ('provider', 'price_by_package_catalogue'), 'quoteservice_ptr']
     ordering = ['datetime_from']
     form = QuotePackageInlineForm
@@ -628,7 +629,7 @@ class QuoteAllotmentSiteModel(QuoteServiceSiteModel):
     menu_group = MENU_GROUP_LABEL_SERVICES
 
     fields = (
-        'quote', ('service', 'status'), ('datetime_from', 'nights', 'datetime_to'),
+        'quote', ('service', 'search_location', 'status'), ('datetime_from', 'nights', 'datetime_to'),
         'room_type', 'board_type', 'provider', 'id')
     list_display = ('quote', 'service', 'datetime_from', 'datetime_to', 'status',)
     top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
@@ -645,7 +646,7 @@ class QuoteTransferSiteModel(QuoteServiceSiteModel):
     menu_group = MENU_GROUP_LABEL_SERVICES
 
     fields = (
-        'quote', ('service', 'status'), ('datetime_from', 'datetime_to'),
+        'quote', ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to'),
         ('location_from', 'location_to'), 'service_addon',
         'provider', 'id')
     list_display = ('quote', 'name', 'service_addon', 'datetime_from', 'status',)
@@ -664,7 +665,7 @@ class QuoteExtraSiteModel(QuoteServiceSiteModel):
 
     fields = (
         'quote',
-        ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
+        ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to', 'time'),
         ('service_addon'), ('quantity', 'parameter'),
         ('pickup_office', 'dropoff_office',),
         'provider', 'description', 'id')
@@ -708,7 +709,7 @@ class QuotePackageSiteModel(QuoteServiceSiteModel):
 
     fields = (
         'quote',
-        ('service', 'status'),
+        ('service', 'search_location', 'status'),
         ('datetime_from', 'datetime_to'),
         ('provider', 'price_by_package_catalogue'), 'id')
     list_display = (
@@ -817,7 +818,7 @@ class QuotePackageAllotmentSiteModel(QuotePackageServiceSiteModel):
     menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
 
     fields = (
-        'quote_package', ('service', 'status'), ('datetime_from', 'datetime_to'),
+        'quote_package', ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to'),
         'room_type', 'board_type', 'provider', 'id')
     list_display = ('quote_package', 'service', 'datetime_from', 'datetime_to', 'status',)
     top_filters = ('service', 'quote_package__quote__reference', ('datetime_from', DateTopFilter), 'status',)
@@ -834,7 +835,7 @@ class QuotePackageTransferSiteModel(QuotePackageServiceSiteModel):
     menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
 
     fields = (
-        'quote_package', ('service', 'status'), ('datetime_from', 'datetime_to'),
+        'quote_package', ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to'),
         ('location_from', 'location_to'), 'service_addon',
         'provider', 'id')
     list_display = ('quote_package', 'name', 'service_addon', 'datetime_from', 'status',)
@@ -853,7 +854,7 @@ class QuotePackageExtraSiteModel(QuotePackageServiceSiteModel):
 
     fields = (
         'quote_package',
-        ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
+        ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to', 'time'),
         ('service_addon'), ('quantity', 'parameter'),
         ('pickup_office', 'dropoff_office',),
         'provider', 'id')
@@ -1635,7 +1636,7 @@ class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):
         (None, {
             'fields': (
                 ('booking', 'details'),
-                ('service', 'status', 'conf_number'),
+                ('service', 'search_location'), ('status', 'conf_number'),
                 ('datetime_from', 'nights', 'datetime_to'),
                 ('room_type', 'board_type',),
                 ('manual_cost', 'provider'),
@@ -1681,7 +1682,7 @@ class BookingPackageAllotmentSiteModel(BookingPackageServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                'booking_package', ('service', 'status', 'conf_number'),
+                'booking_package', ('service', 'search_location'), ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to'),
                 ('room_type', 'board_type'),
                 ('manual_cost', 'provider'),
@@ -1717,7 +1718,7 @@ class BookingTransferSiteModel(BaseBookingServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                'booking', ('service', 'status', 'conf_number'),
+                'booking', ('service', 'search_location'), ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
                 ('location_from', 'place_from'),
                 ('pickup', 'schedule_from', 'schedule_time_from'),
@@ -1758,7 +1759,7 @@ class BookingPackageTransferSiteModel(BookingPackageServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                'booking_package', ('service', 'status', 'conf_number'),
+                'booking_package', ('service', 'search_location'), ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
                 ('location_from', 'place_from'),
                 ('pickup', 'schedule_from', 'schedule_time_from'),
@@ -1800,7 +1801,7 @@ class BookingExtraSiteModel(BaseBookingServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                'booking', ('service', 'status', 'conf_number'),
+                'booking', ('service', 'search_location'), ('status', 'conf_number'),
                 ('datetime_from', 'nights', 'datetime_to', 'time'),
                 'service_addon',
                 ('quantity', 'parameter'),
@@ -1837,7 +1838,7 @@ class BookingPackageExtraSiteModel(BookingPackageServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                'booking_package', ('service', 'status', 'conf_number'),
+                'booking_package', ('service', 'search_location'), ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
                 'service_addon',
                 ('quantity', 'parameter'),
@@ -1879,7 +1880,7 @@ class BookingPackageSiteModel(BaseBookingServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                ('booking', 'voucher_detail'), ('service', 'status', 'conf_number'),
+                ('booking', 'voucher_detail'), ('service', 'search_location'), ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
                 ('provider'), 'cost_amount',
                 ('manual_price', 'price_by_package_catalogue'),
