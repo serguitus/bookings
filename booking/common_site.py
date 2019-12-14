@@ -2045,7 +2045,7 @@ class ProviderBookingPaymentSiteModel(SiteModel):
     change_form_template = 'booking/providerbookingpayment_change_form.html'
     list_details_template = 'booking/providerbookingpayment_details.html'
 
-    custom_actions_template = 'booking/emails/send_email_button.html'
+    custom_actions_template = 'booking/include/providerpayment_actions.html'
 
     def get_changelist(self, request, **kwargs):
         """
@@ -2120,7 +2120,14 @@ class ProviderBookingPaymentSiteModel(SiteModel):
     def changeform_view(self, request, object_id=None,
                         form_url='', extra_context=None):
         if request.method == 'POST':
-            if 'submit_action' in request.POST and request.POST['submit_action'] == '_send_mail':
+            if '_pdf' in request.POST:
+                payment = ProviderBookingPayment.objects.get(id=object_id)
+                result, pdf = self._build_provider_payment_pdf(payment)
+                if result.err:
+                    messages.add_message(request, messages.ERROR, "Failed Provider Payment PDF Generation - %s" % result.err)
+                    return redirect(reverse('common:booking_providerbookingpayment_change', args=[object_id]))
+                return HttpResponse(pdf.getvalue(), content_type='application/pdf')
+            elif 'submit_action' in request.POST and request.POST['submit_action'] == '_send_mail':
                 payment = ProviderBookingPayment.objects.get(id=object_id)
 
 
@@ -2258,10 +2265,10 @@ def default_requests_mail_body(request, provider=None, booking=None):
         services = []
     #rooming = bs.rooming_list.all()
     initial = {
-            'user': request.user,
-            'booking': booking,
-            'provider': provider,
-            'services': services,
+        'user': request.user,
+        'booking': booking,
+        'provider': provider,
+        'services': services,
     }
     return get_template('booking/emails/provider_email.html').render(initial)
 
@@ -2297,8 +2304,8 @@ def default_invoice_mail_body(request, booking=None):
     if booking and booking.agency_contact:
         dest = booking.agency_contact.name
     context = {
-            'user': request.user,
-            'client': dest,
+        'user': request.user,
+        'client': dest,
     }
     return get_template('booking/emails/invoice_email.html').render(context)
 
@@ -2380,7 +2387,7 @@ def default_quote_mail_body(request, quote=None):
 def default_provider_payment_mail_subject(request, payment=None):
     subject_ref = ''
     if payment:
-        subject_ref = '%s - %s' % (payment.date, payment.amount)
+        subject_ref = '%s - %s %s' % (payment.date, payment.amount, payment.currency)
 
     return 'Payment details %s' % (subject_ref)
 
@@ -2393,10 +2400,10 @@ def default_provider_payment_mail_body(request, payment=None):
     else:
         services = []
     initial = {
-            'user': request.user,
-            'payment': payment,
-            'provider': provider,
-            'services': services,
+        'user': request.user,
+        'payment': payment,
+        'provider': provider,
+        'services': services,
     }
     return get_template('booking/emails/provider_payment_email.html').render(initial)
 
