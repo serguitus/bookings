@@ -1,0 +1,21 @@
+{% load booking_tags %}
+Hola {% if provider.alias %}{{ provider.alias }}{% else %}{{ provider }}{% endif %}:
+<br>
+TODO
+<br>
+
+{% if provider.is_private %}{{ user.get_short_name }}{% else%}Liber Martinez
+<br>
+ERGOS CONTINENTAL, CUBA
+<br>
+Miramar Trade Center
+<br>
+Edif. Santiago, Bajos
+<br>
+Calle 78 e/3ra y 5ta avenida
+<br>
+email: ventas1@ergosonline.com
+<br>
+Telf: (53 7)208 2512/13, Monday to Friday (09h00am to 18h00)
+<br>
+Movil: (53 5)551 1234{% endif %}

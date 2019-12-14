@@ -972,7 +972,7 @@ class PackageForm(forms.ModelForm):
         }
 
 
-class ProviderBookingPaymentForm(forms.ModelForm):
+class ProviderBookingPaymentForm(forms.ModelForm, MailForm):
     booking_ref_filter = forms.CharField(required=False)
     internal_ref_filter = forms.CharField(required=False)
     booking_name_filter = forms.CharField(required=False)

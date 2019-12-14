@@ -92,7 +92,8 @@ from booking.models import (
     BookingPackageTransfer, BookingPackageExtra,
     BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine,
     BookingInvoicePartial,
-    ProviderBookingPayment, _get_child_objects, _get_quote_child_objects,
+    ProviderBookingPayment, ProviderBookingPaymentService,
+    _get_child_objects, _get_quote_child_objects,
 )
 from booking.services import BookingServices
 from booking.top_filters import (
@@ -1117,11 +1118,6 @@ class BookingSiteModel(SiteModel):
         context.update({'rooming': current_rooming or []})
         return render(request, 'booking/booking_add_pax.html', context)
 
-    def _fetch_resources(self, uri, rel):
-        path = os.path.join(settings.MEDIA_ROOT,
-                            uri.replace(settings.MEDIA_URL, ""))
-        return path
-
     def _build_vouchers(self, bk, service_ids, context):
         # This helper builds the PDF object with all vouchers
         template = get_template("booking/pdf/voucher.html")
@@ -1138,7 +1134,7 @@ class BookingSiteModel(SiteModel):
         if PY2:
             html = html.encode('UTF-8')
         result = pisa.pisaDocument(StringIO(html), dest=pdf,
-                                   link_callback=self._fetch_resources)
+                                   link_callback=_fetch_resources)
         return result, pdf
 
     def response_change(self, request, obj):
@@ -1256,7 +1252,7 @@ class BookingSiteModel(SiteModel):
             html = html.encode('UTF-8')
         pdf = StringIO()
         result = pisa.pisaDocument(StringIO(html), dest=pdf,
-                                link_callback=self._fetch_resources)
+                                link_callback=_fetch_resources)
         return result, pdf
 
     def response_add_saveasnew(
@@ -2032,6 +2028,8 @@ class ProviderBookingPaymentSiteModel(SiteModel):
                 ('account', 'services_amount'),
                 ('currency_rate', 'amount'),
                 ('details',),
+                'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body',
+                'submit_action',
             )
         }),
     )
@@ -2117,6 +2115,98 @@ class ProviderBookingPaymentSiteModel(SiteModel):
                 raise ValidationError('Invalid Services Payments Data')
         else:
             super(ProviderBookingPaymentSiteModel, self).save_model(request, obj, form, change)
+
+    @csrf_protect_m
+    def changeform_view(self, request, object_id=None,
+                        form_url='', extra_context=None):
+        if request.method == 'POST':
+            if 'submit_action' in request.POST and request.POST['submit_action'] == '_send_mail':
+                payment = ProviderBookingPayment.objects.get(id=object_id)
+
+
+                result, pdf = self._build_provider_payment_pdf(payment)
+                if result.err:
+                    messages.add_message(request, messages.ERROR, "Failed Provider Payment PDF Generation - %s" % result.err)
+                    return redirect(reverse('common:booking_providerbookingpayment_change', args=[object_id]))
+                mail_from = request.POST.get('mail_from')
+                to_list = _build_mail_address_list(request.POST.get('mail_to'))
+                cc_list = _build_mail_address_list(request.POST.get('mail_cc'))
+                bcc_list = _build_mail_address_list(request.POST.get('mail_bcc'))
+
+                if not to_list or not mail_from:
+                    messages.add_message(request=request,
+                                         level=messages.ERROR,
+                                         message='missing Remitent or Destination address',
+                                         extra_tags='',
+                                         fail_silently=False)
+                    return redirect(reverse('common:booking_providerbookingpayment_change',
+                                            args=[object_id]))
+                email = EmailMessage(
+                    from_email=mail_from,
+                    to=to_list,
+                    cc=cc_list,
+                    bcc=bcc_list,
+                    subject=request.POST.get('mail_subject'),
+                    body=request.POST.get('mail_body'))
+
+                email.attach('provider_payment.pdf', pdf.getvalue(), 'application/pdf')
+                email.content_subtype = "html"
+                email.send()
+
+                messages.add_message(
+                    request=request, level=messages.SUCCESS,
+                    message='Payment sent successfully.',
+                    extra_tags='', fail_silently=False)
+                return redirect(reverse('common:booking_providerbookingpayment_change',
+                                        args=[object_id]))
+            else:
+                # default POST request. call Super
+                return super(ProviderBookingPaymentSiteModel, self).changeform_view(
+                    request=request,
+                    object_id=object_id,
+                    form_url=form_url,
+                    extra_context=extra_context)
+        else:
+            # GET request
+            if not extra_context:
+                extra_context = dict()
+            if object_id and object_id.isnumeric():
+                payment = ProviderBookingPayment.objects.get(id=object_id)
+                form = EmailPopupForm(
+                    initial={'mail_from': default_requests_mail_from(request),
+                             'mail_to': default_requests_mail_to(request, payment.provider),
+                             'mail_cc': '',
+                             'mail_bcc': default_mail_bcc(request),
+                             'mail_subject': default_provider_payment_mail_subject(
+                                 request, payment),
+                             'mail_body': default_provider_payment_mail_body(request, payment)})
+            else:
+                form = EmailPopupForm()
+            extra_context.update({
+                'modal_title': 'Send Provider Payment Mail',
+                'form': form,
+            })
+            return super(ProviderBookingPaymentSiteModel, self).changeform_view(
+                request=request,
+                object_id=object_id,
+                form_url=form_url,
+                extra_context=extra_context)
+
+    def _build_provider_payment_pdf(self, payment):
+        template = get_template("booking/pdf/provider_payment.html")
+        services = ProviderBookingPaymentService.objects.filter(provider_payment=payment)
+        context = {
+            'pagesize': 'Letter',
+            'payment': payment,
+            'services': services,
+        }
+        html = template.render(context)
+        if PY2:
+            html = html.encode('UTF-8')
+        pdf = StringIO()
+        result = pisa.pisaDocument(StringIO(html), dest=pdf,
+                                link_callback=_fetch_resources)
+        return result, pdf
 
 
 def default_requests_mail_from(request, provider=None, booking=None):
@@ -2285,6 +2375,37 @@ def default_quote_mail_body(request, quote=None):
         # 'quote_services': child_services,
     }
     return get_template('booking/emails/quote_email.html').render(context)
+
+
+def default_provider_payment_mail_subject(request, payment=None):
+    subject_ref = ''
+    if payment:
+        subject_ref = '%s - %s' % (payment.date, payment.amount)
+
+    return 'Payment details %s' % (subject_ref)
+
+
+def default_provider_payment_mail_body(request, payment=None):
+    if payment:
+        provider = payment.provider
+        services = list(ProviderBookingPaymentService.objects.filter(
+            provider_payment=payment).order_by('provider_service__datetime_from'))
+    else:
+        services = []
+    initial = {
+            'user': request.user,
+            'payment': payment,
+            'provider': provider,
+            'services': services,
+    }
+    return get_template('booking/emails/provider_payment_email.html').render(initial)
+
+
+def _fetch_resources(uri, rel):
+    path = os.path.join(settings.MEDIA_ROOT,
+                        uri.replace(settings.MEDIA_URL, ""))
+    return path
+
 
 
 # Starts Registration Section
