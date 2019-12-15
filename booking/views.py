@@ -1188,3 +1188,25 @@ class ExtraServiceDetailsView(ServiceDetailsView):
             'car_rental': extra.car_rental is not None,
         })
 
+
+class TransferServiceDetailsView(View):
+    
+    def post(self, request, *args, **kwargs):
+        service_id = request.POST.get('service', None)
+        location_from_id = request.POST.get('location_from', None)
+        location_to_id = request.POST.get('location_to', None)
+        return self.process_data(service_id, location_from_id, location_to_id)
+
+
+    def process_data(self, service_id, location_from_id, location_to_id):
+        has_place_from = False
+        if location_from_id:
+            has_place_from = Place.objects.filter(location=location_from_id).count() > 0
+        has_place_to = False
+        if location_to_id:
+            has_place_to = Place.objects.filter(location=location_to_id).count() > 0
+        return JsonResponse({
+            'service_id': service_id,
+            'has_place_from': has_place_from,
+            'has_place_to': has_place_to,
+        })
