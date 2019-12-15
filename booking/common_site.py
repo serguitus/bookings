@@ -43,7 +43,8 @@ from finance.models import Office
 from finance.top_filters import ProviderTopFilter, AgencyTopFilter
 
 from booking.constants import (
-    SERVICE_STATUS_PENDING, BOOTSTRAP_STYLE_STATUS_MAPPING,
+    SERVICE_STATUS_PENDING, SERVICE_STATUS_COORDINATED, SERVICE_STATUS_CONFIRMED,
+    BOOTSTRAP_STYLE_STATUS_MAPPING,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT, BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA, BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE,
     BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_ALLOTMENT, BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_TRANSFER,
@@ -1354,6 +1355,20 @@ class BookingBaseServiceSiteModel(SiteModel):
         """
         return BaseServiceChangeList
 
+    actions = ['coordinated_services', 'confirmed_services', ]
+
+    def coordinated_services(self, request, queryset):
+        services = list(queryset.all())
+        BookingServices.set_services_status(services, SERVICE_STATUS_COORDINATED)
+
+    coordinated_services.short_description = "Coordinated Services"
+
+    def confirmed_services(self, request, queryset):
+        services = list(queryset.all())
+        BookingServices.set_services_status(services, SERVICE_STATUS_CONFIRMED)
+
+    confirmed_services.short_description = "Confirmed Services"
+
 
 class BookingServiceSiteModel(SiteModel):
     model_order = 1260
@@ -1394,6 +1409,20 @@ class BookingServiceSiteModel(SiteModel):
         Returns the ChangeList class for use on the changelist page.
         """
         return ServiceChangeList
+
+    actions = ['coordinated_services', 'confirmed_services', ]
+
+    def coordinated_services(self, request, queryset):
+        services = list(queryset.all())
+        BookingServices.set_services_status(services, SERVICE_STATUS_COORDINATED)
+
+    coordinated_services.short_description = "Coordinated Services"
+
+    def confirmed_services(self, request, queryset):
+        services = list(queryset.all())
+        BookingServices.set_services_status(services, SERVICE_STATUS_CONFIRMED)
+
+    confirmed_services.short_description = "Confirmed Services"
 
 
 class BaseBookingServiceSiteModel(SiteModel):
@@ -1508,6 +1537,20 @@ class BaseBookingServiceSiteModel(SiteModel):
             'common:%s_%s_change' % (self.model._meta.app_label, self.model._meta.model_name),
             args=[object_id]))
 
+    actions = ['coordinated_services', 'confirmed_services', ]
+
+    def coordinated_services(self, request, queryset):
+        services = list(queryset.all())
+        BookingServices.set_services_status(services, SERVICE_STATUS_COORDINATED)
+
+    coordinated_services.short_description = "Coordinated Services"
+
+    def confirmed_services(self, request, queryset):
+        services = list(queryset.all())
+        BookingServices.set_services_status(services, SERVICE_STATUS_CONFIRMED)
+
+    confirmed_services.short_description = "Confirmed Services"
+
 
 class BookingPackageServiceSiteModel(SiteModel):
 
@@ -1567,6 +1610,21 @@ class BookingPackageServiceSiteModel(SiteModel):
             super(BookingPackageServiceSiteModel, self).save_related(request, form, formsets, change)
             obj = self.save_form(request, form, change)
             BookingServices.update_bookingpackage_amounts(obj)
+
+    actions = ['coordinated_services', 'confirmed_services', ]
+
+    def coordinated_services(self, request, queryset):
+        services = list(queryset.all())
+        BookingServices.set_services_status(services, SERVICE_STATUS_COORDINATED)
+
+    coordinated_services.short_description = "Coordinated Services"
+
+    def confirmed_services(self, request, queryset):
+        services = list(queryset.all())
+        BookingServices.set_services_status(services, SERVICE_STATUS_CONFIRMED)
+
+    confirmed_services.short_description = "Confirmed Services"
+
 
     @csrf_protect_m
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):

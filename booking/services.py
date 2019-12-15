@@ -5049,6 +5049,13 @@ class BookingServices(object):
             service.delete()
 
 
+    @classmethod
+    def set_services_status(cls, services, status):
+        for service in services:
+            service.status = status
+            service.save(update_fields=['status'])
+
+
 def details_allotment_queryset(
         service, date_from=None, date_to=None, room_type=None, board_type=None, addon=None):
     if not service:
