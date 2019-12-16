@@ -621,6 +621,13 @@ class BookingInvoice(AgencyInvoice):
     content_format = models.CharField(
         max_length=1, choices=INVOICE_FORMATS, default=INVOICE_FORMAT_COMPACT)
 
+    def __str__(self):
+        return self.__unicode__()
+
+    def __unicode__(self):
+        return 'INVOICE %s x %s' % (
+            self.invoice_booking.name, self.invoice_booking.rooming_list.count())
+
     def fill_data(self):
         agency = Agency.objects.get(pk=self.agency_id)
         self.document_type = DOC_TYPE_AGENCY_BOOKING_INVOICE
