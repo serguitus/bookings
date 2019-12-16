@@ -43,7 +43,8 @@ from finance.models import Office
 from finance.top_filters import ProviderTopFilter, AgencyTopFilter
 
 from booking.constants import (
-    SERVICE_STATUS_PENDING, BOOTSTRAP_STYLE_STATUS_MAPPING,
+    SERVICE_STATUS_PENDING, SERVICE_STATUS_COORDINATED, SERVICE_STATUS_CONFIRMED,
+    BOOTSTRAP_STYLE_STATUS_MAPPING,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT, BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA, BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE,
     BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_ALLOTMENT, BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_TRANSFER,
@@ -92,7 +93,8 @@ from booking.models import (
     BookingPackageTransfer, BookingPackageExtra,
     BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine,
     BookingInvoicePartial,
-    ProviderBookingPayment, _get_child_objects, _get_quote_child_objects,
+    ProviderBookingPayment, ProviderBookingPaymentService,
+    _get_child_objects, _get_quote_child_objects,
 )
 from booking.services import BookingServices
 from booking.top_filters import (
@@ -160,7 +162,8 @@ class PackageAllotmentInLine(CommonStackedInline):
     model = PackageAllotment
     extra = 0
     fields = [
-        ('service', 'room_type', 'board_type'),
+        ('service', 'search_location'),
+        ('room_type', 'board_type'),
         ('days_after', 'days_duration', 'provider')]
     ordering = ['days_after']
     form = PackageAllotmentInlineForm
@@ -170,7 +173,7 @@ class PackageTransferInLine(CommonStackedInline):
     model = PackageTransfer
     extra = 0
     fields = [
-        ('service', 'time'),
+        ('service', 'search_location', 'time'),
         ('location_from', 'pickup', 'schedule_from'),
         ('place_from'),
         ('location_to', 'dropoff', 'schedule_to'),
@@ -184,7 +187,7 @@ class PackageExtraInLine(CommonStackedInline):
     model = PackageExtra
     extra = 0
     fields = [
-        ('service', 'time'),
+        ('service', 'search_location', 'time'),
         ('service_addon', 'quantity', 'parameter'),
         ('days_after', 'days_duration', 'provider'),
         ('pickup_office', 'dropoff_office',)]
@@ -244,7 +247,7 @@ class PackageAllotmentSiteModel(PackageServiceSiteModel):
     menu_group = MENU_GROUP_LABEL_SERVICES
 
     fields = (
-        'package', ('service'),
+        'package', ('service', 'search_location'),
         ('days_after', 'days_duration'),
         ('room_type', 'board_type'), 'provider', 'id')
     list_display = ('package', 'service', 'days_after', 'days_duration',)
@@ -259,7 +262,7 @@ class PackageTransferSiteModel(PackageServiceSiteModel):
     menu_group = MENU_GROUP_LABEL_SERVICES
 
     fields = (
-        'package', ('service'),
+        'package', ('service', 'search_location'),
         ('days_after', 'days_duration', 'time'),
         ('location_from', 'place_from'),
         ('pickup', 'schedule_from', 'schedule_time_from'),
@@ -277,7 +280,7 @@ class PackageExtraSiteModel(PackageServiceSiteModel):
     menu_label = MENU_LABEL_PACKAGE
     menu_group = MENU_GROUP_LABEL_SERVICES
 
-    fields = ['package', ('service'),
+    fields = ['package', ('service', 'search_location'),
               ('days_after', 'days_duration', 'time'),
               ('service_addon', 'quantity', 'parameter'),
               ('pickup_office', 'dropoff_office',),
@@ -350,7 +353,7 @@ class QuotePackageAllotmentInLine(CommonStackedInline):
     model = QuotePackageAllotment
     extra = 0
     fields = [
-        ('service', 'status'), ('datetime_from', 'datetime_to'),
+        ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to'),
         ('room_type', 'board_type'), 'provider']
     ordering = ['datetime_from']
     form = QuotePackageAllotmentInlineForm
@@ -360,7 +363,7 @@ class QuotePackageTransferInLine(CommonStackedInline):
     model = QuotePackageTransfer
     extra = 0
     fields = [
-        ('service', 'status'), ('datetime_from', 'datetime_to'),
+        ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to'),
         ('location_from', 'location_to'), 'provider']
     ordering = ['datetime_from']
     form = QuotePackageTransferInlineForm
@@ -370,7 +373,7 @@ class QuotePackageExtraInLine(CommonStackedInline):
     model = QuotePackageExtra
     extra = 0
     fields = [
-        ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
+        ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to', 'time'),
         ('quantity', 'parameter'),
         ('pickup_office', 'dropoff_office',),
         'provider']
@@ -384,7 +387,7 @@ class QuoteAllotmentInLine(CommonStackedInline):
     model = QuoteAllotment
     extra = 0
     fields = [
-        ('service', 'status'), ('datetime_from', 'datetime_to'),
+        ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to'),
         ('room_type', 'board_type'), 'provider']
     ordering = ['datetime_from']
     form = QuoteAllotmentInlineForm
@@ -394,7 +397,7 @@ class QuoteTransferInLine(CommonStackedInline):
     model = QuoteTransfer
     extra = 0
     fields = [
-        ('service', 'status'), ('datetime_from', 'datetime_to'),
+        ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to'),
         ('location_from', 'location_to'), 'provider']
     ordering = ['datetime_from']
     form = QuoteTransferInlineForm
@@ -404,7 +407,7 @@ class QuoteExtraInLine(CommonStackedInline):
     model = QuoteExtra
     extra = 0
     fields = [
-        ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
+        ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to', 'time'),
         ('quantity', 'parameter'),
         ('pickup_office', 'dropoff_office',),
         'provider']
@@ -417,7 +420,7 @@ class QuotePackageInLine(CommonStackedInline):
     model = QuotePackage
     extra = 0
     fields = [
-        ('service', 'status'), ('datetime_from', 'datetime_to'),
+        ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to'),
         ('provider', 'price_by_package_catalogue'), 'quoteservice_ptr']
     ordering = ['datetime_from']
     form = QuotePackageInlineForm
@@ -627,7 +630,7 @@ class QuoteAllotmentSiteModel(QuoteServiceSiteModel):
     menu_group = MENU_GROUP_LABEL_SERVICES
 
     fields = (
-        'quote', ('service', 'status'), ('datetime_from', 'nights', 'datetime_to'),
+        'quote', ('service', 'search_location', 'status'), ('datetime_from', 'nights', 'datetime_to'),
         'room_type', 'board_type', 'provider', 'id')
     list_display = ('quote', 'service', 'datetime_from', 'datetime_to', 'status',)
     top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
@@ -644,7 +647,7 @@ class QuoteTransferSiteModel(QuoteServiceSiteModel):
     menu_group = MENU_GROUP_LABEL_SERVICES
 
     fields = (
-        'quote', ('service', 'status'), ('datetime_from', 'datetime_to'),
+        'quote', ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to'),
         ('location_from', 'location_to'), 'service_addon',
         'provider', 'id')
     list_display = ('quote', 'name', 'service_addon', 'datetime_from', 'status',)
@@ -663,7 +666,7 @@ class QuoteExtraSiteModel(QuoteServiceSiteModel):
 
     fields = (
         'quote',
-        ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
+        ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to', 'time'),
         ('service_addon'), ('quantity', 'parameter'),
         ('pickup_office', 'dropoff_office',),
         'provider', 'description', 'id')
@@ -707,7 +710,7 @@ class QuotePackageSiteModel(QuoteServiceSiteModel):
 
     fields = (
         'quote',
-        ('service', 'status'),
+        ('service', 'search_location', 'status'),
         ('datetime_from', 'datetime_to'),
         ('provider', 'price_by_package_catalogue'), 'id')
     list_display = (
@@ -816,7 +819,7 @@ class QuotePackageAllotmentSiteModel(QuotePackageServiceSiteModel):
     menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
 
     fields = (
-        'quote_package', ('service', 'status'), ('datetime_from', 'datetime_to'),
+        'quote_package', ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to'),
         'room_type', 'board_type', 'provider', 'id')
     list_display = ('quote_package', 'service', 'datetime_from', 'datetime_to', 'status',)
     top_filters = ('service', 'quote_package__quote__reference', ('datetime_from', DateTopFilter), 'status',)
@@ -833,7 +836,7 @@ class QuotePackageTransferSiteModel(QuotePackageServiceSiteModel):
     menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
 
     fields = (
-        'quote_package', ('service', 'status'), ('datetime_from', 'datetime_to'),
+        'quote_package', ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to'),
         ('location_from', 'location_to'), 'service_addon',
         'provider', 'id')
     list_display = ('quote_package', 'name', 'service_addon', 'datetime_from', 'status',)
@@ -852,7 +855,7 @@ class QuotePackageExtraSiteModel(QuotePackageServiceSiteModel):
 
     fields = (
         'quote_package',
-        ('service', 'status'), ('datetime_from', 'datetime_to', 'time'),
+        ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to', 'time'),
         ('service_addon'), ('quantity', 'parameter'),
         ('pickup_office', 'dropoff_office',),
         'provider', 'id')
@@ -1117,11 +1120,6 @@ class BookingSiteModel(SiteModel):
         context.update({'rooming': current_rooming or []})
         return render(request, 'booking/booking_add_pax.html', context)
 
-    def _fetch_resources(self, uri, rel):
-        path = os.path.join(settings.MEDIA_ROOT,
-                            uri.replace(settings.MEDIA_URL, ""))
-        return path
-
     def _build_vouchers(self, bk, service_ids, context):
         # This helper builds the PDF object with all vouchers
         template = get_template("booking/pdf/voucher.html")
@@ -1138,7 +1136,7 @@ class BookingSiteModel(SiteModel):
         if PY2:
             html = html.encode('UTF-8')
         result = pisa.pisaDocument(StringIO(html), dest=pdf,
-                                   link_callback=self._fetch_resources)
+                                   link_callback=_fetch_resources)
         return result, pdf
 
     def response_change(self, request, obj):
@@ -1256,7 +1254,7 @@ class BookingSiteModel(SiteModel):
             html = html.encode('UTF-8')
         pdf = StringIO()
         result = pisa.pisaDocument(StringIO(html), dest=pdf,
-                                link_callback=self._fetch_resources)
+                                link_callback=_fetch_resources)
         return result, pdf
 
     def response_add_saveasnew(
@@ -1357,6 +1355,20 @@ class BookingBaseServiceSiteModel(SiteModel):
         """
         return BaseServiceChangeList
 
+    actions = ['coordinated_services', 'confirmed_services', ]
+
+    def coordinated_services(self, request, queryset):
+        services = list(queryset.all())
+        BookingServices.set_services_status(services, SERVICE_STATUS_COORDINATED)
+
+    coordinated_services.short_description = "Coordinated Services"
+
+    def confirmed_services(self, request, queryset):
+        services = list(queryset.all())
+        BookingServices.set_services_status(services, SERVICE_STATUS_CONFIRMED)
+
+    confirmed_services.short_description = "Confirmed Services"
+
 
 class BookingServiceSiteModel(SiteModel):
     model_order = 1260
@@ -1397,6 +1409,20 @@ class BookingServiceSiteModel(SiteModel):
         Returns the ChangeList class for use on the changelist page.
         """
         return ServiceChangeList
+
+    actions = ['coordinated_services', 'confirmed_services', ]
+
+    def coordinated_services(self, request, queryset):
+        services = list(queryset.all())
+        BookingServices.set_services_status(services, SERVICE_STATUS_COORDINATED)
+
+    coordinated_services.short_description = "Coordinated Services"
+
+    def confirmed_services(self, request, queryset):
+        services = list(queryset.all())
+        BookingServices.set_services_status(services, SERVICE_STATUS_CONFIRMED)
+
+    confirmed_services.short_description = "Confirmed Services"
 
 
 class BaseBookingServiceSiteModel(SiteModel):
@@ -1511,6 +1537,20 @@ class BaseBookingServiceSiteModel(SiteModel):
             'common:%s_%s_change' % (self.model._meta.app_label, self.model._meta.model_name),
             args=[object_id]))
 
+    actions = ['coordinated_services', 'confirmed_services', ]
+
+    def coordinated_services(self, request, queryset):
+        services = list(queryset.all())
+        BookingServices.set_services_status(services, SERVICE_STATUS_COORDINATED)
+
+    coordinated_services.short_description = "Coordinated Services"
+
+    def confirmed_services(self, request, queryset):
+        services = list(queryset.all())
+        BookingServices.set_services_status(services, SERVICE_STATUS_CONFIRMED)
+
+    confirmed_services.short_description = "Confirmed Services"
+
 
 class BookingPackageServiceSiteModel(SiteModel):
 
@@ -1570,6 +1610,21 @@ class BookingPackageServiceSiteModel(SiteModel):
             super(BookingPackageServiceSiteModel, self).save_related(request, form, formsets, change)
             obj = self.save_form(request, form, change)
             BookingServices.update_bookingpackage_amounts(obj)
+
+    actions = ['coordinated_services', 'confirmed_services', ]
+
+    def coordinated_services(self, request, queryset):
+        services = list(queryset.all())
+        BookingServices.set_services_status(services, SERVICE_STATUS_COORDINATED)
+
+    coordinated_services.short_description = "Coordinated Services"
+
+    def confirmed_services(self, request, queryset):
+        services = list(queryset.all())
+        BookingServices.set_services_status(services, SERVICE_STATUS_CONFIRMED)
+
+    confirmed_services.short_description = "Confirmed Services"
+
 
     @csrf_protect_m
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
@@ -1639,7 +1694,7 @@ class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):
         (None, {
             'fields': (
                 ('booking', 'details'),
-                ('service', 'status', 'conf_number'),
+                ('service', 'search_location'), ('status', 'conf_number'),
                 ('datetime_from', 'nights', 'datetime_to'),
                 ('room_type', 'board_type',),
                 ('manual_cost', 'provider'),
@@ -1685,7 +1740,7 @@ class BookingPackageAllotmentSiteModel(BookingPackageServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                'booking_package', ('service', 'status', 'conf_number'),
+                'booking_package', ('service', 'search_location'), ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to'),
                 ('room_type', 'board_type'),
                 ('manual_cost', 'provider'),
@@ -1721,7 +1776,7 @@ class BookingTransferSiteModel(BaseBookingServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                'booking', ('service', 'status', 'conf_number'),
+                'booking', ('service', 'search_location'), ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
                 ('location_from', 'place_from'),
                 ('pickup', 'schedule_from', 'schedule_time_from'),
@@ -1762,7 +1817,7 @@ class BookingPackageTransferSiteModel(BookingPackageServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                'booking_package', ('service', 'status', 'conf_number'),
+                'booking_package', ('service', 'search_location'), ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
                 ('location_from', 'place_from'),
                 ('pickup', 'schedule_from', 'schedule_time_from'),
@@ -1804,7 +1859,7 @@ class BookingExtraSiteModel(BaseBookingServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                'booking', ('service', 'status', 'conf_number'),
+                'booking', ('service', 'search_location'), ('status', 'conf_number'),
                 ('datetime_from', 'nights', 'datetime_to', 'time'),
                 'service_addon',
                 ('quantity', 'parameter'),
@@ -1841,7 +1896,7 @@ class BookingPackageExtraSiteModel(BookingPackageServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                'booking_package', ('service', 'status', 'conf_number'),
+                'booking_package', ('service', 'search_location'), ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
                 'service_addon',
                 ('quantity', 'parameter'),
@@ -1883,7 +1938,7 @@ class BookingPackageSiteModel(BaseBookingServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                ('booking', 'voucher_detail'), ('service', 'status', 'conf_number'),
+                ('booking', 'voucher_detail'), ('service', 'search_location'), ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
                 ('provider'), 'cost_amount',
                 ('manual_price', 'price_by_package_catalogue'),
@@ -2032,6 +2087,8 @@ class ProviderBookingPaymentSiteModel(SiteModel):
                 ('account', 'services_amount'),
                 ('currency_rate', 'amount'),
                 ('details',),
+                'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body',
+                'submit_action',
             )
         }),
     )
@@ -2047,7 +2104,7 @@ class ProviderBookingPaymentSiteModel(SiteModel):
     change_form_template = 'booking/providerbookingpayment_change_form.html'
     list_details_template = 'booking/providerbookingpayment_details.html'
 
-    custom_actions_template = 'booking/emails/send_email_button.html'
+    custom_actions_template = 'booking/include/providerpayment_actions.html'
 
     def get_changelist(self, request, **kwargs):
         """
@@ -2118,6 +2175,105 @@ class ProviderBookingPaymentSiteModel(SiteModel):
         else:
             super(ProviderBookingPaymentSiteModel, self).save_model(request, obj, form, change)
 
+    @csrf_protect_m
+    def changeform_view(self, request, object_id=None,
+                        form_url='', extra_context=None):
+        if request.method == 'POST':
+            if '_pdf' in request.POST:
+                payment = ProviderBookingPayment.objects.get(id=object_id)
+                result, pdf = self._build_provider_payment_pdf(payment)
+                if result.err:
+                    messages.add_message(request, messages.ERROR, "Failed Provider Payment PDF Generation - %s" % result.err)
+                    return redirect(reverse('common:booking_providerbookingpayment_change', args=[object_id]))
+                return HttpResponse(pdf.getvalue(), content_type='application/pdf')
+            elif 'submit_action' in request.POST and request.POST['submit_action'] == '_send_mail':
+                payment = ProviderBookingPayment.objects.get(id=object_id)
+
+
+                result, pdf = self._build_provider_payment_pdf(payment)
+                if result.err:
+                    messages.add_message(request, messages.ERROR, "Failed Provider Payment PDF Generation - %s" % result.err)
+                    return redirect(reverse('common:booking_providerbookingpayment_change', args=[object_id]))
+                mail_from = request.POST.get('mail_from')
+                to_list = _build_mail_address_list(request.POST.get('mail_to'))
+                cc_list = _build_mail_address_list(request.POST.get('mail_cc'))
+                bcc_list = _build_mail_address_list(request.POST.get('mail_bcc'))
+
+                if not to_list or not mail_from:
+                    messages.add_message(request=request,
+                                         level=messages.ERROR,
+                                         message='missing Remitent or Destination address',
+                                         extra_tags='',
+                                         fail_silently=False)
+                    return redirect(reverse('common:booking_providerbookingpayment_change',
+                                            args=[object_id]))
+                email = EmailMessage(
+                    from_email=mail_from,
+                    to=to_list,
+                    cc=cc_list,
+                    bcc=bcc_list,
+                    subject=request.POST.get('mail_subject'),
+                    body=request.POST.get('mail_body'))
+
+                email.attach('provider_payment.pdf', pdf.getvalue(), 'application/pdf')
+                email.content_subtype = "html"
+                email.send()
+
+                messages.add_message(
+                    request=request, level=messages.SUCCESS,
+                    message='Payment sent successfully.',
+                    extra_tags='', fail_silently=False)
+                return redirect(reverse('common:booking_providerbookingpayment_change',
+                                        args=[object_id]))
+            else:
+                # default POST request. call Super
+                return super(ProviderBookingPaymentSiteModel, self).changeform_view(
+                    request=request,
+                    object_id=object_id,
+                    form_url=form_url,
+                    extra_context=extra_context)
+        else:
+            # GET request
+            if not extra_context:
+                extra_context = dict()
+            if object_id and object_id.isnumeric():
+                payment = ProviderBookingPayment.objects.get(id=object_id)
+                form = EmailPopupForm(
+                    initial={'mail_from': default_requests_mail_from(request),
+                             'mail_to': default_requests_mail_to(request, payment.provider),
+                             'mail_cc': '',
+                             'mail_bcc': default_mail_bcc(request),
+                             'mail_subject': default_provider_payment_mail_subject(
+                                 request, payment),
+                             'mail_body': default_provider_payment_mail_body(request, payment)})
+            else:
+                form = EmailPopupForm()
+            extra_context.update({
+                'modal_title': 'Send Provider Payment Mail',
+                'form': form,
+            })
+            return super(ProviderBookingPaymentSiteModel, self).changeform_view(
+                request=request,
+                object_id=object_id,
+                form_url=form_url,
+                extra_context=extra_context)
+
+    def _build_provider_payment_pdf(self, payment):
+        template = get_template("booking/pdf/provider_payment.html")
+        services = ProviderBookingPaymentService.objects.filter(provider_payment=payment)
+        context = {
+            'pagesize': 'Letter',
+            'payment': payment,
+            'services': services,
+        }
+        html = template.render(context)
+        if PY2:
+            html = html.encode('UTF-8')
+        pdf = StringIO()
+        result = pisa.pisaDocument(StringIO(html), dest=pdf,
+                                link_callback=_fetch_resources)
+        return result, pdf
+
 
 def default_requests_mail_from(request, provider=None, booking=None):
     if provider and not provider.is_private:
@@ -2168,10 +2324,10 @@ def default_requests_mail_body(request, provider=None, booking=None):
         services = []
     #rooming = bs.rooming_list.all()
     initial = {
-            'user': request.user,
-            'booking': booking,
-            'provider': provider,
-            'services': services,
+        'user': request.user,
+        'booking': booking,
+        'provider': provider,
+        'services': services,
     }
     return get_template('booking/emails/provider_email.html').render(initial)
 
@@ -2207,8 +2363,8 @@ def default_invoice_mail_body(request, booking=None):
     if booking and booking.agency_contact:
         dest = booking.agency_contact.name
     context = {
-            'user': request.user,
-            'client': dest,
+        'user': request.user,
+        'client': dest,
     }
     return get_template('booking/emails/invoice_email.html').render(context)
 
@@ -2285,6 +2441,37 @@ def default_quote_mail_body(request, quote=None):
         # 'quote_services': child_services,
     }
     return get_template('booking/emails/quote_email.html').render(context)
+
+
+def default_provider_payment_mail_subject(request, payment=None):
+    subject_ref = ''
+    if payment:
+        subject_ref = '%s - %s %s' % (payment.date, payment.amount, payment.currency)
+
+    return 'Payment details %s' % (subject_ref)
+
+
+def default_provider_payment_mail_body(request, payment=None):
+    if payment:
+        provider = payment.provider
+        services = list(ProviderBookingPaymentService.objects.filter(
+            provider_payment=payment).order_by('provider_service__datetime_from'))
+    else:
+        services = []
+    initial = {
+        'user': request.user,
+        'payment': payment,
+        'provider': provider,
+        'services': services,
+    }
+    return get_template('booking/emails/provider_payment_email.html').render(initial)
+
+
+def _fetch_resources(uri, rel):
+    path = os.path.join(settings.MEDIA_ROOT,
+                        uri.replace(settings.MEDIA_URL, ""))
+    return path
+
 
 
 # Starts Registration Section

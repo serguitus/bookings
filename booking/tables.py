@@ -220,9 +220,10 @@ class ProviderBookingPaymentServiceTable(tables.Table):
     class Meta:
         model = ProviderBookingPaymentService
         template_name = 'booking/providerbookingpaymentservice_table.html'
-        fields = ['provider_service__name', 'provider_service__datetime_from',
-             'provider_service__datetime_to', 'provider_service__status',
-                'service_cost_amount_to_pay', 'service_cost_amount_paid', 'amount_paid']
+        fields = ['provider_service_booking', 'provider_service_name',
+            'provider_service_datetime_from', 'provider_service_datetime_to',
+            'provider_service_status', 'service_cost_amount_to_pay', 'service_cost_amount_paid',
+            'amount_paid']
         attrs = {'class': 'table table-hover table-condensed'}
 
     def __init__(self, *args, **kwargs):

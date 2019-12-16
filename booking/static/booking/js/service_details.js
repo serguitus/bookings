@@ -20,10 +20,28 @@ function update_service_details(data){
   } else {
     $('div.form-row.field-pickup_office.field-dropoff_office').hide();
   }
+  if (data && data.has_place_from) {
+    $('div.field-box.field-place_from').show();
+  } else {
+    $('div.field-box.field-place_from').hide();
+  }
+  if (data && data.has_place_to) {
+    $('div.field-box.field-place_to').show();
+  } else {
+    $('div.field-box.field-place_to').hide();
+  }
 }
 
 $(document).ready(function(){
   $('#id_service').change(function (e) {
+    e.preventDefault();
+    get_service_details();
+  });
+  $('#id_location_from').change(function (e) {
+    e.preventDefault();
+    get_service_details();
+  });
+  $('#id_location_to').change(function (e) {
     e.preventDefault();
     get_service_details();
   });

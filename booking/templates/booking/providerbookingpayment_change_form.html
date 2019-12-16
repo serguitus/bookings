@@ -5,6 +5,7 @@
 {% block head_extra %}
   {{ block.super }}
   <script type="text/javascript" src="{% static 'booking/js/providerbookingpayment.js' %}"></script>
+  <script type="text/javascript" src="{% static 'booking/js/mail_popup.js' %}"></script>
 {% endblock head_extra %}
 
 {% block after_related_objects %}
@@ -14,5 +15,5 @@
 
 {% block admin_change_form_document_ready %}
   {{ block.super }}
-  {% include "booking/emails/popup_modal.html" %}
+  {% include "booking/emails/popup_modal_form.html" %}
 {% endblock admin_change_form_document_ready %}

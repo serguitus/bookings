@@ -52,5 +52,6 @@ urlpatterns = [
     url(r'^quotepackageextra-providers-costs/?', views.QuotePackageExtraProvidersCostsView.as_view(), name='quotepackageextra_providers_costs'),
 
     url(r'^extra-service-details/?', views.ExtraServiceDetailsView.as_view(), name='extra-service-details'),
+    url(r'^transfer-service-details/?', views.TransferServiceDetailsView.as_view(), name='transfer-service-details'),
 
 ]

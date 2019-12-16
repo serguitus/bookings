@@ -765,9 +765,12 @@ class Booking(models.Model):
         return self.__unicode__()
 
     def __unicode__(self):
-        return '%s - %s (%s) (%s)' % (
+        reference = ''
+        if self.reference:
+             reference = '(%s)' % self.reference
+        return '%s - %s %s (%s)' % (
             self.agency.name, self.name,
-            self.reference, self.get_status_display())
+            reference, self.get_status_display())
 
     def has_notes(self):
         # this shows a waring sign with mouse-over message
@@ -1499,6 +1502,36 @@ class ProviderBookingPaymentService(models.Model):
     service_cost_amount_to_pay = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     service_cost_amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    @property
+    def provider_service_booking(self):
+        if self.provider_service:
+            return self.provider_service.booking.__str__()
+        return None
+
+    @property
+    def provider_service_name(self):
+        if self.provider_service:
+            return self.provider_service.name
+        return None
+
+    @property
+    def provider_service_datetime_from(self):
+        if self.provider_service:
+            return self.provider_service.datetime_from
+        return None
+
+    @property
+    def provider_service_datetime_to(self):
+        if self.provider_service:
+            return self.provider_service.datetime_to
+        return None
+
+    @property
+    def provider_service_status(self):
+        if self.provider_service:
+            return self.provider_service.get_status_display()
+        return None
 
     def __str__(self):
         return '%s : %s (%s)' % (
