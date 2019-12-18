@@ -917,7 +917,7 @@ class BookingService(BaseBookingService):
     class Meta:
         verbose_name = 'Booking Service'
         verbose_name_plural = 'Booking Services'
-        ordering = ['datetime_from', 'datetime_to']
+        ordering = ['datetime_from', 'datetime_to', 'time']
     v_notes = models.CharField(
         max_length=200, blank=True, null=True, verbose_name='Voucher Notes')
 
@@ -1245,8 +1245,9 @@ class BookingPackageService(BaseBookingService):
     class Meta:
         verbose_name = 'Booking Package Service'
         verbose_name_plural = 'Bookings Packages Services'
-        ordering = ['datetime_from']
-    booking_package = models.ForeignKey(BookingPackage, related_name='booking_package_services')
+        ordering = ['datetime_from', 'time']
+    booking_package = models.ForeignKey(BookingPackage,
+                                        related_name='booking_package_services')
 
     def fill_data(self):
         self.booking_id = self.booking_package.booking_id
