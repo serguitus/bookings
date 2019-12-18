@@ -184,7 +184,7 @@ def provider_allotment_queryset(
             )
     else:
         qs = qs.filter(
-            providerallotmentservice__providerallotmentdetail__addon=ADDON_FOR_NO_ADDON,
+            providerallotmentservice__provider__isnull=False,
         )
 
     if text:
@@ -321,7 +321,7 @@ def provider_transfer_queryset(
             )
     else:
         qs = qs.filter(
-            providertransferservice__providertransferdetail__addon=ADDON_FOR_NO_ADDON
+            providertransferservice__provider__isnull=False,
         )
 
     if text:
@@ -370,7 +370,7 @@ def provider_extra_queryset(service, addon=None, text=None):
             )
     else:
         qs = qs.filter(
-            providerextraservice__providerextradetail__addon=ADDON_FOR_NO_ADDON,
+            providerextraservice__provider__isnull=False,
         )
 
     if text:
