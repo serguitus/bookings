@@ -192,7 +192,7 @@ class BookingServices(object):
 
             # obtain lines
             booking_service_list = BookingService.objects.filter(
-                booking=booking.id).all()
+                booking=booking.id).exclude(status=constants.SERVICE_STATUS_CANCELLED).all()
             for booking_service in booking_service_list:
                 invoice_line = BookingInvoiceLine()
                 invoice_line.invoice = invoice
@@ -4773,7 +4773,7 @@ class BookingServices(object):
                 constants.SERVICE_STATUS_CANCELLED]:
             basebookingservice.cost_amount_to_pay = 0.00
         elif basebookingservice.pk and basebookingservice.cost_amount is None:
-            raise ValidationError('Current Service Status requires a Cost')
+            raise ValidationError('Service (%s) with Status (basebookingservice.status) requires a Cost' % (basebookingservice.name, basebookingservice.get_status_display()))
         elif basebookingservice.cost_amount is not None:
             basebookingservice.cost_amount_to_pay = basebookingservice.cost_amount
 

@@ -44,6 +44,7 @@ from finance.top_filters import ProviderTopFilter, AgencyTopFilter
 
 from booking.constants import (
     SERVICE_STATUS_PENDING, SERVICE_STATUS_COORDINATED, SERVICE_STATUS_CONFIRMED,
+    SERVICE_STATUS_CANCELLED,
     BOOTSTRAP_STYLE_STATUS_MAPPING,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT, BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA, BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE,
@@ -149,7 +150,7 @@ def _get_voucher_services(services):
                 'A': BookingPackageAllotment,
             }
             package_services = list(BookingPackageService.objects.filter(
-                booking_package=booking_service).exclude(status='CN'))
+                booking_package=booking_service).exclude(status=SERVICE_STATUS_CANCELLED))
             for package_service in package_services:
                 service = PACKAGE_MODELS[package_service.service_type].objects.get(
                     id=package_service.id)
@@ -1094,11 +1095,16 @@ class BookingSiteModel(SiteModel):
             current_rooming = BookingPax.objects.filter(booking=id)
             if formset.is_valid():
                 booking = Booking.objects.get(pk=id)
-                BookingServices.add_paxes_to_booking(
-                    booking,
-                    formset.cleaned_data,
-                    request.POST.getlist('pk'))
-                return redirect(reverse('common:booking_booking_change', args=[id]))
+                try:
+                    BookingServices.add_paxes_to_booking(
+                        booking,
+                        formset.cleaned_data,
+                        request.POST.getlist('pk'))
+                    return redirect(reverse('common:booking_booking_change', args=[id]))
+                except ValidationError as error:
+                    messages.add_message(
+                        request=request, level=messages.ERROR,
+                        message=error.message)
             else:
                 # some data missing. show error message
                 messages.add_message(request, messages.ERROR,
