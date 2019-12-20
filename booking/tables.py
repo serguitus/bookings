@@ -139,7 +139,7 @@ class BookingServiceTable(tables.Table):
         fields = ['check', 'name', 'service_location', 'datetime_from',
                   'datetime_to', 'nights', 'description',
                   'cost_amount', 'price_amount',
-                  'provider', 'conf_number', 'status', 'cost_amount_paid']
+                  'provider', 'conf_number', 'status', 'cost_amount_paid', 'time']
         attrs = {'class': 'table table-hover table-condensed'}
         row_attrs = {
             'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_STATUS_MAPPING[record.status]),
@@ -156,6 +156,7 @@ class BookingServiceTable(tables.Table):
         self.base_columns['cost_amount'].verbose_name='Cost'
         self.base_columns['price_amount'].verbose_name='Price'
         self.base_columns['conf_number'].verbose_name='Conf.'
+        self.base_columns['time'].visible = False
         super(BookingServiceTable, self).__init__(*args, **kwargs)
 
     def render_name(self, value, record):
