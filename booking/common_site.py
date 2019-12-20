@@ -1095,11 +1095,16 @@ class BookingSiteModel(SiteModel):
             current_rooming = BookingPax.objects.filter(booking=id)
             if formset.is_valid():
                 booking = Booking.objects.get(pk=id)
-                BookingServices.add_paxes_to_booking(
-                    booking,
-                    formset.cleaned_data,
-                    request.POST.getlist('pk'))
-                return redirect(reverse('common:booking_booking_change', args=[id]))
+                try:
+                    BookingServices.add_paxes_to_booking(
+                        booking,
+                        formset.cleaned_data,
+                        request.POST.getlist('pk'))
+                    return redirect(reverse('common:booking_booking_change', args=[id]))
+                except ValidationError as error:
+                    messages.add_message(
+                        request=request, level=messages.ERROR,
+                        message=error.message)
             else:
                 # some data missing. show error message
                 messages.add_message(request, messages.ERROR,
