@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 from django import template
 
+from booking.constants import SERVICE_STATUS_CANCELLED
 from booking.models import (
     Booking,
     BookingService,
@@ -140,7 +141,7 @@ def booking_services_summary_table(booking, request):
 @register.simple_tag
 def vouchers_table(booking):
     table = BookingVouchersTable(
-        BookingService.objects.filter(booking=booking),
+        BookingService.objects.filter(booking=booking).exclude(status=SERVICE_STATUS_CANCELLED),
         order_by=('datetime_from', 'time', 'datetime_to'))
     return table
 

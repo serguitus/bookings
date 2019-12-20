@@ -43,7 +43,7 @@ from booking.common_site import (
     default_requests_mail_bcc, default_requests_mail_subject,
     default_requests_mail_body, default_mail_cc
 )
-from booking.constants import ACTIONS
+from booking.constants import ACTIONS, SERVICE_STATUS_CANCELLED
 from booking.models import (
     Package,
     Quote, QuotePaxVariant, QuoteService,
@@ -700,7 +700,7 @@ class EmailConfirmationView(View):
         bk = Booking.objects.get(id=id)
         # pick all non-cancelled services
         services = BookingService.objects.filter(
-            booking=bk.pk).exclude(status='CN')
+            booking=bk.pk).exclude(status=SERVICE_STATUS_CANCELLED)
         # this is for the agency seller name (add also variable for email)
         client_name = ''
         if bk.agency_contact:

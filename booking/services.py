@@ -192,7 +192,7 @@ class BookingServices(object):
 
             # obtain lines
             booking_service_list = BookingService.objects.filter(
-                booking=booking.id).all()
+                booking=booking.id).exclude(status=constants.SERVICE_STATUS_CANCELLED).all()
             for booking_service in booking_service_list:
                 invoice_line = BookingInvoiceLine()
                 invoice_line.invoice = invoice
