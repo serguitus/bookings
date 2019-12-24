@@ -1485,7 +1485,6 @@ class ProviderBookingPayment(Withdraw):
         # Call the "real" save() method.
         super(ProviderBookingPayment, self).save(*args, **kwargs)
 
-
     def delete(self, using=None, keep_parents=False):
         if self.status != STATUS_DRAFT:
             raise ValidationError('Can not delete Payments')
