@@ -4773,7 +4773,7 @@ class BookingServices(object):
                 constants.SERVICE_STATUS_CANCELLED]:
             basebookingservice.cost_amount_to_pay = 0.00
         elif basebookingservice.pk and basebookingservice.cost_amount is None:
-            raise ValidationError('Service (%s) with Status (basebookingservice.status) requires a Cost' % (basebookingservice.name, basebookingservice.get_status_display()))
+            raise ValidationError('%s with Status %s requires a Cost' % (basebookingservice.name, basebookingservice.get_status_display()))
         elif basebookingservice.cost_amount is not None:
             basebookingservice.cost_amount_to_pay = basebookingservice.cost_amount
 

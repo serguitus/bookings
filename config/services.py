@@ -30,6 +30,7 @@ from finance.models import Agency
 
 from reservas.custom_settings import ADDON_FOR_NO_ADDON
 
+
 class ConfigServices(object):
     """
     ConfigServices
@@ -48,7 +49,7 @@ class ConfigServices(object):
     @classmethod
     def _copy_allotments(cls, src_agency, dst_agency, is_update):
         # find agencyservice list
-        src_agency_services = list(AgencyAllotmentService.objects.filter(agency=src_agency.id))
+        src_agency_services = AgencyAllotmentService.objects.filter(agency=src_agency.id)
         # for each agencyservice create agencyservice
         for src_agency_service in src_agency_services:
             dst_agency_service, created = AgencyAllotmentService.objects.get_or_create(

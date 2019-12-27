@@ -790,6 +790,7 @@ class BookingPax(models.Model):
         verbose_name = 'Booking Pax'
         verbose_name_plural = 'Booking Rooming List'
         unique_together = (('booking', 'pax_name'),)
+        ordering = ['pax_group']
     version = AutoIncVersionField( )
     booking = models.ForeignKey(Booking, related_name='rooming_list')
     pax_name = models.CharField(max_length=50)
