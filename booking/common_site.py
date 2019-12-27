@@ -947,6 +947,7 @@ class BookingSiteModel(SiteModel):
                    ('date_from', DateTopFilter), 'rooming_list__pax_name',
                    (InternalReferenceTopFilter),
                    (CancelledTopFilter), 'seller', 'invoice__document_number')
+    list_per_page = 50
     ordering = ['date_from', 'date_to', 'reference']
     readonly_fields = ('date_from', 'date_to', 'status',
                        'cost_amount', 'price_amount', 'utility_percent', 'utility',
