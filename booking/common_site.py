@@ -2255,7 +2255,7 @@ class ProviderBookingPaymentSiteModel(SiteModel):
             else:
                 form = EmailPopupForm()
             extra_context.update({
-                'modal_title': 'Send Provider Payment Mail',
+                'modal_title': 'Provider Payment E-mail',
                 'form': form,
             })
             return super(ProviderBookingPaymentSiteModel, self).changeform_view(
