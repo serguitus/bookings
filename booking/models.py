@@ -1470,6 +1470,8 @@ class ProviderBookingPayment(Withdraw):
     class Meta:
         verbose_name = 'Provider Booking Payment'
         verbose_name_plural = 'Providers Bookings Payments'
+        ordering = ['-date']
+
     provider = models.ForeignKey(Provider)
     services_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     currency_rate = models.DecimalField(max_digits=10, decimal_places=4, default=1.00)
