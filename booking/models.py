@@ -1509,7 +1509,7 @@ class ProviderBookingPaymentService(models.Model):
     @property
     def provider_service_booking(self):
         if self.provider_service:
-            return self.provider_service.booking.__str__()
+            return self.provider_service.booking.name
         return None
 
     @property
@@ -1535,6 +1535,10 @@ class ProviderBookingPaymentService(models.Model):
         if self.provider_service:
             return self.provider_service.get_status_display()
         return None
+
+    @property
+    def service_cost_amount_pending(self):
+        return self.service_cost_amount_to_pay - self.service_cost_amount_paid
 
     def __str__(self):
         return '%s : %s (%s)' % (

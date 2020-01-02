@@ -241,6 +241,35 @@ class ProviderBookingPaymentServiceTable(tables.Table):
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
 
+class ProviderBookingPaymentReportTable(tables.Table):
+    class Meta:
+        model = ProviderBookingPaymentService
+        template_name = 'booking/providerbookingpaymentservice_table.html'
+        fields = ['provider_service_booking', 'provider_service_name',
+            'provider_service_datetime_from', 'provider_service_datetime_to',
+            'service_cost_amount_to_pay', 'service_cost_amount_pending',
+            'amount_paid']
+        attrs = {'class': 'table table-hover table-condensed'}
+
+    def __init__(self, *args, **kwargs):
+        self.base_columns['provider_service_booking'].verbose_name = 'Booking'
+        self.base_columns['provider_service_name'].verbose_name = 'Service'
+        self.base_columns['provider_service_datetime_from'].verbose_name = 'From'
+        self.base_columns['provider_service_datetime_to'].verbose_name = 'To'
+        self.base_columns['service_cost_amount_to_pay'].verbose_name = 'Total'
+        self.base_columns['service_cost_amount_pending'].verbose_name = 'Pending'
+        self.base_columns['amount_paid'].verbose_name = 'Paid'
+        super(ProviderBookingPaymentReportTable, self).__init__(
+            *args, **kwargs)
+
+    # def render_name(self, value, record):
+    #     obj_url = reverse(
+    #         'common:booking_providerbookingpayment_change',
+    #         args=(quote(record.pk),)
+    #     )
+    #     return format_html('<a href="%s">%s</a>' % (obj_url, value))
+
+
 class BookingConfirmationTable(tables.Table):
     class Meta:
         model = BookingService

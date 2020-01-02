@@ -2267,11 +2267,11 @@ class ProviderBookingPaymentSiteModel(SiteModel):
 
     def _build_provider_payment_pdf(self, payment):
         template = get_template("booking/pdf/provider_payment.html")
-        services = ProviderBookingPaymentService.objects.filter(provider_payment=payment)
+        # services = ProviderBookingPaymentService.objects.filter(provider_payment=payment)
         context = {
-            'pagesize': 'Letter',
+            # 'pagesize': 'Letter',
             'payment': payment,
-            'services': services,
+            # 'services': services,
         }
         html = template.render(context)
         if PY2:
