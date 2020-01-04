@@ -1,4 +1,4 @@
-{% load common_utils %}
+{% load common_utils  static%}
 {% load booking_tags %}
 {% load render_table from django_tables2 %}
 
@@ -15,13 +15,20 @@
          font-weight: 700;
          text-align: center;
      }
+     .total{
+         font-size: 4;
+         font-weight: 700;
+     }
+     .total-bottom{
+         text-align: right;
+         padding-top: 10px;
+     }
      .table-container table {
          width: 100%;
          border-top: 1px solid black;
      }
      .provider{
          font-size: 4;
-
      }
      .provider-label{
          font-weight: 700;
@@ -40,31 +47,36 @@
      td.provider {
          text-align: left;
      }
-     td.content {
-         text-align: left;
+     td.amount_paid, td.service_cost_amount_pending{
+         width: 70px;
      }
-     td.content-centered {
-         text-align: center;
-         padding: 4px,0px,0px,3px;
+     td.service_cost_amount_to_pay,
+     td.provider_service_datetime_from,
+     td.provider_service_datetime_to{
+         width: 130px;
      }
     </style>
 </head>
 <body>
-    <div class="title">Pago a Proveedor</div>
     <div class="payment-header">
-        <span class="payment-header-logo"><img src="/static/booking/img/logo_tnx.png"  alt="Office"></span>
+        <span class="payment-header-logo"><img src="{% static '/media/logo_tnx.png' %}"  alt="Office"></span>
     </div>
+    <div class="title">Pago a Proveedor {% if payment.status != 'R' %}({{ payment.payment_status }}){% endif %}</div>
     <table class="header">
         <tr>
             <td class="provider">
                 <span class="provider-label">Provider:</span> <span class="provider-name">{% if payment.provider.alias  %}{{ payment.provider.alias }}{% else %}{{ payment.provider }}{% endif %}</span></td>
-            <td class="payment-date">Date: {{ payment.date }}</td>
+            <td><div class="title">Pago a Proveedor {% if payment.status != 'R' %}({{ payment.payment_status }}){% endif %}</div></td>
+            <td class="payment-date">
+                <div>Date: {{ payment.date }}</div>
+                <div>No.{{ payment.id }}</div>
+                <div class="total">Total: {{ payment.services_amount }}</div></td>
         </tr>
     </table>
     {% providerbookingpaymentreport_table payment as table %}
     <div class="table-container">
     {% render_table table %}
     </div>
-
+    <div class="total total-bottom">Total: {{ payment.services_amount }}</div>
 </body>
 </html>

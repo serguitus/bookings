@@ -76,7 +76,7 @@ def quotepaxvariant_table(quote):
 def bookingservice_table(booking):
     table = BookingServiceTable(
         BookingService.objects.filter(booking=booking),
-        order_by=('datetime_from', 'datetime_to', 'time'))
+        order_by=('datetime_from', 'time', 'datetime_to'))
     return table
 
 

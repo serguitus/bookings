@@ -2311,7 +2311,7 @@ def default_requests_mail_body(request, provider=None, booking=None):
     if provider:
         services = list(BookingService.objects.filter(
             booking=booking,
-            provider=provider).all())
+            provider=provider).exclude(status='CN').all())
         package_services = list(BookingPackageService.objects.filter(
             Q(booking_package__booking=booking)
             & (
