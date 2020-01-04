@@ -17,6 +17,6 @@
     NOTA: {{ bs.provider_notes }}
 {% endif %}
 Rooming:
-{% for pax in bs.rooming_list.all %}[{% if bs.service_type == 'A' %}{{ pax.group }}{% else %}{{ forloop.counter }}{% endif %}] {{ pax.booking_pax.pax_name }}{% if pax.booking_pax.pax_age %} (Edad: {{ pax.booking_pax.pax_age }} años){% endif %}
+{% for pax in bs.rooming_list.all|dictsort:'group' %}[{% if bs.service_type == 'A' %}{{ pax.group }}{% else %}{{ forloop.counter }}{% endif %}] {{ pax.booking_pax.pax_name }}{% if pax.booking_pax.pax_age %} (Edad: {{ pax.booking_pax.pax_age }} años){% endif %}
 {% endfor %}
 ----------------------------------{% endlanguage %}
