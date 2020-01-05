@@ -46,7 +46,10 @@ from config.models import (
 from datetime import time
 
 from finance.constants import (
-    DOC_TYPE_AGENCY_BOOKING_INVOICE, DOC_TYPE_PROVIDER_PAYMENT_WITHDRAW, STATUS_DRAFT,
+    DOC_TYPE_AGENCY_BOOKING_INVOICE,
+    DOC_TYPE_PROVIDER_PAYMENT_WITHDRAW,
+    STATUS_DRAFT,
+    STATUS_LABELS,
 )
 from finance.models import (
     Office, Agency, AgencyInvoice, AgencyContact,
@@ -777,7 +780,7 @@ class Booking(models.Model):
         # for bookings with private notes
         if self.p_notes:
             return '<a href="#" data-toggle="tooltip" title="%s"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span></a>' % self.p_notes
-        return
+
     has_notes.allow_tags = True
     has_notes.short_description = 'Notes'
 
@@ -1492,6 +1495,9 @@ class ProviderBookingPayment(Withdraw):
         if self.status != STATUS_DRAFT:
             raise ValidationError('Can not delete Payments')
 
+    def payment_status(self):
+        return STATUS_LABELS[self.status]
+
 
 class ProviderBookingPaymentService(models.Model):
     """
@@ -1510,8 +1516,14 @@ class ProviderBookingPaymentService(models.Model):
     @property
     def provider_service_booking(self):
         if self.provider_service:
-            return self.provider_service.booking.__str__()
+            return self.provider_service.full_booking_name
         return None
+
+    @property
+    def provider_service_ref(self):
+        if self.provider_service:
+            return self.provider_service.booking_internal_reference
+        return ''
 
     @property
     def provider_service_name(self):
@@ -1536,6 +1548,15 @@ class ProviderBookingPaymentService(models.Model):
         if self.provider_service:
             return self.provider_service.get_status_display()
         return None
+
+    @property
+    def service_cost_amount_pending(self):
+        return self.service_cost_amount_to_pay - self.service_cost_amount_paid
+
+    @property
+    def service_confirmation(self):
+        if self.provicer_service:
+            return self.provider_service.conf_number
 
     def __str__(self):
         return '%s : %s (%s)' % (

@@ -2267,11 +2267,11 @@ class ProviderBookingPaymentSiteModel(SiteModel):
 
     def _build_provider_payment_pdf(self, payment):
         template = get_template("booking/pdf/provider_payment.html")
-        services = ProviderBookingPaymentService.objects.filter(provider_payment=payment)
+        # services = ProviderBookingPaymentService.objects.filter(provider_payment=payment)
         context = {
-            'pagesize': 'Letter',
+            # 'pagesize': 'Letter',
             'payment': payment,
-            'services': services,
+            # 'services': services,
         }
         html = template.render(context)
         if PY2:
@@ -2311,7 +2311,7 @@ def default_requests_mail_body(request, provider=None, booking=None):
     if provider:
         services = list(BookingService.objects.filter(
             booking=booking,
-            provider=provider).all())
+            provider=provider).exclude(status='CN').all())
         package_services = list(BookingPackageService.objects.filter(
             Q(booking_package__booking=booking)
             & (

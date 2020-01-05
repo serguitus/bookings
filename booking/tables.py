@@ -1,7 +1,8 @@
 import django_tables2 as tables
 
-from django.urls import reverse
 from django.contrib.admin.utils import quote
+from django.urls import reverse
+from django.utils import formats
 from django.utils.html import format_html
 from booking.models import (
     PackageService,
@@ -16,6 +17,7 @@ from booking.constants import (
 from finance.models import (
     AgencyPayment,
 )
+
 
 class PackageServiceTable(tables.Table):
     class Meta:
@@ -239,6 +241,40 @@ class ProviderBookingPaymentServiceTable(tables.Table):
             args=(quote(record.pk),)
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
+
+
+class ProviderBookingPaymentReportTable(tables.Table):
+    class Meta:
+        model = ProviderBookingPaymentService
+        template_name = 'booking/providerbookingpaymentservice_table.html'
+        fields = ['provider_service_booking',
+                  'provider_service_name',
+                  'provider_service_ref',
+                  'provider_service_datetime_from',
+                  'provider_service_datetime_to',
+                  'service_cost_amount_to_pay', 'service_cost_amount_pending',
+                  'amount_paid']
+        attrs = {'class': 'table table-hover table-condensed'}
+
+    def __init__(self, *args, **kwargs):
+        self.base_columns['provider_service_booking'].verbose_name = 'Booking'
+        self.base_columns['provider_service_name'].verbose_name = 'Service'
+        self.base_columns['provider_service_ref'].verbose_name = 'Reference'
+        self.base_columns['provider_service_datetime_from'].verbose_name = 'From'
+        self.base_columns['provider_service_datetime_to'].verbose_name = 'To'
+        self.base_columns['service_cost_amount_to_pay'].verbose_name = 'Total'
+        self.base_columns['service_cost_amount_pending'].verbose_name = 'Pending'
+        self.base_columns['amount_paid'].verbose_name = 'Paid'
+        super(ProviderBookingPaymentReportTable, self).__init__(
+            *args, **kwargs)
+
+    def render_provider_service_datetime_from(self, value, record):
+        if value:
+            return formats.date_format(value, 'd-b-Y')
+
+    def render_provider_service_datetime_to(self, value, record):
+        if value:
+            return formats.date_format(value, 'd-b-Y')
 
 
 class BookingConfirmationTable(tables.Table):

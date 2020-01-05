@@ -1,39 +1,82 @@
-{% load common_utils %}
+{% load common_utils  static%}
+{% load booking_tags %}
+{% load render_table from django_tables2 %}
 
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <style>
-        @page {
-            size: letter portrait;
-            @frame content_frame { /* Content Frame */
-                left: 45pt; right: 45pt; top: 45pt; bottom: 45pt;
-            };
-        }
-        tr.top-line {
-            border-top: 1px solid black;
-        }
-        tr.bottom-line {
-            border-bottom: 1px solid black;
-        }
-        td.label {
-            text-align: right;
-            padding: 4px,3px,0px,0px;
-        }
-        td.content {
-            text-align: left;
-            padding: 4px,0px,0px,3px;
-        }
-        td.content-centered {
-            text-align: center;
-            padding: 4px,0px,0px,3px;
-        }
+     @page {
+         size: letter landscape;
+         margin: 2cm;
+     }
+     .title{
+         font-size=6;
+         font-weight: 700;
+         text-align: center;
+     }
+     .total{
+         font-size: 4;
+         font-weight: 700;
+     }
+     .total-bottom{
+         text-align: right;
+         padding-top: 10px;
+     }
+     .table-container table {
+         width: 100%;
+         border-top: 1px solid black;
+     }
+     .provider{
+         font-size: 4;
+     }
+     .provider-label{
+         font-weight: 700;
+         padding-right: 200px;
+     }
+     .provider-name{
+         align: right;
+         width: 200px;
+     }
+     tr{
+         padding-top: 5px;
+     }
+     td, th {
+         text-align: right;
+     }
+     td.provider {
+         text-align: left;
+     }
+     td.amount_paid, td.service_cost_amount_pending{
+         width: 70px;
+     }
+     td.service_cost_amount_to_pay,
+     td.provider_service_datetime_from,
+     td.provider_service_datetime_to{
+         width: 130px;
+     }
     </style>
 </head>
 <body>
     <div class="payment-header">
-        <span class="payment-header-logo"><img src="/static/booking/img/logo_tnx.png"  alt="Office"></span>
-        <span></span>
+        <span class="payment-header-logo"><img src="{% static '/media/logo_tnx.png' %}"  alt="Office"></span>
     </div>
+    <div class="title">Pago a Proveedor {% if payment.status != 'R' %}({{ payment.payment_status }}){% endif %}</div>
+    <table class="header">
+        <tr>
+            <td class="provider">
+                <span class="provider-label">Provider:</span> <span class="provider-name">{% if payment.provider.alias  %}{{ payment.provider.alias }}{% else %}{{ payment.provider }}{% endif %}</span></td>
+            <td><div class="title">Pago a Proveedor {% if payment.status != 'R' %}({{ payment.payment_status }}){% endif %}</div></td>
+            <td class="payment-date">
+                <div>Date: {{ payment.date }}</div>
+                <div>No.{{ payment.id }}</div>
+                <div class="total">Total: {{ payment.services_amount }}</div></td>
+        </tr>
+    </table>
+    {% providerbookingpaymentreport_table payment as table %}
+    <div class="table-container">
+    {% render_table table %}
+    </div>
+    <div class="total total-bottom">Total: {{ payment.services_amount }}</div>
 </body>
 </html>

@@ -13,7 +13,8 @@ from booking.models import (
     BookingPackageTransfer,
     BookingPackageAllotment,
     BookingPackageExtra,
-    BookingPackage, ProviderBookingPayment, ProviderBookingPaymentService,
+    BookingPackage, ProviderBookingPayment,
+    ProviderBookingPaymentService,
 )
 from booking.tables import (
     PackageServiceTable,
@@ -26,7 +27,10 @@ from booking.tables import (
     BookingServiceUpdateTable,
     BookingPackageServiceTable,
     BookingPackageServiceSummaryTable,
-    AddPaxBookingServicesTable, ProviderBookingPaymentTable, ProviderBookingPaymentServiceTable,
+    AddPaxBookingServicesTable,
+    ProviderBookingPaymentTable,
+    ProviderBookingPaymentServiceTable,
+    ProviderBookingPaymentReportTable,
     AgencyPaymentTable,
 )
 from booking.services import BookingServices
@@ -72,7 +76,7 @@ def quotepaxvariant_table(quote):
 def bookingservice_table(booking):
     table = BookingServiceTable(
         BookingService.objects.filter(booking=booking),
-        order_by=('datetime_from', 'datetime_to', 'time'))
+        order_by=('datetime_from', 'time', 'datetime_to'))
     return table
 
 
@@ -100,6 +104,15 @@ def providerbookingpaymentservice_table(payment):
     table = ProviderBookingPaymentServiceTable(
         ProviderBookingPaymentService.objects.filter(provider_payment=payment),
         order_by=('datetime_from', 'time','datetime_to',),
+    )
+    return table
+
+
+@register.simple_tag
+def providerbookingpaymentreport_table(payment):
+    table = ProviderBookingPaymentReportTable(
+        ProviderBookingPaymentService.objects.filter(provider_payment=payment),
+        order_by=['datetime_from', 'time', 'datetime_to'],
     )
     return table
 
