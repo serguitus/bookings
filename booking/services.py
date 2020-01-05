@@ -1102,7 +1102,7 @@ class BookingServices(object):
                         groups[pax.group][1] = 0 # child count
                         groups[pax.group][2] = 0 # free adults
                         groups[pax.group][3] = 0 # free children
-                    if pax.booking_pax.pax_age is None:
+                    if pax.force_adult or pax.booking_pax.pax_age is None:
                         groups[pax.group][0] += 1
                         if for_cost:
                             if pax.is_cost_free:
@@ -1158,7 +1158,7 @@ class BookingServices(object):
             free_children = 0
             for pax in pax_list:
                 if pax.booking_pax_id is not None:
-                    if pax.booking_pax.pax_age is None:
+                    if pax.force_adult or pax.booking_pax.pax_age is None:
                         adults += 1
                         if for_cost:
                             if pax.is_cost_free:
