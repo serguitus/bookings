@@ -405,7 +405,7 @@ class CarRentalOffice(models.Model):
         verbose_name_plural = 'Cars Rentals Offices'
         unique_together = (('car_rental', 'office',),)
     car_rental = models.ForeignKey(CarRental)
-    office = models.CharField(max_length=30)
+    office = models.CharField(max_length=60)
 
     def __str__(self):
         return '%s - %s' % (self.car_rental, self.office)

@@ -55,18 +55,20 @@
      td.provider_service_datetime_to{
          width: 130px;
      }
+     td.logo{
+         text-align: left;
+     }
+     .payment-header-logo img{
+         width: 161px;
+         height: 100px;
+     }
     </style>
 </head>
 <body>
-    <div class="payment-header">
-        <span class="payment-header-logo"><img src="{% static '/media/logo_tnx.png' %}"  alt="Office"></span>
-    </div>
-    <div class="title">Pago a Proveedor {% if payment.status != 'R' %}({{ payment.payment_status }}){% endif %}</div>
     <table class="header">
         <tr>
-            <td class="provider">
-                <span class="provider-label">Provider:</span> <span class="provider-name">{% if payment.provider.alias  %}{{ payment.provider.alias }}{% else %}{{ payment.provider }}{% endif %}</span></td>
-            <td><div class="title">Pago a Proveedor {% if payment.status != 'R' %}({{ payment.payment_status }}){% endif %}</div></td>
+            <td class="logo"><span class="payment-header-logo"><img src="{% static '/media/logo_tnx.png' %}"  alt="Office"></span></td>
+            <td><div class="title">Pago a Proveedor <span class="provider-name">{% if payment.provider.alias  %}{{ payment.provider.alias }}{% else %}{{ payment.provider }}{% endif %}</span>{% if payment.status != 'R' %}({{ payment.payment_status }}){% endif %}</div></td>
             <td class="payment-date">
                 <div>Date: {{ payment.date }}</div>
                 <div>No.{{ payment.id }}</div>
