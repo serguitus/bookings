@@ -951,6 +951,7 @@ class BookingServicePax(models.Model):
     cost_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost')
     cost_comments = models.CharField(max_length=1000, blank=True, null=True)
+    force_adult = models.BooleanField(default=False)
     is_cost_free = models.BooleanField(default=False)
     price_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price')
