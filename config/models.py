@@ -145,6 +145,7 @@ class Service(models.Model):
     grouping = models.BooleanField(default=False)
     pax_range = models.BooleanField(default=False)
     child_age = models.IntegerField(blank=True, null=True)
+    child_discount_percent = models.IntegerField(blank=True, null=True)
     infant_age = models.IntegerField(default=2, blank=True, null=True)
     location = models.ForeignKey(Location, blank=True, null=True)
     enabled = models.BooleanField(default=True)

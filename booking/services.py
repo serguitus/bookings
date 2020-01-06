@@ -1460,7 +1460,7 @@ class BookingServices(object):
                     children_amount = (children - free_children) * detail.ch_1_ad_1_amount
                 amount = adult_amount + children_amount
             else:
-                amount = ConfigServices.find_detail_amount(detail, adults, children, free_adults, free_children)
+                amount = ConfigServices.find_detail_amount(service, detail, adults, children, free_adults, free_children)
             if amount is not None and amount >= 0:
                 return cls._round_price(amount)
         return None

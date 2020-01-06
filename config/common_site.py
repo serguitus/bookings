@@ -301,7 +301,7 @@ class AllotmentSiteModel(SiteModel):
               ('phone', 'address'),
               ('time_from', 'time_to'),
               ('pax_range', 'enabled'),
-              ('child_age', 'infant_age'))
+              ('child_discount_percent', 'child_age', 'infant_age'))
     list_display = ('name', 'service_category', 'phone',
                     'location', 'is_shared_point', 'enabled',)
     top_filters = ('name', ('location', LocationTopFilter),
@@ -333,7 +333,8 @@ class TransferSiteModel(SiteModel):
     menu_group = 'Configuration Services'
     fields = (
         ('name', 'service_category'), ('cost_type', 'max_capacity', 'is_shared'),
-        ('pax_range', 'has_pickup_time', 'is_ticket'), ('child_age', 'infant_age'), 'enabled',)
+        ('pax_range', 'has_pickup_time', 'is_ticket'),
+        ('child_discount_percent', 'child_age', 'infant_age'), 'enabled',)
     list_display = ('name', 'cost_type', 'max_capacity', 'is_shared', 'is_ticket', 'enabled',
                     'infant_age', 'child_age')
     top_filters = ('name', ('service_category', ServiceCategoryTopFilter), 'is_shared', 'enabled',)
@@ -380,7 +381,7 @@ class ExtraSiteModel(SiteModel):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
     fields = ('name', 'service_category', 'location', 'cost_type', 'parameter_type',
-              'pax_range', ('infant_age', 'child_age'), ('car_rental', 'enabled'),)
+              'pax_range', ('child_discount_percent', 'child_age', 'infant_age'), ('car_rental', 'enabled'),)
     list_display = ('name', 'service_category', 'location', 'cost_type',
                     'parameter_type', 'enabled', 'pax_range', 'has_pax_range',
                     'infant_age', 'child_age')
