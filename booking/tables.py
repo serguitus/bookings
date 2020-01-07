@@ -253,7 +253,7 @@ class ProviderBookingPaymentReportTable(tables.Table):
                   'provider_service_datetime_from',
                   'provider_service_datetime_to',
                   'service_cost_amount_to_pay', 'service_cost_amount_pending',
-                  'amount_paid']
+                  'amount_paid', 'provider_service_balance']
         attrs = {'class': 'table table-hover table-condensed'}
 
     def __init__(self, *args, **kwargs):
@@ -265,6 +265,7 @@ class ProviderBookingPaymentReportTable(tables.Table):
         self.base_columns['service_cost_amount_to_pay'].verbose_name = 'Total'
         self.base_columns['service_cost_amount_pending'].verbose_name = 'Pending'
         self.base_columns['amount_paid'].verbose_name = 'Paid'
+        self.base_columns['provider_service_balance'].verbose_name = 'Balance'
         super(ProviderBookingPaymentReportTable, self).__init__(
             *args, **kwargs)
 

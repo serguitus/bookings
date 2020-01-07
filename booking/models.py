@@ -1554,6 +1554,10 @@ class ProviderBookingPaymentService(models.Model):
         return self.service_cost_amount_to_pay - self.service_cost_amount_paid
 
     @property
+    def provider_service_balance(self):
+        return self.service_cost_amount_to_pay - self.service_cost_amount_paid - self.amount_paid
+
+    @property
     def service_confirmation(self):
         if self.provicer_service:
             return self.provider_service.conf_number
