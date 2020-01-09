@@ -2284,7 +2284,7 @@ class ProviderBookingPaymentSiteModel(SiteModel):
 
 def default_requests_mail_from(request, provider=None, booking=None):
     if provider and not provider.is_private:
-        return 'reservas1@ergosonline.com'
+        return settings.FORMAL_COMPANY_EMAIL
     return request.user.email or None
 
 
