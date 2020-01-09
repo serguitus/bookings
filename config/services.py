@@ -1241,15 +1241,15 @@ class ConfigServices(object):
                 if detail.ch_1_ad_1_amount is not None:
                     return (adults - free_adults) * detail.ad_1_amount + (children - free_children) * detail.ch_1_ad_1_amount
                 elif  service.child_discount_percent is not None:
-                    return (adults - free_adults) * detail.ad_1_amount + (children - free_children) * float(detail.ad_1_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
-            if children == 2:
+                    return (adults - free_adults) * float(detail.ad_1_amount) + (children - free_children) * float(detail.ad_1_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
+            elif children == 2:
                 if detail.ch_2_ad_1_amount is not None:
-                    return (adults - free_adults) * detail.ad_1_amount + (children - free_children) * detail.ch_2_ad_1_amount
+                    return (adults - free_adults) * float(detail.ad_1_amount) + (children - free_children) * detail.ch_2_ad_1_amount
                 elif  service.child_discount_percent is not None:
-                    return (adults - free_adults) * detail.ad_1_amount + (children - free_children) * float(detail.ad_1_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
-            if children == 3:
+                    return (adults - free_adults) * float(detail.ad_1_amount) + (children - free_children) * float(detail.ad_1_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
+            elif children == 3:
                 if detail.ch_3_ad_1_amount is not None:
-                    return (adults - free_adults) * detail.ad_1_amount + (children - free_children) * detail.ch_3_ad_1_amount
+                    return (adults - free_adults) * float(detail.ad_1_amount) + (children - free_children) * detail.ch_3_ad_1_amount
                 elif  service.child_discount_percent is not None:
                     return (adults - free_adults) * detail.ad_1_amount + (children - free_children) * float(detail.ad_1_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
         if adults == 2 and detail.ad_2_amount is not None:
