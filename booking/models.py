@@ -913,6 +913,9 @@ class BaseBookingService(BaseService, DateInterval):
         return self.booking.internal_reference()
     booking_internal_reference.short_description = 'Ref.'
 
+    def get_child_object(self):
+        return _get_child_objects([self])[0]
+
 
 class BookingService(BaseBookingService):
     """
