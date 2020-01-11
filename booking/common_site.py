@@ -1714,10 +1714,10 @@ class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):
                    'classes': ('collapse', 'wide')})
     )
 
-    list_display = ('booking', 'name', 'datetime_from',
-                    'datetime_to', 'cost_amount', 'manual_cost',
-                    'price_amount', 'manual_price', 'utility_percent',
-                    'utility', 'status')
+    list_display = ('name', 'datetime_from', 'datetime_to', 'provider',
+                    'booking', 'conf_number', 'cost_amount',
+                    'price_amount',
+                    'status', 'cost_amount_paid')
     top_filters = (('booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking__reference', 'conf_number',
