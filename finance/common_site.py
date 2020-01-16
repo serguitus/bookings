@@ -408,10 +408,10 @@ class CurrencyExchangeSiteModel(BaseFinantialDocumentSiteModel):
     menu_label = MENU_LABEL_ACCOUNTING
     menu_group = MENU_GROUP_LABEL_FINANCE_BASIC
     fields = ('name', 'account', 'amount', 'date', 'status',
-              'exchange_account', 'exchange_amount')
+              'exchange_account', 'exchange_amount', 'details')
     list_display = (
-        'name', 'account', 'amount', 'date', 'status',
-        'exchange_account', 'exchange_amount')
+        'details', 'exchange_account', 'exchange_amount',
+        'account', 'amount', 'date', 'status')
     top_filters = ('currency', ('account', AccountTopFilter), 'status', 'date')
     form = CurrencyExchangeForm
 
