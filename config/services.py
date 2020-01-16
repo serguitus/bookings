@@ -1251,7 +1251,7 @@ class ConfigServices(object):
                 if detail.ch_3_ad_1_amount is not None:
                     return (adults - free_adults) * float(detail.ad_1_amount) + (children - free_children) * detail.ch_3_ad_1_amount
                 elif  service.child_discount_percent is not None:
-                    return (adults - free_adults) * detail.ad_1_amount + (children - free_children) * float(detail.ad_1_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
+                    return (adults - free_adults) * float(detail.ad_1_amount) + (children - free_children) * float(detail.ad_1_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
         if adults == 2 and detail.ad_2_amount is not None:
             if children == 0:
                 return (adults - free_adults) * detail.ad_2_amount
@@ -1259,17 +1259,17 @@ class ConfigServices(object):
                 if detail.ch_1_ad_2_amount is not None:
                     return (adults - free_adults) * detail.ad_2_amount + (children - free_children) * detail.ch_1_ad_2_amount
                 elif  service.child_discount_percent is not None:
-                    return (adults - free_adults) * detail.ad_2_amount + (children - free_children) * float(detail.ad_2_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
+                    return (adults - free_adults) * float(detail.ad_2_amount) + (children - free_children) * float(detail.ad_2_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
             if children == 2:
                 if detail.ch_2_ad_2_amount is not None:
                     return (adults - free_adults) * detail.ad_2_amount + (children - free_children) * detail.ch_2_ad_2_amount
                 elif  service.child_discount_percent is not None:
-                    return (adults - free_adults) * detail.ad_2_amount + (children - free_children) * float(detail.ad_2_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
+                    return (adults - free_adults) * float(detail.ad_2_amount) + (children - free_children) * float(detail.ad_2_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
             if children == 3:
                 if detail.ch_3_ad_2_amount is not None:
                     return (adults - free_adults) * detail.ad_2_amount + (children - free_children) * detail.ch_3_ad_2_amount
                 elif  service.child_discount_percent is not None:
-                    return (adults - free_adults) * detail.ad_2_amount + (children - free_children) * float(detail.ad_2_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
+                    return (adults - free_adults) * float(detail.ad_2_amount) + (children - free_children) * float(detail.ad_2_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
         if adults == 3 and detail.ad_3_amount is not None:
             if children == 0:
                 return (adults - free_adults) * detail.ad_3_amount
@@ -1277,17 +1277,17 @@ class ConfigServices(object):
                 if detail.ch_1_ad_3_amount is not None:
                     return (adults - free_adults) * detail.ad_3_amount + (children - free_children) * detail.ch_1_ad_3_amount
                 elif  service.child_discount_percent is not None:
-                    return (adults - free_adults) * detail.ad_3_amount + (children - free_children) * float(detail.ad_3_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
+                    return (adults - free_adults) * float(detail.ad_3_amount) + (children - free_children) * float(detail.ad_3_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
             if children == 2:
                 if detail.ch_2_ad_3_amount is not None:
                     return (adults - free_adults) * detail.ad_3_amount + (children - free_children) * detail.ch_2_ad_3_amount
                 elif  service.child_discount_percent is not None:
-                    return (adults - free_adults) * detail.ad_3_amount + (children - free_children) * float(detail.ad_3_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
+                    return (adults - free_adults) * float(detail.ad_3_amount) + (children - free_children) * float(detail.ad_3_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
             if children == 3:
                 if detail.ch_3_ad_3_amount is not None:
                     return (adults - free_adults) * detail.ad_3_amount + (children - free_children) * detail.ch_3_ad_3_amount
                 elif  service.child_discount_percent is not None:
-                    return (adults - free_adults) * detail.ad_3_amount + (children - free_children) * float(detail.ad_3_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
+                    return (adults - free_adults) * float(detail.ad_3_amount) + (children - free_children) * float(detail.ad_3_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
         if adults == 4 and detail.ad_4_amount is not None:
             if children == 0:
                 return (adults - free_adults) * detail.ad_4_amount
@@ -1295,17 +1295,17 @@ class ConfigServices(object):
                 if detail.ch_1_ad_4_amount is not None:
                     return (adults - free_adults) * detail.ad_4_amount + (children - free_children) * detail.ch_1_ad_4_amount
                 elif  service.child_discount_percent is not None:
-                    return (adults - free_adults) * detail.ad_4_amount + (children - free_children) * float(detail.ad_4_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
+                    return (adults - free_adults) * float(detail.ad_4_amount) + (children - free_children) * float(detail.ad_4_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
             if children == 2:
                 if detail.ch_2_ad_4_amount is not None:
                     return (adults - free_adults) * detail.ad_4_amount + (children - free_children) * detail.ch_2_ad_4_amount
                 elif  service.child_discount_percent is not None:
-                    return (adults - free_adults) * detail.ad_4_amount + (children - free_children) * float(detail.ad_4_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
+                    return (adults - free_adults) * float(detail.ad_4_amount) + (children - free_children) * float(detail.ad_4_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
             if children == 3:
                 if detail.ch_3_ad_4_amount is not None:
                     return (adults - free_adults) * detail.ad_4_amount + (children - free_children) * detail.ch_3_ad_4_amount
                 elif  service.child_discount_percent is not None:
-                    return (adults - free_adults) * detail.ad_4_amount + (children - free_children) * float(detail.ad_4_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
+                    return (adults - free_adults) * float(detail.ad_4_amount) + (children - free_children) * float(detail.ad_4_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
         return None
 
     @classmethod
