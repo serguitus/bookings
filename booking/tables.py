@@ -249,10 +249,10 @@ class ProviderBookingPaymentReportTable(tables.Table):
         template_name = 'booking/providerbookingpaymentservice_table.html'
         fields = ['provider_service_booking',
                   'provider_service_name',
-                  'provider_service_ref',
+                  'provider_service_ref', 'service_cost_amount_to_pay',
                   'provider_service_datetime_from',
                   'provider_service_datetime_to',
-                  'service_cost_amount_to_pay', 'service_cost_amount_pending',
+                  'service_cost_amount_pending',
                   'amount_paid', 'provider_service_balance']
         attrs = {'class': 'table table-hover table-condensed'}
 
