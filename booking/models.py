@@ -896,7 +896,7 @@ class BaseBookingService(BaseService, DateInterval):
     def full_booking_name(self):
         ref = self.booking_agency_ref()
         full_name = self.booking_name()
-        if ref:
+        if ref and ref not in full_name:
             full_name += ' ({})'.format(ref)
         return full_name
     full_booking_name.short_description = 'Booking'
