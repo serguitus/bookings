@@ -24,6 +24,7 @@
         <td class="top-line amount-content"><b>SGL</b></td>
         <td class="top-line amount-content"><b>DBL</b></td>
         <td class="top-line amount-content"><b>TPL</b></td>
+        <td class="top-line amount-content"><b>QPL</b></td>
     </tr>
     {% setvar '' as prev_board %}
     {% setvar '' as prev_room %}
@@ -80,6 +81,9 @@
             </td>
             <td class="top-line amount">
                 {{ detail.ad_3_amount }}
+            </td>
+            <td class="top-line amount">
+                {{ detail.ad_4_amount }}
             </td>
         </tr>
         {% setvar detail.board_type as prev_board %}

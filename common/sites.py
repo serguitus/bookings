@@ -1065,8 +1065,7 @@ class SiteModel(TotalsumAdmin):
         else:
             obj = self.get_object(request, unquote(object_id), to_field)
 
-            if (
-                    (not self.has_module_permission(request))
+            if ((not self.has_module_permission(request))
                     and (not self.has_change_permission(request, obj))):
                 raise PermissionDenied
 

@@ -303,13 +303,18 @@ class QuotePaxVariantInline(CommonStackedInline):
         ('free_cost_single', 'free_price_single'),
         ('free_cost_double', 'free_price_double'),
         ('free_cost_triple', 'free_price_triple'),
+        ('free_cost_qdrple', 'free_price_qdrple'),
         ('cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single', 'extra_single_amount'),
         ('cost_double_amount', 'price_double_amount', 'utility_percent_double', 'utility_double', 'extra_double_amount'),
-        ('cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple', 'extra_triple_amount')]
+        ('cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple', 'extra_triple_amount'),
+        ('cost_qdrple_amount', 'price_qdrple_amount', 'utility_percent_qdrple', 'utility_qdrple', 'extra_qdrple_amount'),
+    ]
     readonly_fields = [
         'cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single',
         'cost_double_amount', 'price_double_amount', 'utility_percent_double', 'utility_double',
-        'cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple']
+        'cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple',
+        'cost_qdrple_amount', 'price_qdrple_amount', 'utility_percent_qdrple', 'utility_qdrple',
+    ]
     verbose_name_plural = 'Paxes Variants'
 
 
@@ -321,16 +326,20 @@ class QuoteServicePaxVariantInline(CommonStackedInline):
         ('free_cost_single', 'free_price_single'),
         ('free_cost_double', 'free_price_double'),
         ('free_cost_triple', 'free_price_triple'),
+        ('free_cost_qdrple', 'free_price_qdrple'),
         ('manual_costs', 'manual_prices'),
         ('cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single'),
         ('cost_double_amount', 'price_double_amount', 'utility_percent_double', 'utility_double'),
-        ('cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple')]
+        ('cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple'),
+        ('cost_qdrple_amount', 'price_qdrple_amount', 'utility_percent_qdrple', 'utility_qdrple'),
+    ]
     verbose_name_plural = 'Paxes Variants'
     can_delete = False
 
     readonly_fields = [
-        'utility_percent_single', 'utility_percent_double', 'utility_percent_triple',
-        'utility_single', 'utility_double', 'utility_triple']
+        'utility_percent_single', 'utility_percent_double',
+        'utility_percent_triple', 'utility_percent_qdrple',
+        'utility_single', 'utility_double', 'utility_triple', 'utility_qdrple']
 
     def has_add_permission(self,request):
         return False
@@ -343,7 +352,9 @@ class QuoteServicePaxVariantInline(CommonStackedInline):
                 'manual_costs', 'manual_prices',
                 'cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single',
                 'cost_double_amount', 'price_double_amount', 'utility_percent_double', 'utility_double',
-                'cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple']
+                'cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple',
+                'cost_qdrple_amount', 'price_qdrple_amount', 'utility_percent_qdrple', 'utility_qdrple',
+            ]
 
         return readonly_fields
 
@@ -690,13 +701,18 @@ class QuotePackagePaxVariantInline(CommonStackedInline):
         ('free_cost_single', 'free_price_single'),
         ('free_cost_double', 'free_price_double'),
         ('free_cost_triple', 'free_price_triple'),
+        ('free_cost_qdrple', 'free_price_qdrple'),
         ('cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single'),
         ('cost_double_amount', 'price_double_amount', 'utility_percent_double', 'utility_double'),
-        ('cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple')]
+        ('cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple'),
+        ('cost_qdrple_amount', 'price_qdrple_amount', 'utility_percent_qdrple', 'utility_qdrple')
+    ]
     readonly_fields = [
         'cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single',
         'cost_double_amount', 'price_double_amount', 'utility_percent_double', 'utility_double',
-        'cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple']
+        'cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple',
+        'cost_qdrple_amount', 'price_qdrple_amount', 'utility_percent_qdrple', 'utility_qdrple',
+    ]
     verbose_name_plural = 'Paxes Variants'
     can_delete = False
 
@@ -790,13 +806,16 @@ class QuotePackageServicePaxVariantInline(CommonStackedInline):
         ('manual_costs', 'manual_prices'),
         ('cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single'),
         ('cost_double_amount', 'price_double_amount', 'utility_percent_double', 'utility_double'),
-        ('cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple')]
+        ('cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple'),
+        ('cost_qdrple_amount', 'price_qdrple_amount', 'utility_percent_qdrple', 'utility_qdrple'),
+    ]
     verbose_name_plural = 'Paxes Variants'
     can_delete = False
 
     readonly_fields = [
-        'utility_percent_single', 'utility_percent_double', 'utility_percent_triple',
-        'utility_single', 'utility_double', 'utility_triple']
+        'utility_percent_single', 'utility_percent_double',
+        'utility_percent_triple', 'utility_percent_qdrple',
+        'utility_single', 'utility_double', 'utility_triple', 'utility_qdrple']
 
     def has_add_permission(self, request):
         return False
@@ -809,7 +828,9 @@ class QuotePackageServicePaxVariantInline(CommonStackedInline):
                 'manual_costs', 'manual_prices',
                 'cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single',
                 'cost_double_amount', 'price_double_amount', 'utility_percent_double', 'utility_double',
-                'cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple']
+                'cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple',
+                'cost_qdrple_amount', 'price_qdrple_amount', 'utility_percent_qdrple', 'utility_qdrple',
+            ]
 
         return readonly_fields
 
@@ -928,8 +949,8 @@ class BookingSiteModel(SiteModel):
                 ('agency', 'agency_contact'),
                 ('date_from', 'date_to'),
                 ('is_package_price',),
-                ('package_sgl_price_amount', 'package_dbl_price_amount',
-                 'package_tpl_price_amount'),
+                ('package_sgl_price_amount', 'package_dbl_price_amount'),
+                ('package_tpl_price_amount', 'package_qpl_price_amount'),
                 ('cost_amount', 'price_amount', 'utility_percent', 'utility'),
                 'id', 'version',
                 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc',
@@ -959,7 +980,7 @@ class BookingSiteModel(SiteModel):
     add_form_template = 'booking/booking_change_form.html'
     change_form_template = 'booking/booking_change_form.html'
     totalsum_list = ['cost_amount', 'price_amount']
-    save_as = False
+    save_as = True
 
     def details(self, obj):
         return '[%s pax]' % obj.rooming_list.count()

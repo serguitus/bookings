@@ -143,18 +143,24 @@ class PaxVariantAmounts(models.Model):
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost DBL')
     cost_triple_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost TPL')
+    cost_qdrple_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost QPL')
     price_single_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price SGL')
     price_double_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price DBL')
     price_triple_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price TPL')
+    price_qdrple_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price QPL')
     free_cost_single = models.SmallIntegerField(default=0)
     free_cost_double = models.SmallIntegerField(default=0)
     free_cost_triple = models.SmallIntegerField(default=0)
+    free_cost_qdrple = models.SmallIntegerField(default=0)
     free_price_single = models.SmallIntegerField(default=0)
     free_price_double = models.SmallIntegerField(default=0)
     free_price_triple = models.SmallIntegerField(default=0)
+    free_price_qdrple = models.SmallIntegerField(default=0)
 
     @property
     def utility_single(self):
@@ -172,6 +178,11 @@ class PaxVariantAmounts(models.Model):
     utility_triple.fget.short_description = 'Util.TPL'
 
     @property
+    def utility_qdrple(self):
+        return utility(self.cost_qdrple_amount, self.price_qdrple_amount)
+    utility_qdrple.fget.short_description = 'Util.QPL'
+
+    @property
     def utility_percent_single(self):
         return utility_percent(self.cost_single_amount, self.price_single_amount)
     utility_percent_single.fget.short_description = 'Util.SGL %'
@@ -185,6 +196,12 @@ class PaxVariantAmounts(models.Model):
     def utility_percent_triple(self):
         return utility_percent(self.cost_triple_amount, self.price_triple_amount)
     utility_percent_triple.fget.short_description = 'Util.TPL %'
+
+    @property
+    def utility_percent_qdrple(self):
+        return utility_percent(self.cost_qgrple_amount, self.price_qdrple_amount)
+    utility_percent_qdrple.fget.short_description = 'Util.QPL %'
+
 
 
 class BaseService(models.Model):
@@ -397,6 +414,8 @@ class QuotePaxVariant(PaxVariantAmounts):
         max_digits=5, decimal_places=2, default=0.0, verbose_name='Extra DBL')
     extra_triple_amount = models.DecimalField(
         max_digits=5, decimal_places=2, default=0.0, verbose_name='Extra TPL')
+    extra_qdrple_amount = models.DecimalField(
+        max_digits=5, decimal_places=2, default=0.0, verbose_name='Extra QPL')
 
     def __str__(self):
         return '%s paxes' % (self.pax_quantity)
@@ -720,6 +739,8 @@ class Booking(models.Model):
     package_dbl_price_amount = models.DecimalField(
         max_digits=10, decimal_places=2, default=0.0, verbose_name='Price DBL')
     package_tpl_price_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.0, verbose_name='Price TPL')
+    package_qpl_price_amount = models.DecimalField(
         max_digits=10, decimal_places=2, default=0.0, verbose_name='Price TPL')
     # a field to add global notes to a booking
     p_notes = models.CharField(

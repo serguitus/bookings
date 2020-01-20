@@ -15,6 +15,7 @@ Booking: {{ quote.reference }}
     {% if min.price_single_amount %}<div>SGL ${{ min.price_single_amount }}</div>{% endif %}
     {% if min.price_double_amount %}<div>DBL ${{ min.price_double_amount }}</div>{% endif %}
     {% if min.price_triple_amount %}<div>TPL ${{ min.price_triple_amount }}</div>{% endif %}
+    {% if min.price_qdrple_amount %}<div>QPL ${{ min.price_qdrple_amount }}</div>{% endif %}
 {% endfor %}
 <div>
 Best Regards
