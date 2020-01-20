@@ -129,6 +129,7 @@ FORMAT_MODULE_PATH = [
 ]
 DEFAULT_FROM_EMAIL = 'sales@thenaturexperts.com'
 DEFAULT_BCC = 'sales@thenaturexperts.com'
+FORMAL_COMPANY_EMAIL = 'reservas1@ergosonline.com'
 
 CKEDITOR_CONFIGS = {
     'default': {

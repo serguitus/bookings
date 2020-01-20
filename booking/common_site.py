@@ -1735,10 +1735,10 @@ class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):
                    'classes': ('collapse', 'wide')})
     )
 
-    list_display = ('booking', 'name', 'datetime_from',
-                    'datetime_to', 'cost_amount', 'manual_cost',
-                    'price_amount', 'manual_price', 'utility_percent',
-                    'utility', 'status')
+    list_display = ('name', 'datetime_from', 'datetime_to', 'provider',
+                    'booking', 'conf_number', 'cost_amount',
+                    'price_amount',
+                    'status', 'cost_amount_paid')
     top_filters = (('booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking__reference', 'conf_number',
@@ -2120,12 +2120,12 @@ class ProviderBookingPaymentSiteModel(SiteModel):
             )
         }),
     )
-    list_display = ('name', 'details', 'account', 'services_amount',
+    list_display = ('provider', 'details', 'account', 'services_amount',
                     'amount', 'date', 'status')
     readonly_fields = ['services_amount']
     add_readonly_fields = ['status']
 
-    top_filters = ('name', 'details', 'account', 'status', 'date',)
+    top_filters = ('provider', 'details', 'account', 'status', 'date',)
 
     recent_allowed = True
     form = ProviderBookingPaymentForm
@@ -2305,7 +2305,7 @@ class ProviderBookingPaymentSiteModel(SiteModel):
 
 def default_requests_mail_from(request, provider=None, booking=None):
     if provider and not provider.is_private:
-        return 'reservas1@ergosonline.com'
+        return settings.FORMAL_COMPANY_EMAIL
     return request.user.email or None
 
 

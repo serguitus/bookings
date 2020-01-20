@@ -934,6 +934,9 @@ class BaseBookingService(BaseService, DateInterval):
         return self.booking.internal_reference()
     booking_internal_reference.short_description = 'Ref.'
 
+    def get_child_object(self):
+        return _get_child_objects([self])[0]
+
 
 class BookingService(BaseBookingService):
     """
@@ -1573,6 +1576,10 @@ class ProviderBookingPaymentService(models.Model):
     @property
     def service_cost_amount_pending(self):
         return self.service_cost_amount_to_pay - self.service_cost_amount_paid
+
+    @property
+    def provider_service_balance(self):
+        return self.service_cost_amount_to_pay - self.service_cost_amount_paid - self.amount_paid
 
     @property
     def service_confirmation(self):
