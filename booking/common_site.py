@@ -1349,6 +1349,7 @@ class BookingBaseServiceSiteModel(SiteModel):
     top_filters = (('booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking__reference', 'conf_number',
+                   ('booking__id', InternalReferenceTopFilter),
                    ('datetime_from', DateTopFilter), 'status', 'provider',
                    (CancelledTopFilter),
                    ('provider__is_private', 'Private'))
@@ -1405,6 +1406,7 @@ class BookingServiceSiteModel(SiteModel):
     top_filters = (('booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking__reference', 'conf_number',
+                   ('booking__id', InternalReferenceTopFilter),
                    ('datetime_from', DateTopFilter), 'status', 'provider',
                    ('provider__is_private', 'Private'))
     ordering = ('datetime_from', 'booking__reference', 'name',)

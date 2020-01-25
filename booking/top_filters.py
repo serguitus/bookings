@@ -32,14 +32,15 @@ class CancelledTopFilter(filters.BooleanFilter):
 
 class InternalReferenceTopFilter(filters.TextFilter):
     filter_title = 'Int.Ref.'
-    filter_field_path = 'int_ref'
 
     def queryset(self, request, queryset):
         search_terms = self._values[0]
         if search_terms and search_terms != '':
             try:
                 number = int(search_terms)
-                queryset = queryset.filter(id=number - 20000)
+                if not self.field_path:
+                    self.field_path = 'id'
+                queryset = queryset.filter(**{self.field_path: number - 20000})
             except:
                 queryset = queryset.none()
         return queryset
