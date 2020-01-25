@@ -312,7 +312,7 @@ class BookingServices(object):
                 for quote_allotment in QuoteAllotment.objects.filter(quote_id=quote.id).all():
                     booking_allotment = BookingAllotment()
                     booking_allotment.booking = booking
-                    booking_allotment.conf_number = '< confirm number >'
+                    # booking_allotment.conf_number = '< confirm number >'
                     booking_allotment.name = quote_allotment.name
                     cls._copy_service_info(
                         dst_service=booking_allotment, src_service=quote_allotment)
@@ -343,7 +343,7 @@ class BookingServices(object):
                 for quote_transfer in QuoteTransfer.objects.filter(quote_id=quote.id).all():
                     booking_transfer = BookingTransfer()
                     booking_transfer.booking = booking
-                    booking_transfer.conf_number = '< confirm number >'
+                    # booking_transfer.conf_number = '< confirm number >'
                     booking_transfer.name = quote_transfer.name
                     cls._copy_service_info(
                         dst_service=booking_transfer, src_service=quote_transfer)
@@ -383,7 +383,7 @@ class BookingServices(object):
                 for quote_extra in QuoteExtra.objects.filter(quote_id=quote.id).all():
                     booking_extra = BookingExtra()
                     booking_extra.booking = booking
-                    booking_extra.conf_number = '< confirm number >'
+                    # booking_extra.conf_number = '< confirm number >'
                     booking_extra.name = quote_extra.name
                     cls._copy_service_info(
                         dst_service=booking_extra, src_service=quote_extra)
@@ -415,7 +415,7 @@ class BookingServices(object):
                 for quote_package in QuotePackage.objects.filter(quote_id=quote.id).all():
                     booking_package = BookingPackage()
                     booking_package.booking = booking
-                    booking_package.conf_number = '< confirm number >'
+                    # booking_package.conf_number = '< confirm number >'
                     booking_package.name = quote_package.name
                     cls._copy_service_info(
                         dst_service=booking_package, src_service=quote_package)
@@ -446,7 +446,7 @@ class BookingServices(object):
                             quote_package_id=quote_package.id).all():
                         bookingpackage_allotment = BookingPackageAllotment()
                         bookingpackage_allotment.booking_package = booking_package
-                        bookingpackage_allotment.conf_number = '< confirm number >'
+                        # bookingpackage_allotment.conf_number = '< confirm number >'
                         bookingpackage_allotment.name = quotepackage_allotment.name
                         cls._copy_service_info(
                             dst_service=bookingpackage_allotment,
@@ -472,7 +472,7 @@ class BookingServices(object):
                             quote_package_id=quote_package.id).all():
                         bookingpackage_transfer = BookingPackageTransfer()
                         bookingpackage_transfer.booking_package = booking_package
-                        bookingpackage_transfer.conf_number = '< confirm number >'
+                        # bookingpackage_transfer.conf_number = '< confirm number >'
                         bookingpackage_transfer.name = quotepackage_transfer.name
                         cls._copy_service_info(
                             dst_service=bookingpackage_transfer, src_service=quotepackage_transfer)
@@ -506,7 +506,7 @@ class BookingServices(object):
                             quote_package_id=quote_package.id).all():
                         bookingpackage_extra = BookingPackageExtra()
                         bookingpackage_extra.booking_package = booking_package
-                        bookingpackage_extra.conf_number = '< confirm number >'
+                        # bookingpackage_extra.conf_number = '< confirm number >'
                         bookingpackage_extra.name = quotepackage_extra.name
                         cls._copy_service_info(
                             dst_service=bookingpackage_extra, src_service=quotepackage_extra)
@@ -585,7 +585,7 @@ class BookingServices(object):
         for package_allotment in PackageAllotment.objects.filter(package_id=package.id).all():
             quote_package_allotment = QuotePackageAllotment()
             quote_package_allotment.quote_package = quote_package
-            quote_package_allotment.conf_number = '< confirm number >'
+            # quote_package_allotment.conf_number = '< confirm number >'
             # cost_amount
             # cost_comment
             # price_amount
@@ -605,7 +605,7 @@ class BookingServices(object):
         for package_transfer in PackageTransfer.objects.filter(package_id=package.id).all():
             quote_package_transfer = QuotePackageTransfer()
             quote_package_transfer.quote_package = quote_package
-            quote_package_transfer.conf_number = '< confirm number >'
+            # quote_package_transfer.conf_number = '< confirm number >'
             # cost_amount
             # cost_comment
             # price_amount
@@ -632,7 +632,7 @@ class BookingServices(object):
         for package_extra in PackageExtra.objects.filter(package_id=package.id).all():
             quote_package_extra = QuotePackageExtra()
             quote_package_extra.quote_package = quote_package
-            quote_package_extra.conf_number = '< confirm number >'
+            # quote_package_extra.conf_number = '< confirm number >'
             # cost_amount
             # cost_comment
             # price_amount
@@ -4284,7 +4284,7 @@ class BookingServices(object):
         for package_transfer in PackageTransfer.objects.filter(package_id=package.id).all():
             booking_package_transfer = BookingPackageTransfer()
             booking_package_transfer.booking_package = bookingpackage
-            booking_package_transfer.conf_number = '< confirm number >'
+            # booking_package_transfer.conf_number = '< confirm number >'
             cls._copy_package_info(
                 dst_package=booking_package_transfer, src_package=package_transfer)
             # time
@@ -4305,7 +4305,7 @@ class BookingServices(object):
         for package_extra in PackageExtra.objects.filter(package_id=package.id).all():
             booking_package_extra = BookingPackageExtra()
             booking_package_extra.booking_package = bookingpackage
-            booking_package_extra.conf_number = '< confirm number >'
+            # booking_package_extra.conf_number = '< confirm number >'
             cls._copy_package_info(
                 dst_package=booking_package_extra, src_package=package_extra)
             booking_package_extra.service_addon = package_extra.service_addon
