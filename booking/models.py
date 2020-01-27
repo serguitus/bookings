@@ -733,7 +733,8 @@ class Booking(models.Model):
                                        verbose_name='Price')
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
     invoice = models.ForeignKey(BookingInvoice, blank=True, null=True)
-    is_package_price = models.BooleanField(default=False, verbose_name='Package Price')
+    is_package_price = models.BooleanField(default=False,
+                                           verbose_name='Package Price')
     package_sgl_price_amount = models.DecimalField(
         max_digits=10, decimal_places=2, default=0.0, verbose_name='Price SGL')
     package_dbl_price_amount = models.DecimalField(
@@ -741,12 +742,14 @@ class Booking(models.Model):
     package_tpl_price_amount = models.DecimalField(
         max_digits=10, decimal_places=2, default=0.0, verbose_name='Price TPL')
     package_qpl_price_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, default=0.0, verbose_name='Price TPL')
+        max_digits=10, decimal_places=2, default=0.0,
+        verbose_name='Price QUAD')
     # a field to add global notes to a booking
     p_notes = models.CharField(
         max_length=1000, blank=True, null=True, verbose_name='Private Notes')
     seller = models.ForeignKey(User)
-    agency_contact = models.ForeignKey(AgencyContact, blank=True, null=True, verbose_name='Contact')
+    agency_contact = models.ForeignKey(AgencyContact, blank=True, null=True,
+                                       verbose_name='Contact')
 
     @property
     def utility(self):
