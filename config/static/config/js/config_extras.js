@@ -11,6 +11,7 @@ $(document).ready(function(){
     sgl_val = $($(this).parents('fieldset')[0]).find('[id$=-ad_1_amount]');
     dbl_val = $(this);
     tpl_val = $($(this).parents('fieldset')[0]).find('[id$=-ad_3_amount]');
+    qpl_val = $($(this).parents('fieldset')[0]).find('[id$=-ad_4_amount]');
     if(sgl_sup.val()){
       // if a SGL suplement exists, SGL = DBL + Supplement
       sgl_val.val(Number(dbl_val.val())+Number(sgl_sup.val()));
@@ -18,6 +19,10 @@ $(document).ready(function(){
     if(tpl_dsc.val()){
       // if a 3rd pax discount is provided, TPL = DBL * TPL-discount %
       tpl_val.val((3*Number(dbl_val.val()) - Number(dbl_val.val())*Number(tpl_dsc.val())/100)/3);
+    }
+    if(qpl_dsc.val()){
+      // if a 4rd pax discount is provided, QPL = DBL * QPL-discount %
+      qpl_val.val((4*Number(dbl_val.val()) - Number(dbl_val.val())*Number(qpl_dsc.val())/100)/4);
     }
 
   })

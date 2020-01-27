@@ -90,11 +90,13 @@ class QuotePaxVariantTable(tables.Table):
         template_name = 'booking/quoteservice_list.html'
         fields = [
             'pax_quantity',
-            'cost_single_amount', 'cost_double_amount', 'cost_triple_amount',
+            'cost_single_amount', 'cost_double_amount', 'cost_triple_amount', 'cost_qdrple_amount',
             'price_percent',
             'price_single_amount', 'utility_percent_single', 'utility_single',
             'price_double_amount', 'utility_percent_double', 'utility_double',
-            'price_triple_amount', 'utility_percent_triple', 'utility_triple']
+            'price_triple_amount', 'utility_percent_triple', 'utility_triple',
+            'price_qdrple_amount', 'utility_percent_qdrple', 'utility_qdrple',
+        ]
 
     def __init__(self, *args, **kwargs):
         self.base_columns['utility_percent_single'].verbose_name='Util.SGL %'
@@ -103,6 +105,8 @@ class QuotePaxVariantTable(tables.Table):
         self.base_columns['utility_double'].verbose_name='Util.DBL'
         self.base_columns['utility_percent_triple'].verbose_name='Util.TPL %'
         self.base_columns['utility_triple'].verbose_name='Util.TPL'
+        self.base_columns['utility_percent_qdrple'].verbose_name='Util.QPL %'
+        self.base_columns['utility_qdrple'].verbose_name='Util.QPL'
         super(QuotePaxVariantTable, self).__init__(*args, **kwargs)
 
 

@@ -55,8 +55,10 @@ $(document).ready(function(){
   function show_package_amounts() {
     if ($('#id_is_package_price')[0].checked) {
       $('.form-row.field-package_sgl_price_amount')[0].hidden = false;
+      $('.form-row.field-package_tpl_price_amount')[0].hidden = false;
     } else {
       $('.form-row.field-package_sgl_price_amount')[0].hidden = true;
+      $('.form-row.field-package_tpl_price_amount')[0].hidden = true;
     }
   }
 
