@@ -1155,17 +1155,19 @@ class ConfigServices(object):
         return None
 
     @classmethod
-    def get_service_quantity(cls, service, pax_qtty):
+    def get_service_quantity(cls, service, pax_qtty, default=1):
+        if not default:
+            default = 1
         if not hasattr(service, 'max_capacity'):
-            return 1
+            return default
         if service.max_capacity is None or (service.max_capacity < 1):
-            return 1
+            return default
         return int((pax_qtty + service.max_capacity - 1) / service.max_capacity)
 
     @classmethod
     def _get_transfer_amount(
             cls, service, detail, adults, children, free_adults, free_children, quantity):
-        quantity = cls.get_service_quantity(service, adults + children)
+        quantity = cls.get_service_quantity(service, adults + children, quantity)
         if service.cost_type == AMOUNTS_FIXED and detail.ad_1_amount is not None:
             # TODO verificar si esto es correcto
             return (adults + children - free_adults - free_children) * detail.ad_1_amount * quantity / (adults + children)
@@ -1178,6 +1180,7 @@ class ConfigServices(object):
     @classmethod
     def _get_extra_amount(
             cls, service, detail, date_from, date_to, adults, children, free_adults, free_children, quantity, parameter):
+        quantity = cls.get_service_quantity(service, adults + children, quantity)
         if service.parameter_type == EXTRA_PARAMETER_TYPE_HOURS:
             # parameter hours mandatory
             if parameter is None:
@@ -1192,8 +1195,6 @@ class ConfigServices(object):
                 parameter = interval.days
             else:
                 return None
-        if quantity is None or quantity < 1:
-            quantity = cls.get_service_quantity(service, adults + children)
         if service.cost_type == AMOUNTS_FIXED and detail.ad_1_amount is not None:
             # TODO verificar si esto es correcto
             return (adults + children - free_adults - free_children) * detail.ad_1_amount * quantity * parameter / (adults + children)

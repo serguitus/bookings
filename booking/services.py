@@ -349,7 +349,7 @@ class BookingServices(object):
                         dst_service=booking_transfer, src_service=quote_transfer)
                     # time
                     booking_transfer.quantity = ConfigServices.get_service_quantity(
-                        booking_transfer.service, len(pax_list))
+                        booking_transfer.service, len(pax_list), quote_transfer.quantity)
                     booking_transfer.location_from = quote_transfer.location_from
                     # place_from
                     # schedule_from
@@ -389,7 +389,8 @@ class BookingServices(object):
                         dst_service=booking_extra, src_service=quote_extra)
                     booking_extra.service_addon = quote_extra.service_addon
                     booking_extra.time = quote_extra.time
-                    booking_extra.quantity = quote_extra.quantity
+                    booking_extra.quantity = ConfigServices.get_service_quantity(
+                        booking_extra.service, len(pax_list), quote_extra.quantity)
                     booking_extra.parameter = quote_extra.parameter
                     booking_extra.p_notes = quote_extra.description
 
@@ -478,7 +479,7 @@ class BookingServices(object):
                             dst_service=bookingpackage_transfer, src_service=quotepackage_transfer)
                         # time
                         bookingpackage_transfer.quantity = ConfigServices.get_service_quantity(
-                            bookingpackage_transfer.service, len(pax_list))
+                            bookingpackage_transfer.service, len(pax_list), quotepackage_transfer.quantity)
                         bookingpackage_transfer.location_from = quotepackage_transfer.location_from
                         # place_from
                         # schedule_from
@@ -512,7 +513,8 @@ class BookingServices(object):
                             dst_service=bookingpackage_extra, src_service=quotepackage_extra)
                         bookingpackage_extra.service_addon = quotepackage_extra.service_addon
                         bookingpackage_extra.time = quotepackage_extra.time
-                        bookingpackage_extra.quantity = quotepackage_extra.quantity
+                        bookingpackage_extra.quantity = ConfigServices.get_service_quantity(
+                            bookingpackage_extra.service, len(pax_list), quotepackage_extra.quantity)
                         bookingpackage_extra.parameter = quotepackage_extra.parameter
                         bookingpackage_extra.p_notes = quotepackage_extra.description
 

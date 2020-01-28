@@ -380,10 +380,11 @@ class ExtraSiteModel(SiteModel):
     model_order = 6130
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
-    fields = ('name', 'service_category', 'location', 'cost_type', 'parameter_type',
+    fields = ('name', 'service_category', 'location',
+            ('cost_type', 'parameter_type'), 'max_capacity',
               'pax_range', ('child_discount_percent', 'child_age', 'infant_age'), ('car_rental', 'enabled'),)
     list_display = ('name', 'service_category', 'location', 'cost_type',
-                    'parameter_type', 'enabled', 'pax_range', 'has_pax_range',
+                    'parameter_type', 'max_capacity', 'enabled', 'pax_range', 'has_pax_range',
                     'infant_age', 'child_age')
     top_filters = (('service_category', ServiceCategoryTopFilter), 'name',)
     ordering = ['enabled', 'name']
