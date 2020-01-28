@@ -2508,6 +2508,8 @@ class ExportBooking(Booking):
         proxy = True
         verbose_name = 'Export Booking'
         verbose_name_plural = 'Export Bookings'
+        default_permissions = ('view',)
+        permissions = ()
 
 
 class ExportBookingSiteModel(SiteModel):
@@ -2530,11 +2532,10 @@ class ExportBookingSiteModel(SiteModel):
         ('General Notes', {'fields': ('p_notes',),
                            'classes': ('collapse', 'wide')})
     )
-    list_display = ('name', 'internal_reference', 'agency',
-                    'reference', 'date_from',
-                    'date_to', 'status', 'cost_amount',
-                    'price_amount', 'utility_percent', 'utility',
-                    'invoiced_amount', 'has_notes')
+    list_display = ('internal_reference', 'name', 'status', 'date_from', 'date_to',
+                    'agency', 'reference', 'cost_amount', 'price_amount',
+                    'utility', 'invoice', 'invoiced_amount', 'paid_amount',
+                    'pending_amount', 'seller')
     top_filters = (('name', 'Booking Name'), 'reference', 'agency',
                    ('date_from', DateTopFilter), 'rooming_list__pax_name',
                    (InternalReferenceTopFilter),

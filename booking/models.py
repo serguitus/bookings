@@ -808,6 +808,28 @@ class Booking(models.Model):
     has_notes.allow_tags = True
     has_notes.short_description = 'Notes'
 
+    @property
+    def invoiced_amount(self):
+        if self.invoice:
+            return self.invoice.amount
+        return ''
+    invoiced_amount.fget.short_description = 'Invoiced'
+
+    @property
+    def paid_amount(self):
+        if self.invoice:
+            return self.invoice.matched_amount
+        return ''
+    paid_amount.fget.short_description = 'Paid'
+
+    @property
+    def pending_amount(self):
+        if self.invoice:
+            return self.invoice.amount - self.invoice.matched_amount
+        return ''
+    pending_amount.fget.short_description = 'Pending'
+
+
 
 class BookingPax(models.Model):
     """
