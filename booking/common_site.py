@@ -100,7 +100,7 @@ from booking.models import (
 from booking.services import BookingServices
 from booking.top_filters import (
     DateTopFilter, PackageTopFilter, CancelledTopFilter, InternalReferenceTopFilter,
-    SellerTopFilter)
+    SellerTopFilter, PaidTopFilter)
 
 from common.sites import CommonStackedInline, CommonTabularInline
 
@@ -1373,7 +1373,7 @@ class BookingBaseServiceSiteModel(SiteModel):
                    ('booking__id', InternalReferenceTopFilter),
                    ('datetime_from', DateTopFilter), 'status', 'provider',
                    (CancelledTopFilter),
-                   ('provider__is_private', 'Private'))
+                   ('provider__is_private', 'Private'), PaidTopFilter)
     ordering = ('datetime_from', 'booking__reference', 'name',)
     list_details_template = 'booking/basebookingservice_details.html'
     change_details_template = 'booking/basebookingservice_details.html'
@@ -1429,7 +1429,7 @@ class BookingServiceSiteModel(SiteModel):
                    'booking__reference', 'conf_number',
                    ('booking__id', InternalReferenceTopFilter),
                    ('datetime_from', DateTopFilter), 'status', 'provider',
-                   ('provider__is_private', 'Private'))
+                   ('provider__is_private', 'Private'), CancelledTopFilter, PaidTopFilter)
     ordering = ('datetime_from', 'booking__reference', 'name',)
     list_details_template = 'booking/bookingservice_details.html'
     change_details_template = 'booking/bookingservice_details.html'

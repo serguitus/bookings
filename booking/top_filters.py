@@ -1,7 +1,8 @@
 from __future__ import unicode_literals
-from datetime import date, timedelta
 from common import filters
 from booking.constants import BOOKING_STATUS_CANCELLED
+from datetime import date, timedelta
+from django.db.models import F, Q
 
 class DateTopFilter(filters.DateFilter):
     default_value = [date.today() - timedelta(days=30), None]
@@ -44,3 +45,20 @@ class InternalReferenceTopFilter(filters.TextFilter):
             except:
                 queryset = queryset.none()
         return queryset
+
+class PaidTopFilter(filters.BooleanFilter):
+    filter_title = 'Paid'
+    filter_field_path = ''
+
+    def queryset(self, request, queryset):
+        search_option = self._values[0]
+        if search_option == "True":
+            queryset = queryset.filter(cost_amount_to_pay__gt=0)
+            queryset = queryset.filter(cost_amount_to_pay=F('cost_amount_paid'))
+        if search_option == "False":
+            queryset = queryset.filter(cost_amount_to_pay__gt=0)
+            queryset = queryset.exclude(cost_amount_to_pay=F('cost_amount_paid'))
+
+        queryset = queryset.distinct()
+        return queryset
+
