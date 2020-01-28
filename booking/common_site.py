@@ -2503,6 +2503,45 @@ def _fetch_resources(uri, rel):
     return path
 
 
+class ExportBooking(Booking):
+    class Meta:
+        proxy = True
+        verbose_name = 'Export Booking'
+        verbose_name_plural = 'Export Bookings'
+
+
+class ExportBookingSiteModel(SiteModel):
+    model_order = 1110
+    menu_label = MENU_LABEL_BOOKING
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                ('seller'),
+                ('name', 'reference', 'status'),
+                ('agency', 'agency_contact'),
+                ('date_from', 'date_to'),
+                ('is_package_price',),
+                ('package_sgl_price_amount', 'package_dbl_price_amount'),
+                ('package_tpl_price_amount', 'package_qpl_price_amount'),
+                ('cost_amount', 'price_amount'),
+                'version',)
+        }),
+        ('General Notes', {'fields': ('p_notes',),
+                           'classes': ('collapse', 'wide')})
+    )
+    list_display = ('name', 'internal_reference', 'agency',
+                    'reference', 'date_from',
+                    'date_to', 'status', 'cost_amount',
+                    'price_amount', 'utility_percent', 'utility',
+                    'invoiced_amount', 'has_notes')
+    top_filters = (('name', 'Booking Name'), 'reference', 'agency',
+                   ('date_from', DateTopFilter), 'rooming_list__pax_name',
+                   (InternalReferenceTopFilter),
+                   (CancelledTopFilter), 'seller', 'invoice__document_number')
+    ordering = ['date_from', 'date_to', 'reference']
+    readonly_model = True
+
 
 # Starts Registration Section
 
@@ -2527,6 +2566,8 @@ bookings_site.register(QuotePackageExtra, QuotePackageExtraSiteModel)
 
 
 bookings_site.register(Booking, BookingSiteModel)
+
+bookings_site.register(ExportBooking, ExportBookingSiteModel)
 
 bookings_site.register(BaseBookingService, BookingBaseServiceSiteModel)
 

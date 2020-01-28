@@ -961,7 +961,7 @@ class SiteModel(TotalsumAdmin):
         """
         opts = self.model._meta
 
-        if self.has_change_permission(request, None):
+        if self.has_view_permission(request, None):
             post_url = reverse(self.changelist_url_format() %
                                (opts.app_label, opts.model_name),
                                current_app=self.admin_site.name)
