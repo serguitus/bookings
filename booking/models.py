@@ -829,6 +829,10 @@ class Booking(models.Model):
         return ''
     pending_amount.fget.short_description = 'Pending'
 
+    @property
+    def pax_count(self):
+        return self.rooming_list.count()
+    pax_count.fget.short_description = 'Paxes'
 
 
 class BookingPax(models.Model):
