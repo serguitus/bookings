@@ -963,7 +963,7 @@ class BookingSiteModel(SiteModel):
                     'reference', 'date_from',
                     'date_to', 'status', 'cost_amount',
                     'price_amount', 'utility_percent', 'utility',
-                    'invoiced_amount', 'has_notes')
+                    'invoiced_amount', 'paid_amount', 'has_notes')
     top_filters = (('name', 'Booking Name'), 'reference', 'agency',
                    ('date_from', DateTopFilter), 'rooming_list__pax_name',
                    (InternalReferenceTopFilter),
@@ -2534,7 +2534,7 @@ class ExportBookingSiteModel(SiteModel):
     )
     list_display = ('internal_reference', 'name', 'status', 'date_from', 'date_to',
                     'pax_count', 'agency', 'reference', 'cost_amount', 'price_amount',
-                    'utility', 'invoice', 'invoiced_amount', 'paid_amount',
+                    'utility', 'invoice_number', 'invoiced_amount', 'paid_amount',
                     'pending_amount', 'seller')
     top_filters = (('name', 'Booking Name'), 'reference', 'agency',
                    ('date_from', DateTopFilter), 'rooming_list__pax_name',
