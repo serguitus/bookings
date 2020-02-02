@@ -1170,7 +1170,7 @@ class BookingServices(object):
                                     elif pax.is_price_free:
                                         groups[pax.group][2] += 1
                         else:
-                            if pax.booking_pax.pax_age > service.child_age:
+                            if pax.booking_pax.pax_age >= service.child_age:
                                 groups[pax.group][0] += 1
                                 if for_cost:
                                     if pax.is_cost_free:
@@ -1226,7 +1226,7 @@ class BookingServices(object):
                                     elif pax.is_price_free:
                                         free_adults += 1
                         else:
-                            if pax.booking_pax.pax_age > service.child_age:
+                            if pax.booking_pax.pax_age >= service.child_age:
                                 adults += 1
                                 if for_cost:
                                     if pax.is_cost_free:
