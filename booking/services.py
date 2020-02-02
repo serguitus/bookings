@@ -1103,10 +1103,10 @@ class BookingServices(object):
             price, price_msg = cls._find_booking_package_price(booking)
 
         fields = []
-        if booking.date_from != date_from:
+        if date_from is not None and booking.date_from != date_from:
             fields.append('date_from')
             booking.date_from = date_from
-        if booking.date_to != date_to:
+        if date_to is not None and booking.date_to != date_to:
             fields.append('date_to')
             booking.date_to = date_to
         if booking.status != status:
