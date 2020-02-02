@@ -111,7 +111,7 @@ def providerbookingpaymentservice_table(payment):
 @register.simple_tag
 def providerbookingpaymentreport_table(payment):
     table = ProviderBookingPaymentReportTable(
-        ProviderBookingPaymentService.objects.filter(provider_payment=payment),
+        ProviderBookingPaymentService.objects.filter(provider_payment=payment).order_by('provider_service__datetime_from'),
         order_by=['datetime_from', 'time', 'datetime_to'],
     )
     return table
