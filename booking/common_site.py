@@ -9,6 +9,7 @@ except ImportError:
 from xhtml2pdf import pisa
 
 from common.sites import SiteModel, CommonChangeList
+from common.templatetags.common_utils import common_add_preserved_filters
 
 from django.conf import settings
 from django.conf.urls import url
@@ -1580,6 +1581,12 @@ class BaseBookingServiceSiteModel(SiteModel):
         BookingServices.set_services_status(services, SERVICE_STATUS_CONFIRMED)
 
     confirmed_services.short_description = "Confirmed Services"
+
+    def build_another_redirect_url(self, request, obj, obj_url, preserved_filters, opts):
+        redirect_url = request.path
+        redirect_url = '%s?booking=%i' % (redirect_url, obj.booking_id)
+        redirect_url = common_add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
+        return redirect_url
 
 
 class BookingPackageServiceSiteModel(SiteModel):

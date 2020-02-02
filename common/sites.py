@@ -795,14 +795,8 @@ class SiteModel(TotalsumAdmin):
                 request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue)
 
         elif "_addanother" in request.POST:
-            msg = format_html(
-                _('The {name} "{obj}" was added successfully. You may add another {name} below.'),
-                **msg_dict
-            )
-            self.message_user(request, msg, messages.SUCCESS)
-            redirect_url = request.path
-            redirect_url = common_add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
-            return HttpResponseRedirect(redirect_url)
+            return self.response_add_saveaddanother(
+                request, obj, msg_dict, obj_url, preserved_filters, opts)
 
         else:
             msg = format_html(
@@ -811,6 +805,22 @@ class SiteModel(TotalsumAdmin):
             )
             self.message_user(request, msg, messages.SUCCESS)
             return self.response_post_save_add(request, obj)
+
+    def response_add_saveaddanother(
+            self, request, obj, msg_dict, obj_url, preserved_filters, opts):
+            msg = format_html(
+                _('The {name} "{obj}" was added successfully. You may add another {name} below.'),
+                **msg_dict
+            )
+            self.message_user(request, msg, messages.SUCCESS)
+            redirect_url = self.build_another_redirect_url(
+                request, obj, obj_url, preserved_filters, opts)
+            return HttpResponseRedirect(redirect_url)
+
+    def build_another_redirect_url(self, request, obj, obj_url, preserved_filters, opts):
+        redirect_url = request.path
+        redirect_url = common_add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
+        return redirect_url
 
     def response_add_saveasnew(
             self, request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue=None):
