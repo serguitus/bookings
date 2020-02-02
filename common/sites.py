@@ -807,15 +807,15 @@ class SiteModel(TotalsumAdmin):
             return self.response_post_save_add(request, obj)
 
     def response_add_saveaddanother(
-            self, request, obj, msg_dict, obj_url, preserved_filters, opts):
-            msg = format_html(
-                _('The {name} "{obj}" was added successfully. You may add another {name} below.'),
-                **msg_dict
-            )
-            self.message_user(request, msg, messages.SUCCESS)
-            redirect_url = self.build_another_redirect_url(
-                request, obj, obj_url, preserved_filters, opts)
-            return HttpResponseRedirect(redirect_url)
+        self, request, obj, msg_dict, obj_url, preserved_filters, opts):
+        msg = format_html(
+            _('The {name} "{obj}" was added successfully. You may add another {name} below.'),
+            **msg_dict
+        )
+        self.message_user(request, msg, messages.SUCCESS)
+        redirect_url = self.build_another_redirect_url(
+            request, obj, obj_url, preserved_filters, opts)
+        return HttpResponseRedirect(redirect_url)
 
     def build_another_redirect_url(self, request, obj, obj_url, preserved_filters, opts):
         redirect_url = request.path
