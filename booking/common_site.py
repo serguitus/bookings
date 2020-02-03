@@ -1429,7 +1429,8 @@ class BookingServiceSiteModel(SiteModel):
                    'booking__reference', 'conf_number',
                    ('booking__id', InternalReferenceTopFilter),
                    ('datetime_from', DateTopFilter), 'status', 'provider',
-                   ('provider__is_private', 'Private'), CancelledTopFilter, PaidTopFilter)
+                   ('provider__is_private', 'Private'), CancelledTopFilter,
+                   PaidTopFilter)
     ordering = ('datetime_from', 'booking__reference', 'name',)
     list_details_template = 'booking/bookingservice_details.html'
     change_details_template = 'booking/bookingservice_details.html'
@@ -1446,13 +1447,13 @@ class BookingServiceSiteModel(SiteModel):
         services = list(queryset.all())
         BookingServices.set_services_status(services, SERVICE_STATUS_COORDINATED)
 
-    coordinated_services.short_description = "Coordinated Services"
+    coordinated_services.short_description = "Coordinate Services"
 
     def confirmed_services(self, request, queryset):
         services = list(queryset.all())
         BookingServices.set_services_status(services, SERVICE_STATUS_CONFIRMED)
 
-    confirmed_services.short_description = "Confirmed Services"
+    confirmed_services.short_description = "Confirm Services"
 
 
 class BaseBookingServiceSiteModel(SiteModel):
@@ -2540,7 +2541,7 @@ class ExportBookingSiteModel(SiteModel):
                    ('date_from', DateTopFilter), 'rooming_list__pax_name',
                    (InternalReferenceTopFilter),
                    (CancelledTopFilter), 'seller', 'invoice__document_number')
-    ordering = ['-date_from', '-date_to', 'reference']
+    ordering = ['date_from', 'date_to', 'reference']
     readonly_model = True
 
 
