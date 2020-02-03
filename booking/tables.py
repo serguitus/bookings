@@ -259,6 +259,7 @@ class ProviderBookingPaymentReportTable(tables.Table):
                   'service_cost_amount_pending',
                   'amount_paid', 'provider_service_balance']
         attrs = {'class': 'table table-hover table-condensed'}
+        order_by = ('datetime_from', 'datetime_to')
 
     def __init__(self, *args, **kwargs):
         self.base_columns['provider_service_booking'].verbose_name = 'Booking'
