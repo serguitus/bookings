@@ -108,6 +108,9 @@ class BookingServices(object):
         result['3'] = dict()
         result['3']['qtty'] = 0
         result['3']['free'] = 0
+        result['4'] = dict()
+        result['4']['qtty'] = 0
+        result['4']['free'] = 0
         for group in groups.values():
             if group['qtty'] == 1:
                 result['1']['qtty'] += group['qtty']
@@ -121,6 +124,10 @@ class BookingServices(object):
                 result['3']['qtty'] += group['qtty']
                 if group['free'] > 0:
                     result['3']['free'] += group['free']
+            elif group['qtty'] == 4:
+                result['4']['qtty'] += group['qtty']
+                if group['free'] > 0:
+                    result['4']['free'] += group['free']
         return result
 
 
