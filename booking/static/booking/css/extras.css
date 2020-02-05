@@ -11,6 +11,14 @@
     margin: 20px 0 20px 0;
 }
 
+.payment-filters{
+    margin: 10px 0 20px 0;
+    padding: 10px 0 10px 10px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    background-color: #f8f8f8;
+}
+
 .field-conf_number .vTextField {
     width: 150px;
 }

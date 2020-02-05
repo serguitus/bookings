@@ -31,6 +31,7 @@ class CancelledTopFilter(filters.BooleanFilter):
         queryset = queryset.distinct()
         return queryset
 
+
 class InternalReferenceTopFilter(filters.TextFilter):
     filter_title = 'Int.Ref.'
 
@@ -45,6 +46,7 @@ class InternalReferenceTopFilter(filters.TextFilter):
             except:
                 queryset = queryset.none()
         return queryset
+
 
 class PaidTopFilter(filters.BooleanFilter):
     filter_title = 'Paid'
@@ -61,4 +63,3 @@ class PaidTopFilter(filters.BooleanFilter):
 
         queryset = queryset.distinct()
         return queryset
-

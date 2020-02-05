@@ -403,7 +403,7 @@ class QuotePaxVariant(PaxVariantAmounts):
     """
     class Meta:
         verbose_name = 'Quote Pax'
-        verbose_name_plural = 'Quotes Paxes'
+        verbose_name_plural = 'Quotes Pax'
         unique_together = (('quote', 'pax_quantity'),)
     quote = models.ForeignKey(Quote, related_name='quote_paxvariants')
     pax_quantity = models.SmallIntegerField()
@@ -418,7 +418,7 @@ class QuotePaxVariant(PaxVariantAmounts):
         max_digits=5, decimal_places=2, default=0.0, verbose_name='Extra QPL')
 
     def __str__(self):
-        return '%s paxes' % (self.pax_quantity)
+        return '%s pax' % (self.pax_quantity)
 
 
 class QuoteService(BaseService, DateInterval):
@@ -444,7 +444,7 @@ class QuoteServicePaxVariant(PaxVariantAmounts):
     """
     class Meta:
         verbose_name = 'Quote Service Pax Variant'
-        verbose_name_plural = 'Quotes Services Paxes Variants'
+        verbose_name_plural = 'Quote Services Pax Variants'
         unique_together = (('quote_pax_variant', 'quote_service'),)
     quote_pax_variant = models.ForeignKey(QuotePaxVariant, verbose_name='Pax Variant')
     quote_service = models.ForeignKey(QuoteService, related_name='quoteservice_paxvariants')
@@ -561,7 +561,7 @@ class QuotePackageServicePaxVariant(PaxVariantAmounts):
     """
     class Meta:
         verbose_name = 'Quote Package Service Pax Variant'
-        verbose_name_plural = 'Quotes Packages Services Paxes Variants'
+        verbose_name_plural = 'Quote Package Services Pax Variants'
         unique_together = (('quotepackage_pax_variant', 'quotepackage_service'),)
     quotepackage_pax_variant = models.ForeignKey(QuoteServicePaxVariant, verbose_name='Pax Variant')
     quotepackage_service = models.ForeignKey(QuotePackageService, related_name='quotepackageservice_paxvariants')
@@ -832,7 +832,7 @@ class Booking(models.Model):
     @property
     def pax_count(self):
         return self.rooming_list.count()
-    pax_count.fget.short_description = 'Paxes'
+    pax_count.fget.short_description = 'Pax'
 
 
 class BookingPax(models.Model):

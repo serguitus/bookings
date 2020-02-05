@@ -93,7 +93,8 @@ def agencypayment_table(booking):
 @register.simple_tag
 def providerbookingpayment_table(service):
     table = ProviderBookingPaymentTable(
-        ProviderBookingPayment.objects.filter(providerbookingpaymentservice__provider_service=service),
+        ProviderBookingPayment.objects.filter(
+            providerbookingpaymentservice__provider_service=service),
         order_by=('date',),
     )
     return table
@@ -103,7 +104,9 @@ def providerbookingpayment_table(service):
 def providerbookingpaymentservice_table(payment):
     table = ProviderBookingPaymentServiceTable(
         ProviderBookingPaymentService.objects.filter(provider_payment=payment),
-        order_by=('datetime_from', 'time','datetime_to',),
+        # TODO el parametro order_by no funciona aqui. al parecer el
+        # orden del queryset es el que cuenta aqui
+        order_by=('datetime_from', 'time', 'datetime_to'),
     )
     return table
 
@@ -111,8 +114,10 @@ def providerbookingpaymentservice_table(payment):
 @register.simple_tag
 def providerbookingpaymentreport_table(payment):
     table = ProviderBookingPaymentReportTable(
-        ProviderBookingPaymentService.objects.filter(provider_payment=payment).order_by('provider_service__datetime_from'),
-        order_by=['datetime_from', 'time', 'datetime_to'],
+        ProviderBookingPaymentService.objects.filter(
+            provider_payment=payment).order_by(
+                'provider_service__datetime_from',
+                'provider_service__datetime_to'),
     )
     return table
 
