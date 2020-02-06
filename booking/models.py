@@ -203,7 +203,6 @@ class PaxVariantAmounts(models.Model):
     utility_percent_qdrple.fget.short_description = 'Util.QPL %'
 
 
-
 class BaseService(models.Model):
     class Meta:
         abstract = True
@@ -1555,7 +1554,10 @@ class ProviderBookingPaymentService(models.Model):
     @property
     def provider_service_name(self):
         if self.provider_service:
-            return self.provider_service.name
+            rich_name = self.provider_service.name
+            if self.provider_service.description:
+                rich_name += ' ({})'.format(self.provider_service.description)
+            return rich_name
         return None
 
     @property
