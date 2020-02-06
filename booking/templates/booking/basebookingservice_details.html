@@ -1,10 +1,15 @@
 {% load booking_tags %}
 {% load render_table from django_tables2 %}
 {% with current.get_child_object as service %}
-    {% if service.service_type == 'E' %}
+    {% if service.service_type == 'E' %}{# Extra service #}
         Time: {{ service.time }}
-    {% elif service.service_type == 'T' %}
-        Pick Up: {{ service.pickup }}
+    {% elif service.service_type == 'T' %}{# Transfer service #}
+        <div>Time: {{ service.time }}</div>
+        <div>Pick Up: {% if service.pickup %}{{ service.pickup }}
+        {% elif service.place_from %}{{ service.place_from }}{% endif %}</div>
+        <div>Drop Off: {{ service.dropoff }}</div>
+    {% elif service.service_type == 'A' %}{# Accommodation service #}
+        Booking Info
     {% endif %}
 {% endwith %}
 {% if current.has_payment %}

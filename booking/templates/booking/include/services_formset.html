@@ -1,16 +1,16 @@
-<div class="fieldWrapper">
+<div class="fieldWrapper payment-filters">
+    <label for="{{ adminform.form.booking_name_filter.id_for_label }}">Book.Name:</label>
+    {{ adminform.form.booking_name_filter }}
+    <label for="{{ adminform.form.confirm_number_filter.id_for_label }}">Conf.Number:</label>
+    {{ adminform.form.confirm_number_filter }}
     <label for="{{ adminform.form.booking_ref_filter.id_for_label }}">Book.Ref.:</label>
     {{ adminform.form.booking_ref_filter }}
     <label for="{{ adminform.form.internal_ref_filter.id_for_label }}">Int.Ref.:</label>
     {{ adminform.form.internal_ref_filter }}
-    <label for="{{ adminform.form.booking_name_filter.id_for_label }}">Book.Name:</label>
-    {{ adminform.form.booking_name_filter }}
     <label for="{{ adminform.form.date_from_filter.id_for_label }}">From:</label>
     {{ adminform.form.date_from_filter }}
     <label for="{{ adminform.form.date_to_filter.id_for_label }}">To:</label>
     {{ adminform.form.date_to_filter }}
-    <label for="{{ adminform.form.confirm_number_filter.id_for_label }}">Conf.Number:</label>
-    {{ adminform.form.confirm_number_filter }}
     <input type="submit" value="Filter" class="btn-save btn-filter" name="_filter">
 </div>
 {{ services_formset.management_form }}

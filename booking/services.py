@@ -108,6 +108,9 @@ class BookingServices(object):
         result['3'] = dict()
         result['3']['qtty'] = 0
         result['3']['free'] = 0
+        result['4'] = dict()
+        result['4']['qtty'] = 0
+        result['4']['free'] = 0
         for group in groups.values():
             if group['qtty'] == 1:
                 result['1']['qtty'] += group['qtty']
@@ -121,6 +124,10 @@ class BookingServices(object):
                 result['3']['qtty'] += group['qtty']
                 if group['free'] > 0:
                     result['3']['free'] += group['free']
+            elif group['qtty'] == 4:
+                result['4']['qtty'] += group['qtty']
+                if group['free'] > 0:
+                    result['4']['free'] += group['free']
         return result
 
 
@@ -349,7 +356,7 @@ class BookingServices(object):
                         dst_service=booking_transfer, src_service=quote_transfer)
                     # time
                     booking_transfer.quantity = ConfigServices.get_service_quantity(
-                        booking_transfer.service, len(pax_list))
+                        booking_transfer.service, len(pax_list), quote_transfer.quantity)
                     booking_transfer.location_from = quote_transfer.location_from
                     # place_from
                     # schedule_from
@@ -389,7 +396,8 @@ class BookingServices(object):
                         dst_service=booking_extra, src_service=quote_extra)
                     booking_extra.service_addon = quote_extra.service_addon
                     booking_extra.time = quote_extra.time
-                    booking_extra.quantity = quote_extra.quantity
+                    booking_extra.quantity = ConfigServices.get_service_quantity(
+                        booking_extra.service, len(pax_list), quote_extra.quantity)
                     booking_extra.parameter = quote_extra.parameter
                     booking_extra.p_notes = quote_extra.description
 
@@ -478,7 +486,7 @@ class BookingServices(object):
                             dst_service=bookingpackage_transfer, src_service=quotepackage_transfer)
                         # time
                         bookingpackage_transfer.quantity = ConfigServices.get_service_quantity(
-                            bookingpackage_transfer.service, len(pax_list))
+                            bookingpackage_transfer.service, len(pax_list), quotepackage_transfer.quantity)
                         bookingpackage_transfer.location_from = quotepackage_transfer.location_from
                         # place_from
                         # schedule_from
@@ -512,7 +520,8 @@ class BookingServices(object):
                             dst_service=bookingpackage_extra, src_service=quotepackage_extra)
                         bookingpackage_extra.service_addon = quotepackage_extra.service_addon
                         bookingpackage_extra.time = quotepackage_extra.time
-                        bookingpackage_extra.quantity = quotepackage_extra.quantity
+                        bookingpackage_extra.quantity = ConfigServices.get_service_quantity(
+                            bookingpackage_extra.service, len(pax_list), quotepackage_extra.quantity)
                         bookingpackage_extra.parameter = quotepackage_extra.parameter
                         bookingpackage_extra.p_notes = quotepackage_extra.description
 
@@ -1101,10 +1110,10 @@ class BookingServices(object):
             price, price_msg = cls._find_booking_package_price(booking)
 
         fields = []
-        if booking.date_from != date_from:
+        if date_from is not None and booking.date_from != date_from:
             fields.append('date_from')
             booking.date_from = date_from
-        if booking.date_to != date_to:
+        if date_to is not None and booking.date_to != date_to:
             fields.append('date_to')
             booking.date_to = date_to
         if booking.status != status:
@@ -1168,7 +1177,7 @@ class BookingServices(object):
                                     elif pax.is_price_free:
                                         groups[pax.group][2] += 1
                         else:
-                            if pax.booking_pax.pax_age > service.child_age:
+                            if pax.booking_pax.pax_age >= service.child_age:
                                 groups[pax.group][0] += 1
                                 if for_cost:
                                     if pax.is_cost_free:
@@ -1224,7 +1233,7 @@ class BookingServices(object):
                                     elif pax.is_price_free:
                                         free_adults += 1
                         else:
-                            if pax.booking_pax.pax_age > service.child_age:
+                            if pax.booking_pax.pax_age >= service.child_age:
                                 adults += 1
                                 if for_cost:
                                     if pax.is_cost_free:

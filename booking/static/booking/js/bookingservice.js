@@ -162,6 +162,7 @@ $(document).ready(function(){
   // for dates changed by calendar
   $(service_form_selector + ' input[name*="datetime"]').focusout(function (e) {
     e.preventDefault();
+    $('#id_status').val('PD').trigger('change');
     get_computed_amounts();
   });
 
@@ -186,7 +187,18 @@ $(document).ready(function(){
     $('#id_addon').val(null).trigger('change');
     $('#id_pickup_office').val(null).trigger('change');
     $('#id_dropoff_office').val(null).trigger('change');
+    $('#id_status').val('PD').trigger('change');
   });
+
+  $('#id_room_type').on('change', function(e){
+    e.preventDefault();
+    $('#id_status').val('PD').trigger('change');
+  })
+
+  $('#id_board_type').on('change', function(e){
+    e.preventDefault();
+    $('#id_status').val('PD').trigger('change');
+  })
 
   // for location from changed
   $('#id_location_from').change(function (e) {
@@ -195,6 +207,7 @@ $(document).ready(function(){
     $('#id_pickup').val(null).trigger('change');
     $('#id_place_from').val(null).trigger('change');
     $('#id_schedule_from').val(null).trigger('change');
+    $('#id_status').val('PD').trigger('change');
   });
 
   // for location to changed
@@ -204,7 +217,18 @@ $(document).ready(function(){
     $('#id_dropoff').val(null).trigger('change');
     $('#id_place_to').val(null).trigger('change');
     $('#id_schedule_to').val(null).trigger('change');
+    $('#id_status').val('PD').trigger('change');
   });
+
+  $('#id_pickup').on('change', function(e){
+    e.preventDefault();
+    $('#id_status').val('PD').trigger('change');
+  })
+
+  $('#id_dropoff').on('change', function(e){
+    e.preventDefault();
+    $('#id_status').val('PD').trigger('change');
+  })
 
   // for conf_number changed
   $('#id_conf_number').change(function (e) {

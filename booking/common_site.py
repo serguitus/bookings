@@ -9,6 +9,7 @@ except ImportError:
 from xhtml2pdf import pisa
 
 from common.sites import SiteModel, CommonChangeList
+from common.templatetags.common_utils import common_add_preserved_filters
 
 from django.conf import settings
 from django.conf.urls import url
@@ -100,7 +101,7 @@ from booking.models import (
 from booking.services import BookingServices
 from booking.top_filters import (
     DateTopFilter, PackageTopFilter, CancelledTopFilter, InternalReferenceTopFilter,
-    SellerTopFilter)
+    SellerTopFilter, PaidTopFilter)
 
 from common.sites import CommonStackedInline, CommonTabularInline
 
@@ -963,7 +964,7 @@ class BookingSiteModel(SiteModel):
                     'reference', 'date_from',
                     'date_to', 'status', 'cost_amount',
                     'price_amount', 'utility_percent', 'utility',
-                    'invoiced_amount', 'has_notes')
+                    'invoiced_amount', 'paid_amount', 'has_notes')
     top_filters = (('name', 'Booking Name'), 'reference', 'agency',
                    ('date_from', DateTopFilter), 'rooming_list__pax_name',
                    (InternalReferenceTopFilter),
@@ -1370,9 +1371,10 @@ class BookingBaseServiceSiteModel(SiteModel):
     top_filters = (('booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking__reference', 'conf_number',
+                   ('booking__id', InternalReferenceTopFilter),
                    ('datetime_from', DateTopFilter), 'status', 'provider',
                    (CancelledTopFilter),
-                   ('provider__is_private', 'Private'))
+                   ('provider__is_private', 'Private'), PaidTopFilter)
     ordering = ('datetime_from', 'booking__reference', 'name',)
     list_details_template = 'booking/basebookingservice_details.html'
     change_details_template = 'booking/basebookingservice_details.html'
@@ -1426,8 +1428,10 @@ class BookingServiceSiteModel(SiteModel):
     top_filters = (('booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking__reference', 'conf_number',
+                   ('booking__id', InternalReferenceTopFilter),
                    ('datetime_from', DateTopFilter), 'status', 'provider',
-                   ('provider__is_private', 'Private'))
+                   ('provider__is_private', 'Private'), CancelledTopFilter,
+                   PaidTopFilter)
     ordering = ('datetime_from', 'booking__reference', 'name',)
     list_details_template = 'booking/bookingservice_details.html'
     change_details_template = 'booking/bookingservice_details.html'
@@ -1444,13 +1448,13 @@ class BookingServiceSiteModel(SiteModel):
         services = list(queryset.all())
         BookingServices.set_services_status(services, SERVICE_STATUS_COORDINATED)
 
-    coordinated_services.short_description = "Coordinated Services"
+    coordinated_services.short_description = "Coordinate Services"
 
     def confirmed_services(self, request, queryset):
         services = list(queryset.all())
         BookingServices.set_services_status(services, SERVICE_STATUS_CONFIRMED)
 
-    confirmed_services.short_description = "Confirmed Services"
+    confirmed_services.short_description = "Confirm Services"
 
 
 class BaseBookingServiceSiteModel(SiteModel):
@@ -1578,6 +1582,12 @@ class BaseBookingServiceSiteModel(SiteModel):
         BookingServices.set_services_status(services, SERVICE_STATUS_CONFIRMED)
 
     confirmed_services.short_description = "Confirmed Services"
+
+    def build_another_redirect_url(self, request, obj, obj_url, preserved_filters, opts):
+        redirect_url = request.path
+        redirect_url = '%s?booking=%i' % (redirect_url, obj.booking_id)
+        redirect_url = common_add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
+        return redirect_url
 
 
 class BookingPackageServiceSiteModel(SiteModel):
@@ -2501,6 +2511,46 @@ def _fetch_resources(uri, rel):
     return path
 
 
+class ExportBooking(Booking):
+    class Meta:
+        proxy = True
+        verbose_name = 'Export Booking'
+        verbose_name_plural = 'Export Bookings'
+        default_permissions = ('view',)
+        permissions = ()
+
+
+class ExportBookingSiteModel(SiteModel):
+    model_order = 1110
+    menu_label = MENU_LABEL_BOOKING
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                ('seller'),
+                ('name', 'reference', 'status'),
+                ('agency', 'agency_contact'),
+                ('date_from', 'date_to'),
+                ('is_package_price',),
+                ('package_sgl_price_amount', 'package_dbl_price_amount'),
+                ('package_tpl_price_amount', 'package_qpl_price_amount'),
+                ('cost_amount', 'price_amount'),
+                'version',)
+        }),
+        ('General Notes', {'fields': ('p_notes',),
+                           'classes': ('collapse', 'wide')})
+    )
+    list_display = ('internal_reference', 'name', 'status', 'date_from', 'date_to',
+                    'pax_count', 'agency', 'reference', 'cost_amount', 'price_amount',
+                    'utility', 'invoice_number', 'invoiced_amount', 'paid_amount',
+                    'pending_amount', 'seller')
+    top_filters = (('name', 'Booking Name'), 'reference', 'agency',
+                   ('date_from', DateTopFilter), 'rooming_list__pax_name',
+                   (InternalReferenceTopFilter),
+                   (CancelledTopFilter), 'seller', 'invoice__document_number')
+    ordering = ['date_from', 'date_to', 'reference']
+    readonly_model = True
+
 
 # Starts Registration Section
 
@@ -2525,6 +2575,8 @@ bookings_site.register(QuotePackageExtra, QuotePackageExtraSiteModel)
 
 
 bookings_site.register(Booking, BookingSiteModel)
+
+bookings_site.register(ExportBooking, ExportBookingSiteModel)
 
 bookings_site.register(BaseBookingService, BookingBaseServiceSiteModel)
 

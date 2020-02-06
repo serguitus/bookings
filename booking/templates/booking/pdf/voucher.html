@@ -45,6 +45,9 @@
          .voucher-notes-label{
              padding-top: 3px;
          }
+         .voucher-title td{
+             height: 30px;
+         }
          .voucher-notes{
              border-left: 1px solid black;
              border-right: 1px solid black;
@@ -97,7 +100,7 @@
                         <td colspan="3">
                             <table width="100%">
                                 <tr class="voucher-title-1">
-                                    <td width="40%"><b>Client:</b> {{ service.booking.name }} {% if service.booking.reference %}({{ service.booking.reference }}){% endif %}</td>
+                                    <td width="40%"><b>Client:</b> {{ service.full_booking_name }}</td>
                                     <td width="20%">
                                     {% if service.service_type == 'A' %}
                                         <b>Adults:</b> {{ service.adult_quantity }}

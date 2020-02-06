@@ -402,7 +402,7 @@ class QuotePaxVariant(PaxVariantAmounts):
     """
     class Meta:
         verbose_name = 'Quote Pax'
-        verbose_name_plural = 'Quotes Paxes'
+        verbose_name_plural = 'Quotes Pax'
         unique_together = (('quote', 'pax_quantity'),)
     quote = models.ForeignKey(Quote, related_name='quote_paxvariants')
     pax_quantity = models.SmallIntegerField()
@@ -417,7 +417,7 @@ class QuotePaxVariant(PaxVariantAmounts):
         max_digits=5, decimal_places=2, default=0.0, verbose_name='Extra QPL')
 
     def __str__(self):
-        return '%s paxes' % (self.pax_quantity)
+        return '%s pax' % (self.pax_quantity)
 
 
 class QuoteService(BaseService, DateInterval):
@@ -443,7 +443,7 @@ class QuoteServicePaxVariant(PaxVariantAmounts):
     """
     class Meta:
         verbose_name = 'Quote Service Pax Variant'
-        verbose_name_plural = 'Quotes Services Paxes Variants'
+        verbose_name_plural = 'Quote Services Pax Variants'
         unique_together = (('quote_pax_variant', 'quote_service'),)
     quote_pax_variant = models.ForeignKey(QuotePaxVariant, verbose_name='Pax Variant')
     quote_service = models.ForeignKey(QuoteService, related_name='quoteservice_paxvariants')
@@ -560,7 +560,7 @@ class QuotePackageServicePaxVariant(PaxVariantAmounts):
     """
     class Meta:
         verbose_name = 'Quote Package Service Pax Variant'
-        verbose_name_plural = 'Quotes Packages Services Paxes Variants'
+        verbose_name_plural = 'Quote Package Services Pax Variants'
         unique_together = (('quotepackage_pax_variant', 'quotepackage_service'),)
     quotepackage_pax_variant = models.ForeignKey(QuoteServicePaxVariant, verbose_name='Pax Variant')
     quotepackage_service = models.ForeignKey(QuotePackageService, related_name='quotepackageservice_paxvariants')
@@ -807,6 +807,32 @@ class Booking(models.Model):
     has_notes.allow_tags = True
     has_notes.short_description = 'Notes'
 
+    @property
+    def invoiced_amount(self):
+        if self.invoice:
+            return self.invoice.amount
+        return ''
+    invoiced_amount.fget.short_description = 'Invoiced'
+
+    @property
+    def paid_amount(self):
+        if self.invoice:
+            return self.invoice.matched_amount
+        return ''
+    paid_amount.fget.short_description = 'Paid'
+
+    @property
+    def pending_amount(self):
+        if self.invoice:
+            return self.invoice.amount - self.invoice.matched_amount
+        return ''
+    pending_amount.fget.short_description = 'Pending'
+
+    @property
+    def pax_count(self):
+        return self.rooming_list.count()
+    pax_count.fget.short_description = 'Pax'
+
 
 class BookingPax(models.Model):
     """
@@ -919,7 +945,7 @@ class BaseBookingService(BaseService, DateInterval):
     def full_booking_name(self):
         ref = self.booking_agency_ref()
         full_name = self.booking_name()
-        if ref:
+        if ref and ref not in full_name:
             full_name += ' ({})'.format(ref)
         return full_name
     full_booking_name.short_description = 'Booking'

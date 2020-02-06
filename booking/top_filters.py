@@ -1,7 +1,8 @@
 from __future__ import unicode_literals
-from datetime import date, timedelta
 from common import filters
 from booking.constants import BOOKING_STATUS_CANCELLED
+from datetime import date, timedelta
+from django.db.models import F, Q
 
 class DateTopFilter(filters.DateFilter):
     default_value = [date.today() - timedelta(days=30), None]
@@ -30,16 +31,35 @@ class CancelledTopFilter(filters.BooleanFilter):
         queryset = queryset.distinct()
         return queryset
 
+
 class InternalReferenceTopFilter(filters.TextFilter):
     filter_title = 'Int.Ref.'
-    filter_field_path = 'int_ref'
 
     def queryset(self, request, queryset):
         search_terms = self._values[0]
         if search_terms and search_terms != '':
             try:
                 number = int(search_terms)
-                queryset = queryset.filter(id=number - 20000)
+                if not self.field_path:
+                    self.field_path = 'id'
+                queryset = queryset.filter(**{self.field_path: number - 20000})
             except:
                 queryset = queryset.none()
+        return queryset
+
+
+class PaidTopFilter(filters.BooleanFilter):
+    filter_title = 'Paid'
+    filter_field_path = ''
+
+    def queryset(self, request, queryset):
+        search_option = self._values[0]
+        if search_option == "True":
+            queryset = queryset.filter(cost_amount_to_pay__gt=0)
+            queryset = queryset.filter(cost_amount_to_pay=F('cost_amount_paid'))
+        if search_option == "False":
+            queryset = queryset.filter(cost_amount_to_pay__gt=0)
+            queryset = queryset.exclude(cost_amount_to_pay=F('cost_amount_paid'))
+
+        queryset = queryset.distinct()
         return queryset
