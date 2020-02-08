@@ -4809,17 +4809,17 @@ class BookingServices(object):
     def add_paxes_to_booking(cls, booking, pax_list, bookingservice_ids):
         with transaction.atomic(savepoint=False):
             for pax in pax_list:
-                booking_pax = BookingPax()
-                booking_pax.booking = booking
-                booking_pax.pax_name = pax['pax_name']
-                booking_pax.pax_group = pax['pax_group']
-                booking_pax.pax_age = pax['pax_age']
-                booking_pax.is_price_free = pax['is_price_free']
-                booking_pax.avoid_booking_update = True
-                booking_pax.save()
+                if pax:
+                    booking_pax = BookingPax()
+                    booking_pax.booking = booking
+                    booking_pax.pax_name = pax['pax_name']
+                    booking_pax.pax_group = pax['pax_group']
+                    booking_pax.pax_age = pax['pax_age']
+                    booking_pax.is_price_free = pax['is_price_free']
+                    booking_pax.avoid_booking_update = True
+                    booking_pax.save()
 
-                cls._add_bookingpax_to_bookingservices(booking_pax,
-                                                       bookingservice_ids)
+                    cls._add_bookingpax_to_bookingservices(booking_pax, bookingservice_ids)
 
     @classmethod
     def _add_bookingpax_to_bookingservices(cls, booking_pax,
