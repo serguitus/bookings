@@ -1726,7 +1726,8 @@ class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
 
-    readonly_fields = ['utility_percent', 'utility', 'details']
+    readonly_fields = ['utility_percent', 'utility', 'details',
+                       'booking_general_notes']
 
     fieldsets = (
         (None, {
@@ -1737,7 +1738,7 @@ class BookingAllotmentSiteModel(BaseBookingServiceSiteModel):
                 ('room_type', 'board_type',),
                 ('manual_cost', 'provider'),
                 'cost_amount', 'manual_price', 'price_amount',
-                'utility_percent', 'utility', 'id', 'version',
+                'utility_percent', 'utility', ('booking_general_notes',), 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc',
                 'mail_bcc', 'mail_subject', 'mail_body')
         }),
@@ -1809,7 +1810,7 @@ class BookingTransferSiteModel(BaseBookingServiceSiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
 
-    readonly_fields = ['utility_percent', 'utility']
+    readonly_fields = ['utility_percent', 'utility', 'booking_general_notes']
 
     fieldsets = (
         (None, {
@@ -1822,7 +1823,10 @@ class BookingTransferSiteModel(BaseBookingServiceSiteModel):
                 ('dropoff', 'schedule_to', 'schedule_time_to'),
                 'service_addon',
                 ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility', 'id', 'version',
+                'cost_amount', 'manual_price', 'price_amount',
+                'utility_percent', 'utility',
+                'booking_general_notes',
+                'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
@@ -1892,7 +1896,7 @@ class BookingExtraSiteModel(BaseBookingServiceSiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
 
-    readonly_fields = ['utility_percent', 'utility']
+    readonly_fields = ['utility_percent', 'utility', 'booking_general_notes']
 
     fieldsets = (
         (None, {
@@ -1903,7 +1907,10 @@ class BookingExtraSiteModel(BaseBookingServiceSiteModel):
                 ('quantity', 'parameter'),
                 ('pickup_office', 'dropoff_office',),
                 ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility', 'id', 'version',
+                'cost_amount', 'manual_price', 'price_amount',
+                'utility_percent', 'utility',
+                'booking_general_notes',
+                'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),

@@ -962,6 +962,14 @@ class BaseBookingService(BaseService, DateInterval):
         return self.booking.internal_reference()
     booking_internal_reference.short_description = 'Ref.'
 
+    def booking_general_notes(self):
+        """
+        returns global notes from the booking this
+        service belongs to
+        """
+        return self.booking.p_notes or ''
+    booking_general_notes.short_description = 'General Booking Notes'
+
     def get_child_object(self):
         return _get_child_objects([self])[0]
 

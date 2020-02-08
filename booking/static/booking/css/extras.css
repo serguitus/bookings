@@ -158,6 +158,12 @@ div.readonly {
     max-width: 160px;
 }
 
+/* exception for field Booking.p_notes */
+div.field-booking_general_notes div.readonly{
+    max-width: 100%;
+    font-weight: 700;
+}
+
 .inline-group .aligned div.form-row label, .inline-group .aligned div.field-box label {
     width: 100px;
 }
