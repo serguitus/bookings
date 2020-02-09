@@ -5289,7 +5289,8 @@ class BookingServices(object):
     def set_services_status(cls, services, status):
         for service in services:
             service.status = status
-            service.save(update_fields=['status'])
+            cls.validate_basebookingservice(service)            
+            service.save(update_fields=['status', 'cost_amount_to_pay'])
 
 
 def details_allotment_queryset(
