@@ -123,13 +123,13 @@ class DateInterval(models.Model):
 
 
 def utility(cost, price):
-    if not price is None and not cost is None:
+    if price is not None and cost is not None:
         return price - cost
-    return '-'
+    return 0
 
 
 def utility_percent(cost, price):
-    if not price is None and cost:
+    if price is not None and cost:
         return round(100 * (price / cost - 1), 1).__str__() + '%'
     return '-'
 
@@ -773,12 +773,6 @@ class Booking(models.Model):
         return ''
     invoice_number.short_description = 'Inv.'
 
-    def invoiced_amount(self):
-        if self.invoice:
-            return self.invoice.booking_amount
-        return ''
-    invoiced_amount.short_description = 'Invoiced'
-
     def fill_data(self):
         pass
 
@@ -811,7 +805,7 @@ class Booking(models.Model):
     def invoiced_amount(self):
         if self.invoice:
             return self.invoice.amount
-        return ''
+        return 0
     invoiced_amount.fget.short_description = 'Invoiced'
 
     @property
