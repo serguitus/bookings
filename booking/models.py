@@ -812,14 +812,14 @@ class Booking(models.Model):
     def paid_amount(self):
         if self.invoice:
             return self.invoice.matched_amount
-        return ''
+        return 0
     paid_amount.fget.short_description = 'Paid'
 
     @property
     def pending_amount(self):
         if self.invoice:
             return self.invoice.amount - self.invoice.matched_amount
-        return ''
+        return 0
     pending_amount.fget.short_description = 'Pending'
 
     @property

@@ -972,7 +972,8 @@ class BookingSiteModel(SiteModel):
     list_per_page = 50
     ordering = ['date_from', 'date_to', 'reference']
     readonly_fields = ('date_from', 'date_to', 'status',
-                       'cost_amount', 'price_amount', 'utility_percent', 'utility',
+                       'cost_amount', 'price_amount',
+                       'utility_percent', 'utility',
                        'internal_reference', 'details')
     list_details_template = 'booking/booking_details.html'
     change_details_template = 'booking/booking_details.html'
@@ -980,7 +981,9 @@ class BookingSiteModel(SiteModel):
     form = BookingForm
     add_form_template = 'booking/booking_change_form.html'
     change_form_template = 'booking/booking_change_form.html'
-    totalsum_list = ['cost_amount', 'price_amount', 'invoiced_amount', 'utility']
+    totalsum_list = ['cost_amount', 'price_amount',
+                     'invoiced_amount', 'utility',
+                     'paid_amount']
     save_as = True
 
     def details(self, obj):
@@ -2557,6 +2560,9 @@ class ExportBookingSiteModel(SiteModel):
                    (CancelledTopFilter), 'seller', 'invoice__document_number')
     ordering = ['date_from', 'date_to', 'reference']
     readonly_model = True
+    totalsum_list = ['cost_amount', 'price_amount',
+                     'invoiced_amount', 'utility',
+                     'paid_amount', 'pending_amount']
 
 
 # Starts Registration Section
