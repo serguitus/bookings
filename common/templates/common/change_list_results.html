@@ -41,17 +41,19 @@
 				</tr>
 			</thead>
 			<tbody>
+                            {% if totals %}
                             <tr class="totals">
-                                  {% for header in result_headers %}
+                                {% for header in result_headers %}
                                     {% with header.text as header_text %}
                                         <td>{% if totals|get_total:header_text != '' %}
-                                          {{ totals|get_total:header_text }} {{ unit_of_measure|safe }}
+                                            {{ totals|get_total:header_text }} {{ unit_of_measure|safe }}
                                         {% endif %}
-                                      </td>
+                                        </td>
                                     {% endwith %}
-                                  {% endfor %}
-                                </tr>
-				{% for result in results %}
+                                {% endfor %}
+                            </tr>
+                            {% endif %}
+			    {% for result in results %}
 					{% if result.form.non_field_errors %}
 						<tr>
 							<td colspan="{{ result|length }}">{{ result.form.non_field_errors }}</td>
