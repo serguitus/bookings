@@ -101,7 +101,7 @@ from booking.models import (
 from booking.services import BookingServices
 from booking.top_filters import (
     DateTopFilter, PackageTopFilter, CancelledTopFilter, InternalReferenceTopFilter,
-    SellerTopFilter, PaidTopFilter)
+    SellerTopFilter, PaidTopFilter, BookingPaidTopFilter)
 
 from common.sites import CommonStackedInline, CommonTabularInline
 
@@ -968,7 +968,8 @@ class BookingSiteModel(SiteModel):
     top_filters = (('name', 'Booking Name'), 'reference', 'agency',
                    ('date_from', DateTopFilter), 'rooming_list__pax_name',
                    (InternalReferenceTopFilter),
-                   (CancelledTopFilter), 'seller', 'invoice__document_number')
+                   (CancelledTopFilter), 'seller', 'invoice__document_number',
+                   BookingPaidTopFilter)
     list_per_page = 50
     ordering = ['date_from', 'date_to', 'reference']
     readonly_fields = ('date_from', 'date_to', 'status',
