@@ -9,6 +9,7 @@ from booking.models import (
     Quote, QuoteService, QuotePaxVariant, QuotePackageService,
     Booking, BookingService, BookingPax, BookingPackageService,
     ProviderBookingPayment, ProviderBookingPaymentService,
+    BookingExtraComponent,
 )
 from booking.constants import (
     PACKAGESERVICE_TYPES, QUOTESERVICE_TYPES, QUOTEPACKAGESERVICE_TYPES,
@@ -186,7 +187,7 @@ class BookingServiceTable(tables.Table):
 class AgencyPaymentTable(tables.Table):
     class Meta:
         model = AgencyPayment
-        template_name = 'booking/agencypayment_table.html'
+        template_name = 'booking/table/agencypayment_table.html'
         fields = ['name', 'date', 'status', 'account', 'amount', 'details']
         attrs = {'class': 'table table-hover table-condensed'}
 
@@ -205,7 +206,7 @@ class AgencyPaymentTable(tables.Table):
 class ProviderBookingPaymentTable(tables.Table):
     class Meta:
         model = ProviderBookingPayment
-        template_name = 'booking/providerbookingpayment_table.html'
+        template_name = 'booking/table/providerbookingpayment_table.html'
         fields = ['name', 'date', 'status', 'account', 'services_amount',
                 'currency_rate', 'amount', 'details']
         attrs = {'class': 'table table-hover table-condensed'}
@@ -223,10 +224,18 @@ class ProviderBookingPaymentTable(tables.Table):
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
 
+class BookingExtraComponentTable(tables.Table):
+    class Meta:
+        model = BookingExtraComponent
+        template_name = 'booking/table/bookingextracomponent_table.html'
+        fields = ['name',]
+        attrs = {'class': 'table table-hover table-condensed'}
+
+
 class ProviderBookingPaymentServiceTable(tables.Table):
     class Meta:
         model = ProviderBookingPaymentService
-        template_name = 'booking/providerbookingpaymentservice_table.html'
+        template_name = 'booking/table/providerbookingpaymentservice_table.html'
         fields = ['provider_service_booking', 'provider_service_name',
             'provider_service_datetime_from', 'provider_service_datetime_to',
             'provider_service_status', 'service_cost_amount_to_pay', 'service_cost_amount_paid',
@@ -250,7 +259,7 @@ class ProviderBookingPaymentServiceTable(tables.Table):
 class ProviderBookingPaymentReportTable(tables.Table):
     class Meta:
         model = ProviderBookingPaymentService
-        template_name = 'booking/providerbookingpaymentservice_table.html'
+        template_name = 'booking/table/providerbookingpaymentservice_table.html'
         fields = ['provider_service_booking',
                   'provider_service_name',
                   'provider_service_ref', 'service_cost_amount_to_pay',
