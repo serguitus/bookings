@@ -211,7 +211,7 @@ class BaseService(models.Model):
     service_type = models.CharField(max_length=5, choices=SERVICE_CATEGORIES,
                                     blank=True, null=True)
     # this will store related serice's location
-    base_location = models.ForeignKey(Location, blank=True, null=True)
+    base_location = models.ForeignKey(Location, blank=True, null=True, verbose_name='Location')
     service_location = models.CharField(max_length=50, blank=True, null=True,
                                         verbose_name='Location')
     description = models.CharField(max_length=1000, blank=True, null=True)
@@ -432,7 +432,7 @@ class QuoteService(BaseService, DateInterval):
         verbose_name_plural = 'Quote Services'
         default_permissions = ('add', 'change',)
     quote = models.ForeignKey(Quote, related_name='quote_services')
-    base_service = models.ForeignKey(Service, blank=True, null=True, related_name='quote_base_service')
+    base_service = models.ForeignKey(Service, blank=True, null=True, related_name='quote_base_service', verbose_name='Service')
 
     def save(self, *args, **kwargs):
         self.validate_date_interval()
@@ -581,7 +581,7 @@ class QuotePackageService(BaseService, DateInterval):
         verbose_name_plural = 'Quotes Packages Services'
         default_permissions = ('add', 'change',)
     quote_package = models.ForeignKey(QuotePackage, related_name='quotepackage_services')
-    base_service = models.ForeignKey(Service, blank=True, null=True, related_name='quotepackage_base_service')
+    base_service = models.ForeignKey(Service, blank=True, null=True, related_name='quotepackage_base_service', verbose_name='Service')
 
     def fill_data(self):
         pass
@@ -944,7 +944,7 @@ class BaseBookingService(BaseService, DateInterval):
                                            verbose_name='Paid')
     has_payment = models.BooleanField(default=False)
     booking = models.ForeignKey(Booking, related_name='base_booking_services')
-    base_service = models.ForeignKey(Service, related_name='booking_base_service')
+    base_service = models.ForeignKey(Service, related_name='booking_base_service', verbose_name='Service')
 
     @property
     def utility(self):
