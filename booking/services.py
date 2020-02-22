@@ -4969,6 +4969,8 @@ class BookingServices(object):
             booking_service.cost_amount = None
         if not hasattr(booking_service, 'manual_price') or not booking_service.manual_price:
             booking_service.price_amount = None
+        booking_service.cost_amount_to_pay = 0.00
+        booking_service.cost_amount_paid = 0.00
         booking_service.avoid_all = True
         booking_service.save()
 
@@ -4989,6 +4991,8 @@ class BookingServices(object):
             bookingpackage_service.cost_amount = None
         if not hasattr(bookingpackage_service, 'manual_price') or not bookingpackage_service.manual_price:
             bookingpackage_service.price_amount = None
+        booking_service.cost_amount_to_pay = 0.00
+        booking_service.cost_amount_paid = 0.00
         bookingpackage_service.avoid_all = True
         bookingpackage_service.save()
 
