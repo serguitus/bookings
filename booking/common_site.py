@@ -101,7 +101,7 @@ from booking.models import (
 from booking.services import BookingServices
 from booking.top_filters import (
     DateTopFilter, PackageTopFilter, CancelledTopFilter, InternalReferenceTopFilter,
-    SellerTopFilter, PaidTopFilter)
+    SellerTopFilter, PaidTopFilter, BookingPaidTopFilter)
 
 from common.sites import CommonStackedInline, CommonTabularInline
 
@@ -968,7 +968,8 @@ class BookingSiteModel(SiteModel):
     top_filters = (('name', 'Booking Name'), 'reference', 'agency',
                    ('date_from', DateTopFilter), 'rooming_list__pax_name',
                    (InternalReferenceTopFilter),
-                   (CancelledTopFilter), 'seller', 'invoice__document_number')
+                   (CancelledTopFilter), 'seller', 'invoice__document_number',
+                   BookingPaidTopFilter)
     list_per_page = 50
     ordering = ['date_from', 'date_to', 'reference']
     readonly_fields = ('date_from', 'date_to', 'status',
@@ -1377,7 +1378,7 @@ class BookingBaseServiceSiteModel(SiteModel):
                    ('booking__id', InternalReferenceTopFilter),
                    ('datetime_from', DateTopFilter), 'status', 'provider',
                    (CancelledTopFilter),
-                   ('provider__is_private', 'Private'), PaidTopFilter)
+                   ('provider__is_private', 'Private'), PaidTopFilter, 'base_location')
     ordering = ('datetime_from', 'booking__reference', 'name',)
     list_details_template = 'booking/basebookingservice_details.html'
     change_details_template = 'booking/basebookingservice_details.html'
@@ -1434,7 +1435,7 @@ class BookingServiceSiteModel(SiteModel):
                    ('booking__id', InternalReferenceTopFilter),
                    ('datetime_from', DateTopFilter), 'status', 'provider',
                    ('provider__is_private', 'Private'), CancelledTopFilter,
-                   PaidTopFilter)
+                   PaidTopFilter, 'base_location')
     ordering = ('datetime_from', 'booking__reference', 'name',)
     list_details_template = 'booking/bookingservice_details.html'
     change_details_template = 'booking/bookingservice_details.html'

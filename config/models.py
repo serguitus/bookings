@@ -335,6 +335,18 @@ class ExtraSupplement(ServiceSupplement):
         verbose_name_plural = 'Extras Supplements'
 
 
+class ExtraComponent(models.Model):
+    """
+    Extra Component
+    """
+    class Meta:
+        verbose_name = 'Extra Component'
+        verbose_name_plural = 'Extras Components'
+        unique_together = (('extra', 'component'),)
+    extra = models.ForeignKey(Extra, related_name='extra')
+    component = models.ForeignKey(Extra, related_name='component')
+
+
 class ProviderExtraService(ProviderCatalogue):
     """
     ProviderExtraService

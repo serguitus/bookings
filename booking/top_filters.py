@@ -50,7 +50,7 @@ class InternalReferenceTopFilter(filters.TextFilter):
 
 class PaidTopFilter(filters.BooleanFilter):
     filter_title = 'Paid'
-    filter_field_path = ''
+    filter_field_path = 'paid'
 
     def queryset(self, request, queryset):
         search_option = self._values[0]
@@ -60,6 +60,23 @@ class PaidTopFilter(filters.BooleanFilter):
         if search_option == "False":
             queryset = queryset.filter(cost_amount_to_pay__gt=0)
             queryset = queryset.exclude(cost_amount_to_pay=F('cost_amount_paid'))
+
+        queryset = queryset.distinct()
+        return queryset
+
+
+class BookingPaidTopFilter(filters.BooleanFilter):
+    filter_title = 'Paid'
+    filter_field_path = 'paid'
+
+    def queryset(self, request, queryset):
+        search_option = self._values[0]
+        if search_option == "True":
+            queryset = queryset.exclude(status__exact=BOOKING_STATUS_CANCELLED)
+            queryset = queryset.filter(invoice__isnull=False, invoice__amount=F('invoice__match_amount'))
+        if search_option == "False":
+            queryset = queryset.exclude(status__exact=BOOKING_STATUS_CANCELLED)
+            queryset = queryset.exclude(invoice__isnull=False, invoice__amount=F('invoice__match_amount'))
 
         queryset = queryset.distinct()
         return queryset
