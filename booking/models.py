@@ -130,7 +130,7 @@ def utility(cost, price):
 
 def utility_percent(cost, price):
     if price is not None and cost:
-        return round(100 * (price / cost - 1), 1).__str__() + '%'
+        return round(100 * (float(price) / float(cost) - 1), 1).__str__() + '%'
     return '-'
 
 

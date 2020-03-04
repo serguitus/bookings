@@ -44,7 +44,7 @@ from finance.models import Office
 from finance.top_filters import ProviderTopFilter, AgencyTopFilter
 
 from booking.constants import (
-    SERVICE_STATUS_PENDING, SERVICE_STATUS_COORDINATED, SERVICE_STATUS_CONFIRMED,
+    SERVICE_STATUS_PENDING, SERVICE_STATUS_REQUEST, SERVICE_STATUS_COORDINATED, SERVICE_STATUS_CONFIRMED,
     SERVICE_STATUS_CANCELLED,
     BOOTSTRAP_STYLE_STATUS_MAPPING,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT, BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER,
@@ -895,7 +895,7 @@ class QuotePackageExtraSiteModel(QuotePackageServiceSiteModel):
 
 # Starts Booking Section
 
-class BookingPaxInline(TabularInline):
+class BookingPaxInline(CommonTabularInline):
     model = BookingPax
     fields = ['pax_name', 'pax_group', 'pax_age', 'is_price_free', 'version']
     verbose_name_plural = 'Rooming List'
@@ -910,7 +910,7 @@ class BookingPaxInline(TabularInline):
             return 0
 
 
-class BookingServicePaxInline(TabularInline):
+class BookingServicePaxInline(CommonTabularInline):
     model = BookingServicePax
     fields = ['booking_pax', 'group', 'is_cost_free', 'is_price_free', 'force_adult', 'version']
     verbose_name_plural = 'Service Rooming List'
@@ -1538,6 +1538,12 @@ class BaseBookingServiceSiteModel(SiteModel):
                 subject=request.POST.get('mail_subject'),
                 body=request.POST.get('mail_body'))
             email.send()
+            bs = BookingService.objects.get(pk=object_id)
+            services = find_provider_requests_services(request, bs.provider, bs.booking)
+            for service in services:
+                if service.status == SERVICE_STATUS_PENDING:
+                    service.status = SERVICE_STATUS_REQUEST
+                    service.save(update_fields=['status'])
             messages.add_message(
                 request=request, level=messages.SUCCESS,
                 message='Requests mail  sent successfully.',
@@ -1684,6 +1690,15 @@ class BookingPackageServiceSiteModel(SiteModel):
                 subject=request.POST.get('mail_subject'),
                 body=request.POST.get('mail_body'))
             email.send()
+            bps = BookingPackageService.objects.get(pk=object_id)
+            provider = bps.provider
+            if not provider:
+                provider = bps.booking_package.provider
+            services = find_provider_requests_services(request, provider, bps.booking)
+            for service in services:
+                if service.status == SERVICE_STATUS_PENDING:
+                    service.status = SERVICE_STATUS_REQUEST
+                    service.save(update_fields=['status'])
             messages.add_message(
                 request=request, level=messages.SUCCESS,
                 message='Requests mail  sent successfully.',
@@ -2349,7 +2364,7 @@ def default_requests_mail_subject(request, provider=None, booking=None):
     return 'Solicitud de Reserva %s' % subject_ref
 
 
-def default_requests_mail_body(request, provider=None, booking=None):
+def find_provider_requests_services(request, provider=None, booking=None):
     if provider:
         services = list(BookingService.objects.filter(
             booking=booking,
@@ -2371,7 +2386,11 @@ def default_requests_mail_body(request, provider=None, booking=None):
             pass
     else:
         services = []
-    #rooming = bs.rooming_list.all()
+    return services
+
+
+def default_requests_mail_body(request, provider=None, booking=None):
+    services = find_provider_requests_services(request, provider, booking)
     initial = {
         'user': request.user,
         'booking': booking,
