@@ -155,14 +155,37 @@ $(document).ready(function(){
   show_buttons();
   get_computed_amounts();
 
-  $(service_form_selector + ' input, ' + service_form_selector + ' select').on('change', function(){
-    get_computed_amounts();
-  });
+  /* THIS IS FOR HANDLING NIGHTS LOGIC IN BOOKING SERVICES */
+  /* ***** IMPORTANT THIS MUST GO BEFORE CALLING COMPUTED AMOUNTS EVENT *********/
+  var nights_selector = $('#id_nights');
+  var start_selector = $('#id_datetime_from');
+  var end_selector = $('#id_datetime_to');
 
-  // for dates changed by calendar
-  $(service_form_selector + ' input[name*="datetime"]').focusout(function (e) {
-    e.preventDefault();
-    $('#id_status').val('PD').trigger('change');
+  update_nights();
+
+  nights_selector.on('change', function(){
+    update_end_date();
+  });
+  end_selector.on('change', function(){
+    update_nights();
+  });
+  start_selector.on('change', function(){
+    update_end_date();
+  });
+  /* END OF NIGHTS LOGIC SCRIPT */
+
+  $(service_form_selector + ' input, ' + service_form_selector + ' select').on('change', function(e){
+    // following fields trigger a service Status change to 'PENDING
+    var fields = ['id_room_type', 'id_board_type', 'id_service', 'id_provider',
+      'id_time', 'id_service_addon', 'id_nights', 'id_datetime_from', 'id_datetime_to',
+      'id_quantity', 'id_parameter', 'id_location_from', 'id_location_to',
+      'id_pickup', 'id_dropoff', 'id_place_from', 'id_place_to',
+      'id_schedule_from', 'id_schedule_to', 'id_schedule_time_from',
+      'id_schedule_time_to'];
+    if (fields.includes(this.id)){
+      e.preventDefault();
+      $('#id_status').val('PD').trigger('change');
+    }
     get_computed_amounts();
   });
 
@@ -187,18 +210,7 @@ $(document).ready(function(){
     $('#id_addon').val(null).trigger('change');
     $('#id_pickup_office').val(null).trigger('change');
     $('#id_dropoff_office').val(null).trigger('change');
-    $('#id_status').val('PD').trigger('change');
   });
-
-  $('#id_room_type').on('change', function(e){
-    e.preventDefault();
-    $('#id_status').val('PD').trigger('change');
-  })
-
-  $('#id_board_type').on('change', function(e){
-    e.preventDefault();
-    $('#id_status').val('PD').trigger('change');
-  })
 
   // for location from changed
   $('#id_location_from').change(function (e) {
@@ -207,7 +219,6 @@ $(document).ready(function(){
     $('#id_pickup').val(null).trigger('change');
     $('#id_place_from').val(null).trigger('change');
     $('#id_schedule_from').val(null).trigger('change');
-    $('#id_status').val('PD').trigger('change');
   });
 
   // for location to changed
@@ -217,18 +228,7 @@ $(document).ready(function(){
     $('#id_dropoff').val(null).trigger('change');
     $('#id_place_to').val(null).trigger('change');
     $('#id_schedule_to').val(null).trigger('change');
-    $('#id_status').val('PD').trigger('change');
   });
-
-  $('#id_pickup').on('change', function(e){
-    e.preventDefault();
-    $('#id_status').val('PD').trigger('change');
-  })
-
-  $('#id_dropoff').on('change', function(e){
-    e.preventDefault();
-    $('#id_status').val('PD').trigger('change');
-  })
 
   // for conf_number changed
   $('#id_conf_number').change(function (e) {
@@ -239,22 +239,6 @@ $(document).ready(function(){
     }
   });
 
-  /* THIS IS FOR HANDLING NIGHTS LOGIC IN BOOKING SERVICES */
-  var nights_selector = $('#id_nights');
-  var start_selector = $('#id_datetime_from');
-  var end_selector = $('#id_datetime_to');
-
-  update_nights();
-  nights_selector.on('change', function(){
-    update_end_date();
-  });
-  end_selector.on('change', function(){
-    update_nights();
-  });
-  start_selector.on('change', function(){
-    update_end_date();
-  });
-  /* END OF NIGHTS LOGIC SCRIPT */
 });
 
 /* HELPER METHODS FOR HANDLING NIGHTS LOGIC IN BOOKING SERVICES */
