@@ -124,7 +124,7 @@ class DateInterval(models.Model):
 
 def utility(cost, price):
     if price is not None and cost is not None:
-        return price - cost
+        return float(price) - float(cost)
     return 0
 
 
