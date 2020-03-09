@@ -36,7 +36,7 @@ from config.views import (
     TransferAutocompleteView, ProviderTransferAutocompleteView,
     AddonAutocompleteView,
     ExtraAutocompleteView, ProviderExtraAutocompleteView,
-    ServiceAllotmentAutocompleteView, ServiceTransferAutocompleteView,
+    ServiceAutocompleteView, ServiceAllotmentAutocompleteView, ServiceTransferAutocompleteView,
     ServiceExtraAutocompleteView, CarRentalAutocompleteView, CarRentalOfficeAutocompleteView,
 )
 from booking import urls as booking_urls
@@ -74,6 +74,10 @@ urlpatterns = [
     url(r'^agencycontact-autocomplete/$',
         AgencyContactAutocompleteView.as_view(),
         name='agencycontact-autocomplete',
+    ),
+    url(r'^service-autocomplete/$',
+        ServiceAutocompleteView.as_view(),
+        name='service-autocomplete',
     ),
     url(r'^allotment-autocomplete/$',
         AllotmentAutocompleteView.as_view(),

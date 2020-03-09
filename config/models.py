@@ -15,6 +15,8 @@ from config.constants import (
     ALLOTMENT_SUPPLEMENT_COST_TYPES, TRANSFER_SUPPLEMENT_COST_TYPES,
     TRANSFER_COST_TYPES)
 
+from datetime import time
+
 from finance.models import Agency, Provider
 
 from reservas.custom_settings import ADDON_FOR_NO_ADDON
@@ -129,6 +131,44 @@ class Addon(models.Model):
         return self.name
 
 
+class CarRental(models.Model):
+    """
+    CarRental
+    """
+    class Meta:
+        verbose_name = 'Car Rental'
+        verbose_name_plural = 'Cars Rentals'
+        unique_together = (('name',),)
+    name = models.CharField(max_length=30)
+
+    def __str__(self):
+        return '%s' % (self.name)
+
+
+class CarRentalOffice(models.Model):
+    """
+    CarRentalOffice
+    """
+    class Meta:
+        verbose_name = 'Car Rental Office'
+        verbose_name_plural = 'Cars Rentals Offices'
+        unique_together = (('car_rental', 'office',),)
+    car_rental = models.ForeignKey(CarRental)
+    office = models.CharField(max_length=60)
+
+    def __str__(self):
+        return '%s - %s' % (self.car_rental, self.office)
+
+
+class RelativeInterval(models.Model):
+    class Meta:
+        abstract = True
+    days_after = models.SmallIntegerField(
+        default=0, blank=True, null=True, verbose_name='Days after')
+    days_duration = models.SmallIntegerField(
+        default=0, blank=True, null=True, verbose_name='Days duration')
+
+
 class Service(models.Model):
     """
     Service
@@ -199,6 +239,65 @@ class ServiceSupplement(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class BaseAllotment(models.Model):
+    """
+    Base Allotment
+    """
+    class Meta:
+        abstract = True
+    room_type = models.ForeignKey(RoomType)
+    board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
+
+
+class BaseTransfer(models.Model):
+    """
+    Base Transfer
+    """
+    class Meta:
+        abstract = True
+    quantity = models.SmallIntegerField(default=1)
+
+
+class BaseExtra(models.Model):
+    """
+    Base Service Extra
+    """
+    class Meta:
+        abstract = True
+    quantity = models.SmallIntegerField(default=1)
+    parameter = models.SmallIntegerField(default=0, verbose_name='Hours')
+
+
+class BaseDetail(models.Model):
+    class Meta:
+        abstract = True
+    name = models.CharField(max_length=250, default='Detail')
+    base_detail_service = models.ForeignKey(Service, related_name='service_base_details')
+    location = models.ForeignKey(Location, blank=True, null=True, verbose_name='Location')
+    description = models.CharField(max_length=1000, blank=True, null=True)
+    addon = models.ForeignKey(Addon, blank=True, null=True, verbose_name='Addon')
+    time = models.TimeField(blank=True, null=True)
+
+
+class ServiceDetail(BaseDetail, RelativeInterval):
+    """
+    Service Detail
+    """
+    class Meta:
+        verbose_name = 'Service Detail'
+        verbose_name_plural = 'Services Details'
+    service = models.ForeignKey(Service, related_name='service_details')
+    base_detail_service = models.ForeignKey(Service, related_name='detail_service')
+
+    def fill_data(self):
+        pass
+
+    def save(self, *args, **kwargs):
+        self.fill_data()
+        # Call the "real" save() method.
+        super(ServiceDetail, self).save(*args, **kwargs)
 
 
 class ProviderCatalogue(models.Model):
@@ -272,20 +371,6 @@ class AmountDetail(models.Model):
 #===============================================================================
 # Extra
 #===============================================================================
-class CarRental(models.Model):
-    """
-    CarRental
-    """
-    class Meta:
-        verbose_name = 'Car Rental'
-        verbose_name_plural = 'Cars Rentals'
-        unique_together = (('name',),)
-    name = models.CharField(max_length=30)
-
-    def __str__(self):
-        return '%s' % (self.name)
-
-
 class Extra(Service):
     """
     Extra
@@ -309,6 +394,25 @@ class Extra(Service):
         if self.parameter_type == EXTRA_PARAMETER_TYPE_HOURS:
             return '%s (Hours)'  % self.name
         return '%s'  % self.name
+
+
+class ServiceDetailExtra(ServiceDetail, BaseExtra):
+    """
+    Service Detail Extra
+    """
+    class Meta:
+        verbose_name = 'Service Detail Extra'
+        verbose_name_plural = 'Services Details Extras'
+    detail_service = models.ForeignKey(Extra)
+    pickup_office = models.ForeignKey(
+        CarRentalOffice, related_name='detail_pickup_office', blank=True, null=True)
+    dropoff_office = models.ForeignKey(
+        CarRentalOffice, related_name='detail_dropoff_office', blank=True, null=True)
+
+    def fill_data(self):
+        # setting name for this booking_service
+        self.name = '%s - %s' % (self.service, self.detail_service)
+        self.base_detail_service = self.detail_service
 
 
 class ExtraAddon(models.Model):
@@ -408,21 +512,6 @@ class AgencyExtraDetail(AmountDetail):
     pax_range_max = models.SmallIntegerField(default=0)
 
 
-class CarRentalOffice(models.Model):
-    """
-    CarRentalOffice
-    """
-    class Meta:
-        verbose_name = 'Car Rental Office'
-        verbose_name_plural = 'Cars Rentals Offices'
-        unique_together = (('car_rental', 'office',),)
-    car_rental = models.ForeignKey(CarRental)
-    office = models.CharField(max_length=60)
-
-    def __str__(self):
-        return '%s - %s' % (self.car_rental, self.office)
-
-
 #===============================================================================
 # Allotment
 #===============================================================================
@@ -444,6 +533,21 @@ class Allotment(Service):
     def fill_data(self):
         self.category = SERVICE_CATEGORY_ALLOTMENT
         self.grouping = True
+
+
+class ServiceDetailAllotment(ServiceDetail, BaseAllotment):
+    """
+    Service Detail Allotment
+    """
+    class Meta:
+        verbose_name = 'Service Detail Accomodation'
+        verbose_name_plural = 'Services Details Accomodations'
+    detail_service = models.ForeignKey(Allotment)
+
+    def fill_data(self):
+        self.name = '%s - %s' % (self.service, self.detail_service)
+        self.time = time(23, 59, 59)
+        self.base_detail_service = self.detail_service
 
 
 class AllotmentRoomType(models.Model):
@@ -584,6 +688,40 @@ class Transfer(Service):
     def fill_data(self):
         self.category = SERVICE_CATEGORY_TRANSFER
         self.grouping = False
+
+
+class ServiceDetailTransfer(ServiceDetail, BaseTransfer):
+    """
+    Service Detail Transfer
+    """
+    class Meta:
+        verbose_name = 'Service Detail Transfer'
+        verbose_name_plural = 'Services Details Transfers'
+    detail_service = models.ForeignKey(Transfer)
+    location_from = models.ForeignKey(
+        Location, related_name='detail_location_from', verbose_name='Location from')
+    place_from = models.ForeignKey(Place, related_name='detail_place_from', blank=True, null=True)
+    schedule_from = models.ForeignKey(
+        Schedule, related_name='detail_schedule_from', blank=True, null=True)
+    pickup = models.ForeignKey(Allotment, related_name='detail_pickup',
+                               null=True, blank=True)
+    location_to = models.ForeignKey(
+        Location, related_name='detail_location_to', verbose_name='Location to')
+    place_to = models.ForeignKey(Place, related_name='detail_place_to', blank=True, null=True)
+    schedule_to = models.ForeignKey(
+        Schedule, related_name='detail_schedule_to', blank=True, null=True)
+    dropoff = models.ForeignKey(Allotment, related_name='detail_dropoff',
+                                null=True, blank=True)
+    schedule_time_from = models.TimeField(blank=True, null=True)
+    schedule_time_to = models.TimeField(blank=True, null=True)
+
+    def fill_data(self):
+        # setting name for this booking_service
+        self.name = '%s - %s (%s -> %s)' % (
+            self.service, self.detail_service,
+            self.location_from.short_name or self.location_from,
+            self.location_to.short_name or self.location_to)
+        self.base_detail_service = self.detail_service
 
 
 class TransferZone(models.Model):

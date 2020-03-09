@@ -13,6 +13,12 @@ SERVICE_CATEGORIES = (
     (SERVICE_CATEGORY_PACKAGE, 'Package'),
 )
 
+SERVICE_DETAIL_CATEGORIES = {
+    SERVICE_CATEGORY_ALLOTMENT: 'servicedetailallotment',
+    SERVICE_CATEGORY_TRANSFER: 'servicedetailtransfer',
+    SERVICE_CATEGORY_EXTRA: 'servicedetailextra',
+}
+
 AMOUNTS_FIXED = 'F'
 AMOUNTS_BY_PAX = 'P'
 AMOUNTS_BY_DAY = 'D'

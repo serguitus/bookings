@@ -43,7 +43,7 @@ from accounting.top_filters import AccountTopFilter, AmountTopFilter
 from accounting.common_site import MENU_LABEL_ACCOUNTING
 from booking.services import BookingServices
 from booking.constants import BOOTSTRAP_STYLE_STATUS_MAPPING
-from common.sites import SiteModel, CommonChangeList
+from common.sites import SiteModel, CommonChangeList, CommonTabularInline
 from reservas.admin import bookings_site
 
 MENU_LABEL_FINANCE_BASIC = 'Finance Basic'
@@ -176,7 +176,7 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
             if isinstance(fieldset, six.string_types):
                 result.append(fieldset)
             else:
-               for field in fieldset:
+                for field in fieldset:
                     result.append(field)
         return result
 
@@ -188,9 +188,9 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
             return self.match_fieldsets
         return [(None, {'fields': self.get_match_parent_fields(request, obj)})]
 
-    def build_matches(self, forms):
+    def build_matches(self, view_forms):
         result = list()
-        for form in forms:
+        for form in view_forms:
             if form.is_valid():
                 included = form.cleaned_data['included']
                 if included:
@@ -676,7 +676,7 @@ class ProviderPaymentSiteModel(ProviderCreditDocumentSiteModel):
         return FinanceServices.match_provider_document(parent, matches, True)
 
 
-class AgencyContactInline(TabularInline):
+class AgencyContactInline(CommonTabularInline):
     model = AgencyContact
     fields = ['name', 'email']
     verbose_name_plural = 'Agency Contact List'
@@ -684,7 +684,7 @@ class AgencyContactInline(TabularInline):
     ordering = ('name',)
 
 
-class AgencyCopyContactInline(TabularInline):
+class AgencyCopyContactInline(CommonTabularInline):
     model = AgencyCopyContact
     fields = ['name', 'email']
     verbose_name_plural = 'Agency CC Contact List'
@@ -692,7 +692,7 @@ class AgencyCopyContactInline(TabularInline):
     ordering = ('name',)
 
 
-class AgencyBillingContactInline(TabularInline):
+class AgencyBillingContactInline(CommonTabularInline):
     model = AgencyBillingContact
     fields = ['name', 'email']
     verbose_name_plural = 'Agency Billing Contacts'

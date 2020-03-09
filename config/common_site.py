@@ -13,7 +13,7 @@ from django.db import router, transaction
 from django import forms
 from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, reverse
+from django.shortcuts import render, reverse, redirect
 from django.template.response import SimpleTemplateResponse, TemplateResponse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext as _, ungettext
@@ -31,17 +31,20 @@ from config.forms import (
     AgencyAllotmentServiceForm, AgencyTransferServiceForm, AgencyExtraServiceForm,
     AgencyAllotmentDetailInlineForm, AgencyTransferDetailInlineForm,
     AgencyExtraDetailInlineForm,
-    AllotmentRoomTypeInlineForm, ExtraAddonInlineForm, TransferZoneForm,
+    AllotmentRoomTypeInlineForm, ExtraAddonInlineForm, ExtraComponentInlineForm, TransferZoneForm,
     LocationTransferIntervalInlineForm, ServiceAddonInlineForm, TransferPickupTimeInlineForm,
     PricesExportForm, ExtraForm,
+    ServiceForm, ServiceDetailForm,
+    ServiceDetailAllotmentForm, ServiceDetailTransferForm, ServiceDetailExtraForm, 
+    SearchServiceForm,
 )
 from config.models import (
     ServiceCategory, Location, Place, TransferInterval, Schedule,
     TransferZone, TransferPickupTime, AllotmentTransferZone, RoomType, Addon,
-    Service,
+    Service, ServiceDetail, ServiceDetailAllotment, ServiceDetailTransfer, ServiceDetailExtra,
     Allotment, AllotmentRoomType, AllotmentBoardType, AllotmentSupplement,
     Transfer, TransferSupplement,
-    Extra, ExtraAddon, ExtraSupplement,
+    Extra, ExtraAddon, ExtraSupplement, ExtraComponent,
     AgencyAllotmentService, AgencyAllotmentDetail,
     AgencyTransferService, AgencyTransferDetail,
     AgencyExtraService, AgencyExtraDetail,
@@ -172,6 +175,125 @@ class ServiceChangeList(CommonChangeList):
             current_app=self.model_admin.admin_site.name)
 
 
+class BaseServiceDetailSiteModel(SiteModel):
+    def response_post_delete(self, request, obj):
+        if hasattr(obj, 'service') and obj.service:
+            if obj.service.category == 'A':
+                return redirect(reverse('common:config_allotment_change', args=[obj.service.pk]))
+            elif obj.service.category == 'T':
+                return redirect(reverse('common:config_transfer_change', args=[obj.service.pk]))
+            elif obj.service.category == 'E':
+                return redirect(reverse('common:config_extra_change', args=[obj.service.pk]))
+        service = request.POST.get('service')
+        if service:
+            service = Service.objects.get(id=service)
+            if service.category == 'A':
+                return redirect(reverse('common:config_allotment_change', args=[service.pk]))
+            elif obj.service.category == 'T':
+                return redirect(reverse('common:config_transfer_change', args=[service.pk]))
+            elif obj.service.category == 'E':
+                return redirect(reverse('common:config_extra_change', args=[service.pk]))
+        return super(BaseServiceDetailSiteModel, self).response_post_delete(request, obj)
+
+    def response_post_save_add(self, request, obj):
+        if hasattr(obj, 'service') and obj.service:
+            if obj.service.category == 'A':
+                return redirect(reverse('common:config_allotment_change', args=[obj.service.pk]))
+            elif obj.service.category == 'T':
+                return redirect(reverse('common:config_transfer_change', args=[obj.service.pk]))
+            elif obj.service.category == 'E':
+                return redirect(reverse('common:config_extra_change', args=[obj.service.pk]))
+        service = request.POST.get('service')
+        if service:
+            service = Service.objects.get(id=service)
+            if service.category == 'A':
+                return redirect(reverse('common:config_allotment_change', args=[service.pk]))
+            elif obj.service.category == 'T':
+                return redirect(reverse('common:config_transfer_change', args=[service.pk]))
+            elif obj.service.category == 'E':
+                return redirect(reverse('common:config_extra_change', args=[service.pk]))
+        return super(BaseServiceDetailSiteModel, self).response_post_save_add(request, obj)
+
+    def response_post_save_change(self, request, obj):
+        if hasattr(obj, 'service') and obj.service:
+            if obj.service.category == 'A':
+                return redirect(reverse('common:config_allotment_change', args=[obj.service.pk]))
+            elif obj.service.category == 'T':
+                return redirect(reverse('common:config_transfer_change', args=[obj.service.pk]))
+            elif obj.service.category == 'E':
+                return redirect(reverse('common:config_extra_change', args=[obj.service.pk]))
+        service = request.POST.get('service')
+        if service:
+            service = Service.objects.get(id=service)
+            if service.category == 'A':
+                return redirect(reverse('common:config_allotment_change', args=[service.pk]))
+            elif obj.service.category == 'T':
+                return redirect(reverse('common:config_transfer_change', args=[service.pk]))
+            elif obj.service.category == 'E':
+                return redirect(reverse('common:config_extra_change', args=[service.pk]))
+        return super(BaseServiceDetailSiteModel, self).response_post_save_change(request, obj)
+
+
+
+class ServiceDetailAllotmentSiteModel(BaseServiceDetailSiteModel):
+    model_order = 6150
+    menu_label = MENU_LABEL_CONFIG_BASIC
+    menu_group = 'Configuration Services'
+    fields = [
+        'service',
+        ('detail_service', 'search_location'),
+        ('days_after', 'days_duration'),
+        ('room_type', 'board_type'),
+        'time',
+        'addon',]
+    list_display = ('service', 'detail_service',
+        'days_after', 'days_duration', 'room_type', 'board_type', 'addon',)
+    top_filters = ('service',)
+    ordering = ['service__name', 'days_after']
+    form = ServiceDetailAllotmentForm
+
+
+class ServiceDetailTransferSiteModel(BaseServiceDetailSiteModel):
+    model_order = 6160
+    menu_label = MENU_LABEL_CONFIG_BASIC
+    menu_group = 'Configuration Services'
+    fields = [
+        'service',
+        ('detail_service', 'search_location'),
+        ('days_after', 'days_duration'),
+        ('location_from', 'location_to'),
+        ('pickup', 'dropoff'),
+        ('place_from', 'place_to'),
+        ('schedule_from', 'schedule_to'),
+        ('schedule_time_from', 'schedule_time_to'),
+        ('time', 'quantity'),
+        'addon',]
+    list_display = ('service', 'detail_service',
+        'days_after', 'days_duration', 'location_from', 'location_to', 'quantity',  'addon')
+    top_filters = ('service',)
+    ordering = ['service__name', 'days_after']
+    form = ServiceDetailTransferForm
+
+
+class ServiceDetailExtraSiteModel(BaseServiceDetailSiteModel):
+    model_order = 6170
+    menu_label = MENU_LABEL_CONFIG_BASIC
+    menu_group = 'Configuration Services'
+    fields = [
+        'service',
+        ('detail_service', 'search_location'),
+        ('days_after', 'days_duration'),
+        ('pickup_office', 'dropoff_office'),
+        ('time', 'parameter', 'quantity'),
+        'addon',]
+    list_display = ('service', 'detail_service',
+        'days_after', 'days_duration', 'parameter', 'quantity',
+        'pickup_office', 'dropoff_office', 'addon')
+    top_filters = ('service',)
+    ordering = ['service__name', 'days_after']
+    form = ServiceDetailExtraForm
+
+
 class ServiceSiteModel(SiteModel):
     model_order = 6100
     menu_label = MENU_LABEL_CONFIG_BASIC
@@ -179,10 +301,24 @@ class ServiceSiteModel(SiteModel):
     fields = (('name', 'enabled'), ('service_category', 'category'),)
     list_display = ('name', 'location', 'service_category',
                     'category', 'enabled')
+    list_editable = ('enabled',)
     top_filters = ('name', ('service_category', ServiceCategoryTopFilter),
                    'location', 'category', 'enabled')
     ordering = ['enabled', 'category', 'name']
     actions = ['export_prices']
+    change_list_template = 'config/service_change_list.html'
+    list_details_template = 'config/service_details.html'
+    change_details_template = 'config/service_details.html'
+    form = ServiceForm
+
+    @csrf_protect_m
+    def changelist_view(self, request, extra_context=None):
+        search_service_form = SearchServiceForm()
+        context = dict(search_service_form=search_service_form)
+        context.update(extra_context or {})
+        return super(ServiceSiteModel, self).changelist_view(
+            request, context)
+
 
     def get_changelist(self, request, **kwargs):
         """
@@ -278,12 +414,14 @@ def export_prices(request, queryset, extra_context=None):
 
         services = request.POST.getlist('_selected_action', [])
         if agency and services:
-            return render_prices_pdf({
-                'agency': Agency.objects.get(id=agency),
-                'date_from': date_from,
-                'date_to': date_to,
-                'services': Service.objects.filter(id__in=services).order_by('location__name')
-            })
+            return render_prices_pdf(
+                request,
+                {
+                    'agency': Agency.objects.get(id=agency),
+                    'date_from': date_from,
+                    'date_to': date_to,
+                    'services': Service.objects.filter(id__in=services).order_by('location__name')
+                })
     context.update({'services': queryset})
     context.update({'form': PricesExportForm()})
     context.update({'site_title': 'Export Services'})
@@ -309,8 +447,21 @@ class AllotmentSiteModel(SiteModel):
                    'is_shared_point', 'enabled')
     ordering = ['enabled', 'name']
     inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline,
-               ServiceAddonInline, AllotmentTransferZoneInline]
+               ServiceAddonInline, AllotmentTransferZoneInline,]
     actions = ['export_prices']
+    change_list_template = 'config/service_change_list.html'
+    list_details_template = 'config/service_details.html'
+    change_details_template = 'config/service_details.html'
+    form = ServiceForm
+
+    @csrf_protect_m
+    def changelist_view(self, request, extra_context=None):
+        search_service_form = SearchServiceForm()
+        context = dict(search_service_form=search_service_form)
+        context.update(extra_context or {})
+        return super(AllotmentSiteModel, self).changelist_view(
+            request, context)
+
 
     def export_prices(self, request, queryset, extra_context=None):
         """
@@ -341,6 +492,19 @@ class TransferSiteModel(SiteModel):
     ordering = ['enabled', 'name']
     inlines = [ServiceAddonInline]
     actions = ['export_prices']
+    change_list_template = 'config/service_change_list.html'
+    list_details_template = 'config/service_details.html'
+    change_details_template = 'config/service_details.html'
+    form = ServiceForm
+
+    @csrf_protect_m
+    def changelist_view(self, request, extra_context=None):
+        search_service_form = SearchServiceForm()
+        context = dict(search_service_form=search_service_form)
+        context.update(extra_context or {})
+        return super(TransferSiteModel, self).changelist_view(
+            request, context)
+
 
     def export_prices(self, request, queryset, extra_context=None):
         """
@@ -376,6 +540,12 @@ class ExtraSupplementInline(CommonTabularInline):
     extra = 0
 
 
+class ExtraComponentInline(CommonTabularInline):
+    model = ExtraComponent
+    extra = 0
+    fk_name = 'extra'
+    form = ExtraComponentInlineForm
+
 class ExtraSiteModel(SiteModel):
     model_order = 6130
     menu_label = MENU_LABEL_CONFIG_BASIC
@@ -388,9 +558,21 @@ class ExtraSiteModel(SiteModel):
                     'infant_age', 'child_age')
     top_filters = (('service_category', ServiceCategoryTopFilter), 'name',)
     ordering = ['enabled', 'name']
-    inlines = [ServiceAddonInline]
+    inlines = [ExtraComponentInline, ServiceAddonInline]
     actions = ['export_prices']
+    change_list_template = 'config/service_change_list.html'
+    list_details_template = 'config/service_details.html'
+    change_details_template = 'config/service_details.html'
     form = ExtraForm
+
+    @csrf_protect_m
+    def changelist_view(self, request, extra_context=None):
+        search_service_form = SearchServiceForm()
+        context = dict(search_service_form=search_service_form)
+        context.update(extra_context or {})
+        return super(ExtraSiteModel, self).changelist_view(
+            request, context)
+
 
     def export_prices(self, request, queryset, extra_context=None):
         """
@@ -646,6 +828,9 @@ bookings_site.register(Service, ServiceSiteModel)
 bookings_site.register(Allotment, AllotmentSiteModel)
 bookings_site.register(Transfer, TransferSiteModel)
 bookings_site.register(Extra, ExtraSiteModel)
+bookings_site.register(ServiceDetailAllotment, ServiceDetailAllotmentSiteModel)
+bookings_site.register(ServiceDetailTransfer, ServiceDetailTransferSiteModel)
+bookings_site.register(ServiceDetailExtra, ServiceDetailExtraSiteModel)
 
 bookings_site.register(AgencyAllotmentService, AgencyAllotmentServiceSiteModel)
 bookings_site.register(AgencyTransferService, AgencyTransferServiceSiteModel)

@@ -230,7 +230,6 @@ class BaseAllotment(models.Model):
     """
     class Meta:
         abstract = True
-    service = models.ForeignKey(Allotment)
     room_type = models.ForeignKey(RoomType)
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
 
@@ -241,7 +240,6 @@ class BaseTransfer(models.Model):
     """
     class Meta:
         abstract = True
-    service = models.ForeignKey(Transfer)
     quantity = models.SmallIntegerField(default=1)
 
 
@@ -251,10 +249,13 @@ class BaseExtra(models.Model):
     """
     class Meta:
         abstract = True
-    service = models.ForeignKey(Extra)
     addon = models.ForeignKey(Addon, blank=True, null=True)
     quantity = models.SmallIntegerField(default=1)
     parameter = models.SmallIntegerField(default=0, verbose_name='Hours')
+    pickup_office = models.ForeignKey(
+        CarRentalOffice, related_name='pickup_office', blank=True, null=True)
+    dropoff_office = models.ForeignKey(
+        CarRentalOffice, related_name='dropoff_office', blank=True, null=True)
 
 
 class Package(Service):
@@ -302,6 +303,7 @@ class PackageAllotment(PackageService, BaseAllotment):
     class Meta:
         verbose_name = 'Package Accomodation'
         verbose_name_plural = 'Packages Accomodations'
+    service = models.ForeignKey(Allotment)
 
     def fill_data(self):
         self.name = '%s' % (self.service,)
@@ -316,6 +318,7 @@ class PackageTransfer(PackageService, BaseTransfer):
     class Meta:
         verbose_name = 'Package Transfer'
         verbose_name_plural = 'Packages Transfers'
+    service = models.ForeignKey(Transfer)
     location_from = models.ForeignKey(
         Location, related_name='package_location_from', verbose_name='Location from')
     place_from = models.ForeignKey(Place, related_name='package_place_from', blank=True, null=True)
@@ -349,6 +352,7 @@ class PackageExtra(PackageService, BaseExtra):
     class Meta:
         verbose_name = 'Package Extra'
         verbose_name_plural = 'Packages Extras'
+    service = models.ForeignKey(Extra)
     pickup_office = models.ForeignKey(
         CarRentalOffice, related_name='package_pickup_office', blank=True, null=True)
     dropoff_office = models.ForeignKey(
@@ -466,6 +470,7 @@ class QuoteAllotment(QuoteService, BaseAllotment):
         verbose_name = 'Quote Accomodation'
         verbose_name_plural = 'Quotes Accomodations'
         default_permissions = ('add', 'change',)
+    service = models.ForeignKey(Allotment)
 
     def fill_data(self):
         self.name = '%s' % (self.service,)
@@ -482,6 +487,7 @@ class QuoteTransfer(QuoteService, BaseTransfer):
         verbose_name = 'Quote Transfer'
         verbose_name_plural = 'Quotes Transfers'
         default_permissions = ('add', 'change',)
+    service = models.ForeignKey(Transfer)
     location_from = models.ForeignKey(
         Location, related_name='quote_location_from', verbose_name='Location from')
     location_to = models.ForeignKey(
@@ -504,6 +510,7 @@ class QuoteExtra(QuoteService, BaseExtra):
         verbose_name = 'Quote Extra'
         verbose_name_plural = 'Quotes Extras'
         default_permissions = ('add', 'change',)
+    service = models.ForeignKey(Extra)
     pickup_office = models.ForeignKey(
         CarRentalOffice, related_name='quote_pickup_office', blank=True, null=True)
     dropoff_office = models.ForeignKey(
@@ -615,6 +622,7 @@ class QuotePackageAllotment(QuotePackageService, BaseAllotment):
         verbose_name = 'Quote Package Accomodation'
         verbose_name_plural = 'Quotes Packages Accomodations'
         default_permissions = ('add', 'change',)
+    service = models.ForeignKey(Allotment)
 
     def fill_data(self):
         self.name = '%s' % (self.service,)
@@ -631,6 +639,7 @@ class QuotePackageTransfer(QuotePackageService, BaseTransfer):
         verbose_name = 'Quote Package Transfer'
         verbose_name_plural = 'Quotes Packages Transfers'
         default_permissions = ('add', 'change',)
+    service = models.ForeignKey(Transfer)
     location_from = models.ForeignKey(
         Location, related_name='quote_package_location_from', verbose_name='Location from')
     location_to = models.ForeignKey(
@@ -653,6 +662,7 @@ class QuotePackageExtra(QuotePackageService, BaseExtra):
         verbose_name = 'Quote Package Extra'
         verbose_name_plural = 'Quotes Packages Extras'
         default_permissions = ('add', 'change',)
+    service = models.ForeignKey(Extra)
     pickup_office = models.ForeignKey(
         CarRentalOffice, related_name='quotepackage_pickup_office', blank=True, null=True)
     dropoff_office = models.ForeignKey(
@@ -1132,6 +1142,7 @@ class BookingAllotment(BookingService, BaseAllotment):
     class Meta:
         verbose_name = 'Booking Accomodation'
         verbose_name_plural = 'Bookings Accomodations'
+    service = models.ForeignKey(Allotment)
     version = AutoIncVersionField( )
 
     def __unicode__(self):
@@ -1219,6 +1230,7 @@ class BookingTransfer(BookingService, BaseTransfer):
     class Meta:
         verbose_name = 'Booking Transfer'
         verbose_name_plural = 'Booking Transfers'
+    service = models.ForeignKey(Transfer)
     version = AutoIncVersionField( )
     location_from = models.ForeignKey(
         Location, related_name='location_from', verbose_name='Location from')
@@ -1280,6 +1292,7 @@ class BookingExtra(BookingService, BaseExtra):
     class Meta:
         verbose_name = 'Booking Extra'
         verbose_name_plural = 'Booking Extras'
+    service = models.ForeignKey(Extra)
     version = AutoIncVersionField( )
     pickup_office = models.ForeignKey(
         CarRentalOffice, related_name='booking_pickup_office', blank=True, null=True)
@@ -1402,6 +1415,7 @@ class BookingPackageAllotment(BookingPackageService, BaseAllotment):
     class Meta:
         verbose_name = 'Booking Package Accomodation'
         verbose_name_plural = 'Bookings Packages Accomodations'
+    service = models.ForeignKey(Allotment)
     version = AutoIncVersionField( )
 
     def build_description(self):
@@ -1475,6 +1489,7 @@ class BookingPackageTransfer(BookingPackageService, BaseTransfer):
     class Meta:
         verbose_name = 'Booking Package Transfer'
         verbose_name_plural = 'Bookingss Packages Transfers'
+    service = models.ForeignKey(Transfer)
     version = AutoIncVersionField( )
     location_from = models.ForeignKey(
         Location, related_name='booking_package_location_from', verbose_name='Location from')
@@ -1519,6 +1534,7 @@ class BookingPackageExtra(BookingPackageService, BaseExtra):
     class Meta:
         verbose_name = 'Booking Package Extra'
         verbose_name_plural = 'Bookings Packages Extras'
+    service = models.ForeignKey(Extra)
     version = AutoIncVersionField( )
     pickup_office = models.ForeignKey(
         CarRentalOffice, related_name='bookingpackage_pickup_office', blank=True, null=True)
