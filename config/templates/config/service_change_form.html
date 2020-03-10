@@ -1,0 +1,17 @@
+{% extends "common/change_form.html" %}
+
+{% load static %}
+
+{% block head_extra %}
+  <script type="text/javascript">
+    var service_id = {{ object_id }};
+  </script>
+  {{ block.super }}
+  <script type="text/javascript" src="{% static 'config/js/service_change.js' %}"></script>
+  <script type="text/javascript" src="{% static 'config/js/add_service_detail.js' %}"></script>
+{% endblock head_extra %}
+
+{% block content %}
+  {{ block.super }}
+  {% include 'config/include/search_service_dialog.html' with form=search_service_form %}
+{% endblock content %}

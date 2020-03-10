@@ -189,9 +189,9 @@ class BaseServiceDetailSiteModel(SiteModel):
             service = Service.objects.get(id=service)
             if service.category == 'A':
                 return redirect(reverse('common:config_allotment_change', args=[service.pk]))
-            elif obj.service.category == 'T':
+            elif service.category == 'T':
                 return redirect(reverse('common:config_transfer_change', args=[service.pk]))
-            elif obj.service.category == 'E':
+            elif service.category == 'E':
                 return redirect(reverse('common:config_extra_change', args=[service.pk]))
         return super(BaseServiceDetailSiteModel, self).response_post_delete(request, obj)
 
@@ -208,9 +208,9 @@ class BaseServiceDetailSiteModel(SiteModel):
             service = Service.objects.get(id=service)
             if service.category == 'A':
                 return redirect(reverse('common:config_allotment_change', args=[service.pk]))
-            elif obj.service.category == 'T':
+            elif service.category == 'T':
                 return redirect(reverse('common:config_transfer_change', args=[service.pk]))
-            elif obj.service.category == 'E':
+            elif service.category == 'E':
                 return redirect(reverse('common:config_extra_change', args=[service.pk]))
         return super(BaseServiceDetailSiteModel, self).response_post_save_add(request, obj)
 
@@ -227,9 +227,9 @@ class BaseServiceDetailSiteModel(SiteModel):
             service = Service.objects.get(id=service)
             if service.category == 'A':
                 return redirect(reverse('common:config_allotment_change', args=[service.pk]))
-            elif obj.service.category == 'T':
+            elif service.category == 'T':
                 return redirect(reverse('common:config_transfer_change', args=[service.pk]))
-            elif obj.service.category == 'E':
+            elif service.category == 'E':
                 return redirect(reverse('common:config_extra_change', args=[service.pk]))
         return super(BaseServiceDetailSiteModel, self).response_post_save_change(request, obj)
 
@@ -294,7 +294,42 @@ class ServiceDetailExtraSiteModel(BaseServiceDetailSiteModel):
     form = ServiceDetailExtraForm
 
 
-class ServiceSiteModel(SiteModel):
+class BaseServiceSiteModel(SiteModel):
+    change_form_template = 'config/service_change_form.html'
+    change_list_template = 'config/service_change_list.html'
+    list_details_template = 'config/service_details.html'
+    change_details_template = 'config/service_details.html'
+
+    @csrf_protect_m
+    def changelist_view(self, request, extra_context=None):
+        search_service_form = SearchServiceForm()
+        context = dict(search_service_form=search_service_form)
+        context.update(extra_context or {})
+        return super(BaseServiceSiteModel, self).changelist_view(
+            request, context)
+
+    def changeform_context(
+            self, request, form, obj, formsets, inline_instances,
+            add, opts, object_id, to_field, form_validated=None, extra_context=None):
+        search_service_form = SearchServiceForm()
+        context = dict(search_service_form=search_service_form)
+        context.update(extra_context or {})
+        return super(BaseServiceSiteModel, self).changeform_context(
+            request, form, obj, formsets, inline_instances,
+            add, opts, object_id, to_field, form_validated, context)
+
+    def export_prices(self, request, queryset, extra_context=None):
+        """
+        This allows exporting service prices for certain agency and dates
+        """
+        context = {}
+        context.update(self.get_model_extra_context(request))
+        context.update(extra_context or {})
+        return export_prices(request, queryset, context)
+
+
+    
+class ServiceSiteModel(BaseServiceSiteModel):
     model_order = 6100
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
@@ -306,34 +341,13 @@ class ServiceSiteModel(SiteModel):
                    'location', 'category', 'enabled')
     ordering = ['enabled', 'category', 'name']
     actions = ['export_prices']
-    change_list_template = 'config/service_change_list.html'
-    list_details_template = 'config/service_details.html'
-    change_details_template = 'config/service_details.html'
     form = ServiceForm
-
-    @csrf_protect_m
-    def changelist_view(self, request, extra_context=None):
-        search_service_form = SearchServiceForm()
-        context = dict(search_service_form=search_service_form)
-        context.update(extra_context or {})
-        return super(ServiceSiteModel, self).changelist_view(
-            request, context)
-
 
     def get_changelist(self, request, **kwargs):
         """
         Returns the ChangeList class for use on the changelist page.
         """
         return ServiceChangeList
-
-    def export_prices(self, request, queryset, extra_context=None):
-        """
-        This allows exporting service prices for certain agency and dates
-        """
-        context = {}
-        context.update(self.get_model_extra_context(request))
-        context.update(extra_context or {})
-        return export_prices(request, queryset, context)
 
 
 class RoomTypeSiteModel(SiteModel):
@@ -430,7 +444,7 @@ def export_prices(request, queryset, extra_context=None):
     return render(request, 'config/agency_prices_export.html', context=context)
 
 
-class AllotmentSiteModel(SiteModel):
+class AllotmentSiteModel(BaseServiceSiteModel):
     model_order = 6110
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
@@ -449,28 +463,7 @@ class AllotmentSiteModel(SiteModel):
     inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline,
                ServiceAddonInline, AllotmentTransferZoneInline,]
     actions = ['export_prices']
-    change_list_template = 'config/service_change_list.html'
-    list_details_template = 'config/service_details.html'
-    change_details_template = 'config/service_details.html'
     form = ServiceForm
-
-    @csrf_protect_m
-    def changelist_view(self, request, extra_context=None):
-        search_service_form = SearchServiceForm()
-        context = dict(search_service_form=search_service_form)
-        context.update(extra_context or {})
-        return super(AllotmentSiteModel, self).changelist_view(
-            request, context)
-
-
-    def export_prices(self, request, queryset, extra_context=None):
-        """
-        This allows exporting service prices for certain agency and dates
-        """
-        context = {}
-        context.update(self.get_model_extra_context(request))
-        context.update(extra_context or {})
-        return export_prices(request, queryset, context)
 
 
 class TransferSupplementInline(CommonTabularInline):
@@ -478,7 +471,7 @@ class TransferSupplementInline(CommonTabularInline):
     extra = 0
 
 
-class TransferSiteModel(SiteModel):
+class TransferSiteModel(BaseServiceSiteModel):
     model_order = 6120
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
@@ -492,37 +485,7 @@ class TransferSiteModel(SiteModel):
     ordering = ['enabled', 'name']
     inlines = [ServiceAddonInline]
     actions = ['export_prices']
-    change_list_template = 'config/service_change_list.html'
-    list_details_template = 'config/service_details.html'
-    change_details_template = 'config/service_details.html'
     form = ServiceForm
-
-    @csrf_protect_m
-    def changelist_view(self, request, extra_context=None):
-        search_service_form = SearchServiceForm()
-        context = dict(search_service_form=search_service_form)
-        context.update(extra_context or {})
-        return super(TransferSiteModel, self).changelist_view(
-            request, context)
-
-
-    def export_prices(self, request, queryset, extra_context=None):
-        """
-        This allows exporting service prices for certain agency and dates
-        """
-        context = {}
-        context.update(self.get_model_extra_context(request))
-        context.update(extra_context or {})
-        return export_prices(request, queryset, context)
-
-
-# TODO deprecated class. To be removed with related elements
-class ExtraAddonInline(CommonTabularInline):
-    model = ExtraAddon
-    extra = 0
-    show_change_link = True
-
-    form = ExtraAddonInlineForm
 
 
 class ExtraAddonSiteModel(SiteModel):
@@ -546,7 +509,7 @@ class ExtraComponentInline(CommonTabularInline):
     fk_name = 'extra'
     form = ExtraComponentInlineForm
 
-class ExtraSiteModel(SiteModel):
+class ExtraSiteModel(BaseServiceSiteModel):
     model_order = 6130
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
@@ -560,28 +523,7 @@ class ExtraSiteModel(SiteModel):
     ordering = ['enabled', 'name']
     inlines = [ExtraComponentInline, ServiceAddonInline]
     actions = ['export_prices']
-    change_list_template = 'config/service_change_list.html'
-    list_details_template = 'config/service_details.html'
-    change_details_template = 'config/service_details.html'
     form = ExtraForm
-
-    @csrf_protect_m
-    def changelist_view(self, request, extra_context=None):
-        search_service_form = SearchServiceForm()
-        context = dict(search_service_form=search_service_form)
-        context.update(extra_context or {})
-        return super(ExtraSiteModel, self).changelist_view(
-            request, context)
-
-
-    def export_prices(self, request, queryset, extra_context=None):
-        """
-        This allows exporting service prices for certain agency and dates
-        """
-        context = {}
-        context.update(self.get_model_extra_context(request))
-        context.update(extra_context or {})
-        return export_prices(request, queryset, context)
 
 
 class ProviderAllotmentDetailInline(CommonStackedInline):
