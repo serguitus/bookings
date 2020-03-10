@@ -35,6 +35,7 @@ class Office(models.Model):
     detail1 = models.CharField(max_length=100, blank=True, null=True)
     detail2 = models.CharField(max_length=100, blank=True, null=True)
     default_office = models.BooleanField(default=False)
+    bank_details = models.CharField(max_length=1000, blank=True, null=True)
 
     def __unicode__(self):
         return self.name

@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
+from ckeditor.widgets import CKEditorWidget
+
 from dal import autocomplete
 
 from django import forms
@@ -60,4 +63,12 @@ class AgencyDocumentForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'agency': autocomplete.ModelSelect2(url='agency-autocomplete'),
+        }
+
+
+class OfficeForm(forms.ModelForm):
+    class Meta:
+        fields = ('__all__')
+        widgets = {
+            'bank_details': CKEditorWidget(attrs={'class': 'form-control'})
         }

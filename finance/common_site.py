@@ -24,7 +24,7 @@ from functools import partial
 from finance.forms import (
     AccountingForm, CurrencyExchangeForm, TransferForm,
     LoanEntityDocumentForm, LoanAccountDocumentForm,
-    ProviderDocumentForm, AgencyDocumentForm)
+    ProviderDocumentForm, AgencyDocumentForm, OfficeForm)
 from finance.models import (
     Office,
     FinantialDocument,
@@ -588,8 +588,9 @@ class LoanAccountWithdrawSiteModel(LoanAccountDocumentSiteModel):
 class OfficeSiteModel(SiteModel):
     model_order = 4010
     menu_label = MENU_LABEL_FINANCE_ADVANCED
-    fields = ('name', 'logo', 'address', 'detail1', 'detail2')
+    fields = ('name', 'logo', 'address', 'detail1', 'detail2', 'bank_details')
     list_display = ('name', 'logo', 'address')
+    form = OfficeForm
 
 
 class ProviderSiteModel(SiteModel):
