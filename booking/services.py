@@ -3410,9 +3410,14 @@ class BookingServices(object):
                 if allotment.status == constants.SERVICE_STATUS_CANCELLED:
                     continue
                 if not hasattr(allotment, 'service'):
-                    return None, "Missing Allotment Service", None, "Missing Allotment Service"
+                    error_msg = "%s - Missing Allotment Service" % allotment
+                    return None, error_msg, None, error_msg
                 c, c_msg, p, p_msg = cls._find_bookingservice_update_amounts(
                     bookingservice=allotment, agency=agency)
+                if c is None:
+                    c_msg = "%s - %s" % (allotment, c_msg)
+                if p is None:
+                    p_msg = "%s - %s" % (allotment, p_msg)
                 cost, cost_msg = cls._merge_costs(cost, cost_msg, c, c_msg)
                 price, price_msg = cls._merge_prices(price, price_msg, p, p_msg, )
                 if cost is None and price is None:
@@ -3423,9 +3428,14 @@ class BookingServices(object):
                 if transfer.status == constants.SERVICE_STATUS_CANCELLED:
                     continue
                 if not hasattr(transfer, 'service'):
-                    return None, "Missing Transfer Service", None, "Missing Transfer Service"
+                    error_msg = "%s - Missing Transfer Service" % transfer
+                    return None, error_msg, None, error_msg
                 c, c_msg, p, p_msg = cls._find_bookingservice_update_amounts(
                     bookingservice=transfer, agency=agency)
+                if c is None:
+                    c_msg = "%s - %s" % (transfer, c_msg)
+                if p is None:
+                    p_msg = "%s - %s" % (transfer, p_msg)
                 cost, cost_msg = cls._merge_costs(cost, cost_msg, c, c_msg)
                 price, price_msg = cls._merge_prices(price, price_msg, p, p_msg, )
                 if cost is None and price is None:
@@ -3436,9 +3446,14 @@ class BookingServices(object):
                 if extra.status == constants.SERVICE_STATUS_CANCELLED:
                     continue
                 if not hasattr(extra, 'service'):
-                    return None, "Missing Extra Service", None, "Missing Extra Service"
+                    error_msg = "%s - Missing Extra Service" % extra
+                    return None, error_msg, None, error_msg
                 c, c_msg, p, p_msg = cls._find_bookingservice_update_amounts(
                     bookingservice=extra, agency=agency)
+                if c is None:
+                    c_msg = "%s - %s" % (extra, c_msg)
+                if p is None:
+                    p_msg = "%s - %s" % (extra, p_msg)
                 cost, cost_msg = cls._merge_costs(cost, cost_msg, c, c_msg)
                 price, price_msg = cls._merge_prices(price, price_msg, p, p_msg, )
                 if cost is None and price is None:
@@ -3449,9 +3464,14 @@ class BookingServices(object):
                 if package.status == constants.SERVICE_STATUS_CANCELLED:
                     continue
                 if not hasattr(package, 'service'):
-                    return None, "Missing Extra Service", None, "Missing Extra Service"
+                    error_msg = "%s - Missing Package Service" % package
+                    return None, error_msg, None, error_msg
                 c, c_msg, p, p_msg = cls._find_bookingservice_update_amounts(
                     bookingservice=package, agency=agency)
+                if c is None:
+                    c_msg = "%s - %s" % (package, c_msg)
+                if p is None:
+                    p_msg = "%s - %s" % (package, p_msg)
                 cost, cost_msg = cls._merge_costs(cost, cost_msg, c, c_msg)
                 price, price_msg = cls._merge_prices(price, price_msg, p, p_msg, )
                 if cost is None and price is None:
