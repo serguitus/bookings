@@ -4846,6 +4846,10 @@ class BookingServices(object):
                                            bookingservice_ids):
         for bookingservice_id in bookingservice_ids:
             bookingservice = BookingService.objects.get(pk=bookingservice_id)
+            if bookingservice.status != SERVICE_STATUS_PENDING:
+                bookingservice.status = SERVICE_STATUS_PENDING
+                bookingservice.save(update_fields=['status'])
+
             bookingservice_pax = BookingServicePax()
             bookingservice_pax.booking_service = bookingservice
             bookingservice_pax.booking_pax = booking_pax
