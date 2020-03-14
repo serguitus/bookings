@@ -1020,6 +1020,21 @@ class BaseBookingService(BaseService, DateInterval):
     def get_child_object(self):
         return _get_child_objects([self])[0]
 
+    def validate(self):
+        if self.status in [
+                SERVICE_STATUS_PENDING, SERVICE_STATUS_REQUEST,
+                SERVICE_STATUS_CANCELLED]:
+            self.cost_amount_to_pay = 0.00
+        elif self.cost_amount is None:
+            raise ValidationError(
+                '%s with Status %s requires a Cost' % (self.name, self.get_status_display()))
+        elif self.cost_amount is not None:
+            self.cost_amount_to_pay = self.cost_amount
+
+    def save(self, *args, **kwargs):
+        self.validate()
+        super(BaseBookingService, self).save(*args, **kwargs)
+
 
 class BookingService(BaseBookingService):
     """
