@@ -283,7 +283,7 @@ class ServiceDetailTransferForm(forms.ModelForm, BaseServiceDetailForm):
                 ),
             'detail_service': autocomplete.ModelSelect2(
                 url='servicetransfer-autocomplete',
-                forward=['search_location'],
+                forward=['search_location', 'location_from', 'location_to'],
                 ),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),

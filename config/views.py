@@ -500,6 +500,8 @@ class ServiceTransferAutocompleteView(autocomplete.Select2QuerySetView):
             return Transfer.objects.none()
         provider = self.forwarded.get('provider', None)
         location = self.forwarded.get('search_location', None)
+        location_from = self.forwarded.get('location_from', None)
+        location_to = self.forwarded.get('location_to', None)
         qs = Transfer.objects.filter(enabled=True).distinct()
         if provider:
             qs = qs.filter(
@@ -509,6 +511,35 @@ class ServiceTransferAutocompleteView(autocomplete.Select2QuerySetView):
             qs = qs.filter(
                 location=location,
             )
+        if location_from:
+            if location_to:
+                qs = qs.filter(
+                    (
+                        Q(providertransferservice__providertransferdetail__p_location_from=location_from)
+                        &
+                        Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                    )
+                    |
+                    (
+                        Q(providertransferservice__providertransferdetail__p_location_from=location_to)
+                        &
+                        Q(providertransferservice__providertransferdetail__p_location_to=location_from)
+                    )
+                )
+            else:
+                qs = qs.filter(
+                    Q(providertransferservice__providertransferdetail__p_location_from=location_from)
+                    |
+                    Q(providertransferservice__providertransferdetail__p_location_to=location_from)
+                )
+        else:
+            if location_to:
+                qs = qs.filter(
+                    Q(providertransferservice__providertransferdetail__p_location_from=location_to)
+                    |
+                    Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                )
+    
         if self.q:
             qs = qs.filter(name__icontains=self.q)
         return qs[:20]

@@ -86,7 +86,7 @@ class PackageTransferInlineForm(forms.ModelForm, ServiceForm):
         widgets = {
             'service': autocomplete.ModelSelect2(
                 url='servicetransfer-autocomplete',
-                forward=['provider', 'search_location'],
+                forward=['provider', 'search_location', 'location_from', 'location_to'],
                 ),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
@@ -166,7 +166,7 @@ class PackageTransferForm(forms.ModelForm, ServiceForm):
         widgets = {
             'service': autocomplete.ModelSelect2(
                 url='servicetransfer-autocomplete',
-                forward=['provider', 'search_location'],
+                forward=['provider', 'search_location', 'location_from', 'location_to'],
                 ),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'place_from': autocomplete.ModelSelect2(
@@ -300,7 +300,7 @@ class QuotePackageTransferInlineForm(forms.ModelForm, ServiceForm):
         widgets = {
             'service': autocomplete.ModelSelect2(
                 url='servicetransfer-autocomplete',
-                forward=['provider', 'search_location'],
+                forward=['provider', 'search_location', 'location_from', 'location_to'],
                 ),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
@@ -322,7 +322,7 @@ class QuotePackageTransferForm(forms.ModelForm, ServiceForm):
         widgets = {
             'service': autocomplete.ModelSelect2(
                 url='servicetransfer-autocomplete',
-                forward=['provider', 'search_location'],
+                forward=['provider', 'search_location', 'location_from', 'location_to'],
                 ),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
@@ -463,7 +463,7 @@ class QuoteTransferInlineForm(forms.ModelForm, ServiceForm):
         widgets = {
             'service': autocomplete.ModelSelect2(
                 url='servicetransfer-autocomplete',
-                forward=['provider', 'search_location'],
+                forward=['provider', 'search_location', 'location_from', 'location_to'],
                 ),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
@@ -485,7 +485,7 @@ class QuoteTransferForm(forms.ModelForm, ServiceForm):
         widgets = {
             'service': autocomplete.ModelSelect2(
                 url='servicetransfer-autocomplete',
-                forward=['provider', 'search_location'],
+                forward=['provider', 'search_location', 'location_from', 'location_to'],
                 ),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
@@ -662,7 +662,7 @@ class BookingTransferForm(forms.ModelForm, MailForm, ServiceForm):
         widgets = {
             'service': autocomplete.ModelSelect2(
                 url='servicetransfer-autocomplete',
-                forward=['provider', 'search_location'],
+                forward=['provider', 'search_location', 'location_from', 'location_to'],
                 ),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'place_from': autocomplete.ModelSelect2(
@@ -797,7 +797,7 @@ class BookingPackageTransferForm(forms.ModelForm, MailForm, ServiceForm):
         widgets = {
             'service': autocomplete.ModelSelect2(
                 url='servicetransfer-autocomplete',
-                forward=['provider', 'search_location'],
+                forward=['provider', 'search_location', 'location_from', 'location_to'],
                 ),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'place_from': autocomplete.ModelSelect2(
@@ -1070,3 +1070,11 @@ class ProviderBookingPaymentServiceReadonlyForm(forms.Form):
         label='Paid', required=False,
         decimal_places=2, disabled=True, widget=forms.NumberInput(
             attrs={'style':'text-align: right; width: 100px;'}))
+
+
+class BookingExtraComponentInlineForm(forms.ModelForm):
+    class Meta:
+        fields = '__all__'
+        widgets = {
+            'component': autocomplete.ModelSelect2(url='extra-autocomplete'),
+        }

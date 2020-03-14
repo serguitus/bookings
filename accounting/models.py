@@ -28,7 +28,7 @@ class Account(models.Model):
             cursor.execute("""
                 UPDATE accounting_account a SET a.balance = (
                     SELECT COALESCE(
-                        SUM(CASE WHEN movement_type = %s THEN 1 ELSE -1 END * amount),
+                        SUM(CASE WHEN movement_type = '%s' THEN 1 ELSE -1 END * amount),
                         0)
                     FROM accounting_operationmovement
                     WHERE account_id = a.id)
@@ -45,7 +45,7 @@ class Account(models.Model):
             cursor.execute("""
                 UPDATE accounting_account a SET a.balance = (
                     SELECT COALESCE(
-                        SUM(CASE WHEN movement_type = %s THEN 1 ELSE -1 END * amount),
+                        SUM(CASE WHEN movement_type = '%s' THEN 1 ELSE -1 END * amount),
                         0)
                     FROM accounting_operationmovement
                     WHERE account_id = a.id)
