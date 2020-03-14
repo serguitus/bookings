@@ -243,3 +243,8 @@ a.btn-back:hover {
 tr.active, tr.active a{
     color: #bbbbbb;
 }
+
+th>input[type="checkbox"] {
+    vertical-align: bottom;
+    margin-right: 3px;
+}

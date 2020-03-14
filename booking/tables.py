@@ -4,6 +4,8 @@ from django.contrib.admin.utils import quote
 from django.urls import reverse
 from django.utils import formats
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
+
 from booking.models import (
     PackageService,
     Quote, QuoteService, QuotePaxVariant, QuotePackageService,
@@ -458,21 +460,38 @@ class BookingServiceUpdateTable(tables.Table):
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
 
+class TitledCheckBoxColumn(tables.CheckBoxColumn):
+    @property
+    def header(self):
+        title = self.attrs.get('title', '')
+        return mark_safe('%s %s' % (super(TitledCheckBoxColumn, self).header, title))
+
 class AddPaxBookingServicesTable(tables.Table):
     class Meta:
         model = BookingService
         # fields update_cost_amount and update_price_amount are lazy
         # they contain computed values that will be saved upon save action
         template_name = 'booking/add_pax_bookingservices.html'
-        fields = ['pk', 'name', 'datetime_from', 'datetime_to',
+        fields = ['pk', 'reset_pk', 'name', 'datetime_from', 'datetime_to',
                   'cost_amount', 'price_amount', 'status', 'conf_number', 'provider']
-    pk = tables.CheckBoxColumn(accessor='pk',
-                               attrs={
-                                   'th__input': {
-                                       'id': 'action-toggle'},
-                                   'td__input': {
-                                       'class': 'action-select'},
-                               })
+    pk = TitledCheckBoxColumn(
+        accessor='pk',
+        attrs={
+            'title' : 'Add',
+            'th__input': {
+                'id': 'action-toggle'},
+            'td__input': {
+                'class': 'action-select'},
+        })
+    reset_pk = TitledCheckBoxColumn(
+        accessor='pk',
+        attrs={
+            'title' : 'Reset',
+            'th__input': {
+                'id': 'action-reset-toggle'},
+            'td__input': {
+                'class': 'action-reset-select'},
+        })
 
     def __init__(self, *args, **kwargs):
         self.base_columns['cost_amount'].verbose_name = 'Cost'

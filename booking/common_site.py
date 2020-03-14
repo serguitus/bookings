@@ -1127,6 +1127,9 @@ class BookingSiteModel(SiteModel):
                         booking,
                         formset.cleaned_data,
                         request.POST.getlist('pk'))
+                    BookingServices.reset_paxes_to_services(
+                        booking,
+                        request.POST.getlist('reset_pk'))
                     return redirect(reverse('common:booking_booking_change', args=[id]))
                 except ValidationError as error:
                     messages.add_message(
@@ -1144,7 +1147,7 @@ class BookingSiteModel(SiteModel):
             current_rooming = BookingPax.objects.filter(booking=id)
 
         context = {}
-        context.update({'title': 'Add Pax to Rooming'})
+        context.update({'title': 'Update Rooming'})
         context.update(self.get_model_extra_context(request))
         context.update(extra_context or {})
         context.update({'booking_id': id})
@@ -1945,7 +1948,7 @@ class BookingExtraSiteModel(BaseBookingServiceSiteModel):
     form = BookingExtraForm
     add_form_template = 'booking/bookingextra_change_form.html'
     change_form_template = 'booking/bookingextra_change_form.html'
-    inlines = [BookingServicePaxInline]
+    inlines = [BookingServicePaxInline, BookingExtraComponentInline]
     list_details_template = 'booking/bookingextra_details.html'
     change_details_template = 'booking/bookingextra_details.html'
 

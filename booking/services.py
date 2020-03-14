@@ -4842,15 +4842,36 @@ class BookingServices(object):
                     cls._add_bookingpax_to_bookingservices(booking_pax, bookingservice_ids)
 
     @classmethod
-    def _add_bookingpax_to_bookingservices(cls, booking_pax,
-                                           bookingservice_ids):
+    def reset_paxes_to_services(cls, booking, bookingservice_ids):
+        if bookingservice_ids:
+            with transaction.atomic(savepoint=False):
+                for bookingservice_id in bookingservice_ids:
+                    bookingservice = BookingService.objects.get(pk=bookingservice_id)
+                    if bookingservice.status != constants.SERVICE_STATUS_PENDING:
+                        bookingservice.status = constants.SERVICE_STATUS_PENDING
+                        bookingservice.save(update_fields=['status'])
+                    for bookingservice_pax in bookingservice.rooming_list.all():
+                        bookingservice_pax.delete()
+                    for booking_pax in booking.rooming_list.all():
+                        cls._add_bookingpax_to_bookingservice(booking_pax, bookingservice)
+
+    @classmethod
+    def _add_bookingpax_to_bookingservices(cls, booking_pax, bookingservice_ids):
         for bookingservice_id in bookingservice_ids:
             bookingservice = BookingService.objects.get(pk=bookingservice_id)
-            bookingservice_pax = BookingServicePax()
-            bookingservice_pax.booking_service = bookingservice
-            bookingservice_pax.booking_pax = booking_pax
-            bookingservice_pax.group = booking_pax.pax_group
-            bookingservice_pax.save()
+            cls._add_bookingpax_to_bookingservice(booking_pax, bookingservice)
+
+
+    @classmethod
+    def _add_bookingpax_to_bookingservice(cls, booking_pax, bookingservice):
+        if bookingservice.status != constants.SERVICE_STATUS_PENDING:
+            bookingservice.status = constants.SERVICE_STATUS_PENDING
+            bookingservice.save(update_fields=['status'])
+        bookingservice_pax = BookingServicePax()
+        bookingservice_pax.booking_service = bookingservice
+        bookingservice_pax.booking_pax = booking_pax
+        bookingservice_pax.group = booking_pax.pax_group
+        bookingservice_pax.save()
 
 
     @classmethod
