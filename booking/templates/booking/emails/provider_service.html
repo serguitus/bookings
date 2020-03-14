@@ -1,22 +1,24 @@
 {% load booking_tags i18n %}{% language 'es' %}{% if bs.service_type == 'T' %}{# This is a Transfer #}{{ bs.name }} [{{ bs.description }}]{% if bs.service_addon %}addon{{ bs.service_addon }}{% endif %}
-    Fecha: {{ bs.datetime_from|date:"d-b-Y" }}
-    {% if bs.time %}Hora: {{ bs.time|time:"H:i" }} hrs{% endif %}{% if bs.schedule_from or bs.schedule_to %}
-    Vuelo: {% if bs.schedule_from %}{{ bs.schedule_from }}@{{ bs.schedule_time_from }}{% else %}{{ bs.schedule_to }}@{{ bs.schedule_time_to }}{% endif %}{% endif %}
-    Pick Up: {% if bs.pickup %}{{ bs.pickup.name }}{% if bs.pickup.address %} ({{ bs.pickup.address }}){% endif %}{% elif bs.place_from %}{{ bs.location_from }}({{ bs.place_from }}){% endif %}
-    Drop Off: {% if bs.dropoff %}{{ bs.dropoff.name }}{% if bs.dropoff.address %} ({{ bs.dropoff.address }}){% endif %}{% elif bs.place_to %}{{ bs.location_to }} ({{ bs.place_to }}){% endif %}{% elif bs.service_type == 'A' %}{# This is an Accomodation #}{{ bs.name }}
-    {{ bs.description }}
-    Check In: {{ bs.datetime_from|date:"d-b-Y" }}
-    Check Out {{ bs.datetime_to|date:"d-b-Y" }}{% elif bs.service_type == 'E' %}{# This is an Extra #}{{ bs.service }}{% if bs.service_addon %} {{ bs.service_addon }}{% endif %}
-    {% if bs.datetime_to and bs.datetime_to != bs.datetime_from%}From: {{ bs.datetime_from|date:"d-b-Y" }}
-    To: {{ bs.datetime_to|date:"d-m-Y" }}{% else %}Fecha: {{ bs.datetime_from|date:"d-b-Y" }}{% endif %}
-    {% if bs.time %}Hora: {{ bs.time|time:"H:i" }} hrs{% endif %}{% elif bs.service_type == 'P' %}{# This is a Package #}{{ bs.service }}
-    Fecha: {{ bs.datetime_from|date:"d-b-Y" }}   Hora: {{ bs.time|time:"H:i" }} hrs
-{% endif %}{% if bs.cost_amount and provider.is_private %}
-    TOTAL: ${{ bs.cost_amount }}
+Fecha: {{ bs.datetime_from|date:"d-b-Y" }}
+{% if bs.time %}Hora: {{ bs.time|time:"H:i" }} hrs{% endif %}{% if bs.schedule_from or bs.schedule_to %}
+Vuelo: {% if bs.schedule_from %}{{ bs.schedule_from }}@{{ bs.schedule_time_from }}{% else %}{{ bs.schedule_to }}@{{ bs.schedule_time_to }}{% endif %}{% endif %}
+Pick Up: {% if bs.pickup %}{{ bs.pickup.name }}{% if bs.pickup.address %} ({{ bs.pickup.address }}){% endif %}{% elif bs.place_from %}{{ bs.location_from }} ({{ bs.place_from }}){% endif %}
+Drop Off: {% if bs.dropoff %}{{ bs.dropoff.name }}{% if bs.dropoff.address %} ({{ bs.dropoff.address }}){% endif %}{% elif bs.place_to %}{{ bs.location_to }} ({{ bs.place_to }}){% endif %}{% elif bs.service_type == 'A' %}{# This is an Accomodation #}{{ bs.name }}
+{{ bs.description }}
+Check In: {{ bs.datetime_from|date:"d-b-Y" }}
+Check Out: {{ bs.datetime_to|date:"d-b-Y" }}{% elif bs.service_type == 'E' %}{# This is an Extra #}{{ bs.service }}{% if bs.service_addon %} {{ bs.service_addon }}{% endif %}
+{% if bs.datetime_to and bs.datetime_to != bs.datetime_from%}From: {{ bs.datetime_from|date:"d-b-Y" }}
+To: {{ bs.datetime_to|date:"d-m-Y" }}{% else %}Fecha: {{ bs.datetime_from|date:"d-b-Y" }}{% endif %}
+{% if bs.time %}Hora: {{ bs.time|time:"H:i" }}hrs{% endif %}{% if bs.pickup_office %}
+Pick Up Office: {{ bs.pickup_office.office }}{% endif %}{% if bs.dropoff_office %}
+Drop Off Office: {{ bs.dropoff_office.office }}{% endif %}{% elif bs.service_type == 'P' %}{# This is a Package #}{{ bs.service }}
+Fecha: {{ bs.datetime_from|date:"d-b-Y" }} Hora: {{ bs.time|time:"H:i" }} hrs{% endif %}
+{% if bs.cost_amount and provider.is_private %}
+TOTAL: ${{ bs.cost_amount }}
 {% endif %}{% if bs.provider_notes %}
-    NOTA: {{ bs.provider_notes }}
+NOTA: {{ bs.provider_notes }}
 {% endif %}
 Rooming:
-{% for pax in bs.rooming_list.all|dictsort:'group' %}[{% if bs.service_type == 'A' %}{{ pax.group }}{% else %}{{ forloop.counter }}{% endif %}] {{ pax.booking_pax.pax_name }}{% if pax.booking_pax.pax_age %} (Edad: {{ pax.booking_pax.pax_age }} años){% endif %}
+{% for pax in bs.rooming_list.all|dictsort:'group' %}[{% if bs.service_type == 'A' %}{{ pax.group }}{% else %}{{ forloop.counter }}{% endif %}]{{ pax.booking_pax.pax_name }}{% if pax.booking_pax.pax_age %} (Edad: {{ pax.booking_pax.pax_age }} años){% endif %}
 {% endfor %}
 ----------------------------------{% endlanguage %}
