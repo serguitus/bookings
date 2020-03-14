@@ -1948,7 +1948,7 @@ class BookingExtraSiteModel(BaseBookingServiceSiteModel):
     form = BookingExtraForm
     add_form_template = 'booking/bookingextra_change_form.html'
     change_form_template = 'booking/bookingextra_change_form.html'
-    inlines = [BookingServicePaxInline, BookingExtraComponentInline]
+    inlines = [BookingServicePaxInline]
     list_details_template = 'booking/bookingextra_details.html'
     change_details_template = 'booking/bookingextra_details.html'
 
