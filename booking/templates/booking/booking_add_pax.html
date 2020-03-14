@@ -15,7 +15,7 @@
     {% csrf_token %}
     <input type="hidden" id="booking_id" name="booking_id" value="{{ booking_id }}">
     {{ formset.management_form }}
-    <h1>Add Pax to Rooming List</h1>
+    <h1>Update Rooming List</h1>
     <h2>Rooming List</h2>
     <table class="table table-hover table-sm">
   <thead>
@@ -51,7 +51,7 @@
     {% endfor %}
   </tbody>
     </table>
-    <p><a id="add" class="btn btn-primary add-row">Add Pax</a></p>
+    <p><a id="add" class="btn btn-primary add-row">Update Rooming</a></p>
     <h2>Choose Services to add new pax to:</h2>
     {% add_pax_bookingservices_table services as table %}
     <div class="add-pax-bookingservices-container">
