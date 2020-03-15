@@ -11,7 +11,7 @@
                 <li><a href="{% url 'common:booking_bookingpackage_add' %}?booking={{ current.id }}">New Package</a></li>
             </ul>
         </span>
-        <a class="btn btn-success" href="{% url 'common:booking_booking_add_booking_pax' current.id %}">Add Pax</a>
+        <a class="btn btn-success" href="{% url 'common:booking_booking_add_booking_pax' current.id %}">Update Rooming</a>
         <a class="btn btn-primary" href="{% url 'send_booking_confirmation' current.id %}">Confirmation</a>
         <a class="btn btn-primary" href="{% url 'common:booking_booking_config_vouchers' current.id %}">Voucher</a>
         <a class="btn btn-primary" href="{% url 'booking_invoice' current.id %}">Invoice</a>

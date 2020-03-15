@@ -160,6 +160,7 @@ def _get_voucher_services(services):
             objs.append(booking_service)
     return objs
 
+
 class PackageAllotmentInLine(CommonStackedInline):
     model = PackageAllotment
     extra = 0
@@ -1385,6 +1386,7 @@ class BookingBaseServiceSiteModel(SiteModel):
     ordering = ('datetime_from', 'booking__reference', 'name',)
     list_details_template = 'booking/basebookingservice_details.html'
     change_details_template = 'booking/basebookingservice_details.html'
+    totalsum_list = ['cost_amount', 'price_amount']
 
     def get_changelist(self, request, **kwargs):
         """
@@ -1442,6 +1444,7 @@ class BookingServiceSiteModel(SiteModel):
     ordering = ('datetime_from', 'booking__reference', 'name',)
     list_details_template = 'booking/bookingservice_details.html'
     change_details_template = 'booking/bookingservice_details.html'
+    totalsum_list = ['cost_amount', 'price_amount']
 
     def get_changelist(self, request, **kwargs):
         """

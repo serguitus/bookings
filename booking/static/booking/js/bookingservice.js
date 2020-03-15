@@ -13,7 +13,7 @@ $(document).ready(function(){
 
   // check if there are notes on bookingServices to Expand collapsed notes
   if($('#id_v_notes').val() || $('#id_p_notes').val() || $('#id_provider_notes').val()){
-    $('#fieldsetcollapser0.collapse-toggle').click()
+    $('#fieldsetcollapser0.collapse-toggle').click();
   }
 
   function get_computed_amounts(){
