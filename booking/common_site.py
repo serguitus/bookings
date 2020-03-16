@@ -2547,6 +2547,19 @@ def _fetch_resources(uri, rel):
     return path
 
 
+class ExportBookingChangeList(StatusChangeList):
+    def url_for_result(self, result):
+        pk = getattr(result, self.pk_attname)
+        class_url = result._meta.concrete_model._meta.model_name
+        return reverse(
+            '%s:%s_%s_change' % (
+                self.model_admin.admin_site.site_namespace,
+                self.opts.app_label,
+                class_url),
+            args=(quote(pk),),
+            current_app=self.model_admin.admin_site.name)
+
+
 class ExportBooking(Booking):
     class Meta:
         proxy = True
@@ -2580,6 +2593,7 @@ class ExportBookingSiteModel(SiteModel):
                     'pax_count', 'agency', 'reference', 'cost_amount', 'price_amount',
                     'utility', 'invoice_number', 'invoiced_amount', 'paid_amount',
                     'pending_amount', 'seller')
+    list_display_links = ['internal_reference', 'name']
     top_filters = (('name', 'Booking Name'), 'reference', 'agency',
                    ('date_from', DateTopFilter), 'rooming_list__pax_name',
                    (InternalReferenceTopFilter),
@@ -2589,6 +2603,12 @@ class ExportBookingSiteModel(SiteModel):
     totalsum_list = ['cost_amount', 'price_amount',
                      'invoiced_amount', 'utility',
                      'paid_amount', 'pending_amount']
+
+    def get_changelist(self, request, **kwargs):
+        """
+        Returns the ChangeList class for use on the changelist page.
+        """
+        return ExportBookingChangeList
 
 
 # Starts Registration Section

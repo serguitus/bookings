@@ -948,7 +948,9 @@ class BaseBookingService(BaseService, DateInterval):
                                            verbose_name='Paid')
     has_payment = models.BooleanField(default=False)
     booking = models.ForeignKey(Booking, related_name='base_booking_services')
-    base_service = models.ForeignKey(Service, related_name='booking_base_service', verbose_name='Service')
+    base_service = models.ForeignKey(Service,
+                                     related_name='booking_base_service',
+                                     verbose_name='Service')
 
     @property
     def utility(self):
@@ -959,11 +961,6 @@ class BaseBookingService(BaseService, DateInterval):
     def utility_percent(self):
         return utility_percent(self.cost_amount, self.price_amount)
     utility_percent.fget.short_description = 'Util.%'
-
-    def save(self, *args, **kwargs):
-        self.validate_date_interval()
-        # Call the "real" save() method.
-        super(BaseBookingService, self).save(*args, **kwargs)
 
     def booking_name(self):
         # gets booking.name for this bookingservice
@@ -1033,6 +1030,7 @@ class BaseBookingService(BaseService, DateInterval):
 
     def save(self, *args, **kwargs):
         self.validate()
+        self.validate_date_interval()
         super(BaseBookingService, self).save(*args, **kwargs)
 
 
@@ -1066,7 +1064,7 @@ class BookingServicePax(models.Model):
     class Meta:
         verbose_name = 'Booking Service Pax'
         verbose_name_plural = 'Booking Service Rooming'
-    version = AutoIncVersionField( )
+    version = AutoIncVersionField()
     booking_pax = models.ForeignKey(BookingPax)
     booking_service = models.ForeignKey(BookingService, related_name='rooming_list')
     group = models.SmallIntegerField(verbose_name='Room')
