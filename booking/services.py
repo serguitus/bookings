@@ -1049,7 +1049,7 @@ class BookingServices(object):
         price = 0
         date_from = None
         date_to = None
-        status = constants.BOOKING_STATUS_COORDINATED
+        status = constants.BOOKING_STATUS_NOT_SHOW
         services = False
         cancelled = True
         for service in BookingService.objects.filter(booking=booking):
@@ -1097,6 +1097,12 @@ class BookingServices(object):
                         status != constants.BOOKING_STATUS_PENDING) and (
                             status != constants.BOOKING_STATUS_REQUEST):
                     status = constants.BOOKING_STATUS_CONFIRMED
+                # coordinated sets coordinated when not confirm, not requested and not pending
+                elif (service.status == constants.SERVICE_STATUS_COORDINATED) and (
+                        status != constants.BOOKING_STATUS_PENDING) and (
+                            status != constants.BOOKING_STATUS_REQUEST) and (
+                                status != constants.BOOKING_STATUS_CONFIRMED):
+                    status = constants.BOOKING_STATUS_COORDINATED
 
         # verify that have services and all cancelled
         if services:
@@ -1275,7 +1281,7 @@ class BookingServices(object):
         price = 0
         date_from = None
         date_to = None
-        status = constants.BOOKING_STATUS_COORDINATED
+        status = constants.SERVICE_STATUS_NOSHOW
         services = False
         cancelled = True
         for service in bookingpackage.bookingpackage_services.all():
@@ -1309,20 +1315,29 @@ class BookingServices(object):
                 # status
                 # pending sets always pending
                 if service.status == constants.SERVICE_STATUS_PENDING:
-                    status = constants.BOOKING_STATUS_PENDING
-                # requested sets requested when not pending
+                    status = constants.SERVICE_STATUS_PENDING
+                # requested sets when not pending
                 elif (service.status == constants.SERVICE_STATUS_REQUEST) and (
-                        status != constants.BOOKING_STATUS_PENDING):
-                    status = constants.BOOKING_STATUS_REQUEST
-                # phone confirmed sets requested when not pending
+                        status != constants.SERVICE_STATUS_PENDING):
+                    status = constants.SERVICE_STATUS_REQUEST
+                # phone confirmed sets when not pending or requested
                 elif (service.status == constants.SERVICE_STATUS_PHONE_CONFIRMED) and (
-                        status != constants.BOOKING_STATUS_PENDING):
-                    status = constants.BOOKING_STATUS_REQUEST
-                # confirmed sets confirmed when not requested and not pending
+                        status != constants.SERVICE_STATUS_PENDING) and (
+                            status != constants.SERVICE_STATUS_REQUEST):
+                    status = constants.SERVICE_STATUS_PHONE_CONFIRMED
+                # confirmed sets when not pending or requested or phone confirmed
                 elif (service.status == constants.SERVICE_STATUS_CONFIRMED) and (
-                        status != constants.BOOKING_STATUS_PENDING) and (
-                            status != constants.BOOKING_STATUS_REQUEST):
-                    status = constants.BOOKING_STATUS_CONFIRMED
+                        status != constants.SERVICE_STATUS_PENDING) and (
+                            status != constants.SERVICE_STATUS_REQUEST) and (
+                                status != constants.SERVICE_STATUS_PHONE_CONFIRMED):
+                    status = constants.SERVICE_STATUS_CONFIRMED
+                # coordinated sets when not pending or requested or phone confirmed or confirmed
+                elif (service.status == constants.SERVICE_STATUS_COORDINATED) and (
+                        status != constants.SERVICE_STATUS_PENDING) and (
+                            status != constants.SERVICE_STATUS_REQUEST) and (
+                                status != constants.SERVICE_STATUS_PHONE_CONFIRMED) and (
+                                    status != constants.SERVICE_STATUS_CONFIRMED):
+                    status = constants.SERVICE_STATUS_COORDINATED
 
         # verify that have services and all cancelled
         if services:
