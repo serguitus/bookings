@@ -2553,7 +2553,7 @@ def _fetch_resources(uri, rel):
     return path
 
 
-class ExportBookingChangeList(StatusChangeList):
+class ExportBookingChangeList(BookingStatusChangeList):
     def url_for_result(self, result):
         pk = getattr(result, self.pk_attname)
         class_url = result._meta.concrete_model._meta.model_name
