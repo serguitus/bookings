@@ -15,7 +15,8 @@ from booking.models import (
 )
 from booking.constants import (
     PACKAGESERVICE_TYPES, QUOTESERVICE_TYPES, QUOTEPACKAGESERVICE_TYPES,
-    BOOKINGSERVICE_TYPES, BOOKINGPACKAGESERVICE_TYPES, BOOTSTRAP_STYLE_STATUS_MAPPING)
+    BOOKINGSERVICE_TYPES,
+    BOOKINGPACKAGESERVICE_TYPES, BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING)
 
 from finance.models import (
     AgencyPayment,
@@ -151,7 +152,7 @@ class BookingServiceTable(tables.Table):
                   'provider', 'conf_number', 'status', 'cost_amount_paid', 'time']
         attrs = {'class': 'table table-hover table-condensed'}
         row_attrs = {
-            'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_STATUS_MAPPING[record.status]),
+            'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING[record.status]),
         }
 
     def __init__(self, *args, **kwargs):
@@ -305,7 +306,7 @@ class BookingConfirmationTable(tables.Table):
                  'style': 'width:100%',
                  'border': '1',}
         row_attrs = {
-            'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_STATUS_MAPPING[record.status]),
+            'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING[record.status]),
         }
 
     def __init__(self, *args, **kwargs):
@@ -332,7 +333,7 @@ class QuoteConfirmationTable(tables.Table):
                  'border': '1'}
         row_attrs = {
             'class': lambda record: '{}'.format(
-                BOOTSTRAP_STYLE_STATUS_MAPPING[record.status]),
+                BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING[record.status]),
         }
 
     def __init__(self, *args, **kwargs):
@@ -354,7 +355,7 @@ class BookingServiceSummaryTable(tables.Table):
         fields = ['name', 'datetime_from', 'datetime_to', 'provider', 'status']
         attrs = {'class': 'table table-hover table-condensed'}
         row_attrs = {
-            'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_STATUS_MAPPING[record.status]),
+            'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING[record.status]),
         }
 
 
@@ -421,7 +422,7 @@ class BookingPackageServiceSummaryTable(tables.Table):
             'name', 'datetime_from', 'datetime_to', 'provider', 'status']
         attrs = {'class': 'table table-hover table-condensed'}
         row_attrs = {
-            'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_STATUS_MAPPING[record.status]),
+            'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING[record.status]),
         }
 
 

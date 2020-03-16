@@ -1018,6 +1018,7 @@ class BaseBookingService(BaseService, DateInterval):
         return _get_child_objects([self])[0]
 
     def validate(self):
+        self.validate_date_interval()
         if self.status in [
                 SERVICE_STATUS_PENDING, SERVICE_STATUS_REQUEST,
                 SERVICE_STATUS_CANCELLED]:

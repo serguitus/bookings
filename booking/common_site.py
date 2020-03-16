@@ -40,13 +40,14 @@ from django.utils.functional import curry
 from django.utils.six import PY2
 # from django_tables2 import RequestConfig
 
+from finance.common_site import FinanceDocumentStatusChangeList
 from finance.models import Office
 from finance.top_filters import ProviderTopFilter, AgencyTopFilter
 
 from booking.constants import (
     SERVICE_STATUS_PENDING, SERVICE_STATUS_REQUEST, SERVICE_STATUS_COORDINATED, SERVICE_STATUS_CONFIRMED,
     SERVICE_STATUS_CANCELLED,
-    BOOTSTRAP_STYLE_STATUS_MAPPING,
+    BOOTSTRAP_STYLE_BOOKING_STATUS_MAPPING, BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT, BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA, BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE,
     BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_ALLOTMENT, BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_TRANSFER,
@@ -938,6 +939,11 @@ class BookingServicePaxInline(CommonTabularInline):
         return formset
 
 
+class BookingStatusChangeList(CommonChangeList):
+    def row_classes_for_result(self, result):
+        return BOOTSTRAP_STYLE_BOOKING_STATUS_MAPPING[result.status]
+
+
 class BookingSiteModel(SiteModel):
     model_order = 1110
     menu_label = MENU_LABEL_BOOKING
@@ -995,7 +1001,7 @@ class BookingSiteModel(SiteModel):
         """
         Returns the ChangeList class for use on the changelist page.
         """
-        return StatusChangeList
+        return BookingStatusChangeList
 
     def get_urls(self):
 
@@ -1310,12 +1316,12 @@ def _build_mail_address_list(addresses):
     return mail_address_list
 
 
-class StatusChangeList(CommonChangeList):
+class BookingServiceStatusChangeList(CommonChangeList):
     def row_classes_for_result(self, result):
-        return BOOTSTRAP_STYLE_STATUS_MAPPING[result.status]
+        return BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING[result.status]
 
 
-class ServiceChangeList(StatusChangeList):
+class ServiceChangeList(BookingServiceStatusChangeList):
     def url_for_result(self, result):
         pk = getattr(result, self.pk_attname)
         base_category = getattr(result, 'base_category')
@@ -1475,7 +1481,7 @@ class BaseBookingServiceSiteModel(SiteModel):
         """
         Returns the ChangeList class for use on the changelist page.
         """
-        return StatusChangeList
+        return BookingServiceStatusChangeList
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super(BaseBookingServiceSiteModel, self).get_readonly_fields(request, obj) or []
@@ -1614,7 +1620,7 @@ class BookingPackageServiceSiteModel(SiteModel):
         """
         Returns the ChangeList class for use on the changelist page.
         """
-        return StatusChangeList
+        return BookingServiceStatusChangeList
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super(BookingPackageServiceSiteModel, self).get_readonly_fields(request, obj) or []
@@ -2180,7 +2186,7 @@ class ProviderBookingPaymentSiteModel(SiteModel):
         """
         Returns the ChangeList class for use on the changelist page.
         """
-        return StatusChangeList
+        return FinanceDocumentStatusChangeList
 
     def is_readonly_model(self, request, obj=None):
         return obj and obj.status == STATUS_CANCELLED
