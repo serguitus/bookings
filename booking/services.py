@@ -4473,7 +4473,7 @@ class BookingServices(object):
         price = 0
         date_from = None
         date_to = None
-        status = constants.BOOKING_STATUS_COORDINATED
+        status = constants.BOOKING_STATUS_NOSHOW
         services = False
         cancelled = True
         for service in BookingService.objects.filter(booking=booking):
@@ -4521,6 +4521,12 @@ class BookingServices(object):
                         status != constants.BOOKING_STATUS_PENDING) and (
                             status != constants.BOOKING_STATUS_REQUEST):
                     status = constants.BOOKING_STATUS_CONFIRMED
+                # coordinated sets when not pending or requested or confirmed
+                elif (service.status == constants.SERVICE_STATUS_COORDINATED) and (
+                        status != constants.BOOKING_STATUS_PENDING) and (
+                            status != constants.BOOKING_STATUS_REQUEST) and (
+                                status != constants.BOOKING_STATUS_CONFIRMED):
+                    status = constants.BOOKING_STATUS_COORDINATED
 
         # verify that have services and all cancelled
         if services:
