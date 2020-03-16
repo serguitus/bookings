@@ -21,6 +21,7 @@ from django.utils.translation import ugettext as _, ungettext
 from django.utils import six
 from functools import partial
 
+from finance.constants import BOOTSTRAP_STYLE_FINANCE_DOCUMENT_STATUS_MAPPING
 from finance.forms import (
     AccountingForm, CurrencyExchangeForm, TransferForm,
     LoanEntityDocumentForm, LoanAccountDocumentForm,
@@ -42,7 +43,6 @@ from finance.top_filters import LoanEntityTopFilter, LoanAccountTopFilter
 from accounting.top_filters import AccountTopFilter, AmountTopFilter
 from accounting.common_site import MENU_LABEL_ACCOUNTING
 from booking.services import BookingServices
-from booking.constants import BOOTSTRAP_STYLE_STATUS_MAPPING
 from common.sites import SiteModel, CommonChangeList, CommonTabularInline
 from reservas.admin import bookings_site
 
@@ -57,9 +57,9 @@ class IncorrectLookupParameters(Exception):
     pass
 
 
-class StatusChangeList(CommonChangeList):
+class FinanceDocumentStatusChangeList(CommonChangeList):
     def row_classes_for_result(self, result):
-        return BOOTSTRAP_STYLE_STATUS_MAPPING[result.status]
+        return BOOTSTRAP_STYLE_FINANCE_DOCUMENT_STATUS_MAPPING[result.status]
 
 
 class FinantialDocumentSiteModel(SiteModel):
@@ -75,7 +75,7 @@ class FinantialDocumentSiteModel(SiteModel):
         """
         Returns the ChangeList class for use on the changelist page.
         """
-        return StatusChangeList
+        return FinanceDocumentStatusChangeList
 
 
 class BaseFinantialDocumentSiteModel(FinantialDocumentSiteModel):

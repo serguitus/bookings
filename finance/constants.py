@@ -57,6 +57,12 @@ DOC_TYPES = (
     (DOC_TYPE_PROVIDER_PAYMENT_WITHDRAW, 'Prov.Payment Withdraw'),
 )
 
+BOOTSTRAP_STYLE_FINANCE_DOCUMENT_STATUS_MAPPING = {
+    STATUS_CANCELLED: 'active',
+    STATUS_DRAFT: 'warning',
+    STATUS_READY: 'success',
+}
+
 ERROR_INVALID_MATCH = 'Invalid total matching (%s)'
 ERROR_DIFFERENT_DOCUMENTS = '%s documents must be the same'
 ERROR_MATCH_AMOUNT = 'Can not decrease Amount below matched amount'

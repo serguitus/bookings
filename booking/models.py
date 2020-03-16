@@ -960,11 +960,6 @@ class BaseBookingService(BaseService, DateInterval):
         return utility_percent(self.cost_amount, self.price_amount)
     utility_percent.fget.short_description = 'Util.%'
 
-    def save(self, *args, **kwargs):
-        self.validate_date_interval()
-        # Call the "real" save() method.
-        super(BaseBookingService, self).save(*args, **kwargs)
-
     def booking_name(self):
         # gets booking.name for this bookingservice
         child_service = _get_child_objects([self])[0]
@@ -1021,6 +1016,7 @@ class BaseBookingService(BaseService, DateInterval):
         return _get_child_objects([self])[0]
 
     def validate(self):
+        self.validate_date_interval()
         if self.status in [
                 SERVICE_STATUS_PENDING, SERVICE_STATUS_REQUEST,
                 SERVICE_STATUS_CANCELLED]:
