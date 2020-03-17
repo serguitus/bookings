@@ -1034,109 +1034,6 @@ class BookingServices(object):
 
 
     @classmethod
-    def update_booking(cls, booking_or_bookingservice):
-
-        if hasattr(booking_or_bookingservice, 'avoid_booking_update'):
-            return
-        if hasattr(booking_or_bookingservice, 'booking'):
-            booking = booking_or_bookingservice.booking
-        elif isinstance(booking_or_bookingservice, Booking):
-            booking = booking_or_bookingservice
-        else:
-            return
-
-        cost = 0
-        price = 0
-        date_from = None
-        date_to = None
-        status = constants.BOOKING_STATUS_NOT_SHOW
-        services = False
-        cancelled = True
-        for service in BookingService.objects.filter(booking=booking):
-            services = True
-            # process only non cancelled services
-            if service.status != constants.SERVICE_STATUS_CANCELLED:
-                # set not all cancelled
-                cancelled = False
-                # date_from
-                if (service.datetime_from is not None
-                        and (date_from is None or date_from > service.datetime_from)):
-                    date_from = service.datetime_from
-                # date_to
-                if service.datetime_to is None:
-                    service.datetime_to = service.datetime_from
-                if (service.datetime_to is not None
-                        and (date_to is None or date_to < service.datetime_to)):
-                    date_to = service.datetime_to
-                # cost
-                if cost is not None:
-                    if service.cost_amount is None:
-                        cost = None
-                    else:
-                        cost += service.cost_amount
-                # price
-                if price is not None:
-                    if service.price_amount is None:
-                        price = None
-                    else:
-                        price += service.price_amount
-                # status
-                # pending sets always pending
-                if service.status == constants.SERVICE_STATUS_PENDING:
-                    status = constants.BOOKING_STATUS_PENDING
-                # requested sets requested when not pending
-                elif (service.status == constants.SERVICE_STATUS_REQUEST) and (
-                        status != constants.BOOKING_STATUS_PENDING):
-                    status = constants.BOOKING_STATUS_REQUEST
-                # phone confirmed sets requested when not pending
-                elif (service.status == constants.SERVICE_STATUS_PHONE_CONFIRMED) and (
-                        status != constants.BOOKING_STATUS_PENDING):
-                    status = constants.BOOKING_STATUS_REQUEST
-                # confirmed sets confirmed when not requested and not pending
-                elif (service.status == constants.SERVICE_STATUS_CONFIRMED) and (
-                        status != constants.BOOKING_STATUS_PENDING) and (
-                            status != constants.BOOKING_STATUS_REQUEST):
-                    status = constants.BOOKING_STATUS_CONFIRMED
-                # coordinated sets coordinated when not confirm, not requested and not pending
-                elif (service.status == constants.SERVICE_STATUS_COORDINATED) and (
-                        status != constants.BOOKING_STATUS_PENDING) and (
-                            status != constants.BOOKING_STATUS_REQUEST) and (
-                                status != constants.BOOKING_STATUS_CONFIRMED):
-                    status = constants.BOOKING_STATUS_COORDINATED
-
-        # verify that have services and all cancelled
-        if services:
-            if cancelled:
-                # status cancelled
-                status = constants.BOOKING_STATUS_CANCELLED
-        else:
-            status = constants.BOOKING_STATUS_PENDING
-        # verify package prices
-        if booking.is_package_price:
-            price, price_msg = cls._find_booking_package_price(booking)
-
-        fields = []
-        if date_from is not None and booking.date_from != date_from:
-            fields.append('date_from')
-            booking.date_from = date_from
-        if date_to is not None and booking.date_to != date_to:
-            fields.append('date_to')
-            booking.date_to = date_to
-        if booking.status != status:
-            fields.append('status')
-            booking.status = status
-        if not cls._equals_amounts(booking.cost_amount, cost):
-            fields.append('cost_amount')
-            booking.cost_amount = cost
-        if not cls._equals_amounts(booking.price_amount, price):
-            fields.append('price_amount')
-            booking.price_amount = price
-
-        if fields:
-            booking.save(update_fields=fields)
-
-
-    @classmethod
     def find_groups(cls, booking_service, service, for_cost):
         if booking_service is None:
             return None, None
@@ -1281,11 +1178,23 @@ class BookingServices(object):
         price = 0
         date_from = None
         date_to = None
+        date_from_min = None
+        date_to_max = None
         status = constants.SERVICE_STATUS_NOSHOW
         services = False
         cancelled = True
         for service in bookingpackage.bookingpackage_services.all():
             services = True
+            # date_from_min
+            if (service.datetime_from is not None
+                    and (date_from_min is None or date_from_min > service.datetime_from)):
+                date_from_min = service.datetime_from
+            # date_to_max
+            if service.datetime_to is None:
+                service.datetime_to = service.datetime_from
+            if (service.datetime_to is not None
+                    and (date_to_max is None or date_to_max < service.datetime_to)):
+                date_to_max = service.datetime_to
             # process only non cancelled services
             if service.status != constants.SERVICE_STATUS_CANCELLED:
                 # set not all cancelled
@@ -1344,6 +1253,8 @@ class BookingServices(object):
             if cancelled:
                 # status cancelled
                 status = constants.BOOKING_STATUS_CANCELLED
+                date_from = date_from_min
+                date_to = date_to_max
         else:
             status = constants.BOOKING_STATUS_PENDING
 
@@ -4388,74 +4299,6 @@ class BookingServices(object):
                 for extra in extra_list:
                     cls.update_bookingservice_amounts(extra)
 
-    @classmethod
-    def update_bookingpackage(cls, obj):
-        if hasattr(obj, 'avoid_bookingpackage_update'):
-            return
-
-        if isinstance(obj, BookingPackage):
-            bookingpackage = obj
-        else:
-            bookingpackage = obj.booking_package
-
-        date_from = None
-        date_to = None
-        status = constants.BOOKING_STATUS_COORDINATED
-        services = False
-        cancelled = True
-        for service in bookingpackage.booking_package_services.all():
-            services = True
-            # process only non cancelled services
-            if service.status != constants.SERVICE_STATUS_CANCELLED:
-                # set not all cancelled
-                cancelled = False
-                # date_from
-                if service.datetime_from is not None:
-                    if date_from is None or (date_from > service.datetime_from):
-                        date_from = service.datetime_from
-                # date_to
-                if service.datetime_to is not None:
-                    if date_to is None or (date_to < service.datetime_to):
-                        date_to = service.datetime_to
-                # status
-                # pending sets always pending
-                if service.status == constants.SERVICE_STATUS_PENDING:
-                    status = constants.BOOKING_STATUS_PENDING
-                # requested sets requested when not pending
-                elif (service.status == constants.SERVICE_STATUS_REQUEST) and (
-                        status != constants.BOOKING_STATUS_PENDING):
-                    status = constants.BOOKING_STATUS_REQUEST
-                # phone confirmed sets requested when not pending
-                elif (service.status == constants.SERVICE_STATUS_PHONE_CONFIRMED) and (
-                        status != constants.BOOKING_STATUS_PENDING):
-                    status = constants.BOOKING_STATUS_REQUEST
-                # confirmed sets confirmed when not requested and not pending
-                elif (service.status == constants.SERVICE_STATUS_CONFIRMED) and (
-                        status != constants.BOOKING_STATUS_PENDING) and (
-                            status != constants.BOOKING_STATUS_REQUEST):
-                    status = constants.BOOKING_STATUS_CONFIRMED
-        # verify that have services and all cancelled
-        if services:
-            if cancelled:
-                # status cancelled
-                status = constants.BOOKING_STATUS_CANCELLED
-        else:
-            status = constants.BOOKING_STATUS_PENDING
-        fields = ['description']
-        if bookingpackage.datetime_from != date_from:
-            fields.append('datetime_from')
-            bookingpackage.datetime_from = date_from
-        if bookingpackage.datetime_to != date_to:
-            fields.append('datetime_to')
-            bookingpackage.datetime_to = date_to
-        if bookingpackage.status != status:
-            fields.append('status')
-            bookingpackage.status = status
-
-        if fields:
-            bookingpackage.save(update_fields=fields)
-            cls.update_booking(bookingpackage)
-
 
     @classmethod
     def update_booking(cls, booking_or_bookingservice):
@@ -4473,11 +4316,23 @@ class BookingServices(object):
         price = 0
         date_from = None
         date_to = None
+        date_from_min = None
+        date_to_max = None
         status = constants.BOOKING_STATUS_NOSHOW
         services = False
         cancelled = True
         for service in BookingService.objects.filter(booking=booking):
             services = True
+            # date_from
+            if (service.datetime_from is not None
+                    and (date_from_min is None or date_from_min > service.datetime_from)):
+                date_from_min = service.datetime_from
+            # date_to
+            if service.datetime_to is None:
+                service.datetime_to = service.datetime_from
+            if (service.datetime_to is not None
+                    and (date_to_max is None or date_to_max < service.datetime_to)):
+                date_to_max = service.datetime_to
             # process only non cancelled services
             if service.status != constants.SERVICE_STATUS_CANCELLED:
                 # set not all cancelled
@@ -4533,6 +4388,8 @@ class BookingServices(object):
             if cancelled:
                 # status cancelled
                 status = constants.BOOKING_STATUS_CANCELLED
+                date_from = date_from_min
+                date_to = date_to_max
         else:
             status = constants.BOOKING_STATUS_PENDING
         # verify package prices
