@@ -1277,6 +1277,7 @@ class BookingServices(object):
 
         if fields:
             bookingpackage.save(update_fields=fields)
+            cls.update_booking(bookingpackage)
 
 
     @classmethod
