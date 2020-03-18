@@ -207,3 +207,8 @@ button.booking_payments>span.booking_payments.glyphicon:before {
 button.booking_payments.collapsed>span.booking_payments.glyphicon:before {
     content: "\e114";
 }
+
+div.details a.btn{
+    color: white;
+}
+
