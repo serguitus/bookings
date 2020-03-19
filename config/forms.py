@@ -120,6 +120,9 @@ class AgencyAllotmentDetailForm(forms.ModelForm):
         model = AgencyAllotmentDetail
         fields = ('__all__')
         widgets = {
+            'agency_service': autocomplete.ModelSelect2(
+                url='roomtype-autocomplete',
+                attrs={'disabled': 'true'}),
             'room_type': autocomplete.ModelSelect2(
                 url='roomtype-autocomplete',
                 forward=['agency_service']),
