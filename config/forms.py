@@ -58,6 +58,9 @@ class ProviderAllotmentDetailInlineForm(forms.ModelForm):
             'board_type': autocomplete.ListSelect2(
                 url='boardtype-autocomplete',
                 forward=['service']),
+            'addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['service']),
         }
 
 
@@ -77,6 +80,9 @@ class ProviderTransferDetailInlineForm(forms.ModelForm):
         widgets = {
             'p_location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'p_location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['service']),
         }
 
 
@@ -120,6 +126,9 @@ class AgencyAllotmentDetailInlineForm(forms.ModelForm):
             'board_type': autocomplete.ListSelect2(
                 url='boardtype-autocomplete',
                 forward=['service']),
+            'addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['service']),
         }
 
 
@@ -139,6 +148,9 @@ class AgencyTransferDetailInlineForm(forms.ModelForm):
         widgets = {
             'a_location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'a_location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['service']),
         }
 
 

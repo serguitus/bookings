@@ -572,7 +572,7 @@ class ProviderAllotmentServiceSiteModel(SiteModel):
     update_agency_amounts.short_description = "Generate New Agency Prices"
 
 
-class ProviderTransferDetailInline(CommonStackedInline):
+class ProviderTransferDetailInline(CommonTabularInline):
     model = ProviderTransferDetail
     extra = 0
     fields = (
@@ -613,7 +613,7 @@ class ProviderTransferServiceSiteModel(SiteModel):
     update_agency_amounts.short_description = "Generate New Agency Prices"
 
 
-class ProviderExtraDetailInline(CommonStackedInline):
+class ProviderExtraDetailInline(CommonTabularInline):
     model = ProviderExtraDetail
     extra = 0
     fields = (
@@ -683,7 +683,7 @@ class AgencyAllotmentServiceSiteModel(SiteModel):
     save_as = True
 
 
-class AgencyTransferDetailInline(CommonStackedInline):
+class AgencyTransferDetailInline(CommonTabularInline):
     model = AgencyTransferDetail
     extra = 0
     fields = (
@@ -712,7 +712,7 @@ class AgencyTransferServiceSiteModel(SiteModel):
     save_as = True
 
 
-class AgencyExtraDetailInline(CommonStackedInline):
+class AgencyExtraDetailInline(CommonTabularInline):
     model = AgencyExtraDetail
     extra = 0
     fields = (
