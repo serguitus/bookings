@@ -212,6 +212,7 @@ class ExtraForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'car_rental': autocomplete.ModelSelect2(url='carrental-autocomplete'),
+            'location': autocomplete.ModelSelect2(url='location-autocomplete'),
         }
 
 

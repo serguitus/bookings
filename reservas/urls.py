@@ -48,6 +48,8 @@ from booking.views import (
     ServicePackageAutocompleteView,
 )
 
+from reservas.views import DisabledAutocompleteView
+
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -204,5 +206,9 @@ urlpatterns = [
     url(r'^carrentaloffice-autocomplete/$',
         CarRentalOfficeAutocompleteView.as_view(),
         name='carrentaloffice-autocomplete',
+    ),
+    url(r'^disabled-autocomplete/$',
+        DisabledAutocompleteView.as_view(),
+        name='disabled-autocomplete',
     ),
 ]
