@@ -107,3 +107,20 @@ class ExtraLocationForAgencyTransferTopFilter(filters.ForeignKeyFilter):
 
 class DateToTopFilter(filters.DateFilter):
     default_value = [date.today() - timedelta(days=30), None]
+
+
+class AgencyTransferLocationTopFilter(filters.ForeignKeyFilter):
+    filter_field_path = 'loc2'
+    filter_title = 'Agency Location From / To'
+    filter_queryset = Location.objects.all()
+    autocomplete_url = 'location-autocomplete'
+
+    def queryset(self, request, queryset):
+        search_option = self._values[0]
+        if search_option and search_option != []:
+            queryset = queryset.distinct()
+            for option in search_option:
+                queryset = queryset.filter(
+                    Q(agencytransferservice__agencytransferdetail__a_location_from=option,) |
+                    Q(agencytransferservice__agencytransferdetail__a_location_to=option))
+        return queryset
