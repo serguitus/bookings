@@ -150,6 +150,8 @@ class CommonSite(AdminSite):
         models = self._registry
 
         for model, site_model in models.items():
+            if not site_model.menu_label:
+                continue
             menu_label = site_model.menu_label
 
             if menu_label is None:

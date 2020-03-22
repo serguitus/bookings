@@ -808,6 +808,12 @@ class ProviderTransferDetail(AmountDetail):
     pax_range_min = models.SmallIntegerField(default=0)
     pax_range_max = models.SmallIntegerField(default=0)
 
+    @property
+    def cost_type(self):
+        if self.provider_service:
+            return self.provider_service.service.get_cost_type_display()
+        return ''
+
 
 class AgencyTransferService(AgencyCatalogue):
     """

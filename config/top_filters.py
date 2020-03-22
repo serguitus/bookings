@@ -4,7 +4,7 @@ from django.db.models import Q
 
 from common import filters
 
-from config.models import Location
+from config.models import Location, Transfer
 
 
 class RoomTypeTopFilter(filters.ForeignKeyFilter):
@@ -37,12 +37,44 @@ class TransferTopFilter(filters.ForeignKeyFilter):
     autocomplete_url = 'transfer-autocomplete'
 
 
+class ProviderDetailTransferTopFilter(filters.ForeignKeyFilter):
+    filter_field_path = 'provider_service'
+    filter_title = 'Select Transfers'
+    filter_queryset = Transfer.objects.all()
+    autocomplete_url = 'transfer-autocomplete'
+
+    def queryset(self, request, queryset):
+        search_option = self._values[0]
+        if search_option and search_option != []:
+            queryset = queryset.distinct()
+            queryset = queryset.filter(
+                Q(provider_service__service__in=search_option))
+        return queryset
+
+
+
 class ExtraTopFilter(filters.ForeignKeyFilter):
     filter_title = 'Select Extras'
     autocomplete_url = 'extra-autocomplete'
 
 
-class LocationForProviderTransferTopFilter(filters.ForeignKeyFilter):
+class ProviderTransferDetailLocationTopFilter(filters.ForeignKeyFilter):
+    filter_field_path = 'Location'
+    filter_title = 'Select Locations'
+    filter_queryset = Location.objects.all()
+    autocomplete_url = 'location-autocomplete'
+
+    def queryset(self, request, queryset):
+        search_option = self._values[0]
+        if search_option and search_option != []:
+            queryset = queryset.distinct()
+            queryset = queryset.filter(
+                Q(p_location_from__in=search_option) &
+                Q(p_location_to__in=search_option))
+        return queryset
+
+
+class ProviderTransferLocationTopFilter(filters.ForeignKeyFilter):
     filter_field_path = 'loc1'
     filter_title = 'Select Locations'
     filter_queryset = Location.objects.all()
@@ -57,7 +89,8 @@ class LocationForProviderTransferTopFilter(filters.ForeignKeyFilter):
                 Q(providertransferdetail__p_location_to__in=search_option))
         return queryset
 
-class ExtraLocationForProviderTransferTopFilter(filters.ForeignKeyFilter):
+
+class ProviderTransferLocationAdditionalTopFilter(filters.ForeignKeyFilter):
     filter_field_path = 'loc2'
     filter_title = 'Select Other Locations'
     filter_queryset = Location.objects.all()
@@ -73,7 +106,7 @@ class ExtraLocationForProviderTransferTopFilter(filters.ForeignKeyFilter):
         return queryset
 
 
-class LocationForAgencyTransferTopFilter(filters.ForeignKeyFilter):
+class AgencyTransferLocationTopFilter(filters.ForeignKeyFilter):
     filter_field_path = 'loc1'
     filter_title = 'Select Locations'
     filter_queryset = Location.objects.all()
@@ -89,7 +122,7 @@ class LocationForAgencyTransferTopFilter(filters.ForeignKeyFilter):
         return queryset
 
 
-class ExtraLocationForAgencyTransferTopFilter(filters.ForeignKeyFilter):
+class AgencyTransferLocationAdditionalTopFilter(filters.ForeignKeyFilter):
     filter_field_path = 'loc2'
     filter_title = 'Select Other Locations'
     filter_queryset = Location.objects.all()

@@ -19,6 +19,7 @@ from django.utils.encoding import force_text
 from django.utils.translation import ugettext as _, ungettext
 
 from common.sites import SiteModel, CommonTabularInline, CommonStackedInline, CommonChangeList
+from common.filters import DateFilter
 
 from config.constants import (
     SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER, SERVICE_CATEGORY_EXTRA,
@@ -58,9 +59,10 @@ from config.top_filters import (
     RoomTypeTopFilter, LocationTopFilter, ServiceCategoryTopFilter,
     AddonTopFilter,
     AllotmentTopFilter, TransferTopFilter, ExtraTopFilter,
-    LocationForProviderTransferTopFilter, ExtraLocationForProviderTransferTopFilter,
-    LocationForAgencyTransferTopFilter, ExtraLocationForAgencyTransferTopFilter,
+    ProviderTransferLocationTopFilter, ProviderTransferLocationAdditionalTopFilter,
+    AgencyTransferLocationTopFilter, AgencyTransferLocationAdditionalTopFilter,
     DateToTopFilter, AgencyTransferLocationTopFilter,
+    ProviderDetailTransferTopFilter, ProviderTransferDetailLocationTopFilter,
 )
 from config.views import render_prices_pdf
 
@@ -237,9 +239,9 @@ class BaseServiceDetailSiteModel(SiteModel):
 
 
 class ServiceDetailAllotmentSiteModel(BaseServiceDetailSiteModel):
-    model_order = 6150
-    menu_label = MENU_LABEL_CONFIG_BASIC
-    menu_group = 'Configuration Services'
+    #model_order = 6150
+    #menu_label = MENU_LABEL_CONFIG_BASIC
+    #menu_group = 'Configuration Services'
     fields = [
         'service',
         ('detail_service', 'search_location'),
@@ -255,9 +257,9 @@ class ServiceDetailAllotmentSiteModel(BaseServiceDetailSiteModel):
 
 
 class ServiceDetailTransferSiteModel(BaseServiceDetailSiteModel):
-    model_order = 6160
-    menu_label = MENU_LABEL_CONFIG_BASIC
-    menu_group = 'Configuration Services'
+    #model_order = 6160
+    #menu_label = MENU_LABEL_CONFIG_BASIC
+    #menu_group = 'Configuration Services'
     fields = [
         'service',
         ('detail_service', 'search_location'),
@@ -277,9 +279,9 @@ class ServiceDetailTransferSiteModel(BaseServiceDetailSiteModel):
 
 
 class ServiceDetailExtraSiteModel(BaseServiceDetailSiteModel):
-    model_order = 6170
-    menu_label = MENU_LABEL_CONFIG_BASIC
-    menu_group = 'Configuration Services'
+    #model_order = 6170
+    #menu_label = MENU_LABEL_CONFIG_BASIC
+    #menu_group = 'Configuration Services'
     fields = [
         'service',
         ('detail_service', 'search_location'),
@@ -597,6 +599,28 @@ class ProviderTransferDetailInline(CommonTabularInline):
         return qs
 
 
+class ProviderTransferDetailSiteModel(SiteModel):
+    model_order = 7230
+    menu_label = MENU_LABEL_CONFIG_BASIC
+    menu_group = 'Provider Catalogue'
+    fields = (
+        ('p_location_from', 'p_location_to', 'addon'),
+        ('pax_range_min', 'pax_range_max'),
+        ('ad_1_amount', 'ch_1_ad_1_amount'),
+    )
+    list_display = (
+        'p_location_from', 'p_location_to',
+        'provider_service',
+        'pax_range_min', 'pax_range_max',
+        'cost_type', 'ad_1_amount', 'ch_1_ad_1_amount')
+    top_filters = (
+        ProviderDetailTransferTopFilter, ('provider_service__date_to', DateFilter),
+        ProviderTransferDetailLocationTopFilter)
+    ordering = [
+        'p_location_from', 'p_location_to',
+        'provider_service__service', 'pax_range_max', 'ad_1_amount',]
+
+
 class ProviderTransferServiceSiteModel(SiteModel):
     model_order = 7230
     menu_label = MENU_LABEL_CONFIG_BASIC
@@ -607,7 +631,7 @@ class ProviderTransferServiceSiteModel(SiteModel):
     top_filters = (
         ('service', TransferTopFilter), ('provider', ProviderTopFilter),
         ('date_to', DateToTopFilter),
-        LocationForProviderTransferTopFilter, ExtraLocationForProviderTransferTopFilter)
+        ProviderTransferLocationTopFilter, ProviderTransferLocationAdditionalTopFilter)
     inlines = [ProviderTransferDetailInline]
     ordering = ['service', 'provider', '-date_from']
     form = ProviderTransferServiceForm
@@ -733,7 +757,7 @@ class AgencyTransferServiceSiteModel(SiteModel):
     top_filters = (
         ('service', TransferTopFilter), ('agency', AgencyTopFilter),
         ('date_to', DateToTopFilter),
-        LocationForAgencyTransferTopFilter, ExtraLocationForAgencyTransferTopFilter)
+        AgencyTransferLocationTopFilter, AgencyTransferLocationAdditionalTopFilter)
     inlines = [AgencyTransferDetailInline]
     ordering = ['service', 'agency', '-date_from']
     form = AgencyTransferServiceForm
@@ -814,3 +838,5 @@ bookings_site.register(AgencyExtraService, AgencyExtraServiceSiteModel)
 bookings_site.register(ProviderAllotmentService, ProviderAllotmentServiceSiteModel)
 bookings_site.register(ProviderTransferService, ProviderTransferServiceSiteModel)
 bookings_site.register(ProviderExtraService, ProviderExtraServiceSiteModel)
+
+bookings_site.register(ProviderTransferDetail, ProviderTransferDetailSiteModel)
