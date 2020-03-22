@@ -272,9 +272,7 @@ class QuotePackageAllotmentForm(forms.ModelForm, ServiceForm):
         fields = '__all__'
         widgets = {
             'quote_package': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',
-                attrs={
-                    'disabled': 'true'}),
+                url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
                 url='serviceallotment-autocomplete',
                 forward=['provider', 'search_location'],
@@ -325,9 +323,7 @@ class QuotePackageTransferForm(forms.ModelForm, ServiceForm):
         fields = ('__all__')
         widgets = {
             'quote_package': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',
-                attrs={
-                    'disabled': 'true'}),
+                url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
                 url='servicetransfer-autocomplete',
                 forward=['provider', 'search_location', 'location_from', 'location_to'],
@@ -383,9 +379,7 @@ class QuotePackageExtraForm(forms.ModelForm, ServiceForm):
         fields = ('__all__')
         widgets = {
             'quote_package': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',
-                attrs={
-                    'disabled': 'true'}),
+                url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
                 url='serviceextra-autocomplete',
                 forward=['provider', 'search_location'],
@@ -446,9 +440,7 @@ class QuoteAllotmentForm(forms.ModelForm, ServiceForm):
         fields = '__all__'
         widgets = {
             'quote': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',
-                attrs={
-                    'disabled': 'true'}),
+                url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
                 url='serviceallotment-autocomplete',
                 forward=['provider', 'search_location'],
@@ -500,9 +492,7 @@ class QuoteTransferForm(forms.ModelForm, ServiceForm):
         fields = ('__all__')
         widgets = {
             'booking': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',
-                attrs={
-                    'disabled': 'true'}),
+                url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
                 url='servicetransfer-autocomplete',
                 forward=['provider', 'search_location', 'location_from', 'location_to'],
@@ -558,9 +548,7 @@ class QuoteExtraForm(forms.ModelForm, ServiceForm):
         fields = ('__all__')
         widgets = {
             'booking': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',
-                attrs={
-                    'disabled': 'true'}),
+                url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
                 url='serviceextra-autocomplete',
                 forward=['provider', 'search_location'],
@@ -611,9 +599,7 @@ class QuotePackageForm(forms.ModelForm, ServiceForm):
         fields = ('__all__')
         widgets = {
             'booking': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',
-                attrs={
-                    'disabled': 'true'}),
+                url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
                 url='servicepackage-autocomplete',
                 forward=['provider', 'search_location'],
@@ -657,9 +643,7 @@ class BookingAllotmentForm(forms.ModelForm, MailForm, ServiceForm):
         fields = '__all__'
         widgets = {
             'booking': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',
-                attrs={
-                    'disabled': 'true'}),
+                url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
                 url='serviceallotment-autocomplete',
                 forward=['provider', 'search_location'],
@@ -693,9 +677,7 @@ class BookingTransferForm(forms.ModelForm, MailForm, ServiceForm):
         fields = ('__all__')
         widgets = {
             'booking': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',
-                attrs={
-                    'disabled': 'true'}),
+                url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
                 url='servicetransfer-autocomplete',
                 forward=['provider', 'search_location', 'location_from', 'location_to'],
@@ -747,9 +729,7 @@ class BookingExtraForm(forms.ModelForm, MailForm, ServiceForm):
         fields = ('__all__')
         widgets = {
             'booking': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',
-                attrs={
-                    'disabled': 'true'}),
+                url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
                 url='serviceextra-autocomplete',
                 forward=['provider', 'search_location'],
@@ -788,9 +768,7 @@ class BookingPackageForm(forms.ModelForm, MailForm, ServiceForm):
         fields = '__all__'
         widgets = {
             'booking': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',
-                attrs={
-                    'disabled': 'true'}),
+                url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
                 url='servicepackage-autocomplete',
                 forward=['provider', 'search_location'],
@@ -812,9 +790,7 @@ class BookingPackageAllotmentForm(forms.ModelForm, MailForm, ServiceForm):
         fields = '__all__'
         widgets = {
             'booking_package': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',
-                attrs={
-                    'disabled': 'true'}),
+                url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
                 url='serviceallotment-autocomplete',
                 forward=['provider', 'search_location'],
@@ -844,9 +820,7 @@ class BookingPackageTransferForm(forms.ModelForm, MailForm, ServiceForm):
         fields = ('__all__')
         widgets = {
             'booking_package': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',
-                attrs={
-                    'disabled': 'true'}),
+                url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
                 url='servicetransfer-autocomplete',
                 forward=['provider', 'search_location', 'location_from', 'location_to'],
@@ -895,9 +869,7 @@ class BookingPackageExtraForm(forms.ModelForm, MailForm, ServiceForm):
         fields = ('__all__')
         widgets = {
             'booking_package': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',
-                attrs={
-                    'disabled': 'true'}),
+                url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
                 url='serviceextra-autocomplete',
                 forward=['provider', 'search_location'],

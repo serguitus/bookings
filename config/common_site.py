@@ -60,7 +60,8 @@ from config.top_filters import (
     AllotmentTopFilter, TransferTopFilter, ExtraTopFilter,
     LocationForProviderTransferTopFilter, ExtraLocationForProviderTransferTopFilter,
     LocationForAgencyTransferTopFilter, ExtraLocationForAgencyTransferTopFilter,
-    DateToTopFilter)
+    DateToTopFilter, AgencyTransferLocationTopFilter,
+)
 from config.views import render_prices_pdf
 
 from finance.top_filters import ProviderTopFilter, AgencyTopFilter
@@ -481,7 +482,9 @@ class TransferSiteModel(BaseServiceSiteModel):
         ('child_discount_percent', 'child_age', 'infant_age'), 'enabled',)
     list_display = ('name', 'cost_type', 'max_capacity', 'is_shared', 'is_ticket', 'enabled',
                     'infant_age', 'child_age')
-    top_filters = ('name', ('service_category', ServiceCategoryTopFilter), 'is_shared', 'enabled',)
+    top_filters = (
+        'name', ('service_category', ServiceCategoryTopFilter), 'is_shared', 'enabled',
+        AgencyTransferLocationTopFilter)
     ordering = ['enabled', 'name']
     inlines = [ServiceAddonInline]
     actions = ['export_prices']
@@ -541,6 +544,11 @@ class ProviderAllotmentDetailInline(CommonStackedInline):
     ordering = ['id', 'room_type', 'board_type']
     form = ProviderAllotmentDetailInlineForm
 
+    def get_queryset(self, request):
+        qs = super(ProviderAllotmentDetailInline, self).get_queryset(request)
+        qs.select_related('room_type', 'addon')
+        return qs
+
 
 class ProviderAllotmentServiceSiteModel(SiteModel):
     model_order = 7220
@@ -583,6 +591,11 @@ class ProviderTransferDetailInline(CommonTabularInline):
     ordering = ['p_location_from', 'p_location_to']
     form = ProviderTransferDetailInlineForm
 
+    def get_queryset(self, request):
+        qs = super(ProviderTransferDetailInline, self).get_queryset(request)
+        qs.select_related('p_location_from', 'p_location_to', 'addon')
+        return qs
+
 
 class ProviderTransferServiceSiteModel(SiteModel):
     model_order = 7230
@@ -621,6 +634,11 @@ class ProviderExtraDetailInline(CommonTabularInline):
         ('addon','ad_1_amount'))
     ordering = ['addon', 'pax_range_min', 'id']
     form = ProviderExtraDetailInlineForm
+
+    def get_queryset(self, request):
+        qs = super(ProviderExtraDetailInline, self).get_queryset(request)
+        qs.select_related('addon')
+        return qs
 
 
 class ProviderExtraServiceSiteModel(SiteModel):
@@ -666,6 +684,11 @@ class AgencyAllotmentDetailInline(CommonStackedInline):
     ordering = ['room_type', 'board_type']
     form = AgencyAllotmentDetailInlineForm
 
+    def get_queryset(self, request):
+        qs = super(AgencyAllotmentDetailInline, self).get_queryset(request)
+        qs.select_related('room_type', 'addon')
+        return qs
+
 
 class AgencyAllotmentServiceSiteModel(SiteModel):
     model_order = 7120
@@ -694,6 +717,11 @@ class AgencyTransferDetailInline(CommonTabularInline):
     ordering = ['a_location_from', 'a_location_to']
     form = AgencyTransferDetailInlineForm
 
+    def get_queryset(self, request):
+        qs = super(AgencyTransferDetailInline, self).get_queryset(request)
+        qs.select_related('a_location_from', 'a_location_to', 'addon')
+        return qs
+
 
 class AgencyTransferServiceSiteModel(SiteModel):
     model_order = 7130
@@ -720,6 +748,11 @@ class AgencyExtraDetailInline(CommonTabularInline):
         ('addon', 'ad_1_amount'), )
     ordering = ['addon', 'pax_range_min', 'pax_range_max']
     form = AgencyExtraDetailInlineForm
+
+    def get_queryset(self, request):
+        qs = super(AgencyExtraDetailInline, self).get_queryset(request)
+        qs.select_related('addon')
+        return qs
 
 
 class AgencyExtraServiceSiteModel(SiteModel):
