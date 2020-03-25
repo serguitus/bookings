@@ -824,6 +824,7 @@ class AgencyPaymentSiteModel(AgencyCreditDocumentSiteModel):
     top_filters = ('account', 'agency', 'status', 'date')
     list_details_template = 'finance/agencypayment_details.html'
     change_details_template = 'finance/agencypayment_details.html'
+    match_list_per_page = 200
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
