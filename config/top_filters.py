@@ -1,10 +1,10 @@
 from datetime import date, timedelta
 
-from django.db.models import Q
+from django.db.models import F, Q
 
 from common import filters
 
-from config.models import Location, Transfer
+from config.models import Location, Transfer, Provider
 
 
 class RoomTypeTopFilter(filters.ForeignKeyFilter):
@@ -38,7 +38,7 @@ class TransferTopFilter(filters.ForeignKeyFilter):
 
 
 class ProviderDetailTransferTopFilter(filters.ForeignKeyFilter):
-    filter_field_path = 'provider_service'
+    filter_field_path = 'provider_service__service'
     filter_title = 'Select Transfers'
     filter_queryset = Transfer.objects.all()
     autocomplete_url = 'transfer-autocomplete'
@@ -51,6 +51,20 @@ class ProviderDetailTransferTopFilter(filters.ForeignKeyFilter):
                 Q(provider_service__service__in=search_option))
         return queryset
 
+
+class TransferDetailProviderTopFilter(filters.ForeignKeyFilter):
+    filter_field_path = 'provider_service__provider'
+    filter_title = 'Select Providers'
+    filter_queryset = Provider.objects.all()
+    autocomplete_url = 'provider-autocomplete'
+
+    def queryset(self, request, queryset):
+        search_option = self._values[0]
+        if search_option and search_option != []:
+            queryset = queryset.distinct()
+            queryset = queryset.filter(
+                Q(provider_service__provider__in=search_option))
+        return queryset
 
 
 class ExtraTopFilter(filters.ForeignKeyFilter):
@@ -68,9 +82,19 @@ class ProviderTransferDetailLocationTopFilter(filters.ForeignKeyFilter):
         search_option = self._values[0]
         if search_option and search_option != []:
             queryset = queryset.distinct()
-            queryset = queryset.filter(
-                Q(p_location_from__in=search_option) &
-                Q(p_location_to__in=search_option))
+            if len(search_option) == 1:
+                queryset = queryset.filter(
+                    Q(p_location_from=search_option[0]) |
+                    Q(p_location_to=search_option[0]))
+            else:
+                queryset = queryset.filter(
+                    (
+                        Q(p_location_from__in=search_option) &
+                        Q(p_location_to__in=search_option) &
+                        ~Q(p_location_from=F('p_location_to'))
+                    )
+                )
+
         return queryset
 
 
@@ -140,20 +164,3 @@ class AgencyTransferLocationAdditionalTopFilter(filters.ForeignKeyFilter):
 
 class DateToTopFilter(filters.DateFilter):
     default_value = [date.today() - timedelta(days=30), None]
-
-
-class AgencyTransferLocationTopFilter(filters.ForeignKeyFilter):
-    filter_field_path = 'loc2'
-    filter_title = 'Agency Location From / To'
-    filter_queryset = Location.objects.all()
-    autocomplete_url = 'location-autocomplete'
-
-    def queryset(self, request, queryset):
-        search_option = self._values[0]
-        if search_option and search_option != []:
-            queryset = queryset.distinct()
-            for option in search_option:
-                queryset = queryset.filter(
-                    Q(agencytransferservice__agencytransferdetail__a_location_from=option,) |
-                    Q(agencytransferservice__agencytransferdetail__a_location_to=option))
-        return queryset

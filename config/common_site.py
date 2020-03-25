@@ -62,7 +62,8 @@ from config.top_filters import (
     ProviderTransferLocationTopFilter, ProviderTransferLocationAdditionalTopFilter,
     AgencyTransferLocationTopFilter, AgencyTransferLocationAdditionalTopFilter,
     DateToTopFilter, AgencyTransferLocationTopFilter,
-    ProviderDetailTransferTopFilter, ProviderTransferDetailLocationTopFilter,
+    ProviderDetailTransferTopFilter,
+    ProviderTransferDetailLocationTopFilter, TransferDetailProviderTopFilter,
 )
 from config.views import render_prices_pdf
 
@@ -603,6 +604,7 @@ class ProviderTransferDetailSiteModel(SiteModel):
     model_order = 7230
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Provider Catalogue'
+    readonly_model = True
     fields = (
         ('p_location_from', 'p_location_to', 'addon'),
         ('pax_range_min', 'pax_range_max'),
@@ -614,8 +616,8 @@ class ProviderTransferDetailSiteModel(SiteModel):
         'pax_range_min', 'pax_range_max',
         'cost_type', 'ad_1_amount', 'ch_1_ad_1_amount')
     top_filters = (
-        ProviderDetailTransferTopFilter, ('provider_service__date_to', DateFilter),
-        ProviderTransferDetailLocationTopFilter)
+        ProviderTransferDetailLocationTopFilter,
+        ProviderDetailTransferTopFilter, TransferDetailProviderTopFilter, ('provider_service__date_to', DateFilter))
     ordering = [
         'p_location_from', 'p_location_to',
         'provider_service__service', 'pax_range_max', 'ad_1_amount',]
