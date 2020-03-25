@@ -33,7 +33,7 @@ from booking.models import (
 
 from common.filters import parse_date
 
-from config.constants import AMOUNTS_FIXED
+from config.constants import AMOUNTS_FIXED, SERVICE_CATEGORY_PACKAGE
 from config.models import ProviderAllotmentDetail, ProviderTransferDetail, ProviderExtraDetail
 from config.services import ConfigServices
 from config.views import (
@@ -4946,11 +4946,15 @@ class BookingServices(object):
         booking_services = list()
         if db_payment.status == STATUS_DRAFT:
             booking_services = BaseBookingService.objects.filter(
-                provider=db_payment.provider).exclude(
-                    cost_amount_to_pay=F('cost_amount_paid')).exclude(
-                        providerbookingpaymentservice__provider_payment=db_payment
-                    ).order_by(
-                        'datetime_from', 'time', 'datetime_to')
+                provider=db_payment.provider
+            ).exclude(
+                base_service__category=SERVICE_CATEGORY_PACKAGE
+            ).exclude(
+                cost_amount_to_pay=F('cost_amount_paid')
+            ).exclude(
+                providerbookingpaymentservice__provider_payment=db_payment
+            ).order_by(
+                'datetime_from', 'time', 'datetime_to')
 
             booking_ref_filter = request.POST.get('booking_ref_filter')
             if booking_ref_filter:
