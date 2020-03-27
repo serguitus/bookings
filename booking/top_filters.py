@@ -55,11 +55,13 @@ class PaidTopFilter(filters.BooleanFilter):
     def queryset(self, request, queryset):
         search_option = self._values[0]
         if search_option == "True":
-            queryset = queryset.filter(cost_amount_to_pay__gt=0)
+            queryset = queryset.exclude(cost_amount_to_pay=0)
             queryset = queryset.filter(cost_amount_to_pay=F('cost_amount_paid'))
         if search_option == "False":
-            queryset = queryset.filter(cost_amount_to_pay__gt=0)
-            queryset = queryset.exclude(cost_amount_to_pay=F('cost_amount_paid'))
+            queryset = queryset.filter(
+                Q(cost_amount_to_pay=0)
+                |
+                ~Q(cost_amount_to_pay=F('cost_amount_paid')))
 
         queryset = queryset.distinct()
         return queryset
