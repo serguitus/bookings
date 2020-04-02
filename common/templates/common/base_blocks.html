@@ -30,22 +30,24 @@
         {% block navbar %}
         {% endblock navbar %}
     {% endif %}
-    <div id="main_container" class="collapse in">
-        {% if not is_popup %}
-            {% block leftbar %}
-            {% endblock leftbar %}
-        {% endif %}
-        <div id="page_container" {% if is_popup %}class="popup"{% endif %}>
+    <div id="main_container" class="container-fluid">
+        <div class="row collapse show d-flex leftbar-collapse">
             {% if not is_popup %}
-                <button id="btn_left_collapse" type="button" class="btn btn-default btn-xs left-bg-color" data-toggle="collapse" data-target="#main_container">
-                    <span class="glyphicon"></span>
-                </button>
+                {% block leftbar %}
+                {% endblock leftbar %}
             {% endif %}
-            <div id="page_content_container">
-                {% block messages %}
-                {% endblock messages %}
-                {% block content %}
-                {% endblock content %}
+            <div id="page_container" class="col bd-content {% if is_popup %}popup"{% endif %}">
+                {% if not is_popup %}
+                    <button id="btn_left_collapse" type="button" href="#" class="btn btn-sm left-bg-color" data-toggle="collapse" data-target="#leftbar_container">
+                        <span class="fa fa-arrow-left"></span>
+                    </button>
+                {% endif %}
+                <div id="page_content_container">
+                    {% block messages %}
+                    {% endblock messages %}
+                    {% block content %}
+                    {% endblock content %}
+                </div>
             </div>
         </div>
     </div>

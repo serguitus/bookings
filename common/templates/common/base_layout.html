@@ -7,76 +7,82 @@
 {% endblock head_title %}
 
 {% block navbar %}
-    <nav class="navbar navbar-default navbar-fixed-top">
+    <nav class="navbar navbar-default navbar-dark navbar-expand-lg flex-column flex-md-row bd-navbar">
         <div class="container-fluid">
-            <div class="navbar-header">
+            <div class="navbar-brand">
                 {% block header_logo %}
                 {% endblock header_logo %}
             </div>
             {% block header_app_menu %}
-                <ul class="nav navbar-nav">
-                    <li>
-                        {% url site_namespace|add:':index' as index_url %}
-                        <a href="{{ index_url }}">
-                            <span class="glyphicon glyphicon-home" />
-                        </a>
-                    </li>
-                    {% if app_list %}
-                        {% for menu in app_list %}
-                            {% if menu.model_list %}
-                                <li class="dropdown">
-                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                                        {{ menu.label }}<span class="caret"></span>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div id="navbarSupportedContent" class="collapse navbar-collapse">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item">
+                            {% url site_namespace|add:':index' as index_url %}
+                            <a href="{{ index_url }}" class="nav-link">
+                                <span class="fa fa-home" />
+                            </a>
+                        </li>
+                        {% if app_list %}
+                            {% for menu in app_list %}
+                                {% if menu.model_list %}
+                                    <li class="nav-item dropdown">
+                                        <a class="dropdown-toggle nav-link" data-toggle="dropdown" href="#">
+                                            {{ menu.label }}<span class="caret"></span>
                                         </a>
-                                    <ul class="dropdown-menu" role="menu">
-                                        {% setvar '' as prev_group %}
-                                        {% for model in menu.model_list %}
-                                            {% if model.group and model.group != prev_group %}
-                                                {% if prev_group != '' %}
-                                                    <li  class='divider'></li>
+                                        <ul class="dropdown-menu" role="menu">
+                                            {% setvar '' as prev_group %}
+                                            {% for model in menu.model_list %}
+                                                {% if model.group and model.group != prev_group %}
+                                                    {% if prev_group != '' %}
+                                                        <li  class='divider'></li>
+                                                    {% endif %}
+                                                    <li  class="dropdown-header">{{ model.group }}</li>
+                                                    {% setvar model.group as prev_group %}
                                                 {% endif %}
-                                                <li  class="dropdown-header">{{ model.group }}</li>
-                                                {% setvar model.group as prev_group %}
-                                            {% endif %}
-                                            {% setvar 'common/img/icon-model-'|add:model.app_label|add:model.name|add:'.png' as static_icon_url %}
-                                            <li  style='background-image: url("{% static static_icon_url %}")'>
-                                                <a role="menuitem" href="{{ model.index_url }}">{{ model.label }}</a>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
-                </ul>
+                                                {% setvar 'common/img/icon-model-'|add:model.app_label|add:model.name|add:'.png' as static_icon_url %}
+                                                <li  style='background-image: url("{% static static_icon_url %}")'>
+                                                    <a role="menuitem" href="{{ model.index_url }}">{{ model.label }}</a>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </ul>
             {% endblock header_app_menu %}
             {% block header_user_menu %}
-                <ul class="nav navbar-nav navbar-right">
-                    {% block welcome-msg %}
-                        <span class="navbar-brand">
-                            <strong>{% firstof user.get_short_name user.get_username %}</strong>
-                        </span>
-                    {% endblock welcome-msg %}
+                {% block welcome-msg %}
+                    <span class="navbar-text navbar-brand">
+                        <strong>{% firstof user.get_short_name user.get_username %}</strong>
+                    </span>
+                {% endblock welcome-msg %}
+                <ul class="navbar-nav navbar-right">
                     {% block userlinks %}
                         {% if user.has_usable_password %}
-                            <li>
+                            <li class="nav-item">
                                 {% url site_namespace|add:':password_change' as password_change_url %}
-                                <a href="{{ password_change_url }}">{% trans 'Change password' %}</a>
+                                <a class="nav-link" href="{{ password_change_url }}">{% trans 'Change password' %}</a>
                             </li>
                         {% endif %}
-                        <li>
+                        <li class="nav-item">
                             {% url site_namespace|add:':logout' as logout_url %}
-                            <a href="{{ logout_url }}">{% trans 'Log out' %}</a>
+                            <a class="nav-link" href="{{ logout_url }}">{% trans 'Log out' %}</a>
                         </li>
                     {% endblock userlinks %}
                 </ul>
             {% endblock header_user_menu %}
+                </div>
         </div>
     </nav>
 {% endblock navbar %}
 
 {% block leftbar %}
-    <div id="leftbar_container" class="left-bg-color">
+    <div id="leftbar_container" class="left-bg-color col-sm-2 col-md-3 col-lg-2 collapse show sidebar">
+        <div class="left-bg-color">
         {% if module_name and current_model_actions %}
             {% block model_actions %}
                 <div class="module">
@@ -105,6 +111,7 @@
                 {% endif %}
             </div>
         {% endblock recent_links %}
+        </div>
     </div>
 {% endblock leftbar %}
 
