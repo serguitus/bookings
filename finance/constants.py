@@ -58,9 +58,9 @@ DOC_TYPES = (
 )
 
 BOOTSTRAP_STYLE_FINANCE_DOCUMENT_STATUS_MAPPING = {
-    STATUS_CANCELLED: 'active',
-    STATUS_DRAFT: 'warning',
-    STATUS_READY: 'success',
+    STATUS_CANCELLED: 'table-active',
+    STATUS_DRAFT: 'table-warning',
+    STATUS_READY: 'table-success',
 }
 
 ERROR_INVALID_MATCH = 'Invalid total matching (%s)'
