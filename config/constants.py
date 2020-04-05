@@ -13,10 +13,10 @@ SERVICE_CATEGORIES = (
     (SERVICE_CATEGORY_PACKAGE, 'Package'),
 )
 
-SERVICE_DETAIL_CATEGORIES = {
-    SERVICE_CATEGORY_ALLOTMENT: 'servicedetailallotment',
-    SERVICE_CATEGORY_TRANSFER: 'servicedetailtransfer',
-    SERVICE_CATEGORY_EXTRA: 'servicedetailextra',
+SERVICE_BOOK_DETAIL_CATEGORIES = {
+    SERVICE_CATEGORY_ALLOTMENT: 'servicebookdetailallotment',
+    SERVICE_CATEGORY_TRANSFER: 'servicebookdetailtransfer',
+    SERVICE_CATEGORY_EXTRA: 'servicebookdetailextra',
 }
 
 AMOUNTS_FIXED = 'F'

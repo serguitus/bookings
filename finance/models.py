@@ -72,10 +72,10 @@ class FinantialDocument(models.Model):
     def fill_data(self):
         raise ValidationError('Finantial Document can not be saved')
 
-    def save(self, *args, **kwargs):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.fill_data()
         # Call the "real" save() method.
-        super(FinantialDocument, self).save(*args, **kwargs)
+        super(FinantialDocument, self).save(force_insert, force_update, using, update_fields)
 
     def delete(self, using=None, keep_parents=False):
         raise ValidationError(
@@ -154,10 +154,10 @@ class Withdraw(FinantialDocument, AccountingDocument):
         self.name = '%s - Withdraw from %s of %s %s ' % (
             self.date, account, self.amount, account.get_currency_display())
 
-    def save(self, *args, **kwargs):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.fill_data()
         # Call the "real" save() method.
-        super(Withdraw, self).save(*args, **kwargs)
+        super(Withdraw, self).save(force_insert, force_update, using, update_fields)
 
 
 class CurrencyExchange(FinantialDocument, AccountingDocument):
@@ -1147,8 +1147,7 @@ class ProviderInvoice(ProviderDebitDocument):
         self.name = '%s - Provider Invoice from %s for %s %s' % (
             self.date, provider, self.amount, self.get_currency_display())
 
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.fill_data()
         # Call the real save() method
         super(ProviderInvoice, self).save(force_insert, force_update, using, update_fields)

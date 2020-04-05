@@ -1,0 +1,8 @@
+{% load config_tags %}
+{% load render_table from django_tables2 %}
+
+{% servicebookdetail_table current as table %}
+{% include 'config/include/service_book_details_buttons.html' %}
+<div class="servicebookdetails-container">
+    {% render_table table %}
+</div>

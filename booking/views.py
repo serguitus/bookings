@@ -445,6 +445,11 @@ class BookingExtraAmountsView(BookingServiceAmountsView):
     common_sitemodel = BookingExtraSiteModel
 
 
+class BookingExtraComponentAmountsView(BookingServiceAmountsView):
+    model = BookingExtra
+    common_sitemodel = BookingExtraSiteModel
+
+
 class BookingPackageAmountsView(BookingServiceAmountsView):
     model = BookingPackage
     common_sitemodel = BookingPackageSiteModel
@@ -1209,4 +1214,58 @@ class TransferServiceDetailsView(View):
             'service_id': service_id,
             'has_place_from': has_place_from,
             'has_place_to': has_place_to,
+        })
+
+
+class QuoteServiceBookDetailURLView(View):
+    def post(self, request, *args, **kwargs):
+        parent_id = request.POST.get('parent_id', None)
+        service_id = request.POST.get('service', None)
+        if parent_id and service_id:
+            parent = QuoteService.objects.get(id=parent_id)
+            service = Service.objects.get(id=service_id)
+            if service.category == 'A':
+                return JsonResponse({
+                    'url': 'booking/quoteservicebookdetailallotment/add/?quote_service=%s&book_service=%s'
+                        % (parent_id, service_id),
+                })
+            elif service.category == 'T':
+                return JsonResponse({
+                    'url': 'booking/quoteservicebookdetailtransfer/add/?quote_service=%s&book_service=%s'
+                        % (parent_id, service_id),
+                })
+            elif service.category == 'E':
+                return JsonResponse({
+                    'url': 'booking/quoteservicebookdetailextra/add/?quote_service=%s&book_service=%s'
+                        % (parent_id, service_id),
+                })
+        return JsonResponse({
+            'error': 'Empty value Current: %s - Detail: %s' % (parent_id, service_id),
+        })
+
+
+
+class BookingServiceBookDetailURLView(View):
+    def post(self, request, *args, **kwargs):
+        parent_id = request.POST.get('parent_id', None)
+        service_id = request.POST.get('service', None)
+        if parent_id and service_id:
+            service = Service.objects.get(id=service_id)
+            if service.category == 'A':
+                return JsonResponse({
+                    'url': 'booking/bookingservicebookdetailallotment/add/?booking_service=%s&book_service=%s'
+                        % (parent_id, service_id),
+                })
+            elif service.category == 'T':
+                return JsonResponse({
+                    'url': 'booking/bookingservicebookdetailtransfer/add/?booking_service=%s&book_service=%s'
+                        % (parent_id, service_id),
+                })
+            elif service.category == 'E':
+                return JsonResponse({
+                    'url': 'booking/bookingservicebookdetailextra/add/?booking_service=%s&book_service=%s'
+                        % (parent_id, service_id),
+                })
+        return JsonResponse({
+            'error': 'Empty value Current: %s - Detail: %s' % (parent_id, service_id),
         })

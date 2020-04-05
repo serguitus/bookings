@@ -78,8 +78,8 @@ class ProviderTransferDetailInlineForm(forms.ModelForm):
     class Meta:
         fields = ('__all__')
         widgets = {
-            'p_location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
-            'p_location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
             'addon': autocomplete.ModelSelect2(
                 url='addon-autocomplete',
                 forward=['service']),
@@ -146,8 +146,8 @@ class AgencyTransferDetailInlineForm(forms.ModelForm):
     class Meta:
         fields = ('__all__')
         widgets = {
-            'a_location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
-            'a_location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
             'addon': autocomplete.ModelSelect2(
                 url='addon-autocomplete',
                 forward=['service']),
@@ -179,14 +179,6 @@ class AllotmentRoomTypeInlineForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'room_type': autocomplete.ModelSelect2(url='roomtype-autocomplete'),
-        }
-
-
-class ExtraAddonInlineForm(forms.ModelForm):
-    class Meta:
-        fields = ('__all__')
-        widgets = {
-            'addon': autocomplete.ModelSelect2(url='addon-autocomplete'),
         }
 
 
@@ -236,7 +228,7 @@ class ServiceForm(forms.ModelForm):
     )
 
 
-class BaseServiceDetailForm(forms.Form):
+class BaseBookDataForm(forms.Form):
     search_location = forms.ModelChoiceField(
         queryset=Location.objects.all(),
         empty_label='',
@@ -248,94 +240,94 @@ class BaseServiceDetailForm(forms.Form):
     )
 
 
-class ServiceDetailForm(forms.ModelForm, BaseServiceDetailForm):
+class ServiceBookDetailForm(forms.ModelForm, BaseBookDataForm):
     class Meta:
         fields = ('__all__')
         widgets = {
             'service': autocomplete.ModelSelect2(
-                url='service-autocomplete',
+                url='disabled-autocomplete',
                 ),
-            'base_detail_service': autocomplete.ModelSelect2(
+            'base_service': autocomplete.ModelSelect2(
                 url='service-autocomplete',
                 forward=['search_location'],
                 ),
         }
 
 
-class ServiceDetailAllotmentForm(forms.ModelForm, BaseServiceDetailForm):
+class ServiceBookDetailAllotmentForm(forms.ModelForm, BaseBookDataForm):
     class Meta:
         fields = ('__all__')
         widgets = {
             'service': autocomplete.ModelSelect2(
-                url='service-autocomplete',
+                url='disabled-autocomplete',
                 ),
-            'detail_service': autocomplete.ModelSelect2(
+            'book_service': autocomplete.ModelSelect2(
                 url='serviceallotment-autocomplete',
                 forward=['search_location'],
                 ),
             'room_type': autocomplete.ModelSelect2(
                 url='roomtype-autocomplete',
-                forward=['detail_service'],
+                forward=['book_service'],
                 ),
             'board_type': autocomplete.ListSelect2(
                 url='boardtype-autocomplete',
-                forward=['detail_service']),
-            'addon': autocomplete.ModelSelect2(
+                forward=['book_service']),
+            'service_addon': autocomplete.ModelSelect2(
                 url='addon-autocomplete',
-                forward=['detail_service'],
+                forward=['book_service'],
                 ),
         }
 
 
-class ServiceDetailTransferForm(forms.ModelForm, BaseServiceDetailForm):
+class ServiceBookDetailTransferForm(forms.ModelForm, BaseBookDataForm):
     class Meta:
         fields = ('__all__')
         widgets = {
             'service': autocomplete.ModelSelect2(
-                url='service-autocomplete',
+                url='disabled-autocomplete',
                 ),
-            'detail_service': autocomplete.ModelSelect2(
+            'book_service': autocomplete.ModelSelect2(
                 url='servicetransfer-autocomplete',
                 forward=['search_location', 'location_from', 'location_to'],
                 ),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
-            'addon': autocomplete.ModelSelect2(
+            'service_addon': autocomplete.ModelSelect2(
                 url='addon-autocomplete',
-                forward=['service'],
+                forward=['book_service'],
                 ),
         }
 
 
-class ServiceDetailExtraForm(forms.ModelForm, BaseServiceDetailForm):
+class ServiceBookDetailExtraForm(forms.ModelForm, BaseBookDataForm):
     class Meta:
         fields = ('__all__')
         widgets = {
             'service': autocomplete.ModelSelect2(
-                url='service-autocomplete',
+                url='disabled-autocomplete',
                 ),
-            'detail_service': autocomplete.ModelSelect2(
+            'book_service': autocomplete.ModelSelect2(
                 url='serviceextra-autocomplete',
                 forward=['search_location'],
                 ),
-            'addon': autocomplete.ModelSelect2(
+            'service_addon': autocomplete.ModelSelect2(
                 url='addon-autocomplete',
-                forward=['service'],
+                forward=['book_service'],
                 ),
             'pickup_office': autocomplete.ModelSelect2(
                 url='carrentaloffice-autocomplete',
-                forward=['service',],
+                forward=['book_service',],
                 ),
             'dropoff_office': autocomplete.ModelSelect2(
                 url='carrentaloffice-autocomplete',
-                forward=['service',],
+                forward=['book_service',],
                 ),
         }
 
 
 class SearchServiceForm(forms.Form):
     parent_id = forms.IntegerField(widget=forms.HiddenInput())
-    search_location = forms.ModelChoiceField(
+    search_service_location = forms.ModelChoiceField(
         queryset=Location.objects.all(),
         empty_label='',
         required=False,
@@ -350,7 +342,7 @@ class SearchServiceForm(forms.Form):
         required=True,
         widget=autocomplete.ModelSelect2(
             url='service-autocomplete',
-            forward=['current_service_id', 'search_location',],
+            forward=['current_service_id', 'search_service_location',],
         ),
         label='Service',
     )

@@ -84,14 +84,14 @@ class ProviderTransferDetailLocationTopFilter(filters.ForeignKeyFilter):
             queryset = queryset.distinct()
             if len(search_option) == 1:
                 queryset = queryset.filter(
-                    Q(p_location_from=search_option[0]) |
-                    Q(p_location_to=search_option[0]))
+                    Q(location_from=search_option[0]) |
+                    Q(location_to=search_option[0]))
             else:
                 queryset = queryset.filter(
                     (
-                        Q(p_location_from__in=search_option) &
-                        Q(p_location_to__in=search_option) &
-                        ~Q(p_location_from=F('p_location_to'))
+                        Q(location_from__in=search_option) &
+                        Q(location_to__in=search_option) &
+                        ~Q(location_from=F('location_to'))
                     )
                 )
 
@@ -109,8 +109,8 @@ class ProviderTransferLocationTopFilter(filters.ForeignKeyFilter):
         if search_option and search_option != []:
             queryset = queryset.distinct()
             queryset = queryset.filter(
-                Q(providertransferdetail__p_location_from__in=search_option) |
-                Q(providertransferdetail__p_location_to__in=search_option))
+                Q(providertransferdetail__location_from__in=search_option) |
+                Q(providertransferdetail__location_to__in=search_option))
         return queryset
 
 
@@ -125,8 +125,8 @@ class ProviderTransferLocationAdditionalTopFilter(filters.ForeignKeyFilter):
         if search_option and search_option != []:
             queryset = queryset.distinct()
             queryset = queryset.filter(
-                Q(providertransferdetail__p_location_from__in=search_option) |
-                Q(providertransferdetail__p_location_to__in=search_option))
+                Q(providertransferdetail__location_from__in=search_option) |
+                Q(providertransferdetail__location_to__in=search_option))
         return queryset
 
 
@@ -141,8 +141,8 @@ class AgencyTransferLocationTopFilter(filters.ForeignKeyFilter):
         if search_option and search_option != []:
             queryset = queryset.distinct()
             queryset = queryset.filter(
-                Q(agencytransferdetail__a_location_from__in=search_option) |
-                Q(agencytransferdetail__a_location_to__in=search_option))
+                Q(agencytransferdetail__location_from__in=search_option) |
+                Q(agencytransferdetail__location_to__in=search_option))
         return queryset
 
 
@@ -157,8 +157,8 @@ class AgencyTransferLocationAdditionalTopFilter(filters.ForeignKeyFilter):
         if search_option and search_option != []:
             queryset = queryset.distinct()
             queryset = queryset.filter(
-                Q(agencytransferdetail__a_location_from__in=search_option) |
-                Q(agencytransferdetail__a_location_to__in=search_option))
+                Q(agencytransferdetail__location_from__in=search_option) |
+                Q(agencytransferdetail__location_to__in=search_option))
         return queryset
 
 

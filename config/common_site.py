@@ -32,20 +32,21 @@ from config.forms import (
     AgencyAllotmentServiceForm, AgencyTransferServiceForm, AgencyExtraServiceForm,
     AgencyAllotmentDetailInlineForm, AgencyTransferDetailInlineForm,
     AgencyExtraDetailInlineForm,
-    AllotmentRoomTypeInlineForm, ExtraAddonInlineForm, ExtraComponentInlineForm, TransferZoneForm,
+    AllotmentRoomTypeInlineForm, ExtraComponentInlineForm, TransferZoneForm,
     LocationTransferIntervalInlineForm, ServiceAddonInlineForm, TransferPickupTimeInlineForm,
     PricesExportForm, ExtraForm,
-    ServiceForm, ServiceDetailForm,
-    ServiceDetailAllotmentForm, ServiceDetailTransferForm, ServiceDetailExtraForm, 
+    ServiceForm, ServiceBookDetailForm,
+    ServiceBookDetailAllotmentForm, ServiceBookDetailTransferForm, ServiceBookDetailExtraForm, 
     SearchServiceForm,
 )
 from config.models import (
     ServiceCategory, Location, Place, TransferInterval, Schedule,
     TransferZone, TransferPickupTime, AllotmentTransferZone, RoomType, Addon,
-    Service, ServiceDetail, ServiceDetailAllotment, ServiceDetailTransfer, ServiceDetailExtra,
+    Service,
+    ServiceBookDetailAllotment, ServiceBookDetailTransfer, ServiceBookDetailExtra,
     Allotment, AllotmentRoomType, AllotmentBoardType, AllotmentSupplement,
     Transfer, TransferSupplement,
-    Extra, ExtraAddon, ExtraSupplement, ExtraComponent,
+    Extra, ExtraSupplement, ExtraComponent,
     AgencyAllotmentService, AgencyAllotmentDetail,
     AgencyTransferService, AgencyTransferDetail,
     AgencyExtraService, AgencyExtraDetail,
@@ -179,7 +180,7 @@ class ServiceChangeList(CommonChangeList):
             current_app=self.model_admin.admin_site.name)
 
 
-class BaseServiceDetailSiteModel(SiteModel):
+class BaseServiceBookDetailSiteModel(SiteModel):
     def response_post_delete(self, request, obj):
         if hasattr(obj, 'service') and obj.service:
             if obj.service.category == 'A':
@@ -197,7 +198,7 @@ class BaseServiceDetailSiteModel(SiteModel):
                 return redirect(reverse('common:config_transfer_change', args=[service.pk]))
             elif service.category == 'E':
                 return redirect(reverse('common:config_extra_change', args=[service.pk]))
-        return super(BaseServiceDetailSiteModel, self).response_post_delete(request, obj)
+        return super(BaseServiceBookDetailSiteModel, self).response_post_delete(request, obj)
 
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'service') and obj.service:
@@ -216,7 +217,7 @@ class BaseServiceDetailSiteModel(SiteModel):
                 return redirect(reverse('common:config_transfer_change', args=[service.pk]))
             elif service.category == 'E':
                 return redirect(reverse('common:config_extra_change', args=[service.pk]))
-        return super(BaseServiceDetailSiteModel, self).response_post_save_add(request, obj)
+        return super(BaseServiceBookDetailSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
         if hasattr(obj, 'service') and obj.service:
@@ -235,35 +236,35 @@ class BaseServiceDetailSiteModel(SiteModel):
                 return redirect(reverse('common:config_transfer_change', args=[service.pk]))
             elif service.category == 'E':
                 return redirect(reverse('common:config_extra_change', args=[service.pk]))
-        return super(BaseServiceDetailSiteModel, self).response_post_save_change(request, obj)
+        return super(BaseServiceBookDetailSiteModel, self).response_post_save_change(request, obj)
 
 
-
-class ServiceDetailAllotmentSiteModel(BaseServiceDetailSiteModel):
+class ServiceBookDetailAllotmentSiteModel(BaseServiceBookDetailSiteModel):
     #model_order = 6150
     #menu_label = MENU_LABEL_CONFIG_BASIC
     #menu_group = 'Configuration Services'
     fields = [
         'service',
-        ('detail_service', 'search_location'),
+        ('book_service', 'search_location'),
         ('days_after', 'days_duration'),
         ('room_type', 'board_type'),
         'time',
-        'addon',]
-    list_display = ('service', 'detail_service',
-        'days_after', 'days_duration', 'room_type', 'board_type', 'addon',)
+        'service_addon',]
+    list_display = (
+        'service', 'book_service', 'days_after', 'days_duration',
+        'room_type', 'board_type', 'service_addon',)
     top_filters = ('service',)
     ordering = ['service__name', 'days_after']
-    form = ServiceDetailAllotmentForm
+    form = ServiceBookDetailAllotmentForm
 
 
-class ServiceDetailTransferSiteModel(BaseServiceDetailSiteModel):
+class ServiceBookDetailTransferSiteModel(BaseServiceBookDetailSiteModel):
     #model_order = 6160
     #menu_label = MENU_LABEL_CONFIG_BASIC
     #menu_group = 'Configuration Services'
     fields = [
         'service',
-        ('detail_service', 'search_location'),
+        ('book_service', 'search_location'),
         ('days_after', 'days_duration'),
         ('location_from', 'location_to'),
         ('pickup', 'dropoff'),
@@ -271,38 +272,39 @@ class ServiceDetailTransferSiteModel(BaseServiceDetailSiteModel):
         ('schedule_from', 'schedule_to'),
         ('schedule_time_from', 'schedule_time_to'),
         ('time', 'quantity'),
-        'addon',]
-    list_display = ('service', 'detail_service',
-        'days_after', 'days_duration', 'location_from', 'location_to', 'quantity',  'addon')
+        'service_addon',]
+    list_display = (
+        'service', 'book_service', 'days_after', 'days_duration',
+        'location_from', 'location_to', 'quantity', 'service_addon')
     top_filters = ('service',)
     ordering = ['service__name', 'days_after']
-    form = ServiceDetailTransferForm
+    form = ServiceBookDetailTransferForm
 
 
-class ServiceDetailExtraSiteModel(BaseServiceDetailSiteModel):
+class ServiceBookDetailExtraSiteModel(BaseServiceBookDetailSiteModel):
     #model_order = 6170
     #menu_label = MENU_LABEL_CONFIG_BASIC
     #menu_group = 'Configuration Services'
     fields = [
         'service',
-        ('detail_service', 'search_location'),
+        ('book_service', 'search_location'),
         ('days_after', 'days_duration'),
         ('pickup_office', 'dropoff_office'),
         ('time', 'parameter', 'quantity'),
-        'addon',]
-    list_display = ('service', 'detail_service',
-        'days_after', 'days_duration', 'parameter', 'quantity',
-        'pickup_office', 'dropoff_office', 'addon')
+        'service_addon',]
+    list_display = (
+        'service', 'book_service', 'days_after', 'days_duration',
+        'parameter', 'quantity', 'pickup_office', 'dropoff_office', 'service_addon')
     top_filters = ('service',)
     ordering = ['service__name', 'days_after']
-    form = ServiceDetailExtraForm
+    form = ServiceBookDetailExtraForm
 
 
 class BaseServiceSiteModel(SiteModel):
     change_form_template = 'config/service_change_form.html'
     change_list_template = 'config/service_change_list.html'
-    list_details_template = 'config/service_details.html'
-    change_details_template = 'config/service_details.html'
+    list_details_template = 'config/service_list_details.html'
+    change_details_template = 'config/service_change_details.html'
 
     @csrf_protect_m
     def changelist_view(self, request, extra_context=None):
@@ -494,16 +496,6 @@ class TransferSiteModel(BaseServiceSiteModel):
     form = ServiceForm
 
 
-class ExtraAddonSiteModel(SiteModel):
-    model_order = 8120
-    menu_label = MENU_LABEL_CONFIG_BASIC
-    menu_group = 'Configuration Testing'
-    fields = ('extra', 'addon',)
-    list_display = ('extra', 'addon',)
-    top_filters = ('extra__name', ('addon', AddonTopFilter),)
-    ordering = ['extra__name']
-
-
 class ExtraSupplementInline(CommonTabularInline):
     model = ExtraSupplement
     extra = 0
@@ -546,18 +538,14 @@ class ProviderAllotmentDetailInline(CommonStackedInline):
     )
     ordering = ['id', 'room_type', 'board_type']
     form = ProviderAllotmentDetailInlineForm
-
-    def get_queryset(self, request):
-        qs = super(ProviderAllotmentDetailInline, self).get_queryset(request)
-        qs.select_related('room_type', 'addon')
-        return qs
+    list_select_related = ('room_type', 'addon')
 
 
 class ProviderAllotmentServiceSiteModel(SiteModel):
     model_order = 7220
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Provider Catalogue'
-    recent_allowed = True
+    #recent_allowed = True
     fields = ('provider', 'service', 'date_from', 'date_to',)
     list_display = ('service', 'provider', 'date_from', 'date_to',)
     top_filters = (
@@ -568,6 +556,7 @@ class ProviderAllotmentServiceSiteModel(SiteModel):
     form = ProviderAllotmentServiceForm
     change_form_template = 'config/provider_allotment_change_form.html'
     add_form_template = 'config/provider_allotment_change_form.html'
+    list_select_related = ('service', 'provider')
     save_as = True
 
     actions = ['rewrite_agency_amounts', 'update_agency_amounts']
@@ -587,17 +576,13 @@ class ProviderTransferDetailInline(CommonTabularInline):
     model = ProviderTransferDetail
     extra = 0
     fields = (
-        ('p_location_from', 'p_location_to', 'addon'),
+        ('location_from', 'location_to', 'addon'),
         ('pax_range_min', 'pax_range_max'),
         ('ad_1_amount', 'ch_1_ad_1_amount'),
     )
-    ordering = ['p_location_from', 'p_location_to']
+    ordering = ['location_from', 'location_to']
     form = ProviderTransferDetailInlineForm
-
-    def get_queryset(self, request):
-        qs = super(ProviderTransferDetailInline, self).get_queryset(request)
-        qs.select_related('p_location_from', 'p_location_to', 'addon')
-        return qs
+    list_select_related = ('location_from', 'location_to', 'addon')
 
 
 class ProviderTransferDetailSiteModel(SiteModel):
@@ -606,12 +591,12 @@ class ProviderTransferDetailSiteModel(SiteModel):
     menu_group = 'Provider Catalogue'
     readonly_model = True
     fields = (
-        ('p_location_from', 'p_location_to', 'addon'),
+        ('location_from', 'location_to', 'addon'),
         ('pax_range_min', 'pax_range_max'),
         ('ad_1_amount', 'ch_1_ad_1_amount'),
     )
     list_display = (
-        'p_location_from', 'p_location_to',
+        'location_from', 'location_to',
         'provider_service',
         'pax_range_min', 'pax_range_max',
         'cost_type', 'ad_1_amount', 'ch_1_ad_1_amount')
@@ -619,15 +604,16 @@ class ProviderTransferDetailSiteModel(SiteModel):
         ProviderTransferDetailLocationTopFilter,
         ProviderDetailTransferTopFilter, TransferDetailProviderTopFilter, ('provider_service__date_to', DateFilter))
     ordering = [
-        'p_location_from', 'p_location_to',
+        'location_from', 'location_to',
         'provider_service__service', 'pax_range_max', 'ad_1_amount',]
+    list_select_related = ('location_from', 'location_to', 'addon')
 
 
 class ProviderTransferServiceSiteModel(SiteModel):
     model_order = 7230
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Provider Catalogue'
-    recent_allowed = True
+    #recent_allowed = True
     fields = ('provider', 'service', 'date_from', 'date_to',)
     list_display = ('service', 'provider', 'date_from', 'date_to',)
     top_filters = (
@@ -637,6 +623,7 @@ class ProviderTransferServiceSiteModel(SiteModel):
     inlines = [ProviderTransferDetailInline]
     ordering = ['service', 'provider', '-date_from']
     form = ProviderTransferServiceForm
+    list_select_related = ('service', 'provider')
     save_as = True
 
     actions = ['rewrite_agency_amounts', 'update_agency_amounts']
@@ -671,7 +658,7 @@ class ProviderExtraServiceSiteModel(SiteModel):
     model_order = 7240
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Provider Catalogue'
-    recent_allowed = True
+    #recent_allowed = True
     fields = ('provider', 'service', 'date_from', 'date_to',)
     list_display = ('service', 'provider', 'date_from', 'date_to',)
     top_filters = (
@@ -680,6 +667,7 @@ class ProviderExtraServiceSiteModel(SiteModel):
     inlines = [ProviderExtraDetailInline]
     ordering = ['service', 'provider', '-date_from']
     form = ProviderExtraServiceForm
+    list_select_related = ('service', 'provider')
     save_as = True
 
     actions = ['rewrite_agency_amounts', 'update_agency_amounts']
@@ -709,18 +697,13 @@ class AgencyAllotmentDetailInline(CommonStackedInline):
     )
     ordering = ['room_type', 'board_type']
     form = AgencyAllotmentDetailInlineForm
-
-    def get_queryset(self, request):
-        qs = super(AgencyAllotmentDetailInline, self).get_queryset(request)
-        qs.select_related('room_type', 'addon')
-        return qs
-
+    list_select_related = ('room_type', 'addon')
 
 class AgencyAllotmentServiceSiteModel(SiteModel):
     model_order = 7120
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
-    recent_allowed = True
+    #recent_allowed = True
     fields = ('agency', 'service', 'date_from', 'date_to',)
     list_display = ('agency', 'service', 'date_from', 'date_to',)
     top_filters = (
@@ -729,6 +712,7 @@ class AgencyAllotmentServiceSiteModel(SiteModel):
     inlines = [AgencyAllotmentDetailInline]
     ordering = ['service', 'agency', '-date_from']
     form = AgencyAllotmentServiceForm
+    list_select_related = ('agency', 'service')
     save_as = True
 
 
@@ -736,24 +720,20 @@ class AgencyTransferDetailInline(CommonTabularInline):
     model = AgencyTransferDetail
     extra = 0
     fields = (
-        ('a_location_from', 'a_location_to', 'addon'),
+        ('location_from', 'location_to', 'addon'),
         ('pax_range_min', 'pax_range_max'),
         ('ad_1_amount', 'ch_1_ad_1_amount'),
     )
-    ordering = ['a_location_from', 'a_location_to']
+    ordering = ['location_from', 'location_to']
     form = AgencyTransferDetailInlineForm
-
-    def get_queryset(self, request):
-        qs = super(AgencyTransferDetailInline, self).get_queryset(request)
-        qs.select_related('a_location_from', 'a_location_to', 'addon')
-        return qs
+    list_select_related = ('location_from', 'location_to', 'addon')
 
 
 class AgencyTransferServiceSiteModel(SiteModel):
     model_order = 7130
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
-    recent_allowed = True
+    #recent_allowed = True
     fields = ('agency', 'service', 'date_from', 'date_to',)
     list_display = ('agency', 'service', 'date_from', 'date_to',)
     top_filters = (
@@ -763,6 +743,7 @@ class AgencyTransferServiceSiteModel(SiteModel):
     inlines = [AgencyTransferDetailInline]
     ordering = ['service', 'agency', '-date_from']
     form = AgencyTransferServiceForm
+    list_select_related = ('service', 'agency')
     save_as = True
 
 
@@ -774,6 +755,7 @@ class AgencyExtraDetailInline(CommonTabularInline):
         ('addon', 'ad_1_amount'), )
     ordering = ['addon', 'pax_range_min', 'pax_range_max']
     form = AgencyExtraDetailInlineForm
+    list_select_related = ('addon')
 
     def get_queryset(self, request):
         qs = super(AgencyExtraDetailInline, self).get_queryset(request)
@@ -785,7 +767,7 @@ class AgencyExtraServiceSiteModel(SiteModel):
     model_order = 7140
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
-    recent_allowed = True
+    #recent_allowed = True
     fields = ('agency', 'service', 'date_from', 'date_to')
     list_display = ('agency', 'service', 'date_from', 'date_to',)
     top_filters = (
@@ -794,6 +776,7 @@ class AgencyExtraServiceSiteModel(SiteModel):
     inlines = [AgencyExtraDetailInline]
     ordering = ['service', 'agency', '-date_from']
     form = AgencyExtraServiceForm
+    list_select_related = ('service', 'agency')
     save_as = True
 
 
@@ -823,15 +806,14 @@ bookings_site.register(CarRental, CarRentalSiteModel)
 
 bookings_site.register(AllotmentRoomType, AllotmentRoomTypeSiteModel)
 bookings_site.register(AllotmentBoardType, AllotmentBoardTypeSiteModel)
-bookings_site.register(ExtraAddon, ExtraAddonSiteModel)
 
 bookings_site.register(Service, ServiceSiteModel)
 bookings_site.register(Allotment, AllotmentSiteModel)
 bookings_site.register(Transfer, TransferSiteModel)
 bookings_site.register(Extra, ExtraSiteModel)
-bookings_site.register(ServiceDetailAllotment, ServiceDetailAllotmentSiteModel)
-bookings_site.register(ServiceDetailTransfer, ServiceDetailTransferSiteModel)
-bookings_site.register(ServiceDetailExtra, ServiceDetailExtraSiteModel)
+bookings_site.register(ServiceBookDetailAllotment, ServiceBookDetailAllotmentSiteModel)
+bookings_site.register(ServiceBookDetailTransfer, ServiceBookDetailTransferSiteModel)
+bookings_site.register(ServiceBookDetailExtra, ServiceBookDetailExtraSiteModel)
 
 bookings_site.register(AgencyAllotmentService, AgencyAllotmentServiceSiteModel)
 bookings_site.register(AgencyTransferService, AgencyTransferServiceSiteModel)

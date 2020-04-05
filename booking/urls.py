@@ -16,6 +16,7 @@ urlpatterns = [
     url(r'^bookingallotment-amounts/?', views.BookingAllotmentAmountsView.as_view(), name='bookingallotment_amounts'),
     url(r'^bookingtransfer-amounts/?', views.BookingTransferAmountsView.as_view(), name='bookingtransfer_amounts'),
     url(r'^bookingextra-amounts/?', views.BookingExtraAmountsView.as_view(), name='bookingextra_amounts'),
+    url(r'^bookingextracomponent-amounts/?', views.BookingExtraComponentAmountsView.as_view(), name='bookingextra_amounts'),
     url(r'^bookingpackage-amounts/?', views.BookingPackageAmountsView.as_view(), name='bookingpackage_amounts'),
     url(r'^bookingpackageallotment-amounts/?', views.BookingPackageAllotmentAmountsView.as_view(), name='bookingpackageallotment_amounts'),
     url(r'^bookingpackagetransfer-amounts/?', views.BookingPackageTransferAmountsView.as_view(), name='bookingpackagetransfer_amounts'),
@@ -53,5 +54,14 @@ urlpatterns = [
 
     url(r'^extra-service-details/?', views.ExtraServiceDetailsView.as_view(), name='extra-service-details'),
     url(r'^transfer-service-details/?', views.TransferServiceDetailsView.as_view(), name='transfer-service-details'),
+
+    url(
+        r'^quoteservice_book_detail_url/?',
+        views.QuoteServiceBookDetailURLView.as_view(),
+        name='quoteservice_book_detail_url'),
+    url(
+        r'^bookingservice_book_detail_url/?',
+        views.BookingServiceBookDetailURLView.as_view(),
+        name='bookingservice_book_detail_url'),
 
 ]
