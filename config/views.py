@@ -75,10 +75,10 @@ class RoomTypeAutocompleteView(autocomplete.Select2QuerySetView):
             return RoomType.objects.none()
         qs = RoomType.objects.filter(enabled=True).all().distinct()
 
-        detail_service = self.forwarded.get('detail_service', None)
+        book_service = self.forwarded.get('book_service', None)
 
-        if detail_service:
-            qs = qs.filter(allotmentroomtype__allotment=detail_service)
+        if book_service:
+            qs = qs.filter(allotmentroomtype__allotment=book_service)
         else:
             service = self.forwarded.get('service', None)
 
@@ -93,15 +93,17 @@ class RoomTypeAutocompleteView(autocomplete.Select2QuerySetView):
 class BoardTypeAutocompleteView(autocomplete.Select2ListView):
     def get_list(self):
         result = []
-        detail_service = self.forwarded.get('detail_service', None)
-        if detail_service:
-            allotment_boards = AllotmentBoardType.objects.filter(allotment=detail_service).distinct().all()
+        book_service = self.forwarded.get('book_service', None)
+        if book_service:
+            allotment_boards = AllotmentBoardType.objects.filter(
+                allotment=book_service).distinct().all()
             for allotment_board in allotment_boards:
                 result.append(allotment_board.board_type)
         else:
             service = self.forwarded.get('service', None)
             if service is not None:
-                allotment_boards = AllotmentBoardType.objects.filter(allotment=service).distinct().all()
+                allotment_boards = AllotmentBoardType.objects.filter(
+                    allotment=service).distinct().all()
                 for allotment_board in allotment_boards:
                     result.append(allotment_board.board_type)
 
@@ -115,10 +117,10 @@ class AddonAutocompleteView(autocomplete.Select2QuerySetView):
             return Addon.objects.none()
         qs = Addon.objects.filter(enabled=True).all().distinct()
 
-        detail_service = self.forwarded.get('detail_service', None)
+        book_service = self.forwarded.get('book_service', None)
 
-        if detail_service:
-            qs = qs.filter(serviceaddon__service=detail_service)
+        if book_service:
+            qs = qs.filter(serviceaddon__service=book_service)
         else:
             service = self.forwarded.get('service', None)
 
@@ -249,13 +251,13 @@ def provider_transfer_queryset(
                         &
                         (
                             (
-                                Q(providertransferservice__providertransferdetail__p_location_from=location_from)
-                                & Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                                Q(providertransferservice__providertransferdetail__location_from=location_from)
+                                & Q(providertransferservice__providertransferdetail__location_to=location_to)
                             )
                             |
                             (
-                                Q(providertransferservice__providertransferdetail__p_location_from=location_to)
-                                & Q(providertransferservice__providertransferdetail__p_location_to=location_from)
+                                Q(providertransferservice__providertransferdetail__location_from=location_to)
+                                & Q(providertransferservice__providertransferdetail__location_to=location_from)
                             )
                         )
                     )
@@ -267,13 +269,13 @@ def provider_transfer_queryset(
                         &
                         (
                             (
-                                Q(providertransferservice__providertransferdetail__p_location_from=location_from)
-                                & Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                                Q(providertransferservice__providertransferdetail__location_from=location_from)
+                                & Q(providertransferservice__providertransferdetail__location_to=location_to)
                             )
                             |
                             (
-                                Q(providertransferservice__providertransferdetail__p_location_from=location_to)
-                                & Q(providertransferservice__providertransferdetail__p_location_to=location_from)
+                                Q(providertransferservice__providertransferdetail__location_from=location_to)
+                                & Q(providertransferservice__providertransferdetail__location_to=location_from)
                             )
                         )
                     )
@@ -284,9 +286,9 @@ def provider_transfer_queryset(
                     Q(providertransferservice__providertransferdetail__addon=addon)
                     &
                     (
-                        Q(providertransferservice__providertransferdetail__p_location_from=location_from)
+                        Q(providertransferservice__providertransferdetail__location_from=location_from)
                         |
-                        Q(providertransferservice__providertransferdetail__p_location_to=location_from)
+                        Q(providertransferservice__providertransferdetail__location_to=location_from)
                     )
                 )
             else:
@@ -296,9 +298,9 @@ def provider_transfer_queryset(
                     Q(providertransferservice__providertransferdetail__addon=ADDON_FOR_NO_ADDON)
                     &
                     (
-                        Q(providertransferservice__providertransferdetail__p_location_from=location_from)
+                        Q(providertransferservice__providertransferdetail__location_from=location_from)
                         |
-                        Q(providertransferservice__providertransferdetail__p_location_to=location_from)
+                        Q(providertransferservice__providertransferdetail__location_to=location_from)
                     )
                 )
         elif location_to:
@@ -309,9 +311,9 @@ def provider_transfer_queryset(
                     Q(providertransferservice__providertransferdetail__addon=addon)
                     &
                     (
-                        Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                        Q(providertransferservice__providertransferdetail__location_to=location_to)
                         |
-                        Q(providertransferservice__providertransferdetail__p_location_from=location_to)
+                        Q(providertransferservice__providertransferdetail__location_from=location_to)
                     )
                 )
             else:
@@ -321,9 +323,9 @@ def provider_transfer_queryset(
                     Q(providertransferservice__providertransferdetail__addon=ADDON_FOR_NO_ADDON)
                     &
                     (
-                        Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                        Q(providertransferservice__providertransferdetail__location_to=location_to)
                         |
-                        Q(providertransferservice__providertransferdetail__p_location_from=location_to)
+                        Q(providertransferservice__providertransferdetail__location_from=location_to)
                     )
                 )
         elif addon:
@@ -457,16 +459,22 @@ class ServiceAutocompleteView(autocomplete.Select2QuerySetView):
         if not self.request.user.is_authenticated():
             return Service.objects.none()
         current_service_id = self.forwarded.get('current_service_id', None)
-        search_location = self.forwarded.get('search_location', None)
         qs = Service.objects.filter(enabled=True).distinct()
         if current_service_id:
             qs = qs.exclude(
                 id=current_service_id,
             )
-        if search_location:
+        search_service_location = self.forwarded.get('search_service_location', None)
+        if search_service_location:
             qs = qs.filter(
-                location=search_location,
+                location=search_service_location,
             )
+        else:
+            search_location = self.forwarded.get('search_location', None)
+            if search_location:
+                qs = qs.filter(
+                    location=search_location,
+                )
         if self.q:
             qs = qs.filter(name__icontains=self.q)
         return qs[:20]
@@ -515,29 +523,29 @@ class ServiceTransferAutocompleteView(autocomplete.Select2QuerySetView):
             if location_to:
                 qs = qs.filter(
                     (
-                        Q(providertransferservice__providertransferdetail__p_location_from=location_from)
+                        Q(providertransferservice__providertransferdetail__location_from=location_from)
                         &
-                        Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                        Q(providertransferservice__providertransferdetail__location_to=location_to)
                     )
                     |
                     (
-                        Q(providertransferservice__providertransferdetail__p_location_from=location_to)
+                        Q(providertransferservice__providertransferdetail__location_from=location_to)
                         &
-                        Q(providertransferservice__providertransferdetail__p_location_to=location_from)
+                        Q(providertransferservice__providertransferdetail__location_to=location_from)
                     )
                 )
             else:
                 qs = qs.filter(
-                    Q(providertransferservice__providertransferdetail__p_location_from=location_from)
+                    Q(providertransferservice__providertransferdetail__location_from=location_from)
                     |
-                    Q(providertransferservice__providertransferdetail__p_location_to=location_from)
+                    Q(providertransferservice__providertransferdetail__location_to=location_from)
                 )
         else:
             if location_to:
                 qs = qs.filter(
-                    Q(providertransferservice__providertransferdetail__p_location_from=location_to)
+                    Q(providertransferservice__providertransferdetail__location_from=location_to)
                     |
-                    Q(providertransferservice__providertransferdetail__p_location_to=location_to)
+                    Q(providertransferservice__providertransferdetail__location_to=location_to)
                 )
     
         if self.q:
@@ -583,9 +591,9 @@ class CarRentalOfficeAutocompleteView(autocomplete.Select2QuerySetView):
         if not self.request.user.is_authenticated():
             return CarRentalOffice.objects.none()
 
-        detail_service_id = self.forwarded.get('detail_service', None)
-        if detail_service_id:
-            extra = Extra.objects.get(pk=detail_service_id)
+        book_service = self.forwarded.get('book_service', None)
+        if book_service:
+            extra = Extra.objects.get(pk=book_service)
             if extra.car_rental is None:
                 return CarRentalOffice.objects.none()
         else:
@@ -603,7 +611,7 @@ class CarRentalOfficeAutocompleteView(autocomplete.Select2QuerySetView):
         return qs[:20]
 
 
-class ServiceDetailURLView(View):
+class ServiceBookDetailURLView(View):
     def post(self, request, *args, **kwargs):
         parent_id = request.POST.get('parent_id', None)
         service_id = request.POST.get('service', None)
@@ -611,18 +619,18 @@ class ServiceDetailURLView(View):
             service = Service.objects.get(id=service_id)
             if service.category == 'A':
                 return JsonResponse({
-                    'url': 'config/servicedetailallotment/add/?service=%s&detail_service=%s' % (
-                        parent_id, service_id),
+                    'url': 'config/servicebookdetailallotment/add/?service=%s&book_service=%s'
+                        % (parent_id, service_id),
                 })
             elif service.category == 'T':
                 return JsonResponse({
-                    'url': 'config/servicedetailtransfer/add/?service=%s&detail_service=%s' % (
-                        parent_id, service_id),
+                    'url': 'config/servicebookdetailtransfer/add/?service=%s&book_service=%s'
+                        % (parent_id, service_id),
                 })
             elif service.category == 'E':
                 return JsonResponse({
-                    'url': 'config/servicedetailextra/add/?service=%s&detail_service=%s' % (
-                        parent_id, service_id),
+                    'url': 'config/servicebookdetailextra/add/?service=%s&book_service=%s'
+                        % (parent_id, service_id),
                 })
         return JsonResponse({
             'error': 'Empty value Current: %s - Detail: %s' % (parent_id, service_id),

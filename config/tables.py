@@ -5,25 +5,25 @@ from django.urls import reverse
 from django.utils.html import format_html
 
 from config.models import (
-    ServiceDetail,
+    ServiceBookDetail,
 )
 from config.constants import (
-    SERVICE_DETAIL_CATEGORIES,
+    SERVICE_BOOK_DETAIL_CATEGORIES,
 )
 
 
-class ServiceDetailTable(tables.Table):
+class ServiceBookDetailTable(tables.Table):
     class Meta:
-        model = ServiceDetail
-        template_name = 'config/servicedetail_list.html'
-        fields = ['name', 'description', 'base_detail_service__category', 'days_after', 'days_duration']
+        model = ServiceBookDetail
+        template_name = 'config/table/servicebookdetail_table.html'
+        fields = ['name', 'description', 'base_service__category', 'days_after', 'days_duration']
 
     def render_name(self, value, record):
         obj_url = reverse(
-            'common:config_%s_change' % (SERVICE_DETAIL_CATEGORIES[record.base_detail_service.category]),
+            'common:config_%s_change' % (SERVICE_BOOK_DETAIL_CATEGORIES[record.base_service.category]),
             args=(quote(record.pk),)
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
     def before_render(self, request):
-        self.columns.hide('base_detail_service__category')
+        self.columns.hide('base_service__category')

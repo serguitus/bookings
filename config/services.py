@@ -110,8 +110,8 @@ class ConfigServices(object):
                     # update - dont modify if exists
                     agency_detail, created = AgencyTransferDetail.objects.get_or_create(
                         agency_service_id=dst_agency_service.id,
-                        a_location_from_id=detail.a_location_from_id,
-                        a_location_to_id=detail.a_location_to_id,
+                        location_from_id=detail.location_from_id,
+                        location_to_id=detail.location_to_id,
                         addon_id=detail.addon_id,
                         pax_range_min=detail.pax_range_min,
                         pax_range_max=detail.pax_range_max,
@@ -122,8 +122,8 @@ class ConfigServices(object):
                     # rewrite - modify if exists
                     agency_detail, created = AgencyTransferDetail.objects.update_or_create(
                         agency_service_id=dst_agency_service.id,
-                        a_location_from_id=detail.a_location_from_id,
-                        a_location_to_id=detail.a_location_to_id,
+                        location_from_id=detail.location_from_id,
+                        location_to_id=detail.location_to_id,
                         addon_id=detail.addon_id,
                         pax_range_min=detail.pax_range_min,
                         pax_range_max=detail.pax_range_max,
@@ -651,8 +651,8 @@ class ConfigServices(object):
 
                     detail_list = list(
                         queryset.filter(
-                            p_location_from_id=location_from_id,
-                            p_location_to_id=location_to_id))
+                            location_from_id=location_from_id,
+                            location_to_id=location_to_id))
                     group_cost = None
                     if detail_list:
                         group_cost, group_cost_message = cls.find_groups_amount(
@@ -662,8 +662,8 @@ class ConfigServices(object):
                     if group_cost is None:
                         detail_list = list(
                             queryset.filter(
-                                p_location_to_id=location_from_id,
-                                p_location_from_id=location_to_id))
+                                location_to_id=location_from_id,
+                                location_from_id=location_to_id))
                         if not detail_list:
                             return None, "Cost Not Found"
                         group_cost, group_cost_message = cls.find_groups_amount(
@@ -689,8 +689,8 @@ class ConfigServices(object):
                     queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
                 detail_list = list(
                     queryset.filter(
-                        p_location_from_id=location_from_id,
-                        p_location_to_id=location_to_id))
+                        location_from_id=location_from_id,
+                        location_to_id=location_to_id))
                 cost = None
                 if detail_list:
                     cost, cost_message = cls.find_groups_amount(
@@ -700,8 +700,8 @@ class ConfigServices(object):
                 if cost is None:
                     detail_list = list(
                         queryset.filter(
-                            p_location_to_id=location_from_id,
-                            p_location_from_id=location_to_id))
+                            location_to_id=location_from_id,
+                            location_from_id=location_to_id))
                     if not detail_list:
                         return None, "Cost Not Found"
                     cost, cost_message = cls.find_groups_amount(
@@ -763,8 +763,8 @@ class ConfigServices(object):
 
                     detail_list = list(
                         queryset.filter(
-                            a_location_from_id=location_from_id,
-                            a_location_to_id=location_to_id))
+                            location_from_id=location_from_id,
+                            location_to_id=location_to_id))
                     group_price = None
                     if detail_list:
                         group_price, group_price_message = cls.find_groups_amount(
@@ -774,8 +774,8 @@ class ConfigServices(object):
                     if group_price is None:
                         detail_list = list(
                             queryset.filter(
-                                a_location_to_id=location_from_id,
-                                a_location_from_id=location_to_id))
+                                location_to_id=location_from_id,
+                                location_from_id=location_to_id))
                         if not detail_list:
                             return None, "Price Not Found"
                         group_price, group_price_message = cls.find_groups_amount(
@@ -801,8 +801,8 @@ class ConfigServices(object):
                     queryset = queryset.filter(addon_id=ADDON_FOR_NO_ADDON)
                 detail_list = list(
                     queryset.filter(
-                        a_location_from_id=location_from_id,
-                        a_location_to_id=location_to_id))
+                        location_from_id=location_from_id,
+                        location_to_id=location_to_id))
                 price = None
                 if detail_list:
                     price, price_message = cls.find_groups_amount(
@@ -812,8 +812,8 @@ class ConfigServices(object):
                 if price is None:
                     detail_list = list(
                         queryset.filter(
-                            a_location_to_id=location_from_id,
-                            a_location_from_id=location_to_id))
+                            location_to_id=location_from_id,
+                            location_from_id=location_to_id))
                     if not detail_list:
                         return None, "Price Not Found"
                     price, price_message = cls.find_groups_amount(
@@ -1526,8 +1526,8 @@ class ConfigServices(object):
                 # update - dont modify if exists
                 agency_detail, created = AgencyTransferDetail.objects.get_or_create(
                     agency_service_id=dst_agency_service.id,
-                    a_location_from_id=detail.p_location_from_id,
-                    a_location_to_id=detail.p_location_to_id,
+                    location_from_id=detail.location_from_id,
+                    location_to_id=detail.location_to_id,
                     addon_id=detail.addon_id,
                     pax_range_min=detail.pax_range_min,
                     pax_range_max=detail.pax_range_max,
@@ -1538,8 +1538,8 @@ class ConfigServices(object):
                 # rewrite - modify if exists
                 agency_detail, created = AgencyTransferDetail.objects.update_or_create(
                     agency_service_id=dst_agency_service.id,
-                    a_location_from_id=detail.p_location_from_id,
-                    a_location_to_id=detail.p_location_to_id,
+                    location_from_id=detail.location_from_id,
+                    location_to_id=detail.location_to_id,
                     addon_id=detail.addon_id,
                     pax_range_min=detail.pax_range_min,
                     pax_range_max=detail.pax_range_max,
@@ -1695,7 +1695,7 @@ class ConfigServices(object):
         if date_to:
             qs = qs.filter(agency_service__date_from__lte=date_to)
         qs = qs.order_by(
-            'a_location_from', 'a_location_to', 'addon', 'pax_range_min', '-pax_range_max',
+            'location_from', 'location_to', 'addon', 'pax_range_min', '-pax_range_max',
             'agency_service__date_from', '-agency_service__date_to')
         return list(qs)
 
@@ -1727,3 +1727,45 @@ class ConfigServices(object):
         if service.category == 'P':
             from booking.services import BookingServices
             return BookingServices.list_package_details(service, agency, date_from, date_to)
+
+
+    @classmethod
+    def copy_detail_service_info(cls, dst_service, src_service):
+        dst_service.name = src_service.name
+        dst_service.description = src_service.description
+        dst_service.base_service = src_service.base_service
+        dst_service.base_location = src_service.base_location
+        dst_service.service_addon = src_service.service_addon
+        dst_service.time = src_service.time
+
+
+    @classmethod
+    def copy_detail_allotment_info(cls, dst_service, src_service):
+        cls.copy_detail_service_info(dst_service, src_service)
+        dst_service.room_type = src_service.room_type
+        dst_service.board_type = src_service.board_type
+
+
+    @classmethod
+    def copy_detail_transfer_info(cls, dst_service, src_service):
+        cls.copy_detail_service_info(dst_service, src_service)
+        dst_service.location_from = src_service.location_from
+        dst_service.location_to = src_service.location_to
+        dst_service.place_from = src_service.place_from
+        dst_service.place_to = src_service.place_to
+        dst_service.schedule_from = src_service.schedule_from
+        dst_service.schedule_to = src_service.schedule_to
+        dst_service.schedule_time_from = src_service.schedule_time_from
+        dst_service.schedule_time_to = src_service.schedule_time_to
+        dst_service.pickup = src_service.pickup
+        dst_service.dropoff = src_service.dropoff
+        dst_service.quantity = src_service.quantity
+
+
+    @classmethod
+    def copy_detail_extra_info(cls, dst_service, src_service):
+        cls.copy_detail_service_info(dst_service, src_service)
+        dst_service.pickup_office = src_service.pickup_office
+        dst_service.dropoff_office = src_service.dropoff_office
+        dst_service.quantity = src_service.quantity
+        dst_service.parameter = src_service.parameter

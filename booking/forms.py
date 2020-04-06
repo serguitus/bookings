@@ -18,6 +18,7 @@ from booking.models import (
     ProviderBookingPayment,
 )
 
+from config.forms import BaseBookDataForm
 from config.models import Location
 
 from finance.models import Office
@@ -1105,4 +1106,145 @@ class BookingExtraComponentInlineForm(forms.ModelForm):
         fields = '__all__'
         widgets = {
             'component': autocomplete.ModelSelect2(url='extra-autocomplete'),
+        }
+
+class QuoteServiceBookDetailAllotmentForm(forms.ModelForm, BaseBookDataForm):
+    class Meta:
+        fields = ('__all__')
+        widgets = {
+            'quote_service': autocomplete.ModelSelect2(
+                url='disabled-autocomplete',
+                ),
+            'book_service': autocomplete.ModelSelect2(
+                url='serviceallotment-autocomplete',
+                forward=['search_location'],
+                ),
+            'room_type': autocomplete.ModelSelect2(
+                url='roomtype-autocomplete',
+                forward=['book_service'],
+                ),
+            'board_type': autocomplete.ListSelect2(
+                url='boardtype-autocomplete',
+                forward=['book_service']),
+            'service_addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['book_service'],
+                ),
+        }
+
+
+class QuoteServiceBookDetailTransferForm(forms.ModelForm, BaseBookDataForm):
+    class Meta:
+        fields = ('__all__')
+        widgets = {
+            'quote_service': autocomplete.ModelSelect2(
+                url='disabled-autocomplete',
+                ),
+            'book_service': autocomplete.ModelSelect2(
+                url='servicetransfer-autocomplete',
+                forward=['search_location', 'location_from', 'location_to'],
+                ),
+            'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'service_addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['service'],
+                ),
+        }
+
+
+class QuoteServiceBookDetailExtraForm(forms.ModelForm, BaseBookDataForm):
+    class Meta:
+        fields = ('__all__')
+        widgets = {
+            'quote_service': autocomplete.ModelSelect2(
+                url='service-autocomplete',
+                ),
+            'book_service': autocomplete.ModelSelect2(
+                url='serviceextra-autocomplete',
+                forward=['search_location'],
+                ),
+            'service_addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['service'],
+                ),
+            'pickup_office': autocomplete.ModelSelect2(
+                url='carrentaloffice-autocomplete',
+                forward=['service',],
+                ),
+            'dropoff_office': autocomplete.ModelSelect2(
+                url='carrentaloffice-autocomplete',
+                forward=['service',],
+                ),
+        }
+
+
+class BookingServiceBookDetailAllotmentForm(forms.ModelForm, BaseBookDataForm):
+    class Meta:
+        fields = ('__all__')
+        widgets = {
+            'booking_service': autocomplete.ModelSelect2(
+                url='disabled-autocomplete',
+                ),
+            'book_service': autocomplete.ModelSelect2(
+                url='serviceallotment-autocomplete',
+                forward=['search_location'],
+                ),
+            'room_type': autocomplete.ModelSelect2(
+                url='roomtype-autocomplete',
+                forward=['book_service'],
+                ),
+            'board_type': autocomplete.ListSelect2(
+                url='boardtype-autocomplete',
+                forward=['book_service']),
+            'service_addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['book_service'],
+                ),
+        }
+
+
+class BookingServiceBookDetailTransferForm(forms.ModelForm, BaseBookDataForm):
+    class Meta:
+        fields = ('__all__')
+        widgets = {
+            'booking_service': autocomplete.ModelSelect2(
+                url='disabled-autocomplete',
+                ),
+            'book_service': autocomplete.ModelSelect2(
+                url='servicetransfer-autocomplete',
+                forward=['search_location', 'location_from', 'location_to'],
+                ),
+            'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'service_addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['service'],
+                ),
+        }
+
+
+class BookingServiceBookDetailExtraForm(forms.ModelForm, BaseBookDataForm):
+    class Meta:
+        fields = ('__all__')
+        widgets = {
+            'booking_service': autocomplete.ModelSelect2(
+                url='service-autocomplete',
+                ),
+            'book_service': autocomplete.ModelSelect2(
+                url='serviceextra-autocomplete',
+                forward=['search_location'],
+                ),
+            'service_addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['service'],
+                ),
+            'pickup_office': autocomplete.ModelSelect2(
+                url='carrentaloffice-autocomplete',
+                forward=['service',],
+                ),
+            'dropoff_office': autocomplete.ModelSelect2(
+                url='carrentaloffice-autocomplete',
+                forward=['service',],
+                ),
         }

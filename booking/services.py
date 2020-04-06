@@ -22,19 +22,26 @@ from booking.models import (
     Quote, QuoteService, QuotePaxVariant, QuoteServicePaxVariant, QuotePackageServicePaxVariant,
     QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
     QuotePackageService, QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
+    QuoteServiceBookDetail, QuoteServiceBookDetailAllotment,
+    QuoteServiceBookDetailTransfer, QuoteServiceBookDetailExtra,
     Package, PackageAllotment, PackageTransfer, PackageExtra,
     AgencyPackageService, AgencyPackageDetail,
     Booking, BaseBookingService, BookingService, BookingPax, BookingServicePax,
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
     BookingPackageService, BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
     BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine, BookingInvoicePartial,
+    BookingServiceBookDetail, BookingServiceBookDetailAllotment,
+    BookingServiceBookDetailTransfer, BookingServiceBookDetailExtra,
     ProviderBookingPayment, ProviderBookingPaymentService,
 )
 
 from common.filters import parse_date
 
 from config.constants import AMOUNTS_FIXED, SERVICE_CATEGORY_PACKAGE
-from config.models import ProviderAllotmentDetail, ProviderTransferDetail, ProviderExtraDetail
+from config.models import (
+    ServiceBookDetail, ServiceBookDetailAllotment,
+    ServiceBookDetailTransfer, ServiceBookDetailExtra,
+    ProviderAllotmentDetail, ProviderTransferDetail, ProviderExtraDetail)
 from config.services import ConfigServices
 from config.views import (
     provider_allotment_queryset, provider_transfer_queryset, provider_extra_queryset)
@@ -4562,13 +4569,13 @@ class BookingServices(object):
                     &
                     (
                         (
-                            Q(providertransferservice__providertransferdetail__p_location_from=bookingservice.location_from)
-                            & Q(providertransferservice__providertransferdetail__p_location_to=bookingservice.location_to)
+                            Q(providertransferservice__providertransferdetail__location_from=bookingservice.location_from)
+                            & Q(providertransferservice__providertransferdetail__location_to=bookingservice.location_to)
                         )
                         |
                         (
-                            Q(providertransferservice__providertransferdetail__p_location_from=bookingservice.location_to)
-                            & Q(providertransferservice__providertransferdetail__p_location_to=bookingservice.location_from)
+                            Q(providertransferservice__providertransferdetail__location_from=bookingservice.location_to)
+                            & Q(providertransferservice__providertransferdetail__location_to=bookingservice.location_from)
                         )
                     )
                 )
@@ -5221,6 +5228,117 @@ class BookingServices(object):
             service.save(update_fields=['status', 'cost_amount_to_pay'])
 
 
+    @classmethod
+    def copy_date_info(cls, dst_service, src_service):
+
+        days_after = src_service.days_after
+        if days_after is None:
+            days_after = 0
+        if hasattr(dst_service, 'quote_service') and dst_service.quote_service.datetime_from:
+            dst_service.datetime_from = dst_service.quote_service.datetime_from + timedelta(
+                days=days_after)
+        if hasattr(dst_service, 'booking_service') and dst_service.booking_service.datetime_from:
+            dst_service.datetime_from = dst_service.booking_service.datetime_from + timedelta(
+                days=days_after)
+        if hasattr(dst_service, 'quote_package') and dst_service.quote_package.datetime_from:
+            dst_service.datetime_from = dst_service.quote_package.datetime_from + timedelta(
+                days=days_after)
+        if hasattr(dst_service, 'booking_package') and dst_service.booking_package.datetime_from:
+            dst_service.datetime_from = dst_service.booking_package.datetime_from + timedelta(
+                days=days_after)
+        days_duration = src_service.days_duration
+        if days_duration is None:
+            days_duration = 0
+        if dst_service.datetime_from:
+            dst_service.datetime_to = dst_service.datetime_from + timedelta(days=days_duration)
+
+
+    @classmethod
+    def sync_quoteservice_details(cls, quote_service):
+        if hasattr(quote_service, "avoid_sync_details"):
+            return
+
+        details = list(
+            QuoteServiceBookDetail.objects.filter(quote_service_id=quote_service.id).all())
+        if details:
+            return
+
+        service = quote_service.service
+        # create bookingallotment list
+        for detail_allotment in ServiceBookDetailAllotment.objects.filter(service_id=service.id).all():
+            quote_service_detail_allotment = QuoteServiceBookDetailAllotment()
+            quote_service_detail_allotment.quote_service = quote_service
+            quote_service_detail_allotment.book_service = detail_allotment.book_service
+            ConfigServices.copy_detail_allotment_info(
+                dst_service=quote_service_detail_allotment, src_service=detail_allotment)
+            cls.copy_date_info(
+                dst_service=quote_service_detail_allotment, src_service=detail_allotment)
+            quote_service_detail_allotment.save()
+        # create bookingtransfer list
+        for detail_transfer in ServiceBookDetailTransfer.objects.filter(service_id=service.id).all():
+            quote_service_detail_transfer = QuoteServiceBookDetailTransfer()
+            quote_service_detail_transfer.quote_service = quote_service
+            quote_service_detail_transfer.book_service = detail_transfer.book_service
+            ConfigServices.copy_detail_transfer_info(
+                dst_service=quote_service_detail_transfer, src_service=detail_transfer)
+            cls.copy_date_info(
+                dst_service=quote_service_detail_transfer, src_service=detail_transfer)
+            quote_service_detail_transfer.save()
+        # create bookingextra list
+        for detail_extra in ServiceBookDetailExtra.objects.filter(service_id=service.id).all():
+            quote_service_detail_extra = QuoteServiceBookDetailExtra()
+            quote_service_detail_extra.quote_service = quote_service
+            quote_service_detail_extra.book_service = detail_extra.book_service
+            ConfigServices.copy_detail_extra_info(
+                dst_service=quote_service_detail_extra, src_service=detail_extra)
+            cls.copy_date_info(
+                dst_service=quote_service_detail_extra, src_service=detail_extra)
+            quote_service_detail_extra.save()
+
+
+    @classmethod
+    def sync_bookingservice_details(cls, booking_service):
+        if hasattr(booking_service, "avoid_sync_details"):
+            return
+
+        details = list(
+            BookingServiceBookDetail.objects.filter(booking_service_id=booking_service.id).all())
+        if details:
+            return
+
+        service = booking_service.service
+        # create bookingallotment list
+        for detail_allotment in ServiceBookDetailAllotment.objects.filter(service_id=service.id).all():
+            booking_service_detail_allotment = BookingServiceBookDetailAllotment()
+            booking_service_detail_allotment.booking_service = booking_service
+            booking_service_detail_allotment.book_service = detail_allotment.book_service
+            ConfigServices.copy_detail_allotment_info(
+                dst_service=booking_service_detail_allotment, src_service=detail_allotment)
+            cls.copy_date_info(
+                dst_service=booking_service_detail_allotment, src_service=detail_allotment)
+            booking_service_detail_allotment.save()
+        # create bookingtransfer list
+        for detail_transfer in ServiceBookDetailTransfer.objects.filter(service_id=service.id).all():
+            booking_service_detail_transfer = BookingServiceBookDetailTransfer()
+            booking_service_detail_transfer.booking_service = booking_service
+            booking_service_detail_transfer.book_service = detail_transfer.book_service
+            ConfigServices.copy_detail_transfer_info(
+                dst_service=booking_service_detail_transfer, src_service=detail_transfer)
+            cls.copy_date_info(
+                dst_service=booking_service_detail_transfer, src_service=detail_transfer)
+            booking_service_detail_transfer.save()
+        # create bookingextra list
+        for detail_extra in ServiceBookDetailExtra.objects.filter(service_id=service.id).all():
+            booking_service_detail_extra = BookingServiceBookDetailExtra()
+            booking_service_detail_extra.booking_service = booking_service
+            booking_service_detail_extra.book_service = detail_extra.book_service
+            ConfigServices.copy_detail_extra_info(
+                dst_service=booking_service_detail_extra, src_service=detail_extra)
+            cls.copy_date_info(
+                dst_service=booking_service_detail_extra, src_service=detail_extra)
+            booking_service_detail_extra.save()
+
+
 def details_allotment_queryset(
         service, date_from=None, date_to=None, room_type=None, board_type=None, addon=None):
     if not service:
@@ -5250,6 +5368,7 @@ def details_allotment_queryset(
         'pax_range_min')
     return qs[:50]
 
+
 def details_transfer_queryset(
         service, date_from=None, date_to=None, location_from=None, location_to=None, addon=None):
     if not service:
@@ -5266,22 +5385,22 @@ def details_transfer_queryset(
     if location_from:
         if location_to:
             qs = qs.filter(
-                (Q(p_location_from=location_from)
-                & Q(p_location_to=location_to))
+                (Q(location_from=location_from)
+                & Q(location_to=location_to))
                 |
-                (Q(p_location_from=location_to)
-                & Q(p_location_to=location_from)))
+                (Q(location_from=location_to)
+                & Q(location_to=location_from)))
         else:
             qs = qs.filter(
-                Q(p_location_from=location_from)
+                Q(location_from=location_from)
                 |
-                Q(p_location_to=location_from))
+                Q(location_to=location_from))
     else:
         if location_to:
             qs = qs.filter(
-                Q(p_location_from=location_to)
+                Q(location_from=location_to)
                 |
-                Q(p_location_to=location_to))
+                Q(location_to=location_to))
     if addon:
         qs = qs.filter(addon=addon)
     else:
@@ -5290,7 +5409,7 @@ def details_transfer_queryset(
         'provider_service__provider',
         'provider_service__date_from',
         'provider_service__date_to',
-        'p_location_from', 'p_location_to', 'addon',
+        'location_from', 'location_to', 'addon',
         'pax_range_min')
     return qs[:50]
 

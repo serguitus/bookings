@@ -9,14 +9,17 @@ from django.utils.safestring import mark_safe
 from booking.models import (
     PackageService,
     Quote, QuoteService, QuotePaxVariant, QuotePackageService,
+    QuoteServiceBookDetail,
     Booking, BookingService, BookingPax, BookingPackageService,
-    ProviderBookingPayment, ProviderBookingPaymentService,
     BookingExtraComponent,
+    BookingServiceBookDetail,
+    ProviderBookingPayment, ProviderBookingPaymentService,
 )
 from booking.constants import (
     PACKAGESERVICE_TYPES, QUOTESERVICE_TYPES, QUOTEPACKAGESERVICE_TYPES,
     BOOKINGSERVICE_TYPES,
-    BOOKINGPACKAGESERVICE_TYPES, BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING)
+    BOOKINGPACKAGESERVICE_TYPES, BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING,
+    QUOTESERVICE_BOOK_DETAIL_CATEGORIES, BOOKINGSERVICE_BOOK_DETAIL_CATEGORIES)
 
 from finance.models import (
     AgencyPayment,
@@ -57,7 +60,7 @@ class QuoteTable(tables.Table):
 class QuoteServiceTable(tables.Table):
     class Meta:
         model = QuoteService
-        template_name = 'booking/quoteservice_list.html'
+        template_name = 'booking/table/quoteservice_table.html'
         fields = ['name', 'service_type', 'status', 'datetime_from', 'datetime_to']
 
     def render_name(self, value, record):
@@ -91,7 +94,7 @@ class QuotePackageServiceTable(tables.Table):
 class QuotePaxVariantTable(tables.Table):
     class Meta:
         model = QuotePaxVariant
-        template_name = 'booking/quoteservice_list.html'
+        template_name = 'booking/table/quoteservice_table.html'
         fields = [
             'pax_quantity',
             'cost_single_amount', 'cost_double_amount', 'cost_triple_amount', 'cost_qdrple_amount',
@@ -507,3 +510,37 @@ class AddPaxBookingServicesTable(tables.Table):
             args=(quote(record.pk),)
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
+
+
+class QuoteServiceBookDetailTable(tables.Table):
+    class Meta:
+        model = QuoteServiceBookDetail
+        template_name = 'booking/table/quoteservicebookdetail_table.html'
+        fields = ['name', 'description', 'base_service__category', 'datetime_from', 'time']
+
+    def render_name(self, value, record):
+        obj_url = reverse(
+            'common:booking_%s_change' % (QUOTESERVICE_BOOK_DETAIL_CATEGORIES[record.base_service.category]),
+            args=(quote(record.pk),)
+        )
+        return format_html('<a href="%s">%s</a>' % (obj_url, value))
+
+    def before_render(self, request):
+        self.columns.hide('base_service__category')
+
+
+class BookingServiceBookDetailTable(tables.Table):
+    class Meta:
+        model = BookingServiceBookDetail
+        template_name = 'booking/table/bookingservicebookdetail_table.html'
+        fields = ['name', 'description', 'base_service__category', 'datetime_from', 'time']
+
+    def render_name(self, value, record):
+        obj_url = reverse(
+            'common:booking_%s_change' % (BOOKINGSERVICE_BOOK_DETAIL_CATEGORIES[record.base_service.category]),
+            args=(quote(record.pk),)
+        )
+        return format_html('<a href="%s">%s</a>' % (obj_url, value))
+
+    def before_render(self, request):
+        self.columns.hide('base_service__category')

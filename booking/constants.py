@@ -1,9 +1,7 @@
 from config.constants import (
     AMOUNTS_FIXED, AMOUNTS_BY_PAX,
     SERVICE_CATEGORY_EXTRA, SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER)
-from finance.constants import (
-    STATUS_CANCELLED, STATUS_DRAFT, STATUS_READY
-)
+
 
 BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT = 'BA'
 BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER = 'BT'
@@ -137,3 +135,16 @@ INVOICE_FORMATS = (
     (INVOICE_FORMAT_SERVICES, 'Services'),
     (INVOICE_FORMAT_DETAILS, 'Details'),
 )
+
+QUOTESERVICE_BOOK_DETAIL_CATEGORIES = {
+    SERVICE_CATEGORY_ALLOTMENT: 'quoteservicebookdetailallotment',
+    SERVICE_CATEGORY_TRANSFER: 'quoteservicebookdetailtransfer',
+    SERVICE_CATEGORY_EXTRA: 'quoteservicebookdetailextra',
+}
+
+BOOKINGSERVICE_BOOK_DETAIL_CATEGORIES = {
+    SERVICE_CATEGORY_ALLOTMENT: 'bookingservicebookdetailallotment',
+    SERVICE_CATEGORY_TRANSFER: 'bookingservicebookdetailtransfer',
+    SERVICE_CATEGORY_EXTRA: 'bookingservicebookdetailextra',
+}
+

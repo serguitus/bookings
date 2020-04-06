@@ -22,11 +22,13 @@ from booking.tables import (
     QuotePackageServiceTable,
     BookingServiceTable,
     QuoteConfirmationTable,
+    QuoteServiceBookDetailTable,
     BookingConfirmationTable, BookingServiceSummaryTable, BookingPaxTable,
     BookingVouchersTable,
     BookingServiceUpdateTable,
     BookingPackageServiceTable,
     BookingPackageServiceSummaryTable,
+    BookingServiceBookDetailTable,
     AddPaxBookingServicesTable,
     ProviderBookingPaymentTable,
     ProviderBookingPaymentServiceTable,
@@ -308,3 +310,19 @@ def get_distribution(booking_service):
     dist += ' ({} {})'.format(booking_service.room_type,
                               booking_service.board_type)
     return dist
+
+
+@register.simple_tag
+def quoteservicebookdetail_table(quote_service):
+    table = QuoteServiceBookDetailTable(
+        quote_service.quoteservicebookdetail_set.all(),
+        order_by=('datetime_from', 'time'))
+    return table
+
+
+@register.simple_tag
+def bookingservicebookdetail_table(booking_service):
+    table = BookingServiceBookDetailTable(
+        booking_service.bookingservicebookdetail_booking_service.all(),
+        order_by=('datetime_from', 'time'))
+    return table

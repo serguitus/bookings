@@ -121,22 +121,22 @@
     {% for detail in details %}
         {% setvar False as print_top_line %}
         <tr>
-            {% if detail.a_location_from.name != prev_from %}
+            {% if detail.location_from.name != prev_from %}
                 {% setvar True as print_top_line %}
             {% endif %}
             {% if print_top_line %}
                 <td class="top-line">
-                    {{ detail.a_location_from.name }}
+                    {{ detail.location_from.name }}
                 </td>
             {% else %}
                 <td></td>
             {% endif %}
-            {% if not print_top_line and detail.a_location_to.name != prev_to %}
+            {% if not print_top_line and detail.location_to.name != prev_to %}
                 {% setvar True as print_top_line %}
             {% endif %}
             {% if print_top_line %}
                 <td class="top-line">
-                    {{ detail.a_location_to.name }}
+                    {{ detail.location_to.name }}
                 </td>
             {% else %}
                 <td></td>
@@ -166,8 +166,8 @@
                 {{ detail.ad_1_amount }}
             </td>
         </tr>
-        {% setvar detail.a_location_from.name as prev_from %}
-        {% setvar detail.a_location_to.name as prev_to %}
+        {% setvar detail.location_from.name as prev_from %}
+        {% setvar detail.location_to.name as prev_to %}
         {% setvar detail.addon.name as prev_addon %}
     {% endfor %}
 {% endif %}

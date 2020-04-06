@@ -178,7 +178,8 @@ class CommonSite(AdminSite):
             if model_index_action:
                 try:
                     index_url = reverse(
-                        self.model_action_url_format(model_index_action) % (model._meta.app_label, model._meta.model_name),
+                        self.model_action_url_format(model_index_action)
+                            % (model._meta.app_label, model._meta.model_name),
                         current_app=self.name)
                 except Exception as ex:
                     print('EXCEPTION common sites - _build_menu_dict : ' + ex.__str__())
@@ -186,7 +187,8 @@ class CommonSite(AdminSite):
             if not index_url:
                 try:
                     index_url = reverse(
-                        self.model_action_url_format('changelist') % (model._meta.app_label, model._meta.model_name),
+                        self.model_action_url_format('changelist')
+                            % (model._meta.app_label, model._meta.model_name),
                         current_app=self.name)
                 except Exception as ex:
                     print('EXCEPTION common sites - _build_menu_dict : ' + ex.__str__())
@@ -509,9 +511,11 @@ class SiteModel(TotalsumAdmin):
 
         urlpatterns = []
         if self.list_view is None or not issubclass(self.list_view, View):
-            urlpatterns += [self.build_url(r'^$', self.changelist_view, '%s_%s_changelist' % info),]
+            urlpatterns += [
+                self.build_url(r'^$', self.changelist_view, '%s_%s_changelist' % info),]
         else:
-            urlpatterns += [self.build_url(r'^$', self.list_view.as_view(), '%s_%s_changelist' % info),]
+            urlpatterns += [
+                self.build_url(r'^$', self.list_view.as_view(), '%s_%s_changelist' % info),]
 
         urlpatterns += [
             self.build_url(r'^add/$', self.add_view, '%s_%s_add' % info),
@@ -1164,7 +1168,7 @@ class SiteModel(TotalsumAdmin):
             self, request, form=None, obj=None, formsets=None, inline_instances=None,
             add=None, opts=None, object_id=None, to_field=None):
         return {}
-    
+
     def do_deleting(self, request, obj, obj_display, obj_id):
         """
         Hook for custom deleting actions.
@@ -1783,6 +1787,8 @@ class CommonModelSiteTemplateResponse(TemplateResponse):
 
 
 class CommonInlineModelAdmin(InlineModelAdmin):
+    queryset = None
+
     def related_field_widget_wrapper_class(self):
         return CommonRelatedFieldWidgetWrapper
 
@@ -1842,6 +1848,25 @@ class CommonInlineModelAdmin(InlineModelAdmin):
 
         # For any other type of field, just call its formfield() method.
         return db_field.formfield(**kwargs)
+
+    """
+    def get_queryset(self, request):
+        if not self.queryset:
+            qs = super(CommonInlineModelAdmin, self).get_queryset(request)
+            for related_field in self.list_select_related:
+                qs.select_related(related_field)
+            self.queryset = qs
+            
+        return self.queryset
+
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super(CommonInlineModelAdmin, self).get_formset(request, obj, **kwargs)
+
+        for related_field in self.list_select_related:
+            formset.form.base_fields[related_field].queryset = self.get_queryset(request)
+
+        return formset
+    """
 
 
 class CommonStackedInline(CommonInlineModelAdmin):

@@ -1,20 +1,23 @@
 {% load booking_tags %}
 {% load render_table from django_tables2 %}
-{% with current.get_child_object as service %}
-    {% if service.service_type == 'E' %}{# Extra service #}
-        Time: {{ service.time }}
-    {% elif service.service_type == 'T' %}{# Transfer service #}
-        <div>Time: {{ service.time }}</div>
-        <div>Pick Up: {% if service.pickup %}{{ service.pickup }}
-        {% elif service.place_from %}{{ service.place_from }}{% endif %}</div>
-        <div>Drop Off: {{ service.dropoff }}</div>
-    {% elif service.service_type == 'A' %}{# Accommodation service #}
-        Booking Info
+
+{% block detail %}
+    {% with current.get_child_object as service %}
+        {% if service.service_type == 'E' %}{# Extra service #}
+            Time: {{ service.time }}
+        {% elif service.service_type == 'T' %}{# Transfer service #}
+            <div>Time: {{ service.time }}</div>
+            <div>Pick Up: {% if service.pickup %}{{ service.pickup }}
+            {% elif service.place_from %}{{ service.place_from }}{% endif %}</div>
+            <div>Drop Off: {{ service.dropoff }}</div>
+        {% elif service.service_type == 'A' %}{# Accommodation service #}
+            Booking Info
+        {% endif %}
+    {% endwith %}
+    {% if current.has_payment %}
+    {% providerbookingpayment_table current as table %}
+    <div class="providerbookingpayments-container">
+        {% render_table table %}
+    </div>
     {% endif %}
-{% endwith %}
-{% if current.has_payment %}
-{% providerbookingpayment_table current as table %}
-<div class="providerbookingpayments-container">
-    {% render_table table %}
-</div>
-{% endif %}
+{% endblock detail %}
