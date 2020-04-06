@@ -8,7 +8,10 @@
     min-height: 0px;
     background: #417690;
     /*height: 35px;*/
-}    
+}
+.navbar li{
+    font-size: 14px;
+}
 .navbar-default .navbar-brand {
     padding-top: 5px;
     padding-bottom: 5px;
@@ -91,8 +94,7 @@
 /* button to collase left bar */
 #btn_left_collapse {
     float: left;
-    margin-top: 10px;
-    margin-right: 10px;
+    margin: 5px 10px 5px 0;
 }
 #btn_left_collapse span.glyphicon:before {
     content: "\e079";
@@ -165,8 +167,11 @@ h1 {
 .div-changelist .actions label {
     margin-bottom: 0px;
 }
+#navbarSupportedContent .dropdown-menu{
+    margin: 0;
+}
 .dropdown-menu > li > a {
-    padding: 3px 10px 3px 25px;
+    padding: 3px 10px 3px 5px;
 }
 
 .submit-row {

@@ -339,7 +339,6 @@ class SiteModel(TotalsumAdmin):
     recent_allowed = False
     custom_actions_template = ''
 
-
     class Media:
         pass
 

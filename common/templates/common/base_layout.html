@@ -37,13 +37,13 @@
                                             {% for model in menu.model_list %}
                                                 {% if model.group and model.group != prev_group %}
                                                     {% if prev_group != '' %}
-                                                        <li  class='divider'></li>
+                                                        <div class="dropdown-divider"></div>
                                                     {% endif %}
                                                     <li  class="dropdown-header">{{ model.group }}</li>
                                                     {% setvar model.group as prev_group %}
                                                 {% endif %}
                                                 {% setvar 'common/img/icon-model-'|add:model.app_label|add:model.name|add:'.png' as static_icon_url %}
-                                                <li  style='background-image: url("{% static static_icon_url %}")'>
+                                                <li class="dropdown-item" style='background-image: url("{% static static_icon_url %}")'>
                                                     <a role="menuitem" href="{{ model.index_url }}">{{ model.label }}</a>
                                                 </li>
                                             {% endfor %}
@@ -81,7 +81,7 @@
 {% endblock navbar %}
 
 {% block leftbar %}
-    <div id="leftbar_container" class="left-bg-color col-sm-2 col-md-3 col-lg-2 collapse show sidebar">
+    <div id="leftbar_container" class="left-bg-color col-sm-2 col-md-3 col-lg-2 collapse d-lg-block sidebar">
         <div class="left-bg-color">
         {% if module_name and current_model_actions %}
             {% block model_actions %}
