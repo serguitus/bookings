@@ -153,7 +153,7 @@ class BookingServiceTable(tables.Table):
                   'datetime_to', 'nights', 'description',
                   'cost_amount', 'price_amount',
                   'provider', 'conf_number', 'status', 'cost_amount_paid', 'time']
-        attrs = {'class': 'table table-hover table-condensed'}
+        attrs = {'class': 'table table-hover table-sm'}
         row_attrs = {
             'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING[record.status]),
         }
@@ -195,7 +195,7 @@ class AgencyPaymentTable(tables.Table):
         model = AgencyPayment
         template_name = 'booking/table/agencypayment_table.html'
         fields = ['name', 'date', 'status', 'account', 'amount', 'details']
-        attrs = {'class': 'table table-hover table-condensed'}
+        attrs = {'class': 'table table-hover table-sm'}
 
     def __init__(self, *args, **kwargs):
         self.base_columns['name'].verbose_name='Payment'
@@ -215,7 +215,7 @@ class ProviderBookingPaymentTable(tables.Table):
         template_name = 'booking/table/providerbookingpayment_table.html'
         fields = ['name', 'date', 'status', 'account', 'services_amount',
                 'currency_rate', 'amount', 'details']
-        attrs = {'class': 'table table-hover table-condensed'}
+        attrs = {'class': 'table table-hover table-sm'}
 
     def __init__(self, *args, **kwargs):
         self.base_columns['services_amount'].verbose_name='Serv.Amount'
@@ -235,7 +235,7 @@ class BookingExtraComponentTable(tables.Table):
         model = BookingExtraComponent
         template_name = 'booking/table/bookingextracomponent_table.html'
         fields = ['name',]
-        attrs = {'class': 'table table-hover table-condensed'}
+        attrs = {'class': 'table table-hover table-sm'}
 
 
 class ProviderBookingPaymentServiceTable(tables.Table):
@@ -246,7 +246,7 @@ class ProviderBookingPaymentServiceTable(tables.Table):
             'provider_service_datetime_from', 'provider_service_datetime_to',
             'provider_service_status', 'service_cost_amount_to_pay', 'service_cost_amount_paid',
             'amount_paid']
-        attrs = {'class': 'table table-hover table-condensed'}
+        attrs = {'class': 'table table-hover table-sm'}
 
     def __init__(self, *args, **kwargs):
         self.base_columns['service_cost_amount_to_pay'].verbose_name='Serv.To Pay'
@@ -273,7 +273,7 @@ class ProviderBookingPaymentReportTable(tables.Table):
                   'provider_service_datetime_to',
                   'service_cost_amount_pending',
                   'amount_paid', 'provider_service_balance']
-        attrs = {'class': 'table table-hover table-condensed'}
+        attrs = {'class': 'table table-hover table-sm'}
         order_by = ('datetime_from', 'datetime_to')
 
     def __init__(self, *args, **kwargs):
@@ -356,7 +356,7 @@ class BookingServiceSummaryTable(tables.Table):
         model = BookingService
         template_name = 'booking/include/base_table.html'
         fields = ['name', 'datetime_from', 'datetime_to', 'provider', 'status']
-        attrs = {'class': 'table table-hover table-condensed'}
+        attrs = {'class': 'table table-hover table-sm'}
         row_attrs = {
             'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING[record.status]),
         }
@@ -423,7 +423,7 @@ class BookingPackageServiceSummaryTable(tables.Table):
         template_name = 'booking/include/base_table.html'
         fields = [
             'name', 'datetime_from', 'datetime_to', 'provider', 'status']
-        attrs = {'class': 'table table-hover table-condensed'}
+        attrs = {'class': 'table table-hover table-sm'}
         row_attrs = {
             'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING[record.status]),
         }
