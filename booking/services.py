@@ -291,7 +291,7 @@ class BookingServices(object):
                 dst_service=bookingdetail_allotment,
                 src_service=quotedetail_allotment)
             cls.build_book_detail_from_quote_detail(
-                quotedetail_allotment, quotedetail_allotment, booking_service)
+                bookingdetail_allotment, quotedetail_allotment, booking_service)
 
         for quotedetail_transfer in QuoteServiceBookDetailTransfer.objects.filter(
                 quote_service_id=quote_service.id).all():
@@ -300,7 +300,7 @@ class BookingServices(object):
                 dst_service=bookingdetail_transfer,
                 src_service=quotedetail_transfer)
             cls.build_book_detail_from_quote_detail(
-                quotedetail_transfer, quotedetail_transfer, booking_service)
+                bookingdetail_transfer, quotedetail_transfer, booking_service)
 
         for quotedetail_extra in QuoteServiceBookDetailExtra.objects.filter(
                 quote_service_id=quote_service.id).all():
@@ -309,7 +309,7 @@ class BookingServices(object):
                 dst_service=bookingdetail_extra,
                 src_service=quotedetail_extra)
             cls.build_book_detail_from_quote_detail(
-                quotedetail_extra, quotedetail_extra, booking_service)
+                bookingdetail_extra, quotedetail_extra, booking_service)
 
 
     @classmethod
@@ -333,7 +333,7 @@ class BookingServices(object):
         booking_service.avoid_booking_update = True
         booking_service.save()
         cls.build_bookingservice_paxes(booking_service, pax_list, user)
-        cls.build_bookingservice_book_details_from_quoteservice_book_details(
+        cls.build_bookingservice_details_from_quoteservice(
             booking_service, quote_service)
 
 
