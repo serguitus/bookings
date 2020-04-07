@@ -182,6 +182,10 @@ h1 {
     float: right;
 }
 
+.btn-copy-cost, .btn-copy-price{
+    margin-left: 10px;
+}
+
 .change-tool {
     background-color: green;
 }

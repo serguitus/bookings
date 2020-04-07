@@ -9,7 +9,8 @@
             <div>Time: {{ service.time }}</div>
             <div>Pick Up: {% if service.pickup %}{{ service.pickup }}
             {% elif service.place_from %}{{ service.place_from }}{% endif %}</div>
-            <div>Drop Off: {{ service.dropoff }}</div>
+            <div>Drop Off: {% if service.dropoff %}{{ service.dropoff }}
+            {% elif service.place_to %}{{ service.place_to }}{% endif %}</div>
         {% elif service.service_type == 'A' %}{# Accommodation service #}
             Booking Info
         {% endif %}
