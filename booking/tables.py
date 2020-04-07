@@ -18,7 +18,8 @@ from booking.models import (
 from booking.constants import (
     PACKAGESERVICE_TYPES, QUOTESERVICE_TYPES, QUOTEPACKAGESERVICE_TYPES,
     BOOKINGSERVICE_TYPES,
-    BOOKINGPACKAGESERVICE_TYPES, BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING,
+    BOOKINGPACKAGESERVICE_TYPES,
+    BOOTSTRAP_STYLE_QUOTE_STATUS_MAPPING, BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING,
     QUOTESERVICE_BOOK_DETAIL_CATEGORIES, BOOKINGSERVICE_BOOK_DETAIL_CATEGORIES)
 
 from finance.models import (
@@ -336,7 +337,7 @@ class QuoteConfirmationTable(tables.Table):
                  'border': '1'}
         row_attrs = {
             'class': lambda record: '{}'.format(
-                BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING[record.status]),
+                BOOTSTRAP_STYLE_QUOTE_STATUS_MAPPING[record.status]),
         }
 
     def __init__(self, *args, **kwargs):
