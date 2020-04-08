@@ -3,11 +3,9 @@
 {% load static %}
 
 {% block head_extra %}
-  <script type="text/javascript">
-    var service_id = {{ object_id }};
-  </script>
-  <script type="text/javascript" src="{% static 'booking/js/quoteextra.js' %}"></script>
+  {% include 'config/include/load_service_id.html' with service_id=object_id %}
   {{ block.super }}
+  <script type="text/javascript" src="{% static 'booking/js/quoteextra.js' %}"></script>
   <script type="text/javascript" src="{% static 'booking/js/quoteservice_change.js' %}"></script>
   <script type="text/javascript" src="{% static 'config/js/add_service_detail.js' %}"></script>
 {% endblock head_extra %}

@@ -1148,7 +1148,7 @@ class QuoteServiceBookDetailTransferForm(forms.ModelForm, BaseBookDataForm):
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
             'service_addon': autocomplete.ModelSelect2(
                 url='addon-autocomplete',
-                forward=['service'],
+                forward=['book_service'],
                 ),
         }
 
@@ -1166,15 +1166,15 @@ class QuoteServiceBookDetailExtraForm(forms.ModelForm, BaseBookDataForm):
                 ),
             'service_addon': autocomplete.ModelSelect2(
                 url='addon-autocomplete',
-                forward=['service'],
+                forward=['book_service'],
                 ),
             'pickup_office': autocomplete.ModelSelect2(
                 url='carrentaloffice-autocomplete',
-                forward=['service',],
+                forward=['book_service',],
                 ),
             'dropoff_office': autocomplete.ModelSelect2(
                 url='carrentaloffice-autocomplete',
-                forward=['service',],
+                forward=['book_service',],
                 ),
         }
 
@@ -1219,7 +1219,7 @@ class BookingServiceBookDetailTransferForm(forms.ModelForm, BaseBookDataForm):
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
             'service_addon': autocomplete.ModelSelect2(
                 url='addon-autocomplete',
-                forward=['service'],
+                forward=['book_service'],
                 ),
         }
 
@@ -1237,14 +1237,14 @@ class BookingServiceBookDetailExtraForm(forms.ModelForm, BaseBookDataForm):
                 ),
             'service_addon': autocomplete.ModelSelect2(
                 url='addon-autocomplete',
-                forward=['service'],
+                forward=['book_service'],
                 ),
             'pickup_office': autocomplete.ModelSelect2(
                 url='carrentaloffice-autocomplete',
-                forward=['service',],
+                forward=['book_service',],
                 ),
             'dropoff_office': autocomplete.ModelSelect2(
                 url='carrentaloffice-autocomplete',
-                forward=['service',],
+                forward=['boo_service',],
                 ),
         }

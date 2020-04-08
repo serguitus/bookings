@@ -1730,7 +1730,7 @@ class ConfigServices(object):
 
 
     @classmethod
-    def copy_detail_service_info(cls, dst_service, src_service):
+    def copy_book_service_data(cls, dst_service, src_service):
         dst_service.name = src_service.name
         dst_service.description = src_service.description
         dst_service.base_service = src_service.base_service
@@ -1740,15 +1740,15 @@ class ConfigServices(object):
 
 
     @classmethod
-    def copy_detail_allotment_info(cls, dst_service, src_service):
-        cls.copy_detail_service_info(dst_service, src_service)
+    def copy_book_allotment_data(cls, dst_service, src_service):
+        cls.copy_book_service_data(dst_service, src_service)
         dst_service.room_type = src_service.room_type
         dst_service.board_type = src_service.board_type
 
 
     @classmethod
-    def copy_detail_transfer_info(cls, dst_service, src_service):
-        cls.copy_detail_service_info(dst_service, src_service)
+    def copy_book_transfer_data(cls, dst_service, src_service):
+        cls.copy_book_service_data(dst_service, src_service)
         dst_service.location_from = src_service.location_from
         dst_service.location_to = src_service.location_to
         dst_service.place_from = src_service.place_from
@@ -1763,8 +1763,8 @@ class ConfigServices(object):
 
 
     @classmethod
-    def copy_detail_extra_info(cls, dst_service, src_service):
-        cls.copy_detail_service_info(dst_service, src_service)
+    def copy_book_extra_data(cls, dst_service, src_service):
+        cls.copy_book_service_data(dst_service, src_service)
         dst_service.pickup_office = src_service.pickup_office
         dst_service.dropoff_office = src_service.dropoff_office
         dst_service.quantity = src_service.quantity
