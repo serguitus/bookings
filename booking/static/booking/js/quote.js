@@ -40,7 +40,7 @@ $(document).ready(function(){
         clear_values(data['message']);
       }
     }).fail(function(){
-      clear_values();
+      clear_values('N/A');
     })
   }
 

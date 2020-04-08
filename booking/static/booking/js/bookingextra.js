@@ -37,10 +37,20 @@ $(document).ready(function(){
           }
         }).fail(function(){
           clear_values('N/A');
-        })
-    }
+        });
+      }
     
-    function changed_component_manual_costs(target){
+      function clear_values(msg) {
+        $('span.computed-value').each(function(index) {
+          $( this ).html(msg);
+        });
+        $('button.btn-copy').each(function(index) {
+          $( this ).removeClass('btn-success');
+          $( this ).addClass('btn-danger');
+        });
+      }
+    
+      function changed_component_manual_costs(target){
         isManualCost = target.checked;
         // find index
         idx = target.name.substring(25, target.name.length - 13);
@@ -96,7 +106,7 @@ $(document).ready(function(){
             if (number) {
               input.val(number);
               compare_component_amounts(input, span, button);
-              get_computed_component_amounts();
+              get_component_computed_amounts();
             }
             return false;
         });
@@ -110,7 +120,7 @@ $(document).ready(function(){
             if (number) {
               input.val(number);
               compare_component_amounts(input, span, button);
-              get_computed_component_amounts();
+              get_component_computed_amounts();
             }
             return false;
         });
