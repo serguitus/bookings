@@ -321,9 +321,9 @@ class AmountDetail(models.Model):
         max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3rd CHD')
 
 
-#===============================================================================
+# ===========================================================================
 # Extra
-#===============================================================================
+# ===========================================================================
 class Extra(Service):
     """
     Extra
@@ -346,8 +346,8 @@ class Extra(Service):
 
     def __str__(self):
         if self.parameter_type == EXTRA_PARAMETER_TYPE_HOURS:
-            return '%s (Hours)'  % self.name
-        return '%s'  % self.name
+            return '%s (Hours)' % self.name
+        return '%s' % self.name
 
 
 class ExtraSupplement(ServiceSupplement):
@@ -714,9 +714,9 @@ class AgencyTransferDetail(AmountDetail, RouteData):
     pax_range_max = models.SmallIntegerField(default=0)
 
 
-#===============================================================================
+# ===============================================================================
 # BOOK DETAILS
-#===============================================================================
+# ===============================================================================
 
 class BookServiceData(models.Model):
     """
@@ -730,7 +730,7 @@ class BookServiceData(models.Model):
     base_location = models.ForeignKey(
         Location, related_name='%(class)s_base_location',
         blank=True, null=True, verbose_name='Location')
-    service_addon = models.ForeignKey(
+    service_addon  = models.ForeignKey(
         Addon, related_name='%(class)s_service_addon', blank=True, null=True, verbose_name='Addon')
     time = models.TimeField(blank=True, null=True)
 

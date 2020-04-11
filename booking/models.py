@@ -1252,7 +1252,7 @@ class BookingAllotment(BookingService, BookAllotmentData):
         verbose_name = 'Booking Accomodation'
         verbose_name_plural = 'Bookings Accomodations'
     service = models.ForeignKey(Allotment)
-    version = AutoIncVersionField( )
+    version = AutoIncVersionField()
 
     def __unicode__(self):
         return '%s (%s - %s)' % (self.name,
@@ -1338,7 +1338,7 @@ class BookingTransfer(BookingService, BookTransferData):
         verbose_name = 'Booking Transfer'
         verbose_name_plural = 'Booking Transfers'
     service = models.ForeignKey(Transfer)
-    version = AutoIncVersionField( )
+    version = AutoIncVersionField()
 
     def build_description(self):
         return '%s pax' % self.rooming_list.count()

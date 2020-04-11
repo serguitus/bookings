@@ -1975,7 +1975,8 @@ class BookingExtraSiteModel(BaseBookingServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                'booking', ('service', 'search_location'), ('status', 'conf_number'),
+                'booking', ('service', 'search_location'),
+                ('status', 'conf_number'),
                 ('datetime_from', 'nights', 'datetime_to', 'time'),
                 'service_addon',
                 ('quantity', 'parameter'),
@@ -1985,14 +1986,16 @@ class BookingExtraSiteModel(BaseBookingServiceSiteModel):
                 'utility_percent', 'utility',
                 'booking_general_notes',
                 'id', 'version',
-                'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
+                'submit_action', 'mail_from', 'mail_to', 'mail_cc',
+                'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
-                   'classes': ('collapse', 'wide')})
+                   'classes': ('collapse', 'wide', 'show')})
     )
-    list_display = ('booking', 'name', 'service_addon', 'quantity', 'parameter',
-                    'datetime_from', 'datetime_to', 'time',
-                    'cost_amount', 'manual_cost', 'price_amount', 'manual_price', 'utility_percent', 'utility',
+    list_display = ('booking', 'name', 'service_addon', 'quantity',
+                    'parameter', 'datetime_from', 'datetime_to', 'time',
+                    'cost_amount', 'manual_cost', 'price_amount',
+                    'manual_price', 'utility_percent', 'utility',
                     'status',)
     top_filters = ('booking__name', 'service', 'booking__reference',
                    ('datetime_from', DateTopFilter), 'status',)

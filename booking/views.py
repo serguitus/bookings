@@ -1177,7 +1177,6 @@ class ServiceDetailsView(View):
         service_id = request.POST.get('service', None)
         return self.process_data(service_id)
 
-
     def process_data(self, service_id):
         return JsonResponse({
             'service_id': service_id,
@@ -1187,21 +1186,22 @@ class ServiceDetailsView(View):
 class ExtraServiceDetailsView(ServiceDetailsView):
 
     def process_data(self, service_id):
-        extra = Extra.objects.get(pk=service_id)
-        return JsonResponse({
-            'service_id': service_id,
-            'car_rental': extra.car_rental is not None,
-        })
+        if service_id:
+            extra = Extra.objects.get(pk=service_id)
+            return JsonResponse({
+                'service_id': service_id,
+                'car_rental': extra.car_rental is not None,
+            })
+        return JsonResponse({})
 
 
 class TransferServiceDetailsView(View):
-    
+
     def post(self, request, *args, **kwargs):
         service_id = request.POST.get('service', None)
         location_from_id = request.POST.get('location_from', None)
         location_to_id = request.POST.get('location_to', None)
         return self.process_data(service_id, location_from_id, location_to_id)
-
 
     def process_data(self, service_id, location_from_id, location_to_id):
         has_place_from = False
