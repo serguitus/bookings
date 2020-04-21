@@ -75,10 +75,12 @@ class BookingPaidTopFilter(filters.BooleanFilter):
         search_option = self._values[0]
         if search_option == "True":
             queryset = queryset.exclude(status__exact=BOOKING_STATUS_CANCELLED)
-            queryset = queryset.filter(invoice__isnull=False, invoice__amount=F('invoice__match_amount'))
+            queryset = queryset.filter(
+                invoice__isnull=False, invoice__amount=F('invoice__matched_amount'))
         if search_option == "False":
             queryset = queryset.exclude(status__exact=BOOKING_STATUS_CANCELLED)
-            queryset = queryset.exclude(invoice__isnull=False, invoice__amount=F('invoice__match_amount'))
+            queryset = queryset.exclude(
+                invoice__isnull=False, invoice__amount=F('invoice__matched_amount'))
 
         queryset = queryset.distinct()
         return queryset
