@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'dal',
     'dal_select2',
     'django_tables2',
-    'dal_legacy_static',
     'totalsum',
     # 'django_pdb',
 
