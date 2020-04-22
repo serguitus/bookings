@@ -666,8 +666,8 @@ class ProviderTransferServiceSiteModel(SiteModel):
     #inlines = [ProviderTransferDetailInline]
     ordering = ['service', 'provider', '-date_from']
     form = ProviderTransferServiceForm
-    change_details_template = 'config/include/provider_transfer_service_details.html'
     list_select_related = ('service', 'provider')
+    change_details_template = 'config/include/provider_transfer_service_details.html'
     save_as = True
 
     actions = ['rewrite_agency_amounts', 'update_agency_amounts']
@@ -751,10 +751,11 @@ class ProviderExtraServiceSiteModel(SiteModel):
     top_filters = (
         ('service', ExtraTopFilter), ('provider', ProviderTopFilter),
         ('date_to', DateToTopFilter))
-    inlines = [ProviderExtraDetailInline]
+    #inlines = [ProviderExtraDetailInline]
     ordering = ['service', 'provider', '-date_from']
     form = ProviderExtraServiceForm
     list_select_related = ('service', 'provider')
+    change_details_template = 'config/include/provider_extra_service_details.html'
     save_as = True
 
     actions = ['rewrite_agency_amounts', 'update_agency_amounts']
