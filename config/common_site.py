@@ -27,9 +27,11 @@ from config.constants import (
 
 from config.forms import (
     ProviderAllotmentServiceForm, ProviderTransferServiceForm, ProviderExtraServiceForm,
+    ProviderAllotmentDetailForm, ProviderTransferDetailForm, ProviderExtraDetailForm,
     ProviderAllotmentDetailInlineForm, ProviderTransferDetailInlineForm,
     ProviderExtraDetailInlineForm,
     AgencyAllotmentServiceForm, AgencyTransferServiceForm, AgencyExtraServiceForm,
+    AgencyAllotmentDetailForm, AgencyTransferDetailForm, AgencyExtraDetailForm,
     AgencyAllotmentDetailInlineForm, AgencyTransferDetailInlineForm,
     AgencyExtraDetailInlineForm,
     AllotmentRoomTypeInlineForm, ExtraComponentInlineForm, TransferZoneForm,
@@ -77,6 +79,58 @@ from reservas.admin import bookings_site
 
 
 MENU_LABEL_CONFIG_BASIC = 'Configuration'
+
+
+def export_prices(request, queryset, extra_context=None):
+    """
+    This allows exporting service prices for certain agency and dates
+    """
+    context = {}
+    if 'apply' in request.POST:
+        # The user clicked submit on the intermediate form.
+        # render the pdf
+        agency = request.POST.get('agency', None)
+
+        from common.filters import parse_date
+
+        date_from = parse_date(request.POST.get('start_date', None))
+        date_to = parse_date(request.POST.get('end_date', None))
+
+        services = request.POST.getlist('_selected_action', [])
+        if agency and services:
+            return render_prices_pdf(
+                request,
+                {
+                    'agency': Agency.objects.get(id=agency),
+                    'date_from': date_from,
+                    'date_to': date_to,
+                    'services': Service.objects.filter(id__in=services).order_by('location__name')
+                })
+    context.update({'services': queryset})
+    context.update({'form': PricesExportForm()})
+    context.update({'site_title': 'Export Services'})
+    context.update(extra_context or {})
+    # context.update({'quote_id': id})
+    return render(request, 'config/agency_prices_export.html', context=context)
+
+
+def response_post_agency_service(request, obj, url):
+    if hasattr(obj, 'agency_service') and obj.agency_service:
+        return redirect(reverse(url, args=[obj.agency_service.pk]))
+    agency_service = request.POST.get('agency_service')
+    if agency_service:
+        return redirect(reverse(url, args=[agency_service]))
+    return None
+
+
+def response_post_provider_service(request, obj, url):
+    if hasattr(obj, 'provider_service') and obj.provider_service:
+        return redirect(reverse(url, args=[obj.provider_service.pk]))
+    provider_service = request.POST.get('provider_service')
+    if provider_service:
+        return redirect(reverse(url, args=[provider_service]))
+    return None
+
 
 class IncorrectLookupParameters(Exception):
     pass
@@ -417,39 +471,6 @@ class AllotmentTransferZoneInline(CommonTabularInline):
     extra = 0
 
 
-def export_prices(request, queryset, extra_context=None):
-    """
-    This allows exporting service prices for certain agency and dates
-    """
-    context = {}
-    if 'apply' in request.POST:
-        # The user clicked submit on the intermediate form.
-        # render the pdf
-        agency = request.POST.get('agency', None)
-
-        from common.filters import parse_date
-
-        date_from = parse_date(request.POST.get('start_date', None))
-        date_to = parse_date(request.POST.get('end_date', None))
-
-        services = request.POST.getlist('_selected_action', [])
-        if agency and services:
-            return render_prices_pdf(
-                request,
-                {
-                    'agency': Agency.objects.get(id=agency),
-                    'date_from': date_from,
-                    'date_to': date_to,
-                    'services': Service.objects.filter(id__in=services).order_by('location__name')
-                })
-    context.update({'services': queryset})
-    context.update({'form': PricesExportForm()})
-    context.update({'site_title': 'Export Services'})
-    context.update(extra_context or {})
-    # context.update({'quote_id': id})
-    return render(request, 'config/agency_prices_export.html', context=context)
-
-
 class AllotmentSiteModel(BaseServiceSiteModel):
     model_order = 6110
     menu_label = MENU_LABEL_CONFIG_BASIC
@@ -551,12 +572,13 @@ class ProviderAllotmentServiceSiteModel(SiteModel):
     top_filters = (
         ('service', AllotmentTopFilter), ('provider', ProviderTopFilter),
         ('date_to', DateToTopFilter))
-    inlines = [ProviderAllotmentDetailInline]
+    #inlines = [ProviderAllotmentDetailInline]
     ordering = ['service', 'provider', '-date_from']
     form = ProviderAllotmentServiceForm
     change_form_template = 'config/provider_allotment_change_form.html'
     add_form_template = 'config/provider_allotment_change_form.html'
     list_select_related = ('service', 'provider')
+    change_details_template = 'config/include/provider_allotment_service_details.html'
     save_as = True
 
     actions = ['rewrite_agency_amounts', 'update_agency_amounts']
@@ -572,6 +594,51 @@ class ProviderAllotmentServiceSiteModel(SiteModel):
     update_agency_amounts.short_description = "Generate New Agency Prices"
 
 
+class ProviderAllotmentDetailSiteModel(SiteModel):
+    recent_allowed = False
+    fields = (
+        'provider_service',
+        ('room_type', 'board_type', 'addon'),
+        ('pax_range_min', 'pax_range_max'),
+        ('ad_1_amount', 'ch_1_ad_1_amount', 'ch_2_ad_1_amount'), #, 'ch_3_ad_1_amount',),
+        ('ad_2_amount', 'ch_1_ad_2_amount', 'ch_2_ad_2_amount',), # 'ch_3_ad_2_amount',),
+        ('ad_3_amount', 'ch_1_ad_3_amount', 'ch_2_ad_3_amount',), # 'ch_3_ad_3_amount',),
+        ('ad_4_amount', 'ch_1_ad_4_amount',), # 'ch_2_ad_3_amount',), # 'ch_3_ad_3_amount',),
+        # ('ch_1_ad_0_amount', 'ch_2_ad_0_amount', 'ch_3_ad_0_amount',),
+    )
+    list_display = (
+        'provider_service', 'room_type', 'board_type', 'addon',
+        'pax_range_min', 'pax_range_max',
+        'ad_1_amount', 'ad_2_amount', 'ad_3_amount', 'ad_4_amount')
+    #top_filters = (
+    #    ('provider_service__service', AllotmentTopFilter), ('provider_service__provider', ProviderTopFilter),
+    #    ('provider_service__date_to', DateToTopFilter))
+    ordering = [
+        'provider_service__service', '-provider_service__date_from', 'provider_service__provider']
+    form = ProviderAllotmentDetailForm
+
+    def response_post_delete(self, request, obj):
+        response = response_post_provider_service(
+            request, obj, 'common:config_providerallotmentservice_change')
+        if response:
+            return response
+        return super(ProviderAllotmentDetailSiteModel, self).response_post_delete(request, obj)
+
+    def response_post_save_add(self, request, obj):
+        response = response_post_provider_service(
+            request, obj, 'common:config_providerallotmentservice_change')
+        if response:
+            return response
+        return super(ProviderAllotmentDetailSiteModel, self).response_post_save_add(request, obj)
+
+    def response_post_save_change(self, request, obj):
+        response = response_post_provider_service(
+            request, obj, 'common:config_providerallotmentservice_change')
+        if response:
+            return response
+        return super(ProviderAllotmentDetailSiteModel, self).response_post_save_change(request, obj)
+
+
 class ProviderTransferDetailInline(CommonTabularInline):
     model = ProviderTransferDetail
     extra = 0
@@ -585,11 +652,39 @@ class ProviderTransferDetailInline(CommonTabularInline):
     list_select_related = ('location_from', 'location_to', 'addon')
 
 
-class ProviderTransferDetailSiteModel(SiteModel):
+class ProviderTransferServiceSiteModel(SiteModel):
     model_order = 7230
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Provider Catalogue'
-    readonly_model = True
+    #recent_allowed = True
+    fields = ('provider', 'service', 'date_from', 'date_to',)
+    list_display = ('service', 'provider', 'date_from', 'date_to',)
+    top_filters = (
+        ('service', TransferTopFilter), ('provider', ProviderTopFilter),
+        ('date_to', DateToTopFilter),
+        ProviderTransferLocationTopFilter, ProviderTransferLocationAdditionalTopFilter)
+    #inlines = [ProviderTransferDetailInline]
+    ordering = ['service', 'provider', '-date_from']
+    form = ProviderTransferServiceForm
+    list_select_related = ('service', 'provider')
+    change_details_template = 'config/include/provider_transfer_service_details.html'
+    save_as = True
+
+    actions = ['rewrite_agency_amounts', 'update_agency_amounts']
+
+    def rewrite_agency_amounts(self, request, queryset):
+        ConfigServices.generate_agency_transfers_amounts_from_providers_transfers(
+            list(queryset.all()), False)
+    rewrite_agency_amounts.short_description = "Generate All Agency Prices"
+
+    def update_agency_amounts(self, request, queryset):
+        ConfigServices.generate_agency_transfers_amounts_from_providers_transfers(
+            list(queryset.all()), True)
+    update_agency_amounts.short_description = "Generate New Agency Prices"
+
+
+class ProviderTransferDetailSiteModel(SiteModel):
+    recent_allowed = False
     fields = (
         ('location_from', 'location_to', 'addon'),
         ('pax_range_min', 'pax_range_max'),
@@ -606,37 +701,29 @@ class ProviderTransferDetailSiteModel(SiteModel):
     ordering = [
         'location_from', 'location_to',
         'provider_service__service', 'pax_range_max', 'ad_1_amount',]
+    form = ProviderTransferDetailForm
     list_select_related = ('location_from', 'location_to', 'addon')
 
+    def response_post_delete(self, request, obj):
+        response = response_post_provider_service(
+            request, obj, 'common:config_providertransferservice_change')
+        if response:
+            return response
+        return super(ProviderTransferDetailSiteModel, self).response_post_delete(request, obj)
 
-class ProviderTransferServiceSiteModel(SiteModel):
-    model_order = 7230
-    menu_label = MENU_LABEL_CONFIG_BASIC
-    menu_group = 'Provider Catalogue'
-    #recent_allowed = True
-    fields = ('provider', 'service', 'date_from', 'date_to',)
-    list_display = ('service', 'provider', 'date_from', 'date_to',)
-    top_filters = (
-        ('service', TransferTopFilter), ('provider', ProviderTopFilter),
-        ('date_to', DateToTopFilter),
-        ProviderTransferLocationTopFilter, ProviderTransferLocationAdditionalTopFilter)
-    inlines = [ProviderTransferDetailInline]
-    ordering = ['service', 'provider', '-date_from']
-    form = ProviderTransferServiceForm
-    list_select_related = ('service', 'provider')
-    save_as = True
+    def response_post_save_add(self, request, obj):
+        response = response_post_provider_service(
+            request, obj, 'common:config_providertransferservice_change')
+        if response:
+            return response
+        return super(ProviderTransferDetailSiteModel, self).response_post_save_add(request, obj)
 
-    actions = ['rewrite_agency_amounts', 'update_agency_amounts']
-
-    def rewrite_agency_amounts(self, request, queryset):
-        ConfigServices.generate_agency_transfers_amounts_from_providers_transfers(
-            list(queryset.all()), False)
-    rewrite_agency_amounts.short_description = "Generate All Agency Prices"
-
-    def update_agency_amounts(self, request, queryset):
-        ConfigServices.generate_agency_transfers_amounts_from_providers_transfers(
-            list(queryset.all()), True)
-    update_agency_amounts.short_description = "Generate New Agency Prices"
+    def response_post_save_change(self, request, obj):
+        response = response_post_provider_service(
+            request, obj, 'common:config_providertransferservice_change')
+        if response:
+            return response
+        return super(ProviderTransferDetailSiteModel, self).response_post_save_change(request, obj)
 
 
 class ProviderExtraDetailInline(CommonTabularInline):
@@ -664,10 +751,11 @@ class ProviderExtraServiceSiteModel(SiteModel):
     top_filters = (
         ('service', ExtraTopFilter), ('provider', ProviderTopFilter),
         ('date_to', DateToTopFilter))
-    inlines = [ProviderExtraDetailInline]
+    #inlines = [ProviderExtraDetailInline]
     ordering = ['service', 'provider', '-date_from']
     form = ProviderExtraServiceForm
     list_select_related = ('service', 'provider')
+    change_details_template = 'config/include/provider_extra_service_details.html'
     save_as = True
 
     actions = ['rewrite_agency_amounts', 'update_agency_amounts']
@@ -681,6 +769,42 @@ class ProviderExtraServiceSiteModel(SiteModel):
         ConfigServices.generate_agency_extras_amounts_from_providers_extras(
             list(queryset.all()), True)
     update_agency_amounts.short_description = "Generate New Agency Prices"
+
+
+class ProviderExtraDetailSiteModel(SiteModel):
+    recent_allowed = False
+    fields = (
+        'provider_service',
+        ('pax_range_min', 'pax_range_max'),
+        ('addon', 'ad_1_amount'), )
+    list_display = ('provider_service', 'pax_range_min', 'pax_range_max', 'addon', 'ad_1_amount')
+    #top_filters = (
+    #    ('provider_service__service', ExtraTopFilter), ('provider_service__provider', ProviderTopFilter),
+    #    ('provider_service__date_to', DateToTopFilter))
+    ordering = [
+        'provider_service__service', '-provider_service__date_from', 'provider_service__provider']
+    form = ProviderExtraDetailForm
+
+    def response_post_delete(self, request, obj):
+        response = response_post_provider_service(
+            request, obj, 'common:config_providerextraservice_change')
+        if response:
+            return response
+        return super(ProviderExtraDetailSiteModel, self).response_post_delete(request, obj)
+
+    def response_post_save_add(self, request, obj):
+        response = response_post_provider_service(
+            request, obj, 'common:config_providerextraservice_change')
+        if response:
+            return response
+        return super(ProviderExtraDetailSiteModel, self).response_post_save_add(request, obj)
+
+    def response_post_save_change(self, request, obj):
+        response = response_post_provider_service(
+            request, obj, 'common:config_providerextraservice_change')
+        if response:
+            return response
+        return super(ProviderExtraDetailSiteModel, self).response_post_save_change(request, obj)
 
 
 class AgencyAllotmentDetailInline(CommonStackedInline):
@@ -699,6 +823,7 @@ class AgencyAllotmentDetailInline(CommonStackedInline):
     form = AgencyAllotmentDetailInlineForm
     list_select_related = ('room_type', 'addon')
 
+
 class AgencyAllotmentServiceSiteModel(SiteModel):
     model_order = 7120
     menu_label = MENU_LABEL_CONFIG_BASIC
@@ -709,11 +834,57 @@ class AgencyAllotmentServiceSiteModel(SiteModel):
     top_filters = (
         ('service', AllotmentTopFilter), ('agency', AgencyTopFilter),
         ('date_to', DateToTopFilter))
-    inlines = [AgencyAllotmentDetailInline]
+    #inlines = [AgencyAllotmentDetailInline]
     ordering = ['service', 'agency', '-date_from']
     form = AgencyAllotmentServiceForm
     list_select_related = ('agency', 'service')
+    change_details_template = 'config/include/agency_allotment_service_details.html'
     save_as = True
+
+
+class AgencyAllotmentDetailSiteModel(SiteModel):
+    recent_allowed = False
+    fields = (
+        'agency_service',
+        ('room_type', 'board_type', 'addon'),
+        ('pax_range_min', 'pax_range_max'),
+        ('ad_1_amount', 'ch_1_ad_1_amount', 'ch_2_ad_1_amount'), #, 'ch_3_ad_1_amount',),
+        ('ad_2_amount', 'ch_1_ad_2_amount', 'ch_2_ad_2_amount',), # 'ch_3_ad_2_amount',),
+        ('ad_3_amount', 'ch_1_ad_3_amount', 'ch_2_ad_3_amount',), # 'ch_3_ad_3_amount',),
+        ('ad_4_amount', 'ch_1_ad_4_amount',), # 'ch_2_ad_3_amount',), # 'ch_3_ad_3_amount',),
+        # ('ch_1_ad_0_amount', 'ch_2_ad_0_amount', 'ch_3_ad_0_amount',),
+    )
+    list_display = (
+        'agency_service', 'room_type', 'board_type', 'addon',
+        'pax_range_min', 'pax_range_max',
+        'ad_1_amount', 'ad_2_amount', 'ad_3_amount', 'ad_4_amount')
+    #top_filters = (
+    #    ('agency_service__service', AllotmentTopFilter), ('agency_service__agency', AgencyTopFilter),
+    #    ('agency_service__date_to', DateToTopFilter))
+    ordering = [
+        'agency_service__service', '-agency_service__date_from', 'agency_service__agency']
+    form = AgencyAllotmentDetailForm
+
+    def response_post_delete(self, request, obj):
+        response = response_post_agency_service(
+            request, obj, 'common:config_agencyallotmentservice_change')
+        if response:
+            return response
+        return super(AgencyAllotmentDetailSiteModel, self).response_post_delete(request, obj)
+
+    def response_post_save_add(self, request, obj):
+        response = response_post_agency_service(
+            request, obj, 'common:config_agencyallotmentservice_change')
+        if response:
+            return response
+        return super(AgencyAllotmentDetailSiteModel, self).response_post_save_add(request, obj)
+
+    def response_post_save_change(self, request, obj):
+        response = response_post_agency_service(
+            request, obj, 'common:config_agencyallotmentservice_change')
+        if response:
+            return response
+        return super(AgencyAllotmentDetailSiteModel, self).response_post_save_change(request, obj)
 
 
 class AgencyTransferDetailInline(CommonTabularInline):
@@ -740,11 +911,51 @@ class AgencyTransferServiceSiteModel(SiteModel):
         ('service', TransferTopFilter), ('agency', AgencyTopFilter),
         ('date_to', DateToTopFilter),
         AgencyTransferLocationTopFilter, AgencyTransferLocationAdditionalTopFilter)
-    inlines = [AgencyTransferDetailInline]
+    #inlines = [AgencyTransferDetailInline]
     ordering = ['service', 'agency', '-date_from']
     form = AgencyTransferServiceForm
     list_select_related = ('service', 'agency')
+    change_details_template = 'config/include/agency_transfer_service_details.html'
     save_as = True
+
+
+class AgencyTransferDetailSiteModel(SiteModel):
+    recent_allowed = False
+    fields = (
+        'agency_service',
+        ('location_from', 'location_to', 'addon'),
+        ('pax_range_min', 'pax_range_max'),
+        ('ad_1_amount', 'ch_1_ad_1_amount'))
+    list_display = (
+        'agency_service', 'location_from', 'location_to', 'addon',
+        'pax_range_min', 'pax_range_max', 'ad_1_amount', 'ch_1_ad_1_amount')
+    #top_filters = (
+    #    ('agency_service__service', TransferTopFilter), ('agency_service__agency', AgencyTopFilter),
+    #    ('agency_service__date_to', DateToTopFilter))
+    ordering = [
+        'agency_service__service', '-agency_service__date_from', 'agency_service__agency']
+    form = AgencyTransferDetailForm
+
+    def response_post_delete(self, request, obj):
+        response = response_post_agency_service(
+            request, obj, 'common:config_agencytransferservice_change')
+        if response:
+            return response
+        return super(AgencyTransferDetailSiteModel, self).response_post_delete(request, obj)
+
+    def response_post_save_add(self, request, obj):
+        response = response_post_agency_service(
+            request, obj, 'common:config_agencytransferservice_change')
+        if response:
+            return response
+        return super(AgencyTransferDetailSiteModel, self).response_post_save_add(request, obj)
+
+    def response_post_save_change(self, request, obj):
+        response = response_post_agency_service(
+            request, obj, 'common:config_agencytransferservice_change')
+        if response:
+            return response
+        return super(AgencyTransferDetailSiteModel, self).response_post_save_change(request, obj)
 
 
 class AgencyExtraDetailInline(CommonTabularInline):
@@ -773,11 +984,48 @@ class AgencyExtraServiceSiteModel(SiteModel):
     top_filters = (
         ('service', ExtraTopFilter), ('agency', AgencyTopFilter),
         ('date_to', DateToTopFilter))
-    inlines = [AgencyExtraDetailInline]
+    #inlines = [AgencyExtraDetailInline]
     ordering = ['service', 'agency', '-date_from']
     form = AgencyExtraServiceForm
     list_select_related = ('service', 'agency')
+    change_details_template = 'config/include/agency_extra_service_details.html'
     save_as = True
+
+
+class AgencyExtraDetailSiteModel(SiteModel):
+    recent_allowed = False
+    fields = (
+        'agency_service',
+        ('pax_range_min', 'pax_range_max'),
+        ('addon', 'ad_1_amount'), )
+    list_display = ('agency_service', 'pax_range_min', 'pax_range_max', 'addon', 'ad_1_amount')
+    #top_filters = (
+    #    ('agency_service__service', ExtraTopFilter), ('agency_service__agency', AgencyTopFilter),
+    #    ('agency_service__date_to', DateToTopFilter))
+    ordering = [
+        'agency_service__service', '-agency_service__date_from', 'agency_service__agency']
+    form = AgencyExtraDetailForm
+
+    def response_post_delete(self, request, obj):
+        response = response_post_agency_service(
+            request, obj, 'common:config_agencyextraservice_change')
+        if response:
+            return response
+        return super(AgencyExtraDetailSiteModel, self).response_post_delete(request, obj)
+
+    def response_post_save_add(self, request, obj):
+        response = response_post_agency_service(
+            request, obj, 'common:config_agencyextraservice_change')
+        if response:
+            return response
+        return super(AgencyExtraDetailSiteModel, self).response_post_save_add(request, obj)
+
+    def response_post_save_change(self, request, obj):
+        response = response_post_agency_service(
+            request, obj, 'common:config_agencyextraservice_change')
+        if response:
+            return response
+        return super(AgencyExtraDetailSiteModel, self).response_post_save_change(request, obj)
 
 
 class CarRentalOfficeInline(CommonStackedInline):
@@ -816,11 +1064,15 @@ bookings_site.register(ServiceBookDetailTransfer, ServiceBookDetailTransferSiteM
 bookings_site.register(ServiceBookDetailExtra, ServiceBookDetailExtraSiteModel)
 
 bookings_site.register(AgencyAllotmentService, AgencyAllotmentServiceSiteModel)
+bookings_site.register(AgencyAllotmentDetail, AgencyAllotmentDetailSiteModel)
 bookings_site.register(AgencyTransferService, AgencyTransferServiceSiteModel)
+bookings_site.register(AgencyTransferDetail, AgencyTransferDetailSiteModel)
 bookings_site.register(AgencyExtraService, AgencyExtraServiceSiteModel)
+bookings_site.register(AgencyExtraDetail, AgencyExtraDetailSiteModel)
 
 bookings_site.register(ProviderAllotmentService, ProviderAllotmentServiceSiteModel)
+bookings_site.register(ProviderAllotmentDetail, ProviderAllotmentDetailSiteModel)
 bookings_site.register(ProviderTransferService, ProviderTransferServiceSiteModel)
-bookings_site.register(ProviderExtraService, ProviderExtraServiceSiteModel)
-
 bookings_site.register(ProviderTransferDetail, ProviderTransferDetailSiteModel)
+bookings_site.register(ProviderExtraService, ProviderExtraServiceSiteModel)
+bookings_site.register(ProviderExtraDetail, ProviderExtraDetailSiteModel)
