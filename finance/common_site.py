@@ -816,8 +816,8 @@ class AgencyPaymentSiteModel(AgencyCreditDocumentSiteModel):
     """
     class for agency payments
     """
-    model_order = 4230
-    menu_label = MENU_LABEL_FINANCE_ADVANCED
+    model_order = 2015
+    menu_label = MENU_LABEL_ACCOUNTING
 
     fields = ('name', 'agency', 'account','amount', 'matched_amount', 'date', 'status')
     list_display = ['name', 'agency', 'account', 'amount', 'matched_amount', 'date', 'status']

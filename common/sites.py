@@ -341,7 +341,6 @@ class SiteModel(TotalsumAdmin):
     recent_allowed = False
     custom_actions_template = ''
 
-
     class Media:
         pass
 
@@ -1265,7 +1264,7 @@ class SiteModel(TotalsumAdmin):
         """
         A list_display column containing a button widget.
         """
-        return mark_safe('<button type="button" class="btn btn-default btn-xs collapsed" data-toggle="collapse" data-target="#div_' + str(obj.pk) +  '" aria-expanded="false"><span class="glyphicon"></span></button>')
+        return mark_safe('<a type="button" class="collapsed" data-toggle="collapse" data-target="#div_' + str(obj.pk) +  '" aria-expanded="false"><span class="fa fa-plus"></span></a>')
 
     def get_top_filters(self, request):
         return self.top_filters

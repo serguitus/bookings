@@ -9,6 +9,8 @@
     <link rel="stylesheet" type="text/css" href="{% static 'common/css/font-awesome.min.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'admin/css/base.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'booking/css/extras.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'vendor/select2/dist/css/select2.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'autocomplete_light/select2.css' %}">
     <script type="text/javascript">
         var base_url = "{% url 'common:index' %}";
     </script>
@@ -19,6 +21,12 @@
     <script src="{% static 'common/js/jquery.min.js' %}"></script>
     {% block head_extra %}
     {% endblock head_extra %}
+    <script src="{% static 'autocomplete_light/jquery.init.js' %}"></script>
+    <script src="{% static 'autocomplete_light/autocomplete.init.js' %}"></script>
+    <script src="{% static 'vendor/select2/dist/js/select2.full.js' %}"></script>
+    <script src="{% static 'autocomplete_light/select2.js' %}"></script>
+    <script src="{% static 'autocomplete_light/forward.js' %}"></script>
+    <script src="{% static 'autocomplete_light/jquery.post-setup.js' %}"></script>
 
     <script src="{% static 'common/js/bootstrap.min.js' %}"></script>
     <script src="{% static 'common/js/vue.js' %}"></script>
@@ -30,22 +38,24 @@
         {% block navbar %}
         {% endblock navbar %}
     {% endif %}
-    <div id="main_container" class="collapse in">
-        {% if not is_popup %}
-            {% block leftbar %}
-            {% endblock leftbar %}
-        {% endif %}
-        <div id="page_container" {% if is_popup %}class="popup"{% endif %}>
+    <div id="main_container" class="container-fluid">
+        <div class="row collapse show d-flex leftbar-collapse">
             {% if not is_popup %}
-                <button id="btn_left_collapse" type="button" class="btn btn-default btn-xs left-bg-color" data-toggle="collapse" data-target="#main_container">
-                    <span class="glyphicon"></span>
-                </button>
+                {% block leftbar %}
+                {% endblock leftbar %}
             {% endif %}
-            <div id="page_content_container">
-                {% block messages %}
-                {% endblock messages %}
-                {% block content %}
-                {% endblock content %}
+            <div id="page_container" class="col bd-content {% if is_popup %}popup"{% endif %}">
+                {% if not is_popup %}
+                    <button id="btn_left_collapse" type="button" href="#" class="btn btn-sm left-bg-color" data-toggle="collapse" data-target="#leftbar_container">
+                        <span class="fa fa-arrow-left"></span>
+                    </button>
+                {% endif %}
+                <div id="page_content_container">
+                    {% block messages %}
+                    {% endblock messages %}
+                    {% block content %}
+                    {% endblock content %}
+                </div>
             </div>
         </div>
     </div>

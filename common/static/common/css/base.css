@@ -7,7 +7,11 @@
 .navbar {
     min-height: 0px;
     background: #417690;
-}    
+    /*height: 35px;*/
+}
+.navbar li{
+    font-size: 14px;
+}
 .navbar-default .navbar-brand {
     padding-top: 5px;
     padding-bottom: 5px;
@@ -16,7 +20,7 @@
 .navbar-default .navbar-brand, .navbar-default .navbar-brand:hover {
     color: #f5dd5d;
 }
-.navbar-default .navbar-nav > li > a {
+.navbar-dark .navbar-nav .nav-link {
     color: #fff;
     padding-top: 5px;
     padding-bottom: 5px;
@@ -37,10 +41,10 @@
 }
 
 #leftbar_container {
-    position: fixed;
-    top: 35px;
+    /*position: fixed;*/
+    /*top: 35px;*/
     bottom: 0px;
-    width: 250px;
+    /*width: 250px;*/
     overflow-x: hidden;
     overflow-y: auto;
     padding-top: 10px;
@@ -49,8 +53,8 @@
 }
 
 #page_container {
-    position: fixed;
-    top: 35px;
+    /*position: fixed;*/
+    /*top: 35px;*/
     bottom: 0px;
     right: 0px;
     overflow-x: auto;
@@ -90,8 +94,7 @@
 /* button to collase left bar */
 #btn_left_collapse {
     float: left;
-    margin-top: 10px;
-    margin-right: 10px;
+    margin: 5px 10px 5px 0;
 }
 #btn_left_collapse span.glyphicon:before {
     content: "\e079";
@@ -105,8 +108,14 @@
     border-color: #ddd;
 }
 
+#leftbar_container .module ul{
+    margin-left: 0px;
+    padding-top: 2px;
+    margin-top: 0;
+}
+
 ul.left-nav {
-    margin-left: 5px;
+    /*margin-left: 5px;*/
     margin-right: 0px;
     padding: 0px;
 }
@@ -158,8 +167,11 @@ h1 {
 .div-changelist .actions label {
     margin-bottom: 0px;
 }
+#navbarSupportedContent .dropdown-menu{
+    margin: 0;
+}
 .dropdown-menu > li > a {
-    padding: 3px 10px 3px 25px;
+    padding: 3px 10px 3px 5px;
 }
 
 .submit-row {
@@ -168,6 +180,10 @@ h1 {
 
 .submit-row input.btn-save {
     float: right;
+}
+
+.btn-copy-cost, .btn-copy-price{
+    margin-left: 10px;
 }
 
 .change-tool {

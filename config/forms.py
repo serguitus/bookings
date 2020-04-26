@@ -440,6 +440,7 @@ class SearchServiceForm(forms.Form):
         required=False,
         widget=autocomplete.ModelSelect2(
             url='location-autocomplete',
+            attrs={'dropdownParent': '.modal-content'},
         ),
         label='Search Location',
     )
@@ -449,7 +450,8 @@ class SearchServiceForm(forms.Form):
         required=True,
         widget=autocomplete.ModelSelect2(
             url='service-autocomplete',
-            forward=['current_service_id', 'search_service_location',],
+            attrs={'dropdownParent': '.modal-content'},
+            forward=['current_service_id', 'search_service_location'],
         ),
         label='Service',
     )

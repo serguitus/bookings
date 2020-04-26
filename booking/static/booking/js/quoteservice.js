@@ -2,7 +2,7 @@ $(document).ready(function(){
 
   $('select[name^="quoteservice_paxvariants-"][name$="-quote_pax_variant"]').attr('disabled', true);
 
-  $('div.form-row.field-provider>div>div.related-widget-wrapper').after('<a id="btn-costs" title="Costs" data-toggle="modal" data-target="#popup-costs" class="btn btn-costs glyphicon glyphicon-usd" href="#"></a>');
+  $('div.form-row.field-provider>div>div.related-widget-wrapper').after('<a id="btn-costs" title="Costs" data-toggle="modal" data-target="#popup-costs" class="btn btn-costs fa fa-dollar" href="#"></a>');
 
   $('#btn-costs').on('click', function (e) {
     get_providers_costs();

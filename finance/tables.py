@@ -14,7 +14,7 @@ class AgencyInvoiceTable(tables.Table):
         model = AgencyInvoice
         template_name = 'finance/agencyinvoice_table.html'
         fields = ['name', 'date', 'status', 'amount', 'details']
-        attrs = {'class': 'table table-hover table-condensed'}
+        attrs = {'class': 'table table-hover table-sm'}
 
     def __init__(self, *args, **kwargs):
         self.base_columns['name'].verbose_name='Invoice'
@@ -33,7 +33,7 @@ class AgencyPaymentTable(tables.Table):
         model = AgencyPayment
         template_name = 'finance/agencypayment_table.html'
         fields = ['name', 'date', 'status', 'account', 'amount', 'details']
-        attrs = {'class': 'table table-hover table-condensed'}
+        attrs = {'class': 'table table-hover table-sm'}
 
     def __init__(self, *args, **kwargs):
         self.base_columns['name'].verbose_name='Payment'

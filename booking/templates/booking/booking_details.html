@@ -13,8 +13,8 @@
     <div class="payments-container">
         {% agencypayment_table current as table %}
         <b>AGENCY PAYMENTS </b>
-        <button id="btn_payments_collapse_{{ current.pk }}" type="button" class="btn btn-default btn-xs left-bg-color booking_payments collapsed" data-toggle="collapse" data-target="#div_payments_{{ current.pk }}" aria-expanded="false">
-            <span class="booking_payments glyphicon"></span>
+        <button id="btn_payments_collapse_{{ current.pk }}" type="button" class="btn btn-default btn-xs left-bg-color booking_payments collapsed btn-sm" data-toggle="collapse" data-target="#div_payments_{{ current.pk }}" aria-expanded="false">
+            <span class="booking_payments fa fa-arrow-down"></span>
         </button>
         <div id="div_payments_{{ current.pk }}" class="agencypayment-container collapse">
             {% render_table table %}

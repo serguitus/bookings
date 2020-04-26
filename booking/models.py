@@ -804,6 +804,14 @@ class Booking(models.Model):
         return utility_percent(self.cost_amount, self.price_amount)
     utility_percent.fget.short_description = 'Util.%'
 
+    @property
+    def utility_compact(self):
+        return '{} ({}%)'.format(utility(self.cost_amount,
+                                        self.price_amount),
+                                utility_percent(self.cost_amount,
+                                                self.price_amount))
+    utility_compact.fget.short_description = 'Util.'
+
     def internal_reference(self):
         if self.id:
             code = self.id
@@ -840,7 +848,7 @@ class Booking(models.Model):
         # this shows a waring sign with mouse-over message
         # for bookings with private notes
         if self.p_notes:
-            return '<a href="#" data-toggle="tooltip" title="%s"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span></a>' % self.p_notes
+            return '<a href="#" data-toggle="tooltip" title="%s"><span class="fa fa-exclamation-circle" aria-hidden="true"></span></a>' % self.p_notes
 
     has_notes.allow_tags = True
     has_notes.short_description = 'Notes'
@@ -1244,7 +1252,7 @@ class BookingAllotment(BookingService, BookAllotmentData):
         verbose_name = 'Booking Accomodation'
         verbose_name_plural = 'Bookings Accomodations'
     service = models.ForeignKey(Allotment)
-    version = AutoIncVersionField( )
+    version = AutoIncVersionField()
 
     def __unicode__(self):
         return '%s (%s - %s)' % (self.name,
@@ -1330,7 +1338,7 @@ class BookingTransfer(BookingService, BookTransferData):
         verbose_name = 'Booking Transfer'
         verbose_name_plural = 'Booking Transfers'
     service = models.ForeignKey(Transfer)
-    version = AutoIncVersionField( )
+    version = AutoIncVersionField()
 
     def build_description(self):
         return '%s pax' % self.rooming_list.count()
@@ -1667,8 +1675,8 @@ class ProviderBookingPayment(Withdraw):
     ProviderBookingPayment
     """
     class Meta:
-        verbose_name = 'Provider Booking Payment'
-        verbose_name_plural = 'Providers Bookings Payments'
+        verbose_name = 'Payment to Provider'
+        verbose_name_plural = 'Payments to Providers'
         ordering = ['-date']
 
     provider = models.ForeignKey(Provider)

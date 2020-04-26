@@ -979,13 +979,13 @@ class BookingSiteModel(SiteModel):
                 ('is_package_price',),
                 ('package_sgl_price_amount', 'package_dbl_price_amount'),
                 ('package_tpl_price_amount', 'package_qpl_price_amount'),
-                ('cost_amount', 'price_amount', 'utility_percent', 'utility'),
+                ('cost_amount', 'price_amount', 'utility_compact'),
                 'id', 'version',
                 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc',
                 'mail_subject', 'mail_body', 'submit_action')
         }),
         ('General Notes', {'fields': ('p_notes',),
-                           'classes': ('collapse', 'wide')})
+                           'classes': ('collapse', 'wide', 'show')})
     )
     list_display = ('name', 'internal_reference', 'agency',
                     'reference', 'date_from',
@@ -1001,7 +1001,7 @@ class BookingSiteModel(SiteModel):
     ordering = ['date_from', 'date_to', 'reference']
     readonly_fields = ('date_from', 'date_to', 'status',
                        'cost_amount', 'price_amount',
-                       'utility_percent', 'utility',
+                       'utility_compact',
                        'internal_reference', 'details')
     list_details_template = 'booking/booking_details.html'
     change_details_template = 'booking/booking_details.html'
@@ -1895,8 +1895,9 @@ class BookingTransferSiteModel(BaseBookingServiceSiteModel):
                 ('dropoff', 'schedule_to', 'schedule_time_to'),
                 'service_addon',
                 ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount',
-                'utility_percent', 'utility',
+                'cost_amount',
+                'manual_price', 'price_amount',
+                ('utility_percent', 'utility'),
                 'booking_general_notes',
                 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
@@ -1974,7 +1975,8 @@ class BookingExtraSiteModel(BaseBookingServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                'booking', ('service', 'search_location'), ('status', 'conf_number'),
+                'booking', ('service', 'search_location'),
+                ('status', 'conf_number'),
                 ('datetime_from', 'nights', 'datetime_to', 'time'),
                 'service_addon',
                 ('quantity', 'parameter'),
@@ -1984,14 +1986,16 @@ class BookingExtraSiteModel(BaseBookingServiceSiteModel):
                 'utility_percent', 'utility',
                 'booking_general_notes',
                 'id', 'version',
-                'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
+                'submit_action', 'mail_from', 'mail_to', 'mail_cc',
+                'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
-                   'classes': ('collapse', 'wide')})
+                   'classes': ('collapse', 'wide', 'show')})
     )
-    list_display = ('booking', 'name', 'service_addon', 'quantity', 'parameter',
-                    'datetime_from', 'datetime_to', 'time',
-                    'cost_amount', 'manual_cost', 'price_amount', 'manual_price', 'utility_percent', 'utility',
+    list_display = ('booking', 'name', 'service_addon', 'quantity',
+                    'parameter', 'datetime_from', 'datetime_to', 'time',
+                    'cost_amount', 'manual_cost', 'price_amount',
+                    'manual_price', 'utility_percent', 'utility',
                     'status',)
     top_filters = ('booking__name', 'service', 'booking__reference',
                    ('datetime_from', DateTopFilter), 'status',)
@@ -2193,10 +2197,10 @@ class BookingInvoiceSiteModel(SiteModel):
 
 class ProviderBookingPaymentSiteModel(SiteModel):
 
-    from finance.common_site import MENU_LABEL_FINANCE_ADVANCED
+    from accounting.common_site import MENU_LABEL_ACCOUNTING
 
-    model_order = 4130
-    menu_label = MENU_LABEL_FINANCE_ADVANCED
+    model_order = 2025
+    menu_label = MENU_LABEL_ACCOUNTING
 
     fieldsets = (
         (None, {
