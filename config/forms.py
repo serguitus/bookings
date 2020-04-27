@@ -56,8 +56,7 @@ class ProviderAllotmentDetailForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'provider_service': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',
-                attrs={'disabled': 'true'}),
+                url='disabled-autocomplete',),
             'room_type': autocomplete.ModelSelect2(
                 url='roomtype-autocomplete',
                 forward=['provider_service']),
@@ -65,7 +64,7 @@ class ProviderAllotmentDetailForm(forms.ModelForm):
                 url='boardtype-autocomplete',
                 forward=['provider_service']),
             'addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
+                url='catalogallotmentaddon-autocomplete',
                 forward=['provider_service']),
         }
 
@@ -81,7 +80,7 @@ class ProviderAllotmentDetailInlineForm(forms.ModelForm):
                 url='boardtype-autocomplete',
                 forward=['service']),
             'addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
+                url='catalogallotmentaddon-autocomplete',
                 forward=['service']),
         }
 
@@ -102,12 +101,11 @@ class ProviderTransferDetailForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'provider_service': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',
-                attrs={'disabled': 'true'}),
+                url='disabled-autocomplete',),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
             'addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
+                url='catalogtransferaddon-autocomplete',
                 forward=['provider_service']),
         }
 
@@ -119,7 +117,7 @@ class ProviderTransferDetailInlineForm(forms.ModelForm):
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
             'addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
+                url='catalogtransferaddon-autocomplete',
                 forward=['service']),
         }
 
@@ -140,10 +138,9 @@ class ProviderExtraDetailForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'provider_service': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',
-                attrs={'disabled': 'true'}),
+                url='disabled-autocomplete',),
             'addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
+                url='catalogextraaddon-autocomplete',
                 forward=['provider_service']),
         }
 
@@ -153,7 +150,7 @@ class ProviderExtraDetailInlineForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
+                url='catalogextraaddon-autocomplete',
                 forward=['service']),
         }
 
@@ -174,14 +171,16 @@ class AgencyAllotmentDetailForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'agency_service': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',
-                attrs={'disabled': 'true'}),
+                url='disabled-autocomplete',),
             'room_type': autocomplete.ModelSelect2(
                 url='roomtype-autocomplete',
                 forward=['agency_service']),
             'board_type': autocomplete.ListSelect2(
                 url='boardtype-autocomplete',
                 forward=['agency_service']),
+            'addon': autocomplete.ModelSelect2(
+                url='catalogallotmentaddon-autocomplete',
+                forward=['service']),
         }
 
 
@@ -196,7 +195,7 @@ class AgencyAllotmentDetailInlineForm(forms.ModelForm):
                 url='boardtype-autocomplete',
                 forward=['service']),
             'addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
+                url='catalogallotmentaddon-autocomplete',
                 forward=['service']),
         }
 
@@ -217,12 +216,11 @@ class AgencyTransferDetailForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'agency_service': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',
-                attrs={'disabled': 'true'}),
+                url='disabled-autocomplete',),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
             'addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
+                url='catalogtransferaddon-autocomplete',
                 forward=['agency_service']),
         }
 
@@ -234,7 +232,7 @@ class AgencyTransferDetailInlineForm(forms.ModelForm):
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
             'addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
+                url='catalogtransferaddon-autocomplete',
                 forward=['service']),
         }
 
@@ -255,10 +253,9 @@ class AgencyExtraDetailForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'agency_service': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',
-                attrs={'disabled': 'true'}),
+                url='disabled-autocomplete',),
             'addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
+                url='catalogextraaddon-autocomplete',
                 forward=['agency_service']),
         }
 
@@ -268,7 +265,7 @@ class AgencyExtraDetailInlineForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
+                url='catalogextraaddon-autocomplete',
                 forward=['service']),
         }
 
