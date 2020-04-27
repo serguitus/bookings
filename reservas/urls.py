@@ -38,6 +38,9 @@ from config.views import (
     ExtraAutocompleteView, ProviderExtraAutocompleteView,
     ServiceAutocompleteView, ServiceAllotmentAutocompleteView, ServiceTransferAutocompleteView,
     ServiceExtraAutocompleteView, CarRentalAutocompleteView, CarRentalOfficeAutocompleteView,
+    CatalogAllotmentAddonAutocompleteView,
+    CatalogTransferAddonAutocompleteView,
+    CatalogExtraAddonAutocompleteView,
 )
 from booking import urls as booking_urls
 from booking.views import (
@@ -182,6 +185,18 @@ urlpatterns = [
     url(r'^addon-autocomplete/$',
         AddonAutocompleteView.as_view(),
         name='addon-autocomplete',
+    ),
+    url(r'^catalogallotmentaddon-autocomplete/$',
+        CatalogAllotmentAddonAutocompleteView.as_view(),
+        name='catalogallotmentaddon-autocomplete',
+    ),
+    url(r'^catalogtransferaddon-autocomplete/$',
+        CatalogTransferAddonAutocompleteView.as_view(),
+        name='catalogtransferaddon-autocomplete',
+    ),
+    url(r'^catalogextraaddon-autocomplete/$',
+        CatalogExtraAddonAutocompleteView.as_view(),
+        name='catalogextraaddon-autocomplete',
     ),
     url(r'^place-autocomplete/$',
         PlaceAutocompleteView.as_view(),

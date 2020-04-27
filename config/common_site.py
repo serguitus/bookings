@@ -9,7 +9,7 @@ from django.contrib.admin.checks import ModelAdminChecks
 from django.contrib.admin.utils import unquote, quote
 from django.core import checks
 from django.core.exceptions import FieldDoesNotExist, ValidationError, PermissionDenied
-from django.db import router, transaction
+from django.db import models, router, transaction
 from django import forms
 from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
@@ -543,6 +543,44 @@ class ExtraSiteModel(BaseServiceSiteModel):
     form = ExtraForm
 
 
+class CatalogService(SiteModel):
+
+    def get_details_model(self):
+        return models.Model
+
+    def build_details_formset(self):
+        return modelformset_factory(
+            model=self.get_details_model(),
+            form=None,
+            fields=None,
+            extra=1,
+        )
+
+    def changeform_context(
+            self, request, form, obj, formsets, inline_instances,
+            add, opts, object_id, to_field, form_validated=None, extra_context=None):
+
+        context = super(CatalogService, self).changeform_context(
+            request, form, obj, formsets, inline_instances,
+            add, opts, object_id, to_field, form_validated, extra_context)
+        
+        DetailsFormSet = self.build_details_formset()
+        formset = DetailsFormSet(queryset=self.get_details_model().objects.none())
+        context.update({'formset': formset})
+        return context
+
+    def save_related(self, request, form, formsets, change):
+        super(CatalogService, self).save_related(request, form, formsets, change)
+        DetailsFormSet = self.build_details_formset()
+        formset = None
+        quote_id = request.POST.get('quote_id', None)
+        if quote_id:
+            formset = PaxFormSet(request.POST)
+            if formset.is_valid():
+                booking, msg = BookingServices.build_booking_from_quote(
+                    quote_id, formset.cleaned_data, request.user)
+
+
 class ProviderAllotmentDetailInline(CommonStackedInline):
     model = ProviderAllotmentDetail
     extra = 0
@@ -560,7 +598,7 @@ class ProviderAllotmentDetailInline(CommonStackedInline):
     list_select_related = ('room_type', 'addon')
 
 
-class ProviderAllotmentServiceSiteModel(SiteModel):
+class ProviderAllotmentServiceSiteModel(CatalogService):
     model_order = 7220
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Provider Catalogue'
@@ -591,15 +629,11 @@ class ProviderAllotmentServiceSiteModel(SiteModel):
             list(queryset.all()), True)
     update_agency_amounts.short_description = "Generate New Agency Prices"
 
-    def changeform_context(
-            self, request, form, obj, formsets, inline_instances,
-            add, opts, object_id, to_field, form_validated=None, extra_context=None):
+    def get_details_model(self):
+        return ProviderAllotmentDetail
 
-        context = super(ProviderAllotmentServiceSiteModel, self).changeform_context(
-            request, form, obj, formsets, inline_instances,
-            add, opts, object_id, to_field, form_validated, extra_context)
-        
-        DetailsFormSet = modelformset_factory(
+    def build_details_formset(self):
+        return modelformset_factory(
             model=ProviderAllotmentDetail,
             form=ProviderAllotmentDetailInlineForm,
             fields=[
@@ -611,9 +645,6 @@ class ProviderAllotmentServiceSiteModel(SiteModel):
                 'ad_4_amount', 'ch_1_ad_4_amount',],
             extra=1,
         )
-        formset = DetailsFormSet(queryset=ProviderAllotmentDetail.objects.none())
-        context.update({'formset': formset})
-        return context
 
 
 class ProviderAllotmentDetailSiteModel(SiteModel):
@@ -674,7 +705,7 @@ class ProviderTransferDetailInline(CommonTabularInline):
     list_select_related = ('location_from', 'location_to', 'addon')
 
 
-class ProviderTransferServiceSiteModel(SiteModel):
+class ProviderTransferServiceSiteModel(CatalogService):
     model_order = 7230
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Provider Catalogue'
@@ -706,15 +737,11 @@ class ProviderTransferServiceSiteModel(SiteModel):
             list(queryset.all()), True)
     update_agency_amounts.short_description = "Generate New Agency Prices"
 
-    def changeform_context(
-            self, request, form, obj, formsets, inline_instances,
-            add, opts, object_id, to_field, form_validated=None, extra_context=None):
+    def get_details_model(self):
+        return ProviderTransferDetail
 
-        context = super(ProviderTransferServiceSiteModel, self).changeform_context(
-            request, form, obj, formsets, inline_instances,
-            add, opts, object_id, to_field, form_validated, extra_context)
-        
-        DetailsFormSet = modelformset_factory(
+    def build_details_formset(self):
+        return modelformset_factory(
             model=ProviderTransferDetail,
             form=ProviderTransferDetailInlineForm,
             fields=[
@@ -723,9 +750,6 @@ class ProviderTransferServiceSiteModel(SiteModel):
                 'ad_1_amount', 'ch_1_ad_1_amount',],
             extra=1,
         )
-        formset = DetailsFormSet(queryset=ProviderTransferDetail.objects.none())
-        context.update({'formset': formset})
-        return context
 
 
 class ProviderTransferDetailSiteModel(SiteModel):
@@ -786,7 +810,7 @@ class ProviderExtraDetailInline(CommonTabularInline):
         return qs
 
 
-class ProviderExtraServiceSiteModel(SiteModel):
+class ProviderExtraServiceSiteModel(CatalogService):
     model_order = 7240
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Provider Catalogue'
@@ -817,15 +841,11 @@ class ProviderExtraServiceSiteModel(SiteModel):
             list(queryset.all()), True)
     update_agency_amounts.short_description = "Generate New Agency Prices"
 
-    def changeform_context(
-            self, request, form, obj, formsets, inline_instances,
-            add, opts, object_id, to_field, form_validated=None, extra_context=None):
+    def get_details_model(self):
+        return ProviderExtraDetail
 
-        context = super(ProviderExtraServiceSiteModel, self).changeform_context(
-            request, form, obj, formsets, inline_instances,
-            add, opts, object_id, to_field, form_validated, extra_context)
-        
-        DetailsFormSet = modelformset_factory(
+    def build_details_formset(self):
+        return modelformset_factory(
             model=ProviderExtraDetail,
             form=ProviderExtraDetailInlineForm,
             fields=[
@@ -834,9 +854,6 @@ class ProviderExtraServiceSiteModel(SiteModel):
                 'ad_1_amount',],
             extra=1,
         )
-        formset = DetailsFormSet(queryset=ProviderExtraDetail.objects.none())
-        context.update({'formset': formset})
-        return context
 
 
 class ProviderExtraDetailSiteModel(SiteModel):
@@ -892,7 +909,7 @@ class AgencyAllotmentDetailInline(CommonStackedInline):
     list_select_related = ('room_type', 'addon')
 
 
-class AgencyAllotmentServiceSiteModel(SiteModel):
+class AgencyAllotmentServiceSiteModel(CatalogService):
     model_order = 7120
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
@@ -911,15 +928,11 @@ class AgencyAllotmentServiceSiteModel(SiteModel):
     change_details_template = 'config/include/agency_allotment_service_details.html'
     save_as = True
 
-    def changeform_context(
-            self, request, form, obj, formsets, inline_instances,
-            add, opts, object_id, to_field, form_validated=None, extra_context=None):
+    def get_details_model(self):
+        return AgencyAllotmentDetail
 
-        context = super(AgencyAllotmentServiceSiteModel, self).changeform_context(
-            request, form, obj, formsets, inline_instances,
-            add, opts, object_id, to_field, form_validated, extra_context)
-        
-        DetailsFormSet = modelformset_factory(
+    def build_details_formset(self):
+        return modelformset_factory(
             model=AgencyAllotmentDetail,
             form=AgencyAllotmentDetailInlineForm,
             fields=[
@@ -931,9 +944,6 @@ class AgencyAllotmentServiceSiteModel(SiteModel):
                 'ad_4_amount', 'ch_1_ad_4_amount',],
             extra=1,
         )
-        formset = DetailsFormSet(queryset=AgencyAllotmentDetail.objects.none())
-        context.update({'formset': formset})
-        return context
 
 
 class AgencyAllotmentDetailSiteModel(SiteModel):
@@ -994,7 +1004,7 @@ class AgencyTransferDetailInline(CommonTabularInline):
     list_select_related = ('location_from', 'location_to', 'addon')
 
 
-class AgencyTransferServiceSiteModel(SiteModel):
+class AgencyTransferServiceSiteModel(CatalogService):
     model_order = 7130
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
@@ -1014,15 +1024,11 @@ class AgencyTransferServiceSiteModel(SiteModel):
     change_details_template = 'config/include/agency_transfer_service_details.html'
     save_as = True
 
-    def changeform_context(
-            self, request, form, obj, formsets, inline_instances,
-            add, opts, object_id, to_field, form_validated=None, extra_context=None):
+    def get_details_model(self):
+        return AgencyTransferDetail
 
-        context = super(AgencyTransferServiceSiteModel, self).changeform_context(
-            request, form, obj, formsets, inline_instances,
-            add, opts, object_id, to_field, form_validated, extra_context)
-        
-        DetailsFormSet = modelformset_factory(
+    def build_details_formset(self):
+        return modelformset_factory(
             model=AgencyTransferDetail,
             form=AgencyTransferDetailInlineForm,
             fields=[
@@ -1031,9 +1037,6 @@ class AgencyTransferServiceSiteModel(SiteModel):
                 'ad_1_amount', 'ch_1_ad_1_amount',],
             extra=1,
         )
-        formset = DetailsFormSet(queryset=AgencyTransferDetail.objects.none())
-        context.update({'formset': formset})
-        return context
 
 
 class AgencyTransferDetailSiteModel(SiteModel):
@@ -1091,7 +1094,7 @@ class AgencyExtraDetailInline(CommonTabularInline):
         return qs
 
 
-class AgencyExtraServiceSiteModel(SiteModel):
+class AgencyExtraServiceSiteModel(CatalogService):
     model_order = 7140
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
@@ -1110,15 +1113,11 @@ class AgencyExtraServiceSiteModel(SiteModel):
     change_details_template = 'config/include/agency_extra_service_details.html'
     save_as = True
 
-    def changeform_context(
-            self, request, form, obj, formsets, inline_instances,
-            add, opts, object_id, to_field, form_validated=None, extra_context=None):
+    def get_details_model(self):
+        return AgencyExtraDetail
 
-        context = super(AgencyExtraServiceSiteModel, self).changeform_context(
-            request, form, obj, formsets, inline_instances,
-            add, opts, object_id, to_field, form_validated, extra_context)
-        
-        DetailsFormSet = modelformset_factory(
+    def build_details_formset(self):
+        return modelformset_factory(
             model=AgencyExtraDetail,
             form=AgencyExtraDetailInlineForm,
             fields=[
@@ -1127,9 +1126,6 @@ class AgencyExtraServiceSiteModel(SiteModel):
                 'ad_1_amount',],
             extra=1,
         )
-        formset = DetailsFormSet(queryset=AgencyExtraDetail.objects.none())
-        context.update({'formset': formset})
-        return context
 
 
 class AgencyExtraDetailSiteModel(SiteModel):

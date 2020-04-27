@@ -13,6 +13,9 @@ from config.models import (
     Location, TransferZone, ServiceCategory, RoomType, Addon, AllotmentBoardType,
     Service,
     Allotment, Transfer, Extra, CarRental, CarRentalOffice,
+    ProviderAllotmentService, AgencyAllotmentService,
+    ProviderTransferService, AgencyTransferService,
+    ProviderExtraService, AgencyExtraService,
 )
 
 from django.contrib import messages
@@ -69,43 +72,76 @@ class ServiceCategoryAutocompleteView(autocomplete.Select2QuerySetView):
 
 
 class RoomTypeAutocompleteView(autocomplete.Select2QuerySetView):
+
+    def get_base_queryset(self):
+        qs = RoomType.objects.filter(enabled=True).all().distinct()
+
+        provider_service = self.forwarded.get('provider_service', None)
+        if provider_service:
+            provider_service = ProviderAllotmentService.objects.get(pk=provider_service)
+            return qs.filter(allotmentroomtype__allotment=provider_service.service)
+
+        agency_service = self.forwarded.get('agency_service', None)
+        if agency_service:
+            agency_service = AgencyAllotmentService.objects.get(pk=agency_service)
+            return qs.filter(allotmentroomtype__allotment=agency_service.service)
+
+        book_service = self.forwarded.get('book_service', None)
+        if book_service:
+            return qs.filter(allotmentroomtype__allotment=book_service)
+
+        service = self.forwarded.get('service', None)
+        if service:
+            return qs.filter(allotmentroomtype__allotment=service)
+
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
         if not self.request.user.is_authenticated():
             return RoomType.objects.none()
-        qs = RoomType.objects.filter(enabled=True).all().distinct()
 
-        book_service = self.forwarded.get('book_service', None)
-
-        if book_service:
-            qs = qs.filter(allotmentroomtype__allotment=book_service)
-        else:
-            service = self.forwarded.get('service', None)
-
-            if service:
-                qs = qs.filter(allotmentroomtype__allotment=service)
-
+        qs = self.get_base_queryset()
         if self.q:
             qs = qs.filter(name__icontains=self.q)
         return qs[:20]
 
 
 class BoardTypeAutocompleteView(autocomplete.Select2ListView):
+
     def get_list(self):
         result = []
+        provider_service = self.forwarded.get('provider_service', None)
+        if provider_service:
+            provider_service = ProviderAllotmentService.objects.get(pk=provider_service)
+            allotment_boards = AllotmentBoardType.objects.filter(
+                allotment=provider_service.service).distinct().all()
+            for allotment_board in allotment_boards:
+                result.append(allotment_board.board_type)
+            return result
+
+        agency_service = self.forwarded.get('agency_service', None)
+        if agency_service:
+            agency_service = AgencyAllotmentService.objects.get(pk=agency_service)
+            allotment_boards = AllotmentBoardType.objects.filter(
+                allotment=agency_service.service).distinct().all()
+            for allotment_board in allotment_boards:
+                result.append(allotment_board.board_type)
+            return result
+
         book_service = self.forwarded.get('book_service', None)
         if book_service:
             allotment_boards = AllotmentBoardType.objects.filter(
                 allotment=book_service).distinct().all()
             for allotment_board in allotment_boards:
                 result.append(allotment_board.board_type)
-        else:
-            service = self.forwarded.get('service', None)
-            if service is not None:
-                allotment_boards = AllotmentBoardType.objects.filter(
-                    allotment=service).distinct().all()
-                for allotment_board in allotment_boards:
-                    result.append(allotment_board.board_type)
+            return result
+
+        service = self.forwarded.get('service', None)
+        if service is not None:
+            allotment_boards = AllotmentBoardType.objects.filter(
+                allotment=service).distinct().all()
+            for allotment_board in allotment_boards:
+                result.append(allotment_board.board_type)
+            return result
 
         return result
 
@@ -128,6 +164,81 @@ class AddonAutocompleteView(autocomplete.Select2QuerySetView):
                 qs = qs.filter(serviceaddon__service=service)
 
 
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs[:20]
+
+
+class CatalogAllotmentAddonAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_base_queryset(self):
+        qs = Addon.objects.filter(enabled=True).all().distinct()
+
+        provider_service = self.forwarded.get('provider_service', None)
+        if provider_service:
+            provider_service = ProviderAllotmentService.objects.get(pk=provider_service)
+            return qs.filter(serviceaddon__service=provider_service.service)
+
+        agency_service = self.forwarded.get('agency_service', None)
+        if agency_service:
+            agency_service = AgencyAllotmentService.objects.get(pk=agency_service)
+            return qs.filter(serviceaddon__service=agency_service.service)
+
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return Addon.objects.none()
+
+        qs = self.get_base_queryset()
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs[:20]
+
+
+class CatalogTransferAddonAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_base_queryset(self):
+        qs = Addon.objects.filter(enabled=True).all().distinct()
+
+        provider_service = self.forwarded.get('provider_service', None)
+        if provider_service:
+            provider_service = ProviderTransferService.objects.get(pk=provider_service)
+            return qs.filter(serviceaddon__service=provider_service.service)
+
+        agency_service = self.forwarded.get('agency_service', None)
+        if agency_service:
+            agency_service = AgencyTransferService.objects.get(pk=agency_service)
+            return qs.filter(serviceaddon__service=agency_service.service)
+
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return Addon.objects.none()
+
+        qs = self.get_base_queryset()
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs[:20]
+
+
+class CatalogExtraAddonAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_base_queryset(self):
+        qs = Addon.objects.filter(enabled=True).all().distinct()
+
+        provider_service = self.forwarded.get('provider_service', None)
+        if provider_service:
+            provider_service = ProviderExtraService.objects.get(pk=provider_service)
+            return qs.filter(serviceaddon__service=provider_service.service)
+
+        agency_service = self.forwarded.get('agency_service', None)
+        if agency_service:
+            agency_service = AgencyExtraService.objects.get(pk=agency_service)
+            return qs.filter(serviceaddon__service=agency_service.service)
+
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return Addon.objects.none()
+
+        qs = self.get_base_queryset()
         if self.q:
             qs = qs.filter(name__icontains=self.q)
         return qs[:20]
