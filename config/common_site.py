@@ -569,16 +569,33 @@ class CatalogService(SiteModel):
         context.update({'formset': formset})
         return context
 
+
+class ProviderService(CatalogService):
+    
     def save_related(self, request, form, formsets, change):
-        super(CatalogService, self).save_related(request, form, formsets, change)
+        super(ProviderService, self).save_related(request, form, formsets, change)
         DetailsFormSet = self.build_details_formset()
         formset = None
-        quote_id = request.POST.get('quote_id', None)
-        if quote_id:
-            formset = PaxFormSet(request.POST)
+        provider_service_id = request.POST.get('provider_service_id', None)
+        if provider_service_id:
+            formset = DetailsFormSet(request.POST)
             if formset.is_valid():
-                booking, msg = BookingServices.build_booking_from_quote(
-                    quote_id, formset.cleaned_data, request.user)
+                for detail in formset.cleaned_data:
+                    pass
+
+
+class AgencyService(CatalogService):
+    
+    def save_related(self, request, form, formsets, change):
+        super(AgencyService, self).save_related(request, form, formsets, change)
+        DetailsFormSet = self.build_details_formset()
+        formset = None
+        agency_service_id = request.POST.get('agency_service_id', None)
+        if agency_service_id:
+            formset = DetailsFormSet(request.POST)
+            if formset.is_valid():
+                for detail in formset.cleaned_data:
+                    pass
 
 
 class ProviderAllotmentDetailInline(CommonStackedInline):
@@ -598,7 +615,7 @@ class ProviderAllotmentDetailInline(CommonStackedInline):
     list_select_related = ('room_type', 'addon')
 
 
-class ProviderAllotmentServiceSiteModel(CatalogService):
+class ProviderAllotmentServiceSiteModel(ProviderService):
     model_order = 7220
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Provider Catalogue'
@@ -705,7 +722,7 @@ class ProviderTransferDetailInline(CommonTabularInline):
     list_select_related = ('location_from', 'location_to', 'addon')
 
 
-class ProviderTransferServiceSiteModel(CatalogService):
+class ProviderTransferServiceSiteModel(ProviderService):
     model_order = 7230
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Provider Catalogue'
@@ -810,7 +827,7 @@ class ProviderExtraDetailInline(CommonTabularInline):
         return qs
 
 
-class ProviderExtraServiceSiteModel(CatalogService):
+class ProviderExtraServiceSiteModel(ProviderService):
     model_order = 7240
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Provider Catalogue'
@@ -909,7 +926,7 @@ class AgencyAllotmentDetailInline(CommonStackedInline):
     list_select_related = ('room_type', 'addon')
 
 
-class AgencyAllotmentServiceSiteModel(CatalogService):
+class AgencyAllotmentServiceSiteModel(AgencyService):
     model_order = 7120
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
@@ -1004,7 +1021,7 @@ class AgencyTransferDetailInline(CommonTabularInline):
     list_select_related = ('location_from', 'location_to', 'addon')
 
 
-class AgencyTransferServiceSiteModel(CatalogService):
+class AgencyTransferServiceSiteModel(AgencyService):
     model_order = 7130
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
@@ -1094,7 +1111,7 @@ class AgencyExtraDetailInline(CommonTabularInline):
         return qs
 
 
-class AgencyExtraServiceSiteModel(CatalogService):
+class AgencyExtraServiceSiteModel(AgencyService):
     model_order = 7140
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Agency Catalogue'
