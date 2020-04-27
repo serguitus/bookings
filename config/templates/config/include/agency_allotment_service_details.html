@@ -1,13 +1,7 @@
 {% load config_tags %}
 {% load render_table from django_tables2 %}
 
-<div>
-    <span class="add-details">
-        <a href="{% url 'common:config_agencyallotmentdetail_add' %}?agency_service={{ current.id }}"
-            class="btn btn-success btn-agency_service_detail_add" >Add Detail</a>
-    </span>
-</div>
-{% agencyallotmentdetail_table current as table %}
+{% agencyallotmentdetail_context current as context %}
 <div class="agencyservicedetails-container">
-    {% render_table table %}
+    {% render_table context.table %}
 </div>

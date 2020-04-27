@@ -26,14 +26,12 @@ from config.constants import (
     SERVICE_CATEGORY_PACKAGE)
 
 from config.forms import (
-    ProviderAllotmentServiceForm, ProviderTransferServiceForm, ProviderExtraServiceForm,
-    ProviderAllotmentDetailForm, ProviderTransferDetailForm, ProviderExtraDetailForm,
-    ProviderAllotmentDetailInlineForm, ProviderTransferDetailInlineForm,
-    ProviderExtraDetailInlineForm,
-    AgencyAllotmentServiceForm, AgencyTransferServiceForm, AgencyExtraServiceForm,
-    AgencyAllotmentDetailForm, AgencyTransferDetailForm, AgencyExtraDetailForm,
-    AgencyAllotmentDetailInlineForm, AgencyTransferDetailInlineForm,
-    AgencyExtraDetailInlineForm,
+    ProviderAllotmentServiceForm, ProviderAllotmentDetailForm, ProviderAllotmentDetailInlineForm,
+    ProviderTransferServiceForm, ProviderTransferDetailForm, ProviderTransferDetailInlineForm,
+    ProviderExtraServiceForm, ProviderExtraDetailForm, ProviderExtraDetailInlineForm,
+    AgencyAllotmentServiceForm, AgencyAllotmentDetailForm, AgencyAllotmentDetailInlineForm,
+    AgencyTransferServiceForm, AgencyTransferDetailForm, AgencyTransferDetailInlineForm,
+    AgencyExtraServiceForm, AgencyExtraDetailForm, AgencyExtraDetailInlineForm,
     AllotmentRoomTypeInlineForm, ExtraComponentInlineForm, TransferZoneForm,
     LocationTransferIntervalInlineForm, ServiceAddonInlineForm, TransferPickupTimeInlineForm,
     PricesExportForm, ExtraForm,
@@ -574,10 +572,10 @@ class ProviderAllotmentServiceSiteModel(SiteModel):
         ('date_to', DateToTopFilter))
     #inlines = [ProviderAllotmentDetailInline]
     ordering = ['service', 'provider', '-date_from']
-    form = ProviderAllotmentServiceForm
-    change_form_template = 'config/provider_allotment_change_form.html'
-    add_form_template = 'config/provider_allotment_change_form.html'
     list_select_related = ('service', 'provider')
+    form = ProviderAllotmentServiceForm
+    add_form_template = 'config/catalog_service_change_form.html'
+    change_form_template = 'config/catalog_service_change_form.html'
     change_details_template = 'config/include/provider_allotment_service_details.html'
     save_as = True
 
@@ -592,6 +590,30 @@ class ProviderAllotmentServiceSiteModel(SiteModel):
         ConfigServices.generate_agency_allotments_amounts_from_providers_allotments(
             list(queryset.all()), True)
     update_agency_amounts.short_description = "Generate New Agency Prices"
+
+    def changeform_context(
+            self, request, form, obj, formsets, inline_instances,
+            add, opts, object_id, to_field, form_validated=None, extra_context=None):
+
+        context = super(ProviderAllotmentServiceSiteModel, self).changeform_context(
+            request, form, obj, formsets, inline_instances,
+            add, opts, object_id, to_field, form_validated, extra_context)
+        
+        DetailsFormSet = modelformset_factory(
+            model=ProviderAllotmentDetail,
+            form=ProviderAllotmentDetailInlineForm,
+            fields=[
+                'room_type', 'board_type', 'addon',
+                'pax_range_min', 'pax_range_max',
+                'ad_1_amount', 'ch_1_ad_1_amount', 'ch_2_ad_1_amount',
+                'ad_2_amount', 'ch_1_ad_2_amount', 'ch_2_ad_2_amount',
+                'ad_3_amount', 'ch_1_ad_3_amount', 'ch_2_ad_3_amount',
+                'ad_4_amount', 'ch_1_ad_4_amount',],
+            extra=1,
+        )
+        formset = DetailsFormSet(queryset=ProviderAllotmentDetail.objects.none())
+        context.update({'formset': formset})
+        return context
 
 
 class ProviderAllotmentDetailSiteModel(SiteModel):
@@ -665,8 +687,10 @@ class ProviderTransferServiceSiteModel(SiteModel):
         ProviderTransferLocationTopFilter, ProviderTransferLocationAdditionalTopFilter)
     #inlines = [ProviderTransferDetailInline]
     ordering = ['service', 'provider', '-date_from']
-    form = ProviderTransferServiceForm
     list_select_related = ('service', 'provider')
+    form = ProviderTransferServiceForm
+    add_form_template = 'config/catalog_service_change_form.html'
+    change_form_template = 'config/catalog_service_change_form.html'
     change_details_template = 'config/include/provider_transfer_service_details.html'
     save_as = True
 
@@ -681,6 +705,27 @@ class ProviderTransferServiceSiteModel(SiteModel):
         ConfigServices.generate_agency_transfers_amounts_from_providers_transfers(
             list(queryset.all()), True)
     update_agency_amounts.short_description = "Generate New Agency Prices"
+
+    def changeform_context(
+            self, request, form, obj, formsets, inline_instances,
+            add, opts, object_id, to_field, form_validated=None, extra_context=None):
+
+        context = super(ProviderTransferServiceSiteModel, self).changeform_context(
+            request, form, obj, formsets, inline_instances,
+            add, opts, object_id, to_field, form_validated, extra_context)
+        
+        DetailsFormSet = modelformset_factory(
+            model=ProviderTransferDetail,
+            form=ProviderTransferDetailInlineForm,
+            fields=[
+                'location_from', 'location_to', 'addon',
+                'pax_range_min', 'pax_range_max',
+                'ad_1_amount', 'ch_1_ad_1_amount',],
+            extra=1,
+        )
+        formset = DetailsFormSet(queryset=ProviderTransferDetail.objects.none())
+        context.update({'formset': formset})
+        return context
 
 
 class ProviderTransferDetailSiteModel(SiteModel):
@@ -753,8 +798,10 @@ class ProviderExtraServiceSiteModel(SiteModel):
         ('date_to', DateToTopFilter))
     #inlines = [ProviderExtraDetailInline]
     ordering = ['service', 'provider', '-date_from']
-    form = ProviderExtraServiceForm
     list_select_related = ('service', 'provider')
+    form = ProviderExtraServiceForm
+    add_form_template = 'config/provider_extra_change_form.html'
+    change_form_template = 'config/provider_extra_change_form.html'
     change_details_template = 'config/include/provider_extra_service_details.html'
     save_as = True
 
@@ -769,6 +816,27 @@ class ProviderExtraServiceSiteModel(SiteModel):
         ConfigServices.generate_agency_extras_amounts_from_providers_extras(
             list(queryset.all()), True)
     update_agency_amounts.short_description = "Generate New Agency Prices"
+
+    def changeform_context(
+            self, request, form, obj, formsets, inline_instances,
+            add, opts, object_id, to_field, form_validated=None, extra_context=None):
+
+        context = super(ProviderExtraServiceSiteModel, self).changeform_context(
+            request, form, obj, formsets, inline_instances,
+            add, opts, object_id, to_field, form_validated, extra_context)
+        
+        DetailsFormSet = modelformset_factory(
+            model=ProviderExtraDetail,
+            form=ProviderExtraDetailInlineForm,
+            fields=[
+                'addon',
+                'pax_range_min', 'pax_range_max',
+                'ad_1_amount',],
+            extra=1,
+        )
+        formset = DetailsFormSet(queryset=ProviderExtraDetail.objects.none())
+        context.update({'formset': formset})
+        return context
 
 
 class ProviderExtraDetailSiteModel(SiteModel):
@@ -836,10 +904,36 @@ class AgencyAllotmentServiceSiteModel(SiteModel):
         ('date_to', DateToTopFilter))
     #inlines = [AgencyAllotmentDetailInline]
     ordering = ['service', 'agency', '-date_from']
-    form = AgencyAllotmentServiceForm
     list_select_related = ('agency', 'service')
+    form = AgencyAllotmentServiceForm
+    add_form_template = 'config/catalog_service_change_form.html'
+    change_form_template = 'config/catalog_service_change_form.html'
     change_details_template = 'config/include/agency_allotment_service_details.html'
     save_as = True
+
+    def changeform_context(
+            self, request, form, obj, formsets, inline_instances,
+            add, opts, object_id, to_field, form_validated=None, extra_context=None):
+
+        context = super(AgencyAllotmentServiceSiteModel, self).changeform_context(
+            request, form, obj, formsets, inline_instances,
+            add, opts, object_id, to_field, form_validated, extra_context)
+        
+        DetailsFormSet = modelformset_factory(
+            model=AgencyAllotmentDetail,
+            form=AgencyAllotmentDetailInlineForm,
+            fields=[
+                'room_type', 'board_type', 'addon',
+                'pax_range_min', 'pax_range_max',
+                'ad_1_amount', 'ch_1_ad_1_amount', 'ch_2_ad_1_amount',
+                'ad_2_amount', 'ch_1_ad_2_amount', 'ch_2_ad_2_amount',
+                'ad_3_amount', 'ch_1_ad_3_amount', 'ch_2_ad_3_amount',
+                'ad_4_amount', 'ch_1_ad_4_amount',],
+            extra=1,
+        )
+        formset = DetailsFormSet(queryset=AgencyAllotmentDetail.objects.none())
+        context.update({'formset': formset})
+        return context
 
 
 class AgencyAllotmentDetailSiteModel(SiteModel):
@@ -913,10 +1007,33 @@ class AgencyTransferServiceSiteModel(SiteModel):
         AgencyTransferLocationTopFilter, AgencyTransferLocationAdditionalTopFilter)
     #inlines = [AgencyTransferDetailInline]
     ordering = ['service', 'agency', '-date_from']
-    form = AgencyTransferServiceForm
     list_select_related = ('service', 'agency')
+    form = AgencyTransferServiceForm
+    add_form_template = 'config/catalog_service_change_form.html'
+    change_form_template = 'config/catalog_service_change_form.html'
     change_details_template = 'config/include/agency_transfer_service_details.html'
     save_as = True
+
+    def changeform_context(
+            self, request, form, obj, formsets, inline_instances,
+            add, opts, object_id, to_field, form_validated=None, extra_context=None):
+
+        context = super(AgencyTransferServiceSiteModel, self).changeform_context(
+            request, form, obj, formsets, inline_instances,
+            add, opts, object_id, to_field, form_validated, extra_context)
+        
+        DetailsFormSet = modelformset_factory(
+            model=AgencyTransferDetail,
+            form=AgencyTransferDetailInlineForm,
+            fields=[
+                'location_from', 'location_to', 'addon',
+                'pax_range_min', 'pax_range_max',
+                'ad_1_amount', 'ch_1_ad_1_amount',],
+            extra=1,
+        )
+        formset = DetailsFormSet(queryset=AgencyTransferDetail.objects.none())
+        context.update({'formset': formset})
+        return context
 
 
 class AgencyTransferDetailSiteModel(SiteModel):
@@ -986,10 +1103,33 @@ class AgencyExtraServiceSiteModel(SiteModel):
         ('date_to', DateToTopFilter))
     #inlines = [AgencyExtraDetailInline]
     ordering = ['service', 'agency', '-date_from']
-    form = AgencyExtraServiceForm
     list_select_related = ('service', 'agency')
+    form = AgencyExtraServiceForm
+    add_form_template = 'config/catalog_service_change_form.html'
+    change_form_template = 'config/catalog_service_change_form.html'
     change_details_template = 'config/include/agency_extra_service_details.html'
     save_as = True
+
+    def changeform_context(
+            self, request, form, obj, formsets, inline_instances,
+            add, opts, object_id, to_field, form_validated=None, extra_context=None):
+
+        context = super(AgencyExtraServiceSiteModel, self).changeform_context(
+            request, form, obj, formsets, inline_instances,
+            add, opts, object_id, to_field, form_validated, extra_context)
+        
+        DetailsFormSet = modelformset_factory(
+            model=AgencyExtraDetail,
+            form=AgencyExtraDetailInlineForm,
+            fields=[
+                'addon',
+                'pax_range_min', 'pax_range_max',
+                'ad_1_amount',],
+            extra=1,
+        )
+        formset = DetailsFormSet(queryset=AgencyExtraDetail.objects.none())
+        context.update({'formset': formset})
+        return context
 
 
 class AgencyExtraDetailSiteModel(SiteModel):

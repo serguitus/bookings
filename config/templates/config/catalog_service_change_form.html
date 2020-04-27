@@ -1,0 +1,18 @@
+{% extends "common/change_form.html" %}
+{% load static %}
+
+{% block head_extra %}
+  {{ block.super }}
+  <script type="text/javascript" src="{% static 'booking/js/dynamic_formset.js' %}"></script>
+ {% endblock %}
+
+{% block after_related_objects %}
+  {{ formset.management_form }}
+  {% for form in formset.forms %}
+      <div class="dynamic-row">
+      {{ form }}
+      <a class="btn btn-primary delete-row">Delete</a>
+      </div>
+  {% endfor %}
+  <p><a id="add" class="btn btn-primary add-row">Add Detail</a></p>
+{% endblock after_related_objects %}

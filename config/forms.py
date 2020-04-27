@@ -55,11 +55,17 @@ class ProviderAllotmentDetailForm(forms.ModelForm):
         model = ProviderAllotmentDetail
         fields = ('__all__')
         widgets = {
+            'provider_service': autocomplete.ModelSelect2(
+                url='disabled-autocomplete',
+                attrs={'disabled': 'true'}),
             'room_type': autocomplete.ModelSelect2(
                 url='roomtype-autocomplete',
                 forward=['provider_service']),
             'board_type': autocomplete.ListSelect2(
                 url='boardtype-autocomplete',
+                forward=['provider_service']),
+            'addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
                 forward=['provider_service']),
         }
 
@@ -95,8 +101,14 @@ class ProviderTransferDetailForm(forms.ModelForm):
         model = ProviderTransferDetail
         fields = ('__all__')
         widgets = {
+            'provider_service': autocomplete.ModelSelect2(
+                url='disabled-autocomplete',
+                attrs={'disabled': 'true'}),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['provider_service']),
         }
 
 
@@ -127,6 +139,9 @@ class ProviderExtraDetailForm(forms.ModelForm):
         model = ProviderExtraDetail
         fields = ('__all__')
         widgets = {
+            'provider_service': autocomplete.ModelSelect2(
+                url='disabled-autocomplete',
+                attrs={'disabled': 'true'}),
             'addon': autocomplete.ModelSelect2(
                 url='addon-autocomplete',
                 forward=['provider_service']),
@@ -159,7 +174,7 @@ class AgencyAllotmentDetailForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'agency_service': autocomplete.ModelSelect2(
-                url='roomtype-autocomplete',
+                url='disabled-autocomplete',
                 attrs={'disabled': 'true'}),
             'room_type': autocomplete.ModelSelect2(
                 url='roomtype-autocomplete',
@@ -201,8 +216,14 @@ class AgencyTransferDetailForm(forms.ModelForm):
         model = AgencyTransferDetail
         fields = ('__all__')
         widgets = {
+            'agency_service': autocomplete.ModelSelect2(
+                url='disabled-autocomplete',
+                attrs={'disabled': 'true'}),
             'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['agency_service']),
         }
 
 
@@ -233,6 +254,9 @@ class AgencyExtraDetailForm(forms.ModelForm):
         model = AgencyExtraDetail
         fields = ('__all__')
         widgets = {
+            'agency_service': autocomplete.ModelSelect2(
+                url='disabled-autocomplete',
+                attrs={'disabled': 'true'}),
             'addon': autocomplete.ModelSelect2(
                 url='addon-autocomplete',
                 forward=['agency_service']),
