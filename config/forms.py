@@ -49,6 +49,9 @@ class ProviderAllotmentServiceForm(forms.ModelForm):
             'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
         }
 
+    class Media:
+        js = ('admin/js/inlines.js',)
+
 
 class ProviderAllotmentDetailForm(forms.ModelForm):
     class Meta:
@@ -75,14 +78,26 @@ class ProviderAllotmentDetailInlineForm(forms.ModelForm):
         widgets = {
             'room_type': autocomplete.ModelSelect2(
                 url='roomtype-autocomplete',
-                forward=['service']),
+                forward=['service'],
+                attrs={'data-placeholder': 'Room Type'}),
             'board_type': autocomplete.ListSelect2(
                 url='boardtype-autocomplete',
-                forward=['service']),
+                forward=['service'],
+                attrs={'data-placeholder': 'Board Type'}),
             'addon': autocomplete.ModelSelect2(
                 url='catalogallotmentaddon-autocomplete',
-                forward=['service']),
+                forward=['service'],
+                attrs={'data-placeholder': 'Addon'}),
+            'pax_range_min': forms.TextInput(),
         }
+
+    def __init__(self, *args, **kwargs):
+        super(ProviderAllotmentDetailInlineForm, self).__init__(*args, **kwargs)
+        self.fields['room_type'].label = ''
+        self.fields['board_type'].label = ''
+        self.fields['addon'].label = ''
+        self.fields['pax_range_min'].widget.attrs['placeholder'] = 'Pax Min'
+        self.fields['pax_range_min'].label = ''
 
 
 class ProviderTransferServiceForm(forms.ModelForm):

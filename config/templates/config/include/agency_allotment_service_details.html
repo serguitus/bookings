@@ -1,7 +1,7 @@
 {% load config_tags %}
 {% load render_table from django_tables2 %}
 
-{% agencyallotmentdetail_context current as context %}
+{% catalog_detail_context current as context %}
 <div class="agencyservicedetails-container">
     {% render_table context.table %}
 </div>

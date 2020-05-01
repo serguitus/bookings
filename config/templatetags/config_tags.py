@@ -14,6 +14,35 @@ from config.tables import (
 )
 register = template.Library()
 
+class_mapping = {
+    'ProviderAllotmentService': ProviderAllotmentDetailTable,
+    'AgencyAllotmentService': AgencyAllotmentDetailTable,
+    'ProviderTransferService': ProviderTransferDetailTable,
+    'AgencyTransferService': AgencyTransferDetailTable,
+    'ProviderExtraService': ProviderExtraDetailTable,
+    'AgencyExtraService': AgencyExtraDetailTable,
+}
+
+# related fields per service type to build catalog tables
+table_related_fields = {
+    'ProviderAllotmentService': ['room_type', 'addon'],
+    'AgencyAllotmentService': ['room_type', 'addon'],
+    'ProviderTransferService': ['location_from', 'location_to', 'addon'],
+    'AgencyTransferService': ['location_from', 'location_to', 'addon'],
+    'ProviderExtraService': ['addon'],
+    'AgencyExtraService': ['addon'],
+}
+
+# ordering fields per service type to build catalog tables
+table_ordering_fields = {
+    'ProviderAllotmentService': ['room_type', 'board_type'],
+    'AgencyAllotmentService': ['room_type', 'board_type'],
+    'ProviderTransferService': ['location_from', 'location_to'],
+    'AgencyTransferService': ['location_from', 'location_to'],
+    'ProviderExtraService': ['addon', 'pax_range_min', 'pax_range_min'],
+    'AgencyExtraService': ['addon', 'pax_range_min', 'pax_range_min'],
+}
+
 
 @register.simple_tag
 def servicebookdetail_table(service):
@@ -22,50 +51,12 @@ def servicebookdetail_table(service):
         order_by=('days_after', 'days_duration'))
     return table
 
-@register.simple_tag
-def providerallotmentdetail_context(providerservice):
-    table = ProviderAllotmentDetailTable(
-        providerservice.providerallotmentdetail_set.all() \
-            .select_related('room_type', 'addon'),
-        order_by=('room_type', 'board_type'))
-    return {'table': table}
 
 @register.simple_tag
-def providertransferdetail_context(providerservice):
-    table = ProviderTransferDetailTable(
-        providerservice.providertransferdetail_set.all() \
-            .select_related('location_from', 'location_to', 'addon'),
-        order_by=('location_from', 'location_to'))
-    return {'table': table}
-
-@register.simple_tag
-def providerextradetail_context(providerservice):
-    table = ProviderExtraDetailTable(
-        providerservice.providerextradetail_set.all() \
-            .select_related('addon'),
-        order_by=('addoin', 'pax_range_min', 'pax_range_min'))
-    return {'table': table}
-
-@register.simple_tag
-def agencyallotmentdetail_context(agencyservice):
-    table = AgencyAllotmentDetailTable(
-        agencyservice.agencyallotmentdetail_set.all() \
-            .select_related('room_type', 'addon'),
-        order_by=('room_type', 'board_type'))
-    return {'table': table}
-
-@register.simple_tag
-def agencytransferdetail_context(agencyservice):
-    table = AgencyTransferDetailTable(
-        agencyservice.agencytransferdetail_set.all() \
-            .select_related('location_from', 'location_to', 'addon'),
-        order_by=('location_from', 'location_to'))
-    return {'table': table}
-
-@register.simple_tag
-def agencyextradetail_context(agencyservice):
-    table = AgencyExtraDetailTable(
-        agencyservice.agencyextradetail_set.all() \
-            .select_related('addon'),
-        order_by=('addoin', 'pax_range_min', 'pax_range_min'))
+def catalog_detail_context(providerservice):
+    table = class_mapping[providerservice.__class__.__name__](
+        providerservice.get_detail_objects()
+        .select_related(
+            *table_related_fields[providerservice.__class__.__name__]),
+        order_by=table_ordering_fields[providerservice.__class__.__name__])
     return {'table': table}

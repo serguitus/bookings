@@ -263,6 +263,9 @@ class ProviderCatalogue(models.Model):
     date_from = models.DateField()
     date_to = models.DateField()
 
+    def get_detail_objects(self):
+        return None
+
 
 class AgencyCatalogue(models.Model):
     """
@@ -273,6 +276,9 @@ class AgencyCatalogue(models.Model):
     agency = models.ForeignKey(Agency)
     date_from = models.DateField()
     date_to = models.DateField()
+
+    def get_detail_objects(self):
+        return None
 
 
 class AmountDetail(models.Model):
@@ -384,6 +390,10 @@ class ProviderExtraService(ProviderCatalogue):
     def __str__(self):
         return 'Prov.Extra - %s : %s' % (self.provider, self.service)
 
+    def get_detail_objects(self):
+        return self.providerextradetail_set.all()
+
+
 class ProviderExtraDetail(AmountDetail):
     """
     ProviderExtraDetail
@@ -413,6 +423,9 @@ class AgencyExtraService(AgencyCatalogue):
 
     def __str__(self):
         return 'Ag.Extra - %s : %s' % (self.agency, self.service)
+
+    def get_detail_objects(self):
+        return self.agencyextradetail_set.all()
 
 
 class AgencyExtraDetail(AmountDetail):
@@ -509,6 +522,9 @@ class ProviderAllotmentService(ProviderCatalogue):
     def __str__(self):
         return 'Prov.Accom. - %s : %s' % (self.provider, self.service)
 
+    def get_detail_objects(self):
+        return self.providerallotmentdetail_set.all()
+
 
 class ProviderAllotmentDetail(AmountDetail):
     """
@@ -542,6 +558,9 @@ class AgencyAllotmentService(AgencyCatalogue):
 
     def __str__(self):
         return 'Ag.Accom. - %s : %s' % (self.agency, self.service)
+
+    def get_detail_objects(self):
+        return self.agencyallotmentdetail_set.all()
 
 
 class AgencyAllotmentDetail(AmountDetail):
@@ -660,6 +679,8 @@ class ProviderTransferService(ProviderCatalogue):
     def __str__(self):
         return 'Prov.Transfer - %s : %s' % (self.provider, self.service)
 
+    def get_detail_objects(self):
+        return self.providertransferdetail_set.all()
 
 
 class ProviderTransferDetail(AmountDetail, RouteData):
@@ -696,6 +717,9 @@ class AgencyTransferService(AgencyCatalogue):
 
     def __str__(self):
         return 'Ag.Transfer - %s : %s' % (self.agency, self.service)
+
+    def get_detail_objects(self):
+        return self.agencytransferdetail_set.all()
 
 
 class AgencyTransferDetail(AmountDetail, RouteData):

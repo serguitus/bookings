@@ -386,7 +386,6 @@ class BaseServiceSiteModel(SiteModel):
         return export_prices(request, queryset, context)
 
 
-    
 class ServiceSiteModel(BaseServiceSiteModel):
     model_order = 6100
     menu_label = MENU_LABEL_CONFIG_BASIC

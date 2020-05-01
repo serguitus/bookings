@@ -36,8 +36,11 @@ class ProviderAllotmentDetailTable(tables.Table):
         attrs = {'class': 'table table-hover table-condensed'}
         model = ProviderAllotmentDetail
         fields = [
-            'edit', 'room_type', 'board_type', 'addon', 'pax_range_min', 'pax_range_max',
-            'ad_1_amount', 'ad_2_amount', 'ad_3_amount', 'ad_4_amount']
+            'edit', 'room_type', 'board_type', 'addon', 'pax_range_min',
+            'pax_range_max', 'ad_1_amount', 'ch_1_ad_1_amount',
+            'ch_2_ad_1_amount', 'ad_2_amount', 'ch_1_ad_2_amount',
+            'ch_2_ad_2_amount', 'ad_3_amount', 'ch_1_ad_3_amount',
+            'ad_4_amount']
 
     edit = tables.TemplateColumn(
         template_name="config/include/table_edit.html",
@@ -45,6 +48,21 @@ class ProviderAllotmentDetailTable(tables.Table):
             "edit_url": 'common:config_providerallotmentdetail_change'
         },
         verbose_name='Edit')
+
+    def __init__(self, *args, **kwargs):
+        self.base_columns['pax_range_min'].verbose_name = 'Pax Min'
+        self.base_columns['pax_range_max'].verbose_name = 'Pax Max'
+        self.base_columns['ch_1_ad_1_amount'].verbose_name = '(1st/2nd) Chd'
+        self.base_columns['ch_1_ad_2_amount'].verbose_name = '(1st/2nd) Chd'
+        self.base_columns['ch_1_ad_3_amount'].verbose_name = '1st Chd'
+        super(ProviderAllotmentDetailTable, self).__init__(*args, **kwargs)
+
+    def render_ch_1_ad_1_amount(self, value, record):
+        return format_html('{}/{}'.format(value, record.ch_2_ad_1_amount))
+
+    def before_render(self, request):
+        self.columns.hide('ch_2_ad_1_amount')
+        self.columns.hide('ch_2_ad_2_amount')
 
 
 class ProviderTransferDetailTable(tables.Table):
@@ -91,6 +109,11 @@ class AgencyAllotmentDetailTable(tables.Table):
             "edit_url": 'common:config_agencyallotmentdetail_change'
         },
         verbose_name='Edit')
+
+    def __init__(self, *args, **kwargs):
+        self.base_columns['pax_range_min'].verbose_name='Pax Min'
+        self.base_columns['pax_range_max'].verbose_name='Pax Max'
+        super(AgencyAllotmentDetailTable, self).__init__(*args, **kwargs)
 
 
 class AgencyTransferDetailTable(tables.Table):
