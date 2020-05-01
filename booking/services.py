@@ -5227,10 +5227,14 @@ class BookingServices(object):
 
     @classmethod
     def set_services_status(cls, services, status):
+        booking_dict = dict()
         for service in services:
             service.status = status
             cls.validate_basebookingservice(service)            
             service.save(update_fields=['status', 'cost_amount_to_pay'])
+            booking_dict.update({service.booking_id: service.booking})
+        for booking in booking_dict.values():
+            cls.update_booking(booking)
 
 
     @classmethod
