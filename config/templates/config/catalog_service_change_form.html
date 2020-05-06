@@ -5,16 +5,14 @@
 
 {% block head_extra %}
   {{ block.super }}
-  <script type="text/javascript" src="{% static 'booking/js/dynamic_formset.js' %}"></script>
- {% endblock %}
+  <link rel="stylesheet" type="text/css" href="{% static 'config/css/forms.css' %}"></link>
+{% endblock %}
 
-{% block after_related_objects %}
-  {{ formset.management_form }}
-  {% for form in formset.forms %}
-      <div class="dynamic-row">
-      {{ form }}
-      <a class="btn btn-primary delete-row">Delete</a>
-      </div>
-  {% endfor %}
-  <p><a id="add" class="btn btn-primary add-row">Add Detail</a></p>
-{% endblock after_related_objects %}
+ {% block inline_field_sets %}
+     {% catalog_detail_context original as context %}
+     {% if context.table.paginated_rows %}
+         {% render_table context.table %}
+     {% endif %}
+     {{ formset.management_form }}
+     {{ block.super }}
+{% endblock inline_field_sets %}

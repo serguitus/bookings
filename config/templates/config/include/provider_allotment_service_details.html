@@ -1,9 +1,0 @@
-{% load config_tags %}
-{% load render_table from django_tables2 %}
-
-{% catalog_detail_context current as context %}
-
-<div class="providerservicedetails-container">
-    {% render_table context.table %}
-</div>
-

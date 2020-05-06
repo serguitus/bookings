@@ -163,13 +163,13 @@ class BookingServiceTable(tables.Table):
         # self.base_columns['service_type'].verbose_name='Request emails'
         # self.base_columns['utility_percent'].verbose_name='Util.%'
         # self.base_columns['utility'].verbose_name='Util.'
-        self.base_columns['nights'].verbose_name='N'
-        self.base_columns['datetime_from'].verbose_name='FROM'
-        self.base_columns['datetime_to'].verbose_name='TO'
-        self.base_columns['description'].verbose_name='Pax'
-        self.base_columns['cost_amount'].verbose_name='Cost'
-        self.base_columns['price_amount'].verbose_name='Price'
-        self.base_columns['conf_number'].verbose_name='Conf.'
+        self.base_columns['nights'].verbose_name = 'N'
+        self.base_columns['datetime_from'].verbose_name = 'FROM'
+        self.base_columns['datetime_to'].verbose_name = 'TO'
+        self.base_columns['description'].verbose_name = 'Pax'
+        self.base_columns['cost_amount'].verbose_name = 'Cost'
+        self.base_columns['price_amount'].verbose_name = 'Price'
+        self.base_columns['conf_number'].verbose_name = 'Conf.'
         self.base_columns['time'].visible = False
         super(BookingServiceTable, self).__init__(*args, **kwargs)
 
@@ -337,7 +337,7 @@ class QuoteConfirmationTable(tables.Table):
                  'border': '1'}
         row_attrs = {
             'class': lambda record: '{}'.format(
-                BOOTSTRAP_STYLE_QUOTE_STATUS_MAPPING[record.status]),
+                BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING[record.status]),
         }
 
     def __init__(self, *args, **kwargs):
@@ -470,6 +470,7 @@ class TitledCheckBoxColumn(tables.CheckBoxColumn):
     def header(self):
         title = self.attrs.get('title', '')
         return mark_safe('%s %s' % (super(TitledCheckBoxColumn, self).header, title))
+
 
 class AddPaxBookingServicesTable(tables.Table):
     class Meta:

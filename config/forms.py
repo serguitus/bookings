@@ -49,9 +49,6 @@ class ProviderAllotmentServiceForm(forms.ModelForm):
             'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
         }
 
-    class Media:
-        js = ('admin/js/inlines.js',)
-
 
 class ProviderAllotmentDetailForm(forms.ModelForm):
     class Meta:
@@ -84,20 +81,27 @@ class ProviderAllotmentDetailInlineForm(forms.ModelForm):
                 url='boardtype-autocomplete',
                 forward=['service'],
                 attrs={'data-placeholder': 'Board Type'}),
-            'addon': autocomplete.ModelSelect2(
-                url='catalogallotmentaddon-autocomplete',
-                forward=['service'],
-                attrs={'data-placeholder': 'Addon'}),
-            'pax_range_min': forms.TextInput(),
+            # 'addon': autocomplete.ModelSelect2(
+            #     url='catalogallotmentaddon-autocomplete',
+            #     forward=['service'],
+            #     attrs={'data-placeholder': 'Addon'}),
         }
 
     def __init__(self, *args, **kwargs):
         super(ProviderAllotmentDetailInlineForm, self).__init__(*args, **kwargs)
-        self.fields['room_type'].label = ''
-        self.fields['board_type'].label = ''
-        self.fields['addon'].label = ''
         self.fields['pax_range_min'].widget.attrs['placeholder'] = 'Pax Min'
-        self.fields['pax_range_min'].label = ''
+        self.fields['pax_range_min'].label = 'Pax Min'
+        self.fields['pax_range_max'].widget.attrs['placeholder'] = 'Pax Max'
+        self.fields['pax_range_max'].label = 'Pax Max'
+        self.fields['ad_1_amount'].widget.attrs['placeholder'] = 'SGL'
+        self.fields['ch_1_ad_1_amount'].widget.attrs['placeholder'] = '1st Chd'
+        self.fields['ch_2_ad_1_amount'].widget.attrs['placeholder'] = '2nd Chd'
+        self.fields['ad_2_amount'].widget.attrs['placeholder'] = 'DBL'
+        self.fields['ch_1_ad_2_amount'].widget.attrs['placeholder'] = '1st Chd'
+        self.fields['ch_2_ad_2_amount'].widget.attrs['placeholder'] = '2nd Chd'
+        self.fields['ad_3_amount'].widget.attrs['placeholder'] = 'TPL'
+        self.fields['ch_1_ad_3_amount'].widget.attrs['placeholder'] = '1st Chd'
+        self.fields['ad_4_amount'].widget.attrs['placeholder'] = 'QUAD'
 
 
 class ProviderTransferServiceForm(forms.ModelForm):
@@ -136,6 +140,21 @@ class ProviderTransferDetailInlineForm(forms.ModelForm):
                 forward=['service']),
         }
 
+    def __init__(self, *args, **kwargs):
+        super(ProviderTransferDetailInlineForm, self).__init__(*args, **kwargs)
+        self.fields['location_from'].widget.attrs['placeholder'] = 'Select Location'
+        self.fields['location_from'].label = 'Origin'
+        self.fields['location_to'].widget.attrs['placeholder'] = 'Select Location'
+        self.fields['location_to'].label = 'Destination'
+        self.fields['pax_range_max'].widget.attrs['placeholder'] = 'Pax Max'
+        self.fields['pax_range_max'].label = 'Pax Max'
+        self.fields['pax_range_min'].widget.attrs['placeholder'] = 'Pax Min'
+        self.fields['pax_range_min'].label = 'Pax Min'
+        self.fields['ad_1_amount'].widget.attrs['placeholder'] = 'Adult'
+        self.fields['ad_1_amount'].label = 'Cost'
+        self.fields['ch_1_ad_1_amount'].widget.attrs['placeholder'] = 'Child'
+        self.fields['ch_1_ad_1_amount'].label = 'Chd Cost'
+
 
 class ProviderExtraServiceForm(forms.ModelForm):
     class Meta:
@@ -169,6 +188,17 @@ class ProviderExtraDetailInlineForm(forms.ModelForm):
                 forward=['service']),
         }
 
+    def __init__(self, *args, **kwargs):
+        super(ProviderExtraDetailInlineForm, self).__init__(*args, **kwargs)
+        self.fields['pax_range_max'].widget.attrs['placeholder'] = 'Pax Max'
+        self.fields['pax_range_max'].label = 'Pax Max'
+        self.fields['pax_range_min'].widget.attrs['placeholder'] = 'Pax Min'
+        self.fields['pax_range_min'].label = 'Pax Min'
+        self.fields['ad_1_amount'].widget.attrs['placeholder'] = 'Adult'
+        self.fields['ad_1_amount'].label = 'Cost'
+        # self.fields['ch_1_ad_1_amount'].widget.attrs['placeholder'] = 'Child'
+        # self.fields['ch_1_ad_1_amount'].label = 'Chd Cost'
+
 
 class AgencyAllotmentServiceForm(forms.ModelForm):
     class Meta:
@@ -199,19 +229,21 @@ class AgencyAllotmentDetailForm(forms.ModelForm):
         }
 
 
-class AgencyAllotmentDetailInlineForm(forms.ModelForm):
+class AgencyAllotmentDetailInlineForm(ProviderAllotmentDetailInlineForm):
     class Meta:
         fields = ('__all__')
         widgets = {
             'room_type': autocomplete.ModelSelect2(
                 url='roomtype-autocomplete',
-                forward=['service']),
+                forward=['service'],
+                attrs={'data-placeholder': 'Room Type'}),
             'board_type': autocomplete.ListSelect2(
                 url='boardtype-autocomplete',
-                forward=['service']),
-            'addon': autocomplete.ModelSelect2(
-                url='catalogallotmentaddon-autocomplete',
-                forward=['service']),
+                forward=['service'],
+                attrs={'data-placeholder': 'Board Type'}),
+            #'addon': autocomplete.ModelSelect2(
+            #    url='catalogallotmentaddon-autocomplete',
+            #    forward=['service']),
         }
 
 
@@ -240,12 +272,14 @@ class AgencyTransferDetailForm(forms.ModelForm):
         }
 
 
-class AgencyTransferDetailInlineForm(forms.ModelForm):
+class AgencyTransferDetailInlineForm(ProviderTransferDetailInlineForm):
     class Meta:
         fields = ('__all__')
         widgets = {
-            'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
-            'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'location_from': autocomplete.ModelSelect2(
+                url='location-autocomplete'),
+            'location_to': autocomplete.ModelSelect2(
+                url='location-autocomplete'),
             'addon': autocomplete.ModelSelect2(
                 url='catalogtransferaddon-autocomplete',
                 forward=['service']),
@@ -275,7 +309,7 @@ class AgencyExtraDetailForm(forms.ModelForm):
         }
 
 
-class AgencyExtraDetailInlineForm(forms.ModelForm):
+class AgencyExtraDetailInlineForm(ProviderExtraDetailInlineForm):
     class Meta:
         fields = ('__all__')
         widgets = {

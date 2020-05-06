@@ -6,8 +6,8 @@
     {{ block.super }}
     <script src="{% static 'admin/js/jquery.init.js' %}"></script>
     <script type="text/javascript" src="/admin/jsi18n/"></script>
+    <script type="text/javascript" src="{% static 'admin/js/actions.js' %}"></script>
     <script type="text/javascript" src="{% static 'booking/js/dynamic_formset.js' %}"></script>
-    <script src="{% static 'admin/js/actions.js' %}"></script>
 {% endblock head_extra %}
 
 {% block content %}
@@ -31,7 +31,7 @@
     {% if rooming %}
       {% for pax in rooming %}
     <tr>
-      <th scope="row">{{ pax.pax_group }}</th>
+      <td scope="row">{{ pax.pax_group }}</td>
       <td>{{ pax.pax_name }}</td>
       <td>{{ pax.pax_age }}</td>
       <td>{{ pax.is_price_free }}</td>
@@ -42,7 +42,7 @@
     {% endif %}
     {% for form in formset.forms %}
     <tr class="dynamic-row">
-      <th scope="row">{{ form.pax_group }}</th>
+      <td scope="row">{{ form.pax_group }}</td>
       <td>{{ form.pax_name }}</td>
       <td>{{ form.pax_age }}</td>
       <td>{{ form.is_price_free }}</td>

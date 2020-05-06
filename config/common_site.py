@@ -590,21 +590,28 @@ class CatalogService(SiteModel):
                         continue
 
 
-class ProviderAllotmentDetailInline(CommonStackedInline):
+class ProviderAllotmentDetailInline(CommonTabularInline):
     model = ProviderAllotmentDetail
     extra = 0
     fields = (
         ('single_supplement', 'third_pax_discount'),
-        ('room_type', 'board_type', 'addon'),
+        ('room_type', 'board_type'),
         ('pax_range_min', 'pax_range_max'),
         ('ad_1_amount', 'ch_1_ad_1_amount', 'ch_2_ad_1_amount',), # 'ch_3_ad_1_amount',),
         ('ad_2_amount', 'ch_1_ad_2_amount', 'ch_2_ad_2_amount',), # 'ch_3_ad_2_amount',),
-        ('ad_3_amount', 'ch_1_ad_3_amount', 'ch_2_ad_3_amount',), # 'ch_3_ad_3_amount',),
-        ('ad_4_amount', 'ch_1_ad_4_amount',), # 'ch_2_ad_3_amount',), # 'ch_3_ad_3_amount',),
+        ('ad_3_amount', 'ch_1_ad_3_amount'), # 'ch_2_ad_3_amount', 'ch_3_ad_3_amount',),
+        ('ad_4_amount',), # 'ch_1_ad_4_amount', 'ch_2_ad_3_amount', 'ch_3_ad_3_amount',),
     )
     ordering = ['id', 'room_type', 'board_type']
     form = ProviderAllotmentDetailInlineForm
     list_select_related = ('room_type', 'addon')
+    template = 'config/edit_inline/catalog_tabular_inline.html'
+    extra = 1
+
+    def get_queryset(self, request):
+        queryset = super(ProviderAllotmentDetailInline, self).get_queryset(request)
+        queryset = queryset.none()
+        return queryset
 
 
 class ProviderAllotmentServiceSiteModel(CatalogService):
@@ -617,13 +624,12 @@ class ProviderAllotmentServiceSiteModel(CatalogService):
     top_filters = (
         ('service', AllotmentTopFilter), ('provider', ProviderTopFilter),
         ('date_to', DateToTopFilter))
-    #inlines = [ProviderAllotmentDetailInline]
+    inlines = [ProviderAllotmentDetailInline]
     ordering = ['service', 'provider', '-date_from']
     list_select_related = ('service', 'provider')
     form = ProviderAllotmentServiceForm
     add_form_template = 'config/catalog_service_change_form.html'
     change_form_template = 'config/catalog_service_change_form.html'
-    change_details_template = 'config/include/provider_allotment_service_details.html'
     save_as = True
 
     actions = ['rewrite_agency_amounts', 'update_agency_amounts']
@@ -712,6 +718,10 @@ class ProviderTransferDetailInline(CommonTabularInline):
     ordering = ['location_from', 'location_to']
     form = ProviderTransferDetailInlineForm
     list_select_related = ('location_from', 'location_to', 'addon')
+    template = 'config/edit_inline/catalog_tabular_inline.html'
+
+    def get_queryset(self, request):
+        return super(ProviderTransferDetailInline, self).get_queryset(request).none()
 
 
 class ProviderTransferServiceSiteModel(CatalogService):
@@ -725,13 +735,12 @@ class ProviderTransferServiceSiteModel(CatalogService):
         ('service', TransferTopFilter), ('provider', ProviderTopFilter),
         ('date_to', DateToTopFilter),
         ProviderTransferLocationTopFilter, ProviderTransferLocationAdditionalTopFilter)
-    #inlines = [ProviderTransferDetailInline]
+    inlines = [ProviderTransferDetailInline]
     ordering = ['service', 'provider', '-date_from']
     list_select_related = ('service', 'provider')
     form = ProviderTransferServiceForm
     add_form_template = 'config/catalog_service_change_form.html'
     change_form_template = 'config/catalog_service_change_form.html'
-    change_details_template = 'config/include/provider_transfer_service_details.html'
     save_as = True
 
     actions = ['rewrite_agency_amounts', 'update_agency_amounts']
@@ -812,11 +821,11 @@ class ProviderExtraDetailInline(CommonTabularInline):
         ('addon','ad_1_amount'))
     ordering = ['addon', 'pax_range_min', 'id']
     form = ProviderExtraDetailInlineForm
+    template = 'config/edit_inline/catalog_tabular_inline.html'
+    extra = 1
 
     def get_queryset(self, request):
-        qs = super(ProviderExtraDetailInline, self).get_queryset(request)
-        qs.select_related('addon')
-        return qs
+        return super(ProviderExtraDetailInline, self).get_queryset(request).none()
 
 
 class ProviderExtraServiceSiteModel(CatalogService):
@@ -829,13 +838,12 @@ class ProviderExtraServiceSiteModel(CatalogService):
     top_filters = (
         ('service', ExtraTopFilter), ('provider', ProviderTopFilter),
         ('date_to', DateToTopFilter))
-    #inlines = [ProviderExtraDetailInline]
+    inlines = [ProviderExtraDetailInline]
     ordering = ['service', 'provider', '-date_from']
     list_select_related = ('service', 'provider')
     form = ProviderExtraServiceForm
-    add_form_template = 'config/provider_extra_change_form.html'
-    change_form_template = 'config/provider_extra_change_form.html'
-    change_details_template = 'config/include/provider_extra_service_details.html'
+    add_form_template = 'config/catalog_service_change_form.html'
+    change_form_template = 'config/catalog_service_change_form.html'
     save_as = True
 
     actions = ['rewrite_agency_amounts', 'update_agency_amounts']
@@ -901,21 +909,26 @@ class ProviderExtraDetailSiteModel(SiteModel):
         return super(ProviderExtraDetailSiteModel, self).response_post_save_change(request, obj)
 
 
-class AgencyAllotmentDetailInline(CommonStackedInline):
+class AgencyAllotmentDetailInline(CommonTabularInline):
     model = AgencyAllotmentDetail
     extra = 0
     fields = (
-        ('room_type', 'board_type', 'addon'),
+        ('room_type', 'board_type'),
         ('pax_range_min', 'pax_range_max'),
         ('ad_1_amount', 'ch_1_ad_1_amount', 'ch_2_ad_1_amount'), #, 'ch_3_ad_1_amount',),
         ('ad_2_amount', 'ch_1_ad_2_amount', 'ch_2_ad_2_amount',), # 'ch_3_ad_2_amount',),
-        ('ad_3_amount', 'ch_1_ad_3_amount', 'ch_2_ad_3_amount',), # 'ch_3_ad_3_amount',),
-        ('ad_4_amount', 'ch_1_ad_4_amount',), # 'ch_2_ad_3_amount',), # 'ch_3_ad_3_amount',),
+        ('ad_3_amount', 'ch_1_ad_3_amount'), #'ch_2_ad_3_amount',), 'ch_3_ad_3_amount',),
+        ('ad_4_amount',), # 'ch_1_ad_4_amount'), 'ch_2_ad_3_amount',), 'ch_3_ad_3_amount',),
         # ('ch_1_ad_0_amount', 'ch_2_ad_0_amount', 'ch_3_ad_0_amount',),
     )
     ordering = ['room_type', 'board_type']
     form = AgencyAllotmentDetailInlineForm
     list_select_related = ('room_type', 'addon')
+    template = 'config/edit_inline/catalog_tabular_inline.html'
+    extra = 1
+
+    def get_queryset(self, request):
+        return super(AgencyAllotmentDetailInline, self).get_queryset(request).none()
 
 
 class AgencyAllotmentServiceSiteModel(CatalogService):
@@ -928,13 +941,12 @@ class AgencyAllotmentServiceSiteModel(CatalogService):
     top_filters = (
         ('service', AllotmentTopFilter), ('agency', AgencyTopFilter),
         ('date_to', DateToTopFilter))
-    #inlines = [AgencyAllotmentDetailInline]
+    inlines = [AgencyAllotmentDetailInline]
     ordering = ['service', 'agency', '-date_from']
     list_select_related = ('agency', 'service')
     form = AgencyAllotmentServiceForm
     add_form_template = 'config/catalog_service_change_form.html'
     change_form_template = 'config/catalog_service_change_form.html'
-    change_details_template = 'config/include/agency_allotment_service_details.html'
     save_as = True
 
     def get_details_model(self):
@@ -1012,6 +1024,9 @@ class AgencyTransferDetailInline(CommonTabularInline):
     form = AgencyTransferDetailInlineForm
     list_select_related = ('location_from', 'location_to', 'addon')
 
+    def get_queryset(self, request):
+        return super(AgencyTransferDetailInline, self).get_queryset(request).none()
+
 
 class AgencyTransferServiceSiteModel(CatalogService):
     model_order = 7130
@@ -1024,13 +1039,12 @@ class AgencyTransferServiceSiteModel(CatalogService):
         ('service', TransferTopFilter), ('agency', AgencyTopFilter),
         ('date_to', DateToTopFilter),
         AgencyTransferLocationTopFilter, AgencyTransferLocationAdditionalTopFilter)
-    #inlines = [AgencyTransferDetailInline]
+    inlines = [AgencyTransferDetailInline]
     ordering = ['service', 'agency', '-date_from']
     list_select_related = ('service', 'agency')
     form = AgencyTransferServiceForm
     add_form_template = 'config/catalog_service_change_form.html'
     change_form_template = 'config/catalog_service_change_form.html'
-    change_details_template = 'config/include/agency_transfer_service_details.html'
     save_as = True
 
     def get_details_model(self):
@@ -1098,9 +1112,7 @@ class AgencyExtraDetailInline(CommonTabularInline):
     list_select_related = ('addon')
 
     def get_queryset(self, request):
-        qs = super(AgencyExtraDetailInline, self).get_queryset(request)
-        qs.select_related('addon')
-        return qs
+        return super(AgencyExtraDetailInline, self).get_queryset(request).none()
 
 
 class AgencyExtraServiceSiteModel(CatalogService):
@@ -1113,13 +1125,12 @@ class AgencyExtraServiceSiteModel(CatalogService):
     top_filters = (
         ('service', ExtraTopFilter), ('agency', AgencyTopFilter),
         ('date_to', DateToTopFilter))
-    #inlines = [AgencyExtraDetailInline]
+    inlines = [AgencyExtraDetailInline]
     ordering = ['service', 'agency', '-date_from']
     list_select_related = ('service', 'agency')
     form = AgencyExtraServiceForm
     add_form_template = 'config/catalog_service_change_form.html'
     change_form_template = 'config/catalog_service_change_form.html'
-    change_details_template = 'config/include/agency_extra_service_details.html'
     save_as = True
 
     def get_details_model(self):

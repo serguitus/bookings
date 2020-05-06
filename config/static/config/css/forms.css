@@ -1,3 +1,35 @@
 #transfer_form #id_name {
     width: 40em;
 }
+
+#providerallotmentdetail_set-group .module .select2-container{
+    min-width: 10em;
+}
+
+#providerallotmentdetail_set-group .module input[type=number]{
+    width: 70px;
+}
+
+#providertransferdetail_set-group .module .select2-container{
+    min-width: 15em;
+}
+
+#providertransferdetail_set-group .module input[type=number]{
+    width: 90px;
+}
+
+#agencyallotmentdetail_set-group .module .select2-container{
+    min-width: 10em;
+}
+
+#agencyallotmentdetail_set-group .module input[type=number]{
+    width: 70px;
+}
+
+#agencytransferdetail_set-group .module .select2-container{
+    min-width: 15em;
+}
+
+#agencytransferdetail_set-group .module input[type=number]{
+    width: 90px;
+}

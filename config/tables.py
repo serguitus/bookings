@@ -36,7 +36,7 @@ class ProviderAllotmentDetailTable(tables.Table):
         attrs = {'class': 'table table-hover table-condensed'}
         model = ProviderAllotmentDetail
         fields = [
-            'edit', 'room_type', 'board_type', 'addon', 'pax_range_min',
+            'edit', 'room_type', 'board_type', 'pax_range_min',
             'pax_range_max', 'ad_1_amount', 'ch_1_ad_1_amount',
             'ch_2_ad_1_amount', 'ad_2_amount', 'ch_1_ad_2_amount',
             'ch_2_ad_2_amount', 'ad_3_amount', 'ch_1_ad_3_amount',
@@ -60,6 +60,9 @@ class ProviderAllotmentDetailTable(tables.Table):
     def render_ch_1_ad_1_amount(self, value, record):
         return format_html('{}/{}'.format(value, record.ch_2_ad_1_amount))
 
+    def render_ch_1_ad_2_amount(self, value, record):
+        return format_html('{}/{}'.format(value, record.ch_2_ad_2_amount))
+
     def before_render(self, request):
         self.columns.hide('ch_2_ad_1_amount')
         self.columns.hide('ch_2_ad_2_amount')
@@ -80,6 +83,15 @@ class ProviderTransferDetailTable(tables.Table):
         },
         verbose_name='Edit')
 
+    def __init__(self, *args, **kwargs):
+        self.base_columns['pax_range_min'].verbose_name = 'Pax Min'
+        self.base_columns['pax_range_max'].verbose_name = 'Pax Max'
+        self.base_columns['ad_1_amount'].verbose_name = 'Cost'
+        self.base_columns['ch_1_ad_1_amount'].verbose_name = 'Chd Cost'
+        self.base_columns['location_from'].verbose_name = 'Origin'
+        self.base_columns['location_to'].verbose_name = 'Destination'
+        super(ProviderTransferDetailTable, self).__init__(*args, **kwargs)
+
 
 class ProviderExtraDetailTable(tables.Table):
     class Meta:
@@ -94,14 +106,24 @@ class ProviderExtraDetailTable(tables.Table):
         },
         verbose_name='Edit')
 
+    def __init__(self, *args, **kwargs):
+        self.base_columns['pax_range_min'].verbose_name = 'Pax Min'
+        self.base_columns['pax_range_max'].verbose_name = 'Pax Max'
+        self.base_columns['ad_1_amount'].verbose_name = 'Cost'
+        # self.base_columns['ch_1_ad_1_amount'].verbose_name = 'Child Cost'
+        super(ProviderExtraDetailTable, self).__init__(*args, **kwargs)
 
-class AgencyAllotmentDetailTable(tables.Table):
+
+class AgencyAllotmentDetailTable(ProviderAllotmentDetailTable):
     class Meta:
         attrs = {'class': 'table table-hover table-condensed'}
         model = AgencyAllotmentDetail
         fields = [
-            'edit', 'room_type', 'board_type', 'addon', 'pax_range_min', 'pax_range_max',
-            'ad_1_amount', 'ad_2_amount', 'ad_3_amount', 'ad_4_amount']
+            'edit', 'room_type', 'board_type', 'pax_range_min',
+            'pax_range_max', 'ad_1_amount', 'ch_1_ad_1_amount',
+            'ch_2_ad_1_amount', 'ad_2_amount', 'ch_1_ad_2_amount',
+            'ch_2_ad_2_amount', 'ad_3_amount', 'ch_1_ad_3_amount',
+            'ad_4_amount']
 
     edit = tables.TemplateColumn(
         template_name="config/include/table_edit.html",
@@ -110,13 +132,8 @@ class AgencyAllotmentDetailTable(tables.Table):
         },
         verbose_name='Edit')
 
-    def __init__(self, *args, **kwargs):
-        self.base_columns['pax_range_min'].verbose_name='Pax Min'
-        self.base_columns['pax_range_max'].verbose_name='Pax Max'
-        super(AgencyAllotmentDetailTable, self).__init__(*args, **kwargs)
 
-
-class AgencyTransferDetailTable(tables.Table):
+class AgencyTransferDetailTable(ProviderTransferDetailTable):
     class Meta:
         attrs = {'class': 'table table-hover table-condensed'}
         model = AgencyTransferDetail
@@ -132,7 +149,7 @@ class AgencyTransferDetailTable(tables.Table):
         verbose_name='Edit')
 
 
-class AgencyExtraDetailTable(tables.Table):
+class AgencyExtraDetailTable(ProviderExtraDetailTable):
     class Meta:
         attrs = {'class': 'table table-hover table-condensed'}
         model = AgencyExtraDetail

@@ -54,9 +54,10 @@ def servicebookdetail_table(service):
 
 @register.simple_tag
 def catalog_detail_context(providerservice):
-    table = class_mapping[providerservice.__class__.__name__](
+    obj_class = providerservice.__class__.__name__
+    table = class_mapping[obj_class](
         providerservice.get_detail_objects()
         .select_related(
-            *table_related_fields[providerservice.__class__.__name__]),
-        order_by=table_ordering_fields[providerservice.__class__.__name__])
+            *table_related_fields[obj_class]),
+        order_by=table_ordering_fields[obj_class])
     return {'table': table}
