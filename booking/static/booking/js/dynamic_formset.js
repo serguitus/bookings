@@ -1,3 +1,4 @@
+(function($) {
 function updateElementIndex(el, prefix, ndx) {
     var id_regex = new RegExp('(' + prefix + '-\\d+)');
     var replacement = prefix + '-' + ndx;
@@ -47,3 +48,4 @@ $(document).ready( function () {
     });
 
 });
+})(django.jQuery);
