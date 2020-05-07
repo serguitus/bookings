@@ -33,7 +33,7 @@ class CancelledTopFilter(filters.BooleanFilter):
 
 
 class InternalReferenceTopFilter(filters.TextFilter):
-    filter_title = 'Int.Ref.'
+    filter_title = 'TNX Ref.'
 
     def queryset(self, request, queryset):
         search_terms = self._values[0]
