@@ -94,6 +94,7 @@ class RoomTypeAutocompleteView(autocomplete.Select2QuerySetView):
         service = self.forwarded.get('service', None)
         if service:
             return qs.filter(allotmentroomtype__allotment=service)
+        return qs
 
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
