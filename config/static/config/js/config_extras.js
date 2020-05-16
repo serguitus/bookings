@@ -6,12 +6,12 @@ var bookingextra_url = bookingallotment_url;
 
 $(document).ready(function(){
   $('#providerallotmentdetail_set-group').on('change', '[id$=-ad_2_amount]', function(){
-    sgl_sup = $($(this).parents('fieldset')[0]).find('[id$=-single_supplement]');
-    tpl_dsc = $($(this).parents('fieldset')[0]).find('[id$=-third_pax_discount]');
-    sgl_val = $($(this).parents('fieldset')[0]).find('[id$=-ad_1_amount]');
+    sgl_sup = $($(this).parents('tr')[0]).find('[id$=-single_supplement]');
+    tpl_dsc = $($(this).parents('tr')[0]).find('[id$=-third_pax_discount]');
+    sgl_val = $($(this).parents('tr')[0]).find('[id$=-ad_1_amount]');
     dbl_val = $(this);
-    tpl_val = $($(this).parents('fieldset')[0]).find('[id$=-ad_3_amount]');
-    qpl_val = $($(this).parents('fieldset')[0]).find('[id$=-ad_4_amount]');
+    tpl_val = $($(this).parents('tr')[0]).find('[id$=-ad_3_amount]');
+    // qpl_val = $($(this).parents('tr')[0]).find('[id$=-ad_4_amount]');
     if(sgl_sup.val()){
       // if a SGL suplement exists, SGL = DBL + Supplement
       sgl_val.val(Number(dbl_val.val())+Number(sgl_sup.val()));
