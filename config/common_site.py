@@ -26,13 +26,14 @@ from config.constants import (
     SERVICE_CATEGORY_PACKAGE)
 
 from config.forms import (
+    PackageForm, AgencyPackageServiceForm,
     ProviderAllotmentServiceForm, ProviderAllotmentDetailForm, ProviderAllotmentDetailInlineForm,
     ProviderTransferServiceForm, ProviderTransferDetailForm, ProviderTransferDetailInlineForm,
     ProviderExtraServiceForm, ProviderExtraDetailForm, ProviderExtraDetailInlineForm,
     AgencyAllotmentServiceForm, AgencyAllotmentDetailForm, AgencyAllotmentDetailInlineForm,
     AgencyTransferServiceForm, AgencyTransferDetailForm, AgencyTransferDetailInlineForm,
     AgencyExtraServiceForm, AgencyExtraDetailForm, AgencyExtraDetailInlineForm,
-    AllotmentRoomTypeInlineForm, ExtraComponentInlineForm, TransferZoneForm,
+    AllotmentRoomTypeInlineForm, TransferZoneForm,
     LocationTransferIntervalInlineForm, ServiceAddonInlineForm, TransferPickupTimeInlineForm,
     PricesExportForm, ExtraForm,
     ServiceForm, ServiceBookDetailForm,
@@ -44,9 +45,10 @@ from config.models import (
     TransferZone, TransferPickupTime, AllotmentTransferZone, RoomType, Addon,
     Service,
     ServiceBookDetailAllotment, ServiceBookDetailTransfer, ServiceBookDetailExtra,
-    Allotment, AllotmentRoomType, AllotmentBoardType, AllotmentSupplement,
-    Transfer, TransferSupplement,
-    Extra, ExtraSupplement, ExtraComponent,
+    Allotment, AllotmentRoomType, AllotmentBoardType,
+    Transfer,
+    Extra,
+    NewPackage, NewAgencyPackageService, NewAgencyPackageDetail,
     AgencyAllotmentService, AgencyAllotmentDetail,
     AgencyTransferService, AgencyTransferDetail,
     AgencyExtraService, AgencyExtraDetail,
@@ -62,9 +64,10 @@ from config.top_filters import (
     AllotmentTopFilter, TransferTopFilter, ExtraTopFilter,
     ProviderTransferLocationTopFilter, ProviderTransferLocationAdditionalTopFilter,
     AgencyTransferLocationTopFilter, AgencyTransferLocationAdditionalTopFilter,
-    DateToTopFilter, AgencyTransferLocationTopFilter,
+    DateTopFilter, AgencyTransferLocationTopFilter,
     ProviderDetailTransferTopFilter,
     ProviderTransferDetailLocationTopFilter, TransferDetailProviderTopFilter,
+    PackageTopFilter,
 )
 from config.views import render_prices_pdf
 
@@ -77,6 +80,8 @@ from reservas.admin import bookings_site
 
 
 MENU_LABEL_CONFIG_BASIC = 'Configuration'
+MENU_LABEL_PACKAGE = 'Package'
+MENU_GROUP_LABEL_PACKAGE_SERVICES = 'Package Services By Type'
 
 
 def export_prices(request, queryset, extra_context=None):
@@ -458,11 +463,6 @@ class AllotmentBoardTypeSiteModel(SiteModel):
     ordering = ['allotment__name']
 
 
-class AllotmentSupplementInline(CommonTabularInline):
-    model = AllotmentSupplement
-    extra = 0
-
-
 class AllotmentTransferZoneInline(CommonTabularInline):
     model = AllotmentTransferZone
     extra = 0
@@ -490,11 +490,6 @@ class AllotmentSiteModel(BaseServiceSiteModel):
     form = ServiceForm
 
 
-class TransferSupplementInline(CommonTabularInline):
-    model = TransferSupplement
-    extra = 0
-
-
 class TransferSiteModel(BaseServiceSiteModel):
     model_order = 6120
     menu_label = MENU_LABEL_CONFIG_BASIC
@@ -514,17 +509,6 @@ class TransferSiteModel(BaseServiceSiteModel):
     form = ServiceForm
 
 
-class ExtraSupplementInline(CommonTabularInline):
-    model = ExtraSupplement
-    extra = 0
-
-
-class ExtraComponentInline(CommonTabularInline):
-    model = ExtraComponent
-    extra = 0
-    fk_name = 'extra'
-    form = ExtraComponentInlineForm
-
 class ExtraSiteModel(BaseServiceSiteModel):
     model_order = 6130
     menu_label = MENU_LABEL_CONFIG_BASIC
@@ -537,9 +521,28 @@ class ExtraSiteModel(BaseServiceSiteModel):
                     'infant_age', 'child_age')
     top_filters = (('service_category', ServiceCategoryTopFilter), 'name',)
     ordering = ['enabled', 'name']
-    inlines = [ExtraComponentInline, ServiceAddonInline]
+    inlines = [ServiceAddonInline]
     actions = ['export_prices']
     form = ExtraForm
+
+
+class PackageSiteModel(BaseServiceSiteModel):
+    model_order = 1010
+    menu_label = MENU_LABEL_PACKAGE
+    fields = (
+        ('name', 'service_category', 'enabled'),
+        ('location', 'amounts_type', 'pax_range'),
+        'time', 'description'
+    )
+    list_display = (
+        'name', 'service_category', 'location', 'amounts_type', 'pax_range', 'time', 'enabled')
+    list_editable = ('enabled',)
+    top_filters = ('name', ('location', LocationTopFilter), 'amounts_type', 'pax_range', 'enabled')
+    ordering = ('enabled', 'name',)
+    list_details_template = 'booking/package_details.html'
+    change_details_template = 'booking/package_details.html'
+    form = PackageForm
+    inlines = [ServiceAddonInline]
 
 
 class CatalogService(SiteModel):
@@ -623,7 +626,7 @@ class ProviderAllotmentServiceSiteModel(CatalogService):
     list_display = ('service', 'provider', 'date_from', 'date_to',)
     top_filters = (
         ('service', AllotmentTopFilter), ('provider', ProviderTopFilter),
-        ('date_to', DateToTopFilter))
+        ('date_to', DateTopFilter))
     inlines = [ProviderAllotmentDetailInline]
     ordering = ['service', 'provider', '-date_from']
     list_select_related = ('service', 'provider')
@@ -680,7 +683,7 @@ class ProviderAllotmentDetailSiteModel(SiteModel):
         'ad_1_amount', 'ad_2_amount', 'ad_3_amount', 'ad_4_amount')
     #top_filters = (
     #    ('provider_service__service', AllotmentTopFilter), ('provider_service__provider', ProviderTopFilter),
-    #    ('provider_service__date_to', DateToTopFilter))
+    #    ('provider_service__date_to', DateTopFilter))
     ordering = [
         'provider_service__service', '-provider_service__date_from', 'provider_service__provider']
     form = ProviderAllotmentDetailForm
@@ -733,7 +736,7 @@ class ProviderTransferServiceSiteModel(CatalogService):
     list_display = ('service', 'provider', 'date_from', 'date_to',)
     top_filters = (
         ('service', TransferTopFilter), ('provider', ProviderTopFilter),
-        ('date_to', DateToTopFilter),
+        ('date_to', DateTopFilter),
         ProviderTransferLocationTopFilter, ProviderTransferLocationAdditionalTopFilter)
     inlines = [ProviderTransferDetailInline]
     ordering = ['service', 'provider', '-date_from']
@@ -837,7 +840,7 @@ class ProviderExtraServiceSiteModel(CatalogService):
     list_display = ('service', 'provider', 'date_from', 'date_to',)
     top_filters = (
         ('service', ExtraTopFilter), ('provider', ProviderTopFilter),
-        ('date_to', DateToTopFilter))
+        ('date_to', DateTopFilter))
     inlines = [ProviderExtraDetailInline]
     ordering = ['service', 'provider', '-date_from']
     list_select_related = ('service', 'provider')
@@ -882,7 +885,7 @@ class ProviderExtraDetailSiteModel(SiteModel):
     list_display = ('provider_service', 'pax_range_min', 'pax_range_max', 'addon', 'ad_1_amount')
     #top_filters = (
     #    ('provider_service__service', ExtraTopFilter), ('provider_service__provider', ProviderTopFilter),
-    #    ('provider_service__date_to', DateToTopFilter))
+    #    ('provider_service__date_to', DateTopFilter))
     ordering = [
         'provider_service__service', '-provider_service__date_from', 'provider_service__provider']
     form = ProviderExtraDetailForm
@@ -940,7 +943,7 @@ class AgencyAllotmentServiceSiteModel(CatalogService):
     list_display = ('agency', 'service', 'date_from', 'date_to',)
     top_filters = (
         ('service', AllotmentTopFilter), ('agency', AgencyTopFilter),
-        ('date_to', DateToTopFilter))
+        ('date_to', DateTopFilter))
     inlines = [AgencyAllotmentDetailInline]
     ordering = ['service', 'agency', '-date_from']
     list_select_related = ('agency', 'service')
@@ -985,7 +988,7 @@ class AgencyAllotmentDetailSiteModel(SiteModel):
         'ad_1_amount', 'ad_2_amount', 'ad_3_amount', 'ad_4_amount')
     #top_filters = (
     #    ('agency_service__service', AllotmentTopFilter), ('agency_service__agency', AgencyTopFilter),
-    #    ('agency_service__date_to', DateToTopFilter))
+    #    ('agency_service__date_to', DateTopFilter))
     ordering = [
         'agency_service__service', '-agency_service__date_from', 'agency_service__agency']
     form = AgencyAllotmentDetailForm
@@ -1037,7 +1040,7 @@ class AgencyTransferServiceSiteModel(CatalogService):
     list_display = ('agency', 'service', 'date_from', 'date_to',)
     top_filters = (
         ('service', TransferTopFilter), ('agency', AgencyTopFilter),
-        ('date_to', DateToTopFilter),
+        ('date_to', DateTopFilter),
         AgencyTransferLocationTopFilter, AgencyTransferLocationAdditionalTopFilter)
     inlines = [AgencyTransferDetailInline]
     ordering = ['service', 'agency', '-date_from']
@@ -1074,7 +1077,7 @@ class AgencyTransferDetailSiteModel(SiteModel):
         'pax_range_min', 'pax_range_max', 'ad_1_amount', 'ch_1_ad_1_amount')
     #top_filters = (
     #    ('agency_service__service', TransferTopFilter), ('agency_service__agency', AgencyTopFilter),
-    #    ('agency_service__date_to', DateToTopFilter))
+    #    ('agency_service__date_to', DateTopFilter))
     ordering = [
         'agency_service__service', '-agency_service__date_from', 'agency_service__agency']
     form = AgencyTransferDetailForm
@@ -1124,7 +1127,7 @@ class AgencyExtraServiceSiteModel(CatalogService):
     list_display = ('agency', 'service', 'date_from', 'date_to',)
     top_filters = (
         ('service', ExtraTopFilter), ('agency', AgencyTopFilter),
-        ('date_to', DateToTopFilter))
+        ('date_to', DateTopFilter))
     inlines = [AgencyExtraDetailInline]
     ordering = ['service', 'agency', '-date_from']
     list_select_related = ('service', 'agency')
@@ -1157,7 +1160,7 @@ class AgencyExtraDetailSiteModel(SiteModel):
     list_display = ('agency_service', 'pax_range_min', 'pax_range_max', 'addon', 'ad_1_amount')
     #top_filters = (
     #    ('agency_service__service', ExtraTopFilter), ('agency_service__agency', AgencyTopFilter),
-    #    ('agency_service__date_to', DateToTopFilter))
+    #    ('agency_service__date_to', DateTopFilter))
     ordering = [
         'agency_service__service', '-agency_service__date_from', 'agency_service__agency']
     form = AgencyExtraDetailForm
@@ -1201,6 +1204,28 @@ class CarRentalSiteModel(SiteModel):
     ordering = ['name',]
 
 
+class AgencyPackageDetailInline(CommonStackedInline):
+    model = NewAgencyPackageDetail
+    extra = 0
+    fields = (('ad_1_amount', 'pax_range_min', 'pax_range_max'),)
+
+
+class AgencyPackageServiceSiteModel(SiteModel):
+    model_order = 7140
+    menu_label = MENU_LABEL_CONFIG_BASIC
+    menu_group = 'Agency Catalogue'
+    #recent_allowed = True
+    fields = ('agency', 'service', 'date_from', 'date_to')
+    list_display = ('agency', 'service', 'date_from', 'date_to',)
+    top_filters = (
+        ('service', PackageTopFilter), ('agency', AgencyTopFilter),
+        ('date_to', DateTopFilter))
+    inlines = [AgencyPackageDetailInline]
+    ordering = ['service', 'agency', '-date_from']
+    form = AgencyPackageServiceForm
+    save_as = True
+
+
 bookings_site.register(ServiceCategory, ServiceCategorySiteModel)
 bookings_site.register(Location, LocationSiteModel)
 bookings_site.register(TransferZone, TransferZoneSiteModel)
@@ -1215,6 +1240,7 @@ bookings_site.register(Service, ServiceSiteModel)
 bookings_site.register(Allotment, AllotmentSiteModel)
 bookings_site.register(Transfer, TransferSiteModel)
 bookings_site.register(Extra, ExtraSiteModel)
+bookings_site.register(NewPackage, PackageSiteModel)
 bookings_site.register(ServiceBookDetailAllotment, ServiceBookDetailAllotmentSiteModel)
 bookings_site.register(ServiceBookDetailTransfer, ServiceBookDetailTransferSiteModel)
 bookings_site.register(ServiceBookDetailExtra, ServiceBookDetailExtraSiteModel)
@@ -1232,3 +1258,6 @@ bookings_site.register(ProviderTransferService, ProviderTransferServiceSiteModel
 bookings_site.register(ProviderTransferDetail, ProviderTransferDetailSiteModel)
 bookings_site.register(ProviderExtraService, ProviderExtraServiceSiteModel)
 bookings_site.register(ProviderExtraDetail, ProviderExtraDetailSiteModel)
+
+bookings_site.register(NewAgencyPackageService, AgencyPackageServiceSiteModel)
+

@@ -56,12 +56,12 @@ urlpatterns = [
     url(r'^transfer-service-details/?', views.TransferServiceDetailsView.as_view(), name='transfer-service-details'),
 
     url(
-        r'^quoteservice_book_detail_url/?',
+        r'^quote_book_detail_url/?',
         views.QuoteServiceBookDetailURLView.as_view(),
-        name='quoteservice_book_detail_url'),
+        name='quote_book_detail_url'),
     url(
-        r'^bookingservice_book_detail_url/?',
+        r'^booking_book_detail_url/?',
         views.BookingServiceBookDetailURLView.as_view(),
-        name='bookingservice_book_detail_url'),
+        name='booking_book_detail_url'),
 
 ]

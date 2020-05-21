@@ -4,17 +4,11 @@ from booking.constants import BOOKING_STATUS_CANCELLED
 from datetime import date, timedelta
 from django.db.models import F, Q
 
-class DateTopFilter(filters.DateFilter):
-    default_value = [date.today() - timedelta(days=30), None]
-
-
-class PackageTopFilter(filters.ForeignKeyFilter):
-    filter_title = 'Select Packages'
-    autocomplete_url = 'package-autocomplete'
 
 class SellerTopFilter(filters.ForeignKeyFilter):
     filter_title = 'Select Sellers'
     autocomplete_url = 'seller-autocomplete'
+
 
 class CancelledTopFilter(filters.BooleanFilter):
     default_value = ["False"]

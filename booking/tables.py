@@ -10,8 +10,7 @@ from booking.models import (
     PackageService,
     Quote, QuoteService, QuotePaxVariant, QuotePackageService,
     QuoteServiceBookDetail,
-    Booking, BookingService, BookingPax, BookingPackageService,
-    BookingExtraComponent,
+    Booking, BaseBookingService, BookingPax, BookingPackageService,
     BookingServiceBookDetail,
     ProviderBookingPayment, ProviderBookingPaymentService,
 )
@@ -20,7 +19,7 @@ from booking.constants import (
     BOOKINGSERVICE_TYPES,
     BOOKINGPACKAGESERVICE_TYPES,
     BOOTSTRAP_STYLE_QUOTE_STATUS_MAPPING, BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING,
-    QUOTESERVICE_BOOK_DETAIL_CATEGORIES, BOOKINGSERVICE_BOOK_DETAIL_CATEGORIES)
+    QUOTE_BOOK_DETAIL_CATEGORIES, BOOKING_BOOK_DETAIL_CATEGORIES)
 
 from finance.models import (
     AgencyPayment,
@@ -148,7 +147,7 @@ class BookingServiceTable(tables.Table):
                                })
 
     class Meta:
-        model = BookingService
+        model = BaseBookingService
         template_name = 'booking/bookingservice_list.html'
         fields = ['check', 'name', 'service_location', 'datetime_from',
                   'datetime_to', 'nights', 'description',
@@ -231,14 +230,6 @@ class ProviderBookingPaymentTable(tables.Table):
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
 
-class BookingExtraComponentTable(tables.Table):
-    class Meta:
-        model = BookingExtraComponent
-        template_name = 'booking/table/bookingextracomponent_table.html'
-        fields = ['name',]
-        attrs = {'class': 'table table-hover table-sm'}
-
-
 class ProviderBookingPaymentServiceTable(tables.Table):
     class Meta:
         model = ProviderBookingPaymentService
@@ -301,7 +292,7 @@ class ProviderBookingPaymentReportTable(tables.Table):
 
 class BookingConfirmationTable(tables.Table):
     class Meta:
-        model = BookingService
+        model = BaseBookingService
         template_name = 'booking/bookingservice_list.html'
         fields = ['name', 'service_location', 'datetime_from',
                   'datetime_to', 'nights', 'description',
@@ -354,7 +345,7 @@ class QuoteConfirmationTable(tables.Table):
 
 class BookingServiceSummaryTable(tables.Table):
     class Meta:
-        model = BookingService
+        model = BaseBookingService
         template_name = 'booking/include/base_table.html'
         fields = ['name', 'datetime_from', 'datetime_to', 'provider', 'status']
         attrs = {'class': 'table table-hover table-sm'}
@@ -372,7 +363,7 @@ class BookingPaxTable(tables.Table):
 
 class BookingVouchersTable(tables.Table):
     class Meta:
-        model = BookingService
+        model = BaseBookingService
         template_name = 'booking/bookingservice_list.html'
         fields = ['pk', 'name', 'datetime_from', 'datetime_to',
                   'status', 'conf_number', 'provider']
@@ -432,7 +423,7 @@ class BookingPackageServiceSummaryTable(tables.Table):
 
 class BookingServiceUpdateTable(tables.Table):
     class Meta:
-        model = BookingService
+        model = BaseBookingService
         # fields update_cost_amount and update_price_amount are lazy
         # they contain computed values that will be saved upon save action
         template_name = 'booking/bookingservice_list.html'
@@ -474,7 +465,7 @@ class TitledCheckBoxColumn(tables.CheckBoxColumn):
 
 class AddPaxBookingServicesTable(tables.Table):
     class Meta:
-        model = BookingService
+        model = BaseBookingService
         # fields update_cost_amount and update_price_amount are lazy
         # they contain computed values that will be saved upon save action
         template_name = 'booking/add_pax_bookingservices.html'
@@ -517,12 +508,12 @@ class AddPaxBookingServicesTable(tables.Table):
 class QuoteServiceBookDetailTable(tables.Table):
     class Meta:
         model = QuoteServiceBookDetail
-        template_name = 'booking/table/quoteservicebookdetail_table.html'
+        template_name = 'booking/table/quotebookdetail_table.html'
         fields = ['name', 'description', 'base_service__category', 'datetime_from', 'time']
 
     def render_name(self, value, record):
         obj_url = reverse(
-            'common:booking_%s_change' % (QUOTESERVICE_BOOK_DETAIL_CATEGORIES[record.base_service.category]),
+            'common:booking_%s_change' % (QUOTE_BOOK_DETAIL_CATEGORIES[record.base_service.category]),
             args=(quote(record.pk),)
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
@@ -534,12 +525,12 @@ class QuoteServiceBookDetailTable(tables.Table):
 class BookingServiceBookDetailTable(tables.Table):
     class Meta:
         model = BookingServiceBookDetail
-        template_name = 'booking/table/bookingservicebookdetail_table.html'
+        template_name = 'booking/table/bookingbookdetail_table.html'
         fields = ['name', 'description', 'base_service__category', 'datetime_from', 'time']
 
     def render_name(self, value, record):
         obj_url = reverse(
-            'common:booking_%s_change' % (BOOKINGSERVICE_BOOK_DETAIL_CATEGORIES[record.base_service.category]),
+            'common:booking_%s_change' % (BOOKING_BOOK_DETAIL_CATEGORIES[record.base_service.category]),
             args=(quote(record.pk),)
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))

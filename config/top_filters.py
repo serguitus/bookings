@@ -162,5 +162,11 @@ class AgencyTransferLocationAdditionalTopFilter(filters.ForeignKeyFilter):
         return queryset
 
 
-class DateToTopFilter(filters.DateFilter):
+class DateTopFilter(filters.DateFilter):
     default_value = [date.today() - timedelta(days=30), None]
+
+
+class PackageTopFilter(filters.ForeignKeyFilter):
+    filter_title = 'Select Packages'
+    autocomplete_url = 'package-autocomplete'
+

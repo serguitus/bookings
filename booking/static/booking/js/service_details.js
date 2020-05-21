@@ -1,8 +1,8 @@
 
-function get_service_details(){
-  if (typeof service_details_url !== 'undefined') {
+function get_book_details(){
+  if (typeof book_details_url !== 'undefined') {
     $.ajax({
-      'url': service_details_url,
+      'url': book_details_url,
       'async': true,
       'datatype': 'json',
       'type': 'POST',
@@ -35,15 +35,15 @@ function update_service_details(data){
 $(document).ready(function(){
   $('#id_service').change(function (e) {
     e.preventDefault();
-    get_service_details();
+    get_book_details();
   });
   $('#id_location_from').change(function (e) {
     e.preventDefault();
-    get_service_details();
+    get_book_details();
   });
   $('#id_location_to').change(function (e) {
     e.preventDefault();
-    get_service_details();
+    get_book_details();
   });
-  get_service_details();
+  get_book_details();
 });

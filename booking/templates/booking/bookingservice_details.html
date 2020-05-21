@@ -5,9 +5,9 @@
 
 {% block detail %}
     {{ super }}
-    {% include 'booking/include/bookingservice_book_details_buttons.html' %}
-    <div class="bookingservicebookdetails-container">
-        {% bookingservicebookdetail_table current as table %}
+    {% include 'booking/include/booking_book_details_buttons.html' %}
+    <div class="bookingbookdetails-container">
+        {% bookingbookdetail_table current as table %}
         {% render_table table %}
     </div>
 {% endblock detail %}

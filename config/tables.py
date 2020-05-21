@@ -10,7 +10,7 @@ from config.models import (
     AgencyAllotmentDetail, AgencyTransferDetail, AgencyExtraDetail,
 )
 from config.constants import (
-    SERVICE_BOOK_DETAIL_CATEGORIES,
+    BOOK_DETAIL_CATEGORIES,
 )
 
 
@@ -22,7 +22,7 @@ class ServiceBookDetailTable(tables.Table):
 
     def render_name(self, value, record):
         obj_url = reverse(
-            'common:config_%s_change' % (SERVICE_BOOK_DETAIL_CATEGORIES[record.base_service.category]),
+            'common:config_%s_change' % (BOOK_DETAIL_CATEGORIES[record.base_service.category]),
             args=(quote(record.pk),)
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))

@@ -4,7 +4,7 @@ from django import template
 from booking.constants import SERVICE_STATUS_CANCELLED
 from booking.models import (
     Booking,
-    BookingService,
+    BaseBookingService,
     QuoteService,
     BookingTransfer,
     BookingAllotment,
@@ -77,7 +77,7 @@ def quotepaxvariant_table(quote):
 @register.simple_tag
 def bookingservice_table(booking):
     table = BookingServiceTable(
-        BookingService.objects.filter(booking=booking),
+        BaseBookingService.objects.filter(booking=booking),
         order_by=('datetime_from', 'time', 'datetime_to'))
     return table
 
@@ -127,7 +127,7 @@ def providerbookingpaymentreport_table(payment):
 @register.simple_tag
 def bookingconfirmation_table(booking):
     table = BookingConfirmationTable(
-        BookingService.objects.filter(booking=booking),
+        BaseBookingService.objects.filter(booking=booking),
         order_by=('datetime_from', 'time', 'datetime_to'))
     return table
 
@@ -145,23 +145,23 @@ def booking_services_summary_table(booking, request):
     b_id = request.GET.get('booking')
     if booking:
         table = BookingServiceSummaryTable(
-            BookingService.objects.filter(booking=booking),
+            BaseBookingService.objects.filter(booking=booking),
             order_by=('datetime_from', 'time', 'datetime_to'))
     elif b_id:
         booking = Booking.objects.get(id=b_id)
         table = BookingServiceSummaryTable(
-            BookingService.objects.filter(booking=booking),
+            BaseBookingService.objects.filter(booking=booking),
             order_by=('datetime_from', 'time', 'datetime_to'))
     else:
         table = BookingServiceSummaryTable(
-            BookingService.objects.none())
+            BaseBookingService.objects.none())
     return table
 
 
 @register.simple_tag
 def vouchers_table(booking):
     table = BookingVouchersTable(
-        BookingService.objects.filter(booking=booking).exclude(status=SERVICE_STATUS_CANCELLED),
+        BaseBookingService.objects.filter(booking=booking).exclude(status=SERVICE_STATUS_CANCELLED),
         order_by=('datetime_from', 'time', 'datetime_to'))
     return table
 
@@ -210,7 +210,7 @@ def bookingpackage_services_summary_table(bookingpackage, request):
             order_by=('datetime_from', 'time', 'datetime_to'))
     else:
         table = BookingServiceSummaryTable(
-            BookingService.objects.none())
+            BaseBookingService.objects.none())
     return table
 
 
@@ -313,16 +313,16 @@ def get_distribution(booking_service):
 
 
 @register.simple_tag
-def quoteservicebookdetail_table(quote_service):
+def quotebookdetail_table(quote_service):
     table = QuoteServiceBookDetailTable(
-        quote_service.quoteservicebookdetail_set.all(),
+        quote_service.quotebookdetail_set.all(),
         order_by=('datetime_from', 'time'))
     return table
 
 
 @register.simple_tag
-def bookingservicebookdetail_table(booking_service):
+def bookingbookdetail_table(booking_service):
     table = BookingServiceBookDetailTable(
-        booking_service.bookingservicebookdetail_booking_service.all(),
+        booking_service.bookingbookdetail_booking_service.all(),
         order_by=('datetime_from', 'time'))
     return table

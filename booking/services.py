@@ -19,19 +19,15 @@ from accounting.models import Account
 
 from booking import constants
 from booking.models import (
-    Quote, QuoteService, QuotePaxVariant, QuoteServicePaxVariant, QuotePackageServicePaxVariant,
+    Quote, QuoteService, QuotePaxVariant, QuoteServicePaxVariant,
     QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
-    QuotePackageService, QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
-    QuoteServiceBookDetail, QuoteServiceBookDetailAllotment,
-    QuoteServiceBookDetailTransfer, QuoteServiceBookDetailExtra,
-    Package, PackageAllotment, PackageTransfer, PackageExtra,
-    AgencyPackageService, AgencyPackageDetail,
-    Booking, BaseBookingService, BookingService, BookingPax, BookingServicePax,
-    BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
-    BookingPackageService, BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
+    QuoteServiceBookDetail,
+    QuoteServiceBookDetailAllotment, QuoteServiceBookDetailTransfer, QuoteServiceBookDetailExtra,
+    Booking, BookingPax, BaseBookingService, BookingServicePax, BookingPackage,
+    BookingService, BookingAllotment, BookingTransfer, BookingExtra,
     BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine, BookingInvoicePartial,
-    BookingServiceBookDetail, BookingServiceBookDetailAllotment,
-    BookingServiceBookDetailTransfer, BookingServiceBookDetailExtra,
+    BookingServiceBookDetail,
+    BookingServiceBookDetailAllotment, BookingServiceBookDetailTransfer, BookingServiceBookDetailExtra,
     ProviderBookingPayment, ProviderBookingPaymentService,
 )
 
@@ -39,6 +35,7 @@ from common.filters import parse_date
 
 from config.constants import AMOUNTS_FIXED, SERVICE_CATEGORY_PACKAGE
 from config.models import (
+    NewPackage, NewAgencyPackageService, NewAgencyPackageDetail,
     ServiceBookDetail, ServiceBookDetailAllotment,
     ServiceBookDetailTransfer, ServiceBookDetailExtra,
     ProviderAllotmentDetail, ProviderTransferDetail, ProviderExtraDetail)
@@ -214,7 +211,7 @@ class BookingServices(object):
                     invoice_detail.save()
 
             # obtain lines
-            booking_service_list = BookingService.objects.filter(
+            booking_service_list = BaseBookingService.objects.filter(
                 booking=booking.id).exclude(status=constants.SERVICE_STATUS_CANCELLED).all()
             for booking_service in booking_service_list:
                 invoice_line = BookingInvoiceLine()
@@ -1523,21 +1520,6 @@ class BookingServices(object):
                         provider = allotment.provider
                     date_from = None
                     date_to = None
-                    if isinstance(allotment, QuotePackageAllotment):
-                        date_from = allotment.datetime_from
-                        date_to = allotment.datetime_to
-                        try:
-                            quoteservice_paxvariant = QuoteServicePaxVariant.objects.get(
-                                quote_pax_variant=quote_pax_variant.id,
-                                quote_service=allotment.quote_package_id)
-                        except QuoteServicePaxVariant.DoesNotExist as ex:
-                            continue
-                        try:
-                            packageservice_paxvariant = QuotePackageServicePaxVariant.objects.get(
-                                quotepackage_pax_variant=quoteservice_paxvariant.id,
-                                quotepackage_service=allotment.id)
-                        except QuotePackageServicePaxVariant.DoesNotExist as ex:
-                            continue
                     if isinstance(allotment, PackageAllotment):
                         days_after = allotment.days_after
                         if days_after is None:
@@ -1548,7 +1530,7 @@ class BookingServices(object):
                             if days_duration is None:
                                 days_duration = 0
                             date_to = date_from + timedelta(days=days_duration)
-                        packageservice_paxvariant = QuotePackageServicePaxVariant()
+                        packageservice_paxvariant = QuoteServicePaxVariant()
 
                     c1, c1_msg, c2, c2_msg, c3, c3_msg, c4, c4_msg = cls._find_quoteservice_costs(
                         pax_quantity=quote_pax_variant.pax_quantity,
@@ -1927,7 +1909,7 @@ class BookingServices(object):
     @classmethod
     def _find_bookingservice_pax_list(cls, bookingservice):
         if isinstance(bookingservice, (
-                BookingAllotment, BookingTransfer, BookingExtra, BookingPackage, BookingService)):
+                BookingAllotment, BookingTransfer, BookingExtra, BookingPackage, BaseBookingService)):
             return list(BookingServicePax.objects.filter(booking_service=bookingservice.id).all())
         return list(BookingServicePax.objects.filter(
             booking_service=bookingservice.booking_package.id).all())
@@ -3666,7 +3648,7 @@ class BookingServices(object):
 
     @classmethod
     def _find_booking_service(cls, bookingservice):
-        if isinstance(bookingservice, BookingService):
+        if isinstance(bookingservice, BaseBookingService):
             if bookingservice.service_type == constants.SERVICE_CATEGORY_ALLOTMENT:
                 bookingservice = cls._find_bookingservice(bookingservice, BookingAllotment.objects)
             elif bookingservice.service_type == constants.SERVICE_CATEGORY_TRANSFER:
@@ -3934,7 +3916,7 @@ class BookingServices(object):
             cls._save_booking_service_amounts(booking_service, cost, price)
         elif isinstance(booking_service, BookingPackage):
             cls.update_bookingpackage_amounts(booking_service)
-        elif isinstance(booking_service, BookingService):
+        elif isinstance(booking_service, BaseBookingService):
             if booking_service.service_type == constants.SERVICE_CATEGORY_ALLOTMENT:
                 bookingallotment = cls._find_bookingservice(
                     booking_service, BookingAllotment.objects)
@@ -4024,7 +4006,7 @@ class BookingServices(object):
         else:
             booking = obj.booking
         booking_services = list(
-            BookingService.objects.all().filter(
+            BaseBookingService.objects.all().filter(
                 booking=booking.id).exclude(
                     status=constants.SERVICE_STATUS_CANCELLED))
 
@@ -4287,7 +4269,7 @@ class BookingServices(object):
         status = constants.BOOKING_STATUS_NOSHOW
         services = False
         cancelled = True
-        for service in BookingService.objects.filter(booking=booking):
+        for service in BaseBookingService.objects.filter(booking=booking):
             services = True
             # date_from
             if (service.datetime_from is not None
@@ -4479,7 +4461,7 @@ class BookingServices(object):
     @classmethod
     def find_bookingservices_with_different_amounts(cls, booking):
         agency = booking.agency
-        bookingservices = list(BookingService.objects.all().filter(
+        bookingservices = list(BaseBookingService.objects.all().filter(
             booking=booking.id).exclude(
                 status=constants.SERVICE_STATUS_CANCELLED).order_by(
                     'datetime_from', 'time', 'datetime_to'))
@@ -4713,7 +4695,7 @@ class BookingServices(object):
         if bookingservice_ids:
             with transaction.atomic(savepoint=False):
                 for bookingservice_id in bookingservice_ids:
-                    bookingservice = BookingService.objects.get(pk=bookingservice_id)
+                    bookingservice = BaseBookingService.objects.get(pk=bookingservice_id)
                     if bookingservice.status != constants.SERVICE_STATUS_PENDING:
                         bookingservice.status = constants.SERVICE_STATUS_PENDING
                         bookingservice.save(update_fields=['status'])
@@ -4725,7 +4707,7 @@ class BookingServices(object):
     @classmethod
     def _add_bookingpax_to_bookingservices(cls, booking_pax, bookingservice_ids):
         for bookingservice_id in bookingservice_ids:
-            bookingservice = BookingService.objects.get(pk=bookingservice_id)
+            bookingservice = BaseBookingService.objects.get(pk=bookingservice_id)
             cls._add_bookingpax_to_bookingservice(booking_pax, bookingservice)
 
 

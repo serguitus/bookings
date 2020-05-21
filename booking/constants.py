@@ -127,11 +127,6 @@ ACTIONS = {
     'vouchers': 'BookingSiteModel.config_vouchers',
 }
 
-PACKAGE_AMOUNTS_TYPES = (
-    (AMOUNTS_FIXED, 'Fixed'),
-    (AMOUNTS_BY_PAX, 'By Pax'),
-)
-
 INVOICE_FORMAT_COMPACT = 'C'
 INVOICE_FORMAT_SERVICES = 'S'
 INVOICE_FORMAT_DETAILS = 'D'
@@ -141,15 +136,15 @@ INVOICE_FORMATS = (
     (INVOICE_FORMAT_DETAILS, 'Details'),
 )
 
-QUOTESERVICE_BOOK_DETAIL_CATEGORIES = {
-    SERVICE_CATEGORY_ALLOTMENT: 'quoteservicebookdetailallotment',
-    SERVICE_CATEGORY_TRANSFER: 'quoteservicebookdetailtransfer',
-    SERVICE_CATEGORY_EXTRA: 'quoteservicebookdetailextra',
+QUOTE_BOOK_DETAIL_CATEGORIES = {
+    SERVICE_CATEGORY_ALLOTMENT: 'quotebookdetailallotment',
+    SERVICE_CATEGORY_TRANSFER: 'quotebookdetailtransfer',
+    SERVICE_CATEGORY_EXTRA: 'quotebookdetailextra',
 }
 
-BOOKINGSERVICE_BOOK_DETAIL_CATEGORIES = {
-    SERVICE_CATEGORY_ALLOTMENT: 'bookingservicebookdetailallotment',
-    SERVICE_CATEGORY_TRANSFER: 'bookingservicebookdetailtransfer',
-    SERVICE_CATEGORY_EXTRA: 'bookingservicebookdetailextra',
+BOOKING_BOOK_DETAIL_CATEGORIES = {
+    SERVICE_CATEGORY_ALLOTMENT: 'bookingbookdetailallotment',
+    SERVICE_CATEGORY_TRANSFER: 'bookingbookdetailtransfer',
+    SERVICE_CATEGORY_EXTRA: 'bookingbookdetailextra',
 }
 

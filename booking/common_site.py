@@ -111,14 +111,14 @@ from booking.models import (
 )
 from booking.services import BookingServices
 from booking.top_filters import (
-    DateTopFilter, PackageTopFilter, CancelledTopFilter, InternalReferenceTopFilter,
+    CancelledTopFilter, InternalReferenceTopFilter,
     SellerTopFilter, PaidTopFilter, BookingPaidTopFilter)
 
 from common.sites import CommonStackedInline, CommonTabularInline
 
 from config.forms import SearchServiceForm
 from config.services import ConfigServices
-from config.top_filters import LocationTopFilter
+from config.top_filters import DateTopFilter, LocationTopFilter, PackageTopFilter
 
 from finance.constants import STATUS_DRAFT, STATUS_READY, STATUS_CANCELLED
 

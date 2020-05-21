@@ -4,10 +4,11 @@ from dal import autocomplete
 
 from django import forms
 from django.contrib.admin.widgets import AdminDateWidget
+from django.forms import widgets
 
 from config.models import (
     Location,
-    Service,
+    Service, NewPackage, NewAgencyPackageService,
     ProviderAllotmentService, ProviderTransferService, ProviderExtraService,
     ProviderAllotmentDetail, ProviderTransferDetail, ProviderExtraDetail,
     AgencyAllotmentService, AgencyTransferService, AgencyExtraService,
@@ -361,14 +362,6 @@ class ExtraForm(forms.ModelForm):
         }
 
 
-class ExtraComponentInlineForm(forms.ModelForm):
-    class Meta:
-        fields = ('__all__')
-        widgets = {
-            'component': autocomplete.ModelSelect2(url='extra-autocomplete'),
-        }
-
-
 class ServiceForm(forms.ModelForm):
     search_location = forms.ModelChoiceField(
         queryset=Location.objects.all(),
@@ -501,3 +494,23 @@ class SearchServiceForm(forms.Form):
         ),
         label='Service',
     )
+
+
+class PackageForm(forms.ModelForm):
+    class Meta:
+        model = NewPackage
+        fields = ('__all__')
+        widgets = {
+            'location': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'description': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
+        }
+
+
+class AgencyPackageServiceForm(forms.ModelForm):
+    class Meta:
+        model = NewAgencyPackageService
+        fields = ('__all__')
+        widgets = {
+            'agency': autocomplete.ModelSelect2(url='agency-autocomplete'),
+            'service': autocomplete.ModelSelect2(url='package-autocomplete'),
+        }
