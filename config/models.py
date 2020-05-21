@@ -6,14 +6,11 @@ Config Models
 from django.db import models
 
 from config.constants import (
-    SERVICE_CATEGORIES,
-    SERVICE_CATEGORY_EXTRA, SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER,
-    ROOM_CAPACITIES,
-    BOARD_TYPES,
-    EXTRA_COST_TYPES, EXTRA_PARAMETER_TYPES, EXTRA_PARAMETER_TYPE_HOURS,
-    ALLOTMENT_COST_TYPES, AMOUNTS_BY_PAX,
-    ALLOTMENT_SUPPLEMENT_COST_TYPES, TRANSFER_SUPPLEMENT_COST_TYPES,
-    TRANSFER_COST_TYPES)
+    ROOM_CAPACITIES, BOARD_TYPES, AMOUNTS_BY_PAX,
+    SERVICE_CATEGORIES, SERVICE_CATEGORY_PACKAGE,
+    SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER, SERVICE_CATEGORY_EXTRA,
+    PACKAGE_AMOUNTS_TYPES, ALLOTMENT_AMOUNTS_TYPES, TRANSFER_AMOUNTS_TYPES, EXTRA_AMOUNTS_TYPES,
+    EXTRA_PARAMETER_TYPES, EXTRA_PARAMETER_TYPE_HOURS,)
 
 from datetime import time
 
@@ -169,6 +166,18 @@ class RelativeInterval(models.Model):
         default=0, blank=True, null=True, verbose_name='Days duration')
 
 
+class RouteData(models.Model):
+    """
+    Transfer Data
+    """
+    class Meta:
+        abstract = True
+    location_from = models.ForeignKey(
+        Location, related_name='%(class)s_location_from', verbose_name='Location from')
+    location_to = models.ForeignKey(
+        Location, related_name='%(class)s_location_to', verbose_name='Location to')
+
+
 class Service(models.Model):
     """
     Service
@@ -207,6 +216,164 @@ class Service(models.Model):
         return self.name
 
 
+class Allotment(Service):
+    """
+    Accomodation
+    """
+    class Meta:
+        verbose_name = 'Accomodation'
+        verbose_name_plural = 'Accomodation'
+    cost_type = models.CharField(
+        max_length=5, choices=ALLOTMENT_AMOUNTS_TYPES, default=AMOUNTS_BY_PAX)
+    time_from = models.TimeField(default='16:00')
+    time_to = models.TimeField(default='12:00')
+    address = models.CharField(max_length=75, blank=True, null=True)
+    phone = models.CharField(max_length=30, blank=True, null=True)
+    is_shared_point = models.BooleanField(default=False)
+
+    def fill_data(self):
+        super(Allotment, self).fill_data()
+        self.category = SERVICE_CATEGORY_ALLOTMENT
+        self.grouping = True
+
+
+class Transfer(Service):
+    """
+    Transfer
+    """
+    class Meta:
+        verbose_name = 'Transfer'
+        verbose_name_plural = 'Transfers'
+    cost_type = models.CharField(max_length=5, choices=TRANSFER_AMOUNTS_TYPES)
+    max_capacity = models.IntegerField(blank=True, null=True)
+    is_shared = models.BooleanField(default=False)
+    has_pickup_time = models.BooleanField(default=False)
+    is_ticket = models.BooleanField(default=False)
+
+    def fill_data(self):
+        super(Transfer, self).fill_data()
+        self.category = SERVICE_CATEGORY_TRANSFER
+        self.grouping = False
+
+
+class Extra(Service):
+    """
+    Extra
+    """
+    class Meta:
+        verbose_name = 'Extra'
+        verbose_name_plural = 'Extras'
+    cost_type = models.CharField(
+        max_length=5, choices=EXTRA_AMOUNTS_TYPES)
+    parameter_type = models.CharField(
+        max_length=5, choices=EXTRA_PARAMETER_TYPES)
+    has_pax_range = models.BooleanField(default=False)
+    max_capacity = models.IntegerField(blank=True, null=True)
+    car_rental = models.ForeignKey(CarRental, blank=True, null=True)
+
+    def fill_data(self):
+        super(Extra, self).fill_data()
+        self.category = SERVICE_CATEGORY_EXTRA
+        self.grouping = False
+
+    def __str__(self):
+        if self.parameter_type == EXTRA_PARAMETER_TYPE_HOURS:
+            return '%s (Hours)' % self.name
+        return '%s' % self.name
+
+
+class NewPackage(Service):
+    """
+    Package Service
+    """
+    class Meta:
+        verbose_name = 'Package'
+        verbose_name_plural = 'Packages'
+        ordering = ['name']
+    amounts_type = models.CharField(
+        default=AMOUNTS_BY_PAX, max_length=5, choices=PACKAGE_AMOUNTS_TYPES)
+    has_pax_range = models.BooleanField(default=False)
+    time = models.TimeField(blank=True, null=True)
+
+    def fill_data(self):
+        super(Extra, self).fill_data()
+        self.category = SERVICE_CATEGORY_PACKAGE
+
+    def __str__(self):
+        return '%s'  % self.name
+
+
+class BookServiceData(models.Model):
+    """
+    Book Data
+    """
+    class Meta:
+        abstract = True
+    name = models.CharField(max_length=250, default='Detail')
+    description = models.CharField(max_length=1000, blank=True, null=True)
+    base_service = models.ForeignKey(Service, related_name='%(class)s_base_service')
+    base_location = models.ForeignKey(
+        Location, related_name='%(class)s_base_location',
+        blank=True, null=True, verbose_name='Location')
+    service_addon  = models.ForeignKey(
+        Addon, related_name='%(class)s_service_addon', blank=True, null=True, verbose_name='Addon')
+    time = models.TimeField(blank=True, null=True)
+
+    @property
+    def service_type(self):
+        return self.base_service.category
+
+    @property
+    def service_location(self):
+        return self.base_location.name
+
+
+class BookAllotmentData(models.Model):
+    """
+    Book Allotment Data
+    """
+    class Meta:
+        abstract = True
+    room_type = models.ForeignKey(RoomType, related_name='%(class)s_room_type')
+    board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
+
+
+class BookTransferData(RouteData):
+    """
+    Book Transfer Data
+    """
+    class Meta:
+        abstract = True
+    quantity = models.SmallIntegerField(default=1)
+    place_from = models.ForeignKey(
+        Place, related_name='%(class)s_place_from', blank=True, null=True)
+    schedule_from = models.ForeignKey(
+        Schedule, related_name='%(class)s_schedule_from', blank=True, null=True)
+    pickup = models.ForeignKey(
+        Allotment, related_name='%(class)s_pickup', null=True, blank=True)
+    place_to = models.ForeignKey(Place, related_name='%(class)s_place_to', blank=True, null=True)
+    schedule_to = models.ForeignKey(
+        Schedule, related_name='%(class)s_schedule_to', blank=True, null=True)
+    dropoff = models.ForeignKey(
+        Allotment, related_name='%(class)s_dropoff', null=True, blank=True)
+    schedule_time_from = models.TimeField(blank=True, null=True)
+    schedule_time_to = models.TimeField(blank=True, null=True)
+
+
+class BookExtraData(models.Model):
+    """
+    Book Extra Data
+    """
+    class Meta:
+        abstract = True
+    quantity = models.SmallIntegerField(default=1)
+    parameter = models.SmallIntegerField(default=0, verbose_name='Hours')
+    pickup_office = models.ForeignKey(
+        CarRentalOffice, related_name='%(class)s_pickup_office', blank=True, null=True)
+    dropoff_office = models.ForeignKey(
+        CarRentalOffice, related_name='%(class)s_dropoff_office', blank=True, null=True)
+
+
 class ServiceAddon(models.Model):
     """
     ServiceAddon
@@ -220,37 +387,6 @@ class ServiceAddon(models.Model):
 
     def __str__(self):
         return '%s for %s' % (self.addon, self.service)
-
-
-class ServiceSupplement(models.Model):
-    """
-    ServiceSupplement
-    """
-    class Meta:
-        verbose_name = 'Service Supplement'
-        verbose_name_plural = 'Services Supplements'
-        unique_together = (('service', 'name'),)
-    name = models.CharField(max_length=50)
-    service = models.ForeignKey(Service)
-    datetime_from = models.DateTimeField()
-    datetime_to = models.DateTimeField()
-    automatic = models.BooleanField(default=True)
-    enabled = models.BooleanField(default=True)
-
-    def __str__(self):
-        return self.name
-
-
-class RouteData(models.Model):
-    """
-    Transfer Data
-    """
-    class Meta:
-        abstract = True
-    location_from = models.ForeignKey(
-        Location, related_name='%(class)s_location_from', verbose_name='Location from')
-    location_to = models.ForeignKey(
-        Location, related_name='%(class)s_location_to', verbose_name='Location to')
 
 
 class ProviderCatalogue(models.Model):
@@ -327,148 +463,6 @@ class AmountDetail(models.Model):
         max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3rd CHD')
 
 
-# ===========================================================================
-# Extra
-# ===========================================================================
-class Extra(Service):
-    """
-    Extra
-    """
-    class Meta:
-        verbose_name = 'Extra'
-        verbose_name_plural = 'Extras'
-    cost_type = models.CharField(
-        max_length=5, choices=EXTRA_COST_TYPES)
-    parameter_type = models.CharField(
-        max_length=5, choices=EXTRA_PARAMETER_TYPES)
-    has_pax_range = models.BooleanField(default=False)
-    max_capacity = models.IntegerField(blank=True, null=True)
-    car_rental = models.ForeignKey(CarRental, blank=True, null=True)
-
-    def fill_data(self):
-        super(Extra, self).fill_data()
-        self.category = SERVICE_CATEGORY_EXTRA
-        self.grouping = False
-
-    def __str__(self):
-        if self.parameter_type == EXTRA_PARAMETER_TYPE_HOURS:
-            return '%s (Hours)' % self.name
-        return '%s' % self.name
-
-
-class ExtraSupplement(ServiceSupplement):
-    """
-    ExtraSupplement
-    """
-    class Meta:
-        verbose_name = 'Extra Supplement'
-        verbose_name_plural = 'Extras Supplements'
-
-
-class ExtraComponent(models.Model):
-    """
-    Extra Component
-    """
-    class Meta:
-        verbose_name = 'Extra Component'
-        verbose_name_plural = 'Extras Components'
-        unique_together = (('extra', 'component'),)
-    extra = models.ForeignKey(Extra, related_name='extra')
-    component = models.ForeignKey(Extra, related_name='component')
-
-
-class ProviderExtraService(ProviderCatalogue):
-    """
-    ProviderExtraService
-    """
-    class Meta:
-        verbose_name = 'Provider Extra Service'
-        verbose_name_plural = 'Providers Extras Services'
-        unique_together = (('provider', 'service', 'date_from', 'date_to'),)
-    service = models.ForeignKey(Extra)
-
-    def __str__(self):
-        return 'Prov.Extra - %s : %s' % (self.provider, self.service)
-
-    def get_detail_objects(self):
-        return self.providerextradetail_set.all()
-
-
-class ProviderExtraDetail(AmountDetail):
-    """
-    ProviderExtraDetail
-    """
-    class Meta:
-        verbose_name = 'Provider Extra Detail'
-        verbose_name_plural = 'Providers Extras Details'
-        unique_together = ('provider_service',
-                           'addon',
-                           'pax_range_min',
-                           'pax_range_max')
-    provider_service = models.ForeignKey(ProviderExtraService)
-    addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
-    pax_range_min = models.SmallIntegerField(default=0)
-    pax_range_max = models.SmallIntegerField(default=0)
-
-
-class AgencyExtraService(AgencyCatalogue):
-    """
-    AgencyExtraService
-    """
-    class Meta:
-        verbose_name = 'Agency Extra Service'
-        verbose_name_plural = 'Agency Extras Services'
-        unique_together = (('agency', 'service', 'date_from', 'date_to'),)
-    service = models.ForeignKey(Extra)
-
-    def __str__(self):
-        return 'Ag.Extra - %s : %s' % (self.agency, self.service)
-
-    def get_detail_objects(self):
-        return self.agencyextradetail_set.all()
-
-
-class AgencyExtraDetail(AmountDetail):
-    """
-    AgencyExtraDetail
-    """
-    class Meta:
-        verbose_name = 'Agency Extra Detail'
-        verbose_name_plural = 'Agencies Extra Details'
-        unique_together = ('agency_service',
-                           'addon',
-                           'pax_range_min',
-                           'pax_range_max')
-    agency_service = models.ForeignKey(AgencyExtraService)
-    addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
-    pax_range_min = models.SmallIntegerField(default=0)
-    pax_range_max = models.SmallIntegerField(default=0)
-
-
-#===============================================================================
-# Allotment
-#===============================================================================
-class Allotment(Service):
-    """
-    Accomodation
-    """
-    class Meta:
-        verbose_name = 'Accomodation'
-        verbose_name_plural = 'Accomodation'
-    cost_type = models.CharField(
-        max_length=5, choices=ALLOTMENT_COST_TYPES, default=AMOUNTS_BY_PAX)
-    time_from = models.TimeField(default='16:00')
-    time_to = models.TimeField(default='12:00')
-    address = models.CharField(max_length=75, blank=True, null=True)
-    phone = models.CharField(max_length=30, blank=True, null=True)
-    is_shared_point = models.BooleanField(default=False)
-
-    def fill_data(self):
-        super(Allotment, self).fill_data()
-        self.category = SERVICE_CATEGORY_ALLOTMENT
-        self.grouping = True
-
-
 class AllotmentRoomType(models.Model):
     """
     AllotmentRoomType
@@ -498,15 +492,6 @@ class AllotmentBoardType(models.Model):
 
     def __str__(self):
         return self.get_board_type_display()
-
-
-class AllotmentSupplement(ServiceSupplement):
-    """
-    AccomodationSupplement
-    """
-    class Meta:
-        verbose_name = 'Accomodation Supplement'
-        verbose_name_plural = 'Accomodation Supplements'
 
 
 class ProviderAllotmentService(ProviderCatalogue):
@@ -581,41 +566,6 @@ class AgencyAllotmentDetail(AmountDetail):
     pax_range_max = models.SmallIntegerField(default=0)
 
 
-class AllotmentRoomAvailability(models.Model):
-    """
-    AccomodationRoomAvailability
-    """
-    class Meta:
-        verbose_name = 'Accomodation Availability'
-        verbose_name_plural = 'Accomodation Availabilities'
-    room_type = models.ForeignKey(AllotmentRoomType)
-    availability = models.SmallIntegerField(default=10)
-    date_from = models.DateField()
-    date_to = models.DateField()
-
-
-#===============================================================================
-# TRANSFER
-#===============================================================================
-class Transfer(Service):
-    """
-    Transfer
-    """
-    class Meta:
-        verbose_name = 'Transfer'
-        verbose_name_plural = 'Transfers'
-    cost_type = models.CharField(max_length=5, choices=TRANSFER_COST_TYPES)
-    max_capacity = models.IntegerField(blank=True, null=True)
-    is_shared = models.BooleanField(default=False)
-    has_pickup_time = models.BooleanField(default=False)
-    is_ticket = models.BooleanField(default=False)
-
-    def fill_data(self):
-        super(Transfer, self).fill_data()
-        self.category = SERVICE_CATEGORY_TRANSFER
-        self.grouping = False
-
-
 class TransferZone(models.Model):
     """
     Transfer Zone
@@ -655,15 +605,6 @@ class AllotmentTransferZone(models.Model):
         unique_together = (('allotment', 'transfer_zone'),)
     allotment = models.ForeignKey(Allotment)
     transfer_zone = models.ForeignKey(TransferZone)
-
-
-class TransferSupplement(ServiceSupplement):
-    """
-    TransferSupplement
-    """
-    class Meta:
-        verbose_name = 'Transfer Supplement'
-        verbose_name_plural = 'Transfers Supplements'
 
 
 class ProviderTransferService(ProviderCatalogue):
@@ -738,34 +679,77 @@ class AgencyTransferDetail(AmountDetail, RouteData):
     pax_range_max = models.SmallIntegerField(default=0)
 
 
+class ProviderExtraService(ProviderCatalogue):
+    """
+    ProviderExtraService
+    """
+    class Meta:
+        verbose_name = 'Provider Extra Service'
+        verbose_name_plural = 'Providers Extras Services'
+        unique_together = (('provider', 'service', 'date_from', 'date_to'),)
+    service = models.ForeignKey(Extra)
+
+    def __str__(self):
+        return 'Prov.Extra - %s : %s' % (self.provider, self.service)
+
+    def get_detail_objects(self):
+        return self.providerextradetail_set.all()
+
+
+class ProviderExtraDetail(AmountDetail):
+    """
+    ProviderExtraDetail
+    """
+    class Meta:
+        verbose_name = 'Provider Extra Detail'
+        verbose_name_plural = 'Providers Extras Details'
+        unique_together = ('provider_service',
+                           'addon',
+                           'pax_range_min',
+                           'pax_range_max')
+    provider_service = models.ForeignKey(ProviderExtraService)
+    addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
+    pax_range_min = models.SmallIntegerField(default=0)
+    pax_range_max = models.SmallIntegerField(default=0)
+
+
+class AgencyExtraService(AgencyCatalogue):
+    """
+    AgencyExtraService
+    """
+    class Meta:
+        verbose_name = 'Agency Extra Service'
+        verbose_name_plural = 'Agency Extras Services'
+        unique_together = (('agency', 'service', 'date_from', 'date_to'),)
+    service = models.ForeignKey(Extra)
+
+    def __str__(self):
+        return 'Ag.Extra - %s : %s' % (self.agency, self.service)
+
+    def get_detail_objects(self):
+        return self.agencyextradetail_set.all()
+
+
+class AgencyExtraDetail(AmountDetail):
+    """
+    AgencyExtraDetail
+    """
+    class Meta:
+        verbose_name = 'Agency Extra Detail'
+        verbose_name_plural = 'Agencies Extra Details'
+        unique_together = ('agency_service',
+                           'addon',
+                           'pax_range_min',
+                           'pax_range_max')
+    agency_service = models.ForeignKey(AgencyExtraService)
+    addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
+    pax_range_min = models.SmallIntegerField(default=0)
+    pax_range_max = models.SmallIntegerField(default=0)
+
+
 # ===============================================================================
 # BOOK DETAILS
 # ===============================================================================
-
-class BookServiceData(models.Model):
-    """
-    Book Data
-    """
-    class Meta:
-        abstract = True
-    name = models.CharField(max_length=250, default='Detail')
-    description = models.CharField(max_length=1000, blank=True, null=True)
-    base_service = models.ForeignKey(Service, related_name='%(class)s_base_service')
-    base_location = models.ForeignKey(
-        Location, related_name='%(class)s_base_location',
-        blank=True, null=True, verbose_name='Location')
-    service_addon  = models.ForeignKey(
-        Addon, related_name='%(class)s_service_addon', blank=True, null=True, verbose_name='Addon')
-    time = models.TimeField(blank=True, null=True)
-
-    @property
-    def service_type(self):
-        return self.base_service.category
-
-    @property
-    def service_location(self):
-        return self.base_location.name
-
 
 class ServiceBookDetail(BookServiceData, RelativeInterval):
     """
@@ -785,16 +769,6 @@ class ServiceBookDetail(BookServiceData, RelativeInterval):
         super(ServiceBookDetail, self).save(force_insert, force_update, using, update_fields)
 
 
-class BookAllotmentData(models.Model):
-    """
-    Book Allotment Data
-    """
-    class Meta:
-        abstract = True
-    room_type = models.ForeignKey(RoomType, related_name='%(class)s_room_type')
-    board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
-
-
 class ServiceBookDetailAllotment(ServiceBookDetail, BookAllotmentData):
     """
     Service Book Detail Allotment
@@ -809,28 +783,6 @@ class ServiceBookDetailAllotment(ServiceBookDetail, BookAllotmentData):
         super(ServiceBookDetailAllotment, self).fill_data()
         self.name = '%s - %s' % (self.service, self.book_service)
         self.time = time(23, 59, 59)
-
-
-class BookTransferData(RouteData):
-    """
-    Book Transfer Data
-    """
-    class Meta:
-        abstract = True
-    quantity = models.SmallIntegerField(default=1)
-    place_from = models.ForeignKey(
-        Place, related_name='%(class)s_place_from', blank=True, null=True)
-    schedule_from = models.ForeignKey(
-        Schedule, related_name='%(class)s_schedule_from', blank=True, null=True)
-    pickup = models.ForeignKey(
-        Allotment, related_name='%(class)s_pickup', null=True, blank=True)
-    place_to = models.ForeignKey(Place, related_name='%(class)s_place_to', blank=True, null=True)
-    schedule_to = models.ForeignKey(
-        Schedule, related_name='%(class)s_schedule_to', blank=True, null=True)
-    dropoff = models.ForeignKey(
-        Allotment, related_name='%(class)s_dropoff', null=True, blank=True)
-    schedule_time_from = models.TimeField(blank=True, null=True)
-    schedule_time_to = models.TimeField(blank=True, null=True)
 
 
 class ServiceBookDetailTransfer(ServiceBookDetail, BookTransferData):
@@ -851,20 +803,6 @@ class ServiceBookDetailTransfer(ServiceBookDetail, BookTransferData):
             self.location_to.short_name or self.location_to)
 
 
-class BookExtraData(models.Model):
-    """
-    Book Extra Data
-    """
-    class Meta:
-        abstract = True
-    quantity = models.SmallIntegerField(default=1)
-    parameter = models.SmallIntegerField(default=0, verbose_name='Hours')
-    pickup_office = models.ForeignKey(
-        CarRentalOffice, related_name='%(class)s_pickup_office', blank=True, null=True)
-    dropoff_office = models.ForeignKey(
-        CarRentalOffice, related_name='%(class)s_dropoff_office', blank=True, null=True)
-
-
 class ServiceBookDetailExtra(ServiceBookDetail, BookExtraData):
     """
     Service Book Detail Extra
@@ -878,3 +816,30 @@ class ServiceBookDetailExtra(ServiceBookDetail, BookExtraData):
         self.base_service = self.book_service
         super(ServiceBookDetailExtra, self).fill_data()
         self.name = '%s - %s' % (self.service, self.book_service)
+
+
+class NewAgencyPackageService(AgencyCatalogue):
+    """
+    AgencyPackageService
+    """
+    class Meta:
+        verbose_name = 'Agency Package Service'
+        verbose_name_plural = 'Agency Packages Services'
+        unique_together = (('agency', 'service', 'date_from', 'date_to'),)
+    service = models.ForeignKey(NewPackage)
+
+    def __str__(self):
+        return 'Ag.Package - %s : %s' % (self.agency, self.service)
+
+
+class NewAgencyPackageDetail(AmountDetail):
+    """
+    AgencyPackageDetail
+    """
+    class Meta:
+        verbose_name = 'Agency Package Detail'
+        verbose_name_plural = 'Agencies Package Details'
+        unique_together = ('agency_service','pax_range_min', 'pax_range_max')
+    agency_service = models.ForeignKey(NewAgencyPackageService)
+    pax_range_min = models.SmallIntegerField(blank=True, null=True)
+    pax_range_max = models.SmallIntegerField(blank=True, null=True)

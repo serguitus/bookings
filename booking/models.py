@@ -26,7 +26,6 @@ from booking.constants import (
     QUOTE_STATUS_LIST, QUOTE_STATUS_DRAFT,
     BOOKING_STATUS_LIST, BOOKING_STATUS_PENDING,
     SERVICE_STATUS_LIST, SERVICE_STATUS_PENDING, SERVICE_STATUS_REQUEST, SERVICE_STATUS_CANCELLED,
-    PACKAGE_AMOUNTS_TYPES,
     INVOICE_FORMATS, INVOICE_FORMAT_COMPACT)
 
 from config.constants import (
@@ -35,14 +34,10 @@ from config.constants import (
     SERVICE_CATEGORY_ALLOTMENT,
     SERVICE_CATEGORY_EXTRA)
 from config.models import (
-    BookAllotmentData, BookTransferData, BookExtraData,
-    BookServiceData,
-    Service,
-    ServiceSupplement,
-    RoomType, Allotment,
-    Transfer, Location, Place, Schedule,
-    Extra, Addon,
-    AmountDetail, AgencyCatalogue, ProviderCatalogue, CarRentalOffice,
+    BookServiceData, BookAllotmentData, BookTransferData, BookExtraData,
+    RoomType, Location, Place, Schedule, Addon, CarRentalOffice,
+    Service, Allotment, Transfer, Extra, NewPackage,
+    AmountDetail, AgencyCatalogue, ProviderCatalogue,
 )
 
 from datetime import time
@@ -66,9 +61,6 @@ def _get_child_objects(services):
         'BE': BookingExtra,
         'BA': BookingAllotment,
         'BP': BookingPackage,
-        'PA': BookingPackageAllotment,
-        'PT': BookingPackageTransfer,
-        'PE': BookingPackageExtra,
     }
     objs = []
     for service in services:
@@ -94,6 +86,28 @@ def _get_quote_child_objects(services):
         obj = TYPE_MODELS[service.base_service.category].objects.get(id=service.id)
         objs.append(obj)
     return objs
+
+
+class CostData(models.Model):
+    """
+    Cost Data
+    """
+    class Meta:
+        abstract = True
+    cost_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost')
+    cost_comments = models.CharField(max_length=1000, blank=True, null=True)
+
+
+class PriceData(models.Model):
+    """
+    Price Data
+    """
+    class Meta:
+        abstract = True
+    price_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price')
+    price_comments = models.CharField(max_length=1000, blank=True, null=True)
 
 
 class RelativeInterval(models.Model):
@@ -204,6 +218,7 @@ class PaxVariantAmounts(models.Model):
         return utility_percent(self.cost_qgrple_amount, self.price_qdrple_amount)
     utility_percent_qdrple.fget.short_description = 'Util.QPL %'
 
+from config.constants import PACKAGE_AMOUNTS_TYPES
 
 class Package(Service):
     """
@@ -450,36 +465,6 @@ class QuoteExtra(QuoteService, BookExtraData):
         self.base_service = self.service
 
 
-class QuoteExtraComponent(models.Model):
-    """
-    Quote Service Cost Service
-    """
-    class Meta:
-        verbose_name = 'Quote Extra Component'
-        verbose_name_plural = 'Quotes Extras Components'
-        default_permissions = ('add', 'change',)
-        unique_together = (('quote_extra', 'component'),)
-    quote_extra = models.ForeignKey(QuoteExtra)
-    component = models.ForeignKey(Extra)
-
-
-class QuoteExtraComponentPaxVariant(PaxVariantAmounts):
-    """
-    Quote Extra Component Pax Variant
-    """
-    class Meta:
-        verbose_name = 'Quote Extra Component Pax Variant'
-        verbose_name_plural = 'Quote Extras Components Pax Variants'
-        unique_together = (('quote_service_pax_variant', 'quote_extra_component'),)
-    quote_service_pax_variant = models.ForeignKey(QuoteServicePaxVariant, verbose_name='Pax Variant')
-    quote_extra_component = models.ForeignKey(QuoteExtraComponent, related_name='quoteextracomponent_paxvariants')
-    manual_costs = models.BooleanField(default=False, verbose_name='Manual Costs')
-    manual_prices = models.BooleanField(default=False, verbose_name='Manual Prices')
-
-    def __str__(self):
-        return self.quote_pax_variant.__str__()
-
-
 class QuotePackage(QuoteService):
     """
     Quote Service Package
@@ -661,6 +646,214 @@ class QuoteServiceBookDetailExtra(QuoteServiceBookDetail, BookExtraData):
     def fill_data(self):
         self.base_service = self.book_service
         super(QuoteServiceBookDetailExtra, self).fill_data()
+        self.name = '%s - %s' % (self.quote_service, self.book_service)
+
+
+class NewQuoteService(BookServiceData, DateInterval):
+    """
+    Quote Service
+    """
+    class Meta:
+        verbose_name = 'Quote Service'
+        verbose_name_plural = 'Quote Services'
+        default_permissions = ('add', 'change',)
+    quote = models.ForeignKey(Quote, related_name='quote_new_services')
+    status = models.CharField(
+        max_length=5, choices=QUOTE_STATUS_LIST, default=QUOTE_STATUS_DRAFT)
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.validate_date_interval()
+        self.fill_data()
+        # Call the "real" save() method.
+        super(NewQuoteService, self).save(force_insert, force_update, using, update_fields)
+
+    def __str__(self):
+        return '%s' % (self.base_service)
+
+
+class NewQuoteServicePaxVariant(PaxVariantAmounts):
+    """
+    Quote Service Pax Variant
+    """
+    class Meta:
+        verbose_name = 'Quote Service Pax Variant'
+        verbose_name_plural = 'Quote Services Pax Variants'
+        unique_together = (('quote_pax_variant', 'quote_service'),)
+    quote_pax_variant = models.ForeignKey(QuotePaxVariant, verbose_name='Pax Variant')
+    quote_service = models.ForeignKey(NewQuoteService, related_name='quoteservice_paxvariants')
+    manual_costs = models.BooleanField(default=False, verbose_name='Manual Costs')
+    manual_prices = models.BooleanField(default=False, verbose_name='Manual Prices')
+
+    def __str__(self):
+        return self.quote_pax_variant.__str__()
+
+
+class NewQuotePackage(NewQuoteService):
+    """
+    Quote Service Package
+    """
+    class Meta:
+        verbose_name = 'Quote Package'
+        verbose_name_plural = 'Quotes Packages'
+        default_permissions = ('add', 'change',)
+    service = models.ForeignKey(NewPackage, related_name='%(class)s_service')
+    price_by_package_catalogue = models.BooleanField(
+        default=False, verbose_name='Prices By Catalogue')
+
+    def fill_data(self):
+        # setting name for this quote_service
+        self.name = self.service.name
+        #self.service_type = SERVICE_CATEGORY_PACKAGE
+        self.base_service = self.service
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        with transaction.atomic(savepoint=False):
+            super(NewQuotePackage, self).save(force_insert, force_update, using, update_fields)
+
+    def __str__(self):
+        return '%s - %s' % (self.quote, self.service)
+
+
+class QuoteProvidedService(NewQuoteService):
+    """
+    Quote Provided Service
+    """
+    class Meta:
+        verbose_name = 'Quote Provided Service'
+        verbose_name_plural = 'Quote Services'
+        default_permissions = ('add', 'change',)
+    provider = models.ForeignKey(Provider, blank=True, null=True)
+    quote_package = models.ForeignKey(NewQuotePackage, blank=True, null=True)
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.validate_date_interval()
+        self.fill_data()
+        # Call the "real" save() method.
+        super(QuoteProvidedService, self).save(force_insert, force_update, using, update_fields)
+
+    def __str__(self):
+        return '%s' % (self.base_service)
+
+
+class NewQuoteAllotment(QuoteProvidedService, BookAllotmentData):
+    """
+    Quote Service Allotment
+    """
+    class Meta:
+        verbose_name = 'Quote Accomodation'
+        verbose_name_plural = 'Quotes Accomodations'
+        default_permissions = ('add', 'change',)
+    service = models.ForeignKey(Allotment)
+
+    def fill_data(self):
+        self.name = '%s' % (self.service,)
+        #self.service_type = SERVICE_CATEGORY_ALLOTMENT
+        self.time = time(23, 59, 59)
+        self.base_service = self.service
+
+
+class NewQuoteTransfer(QuoteProvidedService, BookTransferData):
+    """
+    Quote Service Transfer
+    """
+    class Meta:
+        verbose_name = 'Quote Transfer'
+        verbose_name_plural = 'Quotes Transfers'
+        default_permissions = ('add', 'change',)
+    service = models.ForeignKey(Transfer)
+
+    def fill_data(self):
+        # setting name for this booking_service
+        self.name = '%s (%s -> %s)' % (self.service,
+                                       self.location_from.short_name or self.location_from,
+                                       self.location_to.short_name or self.location_to)
+        #self.service_type = SERVICE_CATEGORY_TRANSFER
+        self.base_service = self.service
+
+
+class NewQuoteExtra(QuoteProvidedService, BookExtraData):
+    """
+    Quote Service Extra
+    """
+    class Meta:
+        verbose_name = 'Quote Extra'
+        verbose_name_plural = 'Quotes Extras'
+        default_permissions = ('add', 'change',)
+    service = models.ForeignKey(Extra, related_name='%(class)s_service')
+
+    def fill_data(self):
+        # setting name for this booking_service
+        self.name = self.service.name
+        #self.service_type = SERVICE_CATEGORY_EXTRA
+        self.base_service = self.service
+
+
+
+class NewQuoteServiceBookDetail(NewQuoteService):
+    """
+    Quote Provided Service Book Detail
+    """
+    class Meta:
+        verbose_name = 'Quote Provided Service Book Detail'
+        verbose_name_plural = 'Quotes Provided Services Book Details'
+    quote_service = models.ForeignKey(QuoteProvidedService, related_name='quoteservicebookdetail_provided')
+
+    def fill_data(self):
+        pass
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.fill_data()
+        # Call the "real" save() method.
+        super(NewQuoteServiceBookDetail, self).save(
+            force_insert, force_update, using, update_fields)
+
+
+class NewQuoteServiceBookDetailAllotment(NewQuoteServiceBookDetail, BookAllotmentData):
+    """
+    Quote Provided Service Book Detail Allotment
+    """
+    class Meta:
+        verbose_name = 'Quote ProvidedService Book Detail Allotment'
+        verbose_name_plural = 'Quotes Provided Services Book Details Allotments'
+    book_service = models.ForeignKey(Allotment)
+
+    def fill_data(self):
+        self.base_service = self.book_service
+        super(NewQuoteServiceBookDetailAllotment, self).fill_data()
+        self.name = '%s - %s' % (self.quote_service, self.book_service)
+        self.time = time(23, 59, 59)
+
+
+class NewQuoteServiceBookDetailTransfer(NewQuoteServiceBookDetail, BookTransferData):
+    """
+    Quote Provided Service Book Detail Transfer
+    """
+    class Meta:
+        verbose_name = 'Quote Provided Service Book Detail Transfer'
+        verbose_name_plural = 'Quotes Provided Services Book Details Transfers'
+    book_service = models.ForeignKey(Transfer)
+
+    def fill_data(self):
+        self.base_service = self.book_service
+        super(NewQuoteServiceBookDetailTransfer, self).fill_data()
+        self.name = '%s - %s (%s -> %s)' % (
+            self.quote_service, self.book_service,
+            self.location_from.short_name or self.location_from,
+            self.location_to.short_name or self.location_to)
+
+
+class NewQuoteServiceBookDetailExtra(NewQuoteServiceBookDetail, BookExtraData):
+    """
+    Quote Provided Service Book Detail Extra
+    """
+    class Meta:
+        verbose_name = 'Quote Provided Service Book Detail Extra'
+        verbose_name_plural = 'Quotes Provided Services Book Details Extras'
+    book_service = models.ForeignKey(Extra)
+
+    def fill_data(self):
+        self.base_service = self.book_service
+        super(NewQuoteServiceBookDetailExtra, self).fill_data()
         self.name = '%s - %s' % (self.quote_service, self.book_service)
 
 
@@ -910,28 +1103,6 @@ class BookingPax(models.Model):
             return '%s (age: %s)' % (self.pax_name, self.pax_age)
         else:
             return '%s' % (self.pax_name)
-
-
-class CostData(models.Model):
-    """
-    Cost Data
-    """
-    class Meta:
-        abstract = True
-    cost_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost')
-    cost_comments = models.CharField(max_length=1000, blank=True, null=True)
-
-
-class PriceData(models.Model):
-    """
-    Price Data
-    """
-    class Meta:
-        abstract = True
-    price_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price')
-    price_comments = models.CharField(max_length=1000, blank=True, null=True)
 
 
 class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
@@ -1194,56 +1365,6 @@ class BookingServicePax(models.Model):
             return '%s' % (self.booking_pax.pax_name)
 
 
-class BookingServiceSupplement(models.Model):
-    """
-    Booking Service Supplement
-    """
-    class Meta:
-        verbose_name = 'Booking Service Supplement'
-        verbose_name_plural = 'Bookings Services Supplements'
-    booking_service = models.ForeignKey(BookingService)
-    supplement = models.ForeignKey(ServiceSupplement)
-    cost_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    cost_comments = models.CharField(max_length=1000)
-    price_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    price_comments = models.CharField(max_length=1000)
-
-    def fill_data(self):
-        pass
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.fill_data()
-        # Call the "real" save() method.
-        super(BookingServiceSupplement, self).save(force_insert, force_update, using, update_fields)
-
-
-class ServiceSupplementBookingPax(models.Model):
-    """
-    Service Supplement Booking Pax
-    """
-    class Meta:
-        verbose_name = 'Service Supplement Booking Pax'
-        verbose_name_plural = 'Services Supplements Bookings Paxes'
-    service_supplment = models.ForeignKey(BookingServiceSupplement)
-    booking_pax = models.ForeignKey(BookingPax)
-    supplement_qtty = models.SmallIntegerField(default=1)
-    description = models.CharField(max_length=1000)
-    datetime_from = models.DateTimeField()
-    datetime_to = models.DateTimeField()
-    cost_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    cost_comments = models.CharField(max_length=1000)
-    price_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    price_comments = models.CharField(max_length=1000)
-
-    def fill_data(self):
-        pass
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.fill_data()
-        # Call the "real" save() method.
-        super(ServiceSupplementBookingPax, self).save(force_insert, force_update, using, update_fields)
-
-
 class BookingAllotment(BookingService, BookAllotmentData):
     """
     Booking Service Allotment
@@ -1363,16 +1484,6 @@ class BookingTransfer(BookingService, BookTransferData):
         return self.__unicode__()
 
 
-class BookingTransferSupplement(BookingServiceSupplement):
-    """
-    Transfer Supplement
-    """
-    class Meta:
-        verbose_name = 'Booking Transfer Line Supplement'
-        verbose_name_plural = 'Booking Transfer Line Supplements'
-    quantity = models.SmallIntegerField(default=1)
-
-
 class BookingExtra(BookingService, BookExtraData):
     """
     Booking Service Extra
@@ -1401,24 +1512,6 @@ class BookingExtra(BookingService, BookExtraData):
 
     def __str__(self):
         return self.__unicode__()
-
-
-class BookingExtraComponent(models.Model):
-    """
-    Booking Service Cost Service
-    """
-    class Meta:
-        verbose_name = 'Booking Extra Component'
-        verbose_name_plural = 'Bookings Extras Components'
-        unique_together = (('booking_extra', 'component'),)
-    booking_extra = models.ForeignKey(BookingExtra)
-    component = models.ForeignKey(Extra)
-    manual_cost = models.BooleanField(default=False)
-    manual_price = models.BooleanField(default=False)
-    cost_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost')
-    price_amount = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price')
 
 
 class BookingPackage(BookingService):
@@ -1712,6 +1805,525 @@ class ProviderBookingPaymentService(models.Model):
         unique_together = (('provider_payment', 'provider_service'),)
     provider_payment = models.ForeignKey(ProviderBookingPayment)
     provider_service = models.ForeignKey(BaseBookingService)
+    service_cost_amount_to_pay = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    service_cost_amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    @property
+    def provider_service_booking(self):
+        if self.provider_service:
+            return self.provider_service.full_booking_name
+        return None
+
+    @property
+    def provider_service_ref(self):
+        if self.provider_service:
+            return self.provider_service.booking_internal_reference
+        return ''
+
+    @property
+    def provider_service_name(self):
+        if self.provider_service:
+            rich_name = self.provider_service.name
+            if self.provider_service.description:
+                rich_name += ' ({})'.format(self.provider_service.description)
+            return rich_name
+        return None
+
+    @property
+    def provider_service_datetime_from(self):
+        if self.provider_service:
+            return self.provider_service.datetime_from
+        return None
+
+    @property
+    def provider_service_datetime_to(self):
+        if self.provider_service:
+            return self.provider_service.datetime_to
+        return None
+
+    @property
+    def provider_service_status(self):
+        if self.provider_service:
+            return self.provider_service.get_status_display()
+        return None
+
+    @property
+    def service_cost_amount_pending(self):
+        return self.service_cost_amount_to_pay - self.service_cost_amount_paid
+
+    @property
+    def provider_service_balance(self):
+        return self.service_cost_amount_to_pay - self.service_cost_amount_paid - self.amount_paid
+
+    @property
+    def service_confirmation(self):
+        if self.provicer_service:
+            return self.provider_service.conf_number
+
+    def __str__(self):
+        return '%s : %s (%s)' % (
+            self.provider_payment, self.provider_service, self.amount_paid)
+
+
+class NewBookingService(BookServiceData, DateInterval, CostData, PriceData):
+    """
+    Booking Service
+    """
+    class Meta:
+        verbose_name = 'Booking Service'
+        verbose_name_plural = 'Bookings Services'
+        ordering = ['datetime_from', 'datetime_to', 'time']
+    booking = models.ForeignKey(Booking, related_name='booking_services')
+    status = models.CharField(
+        max_length=5, choices=SERVICE_STATUS_LIST, default=SERVICE_STATUS_PENDING)
+    p_notes = models.CharField(
+        max_length=1000, blank=True, null=True, verbose_name='Private Notes')
+    v_notes = models.CharField(
+        max_length=200, blank=True, null=True, verbose_name='Voucher Notes')
+    manual_cost = models.BooleanField(default=False)
+    manual_price = models.BooleanField(default=False)
+    base_category = models.CharField(
+        max_length=5, choices=BASE_BOOKING_SERVICE_CATEGORIES, blank=True, null=True)
+
+
+    @property
+    def utility(self):
+        return utility(self.cost_amount, self.price_amount)
+    utility.fget.short_description = 'Util.'
+
+    @property
+    def utility_percent(self):
+        return utility_percent(self.cost_amount, self.price_amount)
+    utility_percent.fget.short_description = 'Util.%'
+
+    def booking_name(self):
+        # gets booking.name for this bookingservice
+        child_service = _get_child_objects([self])[0]
+        if child_service.base_category in ['PA', 'PE', 'PT']:
+            return child_service.booking_package.booking.name
+        return child_service.booking.name
+
+    def booking_agency_ref(self):
+        # gets booking.reference for this bookingservice
+        child_service = _get_child_objects([self])[0]
+        if child_service.base_category in ['PA', 'PE', 'PT']:
+            return child_service.booking_package.booking.reference
+        return child_service.booking.reference
+
+    def service_pax_count(self):
+        # gets rooming_list count for this bookingservice
+        child_service = _get_child_objects([self])[0]
+        if child_service.base_category in ['PA', 'PE', 'PT']:
+            pax_count = child_service.booking_package.rooming_list.count()
+        else:
+            pax_count = child_service.rooming_list.count()
+        return '{}'.format(pax_count)
+    service_pax_count.short_description = 'Pax'
+
+    def full_booking_name(self):
+        ref = self.booking_agency_ref()
+        full_name = self.booking_name()
+        if ref and ref not in full_name:
+            full_name += ' ({})'.format(ref)
+        return full_name
+    full_booking_name.short_description = 'Booking'
+
+    def booking_internal_reference(self):
+        return self.booking.internal_reference()
+    booking_internal_reference.short_description = 'Ref.'
+
+    def booking_general_notes(self):
+        """
+        returns global notes from the booking this
+        service belongs to
+        """
+        return self.booking.p_notes or ''
+    booking_general_notes.short_description = 'General Booking Notes'
+
+    def get_child_object(self):
+        return _get_child_objects([self])[0]
+
+    def validate(self):
+        self.validate_date_interval()
+        if self.status in [
+                SERVICE_STATUS_PENDING, SERVICE_STATUS_REQUEST,
+                SERVICE_STATUS_CANCELLED]:
+            self.cost_amount_to_pay = 0.00
+        elif self.cost_amount is None:
+            raise ValidationError(
+                '%s with Status %s requires a Cost' % (self.name, self.get_status_display()))
+        elif self.cost_amount is not None:
+            self.cost_amount_to_pay = self.cost_amount
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.validate()
+        self.validate_date_interval()
+        super(BaseBookingService, self).save(force_insert, force_update, using, update_fields)
+
+
+class NewBookingServicePax(models.Model):
+    """
+    Booking Service Pax
+    """
+    class Meta:
+        verbose_name = 'Booking Service Pax'
+        verbose_name_plural = 'Booking Service Rooming'
+    version = AutoIncVersionField()
+    booking_pax = models.ForeignKey(BookingPax)
+    booking_service = models.ForeignKey(NewBookingService, related_name='rooming_list')
+    group = models.SmallIntegerField(verbose_name='Room')
+    cost_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost')
+    cost_comments = models.CharField(max_length=1000, blank=True, null=True)
+    force_adult = models.BooleanField(default=False)
+    is_cost_free = models.BooleanField(default=False)
+    price_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Price')
+    price_comments = models.CharField(max_length=1000, blank=True, null=True)
+    is_price_free = models.BooleanField(default=False)
+
+    def fill_data(self):
+        pass
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.fill_data()
+        # Call the "real" save() method.
+        super(BookingServicePax, self).save(force_insert, force_update, using, update_fields)
+
+    def __str__(self):
+        return self.__unicode__()
+
+    def __unicode__(self):
+        if self.booking_pax.pax_age:
+            return '%s (age: %s)' % (
+                self.booking_pax.pax_name,
+                self.booking_pax.pax_age)
+        else:
+            return '%s' % (self.booking_pax.pax_name)
+
+
+class NewBookingPackage(NewBookingService):
+    """
+    Booking Package
+    """
+    class Meta:
+        verbose_name = 'Booking Package'
+        verbose_name_plural = 'Bookings Packages'
+    version = AutoIncVersionField()
+    service = models.ForeignKey(Package)
+    price_by_package_catalogue = models.BooleanField(
+        default=True, verbose_name='Use Catalogue Price')
+    voucher_detail = models.BooleanField(default=False)
+
+    def build_description(self):
+        return '%s pax' % self.rooming_list.count()
+
+    def fill_data(self):
+        super(BookingPackage, self).fill_data()
+        # setting name for this booking_service
+        self.name = self.service.name
+        self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE
+        #self.service_type = SERVICE_CATEGORY_PACKAGE
+        self.description = self.build_description()
+        # TODO define a location for packages to show
+        # maybe first packageservice location
+        self.base_service = self.service
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        with transaction.atomic(savepoint=False):
+            super(BookingPackage, self).save(force_insert, force_update, using, update_fields)
+
+    def __str__(self):
+        return self.__unicode__()
+
+    def __unicode__(self):
+        return '%s : %s' % (self.name, self.booking)
+
+
+class BookingProvidedService(NewBookingService):
+    """
+    Booking Provided Service
+    """
+    class Meta:
+        verbose_name = 'Booking Provided Service'
+        verbose_name_plural = 'Booking Provided Services'
+        ordering = ['datetime_from', 'datetime_to', 'time']
+    booking_package = models.ForeignKey(NewBookingPackage, blank=True, null=True)
+    provider = models.ForeignKey(Provider, blank=True, null=True)
+    # This holds the confirmation number when it exists
+    conf_number = models.CharField(max_length=20, blank=True, null=True)
+    provider_notes = models.CharField(
+        max_length=1000, blank=True, null=True, verbose_name='Provider Notes')
+    cost_amount_to_pay = models.DecimalField(max_digits=10,
+                                             decimal_places=2,
+                                             default=0.00)
+    cost_amount_paid = models.DecimalField(max_digits=10, decimal_places=2,
+                                           default=0.00,
+                                           verbose_name='Paid')
+    has_payment = models.BooleanField(default=False)
+
+    def service_provider(self):
+        provider = ''
+        if self.provider:
+            provider = self.provider.name
+            if self.provider.phone:
+                provider += ' %s' % self.provider.phone
+        return provider
+
+    def fill_data(self):
+        pass
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.fill_data()
+        # Call the "real" save() method.
+        super(BookingProvidedService, self).save(
+            force_insert, force_update, using, update_fields)
+
+    def pax_quantity(self):
+        return self.rooming_list.count()
+
+    def __str__(self):
+        return self.__unicode__()
+
+    def __unicode__(self):
+        return self.name
+
+
+class NewBookingAllotment(BookingProvidedService, BookAllotmentData):
+    """
+    Booking Service Allotment
+    """
+    class Meta:
+        verbose_name = 'Booking Accomodation'
+        verbose_name_plural = 'Bookings Accomodations'
+    service = models.ForeignKey(Allotment)
+    version = AutoIncVersionField()
+
+    def __unicode__(self):
+        return '%s (%s - %s)' % (self.name,
+                                 self.datetime_from, self.datetime_to)
+
+    def __str__(self):
+        return self.__unicode__()
+
+    def build_description(self):
+        """ makes a string detailing room quantity and types"""
+        from booking.services import BookingServices
+        rooms = BookingServices.find_groups(
+            booking_service=self, service=self.service, for_cost=True)
+        dist = ''
+        room_count = {
+            '00': 0,  # NONE counter
+            '10': 0,  # SGL counter
+            '20': 0,  # DBL counter
+            '30': 0,  # TPL counter
+            '11': 0,  # SGL+1Child
+            '21': 0,  # DBL+1Child
+            '22': 0,  # DBL+2Child
+            '31': 0,  # TPL+1Child
+            '40': 0,  # Quad counter
+            'und': 0,  # Undefined room counter
+        }
+        room_types = {
+            '00': 'NONE',
+            '10': 'SGL',
+            '20': 'DBL',
+            '30': 'TPL',
+            '11': 'SGL&1Chld',
+            '21': 'DBL&1Chld',
+            '22': 'DBL&2Chld',
+            '31': 'TPL&1Chld',
+            '40': 'QUAD',
+            'und': 'UNALLOCATED'
+        }
+        for room in rooms:
+            if '%d%d' % (room[0], room[1]) in room_count:
+                room_count['%d%d' % (room[0], room[1])] += 1
+            else:
+                room_count['und'] += 1
+        for k in room_count.keys():
+            if room_count[k]:
+                if dist:
+                    dist += ' + '
+                dist += '%d %s' % (room_count[k],
+                                   room_types[k])
+        dist += ' (%s %s)' % (self.room_type, self.board_type)
+        return dist
+
+    def fill_data(self):
+        super(NewBookingAllotment, self).fill_data()
+        self.name = '%s' % (self.service,)
+        self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT
+        #self.service_type = SERVICE_CATEGORY_ALLOTMENT
+        self.description = self.build_description()
+        self.time = time(23, 59, 59)
+        self.base_service = self.service
+        self.base_location = self.service.location
+
+    def adult_quantity(self):
+        if self.service.child_age:
+            return self.rooming_list.filter(
+                Q(booking_pax__pax_age__isnull=True) |
+                Q(booking_pax__pax_age__gte=self.service.child_age)).count()
+        else:
+            return self.rooming_list.count()
+
+    def child_quantity(self):
+        if self.service.child_age:
+            return self.rooming_list.filter(
+                booking_pax__pax_age__lt=self.service.child_age).count()
+        return 0
+
+
+class NewBookingTransfer(BookingProvidedService, BookTransferData):
+    """
+    Booking Service Transfer
+    """
+    class Meta:
+        verbose_name = 'Booking Transfer'
+        verbose_name_plural = 'Booking Transfers'
+    service = models.ForeignKey(Transfer)
+    version = AutoIncVersionField()
+
+    def build_description(self):
+        return '%s pax' % self.rooming_list.count()
+
+    def fill_data(self):
+        super(NewBookingTransfer, self).fill_data()
+        # setting name for this booking_service
+        self.name = '%s (%s -> %s)' % (
+            self.service,
+            self.location_from.short_name or self.location_from,
+            self.location_to.short_name or self.location_to)
+        self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER
+        #self.service_type = SERVICE_CATEGORY_TRANSFER
+        self.description = self.build_description()
+        self.base_service = self.service
+        self.base_location = self.service.location
+
+    def __unicode__(self):
+        return self.name
+
+    def __str__(self):
+        return self.__unicode__()
+
+
+class NewBookingExtra(BookingProvidedService, BookExtraData):
+    """
+    Booking Service Extra
+    """
+    class Meta:
+        verbose_name = 'Booking Extra'
+        verbose_name_plural = 'Booking Extras'
+    service = models.ForeignKey(Extra, related_name='%(class)s_service')
+    version = AutoIncVersionField()
+
+    def build_description(self):
+        return '%s pax' % self.rooming_list.count()
+
+    def fill_data(self):
+        super(NewBookingExtra, self).fill_data()
+        # setting name for this booking_service
+        self.name = self.service.name
+        self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA
+        #self.service_type = SERVICE_CATEGORY_EXTRA
+        self.description = self.build_description()
+        self.base_service = self.service
+        self.base_location = self.service.location
+
+    def __unicode__(self):
+        return self.name
+
+    def __str__(self):
+        return self.__unicode__()
+
+
+class BookingBookDetail(NewBookingService):
+    """
+    Booking Service Book Detail
+    """
+    class Meta:
+        verbose_name = 'Booking Service Book Detail'
+        verbose_name_plural = 'Bookings Services Book Details'
+    booking_service = models.ForeignKey(
+        BookingProvidedService, related_name='%(class)s_booking_service')
+
+    def fill_data(self):
+        self.location = self.base_service.location
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.fill_data()
+        # Call the "real" save() method.
+        super(BookingBookDetail, self).save(
+            force_insert, force_update, using, update_fields)
+
+    def __str__(self):
+        return self.__unicode__()
+
+    def __unicode__(self):
+        return self.name
+
+
+class BookingBookDetailAllotment(BookingBookDetail, BookAllotmentData):
+    """
+    Booking Service Book Detail Allotment
+    """
+    class Meta:
+        verbose_name = 'Booking Service Book Detail Allotment'
+        verbose_name_plural = 'Bookings Services Book Details Allotments'
+    book_service = models.ForeignKey(Allotment)
+
+    def fill_data(self):
+        self.base_service = self.book_service
+        super(Booking.BookDetailAllotment, self).fill_data()
+        self.name = '%s - %s' % (self.booking_service, self.book_service)
+        self.time = time(23, 59, 59)
+
+
+class BookingBookDetailTransfer(BookingBookDetail, BookTransferData):
+    """
+    Booking Service Book Detail Transfer
+    """
+    class Meta:
+        verbose_name = 'Booking Service Book Detail Transfer'
+        verbose_name_plural = 'Bookings Services Book Details Transfers'
+    book_service = models.ForeignKey(Transfer)
+
+    def fill_data(self):
+        self.base_service = self.book_service
+        super(BookingBookDetailTransfer, self).fill_data()
+        self.name = '%s - %s (%s -> %s)' % (
+            self.booking_service, self.book_service,
+            self.location_from.short_name or self.location_from,
+            self.location_to.short_name or self.location_to)
+
+
+class BookingBookDetailExtra(BookingBookDetail, BookExtraData):
+    """
+    Booking Service Book Detail Extra
+    """
+    class Meta:
+        verbose_name = 'Booking Service Book Detail Extra'
+        verbose_name_plural = 'Bookings Services Book Details Extras'
+    book_service = models.ForeignKey(Extra)
+
+    def fill_data(self):
+        self.base_service = self.book_service
+        super(BookingServiceBookDetailExtra, self).fill_data()
+        self.name = '%s - %s' % (self.booking_service, self.book_service)
+
+
+class NewProviderBookingPaymentService(models.Model):
+    """
+    ProviderBookingPaymentService
+    """
+    class Meta:
+        verbose_name = 'Provider Booking Payment'
+        verbose_name_plural = 'Providers Bookings Payments'
+        unique_together = (('provider_payment', 'provider_service'),)
+    provider_payment = models.ForeignKey(ProviderBookingPayment)
+    provider_service = models.ForeignKey(BookingProvidedService)
     service_cost_amount_to_pay = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     service_cost_amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
