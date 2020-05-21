@@ -5,7 +5,8 @@ import os
 try:
     from cStringIO import StringIO
 except ImportError:
-    from _io import StringIO
+    # for Python3 use BytesIO for pdf handling
+    from _io import BytesIO as StringIO
 from xhtml2pdf import pisa
 
 from common.sites import SiteModel, CommonChangeList
@@ -1196,8 +1197,7 @@ class BookingSiteModel(SiteModel):
                         'services': objs})
         html = template.render(context)
         pdf = StringIO()
-        if PY2:
-            html = html.encode('UTF-8')
+        html = html.encode('UTF-8')
         result = pisa.pisaDocument(StringIO(html), dest=pdf,
                                    link_callback=_fetch_resources)
         return result, pdf
@@ -1313,8 +1313,7 @@ class BookingSiteModel(SiteModel):
             'partials': partials,
         }
         html = template.render(context)
-        if PY2:
-            html = html.encode('UTF-8')
+        html = html.encode('UTF-8')
         pdf = StringIO()
         result = pisa.pisaDocument(StringIO(html), dest=pdf,
                                 link_callback=_fetch_resources)
@@ -2390,8 +2389,7 @@ class ProviderBookingPaymentSiteModel(SiteModel):
             # 'services': services,
         }
         html = template.render(context)
-        if PY2:
-            html = html.encode('UTF-8')
+        html = html.encode('UTF-8')
         pdf = StringIO()
         result = pisa.pisaDocument(
             StringIO(html), dest=pdf, link_callback=_fetch_resources)

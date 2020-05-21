@@ -33,7 +33,8 @@ from reservas.custom_settings import ADDON_FOR_NO_ADDON
 try:
     from cStringIO import StringIO
 except ImportError:
-    from _io import StringIO
+    # For Python3 use BytesIO for pdf handling
+    from _io import BytesIO as StringIO
 
 from xhtml2pdf import pisa
 
@@ -93,6 +94,7 @@ class RoomTypeAutocompleteView(autocomplete.Select2QuerySetView):
         service = self.forwarded.get('service', None)
         if service:
             return qs.filter(allotmentroomtype__allotment=service)
+        return qs
 
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
@@ -550,7 +552,7 @@ def render_prices_pdf(request, extra_context=None):
         # 'date_from': None,
         # 'date_to': None,
     })
-    html = template.render(context)
+    html = template.render(context).encode('UTF-8')
     result = StringIO()
     pdf = pisa.pisaDocument(StringIO(html),
                             dest=result,

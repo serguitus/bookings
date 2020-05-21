@@ -50,7 +50,7 @@ from finance.constants import (
 )
 from finance.models import (
     Office, Agency, AgencyInvoice, AgencyContact,
-    Provider, ProviderInvoice, Withdraw)
+    Provider, Withdraw)
 
 
 # Utility method to get a list of
@@ -889,8 +889,9 @@ class BookingInvoice(AgencyInvoice):
     def fill_data(self):
         agency = Agency.objects.get(pk=self.agency_id)
         self.document_type = DOC_TYPE_AGENCY_BOOKING_INVOICE
+        self.content_date = self.invoice_booking.date_from
         self.name = '%s - %s ($%s %s)' % (
-            self.invoice_booking, self.date, self.amount, self.get_currency_display())
+            self.invoice_booking, self.content_date, self.amount, self.get_currency_display())
         # TODO. remove line below after ensuring all invoice numbers are correct
         # self.document_number = '{}-{}'.format(self.invoice_booking.id, self.id)
 
