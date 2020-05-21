@@ -738,8 +738,10 @@ class AgencyDocumentSiteModel(MatchableSiteModel):
     """
     class for agency documents
     """
-    fields = ('name', 'agency', 'currency','amount', 'matched_amount', 'date', 'status')
-    list_display = ['name', 'agency', 'currency', 'amount', 'matched_amount', 'date', 'status']
+    fields = ('name', 'agency', 'currency', 'amount',
+              'matched_amount', 'date', 'status')
+    list_display = ['name', 'agency', 'currency', 'amount',
+                    'matched_amount', 'date', 'status']
     top_filters = ('currency', 'agency', 'status', 'date')
 
     readonly_fields = ('name', 'matched_amount',)
