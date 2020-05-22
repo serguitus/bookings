@@ -11,8 +11,8 @@ from config.models import (
     Service, NewPackage, NewAgencyPackageService,
     ProviderAllotmentService, ProviderTransferService, ProviderExtraService,
     ProviderAllotmentDetail, ProviderTransferDetail, ProviderExtraDetail,
-    AgencyAllotmentService, AgencyTransferService, AgencyExtraService,
-    AgencyAllotmentDetail, AgencyTransferDetail, AgencyExtraDetail,
+    AgencyAllotmentService, AgencyTransferService, AgencyExtraService, NewAgencyPackageService,
+    AgencyAllotmentDetail, AgencyTransferDetail, AgencyExtraDetail, NewAgencyPackageDetail,
 )
 from finance.models import Agency
 
@@ -318,6 +318,40 @@ class AgencyExtraDetailInlineForm(ProviderExtraDetailInlineForm):
                 url='catalogextraaddon-autocomplete',
                 forward=['service']),
         }
+
+
+class NewAgencyPackageServiceForm(forms.ModelForm):
+    class Meta:
+        model = NewAgencyPackageService
+        fields = ('__all__')
+        widgets = {
+            'agency': autocomplete.ModelSelect2(url='agency-autocomplete'),
+            'service': autocomplete.ModelSelect2(url='newpackage-autocomplete'),
+        }
+
+
+class NewAgencyPackageDetailForm(forms.ModelForm):
+    class Meta:
+        model = NewAgencyPackageDetail
+        fields = ('__all__')
+        widgets = {
+            'agency_service': autocomplete.ModelSelect2(
+                url='disabled-autocomplete',),
+        }
+
+
+class NewAgencyPackageDetailInlineForm(forms.ModelForm):
+    class Meta:
+        fields = ('__all__')
+
+    def __init__(self, *args, **kwargs):
+        super(NewAgencyPackageDetailInlineForm, self).__init__(*args, **kwargs)
+        self.fields['pax_range_max'].widget.attrs['placeholder'] = 'Pax Max'
+        self.fields['pax_range_max'].label = 'Pax Max'
+        self.fields['pax_range_min'].widget.attrs['placeholder'] = 'Pax Min'
+        self.fields['pax_range_min'].label = 'Pax Min'
+        self.fields['ad_1_amount'].widget.attrs['placeholder'] = 'Adult'
+        self.fields['ad_1_amount'].label = 'Price'
 
 
 class AllotmentRoomTypeInlineForm(forms.ModelForm):

@@ -559,7 +559,6 @@ class BookingServices(object):
         cls.build_date_interval_data(
             dst_service=dst_package, src_service=src_package)
         dst_package.status = constants.SERVICE_STATUS_PENDING
-        dst_package.provider = src_package.provider
         dst_package.service = src_package.service
         dst_package.service_addon = src_package.service_addon
 
@@ -957,68 +956,6 @@ class BookingServices(object):
 
 
     @classmethod
-    def package_price(
-            cls, service_id, date_from, date_to, price_groups, agency):
-        service = Package.objects.get(pk=service_id)
-
-        if date_from is None and date_to is None:
-            return None, 'Both Dates are Missing'
-        if date_from is None:
-            date_from = date_to
-        if date_to is None:
-            date_to = date_from
-
-        # agency price
-        # obtain details order by date_from asc, date_to desc
-        if price_groups is None and service.amounts_type == constants.PACKAGE_AMOUNTS_BY_PAX:
-            price = None
-            price_message = 'Paxes Missing'
-        elif agency is None:
-            price = None
-            price_message = 'Agency Not Found'
-        else:
-            if service.pax_range:
-                price = 0
-                price_message = ''
-                # each group can have different details
-                for group in price_groups:
-                    paxes = group[0] + group[1]
-                    queryset = cls._get_agency_queryset(
-                        AgencyPackageDetail.objects,
-                        agency.id, service_id, date_from, date_to)
-                    # pax range filtering
-                    queryset = queryset.filter(
-                        (Q(pax_range_min=0) & Q(pax_range_max__gte=paxes)) |
-                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__gte=paxes)) |
-                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max=0)) |
-                        (Q(pax_range_min=0) & Q(pax_range_max=0))
-                    )
-                    detail_list = list(queryset)
-                    group_price, group_price_message = cls._find_package_group_price(
-                        service, date_from, date_to, group, detail_list
-                    )
-                    if group_price:
-                        price += group_price
-                        price_message = group_price_message
-                    else:
-                        price = None
-                        price_message = group_price_message
-                        break
-            else:
-                queryset = cls._get_agency_queryset(
-                    AgencyPackageDetail.objects,
-                    agency.id, service_id, date_from, date_to)
-
-                detail_list = list(queryset)
-
-                price, price_message = cls._find_package_groups_price(
-                    service, date_from, date_to, price_groups, detail_list
-                )
-
-        return cls._round_price(price), price_message
-
-
-    @classmethod
     def find_groups(cls, booking_service, service, for_cost):
         if booking_service is None:
             return None, None
@@ -1278,155 +1215,6 @@ class BookingServices(object):
         #    id=booking_service.id)
         service.description = service.build_description()
         service.save()
-
-    @classmethod
-    def process_agencies_amounts(cls, agencies, is_update):
-        """
-        process_agencies_amounts
-        """
-        cls.generate_agencies_amounts(agencies, is_update)
-        return
-
-        # from multiprocessing import Process
-        # if __name__ == 'config.services':
-        #    p = Process(target=cls.generate_agencies_amounts, args=(agencies))
-        #    p.start()
-        #    p.join()
-
-
-    @classmethod
-    def generate_agencies_amounts(cls, agencies, is_update):
-        """
-        generate_agencies_amounts
-        """
-        # load source agency
-
-        from reservas.custom_settings import AGENCY_FOR_AMOUNTS
-
-        try:
-            src_agency = Agency.objects.get(id=AGENCY_FOR_AMOUNTS)
-        except Agency.DoesNotExist as ex:
-            print('EXCEPTION booking services - generate_agencies_amounts : ' + ex.__str__())
-            # 'Source Agency not Found'
-            return
-        for dst_agency in agencies:
-            cls.copy_agency_amounts(src_agency, dst_agency, is_update)
-
-
-    @classmethod
-    def copy_agency_amounts(cls, src_agency, dst_agency, is_update):
-        """
-        copy_agency_amounts
-        """
-        ConfigServices.copy_agency_amounts(src_agency, dst_agency, is_update)
-        cls._copy_packages(src_agency, dst_agency, is_update)
-
-
-    @classmethod
-    def _find_package_groups_price(
-            cls, service, date_from, date_to, groups, detail_list):
-
-        groups_amount = 0
-        groups_message = ''
-        for group in groups:
-            amount, message = cls._find_package_group_price(
-                service, date_from, date_to, group, detail_list)
-            if amount is None:
-                return None, message
-            groups_amount += amount
-            groups_message = message
-
-        return groups_amount, groups_message
-
-
-    @classmethod
-    def _find_package_group_price(cls, service, date_from, date_to, group, detail_list):
-        adults, children = group[0], group[1]
-        free_adults, free_children = 0, 0
-        if 2 in group:
-            free_adults = group[2]
-        if 3 in group:
-            free_children = group[3]
-
-        if adults + children - free_adults - free_children == 0:
-            return 0, ''
-        message = ''
-        stop = False
-        solved = False
-        current_date = date_from
-        amount = 0
-        details = list(detail_list)
-        # continue until solved or empty details list
-        while not stop:
-            # verify list not empty
-            if details:
-                # working with first detail
-                detail = details[0]
-
-                detail_date_from = detail.agency_service.date_from
-                detail_date_to = detail.agency_service.date_to
-
-                if current_date >= detail_date_from:
-                    # verify final date included
-                    end_date = detail_date_to + timedelta(days=1)
-                    if end_date >= date_to:
-                        # full date range
-                        result = cls._get_package_price(
-                            service, detail, current_date, date_to,
-                            adults, children, free_adults, free_children)
-                        if result is not None and result >= 0:
-                            amount += result
-                            solved = True
-                            stop = True
-                    else:
-                        result = cls._get_package_price(
-                            service, detail, current_date,
-                            datetime(year=end_date.year, month=end_date.month, day=end_date.day),
-                            adults, children, free_adults, free_children)
-                        if result is not None and result >= 0:
-                            amount += result
-                            current_date = datetime(
-                                year=end_date.year, month=end_date.month, day=end_date.day)
-                # remove detail from list
-                details.remove(detail)
-            else:
-                # empty list, no solved all days
-                stop = True
-                message = 'Amount Not Found for date %s' % current_date
-        if not solved:
-            amount = None
-
-        if amount is not None and amount >= 0:
-            return cls._round_price(amount), message
-        else:
-            return None, message
-
-
-    @classmethod
-    def _get_package_price(
-            cls, service, detail, date_from, date_to, adults, children, free_adults=0, free_children=0):
-        if (service.amounts_type == constants.AMOUNTS_FIXED and
-                detail.ad_1_amount is not None):
-            return (adults - free_adults) * detail.ad_1_amount / adults
-        if service.amounts_type == constants.AMOUNTS_BY_PAX:
-            if not service.grouping:
-                adult_amount = 0
-                if adults - free_adults > 0:
-                    if detail.ad_1_amount is None:
-                        return None
-                    adult_amount = (adults - free_adults) * detail.ad_1_amount
-                children_amount = 0
-                if children - free_children > 0:
-                    if detail.ch_1_ad_1_amount is None:
-                        return None
-                    children_amount = (children - free_children) * detail.ch_1_ad_1_amount
-                amount = adult_amount + children_amount
-            else:
-                amount = ConfigServices.find_detail_amount(service, detail, adults, children, free_adults, free_children)
-            if amount is not None and amount >= 0:
-                return cls._round_price(amount)
-        return None
-
 
     @classmethod
     def _find_service_pax_variant(cls, service, quote_pax_variant, service_pax_variant):
@@ -1969,64 +1757,6 @@ class BookingServices(object):
 
 
     @classmethod
-    def _copy_packages(cls, src_agency, dst_agency, is_update):
-        # find agencyservice list
-        src_agency_services = list(AgencyPackageService.objects.filter(agency=src_agency.id))
-        # for each agencyservice create agencyservice
-        for src_agency_service in src_agency_services:
-            dst_agency_service, created = AgencyPackageService.objects.get_or_create(
-                agency_id=dst_agency.id,
-                date_from=src_agency_service.date_from,
-                date_to=src_agency_service.date_to,
-                service_id=src_agency_service.service_id
-            )
-            # find details
-            details = list(
-                AgencyPackageDetail.objects.filter(agency_service=src_agency_service))
-            # for each src agency detail create dst agency detail
-            for detail in details:
-                if is_update:
-                    # update - dont modify if exists
-                    agency_detail, created = AgencyPackageDetail.objects.get_or_create(
-                        agency_service_id=dst_agency_service.id,
-                        pax_range_min=detail.pax_range_min,
-                        pax_range_max=detail.pax_range_max,
-                        defaults=ConfigServices.calculate_default_amounts(
-                            detail, src_agency.gain_percent, dst_agency.gain_percent)
-                    )
-                else:
-                    # rewrite - modify if exists
-                    agency_detail, created = AgencyPackageDetail.objects.update_or_create(
-                        agency_service_id=dst_agency_service.id,
-                        pax_range_min=detail.pax_range_min,
-                        pax_range_max=detail.pax_range_max,
-                        defaults=ConfigServices.calculate_default_amounts(
-                            detail, src_agency.gain_percent, dst_agency.gain_percent)
-                    )
-
-
-    @classmethod
-    def _get_agency_queryset(
-            cls, manager, agency_id, package_id, date_from, date_to):
-        if date_from is None:
-            return manager.none()
-        if date_to is None:
-            return manager.none()
-        return manager.select_related(
-            'agency_service__service'
-            ).filter(
-                agency_service__agency_id=agency_id
-            ).filter(
-                agency_service__service_id=package_id
-            ).filter(
-                agency_service__date_to__gte=date_from,
-                agency_service__date_from__lte=date_to
-            ).order_by(
-                'agency_service__date_from', '-agency_service__date_to'
-            )
-
-
-    @classmethod
     def _find_pax_quantity_for_booking_rooming(cls, rooming):
         pax_qtty = 0
         for pax in rooming:
@@ -2512,7 +2242,7 @@ class BookingServices(object):
     def _find_quotepackage_catalog_prices(
             cls, pax_quantity, service, date_from, date_to, agency, service_pax_variant):
         total_free_cost, total_free_price = cls._find_free_paxes(service_pax_variant)
-        p1, p1_msg = cls.package_price(
+        p1, p1_msg = ConfigService.package_price(
             service, date_from, date_to, ({0:pax_quantity, 1:0},), agency)
         if p1 is not None:
             p1 = cls._round_price(cls._adjust_price(p1, pax_quantity, total_free_price))
@@ -4035,7 +3765,7 @@ class BookingServices(object):
             bookingpackage = obj.booking_package
             
         bookingpackage_services = list(
-            BookingPackageService.objects.all().filter(
+            BookingProvidedService.objects.filter(
                 booking_package=bookingpackage.id).exclude(
                     status=constants.SERVICE_STATUS_CANCELLED))
 
@@ -4043,7 +3773,7 @@ class BookingServices(object):
 
         if bookingpackage.price_by_package_catalogue:
             price_groups = cls.find_groups(bookingpackage, bookingpackage.service, False)
-            price, price_msg = cls.package_price(
+            price, price_msg = ConfigServices.package_price(
                 bookingpackage.service.id,
                 bookingpackage.datetime_from, bookingpackage.datetime_to,
                 price_groups,
@@ -4732,22 +4462,6 @@ class BookingServices(object):
                     AgencyPackageDetail.objects, agency_service, percent, amount)
             except Error as ex:
                 print('EXCEPTION booking services - next_year_package_prices : ' + ex.__str__())
-
-
-    @classmethod
-    def list_package_details(cls, package, agency, date_from, date_to):
-        qs = AgencyPackageDetail.objects.all()
-        qs = qs.filter(
-            agency_service__agency=agency,
-            agency_service__service=package.id)
-        if date_from:
-            qs = qs.filter(agency_service__date_to__gte=date_from)
-        if date_to:
-            qs = qs.filter(agency_service__date_from__lte=date_to)
-        qs = qs.order_by(
-            'pax_range_min', '-pax_range_max',
-            'agency_service__date_from', '-agency_service__date_to')
-        return list(qs)
 
 
     @classmethod

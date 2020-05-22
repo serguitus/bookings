@@ -33,6 +33,7 @@ from config.forms import (
     AgencyAllotmentServiceForm, AgencyAllotmentDetailForm, AgencyAllotmentDetailInlineForm,
     AgencyTransferServiceForm, AgencyTransferDetailForm, AgencyTransferDetailInlineForm,
     AgencyExtraServiceForm, AgencyExtraDetailForm, AgencyExtraDetailInlineForm,
+    NewAgencyPackageServiceForm, NewAgencyPackageDetailForm, NewAgencyPackageDetailInlineForm,
     AllotmentRoomTypeInlineForm, TransferZoneForm,
     LocationTransferIntervalInlineForm, ServiceAddonInlineForm, TransferPickupTimeInlineForm,
     PricesExportForm, ExtraForm,
@@ -80,6 +81,7 @@ from reservas.admin import bookings_site
 
 
 MENU_LABEL_CONFIG_BASIC = 'Configuration'
+MENU_LABEL_CONFIG_GROUP = 'Configuration Services'
 MENU_LABEL_PACKAGE = 'Package'
 MENU_GROUP_LABEL_PACKAGE_SERVICES = 'Package Services By Type'
 
@@ -299,7 +301,7 @@ class BaseServiceBookDetailSiteModel(SiteModel):
 class ServiceBookDetailAllotmentSiteModel(BaseServiceBookDetailSiteModel):
     #model_order = 6150
     #menu_label = MENU_LABEL_CONFIG_BASIC
-    #menu_group = 'Configuration Services'
+    #menu_group = MENU_LABEL_CONFIG_GROUP
     fields = [
         'service',
         ('book_service', 'search_location'),
@@ -318,7 +320,7 @@ class ServiceBookDetailAllotmentSiteModel(BaseServiceBookDetailSiteModel):
 class ServiceBookDetailTransferSiteModel(BaseServiceBookDetailSiteModel):
     #model_order = 6160
     #menu_label = MENU_LABEL_CONFIG_BASIC
-    #menu_group = 'Configuration Services'
+    #menu_group = MENU_LABEL_CONFIG_GROUP
     fields = [
         'service',
         ('book_service', 'search_location'),
@@ -341,7 +343,7 @@ class ServiceBookDetailTransferSiteModel(BaseServiceBookDetailSiteModel):
 class ServiceBookDetailExtraSiteModel(BaseServiceBookDetailSiteModel):
     #model_order = 6170
     #menu_label = MENU_LABEL_CONFIG_BASIC
-    #menu_group = 'Configuration Services'
+    #menu_group = MENU_LABEL_CONFIG_GROUP
     fields = [
         'service',
         ('book_service', 'search_location'),
@@ -394,7 +396,7 @@ class BaseServiceSiteModel(SiteModel):
 class ServiceSiteModel(BaseServiceSiteModel):
     model_order = 6100
     menu_label = MENU_LABEL_CONFIG_BASIC
-    menu_group = 'Configuration Services'
+    menu_group = MENU_LABEL_CONFIG_GROUP
     fields = (('name', 'enabled'), ('service_category', 'category'),)
     list_display = ('name', 'location', 'service_category',
                     'category', 'enabled')
@@ -471,7 +473,7 @@ class AllotmentTransferZoneInline(CommonTabularInline):
 class AllotmentSiteModel(BaseServiceSiteModel):
     model_order = 6110
     menu_label = MENU_LABEL_CONFIG_BASIC
-    menu_group = 'Configuration Services'
+    menu_group = MENU_LABEL_CONFIG_GROUP
     fields = (('name', 'location'),
               ('service_category', 'cost_type', 'is_shared_point'),
               ('phone', 'address'),
@@ -493,7 +495,7 @@ class AllotmentSiteModel(BaseServiceSiteModel):
 class TransferSiteModel(BaseServiceSiteModel):
     model_order = 6120
     menu_label = MENU_LABEL_CONFIG_BASIC
-    menu_group = 'Configuration Services'
+    menu_group = MENU_LABEL_CONFIG_GROUP
     fields = (
         ('name', 'service_category'), ('cost_type', 'max_capacity', 'is_shared'),
         ('pax_range', 'has_pickup_time', 'is_ticket'),
@@ -512,7 +514,7 @@ class TransferSiteModel(BaseServiceSiteModel):
 class ExtraSiteModel(BaseServiceSiteModel):
     model_order = 6130
     menu_label = MENU_LABEL_CONFIG_BASIC
-    menu_group = 'Configuration Services'
+    menu_group = MENU_LABEL_CONFIG_GROUP
     fields = ('name', 'service_category', 'location',
             ('cost_type', 'parameter_type'), 'max_capacity',
               'pax_range', ('child_discount_percent', 'child_age', 'infant_age'), ('car_rental', 'enabled'),)
@@ -526,9 +528,10 @@ class ExtraSiteModel(BaseServiceSiteModel):
     form = ExtraForm
 
 
-class PackageSiteModel(BaseServiceSiteModel):
-    model_order = 1010
-    menu_label = MENU_LABEL_PACKAGE
+class NewPackageSiteModel(BaseServiceSiteModel):
+    model_order = 6140
+    menu_label = MENU_LABEL_CONFIG_BASIC
+    menu_group = MENU_LABEL_CONFIG_GROUP
     fields = (
         ('name', 'service_category', 'enabled'),
         ('location', 'amounts_type', 'pax_range'),
@@ -536,13 +539,10 @@ class PackageSiteModel(BaseServiceSiteModel):
     )
     list_display = (
         'name', 'service_category', 'location', 'amounts_type', 'pax_range', 'time', 'enabled')
-    list_editable = ('enabled',)
     top_filters = ('name', ('location', LocationTopFilter), 'amounts_type', 'pax_range', 'enabled')
     ordering = ('enabled', 'name',)
-    list_details_template = 'booking/package_details.html'
-    change_details_template = 'booking/package_details.html'
+    actions = ['export_prices']
     form = PackageForm
-    inlines = [ServiceAddonInline]
 
 
 class CatalogService(SiteModel):
@@ -1187,6 +1187,80 @@ class AgencyExtraDetailSiteModel(SiteModel):
         return super(AgencyExtraDetailSiteModel, self).response_post_save_change(request, obj)
 
 
+class NewAgencyPackageDetailInline(CommonTabularInline):
+    model = NewAgencyPackageDetail
+    extra = 0
+    fields = (
+        ('pax_range_min', 'pax_range_max', 'ad_1_amount'),)
+    ordering = ['pax_range_min', 'pax_range_max']
+    form = NewAgencyPackageDetailInlineForm
+
+    def get_queryset(self, request):
+        return super(NewAgencyPackageDetailInline, self).get_queryset(request).none()
+
+
+class NewAgencyPackageServiceSiteModel(SiteModel):
+    model_order = 7150
+    menu_label = MENU_LABEL_CONFIG_BASIC
+    menu_group = 'Agency Catalogue'
+    #recent_allowed = True
+    fields = ('agency', 'service', 'date_from', 'date_to')
+    list_display = ('agency', 'service', 'date_from', 'date_to',)
+    top_filters = (
+        ('service', PackageTopFilter), ('agency', AgencyTopFilter),
+        ('date_to', DateTopFilter))
+    inlines = [NewAgencyPackageDetailInline]
+    ordering = ['service', 'agency', '-date_from']
+    form = NewAgencyPackageServiceForm
+    add_form_template = 'config/catalog_service_change_form.html'
+    change_form_template = 'config/catalog_service_change_form.html'
+    save_as = True
+
+    def get_details_model(self):
+        return NewAgencyPackageDetail
+
+    def build_details_formset(self):
+        return modelformset_factory(
+            model=NewAgencyPackageDetail,
+            form=NewAgencyPackageDetailInlineForm,
+            fields=[
+                'pax_range_min', 'pax_range_max', 'ad_1_amount',],
+            extra=1,
+        )
+
+
+class NewAgencyPackageDetailSiteModel(SiteModel):
+    recent_allowed = False
+    fields = (
+        'agency_service',
+        ('pax_range_min', 'pax_range_max', 'ad_1_amount'),)
+    list_display = ('agency_service', 'pax_range_min', 'pax_range_max', 'ad_1_amount')
+    ordering = [
+        'agency_service__service', '-agency_service__date_from', 'agency_service__agency']
+    form = NewAgencyPackageDetailForm
+
+    def response_post_delete(self, request, obj):
+        response = response_post_agency_service(
+            request, obj, 'common:config_newagencypackageservice_change')
+        if response:
+            return response
+        return super(NewAgencyPackageDetailSiteModel, self).response_post_delete(request, obj)
+
+    def response_post_save_add(self, request, obj):
+        response = response_post_agency_service(
+            request, obj, 'common:config_newagencypackageservice_change')
+        if response:
+            return response
+        return super(NewAgencyPackageDetailSiteModel, self).response_post_save_add(request, obj)
+
+    def response_post_save_change(self, request, obj):
+        response = response_post_agency_service(
+            request, obj, 'common:config_newagencypackageservice_change')
+        if response:
+            return response
+        return super(NewAgencyPackageDetailSiteModel, self).response_post_save_change(request, obj)
+
+
 class CarRentalOfficeInline(CommonStackedInline):
     model = CarRentalOffice
     extra = 0
@@ -1204,28 +1278,6 @@ class CarRentalSiteModel(SiteModel):
     ordering = ['name',]
 
 
-class AgencyPackageDetailInline(CommonStackedInline):
-    model = NewAgencyPackageDetail
-    extra = 0
-    fields = (('ad_1_amount', 'pax_range_min', 'pax_range_max'),)
-
-
-class AgencyPackageServiceSiteModel(SiteModel):
-    model_order = 7140
-    menu_label = MENU_LABEL_CONFIG_BASIC
-    menu_group = 'Agency Catalogue'
-    #recent_allowed = True
-    fields = ('agency', 'service', 'date_from', 'date_to')
-    list_display = ('agency', 'service', 'date_from', 'date_to',)
-    top_filters = (
-        ('service', PackageTopFilter), ('agency', AgencyTopFilter),
-        ('date_to', DateTopFilter))
-    inlines = [AgencyPackageDetailInline]
-    ordering = ['service', 'agency', '-date_from']
-    form = AgencyPackageServiceForm
-    save_as = True
-
-
 bookings_site.register(ServiceCategory, ServiceCategorySiteModel)
 bookings_site.register(Location, LocationSiteModel)
 bookings_site.register(TransferZone, TransferZoneSiteModel)
@@ -1240,7 +1292,7 @@ bookings_site.register(Service, ServiceSiteModel)
 bookings_site.register(Allotment, AllotmentSiteModel)
 bookings_site.register(Transfer, TransferSiteModel)
 bookings_site.register(Extra, ExtraSiteModel)
-bookings_site.register(NewPackage, PackageSiteModel)
+bookings_site.register(NewPackage, NewPackageSiteModel)
 bookings_site.register(ServiceBookDetailAllotment, ServiceBookDetailAllotmentSiteModel)
 bookings_site.register(ServiceBookDetailTransfer, ServiceBookDetailTransferSiteModel)
 bookings_site.register(ServiceBookDetailExtra, ServiceBookDetailExtraSiteModel)
@@ -1251,6 +1303,8 @@ bookings_site.register(AgencyTransferService, AgencyTransferServiceSiteModel)
 bookings_site.register(AgencyTransferDetail, AgencyTransferDetailSiteModel)
 bookings_site.register(AgencyExtraService, AgencyExtraServiceSiteModel)
 bookings_site.register(AgencyExtraDetail, AgencyExtraDetailSiteModel)
+bookings_site.register(NewAgencyPackageService, NewAgencyPackageServiceSiteModel)
+bookings_site.register(NewAgencyPackageDetail, NewAgencyPackageDetailSiteModel)
 
 bookings_site.register(ProviderAllotmentService, ProviderAllotmentServiceSiteModel)
 bookings_site.register(ProviderAllotmentDetail, ProviderAllotmentDetailSiteModel)
@@ -1258,6 +1312,3 @@ bookings_site.register(ProviderTransferService, ProviderTransferServiceSiteModel
 bookings_site.register(ProviderTransferDetail, ProviderTransferDetailSiteModel)
 bookings_site.register(ProviderExtraService, ProviderExtraServiceSiteModel)
 bookings_site.register(ProviderExtraDetail, ProviderExtraDetailSiteModel)
-
-bookings_site.register(NewAgencyPackageService, AgencyPackageServiceSiteModel)
-
