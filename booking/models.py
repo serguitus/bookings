@@ -694,11 +694,14 @@ class BookingInvoice(AgencyInvoice):
             self.invoice_booking.name, self.invoice_booking.rooming_list.count())
 
     def fill_data(self):
-        agency = Agency.objects.get(pk=self.agency_id)
         self.document_type = DOC_TYPE_AGENCY_BOOKING_INVOICE
         self.content_date = self.invoice_booking.date_from
+        self.content_ref = self.invoice_booking.internal_reference()
         self.name = '%s - %s ($%s %s)' % (
-            self.invoice_booking, self.content_date, self.amount, self.get_currency_display())
+            self.invoice_booking,
+            self.content_date,
+            self.amount,
+            self.get_currency_display())
         # TODO. remove line below after ensuring all invoice numbers are correct
         # self.document_number = '{}-{}'.format(self.invoice_booking.id, self.id)
 

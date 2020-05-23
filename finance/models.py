@@ -65,7 +65,9 @@ class FinantialDocument(models.Model):
         max_length=5, choices=STATUSES, default=STATUS_DRAFT)
     details = models.TextField(blank=True)
     document_number = models.CharField(max_length=20, blank=True, null=True)
+    # fields related to content referend on the invoice. ie. Booking.reference
     content_date = models.DateField(blank=True, null=True)
+    content_ref = models.CharField(max_length=20, blank=True, null=True)
 
     def __str__(self):
         return self.name
