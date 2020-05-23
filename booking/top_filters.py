@@ -68,8 +68,8 @@ class PaidTopFilter(filters.BooleanFilter):
 
 
 class BookingPaidTopFilter(filters.BooleanFilter):
-    filter_title = 'Paid'
-    filter_field_path = 'paid'
+    filter_title = 'Charged'
+    filter_field_path = 'charged'
 
     def queryset(self, request, queryset):
         search_option = self._values[0]

@@ -126,7 +126,7 @@ class DateInterval(models.Model):
 
 def utility(cost, price):
     if price is not None and cost is not None:
-        return float(price) - float(cost)
+        return round(float(price) - float(cost), 1)
     return 0
 
 
