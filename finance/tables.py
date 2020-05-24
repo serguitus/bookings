@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.contrib.admin.utils import quote
 from django.utils.html import format_html
 
+from finance.constants import DOC_CLASSES
 from finance.models import (
     AgencyInvoice, AgencyPayment,
 )
@@ -13,7 +14,7 @@ class AgencyInvoiceTable(tables.Table):
     class Meta:
         model = AgencyInvoice
         template_name = 'finance/agencyinvoice_table.html'
-        fields = ['name', 'date', 'status', 'amount', 'details']
+        fields = ['name', 'content_date', 'status', 'amount', 'details']
         attrs = {'class': 'table table-hover table-sm'}
 
     def __init__(self, *args, **kwargs):
@@ -22,7 +23,7 @@ class AgencyInvoiceTable(tables.Table):
 
     def render_name(self, value, record):
         obj_url = reverse(
-            'common:finance_agencyinvoice_change',
+            'common:{}_change'.format(DOC_CLASSES[record.document_type]),
             args=(quote(record.pk),)
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
