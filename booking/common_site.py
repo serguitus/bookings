@@ -2102,28 +2102,6 @@ class PackageProviderSiteModel(SiteModel):
     save_as = True
 
 
-class AgencyPackageDetailInline(CommonStackedInline):
-    model = AgencyPackageDetail
-    extra = 0
-    fields = (('ad_1_amount', 'pax_range_min', 'pax_range_max'),)
-
-
-class AgencyPackageServiceSiteModel(SiteModel):
-    model_order = 7140
-    menu_label = MENU_LABEL_CONFIG_BASIC
-    menu_group = 'Agency Catalogue'
-    #recent_allowed = True
-    fields = ('agency', 'service', 'date_from', 'date_to')
-    list_display = ('agency', 'service', 'date_from', 'date_to',)
-    top_filters = (
-        ('service', PackageTopFilter), ('agency', AgencyTopFilter),
-        ('date_to', DateTopFilter))
-    inlines = [AgencyPackageDetailInline]
-    ordering = ['service', 'agency', '-date_from']
-    form = AgencyPackageServiceForm
-    save_as = True
-
-
 class BookingInvoiceDetailInline(CommonTabularInline):
     model = BookingInvoiceDetail
     extra = 0
@@ -2921,15 +2899,6 @@ class BookingServiceBookDetailExtraSiteModel(BaseBookingServiceBookDetailSiteMod
 
 
 # Starts Registration Section
-
-bookings_site.register(Package, PackageSiteModel)
-
-bookings_site.register(PackageAllotment, PackageAllotmentSiteModel)
-bookings_site.register(PackageTransfer, PackageTransferSiteModel)
-bookings_site.register(PackageExtra, PackageExtraSiteModel)
-
-bookings_site.register(AgencyPackageService, AgencyPackageServiceSiteModel)
-bookings_site.register(PackageProvider, PackageProviderSiteModel)
 
 bookings_site.register(Quote, QuoteSiteModel)
 
