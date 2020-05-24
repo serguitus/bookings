@@ -58,14 +58,17 @@ class FinantialDocument(models.Model):
         verbose_name_plural = 'Finantials Documents'
     document_type = models.CharField(max_length=50, choices=DOC_TYPES)
     name = models.CharField(max_length=200, default='Finantial Document')
-    date = models.DateField(default=now)
+    date = models.DateField(default=now, verbose_name='Issue Date')
     currency = models.CharField(max_length=5, choices=CURRENCIES)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     status = models.CharField(
         max_length=5, choices=STATUSES, default=STATUS_DRAFT)
     details = models.TextField(blank=True)
     document_number = models.CharField(max_length=20, blank=True, null=True)
-    content_date = models.DateField(blank=True, null=True)
+    # fields related to content referend on the invoice. ie. Booking.reference
+    content_date = models.DateField(blank=True, null=True, verbose_name='Date')
+    content_ref = models.CharField(max_length=20, blank=True, null=True,
+                                   verbose_name='Ref.')
 
     def __str__(self):
         return self.name

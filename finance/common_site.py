@@ -799,11 +799,12 @@ class AgencyInvoiceSiteModel(AgencyDebitDocumentSiteModel):
     menu_label = MENU_LABEL_FINANCE_ADVANCED
 
     fields = ('name', 'agency', 'document_number', 'currency', 'amount', 'matched_amount', 'date', 'status')
-    list_display = ['name', 'invoice_number', 'agency', 'currency', 'amount', 'matched_amount', 'date', 'status']
+    list_display = ['name', 'invoice_number', 'content_date', 'currency', 'amount', 'matched_amount', 'date', 'status']
     top_filters = ('currency', 'agency', 'status', 'date', 'document_number')
     readonly_fields = ['name', 'matched_amount', 'document_number',]
     list_details_template = 'finance/agencyinvoice_details.html'
     change_details_template = 'finance/agencyinvoice_details.html'
+    ordering = ['content_date']
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
@@ -821,8 +822,10 @@ class AgencyPaymentSiteModel(AgencyCreditDocumentSiteModel):
     model_order = 2015
     menu_label = MENU_LABEL_ACCOUNTING
 
-    fields = ('name', 'agency', 'account','amount', 'matched_amount', 'date', 'status')
-    list_display = ['name', 'agency', 'account', 'amount', 'matched_amount', 'date', 'status']
+    fields = ('name', 'agency', 'account', 'amount',
+              'matched_amount', 'date', 'status')
+    list_display = ['name', 'agency', 'account', 'amount',
+                    'matched_amount', 'date', 'status']
     top_filters = ('account', 'agency', 'status', 'date')
     list_details_template = 'finance/agencypayment_details.html'
     change_details_template = 'finance/agencypayment_details.html'
