@@ -1823,21 +1823,28 @@ class ConfigServices(object):
 
 
     @classmethod
-    def update_detail_amount(cls, detail_amount, percent, amount):
-        if percent is Nane and amount is None:
+    def update_detail_amount(cls, detail_amount, diff_percent, diff_amount, min_diff, max_diff):
+        if diff_percent is None and diff_amount is None:
             return detail_amount
         if detail_amount is None:
             return None
         result = float(detail_amount)
-        if percent is not None:
-            result += result * float(percent) / 100.0
-        if amount is not None:
-            result += float(amount)
-        return round(0.499999 + result)
+        if diff_percent is not None:
+            diff = result * float(diff_percent) / 100.0
+        if diff_amount is not None:
+            diff += float(diff_amount)
+        if min_diff is not None:
+            if diff < min_diff:
+                diff = min_diff
+        if max_diff is not None:
+            if diff > max_diff:
+                diff = max_diff
+        return round(0.499999 + result + diff)
 
 
     @classmethod
-    def next_year_price(cls, manager, agency_service, percent, amount):
+    def next_year_price(
+            cls, manager, agency_service, diff_percent, diff_amount, min_diff, max_diff):
         details = list(manager.filter(agency_service=agency_service.id))
         new_agency_service = agency_service
         new_agency_service.pk = None
@@ -1853,56 +1860,81 @@ class ConfigServices(object):
             new_detail.pk = None
             new_detail.id = None
 
-            ad_1_amount = cls.update_detail_amount(ad_1_amount, percent, amount)
-            ad_2_amount = cls.update_detail_amount(ad_2_amount, percent, amount)
-            ad_3_amount = cls.update_detail_amount(ad_3_amount, percent, amount)
-            ad_4_amount = cls.update_detail_amount(ad_4_amount, percent, amount)
-            ch_1_ad_0_amount = cls.update_detail_amount(ch_1_ad_0_amount, percent, amount)
-            ch_1_ad_1_amount = cls.update_detail_amount(ch_1_ad_1_amount, percent, amount)
-            ch_1_ad_2_amount = cls.update_detail_amount(ch_1_ad_2_amount, percent, amount)
-            ch_1_ad_3_amount = cls.update_detail_amount(ch_1_ad_3_amount, percent, amount)
-            ch_1_ad_4_amount = cls.update_detail_amount(ch_1_ad_4_amount, percent, amount)
-            ch_2_ad_0_amount = cls.update_detail_amount(ch_2_ad_0_amount, percent, amount)
-            ch_2_ad_1_amount = cls.update_detail_amount(ch_2_ad_1_amount, percent, amount)
-            ch_2_ad_2_amount = cls.update_detail_amount(ch_2_ad_2_amount, percent, amount)
-            ch_2_ad_3_amount = cls.update_detail_amount(ch_2_ad_3_amount, percent, amount)
-            ch_2_ad_4_amount = cls.update_detail_amount(ch_2_ad_4_amount, percent, amount)
-            ch_3_ad_0_amount = cls.update_detail_amount(ch_3_ad_0_amount, percent, amount)
-            ch_3_ad_1_amount = cls.update_detail_amount(ch_3_ad_1_amount, percent, amount)
-            ch_3_ad_2_amount = cls.update_detail_amount(ch_3_ad_2_amount, percent, amount)
-            ch_3_ad_3_amount = cls.update_detail_amount(ch_3_ad_3_amount, percent, amount)
-            ch_3_ad_4_amount = cls.update_detail_amount(ch_3_ad_4_amount, percent, amount)
+            ad_1_amount = cls.update_detail_amount(
+                ad_1_amount, diff_percent, diff_amount, min_diff, max_diff)
+            ad_2_amount = cls.update_detail_amount(
+                ad_2_amount, diff_percent, diff_amount, min_diff, max_diff)
+            ad_3_amount = cls.update_detail_amount(
+                ad_3_amount, diff_percent, diff_amount, min_diff, max_diff)
+            ad_4_amount = cls.update_detail_amount(
+                ad_4_amount, diff_percent, diff_amount, min_diff, max_diff)
+            ch_1_ad_0_amount = cls.update_detail_amount(
+                ch_1_ad_0_amount, diff_percent, diff_amount, min_diff, max_diff)
+            ch_1_ad_1_amount = cls.update_detail_amount(
+                ch_1_ad_1_amount, diff_percent, diff_amount, min_diff, max_diff)
+            ch_1_ad_2_amount = cls.update_detail_amount(
+                ch_1_ad_2_amount, diff_percent, diff_amount, min_diff, max_diff)
+            ch_1_ad_3_amount = cls.update_detail_amount(
+                ch_1_ad_3_amount, diff_percent, diff_amount, min_diff, max_diff)
+            ch_1_ad_4_amount = cls.update_detail_amount(
+                ch_1_ad_4_amount, diff_percent, diff_amount, min_diff, max_diff)
+            ch_2_ad_0_amount = cls.update_detail_amount(
+                ch_2_ad_0_amount, diff_percent, diff_amount, min_diff, max_diff)
+            ch_2_ad_1_amount = cls.update_detail_amount(
+                ch_2_ad_1_amount, diff_percent, diff_amount, min_diff, max_diff)
+            ch_2_ad_2_amount = cls.update_detail_amount(
+                ch_2_ad_2_amount, diff_percent, diff_amount, min_diff, max_diff)
+            ch_2_ad_3_amount = cls.update_detail_amount(
+                ch_2_ad_3_amount, diff_percent, diff_amount, min_diff, max_diff)
+            ch_2_ad_4_amount = cls.update_detail_amount(
+                ch_2_ad_4_amount, diff_percent, diff_amount, min_diff, max_diff)
+            ch_3_ad_0_amount = cls.update_detail_amount(
+                ch_3_ad_0_amount, diff_percent, diff_amount, min_diff, max_diff)
+            ch_3_ad_1_amount = cls.update_detail_amount(
+                ch_3_ad_1_amount, diff_percent, diff_amount, min_diff, max_diff)
+            ch_3_ad_2_amount = cls.update_detail_amount(
+                ch_3_ad_2_amount, diff_percent, diff_amount, min_diff, max_diff)
+            ch_3_ad_3_amount = cls.update_detail_amount(
+                ch_3_ad_3_amount, diff_percent, diff_amount, min_diff, max_diff)
+            ch_3_ad_4_amount = cls.update_detail_amount(
+                ch_3_ad_4_amount, diff_percent, diff_amount, min_diff, max_diff)
 
             new_detail.agency_service = new_agency_service
             new_detail.save()
 
 
     @classmethod
-    def next_year_allotment_prices(cls, agency_service_ids, percent=None, amount=None):
+    def next_year_allotment_prices(cls, agency_service_ids, diff_percent=None, diff_amount=None,
+            min_diff=None, max_diff=None):
         for agency_service_id in agency_service_ids:
             try:
                 agency_service = AgencyAllotmentService.objects.get(agency_service_id)
-                cls.next_year_price(AgencyAllotmentDetail.objects, agency_service, percent, amount)
+                cls.next_year_price(AgencyAllotmentDetail.objects, agency_service,
+                    diff_percent, diff_amount, min_diff, max_diff)
             except Error as ex:
                 print('EXCEPTION config services - next_year_allotment_prices : ' + ex.__str__())
 
 
     @classmethod
-    def next_year_transfer_prices(cls, agency_service_ids, percent=None, amount=None):
+    def next_year_transfer_prices(cls, agency_service_ids, diff_percent=None, diff_amount=None,
+            min_diff=None, max_diff=None):
         for agency_service_id in agency_service_ids:
             try:
                 agency_service = AgencyTransferService.objects.get(agency_service_id)
-                cls.next_year_price(AgencyTransferDetail.objects, agency_service, percent, amount)
+                cls.next_year_price(AgencyTransferDetail.objects, agency_service,
+                    diff_percent, diff_amount, min_diff, max_diff)
             except Error as ex:
                 print('EXCEPTION config services - next_year_transfer_prices : ' + ex.__str__())
 
 
     @classmethod
-    def next_year_extra_prices(cls, agency_service_ids, percent=None, amount=None):
+    def next_year_extra_prices(cls, agency_service_ids, diff_percent=None, diff_amount=None,
+            min_diff=None, max_diff=None):
         for agency_service_id in agency_service_ids:
             try:
                 agency_service = AgencyExtraService.objects.get(agency_service_id)
-                cls.next_year_price(AgencyExtraDetail.objects, agency_service, percent, amount)
+                cls.next_year_price(AgencyExtraDetail.objects, agency_service,
+                    diff_percent, diff_amount, min_diff, max_diff)
             except Error as ex:
                 print('EXCEPTION config services - next_year_extra_prices : ' + ex.__str__())
 
