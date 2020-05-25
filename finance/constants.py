@@ -57,6 +57,28 @@ DOC_TYPES = (
     (DOC_TYPE_PROVIDER_PAYMENT_WITHDRAW, 'Prov.Payment Withdraw'),
 )
 
+DOC_CLASSES = {
+    DOC_TYPE_DEPOSIT: 'finance_deposit',
+    DOC_TYPE_WITHDRAW: 'finance_withdraw',
+    DOC_TYPE_TRANSFER: 'finance_transfer',
+    DOC_TYPE_CURRENCY_EXCHANGE: 'finance_currencyexchange',
+    DOC_TYPE_LOAN_ENTITY_DEPOSIT: 'finance_loanentitydeposit',
+    DOC_TYPE_LOAN_ENTITY_WITHDRAW: 'finance_loanentitywithdraw',
+    DOC_TYPE_LOAN_ACCOUNT_DEPOSIT: 'finance_loanaccountdeposit',
+    DOC_TYPE_LOAN_ACCOUNT_WITHDRAW: 'finance_loanaccountwithdraw',
+    DOC_TYPE_AGENCY_INVOICE: 'finance_agencyinvoice',
+    DOC_TYPE_AGENCY_PAYMENT: 'finance_agencypayment',
+    DOC_TYPE_AGENCY_DEVOLUTION: 'finance_agencydevolution',
+    DOC_TYPE_AGENCY_DISCOUNT: 'finance_agencydiscount',
+    DOC_TYPE_AGENCY_BOOKING_INVOICE: 'booking_bookinginvoice',
+    DOC_TYPE_PROVIDER_INVOICE: 'finance_providerinvoice',
+    DOC_TYPE_PROVIDER_PAYMENT: 'finance_providerpayment',
+    DOC_TYPE_PROVIDER_DEVOLUTION: 'finance_providerdevolution',
+    DOC_TYPE_PROVIDER_DISCOUNT: 'finance_providerdiscount',
+    # DOC_TYPE_PROVIDER_PAYMENT_WITHDRAW: 'Prov.Payment Withdraw',
+
+}
+
 BOOTSTRAP_STYLE_FINANCE_DOCUMENT_STATUS_MAPPING = {
     STATUS_CANCELLED: 'table-active',
     STATUS_DRAFT: 'table-warning',

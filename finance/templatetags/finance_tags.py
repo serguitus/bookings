@@ -16,8 +16,9 @@ register = template.Library()
 @register.simple_tag
 def agencyinvoice_table(payment):
     table = AgencyInvoiceTable(
-        AgencyInvoice.objects.filter(agencydocumentmatch__credit_document=payment),
-        order_by=('date',),
+        AgencyInvoice.objects.filter(
+            agencydocumentmatch__credit_document=payment),
+        order_by=('content_date',),
     )
     return table
 
@@ -25,7 +26,8 @@ def agencyinvoice_table(payment):
 @register.simple_tag
 def agencypayment_table(invoice):
     table = AgencyPaymentTable(
-        AgencyPayment.objects.filter(agencydocumentmatch__debit_document=invoice),
+        AgencyPayment.objects.filter(
+            agencydocumentmatch__debit_document=invoice),
         order_by=('date',),
     )
     return table

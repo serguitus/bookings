@@ -25,7 +25,8 @@ from finance.constants import BOOTSTRAP_STYLE_FINANCE_DOCUMENT_STATUS_MAPPING
 from finance.forms import (
     AccountingForm, CurrencyExchangeForm, TransferForm,
     LoanEntityDocumentForm, LoanAccountDocumentForm,
-    ProviderDocumentForm, AgencyDocumentForm, OfficeForm)
+    ProviderDocumentForm, AgencyDocumentForm, OfficeForm,
+    MatchableChangeListForm)
 from finance.models import (
     Office,
     FinantialDocument,
@@ -84,24 +85,24 @@ class BaseFinantialDocumentSiteModel(FinantialDocumentSiteModel):
     readonly_fields = ('name',)
 
 
-class MatchableChangeListForm(forms.ModelForm):
+# class MatchableChangeListForm(forms.ModelForm):
 
-    def __init__(self, *args, **kwargs):
-        instance = kwargs.get('instance')
-        if instance:
-            initial = kwargs.get('initial', {})
-            if instance.match_id is None:
-                initial['included'] = False
-                unmatched = instance.amount - instance.matched_amount
-                if unmatched < instance.parent_unmatched:
-                    initial['match_amount'] = unmatched
-                else:
-                    initial['match_amount'] = instance.parent_unmatched
-            else:
-                initial['included'] = True
-                initial['match_amount'] = instance.match_matched_amount
-            kwargs['initial'] = initial
-        super(MatchableChangeListForm, self).__init__(*args, **kwargs)
+#     def __init__(self, *args, **kwargs):
+#         instance = kwargs.get('instance')
+#         if instance:
+#             initial = kwargs.get('initial', {})
+#             if instance.match_id is None:
+#                 initial['included'] = False
+#                 unmatched = instance.amount - instance.matched_amount
+#                 if unmatched < instance.parent_unmatched:
+#                     initial['match_amount'] = unmatched
+#                 else:
+#                     initial['match_amount'] = instance.parent_unmatched
+#             else:
+#                 initial['included'] = True
+#                 initial['match_amount'] = instance.match_matched_amount
+#             kwargs['initial'] = initial
+#         super(MatchableChangeListForm, self).__init__(*args, **kwargs)
 
 
 class MatchableSiteModel(BaseFinantialDocumentSiteModel):
@@ -156,8 +157,8 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
             formset_child_model = self.model
         else:
             formset_child_model = self.match_child_model
-            
-        result =  modelformset_factory(
+
+        result = modelformset_factory(
             formset_child_model, self.get_changelist_form(request), extra=0,
             fields=self.match_list_editable, **defaults
         )
@@ -738,15 +739,19 @@ class AgencyDocumentSiteModel(MatchableSiteModel):
     """
     class for agency documents
     """
-    fields = ('name', 'agency', 'currency','amount', 'matched_amount', 'date', 'status')
-    list_display = ['name', 'agency', 'currency', 'amount', 'matched_amount', 'date', 'status']
+    fields = ('name', 'agency', 'currency', 'amount',
+              'matched_amount', 'date', 'status')
+    list_display = ['name', 'agency', 'currency', 'amount',
+                    'matched_amount', 'date', 'status']
     top_filters = ('currency', 'agency', 'status', 'date')
 
     readonly_fields = ('name', 'matched_amount',)
     form = AgencyDocumentForm
 
     match_model = AgencyDocumentMatch
-    match_fields = ('name', ('agency', 'currency'), ('amount', 'matched_amount'), ('date', 'status'))
+    match_fields = ('name', ('agency', 'currency'),
+                    ('amount', 'matched_amount'),
+                    ('date', 'status'))
     match_related_fields = ['agency', 'currency']
 
 
@@ -768,15 +773,20 @@ class AgencyCreditDocumentSiteModel(AgencyDocumentSiteModel):
     """
     class for agency credit documents
     """
-    fields = ('name', 'agency', 'currency','amount', 'matched_amount', 'date', 'status')
-    list_display = ['name', 'agency', 'currency', 'amount', 'matched_amount', 'date', 'status']
+    fields = ('name', 'agency', 'currency', 'amount',
+              'matched_amount', 'date', 'status')
+    list_display = ['name', 'agency', 'currency', 'amount',
+                    'matched_amount', 'date', 'status']
     top_filters = ('currency', 'agency', 'status', 'date')
 
     readonly_fields = ('name', 'matched_amount',)
     form = AgencyDocumentForm
 
     match_model = AgencyDocumentMatch
-    match_fields = ('name', ('agency', 'currency'), ('amount', 'matched_amount'), ('date', 'status'))
+    match_fields = ('name',
+                    ('agency', 'currency'),
+                    ('amount', 'matched_amount'),
+                    ('date', 'status'))
     match_related_fields = ['agency', 'currency']
 
     match_model_parent_field = 'credit_document'
@@ -785,7 +795,7 @@ class AgencyCreditDocumentSiteModel(AgencyDocumentSiteModel):
     match_child_model_keyfield = 'agencydocument_ptr'
 
     match_list_display = [
-        'name', 'included', 'match_amount'
+        'name', 'content_date', 'content_ref', 'included', 'match_amount'
     ]
 
 
@@ -797,11 +807,12 @@ class AgencyInvoiceSiteModel(AgencyDebitDocumentSiteModel):
     menu_label = MENU_LABEL_FINANCE_ADVANCED
 
     fields = ('name', 'agency', 'document_number', 'currency', 'amount', 'matched_amount', 'date', 'status')
-    list_display = ['name', 'invoice_number', 'agency', 'currency', 'amount', 'matched_amount', 'date', 'status']
+    list_display = ['name', 'invoice_number', 'content_date', 'currency', 'amount', 'matched_amount', 'date', 'status']
     top_filters = ('currency', 'agency', 'status', 'date', 'document_number')
     readonly_fields = ['name', 'matched_amount', 'document_number',]
     list_details_template = 'finance/agencyinvoice_details.html'
     change_details_template = 'finance/agencyinvoice_details.html'
+    ordering = ['content_date']
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
@@ -819,8 +830,10 @@ class AgencyPaymentSiteModel(AgencyCreditDocumentSiteModel):
     model_order = 2015
     menu_label = MENU_LABEL_ACCOUNTING
 
-    fields = ('name', 'agency', 'account','amount', 'matched_amount', 'date', 'status')
-    list_display = ['name', 'agency', 'account', 'amount', 'matched_amount', 'date', 'status']
+    fields = ('name', 'agency', 'account', 'amount',
+              'matched_amount', 'date', 'status')
+    list_display = ['name', 'agency', 'account', 'amount',
+                    'matched_amount', 'date', 'status']
     top_filters = ('account', 'agency', 'status', 'date')
     list_details_template = 'finance/agencypayment_details.html'
     change_details_template = 'finance/agencypayment_details.html'

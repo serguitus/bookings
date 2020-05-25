@@ -12,7 +12,7 @@ from django.http import JsonResponse, HttpResponse
 try:
     from cStringIO import StringIO
 except ImportError:
-    from _io import StringIO
+    from _io import BytesIO as StringIO
 
 from xhtml2pdf import pisa
 
@@ -1041,8 +1041,7 @@ class BookingInvoicePDFView(View):
             'partials': partials,
         }
         html = template.render(context)
-        if PY2:
-            html = html.encode('UTF-8')
+        html = html.encode('UTF-8')
         result = StringIO()
         pdf = pisa.pisaDocument(StringIO(html),
                                 dest=result,
