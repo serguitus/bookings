@@ -1590,8 +1590,9 @@ class ConfigServices(object):
         if detail_amount is None:
             return None
         result = float(detail_amount)
+        diff = 0.0
         if diff_percent is not None:
-            diff = result * float(diff_percent) / 100.0
+            diff += result * float(diff_percent) / 100.0
         if diff_amount is not None:
             diff += float(diff_amount)
         if min_diff is not None:
@@ -1604,100 +1605,128 @@ class ConfigServices(object):
 
 
     @classmethod
-    def next_year_price(
-            cls, manager, agency_service, diff_percent, diff_amount, min_diff, max_diff):
-        details = list(manager.filter(agency_service=agency_service.id))
-        new_agency_service = agency_service
-        new_agency_service.pk = None
-        new_agency_service.id = None
+    def next_year_catalog_service_amounts(
+            cls, catalog_service, diff_percent, diff_amount, min_diff, max_diff):
+
+        catalog_service_pk = catalog_service.pk
+
+        new_catalog_service = catalog_service
+        new_catalog_service.pk = None
+        new_catalog_service.id = None
         one_year = timedelta(years=1)
-        if new_agency_service.date_from:
-            new_agency_service.date_from = new_agency_service.date_from + one_year
-        if new_agency_service.date_to:
-            new_agency_service.date_to = new_agency_service.date_to + one_year
-        new_agency_service.save()
-        for detail in details:
-            new_detail = detail
-            new_detail.pk = None
-            new_detail.id = None
+        if new_catalog_service.date_from:
+            new_catalog_service.date_from = new_catalog_service.date_from + one_year
+        if new_catalog_service.date_to:
+            new_catalog_service.date_to = new_catalog_service.date_to + one_year
+        new_catalog_service.save()
 
-            ad_1_amount = cls.update_detail_amount(
-                ad_1_amount, diff_percent, diff_amount, min_diff, max_diff)
-            ad_2_amount = cls.update_detail_amount(
-                ad_2_amount, diff_percent, diff_amount, min_diff, max_diff)
-            ad_3_amount = cls.update_detail_amount(
-                ad_3_amount, diff_percent, diff_amount, min_diff, max_diff)
-            ad_4_amount = cls.update_detail_amount(
-                ad_4_amount, diff_percent, diff_amount, min_diff, max_diff)
-            ch_1_ad_0_amount = cls.update_detail_amount(
-                ch_1_ad_0_amount, diff_percent, diff_amount, min_diff, max_diff)
-            ch_1_ad_1_amount = cls.update_detail_amount(
-                ch_1_ad_1_amount, diff_percent, diff_amount, min_diff, max_diff)
-            ch_1_ad_2_amount = cls.update_detail_amount(
-                ch_1_ad_2_amount, diff_percent, diff_amount, min_diff, max_diff)
-            ch_1_ad_3_amount = cls.update_detail_amount(
-                ch_1_ad_3_amount, diff_percent, diff_amount, min_diff, max_diff)
-            ch_1_ad_4_amount = cls.update_detail_amount(
-                ch_1_ad_4_amount, diff_percent, diff_amount, min_diff, max_diff)
-            ch_2_ad_0_amount = cls.update_detail_amount(
-                ch_2_ad_0_amount, diff_percent, diff_amount, min_diff, max_diff)
-            ch_2_ad_1_amount = cls.update_detail_amount(
-                ch_2_ad_1_amount, diff_percent, diff_amount, min_diff, max_diff)
-            ch_2_ad_2_amount = cls.update_detail_amount(
-                ch_2_ad_2_amount, diff_percent, diff_amount, min_diff, max_diff)
-            ch_2_ad_3_amount = cls.update_detail_amount(
-                ch_2_ad_3_amount, diff_percent, diff_amount, min_diff, max_diff)
-            ch_2_ad_4_amount = cls.update_detail_amount(
-                ch_2_ad_4_amount, diff_percent, diff_amount, min_diff, max_diff)
-            ch_3_ad_0_amount = cls.update_detail_amount(
-                ch_3_ad_0_amount, diff_percent, diff_amount, min_diff, max_diff)
-            ch_3_ad_1_amount = cls.update_detail_amount(
-                ch_3_ad_1_amount, diff_percent, diff_amount, min_diff, max_diff)
-            ch_3_ad_2_amount = cls.update_detail_amount(
-                ch_3_ad_2_amount, diff_percent, diff_amount, min_diff, max_diff)
-            ch_3_ad_3_amount = cls.update_detail_amount(
-                ch_3_ad_3_amount, diff_percent, diff_amount, min_diff, max_diff)
-            ch_3_ad_4_amount = cls.update_detail_amount(
-                ch_3_ad_4_amount, diff_percent, diff_amount, min_diff, max_diff)
+        catalog_detail_model = None
+        param = None
+        if isinstance(catalog_service, AgencyAllotmentService):
+            catalog_detail_model = AgencyAllotmentDetail
+            param = agency_service
+        if isinstance(catalog_service, AgencyTransferService):
+            catalog_detail_model = AgencyTransferDetail
+            param = agency_service
+        if isinstance(catalog_service, AgencyExtraService):
+            catalog_detail_model = AgencyExtraDetail
+            param = agency_service
+        if isinstance(catalog_service, ProviderAllotmentService):
+            catalog_detail_model = ProviderAllotmentDetail
+            param = provider_service
+        if isinstance(catalog_service, ProviderTransferService):
+            catalog_detail_model = ProviderTransferDetail
+            param = provider_service
+        if isinstance(catalog_service, ProviderExtraService):
+            catalog_detail_model = ProviderExtraDetail
+            param = provider_service
 
-            new_detail.agency_service = new_agency_service
-            new_detail.save()
+        catalog_details = catalog_detail_model.objects.filter(**{param: catalog_service_pk})
+
+        for detail in catalog_details:
+            try:
+                new_detail = detail
+                new_detail.pk = None
+                new_detail.id = None
+
+                ad_1_amount = cls.update_detail_amount(
+                    ad_1_amount, diff_percent, diff_amount, min_diff, max_diff)
+                ad_2_amount = cls.update_detail_amount(
+                    ad_2_amount, diff_percent, diff_amount, min_diff, max_diff)
+                ad_3_amount = cls.update_detail_amount(
+                    ad_3_amount, diff_percent, diff_amount, min_diff, max_diff)
+                ad_4_amount = cls.update_detail_amount(
+                    ad_4_amount, diff_percent, diff_amount, min_diff, max_diff)
+                ch_1_ad_0_amount = cls.update_detail_amount(
+                    ch_1_ad_0_amount, diff_percent, diff_amount, min_diff, max_diff)
+                ch_1_ad_1_amount = cls.update_detail_amount(
+                    ch_1_ad_1_amount, diff_percent, diff_amount, min_diff, max_diff)
+                ch_1_ad_2_amount = cls.update_detail_amount(
+                    ch_1_ad_2_amount, diff_percent, diff_amount, min_diff, max_diff)
+                ch_1_ad_3_amount = cls.update_detail_amount(
+                    ch_1_ad_3_amount, diff_percent, diff_amount, min_diff, max_diff)
+                ch_1_ad_4_amount = cls.update_detail_amount(
+                    ch_1_ad_4_amount, diff_percent, diff_amount, min_diff, max_diff)
+                ch_2_ad_0_amount = cls.update_detail_amount(
+                    ch_2_ad_0_amount, diff_percent, diff_amount, min_diff, max_diff)
+                ch_2_ad_1_amount = cls.update_detail_amount(
+                    ch_2_ad_1_amount, diff_percent, diff_amount, min_diff, max_diff)
+                ch_2_ad_2_amount = cls.update_detail_amount(
+                    ch_2_ad_2_amount, diff_percent, diff_amount, min_diff, max_diff)
+                ch_2_ad_3_amount = cls.update_detail_amount(
+                    ch_2_ad_3_amount, diff_percent, diff_amount, min_diff, max_diff)
+                ch_2_ad_4_amount = cls.update_detail_amount(
+                    ch_2_ad_4_amount, diff_percent, diff_amount, min_diff, max_diff)
+                ch_3_ad_0_amount = cls.update_detail_amount(
+                    ch_3_ad_0_amount, diff_percent, diff_amount, min_diff, max_diff)
+                ch_3_ad_1_amount = cls.update_detail_amount(
+                    ch_3_ad_1_amount, diff_percent, diff_amount, min_diff, max_diff)
+                ch_3_ad_2_amount = cls.update_detail_amount(
+                    ch_3_ad_2_amount, diff_percent, diff_amount, min_diff, max_diff)
+                ch_3_ad_3_amount = cls.update_detail_amount(
+                    ch_3_ad_3_amount, diff_percent, diff_amount, min_diff, max_diff)
+                ch_3_ad_4_amount = cls.update_detail_amount(
+                    ch_3_ad_4_amount, diff_percent, diff_amount, min_diff, max_diff)
+
+                if isinstance(
+                        new_detail,
+                        [AgencyAllotmentDetail, AgencyTransferDetail, AgencyExtraDetail]):
+                    new_detail.agency_service = new_catalog_service
+                else:
+                    new_detail.provider_service = new_catalog_service
+                new_detail.save()
+            except Error as ex:
+                print('EXCEPTION config services - next_year_catalog_service_amounts : ' + ex.__str__())
 
 
     @classmethod
-    def next_year_allotment_prices(cls, agency_service_ids, diff_percent=None, diff_amount=None,
+    def next_year_catalog_amounts(
+            cls, catalog_model, catalog_service_ids, diff_percent=None, diff_amount=None,
             min_diff=None, max_diff=None):
-        for agency_service_id in agency_service_ids:
+
+        for catalog_service_id in catalog_service_ids:
             try:
-                agency_service = AgencyAllotmentService.objects.get(agency_service_id)
-                cls.next_year_price(AgencyAllotmentDetail.objects, agency_service,
-                    diff_percent, diff_amount, min_diff, max_diff)
+                catalog_service = catalog_model.objects.get(catalog_service_id)
+                cls.next_year_catalog_service_amounts(
+                    catalog_service, diff_percent, diff_amount, min_diff, max_diff)
             except Error as ex:
-                print('EXCEPTION config services - next_year_allotment_prices : ' + ex.__str__())
+                print('EXCEPTION config services - next_year_catalog_amounts : ' + ex.__str__())
 
 
     @classmethod
-    def next_year_transfer_prices(cls, agency_service_ids, diff_percent=None, diff_amount=None,
-            min_diff=None, max_diff=None):
-        for agency_service_id in agency_service_ids:
-            try:
-                agency_service = AgencyTransferService.objects.get(agency_service_id)
-                cls.next_year_price(AgencyTransferDetail.objects, agency_service,
-                    diff_percent, diff_amount, min_diff, max_diff)
-            except Error as ex:
-                print('EXCEPTION config services - next_year_transfer_prices : ' + ex.__str__())
-
-
-    @classmethod
-    def next_year_extra_prices(cls, agency_service_ids, diff_percent=None, diff_amount=None,
-            min_diff=None, max_diff=None):
-        for agency_service_id in agency_service_ids:
-            try:
-                agency_service = AgencyExtraService.objects.get(agency_service_id)
-                cls.next_year_price(AgencyExtraDetail.objects, agency_service,
-                    diff_percent, diff_amount, min_diff, max_diff)
-            except Error as ex:
-                print('EXCEPTION config services - next_year_extra_prices : ' + ex.__str__())
+    def list_allotment_details(cls, allotment, agency, date_from, date_to):
+        qs = AgencyAllotmentDetail.objects.all()
+        qs = qs.filter(
+            agency_service__agency=agency,
+            agency_service__service=allotment.id)
+        if date_from:
+            qs = qs.filter(agency_service__date_to__gte=date_from)
+        if date_to:
+            qs = qs.filter(agency_service__date_from__lte=date_to)
+        qs = qs.order_by(
+            'board_type', 'room_type', 'addon', 'pax_range_min', '-pax_range_max',
+            'agency_service__date_from', '-agency_service__date_to')
+        return list(qs)
 
 
     @classmethod
