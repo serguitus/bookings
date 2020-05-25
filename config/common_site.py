@@ -1,22 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.conf.urls import url
-from django.contrib import admin, messages
-from django.contrib.admin.options import csrf_protect_m, IS_POPUP_VAR, TO_FIELD_VAR
-from django.contrib.admin import helpers
-from django.contrib.admin.checks import ModelAdminChecks
+from django.contrib.admin.options import csrf_protect_m
 from django.contrib.admin.utils import unquote, quote
-from django.core import checks
-from django.core.exceptions import FieldDoesNotExist, ValidationError, PermissionDenied
-from django.db import models, router, transaction
-from django import forms
+from django.db import models
 from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, reverse, redirect
-from django.template.response import SimpleTemplateResponse, TemplateResponse
-from django.utils.encoding import force_text
-from django.utils.translation import ugettext as _, ungettext
 
 from common.sites import SiteModel, CommonTabularInline, CommonStackedInline, CommonChangeList
 from common.filters import DateFilter
@@ -70,8 +60,6 @@ from config.views import render_prices_pdf
 
 from finance.top_filters import ProviderTopFilter, AgencyTopFilter
 from finance.models import Agency
-
-from functools import update_wrapper, partial
 
 from reservas.admin import bookings_site
 
@@ -133,18 +121,19 @@ def response_post_provider_service(request, obj, url):
 class IncorrectLookupParameters(Exception):
     pass
 
+
 class LocationPlaceInline(CommonStackedInline):
     model = Place
     extra = 0
-    ordering = ['name',]
+    ordering = ['name']
 
 
 class LocationTransferIntervalInline(CommonStackedInline):
     model = TransferInterval
     fk_name = 'location'
     extra = 0
-    fields = [('t_location_from', 'interval'),]
-    ordering = ['t_location_from__name',]
+    fields = [('t_location_from', 'interval')]
+    ordering = ['t_location_from__name']
 
     form = LocationTransferIntervalInlineForm
 
@@ -153,8 +142,8 @@ class LocationScheduleInline(CommonStackedInline):
     model = Schedule
     fk_name = 'location'
     extra = 0
-    fields = [('is_arrival', 'number', 'time'),]
-    ordering = ['is_arrival', 'number',]
+    fields = [('is_arrival', 'number', 'time')]
+    ordering = ['is_arrival', 'number']
 
 
 class LocationSiteModel(SiteModel):
@@ -236,58 +225,76 @@ class BaseServiceBookDetailSiteModel(SiteModel):
     def response_post_delete(self, request, obj):
         if hasattr(obj, 'service') and obj.service:
             if obj.service.category == 'A':
-                return redirect(reverse('common:config_allotment_change', args=[obj.service.pk]))
+                return redirect(reverse('common:config_allotment_change',
+                                        args=[obj.service.pk]))
             elif obj.service.category == 'T':
-                return redirect(reverse('common:config_transfer_change', args=[obj.service.pk]))
+                return redirect(reverse('common:config_transfer_change',
+                                        args=[obj.service.pk]))
             elif obj.service.category == 'E':
-                return redirect(reverse('common:config_extra_change', args=[obj.service.pk]))
+                return redirect(reverse('common:config_extra_change',
+                                        args=[obj.service.pk]))
         service = request.POST.get('service')
         if service:
             service = Service.objects.get(id=service)
             if service.category == 'A':
-                return redirect(reverse('common:config_allotment_change', args=[service.pk]))
+                return redirect(reverse('common:config_allotment_change',
+                                        args=[service.pk]))
             elif service.category == 'T':
-                return redirect(reverse('common:config_transfer_change', args=[service.pk]))
+                return redirect(reverse('common:config_transfer_change',
+                                        args=[service.pk]))
             elif service.category == 'E':
-                return redirect(reverse('common:config_extra_change', args=[service.pk]))
+                return redirect(reverse('common:config_extra_change',
+                                        args=[service.pk]))
         return super(BaseServiceBookDetailSiteModel, self).response_post_delete(request, obj)
 
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'service') and obj.service:
             if obj.service.category == 'A':
-                return redirect(reverse('common:config_allotment_change', args=[obj.service.pk]))
+                return redirect(reverse('common:config_allotment_change',
+                                        args=[obj.service.pk]))
             elif obj.service.category == 'T':
-                return redirect(reverse('common:config_transfer_change', args=[obj.service.pk]))
+                return redirect(reverse('common:config_transfer_change',
+                                        args=[obj.service.pk]))
             elif obj.service.category == 'E':
-                return redirect(reverse('common:config_extra_change', args=[obj.service.pk]))
+                return redirect(reverse('common:config_extra_change',
+                                        args=[obj.service.pk]))
         service = request.POST.get('service')
         if service:
             service = Service.objects.get(id=service)
             if service.category == 'A':
-                return redirect(reverse('common:config_allotment_change', args=[service.pk]))
+                return redirect(reverse('common:config_allotment_change',
+                                        args=[service.pk]))
             elif service.category == 'T':
-                return redirect(reverse('common:config_transfer_change', args=[service.pk]))
+                return redirect(reverse('common:config_transfer_change',
+                                        args=[service.pk]))
             elif service.category == 'E':
-                return redirect(reverse('common:config_extra_change', args=[service.pk]))
+                return redirect(reverse('common:config_extra_change',
+                                        args=[service.pk]))
         return super(BaseServiceBookDetailSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
         if hasattr(obj, 'service') and obj.service:
             if obj.service.category == 'A':
-                return redirect(reverse('common:config_allotment_change', args=[obj.service.pk]))
+                return redirect(reverse('common:config_allotment_change',
+                                        args=[obj.service.pk]))
             elif obj.service.category == 'T':
-                return redirect(reverse('common:config_transfer_change', args=[obj.service.pk]))
+                return redirect(reverse('common:config_transfer_change',
+                                        args=[obj.service.pk]))
             elif obj.service.category == 'E':
-                return redirect(reverse('common:config_extra_change', args=[obj.service.pk]))
+                return redirect(reverse('common:config_extra_change',
+                                        args=[obj.service.pk]))
         service = request.POST.get('service')
         if service:
             service = Service.objects.get(id=service)
             if service.category == 'A':
-                return redirect(reverse('common:config_allotment_change', args=[service.pk]))
+                return redirect(reverse('common:config_allotment_change',
+                                        args=[service.pk]))
             elif service.category == 'T':
-                return redirect(reverse('common:config_transfer_change', args=[service.pk]))
+                return redirect(reverse('common:config_transfer_change',
+                                        args=[service.pk]))
             elif service.category == 'E':
-                return redirect(reverse('common:config_extra_change', args=[service.pk]))
+                return redirect(reverse('common:config_extra_change',
+                                        args=[service.pk]))
         return super(BaseServiceBookDetailSiteModel, self).response_post_save_change(request, obj)
 
 

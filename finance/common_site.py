@@ -608,8 +608,10 @@ class ProviderDocumentSiteModel(MatchableSiteModel):
     """
     class for provider documents
     """
-    fields = ('name', 'provider', 'currency','amount', 'matched_amount', 'date', 'status')
-    list_display = ['name', 'provider', 'currency', 'amount', 'matched_amount', 'date', 'status']
+    fields = ('name', 'provider', 'currency', 'amount',
+              'matched_amount', 'date', 'status')
+    list_display = ['name', 'provider', 'currency', 'amount',
+                    'matched_amount', 'date', 'status']
     top_filters = ('currency', 'provider', 'status', 'date')
 
     readonly_fields = ('name', 'matched_amount',)
