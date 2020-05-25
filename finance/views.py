@@ -162,4 +162,4 @@ class MatchList(CommonChangeList):
             Q(match_id__isnull=False) | Q(amount__gt=F('matched_amount'))
         )
         # Set ordering.
-        return qs.order_by('date')
+        return qs.order_by('content_date')

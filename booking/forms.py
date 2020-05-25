@@ -132,6 +132,7 @@ class PackageExtraInlineForm(forms.ModelForm, ServiceForm):
                 ),
         }
 
+
 class PackageAllotmentForm(forms.ModelForm, ServiceForm):
     class Meta:
         model = PackageAllotment

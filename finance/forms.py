@@ -51,12 +51,14 @@ class LoanAccountDocumentForm(AccountingForm):
             'loan_account': autocomplete.ModelSelect2(url='loanaccount-autocomplete'),
         }
 
+
 class ProviderDocumentForm(forms.ModelForm):
     class Meta:
         fields = ('__all__')
         widgets = {
             'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
         }
+
 
 class AgencyDocumentForm(forms.ModelForm):
     class Meta:
@@ -72,3 +74,23 @@ class OfficeForm(forms.ModelForm):
         widgets = {
             'bank_details': CKEditorWidget(attrs={'class': 'form-control'})
         }
+
+
+class MatchableChangeListForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        instance = kwargs.get('instance')
+        if instance:
+            initial = kwargs.get('initial', {})
+            if instance.match_id is None:
+                initial['included'] = False
+                unmatched = instance.amount - instance.matched_amount
+                if unmatched < instance.parent_unmatched:
+                    initial['match_amount'] = unmatched
+                else:
+                    initial['match_amount'] = instance.parent_unmatched
+            else:
+                initial['included'] = True
+                initial['match_amount'] = instance.match_matched_amount
+            kwargs['initial'] = initial
+        super(MatchableChangeListForm, self).__init__(*args, **kwargs)
