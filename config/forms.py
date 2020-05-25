@@ -501,3 +501,10 @@ class SearchServiceForm(forms.Form):
         ),
         label='Service',
     )
+
+
+class ExtendCatalogForm(forms.Form):
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+    max_util = forms.IntegerField()
+    min_util = forms.IntegerField()
+    increase_percent = forms.IntegerField()

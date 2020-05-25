@@ -16,18 +16,24 @@ from config.constants import (
     SERVICE_CATEGORY_PACKAGE)
 
 from config.forms import (
-    ProviderAllotmentServiceForm, ProviderAllotmentDetailForm, ProviderAllotmentDetailInlineForm,
-    ProviderTransferServiceForm, ProviderTransferDetailForm, ProviderTransferDetailInlineForm,
-    ProviderExtraServiceForm, ProviderExtraDetailForm, ProviderExtraDetailInlineForm,
-    AgencyAllotmentServiceForm, AgencyAllotmentDetailForm, AgencyAllotmentDetailInlineForm,
-    AgencyTransferServiceForm, AgencyTransferDetailForm, AgencyTransferDetailInlineForm,
-    AgencyExtraServiceForm, AgencyExtraDetailForm, AgencyExtraDetailInlineForm,
+    ProviderAllotmentServiceForm, ProviderAllotmentDetailForm,
+    ProviderAllotmentDetailInlineForm,
+    ProviderTransferServiceForm, ProviderTransferDetailForm,
+    ProviderTransferDetailInlineForm,
+    ProviderExtraServiceForm, ProviderExtraDetailForm,
+    ProviderExtraDetailInlineForm,
+    AgencyAllotmentServiceForm, AgencyAllotmentDetailForm,
+    AgencyAllotmentDetailInlineForm,
+    AgencyTransferServiceForm, AgencyTransferDetailForm,
+    AgencyTransferDetailInlineForm,
+    AgencyExtraServiceForm, AgencyExtraDetailForm,
+    AgencyExtraDetailInlineForm,
     AllotmentRoomTypeInlineForm, ExtraComponentInlineForm, TransferZoneForm,
-    LocationTransferIntervalInlineForm, ServiceAddonInlineForm, TransferPickupTimeInlineForm,
-    PricesExportForm, ExtraForm,
+    LocationTransferIntervalInlineForm, ServiceAddonInlineForm,
+    TransferPickupTimeInlineForm, PricesExportForm, ExtraForm,
     ServiceForm, ServiceBookDetailForm,
-    ServiceBookDetailAllotmentForm, ServiceBookDetailTransferForm, ServiceBookDetailExtraForm, 
-    SearchServiceForm,
+    ServiceBookDetailAllotmentForm, ServiceBookDetailTransferForm,
+    ServiceBookDetailExtraForm, SearchServiceForm, ExtendCatalogForm
 )
 from config.models import (
     ServiceCategory, Location, Place, TransferInterval, Schedule,
@@ -532,15 +538,19 @@ class ExtraComponentInline(CommonTabularInline):
     fk_name = 'extra'
     form = ExtraComponentInlineForm
 
+
 class ExtraSiteModel(BaseServiceSiteModel):
     model_order = 6130
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Configuration Services'
     fields = ('name', 'service_category', 'location',
-            ('cost_type', 'parameter_type'), 'max_capacity',
-              'pax_range', ('child_discount_percent', 'child_age', 'infant_age'), ('car_rental', 'enabled'),)
+              ('cost_type', 'parameter_type'), 'max_capacity',
+              'pax_range',
+              ('child_discount_percent', 'child_age', 'infant_age'),
+              ('car_rental', 'enabled'),)
     list_display = ('name', 'service_category', 'location', 'cost_type',
-                    'parameter_type', 'max_capacity', 'enabled', 'pax_range', 'has_pax_range',
+                    'parameter_type', 'max_capacity', 'enabled',
+                    'pax_range', 'has_pax_range',
                     'infant_age', 'child_age')
     top_filters = (('service_category', ServiceCategoryTopFilter), 'name',)
     ordering = ['enabled', 'name']
@@ -639,7 +649,9 @@ class ProviderAllotmentServiceSiteModel(CatalogService):
     change_form_template = 'config/catalog_service_change_form.html'
     save_as = True
 
-    actions = ['rewrite_agency_amounts', 'update_agency_amounts']
+    actions = ['rewrite_agency_amounts',
+               'update_agency_amounts',
+               'extend_catalog_prices']
 
     def rewrite_agency_amounts(self, request, queryset):
         ConfigServices.generate_agency_allotments_amounts_from_providers_allotments(
@@ -650,6 +662,41 @@ class ProviderAllotmentServiceSiteModel(CatalogService):
         ConfigServices.generate_agency_allotments_amounts_from_providers_allotments(
             list(queryset.all()), True)
     update_agency_amounts.short_description = "Generate New Agency Prices"
+
+    def extend_catalog_prices(self, request, queryset):
+        form = None
+        if 'apply' in request.POST:
+            form = ExtendCatalogForm(request.POST)
+            if form.is_valid():
+                max_util = form.cleaned_data['max_util']
+                min_util = form.cleaned_data['min_util']
+                increase_percent = form.cleaned_data['increase_percent']
+                # these 2 bellow are thought to keep track of how many
+                # services/details were created
+                created_services = 0
+                created_details = 0
+                # Here comes the method that actually creates the new objects
+                # Attention, it should check it is not creating already existent
+                # dates/details
+                # created_services, created_details = build_new_prices(
+                #     max_util,
+                #     min_util,
+                #     increase_percent,
+                #     queryset)
+                self.message_user(request,
+                                  "A total of {} Provider Services and {} details were created".format(created_services, created_details))
+                return HttpResponseRedirect(request.get_full_path())
+        if not form:
+            form = ExtendCatalogForm(initial={
+                '_selected_action': queryset.values_list('pk', flat=True)})
+        context = {
+            'form': form,
+            'items': queryset,
+            'title': 'Generate Provider costs for following year'}
+        context.update(self.get_model_extra_context(request))
+        return render(request, 'config/catalog_extend_dates.html', context)
+
+    extend_catalog_prices.short_description = 'Extend selected Costs 1 year'
 
     def get_details_model(self):
         return ProviderAllotmentDetail
