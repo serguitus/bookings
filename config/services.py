@@ -1728,7 +1728,7 @@ class ConfigServices(object):
                     catalog_service, diff_percent, diff_amount, min_diff, max_diff)
                 details_success_count += tmp_success_count
                 details_error_count += tmp_error_count
-                details_error_messages.append(tmp_error_messages)
+                details_error_messages.extend(tmp_error_messages)
                 services_success_count += 1
             except Error as ex:
                 services_error_count += 1
