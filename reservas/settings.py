@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'dal_select2',
     'django_tables2',
     'totalsum',
+    'crispy_forms',
     # 'django_pdb',
 
     'django.contrib.admin',
@@ -149,3 +150,5 @@ CKEDITOR_CONFIGS = {
         'width': '100%',
     },
 }
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'

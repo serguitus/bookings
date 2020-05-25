@@ -505,6 +505,19 @@ class SearchServiceForm(forms.Form):
 
 class ExtendCatalogForm(forms.Form):
     _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
-    max_util = forms.IntegerField()
-    min_util = forms.IntegerField()
-    increase_percent = forms.IntegerField()
+    max_util = forms.IntegerField(required=False,
+                                  label='',
+                                  help_text='Optionally specify maximum increment',
+                                  widget=forms.NumberInput(attrs={'placeholder': 'Max. Increment'}))
+    min_util = forms.IntegerField(required=False,
+                                  label='',
+                                  help_text='Optionally specify minimum increment',
+                                  widget=forms.NumberInput(attrs={'placeholder': 'Min. Increment'}))
+    increase_percent = forms.IntegerField(required=False,
+                                          label='',
+                                          help_text='Specify a percent value to alter generated values',
+                                          widget=forms.NumberInput(attrs={'placeholder': 'Increment (%)'}))
+    increase_value = forms.IntegerField(required=False,
+                                        label='',
+                                        help_text='Specify an absolute value to alter generated numbers',
+                                        widget=forms.NumberInput(attrs={'placeholder': 'Increment (Abs.)'}))

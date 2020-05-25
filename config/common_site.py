@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from django.contrib import messages
 from django.contrib.admin.options import csrf_protect_m
 from django.contrib.admin.utils import unquote, quote
 from django.db import models
@@ -671,6 +672,13 @@ class ProviderAllotmentServiceSiteModel(CatalogService):
                 max_util = form.cleaned_data['max_util']
                 min_util = form.cleaned_data['min_util']
                 increase_percent = form.cleaned_data['increase_percent']
+                increase_value = form.cleaned_data['increase_value']
+                if not increase_percent and not increase_value:
+                    # either increment should be specified!
+                    messages.error(request,
+                                   'Either Percent or Absolute increment'
+                                   ' must be specified')
+                    return HttpResponseRedirect(request.get_full_path())
                 # these 2 bellow are thought to keep track of how many
                 # services/details were created
                 created_services = 0
