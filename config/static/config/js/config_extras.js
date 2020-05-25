@@ -20,10 +20,10 @@ $(document).ready(function(){
       // if a 3rd pax discount is provided, TPL = DBL * TPL-discount %
       tpl_val.val((3*Number(dbl_val.val()) - Number(dbl_val.val())*Number(tpl_dsc.val())/100)/3);
     }
-    if(qpl_dsc.val()){
-      // if a 4rd pax discount is provided, QPL = DBL * QPL-discount %
-      qpl_val.val((4*Number(dbl_val.val()) - Number(dbl_val.val())*Number(qpl_dsc.val())/100)/4);
-    }
+    // if(qpl_dsc.val()){
+    //   // if a 4rd pax discount is provided, QPL = DBL * QPL-discount %
+    //   qpl_val.val((4*Number(dbl_val.val()) - Number(dbl_val.val())*Number(qpl_dsc.val())/100)/4);
+    // }
 
   })
 
