@@ -58,17 +58,17 @@ OK - services con details de varios services book data.
 
 OH - Ver si es puede hacer mas eficiente la carga de los inlines de los agencyDetails y ProviderDetails
 
+OK - metodos en servicios de configuracion para generar nuevos precios de catálogo a partir un otros precios ya definidos incrementando las fechas en un año
+
+- acciones y vista para utilizar Herramienta para generar nuevos precios de catálogo a partir un otros precios ya definidos incrementando las fechas en un año
+
 - emplear urls de retorno donde sea factible.
 
 - incorporar un nuevo tipo a las facturas que muestre, por servicios, el precio por pax para los diferentes tipos de hab. (ver como ejemplo la factura hecha a mano para el booking 20640 de produccion)
 
-- services extras con componentes de varios services extras.
-
 - pensar en una solucion para el problema de las ofertas que envian los hoteles y que incorporan el concepto de "booking window" además del de "travel window". me lo imagino como un campo mas en el change_form de un bookingAllotment donde se muestren códigos de ofertas y que el precio se calcule entonces en funcion de estas.
 
 - Si se alteran los números de habitación del rooming de un bookingService, y el servicio está ‘requested’, ‘confirmed’ o ‘coordinated’, tiene que pasar a ‘Pending’
-
-- Herramienta para generar nuevos precios de catálogo a partir un otros precios ya definidos incrementando las fechas en cierto lapso de tiempo
 
 - Dashboard con problemas de sincronizacion de informacion
 
