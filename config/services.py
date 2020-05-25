@@ -1596,11 +1596,11 @@ class ConfigServices(object):
         if diff_amount is not None:
             diff += float(diff_amount)
         if min_diff is not None:
-            if diff < min_diff:
-                diff = min_diff
+            if abs(diff) < abs(min_diff):
+                diff = float(decimal.Decimal(min_diff).copy_sign(diff))
         if max_diff is not None:
-            if diff > max_diff:
-                diff = max_diff
+            if abs(diff) > abs(max_diff):
+                diff = float(decimal.Decimal(max_diff).copy_sign(diff))
         return round(0.499999 + result + diff)
 
 
@@ -1642,6 +1642,10 @@ class ConfigServices(object):
             param = provider_service
 
         catalog_details = catalog_detail_model.objects.filter(**{param: catalog_service_pk})
+
+        details_success_count = 0
+        details_error_count = 0
+        details_error_messages = []
 
         for detail in catalog_details:
             try:
@@ -1695,8 +1699,15 @@ class ConfigServices(object):
                 else:
                     new_detail.provider_service = new_catalog_service
                 new_detail.save()
+
+                details_success_count += 1
             except Error as ex:
+                details_error_count += 1
+                details_error_messages.append(
+                    'Error for detail : %s - %s' % (detail, ex.__str__()))
                 print('EXCEPTION config services - next_year_catalog_service_amounts : ' + ex.__str__())
+        
+        return details_success_count, details_error_count, details_error_messages
 
 
     @classmethod
@@ -1704,14 +1715,31 @@ class ConfigServices(object):
             cls, catalog_model, catalog_service_ids, diff_percent=None, diff_amount=None,
             min_diff=None, max_diff=None):
 
+        services_success_count = 0
+        services_error_count = 0
+        services_error_messages = []
+        details_success_count = 0
+        details_error_count = 0
+        details_error_messages = []
         for catalog_service_id in catalog_service_ids:
             try:
                 catalog_service = catalog_model.objects.get(catalog_service_id)
-                cls.next_year_catalog_service_amounts(
+                tmp_success_count, tmp_error_count, tmp_error_messages = cls.next_year_catalog_service_amounts(
                     catalog_service, diff_percent, diff_amount, min_diff, max_diff)
+                details_success_count += tmp_success_count
+                details_error_count += tmp_error_count
+                details_error_messages.append(tmp_error_messages)
+                services_success_count += 1
             except Error as ex:
+                services_error_count += 1
+                services_error_messages.append(
+                    'Error for id : %s - %s' % (catalog_service_id, ex.__str__()))
                 print('EXCEPTION config services - next_year_catalog_amounts : ' + ex.__str__())
-
+        return {
+            'services_success_count': services_success_count,
+            'services_error_count': services_error_count,
+            'services_error_messages': services_error_messages,
+        }
 
     @classmethod
     def list_allotment_details(cls, allotment, agency, date_from, date_to):
