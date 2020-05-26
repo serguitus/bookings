@@ -26,7 +26,10 @@ from config.models import (
     AgencyExtraService, AgencyExtraDetail,
     Schedule, TransferInterval, TransferPickupTime,
 )
+
 from finance.models import Agency
+
+import math
 
 from reservas.custom_settings import ADDON_FOR_NO_ADDON
 
@@ -1596,10 +1599,10 @@ class ConfigServices(object):
             diff += float(diff_amount)
         if min_diff is not None:
             if abs(diff) < abs(min_diff):
-                diff = float(decimal.Decimal(min_diff).copy_sign(diff))
+                diff = math.copysign(min_diff, diff)
         if max_diff is not None:
             if abs(diff) > abs(max_diff):
-                diff = float(decimal.Decimal(max_diff).copy_sign(diff))
+                diff = math.copysign(max_diff, diff)
         return round(0.499999 + result + diff)
 
     @classmethod
