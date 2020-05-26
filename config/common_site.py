@@ -604,8 +604,57 @@ class CatalogService(SiteModel):
                         else:
                             continue
                         obj.save()
-                    except Exception as ex:
+                    except Exception:
                         continue
+
+    # A base action to use in all children
+    def extend_catalog_prices(self, request, queryset):
+        form = None
+        if 'apply' in request.POST:
+            form = ExtendCatalogForm(request.POST)
+            if form.is_valid():
+                max_util = form.cleaned_data['max_util']
+                min_util = form.cleaned_data['min_util']
+                increase_percent = form.cleaned_data['increase_percent']
+                increase_value = form.cleaned_data['increase_value']
+                if not increase_percent and not increase_value:
+                    # either increment should be specified!
+                    messages.error(request,
+                                   'Either Percent or Absolute increment'
+                                   ' must be specified')
+                    return HttpResponseRedirect(request.get_full_path())
+
+                results = ConfigServices.next_year_catalog_amounts(
+                    catalog_model=self.model,
+                    catalog_service_ids=queryset.values_list('pk', flat=True),
+                    diff_percent=increase_percent,
+                    diff_amount=increase_value,
+                    min_diff=min_util,
+                    max_diff=max_util)
+                for message in results['services_error_messages']:
+                    messages.error(request, message)
+                for message in results['details_error_messages']:
+                    messages.error(request, message)
+                if results['services_error_count']:
+                    messages.error(request,
+                    '{} services had problems while processing'.format(results['services_error_count']))
+                if results['details_error_count']:
+                    messages.error(request,
+                    '{} Details had problems while processing'.format(results['details_error_count']))
+                if results['services_success_count']:
+                    self.message_user(request,
+                                  "A total of {} Services and {} Details were successfully generated".format(results['services_success_count'],
+                                                                                                            results['details_success_count']))
+                return HttpResponseRedirect(request.get_full_path())
+        if not form:
+            form = ExtendCatalogForm(initial={
+                '_selected_action': queryset.values_list('pk', flat=True)})
+        context = {
+            'form': form,
+            'items': queryset,
+            'title': 'Generate Provider costs for following year'}
+        context.update(self.get_model_extra_context(request))
+        return render(request, 'config/catalog_extend_dates.html', context)
 
 
 class ProviderAllotmentDetailInline(CommonTabularInline):
@@ -665,47 +714,7 @@ class ProviderAllotmentServiceSiteModel(CatalogService):
     update_agency_amounts.short_description = "Generate New Agency Prices"
 
     def extend_catalog_prices(self, request, queryset):
-        form = None
-        if 'apply' in request.POST:
-            form = ExtendCatalogForm(request.POST)
-            if form.is_valid():
-                max_util = form.cleaned_data['max_util']
-                min_util = form.cleaned_data['min_util']
-                increase_percent = form.cleaned_data['increase_percent']
-                increase_value = form.cleaned_data['increase_value']
-                if not increase_percent and not increase_value:
-                    # either increment should be specified!
-                    messages.error(request,
-                                   'Either Percent or Absolute increment'
-                                   ' must be specified')
-                    return HttpResponseRedirect(request.get_full_path())
-
-                results = ConfigServices.next_year_catalog_amounts(
-                    catalog_model=ProviderAllotmentService,
-                    catalog_service_ids=queryset.values_list('pk', flat=True),
-                    diff_percent=increase_percent,
-                    diff_amount=increase_value,
-                    min_diff=min_util,
-                    max_diff=max_util)
-                for message in results['services_error_messages']:
-                    messages.error(request, message)
-                if results['services_error_count']:
-                    messages.error(request,
-                    '{} ids had problems while processing'.format(results['services_error_count']))
-                if results['services_success_count']:
-                    self.message_user(request,
-                                  "A total of {} Provider Services were successfully generated".format(results['services_success_count']))
-                return HttpResponseRedirect(request.get_full_path())
-        if not form:
-            form = ExtendCatalogForm(initial={
-                '_selected_action': queryset.values_list('pk', flat=True)})
-        context = {
-            'form': form,
-            'items': queryset,
-            'title': 'Generate Provider costs for following year'}
-        context.update(self.get_model_extra_context(request))
-        return render(request, 'config/catalog_extend_dates.html', context)
-
+        return super(ProviderAllotmentServiceSiteModel, self).extend_catalog_prices(request, queryset)
     extend_catalog_prices.short_description = 'Extend selected Costs 1 year'
 
     def get_details_model(self):
@@ -807,7 +816,9 @@ class ProviderTransferServiceSiteModel(CatalogService):
     change_form_template = 'config/catalog_service_change_form.html'
     save_as = True
 
-    actions = ['rewrite_agency_amounts', 'update_agency_amounts']
+    actions = ['rewrite_agency_amounts',
+                'update_agency_amounts',
+                'extend_catalog_prices']
 
     def rewrite_agency_amounts(self, request, queryset):
         ConfigServices.generate_agency_transfers_amounts_from_providers_transfers(
@@ -818,6 +829,10 @@ class ProviderTransferServiceSiteModel(CatalogService):
         ConfigServices.generate_agency_transfers_amounts_from_providers_transfers(
             list(queryset.all()), True)
     update_agency_amounts.short_description = "Generate New Agency Prices"
+
+    def extend_catalog_prices(self, request, queryset):
+        return super(ProviderTransferServiceSiteModel, self).extend_catalog_prices(request, queryset)
+    extend_catalog_prices.short_description = 'Extend selected Costs 1 year'
 
     def get_details_model(self):
         return ProviderTransferDetail
@@ -910,7 +925,9 @@ class ProviderExtraServiceSiteModel(CatalogService):
     change_form_template = 'config/catalog_service_change_form.html'
     save_as = True
 
-    actions = ['rewrite_agency_amounts', 'update_agency_amounts']
+    actions = ['rewrite_agency_amounts',
+                'update_agency_amounts',
+                'extend_catalog_prices']
 
     def rewrite_agency_amounts(self, request, queryset):
         ConfigServices.generate_agency_extras_amounts_from_providers_extras(
@@ -921,6 +938,10 @@ class ProviderExtraServiceSiteModel(CatalogService):
         ConfigServices.generate_agency_extras_amounts_from_providers_extras(
             list(queryset.all()), True)
     update_agency_amounts.short_description = "Generate New Agency Prices"
+
+    def extend_catalog_prices(self, request, queryset):
+        return super(ProviderExtraServiceSiteModel, self).extend_catalog_prices(request, queryset)
+    extend_catalog_prices.short_description = 'Extend selected Costs 1 year'
 
     def get_details_model(self):
         return ProviderExtraDetail

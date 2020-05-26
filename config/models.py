@@ -413,6 +413,10 @@ class ProviderExtraDetail(AmountDetail):
     pax_range_min = models.SmallIntegerField(default=0)
     pax_range_max = models.SmallIntegerField(default=0)
 
+    def __str__(self):
+        return 'Cost for {} ({})'.format(self.provider_service,
+                                            self.addon)
+
 
 class AgencyExtraService(AgencyCatalogue):
     """
@@ -425,7 +429,10 @@ class AgencyExtraService(AgencyCatalogue):
     service = models.ForeignKey(Extra)
 
     def __str__(self):
-        return 'Ag.Extra - %s : %s' % (self.agency, self.service)
+        return '{} for {} ({} to {})'.format(self.service,
+                                            self.agency,
+                                            self.date_from,
+                                            self.date_to)
 
     def get_detail_objects(self):
         return self.agencyextradetail_set.all()
@@ -446,6 +453,10 @@ class AgencyExtraDetail(AmountDetail):
     addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
     pax_range_min = models.SmallIntegerField(default=0)
     pax_range_max = models.SmallIntegerField(default=0)
+
+    def __str__(self):
+        return 'Price for {} ({})'.format(self.agency_service,
+                                                self.addon)
 
 
 #===============================================================================
@@ -551,6 +562,10 @@ class ProviderAllotmentDetail(AmountDetail):
     single_supplement = models.IntegerField(blank=True, null=True, verbose_name='SGL Suppl.')
     third_pax_discount = models.IntegerField(blank=True, null=True, verbose_name='TPL Dscnt %')
 
+    def __str__(self):
+        return 'Cost for {} ({})'.format(self.provider_service,
+                                            self.room_type)
+
 
 class AgencyAllotmentService(AgencyCatalogue):
     """
@@ -563,7 +578,12 @@ class AgencyAllotmentService(AgencyCatalogue):
     service = models.ForeignKey(Allotment)
 
     def __str__(self):
-        return 'Ag.Accom. - %s : %s' % (self.agency, self.service)
+        return '{} for {} ({} to {})'.format(self.service,
+                                            self.agency,
+                                            self.date_from,
+                                            self.date_to)
+
+
 
     def get_detail_objects(self):
         return self.agencyallotmentdetail_set.all()
@@ -585,6 +605,10 @@ class AgencyAllotmentDetail(AmountDetail):
     addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
     pax_range_min = models.SmallIntegerField(default=0)
     pax_range_max = models.SmallIntegerField(default=0)
+
+    def __str__(self):
+        return 'Price for {} ({})'.format(self.agency_service,
+                                        self.room_type)
 
 
 class AllotmentRoomAvailability(models.Model):
@@ -708,6 +732,10 @@ class ProviderTransferDetail(AmountDetail, RouteData):
     pax_range_min = models.SmallIntegerField(default=0)
     pax_range_max = models.SmallIntegerField(default=0)
 
+    def __str__(self):
+        return 'Cost for {} ({})'.format(self.provider_service,
+                                        self.addon)
+
     @property
     def cost_type(self):
         if self.provider_service:
@@ -726,7 +754,10 @@ class AgencyTransferService(AgencyCatalogue):
     service = models.ForeignKey(Transfer)
 
     def __str__(self):
-        return 'Ag.Transfer - %s : %s' % (self.agency, self.service)
+        return '{} for {} ({} to {})'.format(self.service,
+                                            self.agency,
+                                            self.date_from,
+                                            self.date_to)
 
     def get_detail_objects(self):
         return self.agencytransferdetail_set.all()
@@ -746,6 +777,10 @@ class AgencyTransferDetail(AmountDetail, RouteData):
     addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
     pax_range_min = models.SmallIntegerField(default=0)
     pax_range_max = models.SmallIntegerField(default=0)
+
+    def __str__(self):
+        return 'Price for {} ({})'.format(self.agency_service,
+                                        self.addon)
 
 
 # ===============================================================================

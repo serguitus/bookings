@@ -1607,7 +1607,7 @@ class ConfigServices(object):
             cls, catalog_service, diff_percent,
             diff_amount, min_diff, max_diff):
 
-        catalog_service_pk = catalog_service.pk
+        # catalog_service_pk = catalog_service.pk
 
         catalog_details = catalog_service.get_detail_objects()
         new_catalog_service = catalog_service
@@ -1619,29 +1619,6 @@ class ConfigServices(object):
         if new_catalog_service.date_to:
             new_catalog_service.date_to = new_catalog_service.date_to + one_year
         new_catalog_service.save()
-
-        # catalog_detail_model = None
-        # param = None
-        # if isinstance(catalog_service, AgencyAllotmentService):
-        #     catalog_detail_model = AgencyAllotmentDetail
-        #     param = 'agency_service'
-        # if isinstance(catalog_service, AgencyTransferService):
-        #     catalog_detail_model = AgencyTransferDetail
-        #     param = 'agency_service'
-        # if isinstance(catalog_service, AgencyExtraService):
-        #     catalog_detail_model = AgencyExtraDetail
-        #     param = 'agency_service'
-        # if isinstance(catalog_service, ProviderAllotmentService):
-        #     catalog_detail_model = ProviderAllotmentDetail
-        #     param = 'provider_service'
-        # if isinstance(catalog_service, ProviderTransferService):
-        #     catalog_detail_model = ProviderTransferDetail
-        #     param = 'provider_service'
-        # if isinstance(catalog_service, ProviderExtraService):
-        #     catalog_detail_model = ProviderExtraDetail
-        #     param = 'provider_service'
-
-        # catalog_details = catalog_detail_model.objects.filter(**{param: catalog_service_pk})
 
         details_success_count = 0
         details_error_count = 0
@@ -1705,7 +1682,7 @@ class ConfigServices(object):
                 details_error_count += 1
                 details_error_messages.append(
                     'Error for detail : %s - %s' % (detail, ex.__str__()))
-                print('EXCEPTION config services - next_year_catalog_service_amounts : ' + ex.__str__())
+                # print('EXCEPTION config services - next_year_catalog_service_amounts : ' + ex.__str__())
         return details_success_count, details_error_count, details_error_messages
 
     @classmethod
@@ -1736,6 +1713,9 @@ class ConfigServices(object):
             'services_success_count': services_success_count,
             'services_error_count': services_error_count,
             'services_error_messages': services_error_messages,
+            'details_success_count': details_success_count,
+            'details_error_count': details_error_count,
+            'details_error_messages': details_error_messages
         }
 
     @classmethod
