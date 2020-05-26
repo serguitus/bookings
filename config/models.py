@@ -388,7 +388,10 @@ class ProviderExtraService(ProviderCatalogue):
     service = models.ForeignKey(Extra)
 
     def __str__(self):
-        return 'Prov.Extra - %s : %s' % (self.provider, self.service)
+        return '{} by {} ({} to {})'.format(self.service,
+                                            self.provider,
+                                            self.date_from,
+                                            self.date_to)
 
     def get_detail_objects(self):
         return self.providerextradetail_set.all()
@@ -497,7 +500,7 @@ class AllotmentBoardType(models.Model):
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
 
     def __str__(self):
-        return self.get_board_type_display()
+        return 'Board {}'.format(self.board_type)
 
 
 class AllotmentSupplement(ServiceSupplement):
@@ -520,7 +523,10 @@ class ProviderAllotmentService(ProviderCatalogue):
     service = models.ForeignKey(Allotment)
 
     def __str__(self):
-        return 'Prov.Accom. - %s : %s' % (self.provider, self.service)
+        return '{} by {} ({} to {})'.format(self.service,
+                                            self.provider,
+                                            self.date_from,
+                                            self.date_to)
 
     def get_detail_objects(self):
         return self.providerallotmentdetail_set.all()
@@ -677,7 +683,11 @@ class ProviderTransferService(ProviderCatalogue):
     service = models.ForeignKey(Transfer)
 
     def __str__(self):
-        return 'Prov.Transfer - %s : %s' % (self.provider, self.service)
+        return '{} by {} ({} to {})'.format(self.service,
+                                            self.provider,
+                                            self.date_from,
+                                            self.date_to)
+
 
     def get_detail_objects(self):
         return self.providertransferdetail_set.all()

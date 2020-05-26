@@ -679,20 +679,22 @@ class ProviderAllotmentServiceSiteModel(CatalogService):
                                    'Either Percent or Absolute increment'
                                    ' must be specified')
                     return HttpResponseRedirect(request.get_full_path())
-                # these 2 bellow are thought to keep track of how many
-                # services/details were created
-                created_services = 0
-                created_details = 0
-                # Here comes the method that actually creates the new objects
-                # Attention, it should check it is not creating already existent
-                # dates/details
-                # created_services, created_details = build_new_prices(
-                #     max_util,
-                #     min_util,
-                #     increase_percent,
-                #     queryset)
-                self.message_user(request,
-                                  "A total of {} Provider Services and {} details were created".format(created_services, created_details))
+
+                results = ConfigServices.next_year_catalog_amounts(
+                    catalog_model=ProviderAllotmentService,
+                    catalog_service_ids=queryset.values_list('pk', flat=True),
+                    diff_percent=increase_percent,
+                    diff_amount=increase_value,
+                    min_diff=min_util,
+                    max_diff=max_util)
+                for message in results['services_error_messages']:
+                    messages.error(request, message)
+                if results['services_error_count']:
+                    messages.error(request,
+                    '{} ids had problems while processing'.format(results['services_error_count']))
+                if results['services_success_count']:
+                    self.message_user(request,
+                                  "A total of {} Provider Services were successfully generated".format(results['services_success_count']))
                 return HttpResponseRedirect(request.get_full_path())
         if not form:
             form = ExtendCatalogForm(initial={
