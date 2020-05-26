@@ -617,7 +617,8 @@ class CatalogService(SiteModel):
                 min_util = form.cleaned_data['min_util']
                 increase_percent = form.cleaned_data['diff_percent']
                 increase_value = form.cleaned_data['diff_value']
-                if not increase_percent and not increase_value:
+                if (increase_percent is None or increase_percent == '') and (
+                        increase_value is None or increase_value == ''):
                     # either increment should be specified!
                     messages.error(request,
                                    'Either Percent or Absolute increment'
