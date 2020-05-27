@@ -1587,7 +1587,8 @@ class ConfigServices(object):
 
     @classmethod
     def update_detail_amount(cls, detail_amount, diff_percent, diff_amount, min_diff, max_diff):
-        if diff_percent is None and diff_amount is None:
+        if (diff_percent is None or diff_percent == 0) and (
+            diff_amount is None or diff_amount == 0):
             return detail_amount
         if detail_amount is None:
             return None
