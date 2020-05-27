@@ -491,7 +491,7 @@ class AllotmentBoardType(models.Model):
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
 
     def __str__(self):
-        return self.get_board_type_display()
+        return 'Board {}'.format(self.board_type)
 
 
 class ProviderAllotmentService(ProviderCatalogue):
@@ -505,7 +505,10 @@ class ProviderAllotmentService(ProviderCatalogue):
     service = models.ForeignKey(Allotment)
 
     def __str__(self):
-        return 'Prov.Accom. - %s : %s' % (self.provider, self.service)
+        return '{} by {} ({} to {})'.format(self.service,
+                                            self.provider,
+                                            self.date_from,
+                                            self.date_to)
 
     def get_detail_objects(self):
         return self.providerallotmentdetail_set.all()
@@ -530,6 +533,10 @@ class ProviderAllotmentDetail(AmountDetail):
     single_supplement = models.IntegerField(blank=True, null=True, verbose_name='SGL Suppl.')
     third_pax_discount = models.IntegerField(blank=True, null=True, verbose_name='TPL Dscnt %')
 
+    def __str__(self):
+        return 'Cost for {} ({})'.format(self.provider_service,
+                                            self.room_type)
+
 
 class AgencyAllotmentService(AgencyCatalogue):
     """
@@ -542,7 +549,12 @@ class AgencyAllotmentService(AgencyCatalogue):
     service = models.ForeignKey(Allotment)
 
     def __str__(self):
-        return 'Ag.Accom. - %s : %s' % (self.agency, self.service)
+        return '{} for {} ({} to {})'.format(self.service,
+                                            self.agency,
+                                            self.date_from,
+                                            self.date_to)
+
+
 
     def get_detail_objects(self):
         return self.agencyallotmentdetail_set.all()
@@ -565,6 +577,9 @@ class AgencyAllotmentDetail(AmountDetail):
     pax_range_min = models.SmallIntegerField(default=0)
     pax_range_max = models.SmallIntegerField(default=0)
 
+    def __str__(self):
+        return 'Price for {} ({})'.format(self.agency_service,
+                                        self.room_type)
 
 class TransferZone(models.Model):
     """
@@ -618,7 +633,11 @@ class ProviderTransferService(ProviderCatalogue):
     service = models.ForeignKey(Transfer)
 
     def __str__(self):
-        return 'Prov.Transfer - %s : %s' % (self.provider, self.service)
+        return '{} by {} ({} to {})'.format(self.service,
+                                            self.provider,
+                                            self.date_from,
+                                            self.date_to)
+
 
     def get_detail_objects(self):
         return self.providertransferdetail_set.all()
@@ -639,6 +658,10 @@ class ProviderTransferDetail(AmountDetail, RouteData):
     pax_range_min = models.SmallIntegerField(default=0)
     pax_range_max = models.SmallIntegerField(default=0)
 
+    def __str__(self):
+        return 'Cost for {} ({})'.format(self.provider_service,
+                                        self.addon)
+
     @property
     def cost_type(self):
         if self.provider_service:
@@ -657,7 +680,10 @@ class AgencyTransferService(AgencyCatalogue):
     service = models.ForeignKey(Transfer)
 
     def __str__(self):
-        return 'Ag.Transfer - %s : %s' % (self.agency, self.service)
+        return '{} for {} ({} to {})'.format(self.service,
+                                            self.agency,
+                                            self.date_from,
+                                            self.date_to)
 
     def get_detail_objects(self):
         return self.agencytransferdetail_set.all()
@@ -678,6 +704,9 @@ class AgencyTransferDetail(AmountDetail, RouteData):
     pax_range_min = models.SmallIntegerField(default=0)
     pax_range_max = models.SmallIntegerField(default=0)
 
+    def __str__(self):
+        return 'Price for {} ({})'.format(self.agency_service,
+                                        self.addon)
 
 class ProviderExtraService(ProviderCatalogue):
     """

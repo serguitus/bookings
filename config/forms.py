@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Row, Column
 from dal import autocomplete
 
 from django import forms
@@ -548,3 +551,45 @@ class AgencyPackageServiceForm(forms.ModelForm):
             'agency': autocomplete.ModelSelect2(url='agency-autocomplete'),
             'service': autocomplete.ModelSelect2(url='package-autocomplete'),
         }
+
+
+class ExtendCatalogForm(forms.Form):
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+    max_util = forms.IntegerField(required=False,
+                                  label='',
+                                  help_text='Optionally specify maximum increment',
+                                  widget=forms.NumberInput(
+                                      attrs={'placeholder': 'Max. Increment'}))
+    min_util = forms.IntegerField(required=False,
+                                  label='',
+                                  help_text='Optionally specify minimum increment',
+                                  widget=forms.NumberInput(
+                                      attrs={'placeholder': 'Min. Increment'}))
+    diff_percent = forms.IntegerField(required=False,
+                                      label='',
+                                      help_text='Specify a percent value to alter generated values',
+                                      widget=forms.NumberInput(
+                                          attrs={'placeholder': 'Increment (%)'}))
+    diff_value = forms.IntegerField(required=False,
+                                    label='',
+                                    help_text='Specify an absolute value to alter generated numbers',
+                                    widget=forms.NumberInput(
+                                        attrs={'placeholder': 'Increment (Abs.)'}))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            Row(
+                Column('min_util', css_class='form-group col-md-6 mb-0'),
+                Column('max_util', css_class='form-group col-md-6 mb-0'),
+                # css_class='form-row'
+            ),
+            Row(
+                Column('diff_percent', css_class='form-group col-md-6 mb-0'),
+                Column('diff_value', css_class='form-group col-md-6 mb-0'),
+                # css_class='form-row'
+            ),
+            '_selected_action',
+        )

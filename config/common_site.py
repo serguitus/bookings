@@ -1,22 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.conf.urls import url
-from django.contrib import admin, messages
-from django.contrib.admin.options import csrf_protect_m, IS_POPUP_VAR, TO_FIELD_VAR
-from django.contrib.admin import helpers
-from django.contrib.admin.checks import ModelAdminChecks
+from django.contrib import messages
+from django.contrib.admin.options import csrf_protect_m
 from django.contrib.admin.utils import unquote, quote
-from django.core import checks
-from django.core.exceptions import FieldDoesNotExist, ValidationError, PermissionDenied
-from django.db import models, router, transaction
-from django import forms
+from django.db import models
 from django.forms.models import modelformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, reverse, redirect
-from django.template.response import SimpleTemplateResponse, TemplateResponse
-from django.utils.encoding import force_text
-from django.utils.translation import ugettext as _, ungettext
 
 from common.sites import SiteModel, CommonTabularInline, CommonStackedInline, CommonChangeList
 from common.filters import DateFilter
@@ -35,11 +26,11 @@ from config.forms import (
     AgencyExtraServiceForm, AgencyExtraDetailForm, AgencyExtraDetailInlineForm,
     NewAgencyPackageServiceForm, NewAgencyPackageDetailForm, NewAgencyPackageDetailInlineForm,
     AllotmentRoomTypeInlineForm, TransferZoneForm,
-    LocationTransferIntervalInlineForm, ServiceAddonInlineForm, TransferPickupTimeInlineForm,
-    PricesExportForm, ExtraForm,
+    LocationTransferIntervalInlineForm, ServiceAddonInlineForm,
+    TransferPickupTimeInlineForm, PricesExportForm, ExtraForm,
     ServiceForm, ServiceBookDetailForm,
-    ServiceBookDetailAllotmentForm, ServiceBookDetailTransferForm, ServiceBookDetailExtraForm, 
-    SearchServiceForm,
+    ServiceBookDetailAllotmentForm, ServiceBookDetailTransferForm,
+    ServiceBookDetailExtraForm, SearchServiceForm, ExtendCatalogForm
 )
 from config.models import (
     ServiceCategory, Location, Place, TransferInterval, Schedule,
@@ -74,8 +65,6 @@ from config.views import render_prices_pdf
 
 from finance.top_filters import ProviderTopFilter, AgencyTopFilter
 from finance.models import Agency
-
-from functools import update_wrapper, partial
 
 from reservas.admin import bookings_site
 
@@ -140,18 +129,19 @@ def response_post_provider_service(request, obj, url):
 class IncorrectLookupParameters(Exception):
     pass
 
+
 class LocationPlaceInline(CommonStackedInline):
     model = Place
     extra = 0
-    ordering = ['name',]
+    ordering = ['name']
 
 
 class LocationTransferIntervalInline(CommonStackedInline):
     model = TransferInterval
     fk_name = 'location'
     extra = 0
-    fields = [('t_location_from', 'interval'),]
-    ordering = ['t_location_from__name',]
+    fields = [('t_location_from', 'interval')]
+    ordering = ['t_location_from__name']
 
     form = LocationTransferIntervalInlineForm
 
@@ -160,8 +150,8 @@ class LocationScheduleInline(CommonStackedInline):
     model = Schedule
     fk_name = 'location'
     extra = 0
-    fields = [('is_arrival', 'number', 'time'),]
-    ordering = ['is_arrival', 'number',]
+    fields = [('is_arrival', 'number', 'time')]
+    ordering = ['is_arrival', 'number']
 
 
 class LocationSiteModel(SiteModel):
@@ -243,58 +233,76 @@ class BaseServiceBookDetailSiteModel(SiteModel):
     def response_post_delete(self, request, obj):
         if hasattr(obj, 'service') and obj.service:
             if obj.service.category == 'A':
-                return redirect(reverse('common:config_allotment_change', args=[obj.service.pk]))
+                return redirect(reverse('common:config_allotment_change',
+                                        args=[obj.service.pk]))
             elif obj.service.category == 'T':
-                return redirect(reverse('common:config_transfer_change', args=[obj.service.pk]))
+                return redirect(reverse('common:config_transfer_change',
+                                        args=[obj.service.pk]))
             elif obj.service.category == 'E':
-                return redirect(reverse('common:config_extra_change', args=[obj.service.pk]))
+                return redirect(reverse('common:config_extra_change',
+                                        args=[obj.service.pk]))
         service = request.POST.get('service')
         if service:
             service = Service.objects.get(id=service)
             if service.category == 'A':
-                return redirect(reverse('common:config_allotment_change', args=[service.pk]))
+                return redirect(reverse('common:config_allotment_change',
+                                        args=[service.pk]))
             elif service.category == 'T':
-                return redirect(reverse('common:config_transfer_change', args=[service.pk]))
+                return redirect(reverse('common:config_transfer_change',
+                                        args=[service.pk]))
             elif service.category == 'E':
-                return redirect(reverse('common:config_extra_change', args=[service.pk]))
+                return redirect(reverse('common:config_extra_change',
+                                        args=[service.pk]))
         return super(BaseServiceBookDetailSiteModel, self).response_post_delete(request, obj)
 
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'service') and obj.service:
             if obj.service.category == 'A':
-                return redirect(reverse('common:config_allotment_change', args=[obj.service.pk]))
+                return redirect(reverse('common:config_allotment_change',
+                                        args=[obj.service.pk]))
             elif obj.service.category == 'T':
-                return redirect(reverse('common:config_transfer_change', args=[obj.service.pk]))
+                return redirect(reverse('common:config_transfer_change',
+                                        args=[obj.service.pk]))
             elif obj.service.category == 'E':
-                return redirect(reverse('common:config_extra_change', args=[obj.service.pk]))
+                return redirect(reverse('common:config_extra_change',
+                                        args=[obj.service.pk]))
         service = request.POST.get('service')
         if service:
             service = Service.objects.get(id=service)
             if service.category == 'A':
-                return redirect(reverse('common:config_allotment_change', args=[service.pk]))
+                return redirect(reverse('common:config_allotment_change',
+                                        args=[service.pk]))
             elif service.category == 'T':
-                return redirect(reverse('common:config_transfer_change', args=[service.pk]))
+                return redirect(reverse('common:config_transfer_change',
+                                        args=[service.pk]))
             elif service.category == 'E':
-                return redirect(reverse('common:config_extra_change', args=[service.pk]))
+                return redirect(reverse('common:config_extra_change',
+                                        args=[service.pk]))
         return super(BaseServiceBookDetailSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
         if hasattr(obj, 'service') and obj.service:
             if obj.service.category == 'A':
-                return redirect(reverse('common:config_allotment_change', args=[obj.service.pk]))
+                return redirect(reverse('common:config_allotment_change',
+                                        args=[obj.service.pk]))
             elif obj.service.category == 'T':
-                return redirect(reverse('common:config_transfer_change', args=[obj.service.pk]))
+                return redirect(reverse('common:config_transfer_change',
+                                        args=[obj.service.pk]))
             elif obj.service.category == 'E':
-                return redirect(reverse('common:config_extra_change', args=[obj.service.pk]))
+                return redirect(reverse('common:config_extra_change',
+                                        args=[obj.service.pk]))
         service = request.POST.get('service')
         if service:
             service = Service.objects.get(id=service)
             if service.category == 'A':
-                return redirect(reverse('common:config_allotment_change', args=[service.pk]))
+                return redirect(reverse('common:config_allotment_change',
+                                        args=[service.pk]))
             elif service.category == 'T':
-                return redirect(reverse('common:config_transfer_change', args=[service.pk]))
+                return redirect(reverse('common:config_transfer_change',
+                                        args=[service.pk]))
             elif service.category == 'E':
-                return redirect(reverse('common:config_extra_change', args=[service.pk]))
+                return redirect(reverse('common:config_extra_change',
+                                        args=[service.pk]))
         return super(BaseServiceBookDetailSiteModel, self).response_post_save_change(request, obj)
 
 
@@ -511,15 +519,19 @@ class TransferSiteModel(BaseServiceSiteModel):
     form = ServiceForm
 
 
+
 class ExtraSiteModel(BaseServiceSiteModel):
     model_order = 6130
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = MENU_LABEL_CONFIG_GROUP
     fields = ('name', 'service_category', 'location',
-            ('cost_type', 'parameter_type'), 'max_capacity',
-              'pax_range', ('child_discount_percent', 'child_age', 'infant_age'), ('car_rental', 'enabled'),)
+              ('cost_type', 'parameter_type'), 'max_capacity',
+              'pax_range',
+              ('child_discount_percent', 'child_age', 'infant_age'),
+              ('car_rental', 'enabled'),)
     list_display = ('name', 'service_category', 'location', 'cost_type',
-                    'parameter_type', 'max_capacity', 'enabled', 'pax_range', 'has_pax_range',
+                    'parameter_type', 'max_capacity', 'enabled',
+                    'pax_range', 'has_pax_range',
                     'infant_age', 'child_age')
     top_filters = (('service_category', ServiceCategoryTopFilter), 'name',)
     ordering = ['enabled', 'name']
@@ -565,7 +577,7 @@ class CatalogService(SiteModel):
         context = super(CatalogService, self).changeform_context(
             request, form, obj, formsets, inline_instances,
             add, opts, object_id, to_field, form_validated, extra_context)
-        
+
         DetailsFormSet = self.build_details_formset()
         formset = DetailsFormSet(queryset=self.get_details_model().objects.none())
         context.update({'formset': formset})
@@ -589,8 +601,58 @@ class CatalogService(SiteModel):
                         else:
                             continue
                         obj.save()
-                    except Exception as ex:
+                    except Exception:
                         continue
+
+    # A base action to use in all children
+    def extend_catalog_prices(self, request, queryset):
+        form = None
+        if 'apply' in request.POST:
+            form = ExtendCatalogForm(request.POST)
+            if form.is_valid():
+                max_util = form.cleaned_data['max_util']
+                min_util = form.cleaned_data['min_util']
+                increase_percent = form.cleaned_data['diff_percent']
+                increase_value = form.cleaned_data['diff_value']
+                if (increase_percent is None or increase_percent == '') and (
+                        increase_value is None or increase_value == ''):
+                    # either increment should be specified!
+                    messages.error(request,
+                                   'Either Percent or Absolute increment'
+                                   ' must be specified')
+                    return HttpResponseRedirect(request.get_full_path())
+
+                results = ConfigServices.next_year_catalog_amounts(
+                    catalog_model=self.model,
+                    catalog_service_ids=queryset.values_list('pk', flat=True),
+                    diff_percent=increase_percent,
+                    diff_amount=increase_value,
+                    min_diff=min_util,
+                    max_diff=max_util)
+                for message in results['services_error_messages']:
+                    messages.error(request, message)
+                for message in results['details_error_messages']:
+                    messages.error(request, message)
+                if results['services_error_count']:
+                    messages.error(request,
+                    '{} services had problems while processing'.format(results['services_error_count']))
+                if results['details_error_count']:
+                    messages.error(request,
+                    '{} Details had problems while processing'.format(results['details_error_count']))
+                if results['services_success_count']:
+                    self.message_user(request,
+                                  "A total of {} Services and {} Details were successfully generated".format(results['services_success_count'],
+                                                                                                            results['details_success_count']))
+                return HttpResponseRedirect(request.get_full_path())
+        if not form:
+            form = ExtendCatalogForm(initial={
+                '_selected_action': queryset.values_list('pk', flat=True)})
+        context = {
+            'form': form,
+            'items': queryset,
+            'title': 'Generate Provider costs for following year'}
+        context.update(self.get_model_extra_context(request))
+        return render(request, 'config/catalog_extend_dates.html', context)
 
 
 class ProviderAllotmentDetailInline(CommonTabularInline):
@@ -635,7 +697,9 @@ class ProviderAllotmentServiceSiteModel(CatalogService):
     change_form_template = 'config/catalog_service_change_form.html'
     save_as = True
 
-    actions = ['rewrite_agency_amounts', 'update_agency_amounts']
+    actions = ['rewrite_agency_amounts',
+               'update_agency_amounts',
+               'extend_catalog_prices']
 
     def rewrite_agency_amounts(self, request, queryset):
         ConfigServices.generate_agency_allotments_amounts_from_providers_allotments(
@@ -646,6 +710,10 @@ class ProviderAllotmentServiceSiteModel(CatalogService):
         ConfigServices.generate_agency_allotments_amounts_from_providers_allotments(
             list(queryset.all()), True)
     update_agency_amounts.short_description = "Generate New Agency Prices"
+
+    def extend_catalog_prices(self, request, queryset):
+        return super(ProviderAllotmentServiceSiteModel, self).extend_catalog_prices(request, queryset)
+    extend_catalog_prices.short_description = 'Extend selected Costs 1 year'
 
     def get_details_model(self):
         return ProviderAllotmentDetail
@@ -746,7 +814,9 @@ class ProviderTransferServiceSiteModel(CatalogService):
     change_form_template = 'config/catalog_service_change_form.html'
     save_as = True
 
-    actions = ['rewrite_agency_amounts', 'update_agency_amounts']
+    actions = ['rewrite_agency_amounts',
+                'update_agency_amounts',
+                'extend_catalog_prices']
 
     def rewrite_agency_amounts(self, request, queryset):
         ConfigServices.generate_agency_transfers_amounts_from_providers_transfers(
@@ -757,6 +827,10 @@ class ProviderTransferServiceSiteModel(CatalogService):
         ConfigServices.generate_agency_transfers_amounts_from_providers_transfers(
             list(queryset.all()), True)
     update_agency_amounts.short_description = "Generate New Agency Prices"
+
+    def extend_catalog_prices(self, request, queryset):
+        return super(ProviderTransferServiceSiteModel, self).extend_catalog_prices(request, queryset)
+    extend_catalog_prices.short_description = 'Extend selected Costs 1 year'
 
     def get_details_model(self):
         return ProviderTransferDetail
@@ -849,7 +923,9 @@ class ProviderExtraServiceSiteModel(CatalogService):
     change_form_template = 'config/catalog_service_change_form.html'
     save_as = True
 
-    actions = ['rewrite_agency_amounts', 'update_agency_amounts']
+    actions = ['rewrite_agency_amounts',
+                'update_agency_amounts',
+                'extend_catalog_prices']
 
     def rewrite_agency_amounts(self, request, queryset):
         ConfigServices.generate_agency_extras_amounts_from_providers_extras(
@@ -860,6 +936,10 @@ class ProviderExtraServiceSiteModel(CatalogService):
         ConfigServices.generate_agency_extras_amounts_from_providers_extras(
             list(queryset.all()), True)
     update_agency_amounts.short_description = "Generate New Agency Prices"
+
+    def extend_catalog_prices(self, request, queryset):
+        return super(ProviderExtraServiceSiteModel, self).extend_catalog_prices(request, queryset)
+    extend_catalog_prices.short_description = 'Extend selected Costs 1 year'
 
     def get_details_model(self):
         return ProviderExtraDetail
