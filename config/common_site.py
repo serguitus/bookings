@@ -580,7 +580,7 @@ class CatalogService(SiteModel):
         context = super(CatalogService, self).changeform_context(
             request, form, obj, formsets, inline_instances,
             add, opts, object_id, to_field, form_validated, extra_context)
-        
+
         DetailsFormSet = self.build_details_formset()
         formset = DetailsFormSet(queryset=self.get_details_model().objects.none())
         context.update({'formset': formset})

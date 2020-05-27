@@ -2,11 +2,11 @@ from __future__ import unicode_literals
 """
 config services
 """
-
 from datetime import date, timedelta, time, datetime
 from dateutil.relativedelta import relativedelta
 from django.db import IntegrityError
 from django.db.models import Q
+import math
 
 from config.constants import (
     SERVICE_CATEGORY_EXTRA, SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER,
@@ -26,11 +26,7 @@ from config.models import (
     AgencyExtraService, AgencyExtraDetail,
     Schedule, TransferInterval, TransferPickupTime,
 )
-
 from finance.models import Agency
-
-import math
-
 from reservas.custom_settings import ADDON_FOR_NO_ADDON
 
 
