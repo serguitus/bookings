@@ -70,6 +70,8 @@ class ProviderAllotmentDetailForm(forms.ModelForm):
                 url='catalogallotmentaddon-autocomplete',
                 forward=['provider_service']),
         }
+    class Media:
+        js = ['config/js/config_extras.js']
 
 
 class ProviderAllotmentDetailInlineForm(forms.ModelForm):

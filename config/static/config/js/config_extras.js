@@ -5,12 +5,12 @@ var bookingtransfer_url = bookingallotment_url;
 var bookingextra_url = bookingallotment_url;
 
 $(document).ready(function(){
-  $('#providerallotmentdetail_set-group').on('change', '[id$=-ad_2_amount]', function(){
-    sgl_sup = $($(this).parents('tr')[0]).find('[id$=-single_supplement]');
-    tpl_dsc = $($(this).parents('tr')[0]).find('[id$=-third_pax_discount]');
-    sgl_val = $($(this).parents('tr')[0]).find('[id$=-ad_1_amount]');
+  $('#providerallotmentdetail_set-group, #providerallotmentdetail_form').on('change', '.field-ad_2_amount [id$=ad_2_amount]', function(){
+    sgl_sup = $($(this).parents('.catalogue-detail')[0]).find('[id$=single_supplement]');
+    tpl_dsc = $($(this).parents('.catalogue-detail')[0]).find('[id$=third_pax_discount]');
+    sgl_val = $($(this).parents('.catalogue-detail')[0]).find('.field-ad_1_amount [id$=ad_1_amount]').not('[id*=ch]');
     dbl_val = $(this);
-    tpl_val = $($(this).parents('tr')[0]).find('[id$=-ad_3_amount]');
+    tpl_val = $($(this).parents('.catalogue-detail')[0]).find('.field-ad_3_amount [id$=ad_3_amount]').not('[id*=ch]');
     // qpl_val = $($(this).parents('tr')[0]).find('[id$=-ad_4_amount]');
     if(sgl_sup.val()){
       // if a SGL suplement exists, SGL = DBL + Supplement
@@ -18,7 +18,7 @@ $(document).ready(function(){
     }
     if(tpl_dsc.val()){
       // if a 3rd pax discount is provided, TPL = DBL * TPL-discount %
-      tpl_val.val((3*Number(dbl_val.val()) - Number(dbl_val.val())*Number(tpl_dsc.val())/100)/3);
+      tpl_val.val(((3*Number(dbl_val.val()) - Number(dbl_val.val())*Number(tpl_dsc.val())/100)/3).toFixed(2));
     }
     // if(qpl_dsc.val()){
     //   // if a 4rd pax discount is provided, QPL = DBL * QPL-discount %

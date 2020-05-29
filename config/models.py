@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-"""
-Config Models
-"""
+from datetime import time
 from django.db import models
 
 from config.constants import (
@@ -14,8 +12,6 @@ from config.constants import (
     ALLOTMENT_COST_TYPES, AMOUNTS_BY_PAX,
     ALLOTMENT_SUPPLEMENT_COST_TYPES, TRANSFER_SUPPLEMENT_COST_TYPES,
     TRANSFER_COST_TYPES)
-
-from datetime import time
 
 from finance.models import Agency, Provider
 
