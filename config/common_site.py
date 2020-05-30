@@ -17,14 +17,12 @@ from config.constants import (
     SERVICE_CATEGORY_PACKAGE)
 
 from config.forms import (
-    PackageForm, AgencyPackageServiceForm,
     ProviderAllotmentServiceForm, ProviderAllotmentDetailForm, ProviderAllotmentDetailInlineForm,
     ProviderTransferServiceForm, ProviderTransferDetailForm, ProviderTransferDetailInlineForm,
     ProviderExtraServiceForm, ProviderExtraDetailForm, ProviderExtraDetailInlineForm,
     AgencyAllotmentServiceForm, AgencyAllotmentDetailForm, AgencyAllotmentDetailInlineForm,
     AgencyTransferServiceForm, AgencyTransferDetailForm, AgencyTransferDetailInlineForm,
     AgencyExtraServiceForm, AgencyExtraDetailForm, AgencyExtraDetailInlineForm,
-    NewAgencyPackageServiceForm, NewAgencyPackageDetailForm, NewAgencyPackageDetailInlineForm,
     AllotmentRoomTypeInlineForm, TransferZoneForm,
     LocationTransferIntervalInlineForm, ServiceAddonInlineForm,
     TransferPickupTimeInlineForm, PricesExportForm, ExtraForm,
@@ -40,7 +38,6 @@ from config.models import (
     Allotment, AllotmentRoomType, AllotmentBoardType,
     Transfer,
     Extra,
-    NewPackage, NewAgencyPackageService, NewAgencyPackageDetail,
     AgencyAllotmentService, AgencyAllotmentDetail,
     AgencyTransferService, AgencyTransferDetail,
     AgencyExtraService, AgencyExtraDetail,
@@ -538,23 +535,6 @@ class ExtraSiteModel(BaseServiceSiteModel):
     inlines = [ServiceAddonInline]
     actions = ['export_prices']
     form = ExtraForm
-
-
-class NewPackageSiteModel(BaseServiceSiteModel):
-    model_order = 6140
-    menu_label = MENU_LABEL_CONFIG_BASIC
-    menu_group = MENU_LABEL_CONFIG_GROUP
-    fields = (
-        ('name', 'service_category', 'enabled'),
-        ('location', 'amounts_type', 'pax_range'),
-        'time', 'description'
-    )
-    list_display = (
-        'name', 'service_category', 'location', 'amounts_type', 'pax_range', 'time', 'enabled')
-    top_filters = ('name', ('location', LocationTopFilter), 'amounts_type', 'pax_range', 'enabled')
-    ordering = ('enabled', 'name',)
-    actions = ['export_prices']
-    form = PackageForm
 
 
 class CatalogService(SiteModel):
@@ -1267,80 +1247,6 @@ class AgencyExtraDetailSiteModel(SiteModel):
         return super(AgencyExtraDetailSiteModel, self).response_post_save_change(request, obj)
 
 
-class NewAgencyPackageDetailInline(CommonTabularInline):
-    model = NewAgencyPackageDetail
-    extra = 0
-    fields = (
-        ('pax_range_min', 'pax_range_max', 'ad_1_amount'),)
-    ordering = ['pax_range_min', 'pax_range_max']
-    form = NewAgencyPackageDetailInlineForm
-
-    def get_queryset(self, request):
-        return super(NewAgencyPackageDetailInline, self).get_queryset(request).none()
-
-
-class NewAgencyPackageServiceSiteModel(SiteModel):
-    model_order = 7150
-    menu_label = MENU_LABEL_CONFIG_BASIC
-    menu_group = 'Agency Catalogue'
-    #recent_allowed = True
-    fields = ('agency', 'service', 'date_from', 'date_to')
-    list_display = ('agency', 'service', 'date_from', 'date_to',)
-    top_filters = (
-        ('service', PackageTopFilter), ('agency', AgencyTopFilter),
-        ('date_to', DateTopFilter))
-    inlines = [NewAgencyPackageDetailInline]
-    ordering = ['service', 'agency', '-date_from']
-    form = NewAgencyPackageServiceForm
-    add_form_template = 'config/catalog_service_change_form.html'
-    change_form_template = 'config/catalog_service_change_form.html'
-    save_as = True
-
-    def get_details_model(self):
-        return NewAgencyPackageDetail
-
-    def build_details_formset(self):
-        return modelformset_factory(
-            model=NewAgencyPackageDetail,
-            form=NewAgencyPackageDetailInlineForm,
-            fields=[
-                'pax_range_min', 'pax_range_max', 'ad_1_amount',],
-            extra=1,
-        )
-
-
-class NewAgencyPackageDetailSiteModel(SiteModel):
-    recent_allowed = False
-    fields = (
-        'agency_service',
-        ('pax_range_min', 'pax_range_max', 'ad_1_amount'),)
-    list_display = ('agency_service', 'pax_range_min', 'pax_range_max', 'ad_1_amount')
-    ordering = [
-        'agency_service__service', '-agency_service__date_from', 'agency_service__agency']
-    form = NewAgencyPackageDetailForm
-
-    def response_post_delete(self, request, obj):
-        response = response_post_agency_service(
-            request, obj, 'common:config_newagencypackageservice_change')
-        if response:
-            return response
-        return super(NewAgencyPackageDetailSiteModel, self).response_post_delete(request, obj)
-
-    def response_post_save_add(self, request, obj):
-        response = response_post_agency_service(
-            request, obj, 'common:config_newagencypackageservice_change')
-        if response:
-            return response
-        return super(NewAgencyPackageDetailSiteModel, self).response_post_save_add(request, obj)
-
-    def response_post_save_change(self, request, obj):
-        response = response_post_agency_service(
-            request, obj, 'common:config_newagencypackageservice_change')
-        if response:
-            return response
-        return super(NewAgencyPackageDetailSiteModel, self).response_post_save_change(request, obj)
-
-
 class CarRentalOfficeInline(CommonStackedInline):
     model = CarRentalOffice
     extra = 0
@@ -1372,7 +1278,6 @@ bookings_site.register(Service, ServiceSiteModel)
 bookings_site.register(Allotment, AllotmentSiteModel)
 bookings_site.register(Transfer, TransferSiteModel)
 bookings_site.register(Extra, ExtraSiteModel)
-bookings_site.register(NewPackage, NewPackageSiteModel)
 bookings_site.register(ServiceBookDetailAllotment, ServiceBookDetailAllotmentSiteModel)
 bookings_site.register(ServiceBookDetailTransfer, ServiceBookDetailTransferSiteModel)
 bookings_site.register(ServiceBookDetailExtra, ServiceBookDetailExtraSiteModel)
@@ -1383,8 +1288,6 @@ bookings_site.register(AgencyTransferService, AgencyTransferServiceSiteModel)
 bookings_site.register(AgencyTransferDetail, AgencyTransferDetailSiteModel)
 bookings_site.register(AgencyExtraService, AgencyExtraServiceSiteModel)
 bookings_site.register(AgencyExtraDetail, AgencyExtraDetailSiteModel)
-bookings_site.register(NewAgencyPackageService, NewAgencyPackageServiceSiteModel)
-bookings_site.register(NewAgencyPackageDetail, NewAgencyPackageDetailSiteModel)
 
 bookings_site.register(ProviderAllotmentService, ProviderAllotmentServiceSiteModel)
 bookings_site.register(ProviderAllotmentDetail, ProviderAllotmentDetailSiteModel)

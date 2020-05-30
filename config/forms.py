@@ -11,12 +11,13 @@ from django.forms import widgets
 
 from config.models import (
     Location,
-    Service, NewPackage, NewAgencyPackageService,
+    Service,
     ProviderAllotmentService, ProviderTransferService, ProviderExtraService,
     ProviderAllotmentDetail, ProviderTransferDetail, ProviderExtraDetail,
-    AgencyAllotmentService, AgencyTransferService, AgencyExtraService, NewAgencyPackageService,
-    AgencyAllotmentDetail, AgencyTransferDetail, AgencyExtraDetail, NewAgencyPackageDetail,
+    AgencyAllotmentService, AgencyTransferService, AgencyExtraService,
+    AgencyAllotmentDetail, AgencyTransferDetail, AgencyExtraDetail,
 )
+ 
 from finance.models import Agency
 
 
@@ -323,40 +324,6 @@ class AgencyExtraDetailInlineForm(ProviderExtraDetailInlineForm):
         }
 
 
-class NewAgencyPackageServiceForm(forms.ModelForm):
-    class Meta:
-        model = NewAgencyPackageService
-        fields = ('__all__')
-        widgets = {
-            'agency': autocomplete.ModelSelect2(url='agency-autocomplete'),
-            'service': autocomplete.ModelSelect2(url='newpackage-autocomplete'),
-        }
-
-
-class NewAgencyPackageDetailForm(forms.ModelForm):
-    class Meta:
-        model = NewAgencyPackageDetail
-        fields = ('__all__')
-        widgets = {
-            'agency_service': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',),
-        }
-
-
-class NewAgencyPackageDetailInlineForm(forms.ModelForm):
-    class Meta:
-        fields = ('__all__')
-
-    def __init__(self, *args, **kwargs):
-        super(NewAgencyPackageDetailInlineForm, self).__init__(*args, **kwargs)
-        self.fields['pax_range_max'].widget.attrs['placeholder'] = 'Pax Max'
-        self.fields['pax_range_max'].label = 'Pax Max'
-        self.fields['pax_range_min'].widget.attrs['placeholder'] = 'Pax Min'
-        self.fields['pax_range_min'].label = 'Pax Min'
-        self.fields['ad_1_amount'].widget.attrs['placeholder'] = 'Adult'
-        self.fields['ad_1_amount'].label = 'Price'
-
-
 class AllotmentRoomTypeInlineForm(forms.ModelForm):
     class Meta:
         fields = ('__all__')
@@ -531,26 +498,6 @@ class SearchServiceForm(forms.Form):
         ),
         label='Service',
     )
-
-
-class PackageForm(forms.ModelForm):
-    class Meta:
-        model = NewPackage
-        fields = ('__all__')
-        widgets = {
-            'location': autocomplete.ModelSelect2(url='location-autocomplete'),
-            'description': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
-        }
-
-
-class AgencyPackageServiceForm(forms.ModelForm):
-    class Meta:
-        model = NewAgencyPackageService
-        fields = ('__all__')
-        widgets = {
-            'agency': autocomplete.ModelSelect2(url='agency-autocomplete'),
-            'service': autocomplete.ModelSelect2(url='package-autocomplete'),
-        }
 
 
 class ExtendCatalogForm(forms.Form):

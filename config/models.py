@@ -197,6 +197,7 @@ class Service(models.Model):
     child_discount_percent = models.IntegerField(blank=True, null=True)
     infant_age = models.IntegerField(default=2, blank=True, null=True)
     location = models.ForeignKey(Location, blank=True, null=True)
+    new_time = models.TimeField(blank=True, null=True)
     enabled = models.BooleanField(default=True)
 
     def __init__(self, *args, **kwargs):
@@ -282,27 +283,6 @@ class Extra(Service):
         return '%s' % self.name
 
 
-class NewPackage(Service):
-    """
-    Package Service
-    """
-    class Meta:
-        verbose_name = 'Package'
-        verbose_name_plural = 'Packages'
-        ordering = ['name']
-    amounts_type = models.CharField(
-        default=AMOUNTS_BY_PAX, max_length=5, choices=PACKAGE_AMOUNTS_TYPES)
-    has_pax_range = models.BooleanField(default=False)
-    time = models.TimeField(blank=True, null=True)
-
-    def fill_data(self):
-        super(Extra, self).fill_data()
-        self.category = SERVICE_CATEGORY_PACKAGE
-
-    def __str__(self):
-        return '%s'  % self.name
-
-
 class BookServiceData(models.Model):
     """
     Book Data
@@ -315,6 +295,8 @@ class BookServiceData(models.Model):
     base_location = models.ForeignKey(
         Location, related_name='%(class)s_base_location',
         blank=True, null=True, verbose_name='Location')
+    new_provider = models.ForeignKey(
+        Provider, blank=True, null=True, related_name='%(class)s_provider')
     service_addon  = models.ForeignKey(
         Addon, related_name='%(class)s_service_addon', blank=True, null=True, verbose_name='Addon')
     time = models.TimeField(blank=True, null=True)
@@ -845,30 +827,3 @@ class ServiceBookDetailExtra(ServiceBookDetail, BookExtraData):
         self.base_service = self.book_service
         super(ServiceBookDetailExtra, self).fill_data()
         self.name = '%s - %s' % (self.service, self.book_service)
-
-
-class NewAgencyPackageService(AgencyCatalogue):
-    """
-    AgencyPackageService
-    """
-    class Meta:
-        verbose_name = 'Agency Package Service'
-        verbose_name_plural = 'Agency Packages Services'
-        unique_together = (('agency', 'service', 'date_from', 'date_to'),)
-    service = models.ForeignKey(NewPackage)
-
-    def __str__(self):
-        return 'Ag.Package - %s : %s' % (self.agency, self.service)
-
-
-class NewAgencyPackageDetail(AmountDetail):
-    """
-    AgencyPackageDetail
-    """
-    class Meta:
-        verbose_name = 'Agency Package Detail'
-        verbose_name_plural = 'Agencies Package Details'
-        unique_together = ('agency_service','pax_range_min', 'pax_range_max')
-    agency_service = models.ForeignKey(NewAgencyPackageService)
-    pax_range_min = models.SmallIntegerField(blank=True, null=True)
-    pax_range_max = models.SmallIntegerField(blank=True, null=True)

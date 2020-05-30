@@ -35,7 +35,6 @@ from common.filters import parse_date
 
 from config.constants import AMOUNTS_FIXED, SERVICE_CATEGORY_PACKAGE
 from config.models import (
-    NewPackage, NewAgencyPackageService, NewAgencyPackageDetail,
     ServiceBookDetail, ServiceBookDetailAllotment,
     ServiceBookDetailTransfer, ServiceBookDetailExtra,
     ProviderAllotmentDetail, ProviderTransferDetail, ProviderExtraDetail)

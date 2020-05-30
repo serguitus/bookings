@@ -24,9 +24,6 @@ from config.models import (
     Extra,
     ProviderExtraService, ProviderExtraDetail,
     AgencyExtraService, AgencyExtraDetail,
-    NewPackage, NewAgencyPackageService, NewAgencyPackageDetail,
-
-
     Schedule, TransferInterval, TransferPickupTime,
 )
 from finance.models import Agency
@@ -202,10 +199,10 @@ class ConfigServices(object):
     @classmethod
     def _copy_packages(cls, src_agency, dst_agency, is_update):
         # find agencyservice list
-        src_agency_services = list(NewAgencyPackageService.objects.filter(agency=src_agency.id))
+        src_agency_services = list(AgencyPackageService.objects.filter(agency=src_agency.id))
         # for each agencyservice create agencyservice
         for src_agency_service in src_agency_services:
-            dst_agency_service, created = NewAgencyPackageService.objects.get_or_create(
+            dst_agency_service, created = AgencyPackageService.objects.get_or_create(
                 agency_id=dst_agency.id,
                 date_from=src_agency_service.date_from,
                 date_to=src_agency_service.date_to,
@@ -213,12 +210,12 @@ class ConfigServices(object):
             )
             # find details
             details = list(
-                NewAgencyPackageDetail.objects.filter(agency_service=src_agency_service))
+                AgencyPackageDetail.objects.filter(agency_service=src_agency_service))
             # for each src agency detail create dst agency detail
             for detail in details:
                 if is_update:
                     # update - dont modify if exists
-                    agency_detail, created = NewAgencyPackageDetail.objects.get_or_create(
+                    agency_detail, created = AgencyPackageDetail.objects.get_or_create(
                         agency_service_id=dst_agency_service.id,
                         addon_id=detail.addon_id,
                         pax_range_min=detail.pax_range_min,
@@ -228,7 +225,7 @@ class ConfigServices(object):
                     )
                 else:
                     # rewrite - modify if exists
-                    agency_detail, created = NewAgencyPackageDetail.objects.update_or_create(
+                    agency_detail, created = AgencyPackageDetail.objects.update_or_create(
                         agency_service_id=dst_agency_service.id,
                         addon_id=detail.addon_id,
                         pax_range_min=detail.pax_range_min,
@@ -1174,7 +1171,7 @@ class ConfigServices(object):
     @classmethod
     def package_price(
             cls, service_id, date_from, date_to, price_groups, agency):
-        service = NewPackage.objects.get(pk=service_id)
+        service = Service.objects.get(pk=service_id)
 
         if date_from is None and date_to is None:
             return None, 'Both Dates are Missing'
@@ -1199,7 +1196,7 @@ class ConfigServices(object):
                 for group in price_groups:
                     paxes = group[0] + group[1]
                     queryset = cls._get_agency_queryset(
-                        NewAgencyPackageDetail.objects,
+                        AgencyPackageDetail.objects,
                         agency.id, service_id, date_from, date_to)
                     # pax range filtering
                     queryset = queryset.filter(
@@ -1221,7 +1218,7 @@ class ConfigServices(object):
                         break
             else:
                 queryset = cls._get_agency_queryset(
-                    NewAgencyPackageDetail.objects,
+                    AgencyPackageDetail.objects,
                     agency.id, service_id, date_from, date_to)
 
                 detail_list = list(queryset)
@@ -2023,7 +2020,7 @@ class ConfigServices(object):
 
     @classmethod
     def list_package_details(cls, package, agency, date_from, date_to):
-        qs = NewAgencyPackageDetail.objects.all()
+        qs = AgencyPackageDetail.objects.all()
         qs = qs.filter(
             agency_service__agency=agency,
             agency_service__service=package.id)
