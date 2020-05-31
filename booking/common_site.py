@@ -1619,13 +1619,13 @@ class BaseBookingServiceSiteModel(SiteModel):
         services = list(queryset.all())
         BookingServices.set_services_status(services, SERVICE_STATUS_COORDINATED)
 
-    coordinated_services.short_description = "Coordinated Services"
+    coordinated_services.short_description = "Coordinate selected Services"
 
     def confirmed_services(self, request, queryset):
         services = list(queryset.all())
         BookingServices.set_services_status(services, SERVICE_STATUS_CONFIRMED)
 
-    confirmed_services.short_description = "Confirmed Services"
+    confirmed_services.short_description = "Confirm selected Services"
 
     def build_another_redirect_url(self, request, obj, obj_url, preserved_filters, opts):
         redirect_url = request.path

@@ -491,17 +491,17 @@ class SearchServiceForm(forms.Form):
         required=False,
         widget=autocomplete.ModelSelect2(
             url='location-autocomplete',
-            attrs={'dropdownParent': '.modal-content'},
+            attrs={'dropdownParent': '#searchServiceModal'},
         ),
         label='Search Location',
     )
-    service = forms.ModelChoiceField(
+    search_service = forms.ModelChoiceField(
         queryset=Service.objects.all(),
         empty_label='',
         required=True,
         widget=autocomplete.ModelSelect2(
             url='service-autocomplete',
-            attrs={'dropdownParent': '.modal-content'},
+            attrs={'dropdownParent': '#searchServiceModal'},
             forward=['current_service_id', 'search_service_location'],
         ),
         label='Service',

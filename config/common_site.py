@@ -59,8 +59,7 @@ from config.top_filters import (
     AllotmentTopFilter, TransferTopFilter, ExtraTopFilter,
     ProviderTransferLocationTopFilter, ProviderTransferLocationAdditionalTopFilter,
     AgencyTransferLocationTopFilter, AgencyTransferLocationAdditionalTopFilter,
-    DateToTopFilter, AgencyTransferLocationTopFilter,
-    ProviderDetailTransferTopFilter,
+    DateToTopFilter, ProviderDetailTransferTopFilter,
     ProviderTransferDetailLocationTopFilter, TransferDetailProviderTopFilter,
 )
 from config.views import render_prices_pdf
