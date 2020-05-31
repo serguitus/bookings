@@ -649,46 +649,7 @@ class QuoteServiceBookDetailExtra(QuoteServiceBookDetail, BookExtraData):
         self.name = '%s - %s' % (self.quote_service, self.book_service)
 
 
-class NewQuoteService(BookServiceData, DateInterval):
-    """
-    Quote Service
-    """
-    class Meta:
-        verbose_name = 'Quote Service'
-        verbose_name_plural = 'Quote Services'
-        default_permissions = ('add', 'change',)
-    quote = models.ForeignKey(Quote, related_name='quote_new_services')
-    status = models.CharField(
-        max_length=5, choices=QUOTE_STATUS_LIST, default=QUOTE_STATUS_DRAFT)
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.validate_date_interval()
-        self.fill_data()
-        # Call the "real" save() method.
-        super(NewQuoteService, self).save(force_insert, force_update, using, update_fields)
-
-    def __str__(self):
-        return '%s' % (self.base_service)
-
-
-class NewQuoteServicePaxVariant(PaxVariantAmounts):
-    """
-    Quote Service Pax Variant
-    """
-    class Meta:
-        verbose_name = 'Quote Service Pax Variant'
-        verbose_name_plural = 'Quote Services Pax Variants'
-        unique_together = (('quote_pax_variant', 'quote_service'),)
-    quote_pax_variant = models.ForeignKey(QuotePaxVariant, verbose_name='Pax Variant')
-    quote_service = models.ForeignKey(NewQuoteService, related_name='quoteservice_paxvariants')
-    manual_costs = models.BooleanField(default=False, verbose_name='Manual Costs')
-    manual_prices = models.BooleanField(default=False, verbose_name='Manual Prices')
-
-    def __str__(self):
-        return self.quote_pax_variant.__str__()
-
-
-class NewQuotePackage(NewQuoteService, BookExtraData):
+class QuoteExtraPackage(QuoteService, BookExtraData):
     """
     Quote Service Package
     """
@@ -696,6 +657,7 @@ class NewQuotePackage(NewQuoteService, BookExtraData):
         verbose_name = 'Quote Package'
         verbose_name_plural = 'Quotes Packages'
         default_permissions = ('add', 'change',)
+    service = models.ForeignKey(Extra)
     price_by_package_catalogue = models.BooleanField(
         default=False, verbose_name='Prices By Catalogue')
 
@@ -707,13 +669,13 @@ class NewQuotePackage(NewQuoteService, BookExtraData):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         with transaction.atomic(savepoint=False):
-            super(NewQuotePackage, self).save(force_insert, force_update, using, update_fields)
+            super(QuoteExtraPackage, self).save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return '%s - %s' % (self.quote, self.service)
 
 
-class QuoteProvidedService(NewQuoteService):
+class QuoteProvidedService(QuoteService):
     """
     Quote Provided Service
     """
@@ -721,8 +683,7 @@ class QuoteProvidedService(NewQuoteService):
         verbose_name = 'Quote Provided Service'
         verbose_name_plural = 'Quote Services'
         default_permissions = ('add', 'change',)
-    provider = models.ForeignKey(Provider, blank=True, null=True)
-    quote_package = models.ForeignKey(NewQuotePackage, blank=True, null=True)
+    quote_package = models.ForeignKey(QuoteExtraPackage, blank=True, null=True)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.validate_date_interval()
@@ -788,7 +749,7 @@ class NewQuoteExtra(QuoteProvidedService, BookExtraData):
 
 
 
-class NewQuoteServiceBookDetail(NewQuoteService):
+class NewQuoteServiceBookDetail(QuoteService):
     """
     Quote Provided Service Book Detail
     """

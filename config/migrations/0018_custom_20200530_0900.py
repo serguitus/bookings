@@ -20,6 +20,26 @@ def migrate_package(apps, schema_editor):
     AgencyExtraService = apps.get_model('config', 'AgencyExtraService')
     AgencyExtraDetail = apps.get_model('config', 'AgencyExtraDetail')
 
+    QuotePackage = apps.get_model('booking', 'QuotePackage')
+    QuotePackageAllotment = apps.get_model('booking', 'QuotePackageAllotment')
+    QuotePackageTransfer = apps.get_model('booking', 'QuotePackageTransfer')
+    QuotePackageExtra = apps.get_model('booking', 'QuotePackageExtra')
+    QuoteExtraPackage = apps.get_model('booking', 'QuoteExtraPackage')
+    NewQuoteAllotment = apps.get_model('booking', 'NewQuoteAllotment')
+    NewQuoteTransfer = apps.get_model('booking', 'NewQuoteTransfer')
+    NewQuoteExtra = apps.get_model('booking', 'NewQuoteExtra')
+
+    BookingPackage = apps.get_model('booking', 'BookingPackage')
+    BookingPackageAllotment = apps.get_model('booking', 'BookingPackageAllotment')
+    BookingPackageTransfer = apps.get_model('booking', 'BookingPackageTransfer')
+    BookingPackageExtra = apps.get_model('booking', 'BookingPackageExtra')
+    BookingExtraPackage = apps.get_model('booking', 'BookingExtraPackage')
+    BookingProvidedAllotment = apps.get_model('booking', 'BookingProvidedAllotment')
+    BookingProvidedTransfer = apps.get_model('booking', 'BookingProvidedTransfer')
+    BookingProvidedExtra = apps.get_model('booking', 'BookingProvidedExtra')
+    BookingServicePax = apps.get_model('booking', 'BookingServicePax')
+    BaseBookingServicePax = apps.get_model('booking', 'BaseBookingServicePax')
+
     for package in Package.objects.all():
         new_extra = Extra()
         build_new_extra(new_extra, package)
@@ -52,9 +72,55 @@ def migrate_package(apps, schema_editor):
                 new_agency_detail.agency_service_id = new_agency_service.id
                 new_agency_detail.save()
 
+        for service in QuotePackage.objects.filter(service=package):
+            new_service = QuoteExtraPackage()
+            build_quote_extra_package(new_service, service)
+            new_service.service = new_extra
+            new_service.save()
+            for package_service in QuotePackageAllotment.objects.filter(quote_package=service):
+                new_package_service = NewQuoteAllotment()
+                build_new_quote_package_allotment(new_package_service, package_service)
+                new_package_service.quote_package = new_service
+                new_package_service.save()
+            for package_service in QuotePackageTransfer.objects.filter(quote_package=service):
+                new_package_service = NewQuoteTransfer()
+                build_new_quote_package_transfer(new_package_service, package_service)
+                new_package_service.quote_package = new_service
+                new_package_service.save()
+            for package_service in QuotePackageExtra.objects.filter(quote_package=service):
+                new_package_service = NewQuoteExtra()
+                build_new_quote_package_extra(new_package_service, package_service)
+                new_package_service.quote_package = new_service
+                new_package_service.save()
+
+        for service in BookingPackage.objects.filter(service=package):
+            new_service = BookingExtraPackage()
+            build_booking_extra_package(new_service, service)
+            new_service.service = new_extra
+            new_service.save()
+            for pax in BookingServicePax.objects.filter(booking_service=service.pk):
+                new_pax = BaseBookingServicePax()
+                build_new_booking_pax(new_pax, pax)
+                new_pax.save()
+            for package_service in BookingPackageAllotment.objects.filter(booking_package=service):
+                new_package_service = BookingProvidedAllotment()
+                build_new_booking_package_allotment(new_package_service, package_service)
+                new_package_service.booking_package = new_service
+                new_package_service.save()
+            for package_service in BookingPackageTransfer.objects.filter(booking_package=service):
+                new_package_service = BookingProvidedTransfer()
+                build_new_booking_package_transfer(new_package_service, package_service)
+                new_package_service.booking_package = new_service
+                new_package_service.save()
+            for package_service in BookingPackageExtra.objects.filter(booking_package=service):
+                new_package_service = BookingProvidedExtra()
+                build_new_booking_package_extra(new_package_service, package_service)
+                new_package_service.booking_package = new_service
+                new_package_service.save()
+
+
 
 def build_new_extra(new_extra, package):
-
     new_extra.pk = package.pk
     new_extra.name = package.name + ' (PACKAGE)'
     new_extra.description = package.description
@@ -79,7 +145,6 @@ def build_new_extra(new_extra, package):
 
 
 def copy_package_service(new_detail, service):
-
     new_detail.name = service.name
     new_detail.description = service.description
     new_detail.days_after = service.days_after
@@ -91,7 +156,6 @@ def copy_package_service(new_detail, service):
 
 
 def build_new_book_detail_allotment(new_detail, package_service):
-
     copy_package_service(new_detail, package_service)
 
     new_detail.book_service_id = package_service.service_id
@@ -101,7 +165,6 @@ def build_new_book_detail_allotment(new_detail, package_service):
 
 
 def build_new_book_detail_transfer(new_detail, package_service):
-
     copy_package_service(new_detail, package_service)
 
     new_detail.book_service_id = package_service.service_id
@@ -120,7 +183,6 @@ def build_new_book_detail_transfer(new_detail, package_service):
 
 
 def build_new_book_detail_extra(new_detail, package_service):
-
     copy_package_service(new_detail, package_service)
 
     new_detail.book_service_id = package_service.service_id
@@ -132,7 +194,6 @@ def build_new_book_detail_extra(new_detail, package_service):
 
 
 def build_new_agency_extra_service(new_agency_service, agency_service):
-
     new_agency_service.pk = None
     new_agency_service.id = None
     new_agency_service.agency_id = agency_service.agency_id
@@ -142,7 +203,6 @@ def build_new_agency_extra_service(new_agency_service, agency_service):
 
 
 def build_new_agency_extra_detail(new_agency_detail, agency_detail):
-
     new_agency_detail.pk = None
     new_agency_detail.id = None
     new_agency_detail.addon_id = 80
@@ -172,6 +232,185 @@ def build_new_agency_extra_detail(new_agency_detail, agency_detail):
     new_agency_detail.ch_3_ad_3_amount = agency_detail.ch_3_ad_3_amount
     new_agency_detail.ch_3_ad_4_amount = agency_detail.ch_3_ad_4_amount
     return new_agency_detail
+
+
+def copy_quote_service(new_service, service):
+    new_service.pk = service.pk
+    new_service.base_service_id = service.base_service_id
+    new_service.name = service.name
+    new_service.description = service.description
+    new_service.time = service.time
+    new_service.datetime_from = service.datetime_from
+    new_service.datetime_to = service.datetime_to
+    new_service.status = service.status
+    new_service.base_location_id = service.base_location_id
+    new_service.service_addon_id = service.service_addon_id
+
+
+def build_quote_extra_package(new_service, service):
+    copy_quote_service(new_service, service)
+    new_service.quote_id = service.quote_id
+
+    new_service.price_by_package_catalogue = service.price_by_package_catalogue
+    new_service.parameter = 0
+    new_service.quantity = 1
+    new_service.dropoff_office = None
+    new_service.pickup_office = None
+
+    return new_service
+
+
+def build_new_quote_package_allotment(new_service, package_service):
+    copy_quote_service(new_service, package_service)
+    new_service.quote_id = package_service.quote_package.quote_id
+    new_service.provider_id = package_service.provider_id
+
+    new_service.service_id = package_service.service_id
+    new_service.room_type_id = package_service.room_type_id
+    new_service.board_type = package_service.board_type
+
+    new_service.pk = None
+    return new_service
+
+
+def build_new_quote_package_transfer(new_service, package_service):
+    copy_quote_service(new_service, package_service)
+    new_service.quote_id = package_service.quote_package.quote_id
+    new_service.provider_id = package_service.provider_id
+
+    new_service.service_id = package_service.service_id
+    new_service.pickup_id = package_service.pickup_id
+    new_service.dropoff_id = package_service.dropoff_id
+    new_service.location_from_id = package_service.location_from_id
+    new_service.location_to_id = package_service.location_to_id
+    new_service.place_from_id = package_service.place_from_id
+    new_service.place_to_id = package_service.place_to_id
+    new_service.schedule_from_id = package_service.schedule_from_id
+    new_service.schedule_to_id = package_service.schedule_to_id
+    new_service.schedule_time_from = package_service.schedule_time_from
+    new_service.schedule_time_to = package_service.schedule_time_to
+    new_service.quantity = package_service.quantity
+
+    new_service.pk = None
+    return new_service
+
+
+def build_new_quote_package_extra(new_service, package_service):
+    copy_quote_service(new_service, package_service)
+    new_service.quote_id = package_service.quote_package.quote_id
+    new_service.provider_id = package_service.provider_id
+
+    new_service.service_id = package_service.service_id
+    new_service.pickup_office_id = package_service.pickup_office_id
+    new_service.dropoff_office_id = package_service.dropoff_office_id
+    new_service.parameter = package_service.parameter
+    new_service.quantity = package_service.quantity
+
+    new_service.pk = None
+    return new_service
+
+
+def copy_booking_service(new_service, service):
+    new_service.pk = service.pk
+    new_service.provider_id = service.provider_id
+    new_service.base_service_id = service.base_service_id
+    new_service.name = service.name
+    new_service.description = service.description
+    new_service.time = service.time
+    new_service.datetime_from = service.datetime_from
+    new_service.datetime_to = service.datetime_to
+    new_service.status = service.status
+    new_service.base_location_id = service.base_location_id
+    new_service.base_category = service.base_category
+    new_service.service_addon_id = service.service_addon_id
+    new_service.cost_amount = service.cost_amount
+    new_service.cost_comments = service.cost_comments
+    new_service.manual_cost = service.manual_cost
+    new_service.price_amount = service.price_amount
+    new_service.price_comments = service.price_comments
+    new_service.manual_price = service.manual_price
+    new_service.p_notes = service.p_notes
+    if hasattr(service, 'v_notes'):
+        new_service.v_notes = service.v_notes
+
+
+def build_booking_extra_package(new_service, service):
+    copy_booking_service(new_service, service)
+    new_service.booking_id = service.booking_id
+
+    new_service.price_by_package_catalogue = service.price_by_package_catalogue
+    new_service.parameter = 0
+    new_service.quantity = 1
+    new_service.dropoff_office = None
+    new_service.pickup_office = None
+    new_service.voucher_detail = service.voucher_detail
+    new_service.version = service.version
+    return new_service
+
+
+def build_new_booking_package_allotment(new_service, package_service):
+    copy_booking_service(new_service, package_service)
+    new_service.booking_id = package_service.booking_package.booking_id
+
+    new_service.service_id = package_service.service_id
+    new_service.room_type_id = package_service.room_type_id
+    new_service.board_type = package_service.board_type
+    new_service.version = package_service.version
+
+    return new_service
+
+
+def build_new_booking_package_transfer(new_service, package_service):
+    copy_booking_service(new_service, package_service)
+    new_service.booking_id = package_service.booking_package.booking_id
+
+    new_service.service_id = package_service.service_id
+    new_service.pickup_id = package_service.pickup_id
+    new_service.dropoff_id = package_service.dropoff_id
+    new_service.location_from_id = package_service.location_from_id
+    new_service.location_to_id = package_service.location_to_id
+    new_service.place_from_id = package_service.place_from_id
+    new_service.place_to_id = package_service.place_to_id
+    new_service.schedule_from_id = package_service.schedule_from_id
+    new_service.schedule_to_id = package_service.schedule_to_id
+    new_service.schedule_time_from = package_service.schedule_time_from
+    new_service.schedule_time_to = package_service.schedule_time_to
+    new_service.quantity = package_service.quantity
+    new_service.version = package_service.version
+
+    return new_service
+
+
+def build_new_booking_package_extra(new_service, package_service):
+    copy_booking_service(new_service, package_service)
+    new_service.booking_id = package_service.booking_package.booking_id
+
+    new_service.service_id = package_service.service_id
+    new_service.pickup_office_id = package_service.pickup_office_id
+    new_service.dropoff_office_id = package_service.dropoff_office_id
+    new_service.parameter = package_service.parameter
+    new_service.quantity = package_service.quantity
+    new_service.version = package_service.version
+
+    return new_service
+
+
+def build_new_booking_pax(new_pax, pax):
+    new_pax.pk = pax.pk
+    new_pax.booking_pax_id = pax.booking_pax_id
+    new_pax.booking_service_id = pax.booking_service_id
+    new_pax.group = pax.group
+    new_pax.force_adult = pax.force_adult
+
+    new_pax.is_cost_free = pax.is_cost_free
+    new_pax.cost_amount = pax.cost_amount
+    new_pax.cost_comments = pax.cost_comments
+
+    new_pax.is_price_free = pax.is_price_free
+    new_pax.price_amount = pax.price_amount
+    new_pax.price_comments = pax.price_comments
+
+    new_pax.version = pax.version
 
 
 def backwards_function(apps, schema_editor):

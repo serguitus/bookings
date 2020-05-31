@@ -79,52 +79,6 @@ class Migration(migrations.Migration):
             bases=('booking.basebookingservice',),
         ),
         migrations.CreateModel(
-            name='NewQuoteService',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(default='Detail', max_length=250)),
-                ('description', models.CharField(blank=True, max_length=1000, null=True)),
-                ('time', models.TimeField(blank=True, null=True)),
-                ('datetime_from', models.DateField(blank=True, null=True, verbose_name='From')),
-                ('datetime_to', models.DateField(blank=True, null=True, verbose_name='To')),
-                ('status', models.CharField(choices=[('DR', 'Draft'), ('RD', 'Ready')], default='DR', max_length=5)),
-            ],
-            options={
-                'verbose_name': 'Quote Service',
-                'verbose_name_plural': 'Quote Services',
-                'default_permissions': ('add', 'change'),
-            },
-        ),
-        migrations.CreateModel(
-            name='NewQuoteServicePaxVariant',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('cost_single_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True, verbose_name='Cost SGL')),
-                ('cost_double_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True, verbose_name='Cost DBL')),
-                ('cost_triple_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True, verbose_name='Cost TPL')),
-                ('cost_qdrple_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True, verbose_name='Cost QPL')),
-                ('price_single_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True, verbose_name='Price SGL')),
-                ('price_double_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True, verbose_name='Price DBL')),
-                ('price_triple_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True, verbose_name='Price TPL')),
-                ('price_qdrple_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True, verbose_name='Price QPL')),
-                ('free_cost_single', models.SmallIntegerField(default=0)),
-                ('free_cost_double', models.SmallIntegerField(default=0)),
-                ('free_cost_triple', models.SmallIntegerField(default=0)),
-                ('free_cost_qdrple', models.SmallIntegerField(default=0)),
-                ('free_price_single', models.SmallIntegerField(default=0)),
-                ('free_price_double', models.SmallIntegerField(default=0)),
-                ('free_price_triple', models.SmallIntegerField(default=0)),
-                ('free_price_qdrple', models.SmallIntegerField(default=0)),
-                ('manual_costs', models.BooleanField(default=False, verbose_name='Manual Costs')),
-                ('manual_prices', models.BooleanField(default=False, verbose_name='Manual Prices')),
-                ('quote_pax_variant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='booking.QuotePaxVariant', verbose_name='Pax Variant')),
-            ],
-            options={
-                'verbose_name': 'Quote Service Pax Variant',
-                'verbose_name_plural': 'Quote Services Pax Variants',
-            },
-        ),
-        migrations.CreateModel(
             name='ProviderPaymentBookingProvided',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -339,9 +293,10 @@ class Migration(migrations.Migration):
             bases=('booking.bookingprovidedservice', models.Model),
         ),
         migrations.CreateModel(
-            name='NewQuotePackage',
+            name='QuoteExtraPackage',
             fields=[
-                ('newquoteservice_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='booking.NewQuoteService')),
+                ('quoteservice_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='booking.QuoteService')),
+                ('service', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='config.Extra')),
                 ('quantity', models.SmallIntegerField(default=1)),
                 ('parameter', models.SmallIntegerField(default=0, verbose_name='Hours')),
                 ('price_by_package_catalogue', models.BooleanField(default=False, verbose_name='Prices By Catalogue')),
@@ -353,30 +308,30 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Quotes Packages',
                 'default_permissions': ('add', 'change'),
             },
-            bases=('booking.newquoteservice', models.Model),
+            bases=('booking.quoteservice', models.Model),
         ),
         migrations.CreateModel(
             name='NewQuoteServiceBookDetail',
             fields=[
-                ('newquoteservice_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='booking.NewQuoteService')),
+                ('quoteservice_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='booking.QuoteService')),
             ],
             options={
                 'verbose_name': 'Quote Provided Service Book Detail',
                 'verbose_name_plural': 'Quotes Provided Services Book Details',
             },
-            bases=('booking.newquoteservice',),
+            bases=('booking.quoteservice',),
         ),
         migrations.CreateModel(
             name='QuoteProvidedService',
             fields=[
-                ('newquoteservice_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='booking.NewQuoteService')),
+                ('quoteservice_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='booking.QuoteService')),
             ],
             options={
                 'verbose_name': 'Quote Provided Service',
                 'verbose_name_plural': 'Quote Services',
                 'default_permissions': ('add', 'change'),
             },
-            bases=('booking.newquoteservice',),
+            bases=('booking.quoteservice',),
         ),
         migrations.DeleteModel(
             name='BookingExtraComponent',
@@ -400,36 +355,6 @@ class Migration(migrations.Migration):
             model_name='providerpaymentbookingprovided',
             name='provider_service',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='booking.BookingProvidedService'),
-        ),
-        migrations.AddField(
-            model_name='newquoteservicepaxvariant',
-            name='quote_service',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='quoteservice_paxvariants', to='booking.NewQuoteService'),
-        ),
-        migrations.AddField(
-            model_name='newquoteservice',
-            name='base_location',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='newquoteservice_base_location', to='config.Location', verbose_name='Location'),
-        ),
-        migrations.AddField(
-            model_name='newquoteservice',
-            name='base_service',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='newquoteservice_base_service', to='config.Service'),
-        ),
-        migrations.AddField(
-            model_name='newquoteservice',
-            name='new_provider',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='newquoteservice_provider', to='finance.Provider'),
-        ),
-        migrations.AddField(
-            model_name='newquoteservice',
-            name='quote',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='quote_new_services', to='booking.Quote'),
-        ),
-        migrations.AddField(
-            model_name='newquoteservice',
-            name='service_addon',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='newquoteservice_service_addon', to='config.Addon', verbose_name='Addon'),
         ),
         migrations.AddField(
             model_name='bookingprovidedservice',
@@ -557,25 +482,26 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='quoteprovidedservice',
-            name='provider',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='finance.Provider'),
-        ),
-        migrations.AddField(
-            model_name='quoteprovidedservice',
             name='quote_package',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='booking.NewQuotePackage'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='booking.QuoteExtraPackage'),
         ),
         migrations.AlterUniqueTogether(
             name='providerpaymentbookingprovided',
             unique_together=set([('provider_payment', 'provider_service')]),
         ),
-        migrations.AlterUniqueTogether(
-            name='newquoteservicepaxvariant',
-            unique_together=set([('quote_pax_variant', 'quote_service')]),
-        ),
         migrations.AddField(
             model_name='newquoteservicebookdetail',
             name='quote_service',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='quoteservicebookdetail_provided', to='booking.QuoteProvidedService'),
+        ),
+        migrations.AlterField(
+            model_name='quoteextrapackage',
+            name='dropoff_office',
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='quoteextrapackage_dropoff_office', to='config.CarRentalOffice'),
+        ),
+        migrations.AlterField(
+            model_name='quoteextrapackage',
+            name='pickup_office',
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='quoteextrapackage_pickup_office', to='config.CarRentalOffice'),
         ),
     ]
