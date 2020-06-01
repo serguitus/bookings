@@ -13,45 +13,35 @@ from common.sites import SiteModel, CommonChangeList
 from common.templatetags.common_utils import common_add_preserved_filters
 
 from django.conf import settings
-from django.conf.urls import url
-from django.contrib import admin, messages
-from django.contrib.admin.options import (csrf_protect_m,
-                                          IS_POPUP_VAR,
-                                          TO_FIELD_VAR)
-from django.contrib.admin import TabularInline
-from django.contrib.admin.checks import ModelAdminChecks
-from django.contrib.admin.utils import quote, unquote
-from django.core import checks
-from django.core.exceptions import (FieldDoesNotExist,
-                                    ValidationError,
-                                    PermissionDenied)
+from django.contrib import messages
+from django.contrib.admin.options import csrf_protect_m
+from django.contrib.admin.utils import quote
+from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage
-from django.db import router, transaction
+from django.db import transaction
 from django.db.models.query_utils import Q
-from django import forms
 from django.forms import formset_factory
 from django.forms.models import modelformset_factory
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, reverse
-from django.template.response import SimpleTemplateResponse, TemplateResponse
 from django.template.loader import get_template
-from django.utils.encoding import force_text
-# from django.utils.translation import ugettext as _, ungettext
 from django.utils.functional import curry
-from django.utils.six import PY2
-# from django_tables2 import RequestConfig
 
 from finance.common_site import FinanceDocumentStatusChangeList
 from finance.models import Office
 from finance.top_filters import ProviderTopFilter, AgencyTopFilter
 
 from booking.constants import (
-    SERVICE_STATUS_PENDING, SERVICE_STATUS_REQUEST, SERVICE_STATUS_COORDINATED, SERVICE_STATUS_CONFIRMED,
-    SERVICE_STATUS_CANCELLED,
-    BOOTSTRAP_STYLE_BOOKING_STATUS_MAPPING, BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING,
-    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT, BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER,
-    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA, BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE,
-    BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_ALLOTMENT, BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_TRANSFER,
+    SERVICE_STATUS_PENDING, SERVICE_STATUS_REQUEST, SERVICE_STATUS_COORDINATED,
+    SERVICE_STATUS_CONFIRMED, SERVICE_STATUS_CANCELLED,
+    BOOTSTRAP_STYLE_BOOKING_STATUS_MAPPING,
+    BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE,
+    BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_ALLOTMENT,
+    BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_TRANSFER,
     BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_EXTRA
 )
 from booking.forms import (
@@ -84,7 +74,8 @@ from booking.forms import (
     BookingServiceBookDetailExtraForm,
     VouchersConfigForm,
     ProviderBookingPaymentForm,
-    ProviderBookingPaymentServiceForm, ProviderBookingPaymentServiceReadonlyForm,
+    ProviderBookingPaymentServiceForm,
+    ProviderBookingPaymentServiceReadonlyForm,
 )
 from booking.models import (
     BaseBookingService,
@@ -107,17 +98,17 @@ from booking.models import (
     BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine,
     BookingInvoicePartial,
     ProviderBookingPayment, ProviderBookingPaymentService,
-    _get_child_objects, _get_quote_child_objects,
+    _get_child_objects,
 )
 from booking.services import BookingServices
 from booking.top_filters import (
-    DateTopFilter, PackageTopFilter, CancelledTopFilter, InternalReferenceTopFilter,
+    DateTopFilter, PackageTopFilter, CancelledTopFilter,
+    InternalReferenceTopFilter,
     SellerTopFilter, PaidTopFilter, BookingPaidTopFilter)
 
 from common.sites import CommonStackedInline, CommonTabularInline
 
 from config.forms import SearchServiceForm
-from config.services import ConfigServices
 from config.top_filters import LocationTopFilter
 
 from finance.constants import STATUS_DRAFT, STATUS_READY, STATUS_CANCELLED
