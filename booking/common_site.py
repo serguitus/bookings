@@ -1372,7 +1372,7 @@ class BookingBaseServiceSiteModel(SiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
 
-    readonly_fields = ['utility_percent', 'utility']
+    readonly_fields = ['utility_percent', 'utility', 'cost_amount_pending']
 
     fieldsets = (
         (None, {
@@ -1391,7 +1391,7 @@ class BookingBaseServiceSiteModel(SiteModel):
                     'service_provider', 'conf_number', 'full_booking_name',
                     'service_pax_count', 'booking_internal_reference',
                     'service_addon', 'cost_amount',
-                    'price_amount', 'status', 'cost_amount_paid')
+                    'price_amount', 'status', 'cost_amount_pending')
     top_filters = (('booking__name', 'Booking'),
                    ('name', 'Service'),
                    'booking__reference', 'conf_number',
