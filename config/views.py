@@ -223,7 +223,7 @@ class CatalogTransferAddonAutocompleteView(autocomplete.Select2QuerySetView):
 
 class CatalogExtraAddonAutocompleteView(autocomplete.Select2QuerySetView):
     def get_base_queryset(self):
-        qs = Addon.objects.filter(enabled=True).all().distinct()
+        qs = Addon.objects.filter(enabled=True).distinct()
 
         provider_service = self.forwarded.get('provider_service', None)
         if provider_service:
@@ -234,6 +234,7 @@ class CatalogExtraAddonAutocompleteView(autocomplete.Select2QuerySetView):
         if agency_service:
             agency_service = AgencyExtraService.objects.get(pk=agency_service)
             return qs.filter(serviceaddon__service=agency_service.service)
+        return qs
 
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
