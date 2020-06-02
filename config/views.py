@@ -10,7 +10,7 @@ from django.conf import settings
 from dal import autocomplete
 
 from config.models import (
-    Location, TransferZone, ServiceCategory, RoomType, Addon, AllotmentBoardType,
+    Location, ServiceCategory, RoomType, Addon, AllotmentBoardType,
     Service,
     Allotment, Transfer, Extra, CarRental, CarRentalOffice,
     ProviderAllotmentService, AgencyAllotmentService,
@@ -26,7 +26,7 @@ from django.template.loader import get_template
 from django.urls import reverse
 from django.views import View
 
-from finance.models import Agency, Provider
+from finance.models import Provider
 
 from reservas.custom_settings import ADDON_FOR_NO_ADDON
 
@@ -184,6 +184,7 @@ class CatalogAllotmentAddonAutocompleteView(autocomplete.Select2QuerySetView):
         if agency_service:
             agency_service = AgencyAllotmentService.objects.get(pk=agency_service)
             return qs.filter(serviceaddon__service=agency_service.service)
+        return qs
 
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
@@ -209,6 +210,7 @@ class CatalogTransferAddonAutocompleteView(autocomplete.Select2QuerySetView):
         if agency_service:
             agency_service = AgencyTransferService.objects.get(pk=agency_service)
             return qs.filter(serviceaddon__service=agency_service.service)
+        return qs
 
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
