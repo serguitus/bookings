@@ -35,6 +35,7 @@ class ServiceForm(forms.Form):
         label='Search Location',
     )
 
+
 class MailForm(forms.Form):
     submit_action = forms.CharField(widget=forms.HiddenInput(), required=False)
     mail_from = forms.CharField(widget=forms.HiddenInput(), required=False)

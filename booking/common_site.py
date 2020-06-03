@@ -313,7 +313,7 @@ class QuotePaxVariantInline(CommonStackedInline):
         'cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple',
         'cost_qdrple_amount', 'price_qdrple_amount', 'utility_percent_qdrple', 'utility_qdrple',
     ]
-    verbose_name_plural = 'Paxes Variants'
+    verbose_name_plural = 'Pax Variants'
 
 
 class QuoteServicePaxVariantInline(CommonStackedInline):
