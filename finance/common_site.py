@@ -307,7 +307,8 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
         ModelForm = self.get_form(request, obj)
 
         form = ModelForm(instance=obj)
-        formsets, inline_instances = self._create_formsets(request, obj, change=True)
+        formsets, inline_instances = self._create_formsets(request, obj,
+                                                           change=True)
 
         adminForm = helpers.AdminForm(
             form,
@@ -331,9 +332,10 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
             cl.result_count
         )
 
-        ModelForm = self.get_form(request, obj)
-        form = ModelForm(instance=obj)
-        formsets, inline_instances = self._create_formsets(request, obj, change=True)
+        # Possible Duplicate of lines 307-310???
+        # ModelForm = self.get_form(request, obj)
+        # form = ModelForm(instance=obj)
+        # formsets, inline_instances = self._create_formsets(request, obj, change=True)
 
         context = dict(
             self.admin_site.each_context(request),
@@ -781,14 +783,14 @@ class AgencyCreditDocumentSiteModel(AgencyDocumentSiteModel):
                     'matched_amount', 'date', 'status']
     top_filters = ('currency', 'agency', 'status', 'date')
 
-    readonly_fields = ('name', 'matched_amount',)
+    readonly_fields = ('name', 'matched_amount', 'selected_amount')
     form = AgencyDocumentForm
 
     match_model = AgencyDocumentMatch
     match_fields = ('name',
                     ('agency', 'currency'),
-                    ('amount', 'matched_amount'),
-                    ('date', 'status'))
+                    ('date', 'status'),
+                    ('amount', 'matched_amount', 'selected_amount'))
     match_related_fields = ['agency', 'currency']
 
     match_model_parent_field = 'credit_document'
@@ -799,6 +801,13 @@ class AgencyCreditDocumentSiteModel(AgencyDocumentSiteModel):
     match_list_display = [
         'name', 'content_date', 'content_ref', 'included', 'match_amount'
     ]
+
+    def selected_amount(self, obj):
+        """
+        initially returns matched_amount.
+        Usefull to compute current selected total with js
+        """
+        return obj.matched_amount
 
 
 class AgencyInvoiceSiteModel(AgencyDebitDocumentSiteModel):
@@ -840,6 +849,14 @@ class AgencyPaymentSiteModel(AgencyCreditDocumentSiteModel):
     list_details_template = 'finance/agencypayment_details.html'
     change_details_template = 'finance/agencypayment_details.html'
     match_list_per_page = 200
+
+    class Media:
+        css = {
+            'all': (
+                'finance/css/finance_styles.css',
+            )
+        }
+        js = ('finance/js/finance_extras.js',)
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
