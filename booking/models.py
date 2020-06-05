@@ -61,6 +61,7 @@ def _get_child_objects(services):
         'BE': BookingExtra,
         'BA': BookingAllotment,
         'BP': BookingPackage,
+        # 'PE': PackageExtra,
     }
     objs = []
     for service in services:
@@ -1914,7 +1915,10 @@ class BookingProvidedService(BaseBookingService):
         verbose_name = 'Booking Provided Service'
         verbose_name_plural = 'Booking Provided Services'
         ordering = ['datetime_from', 'datetime_to', 'time']
-    booking_package = models.ForeignKey(BookingExtraPackage, blank=True, null=True)
+
+    booking_package = models.ForeignKey(BookingExtraPackage,
+                                        blank=True,
+                                        null=True)
 
 
 class BookingProvidedAllotment(BookingProvidedService, BookAllotmentData):

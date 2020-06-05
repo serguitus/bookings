@@ -9,22 +9,7 @@
 
 OK - opcion para cambiar estado de servicios desde la lista de servicios de un booking y desde el change_list de bookingServices y BaseBookingServices, de manera que se pueda seleccionar varios servicios y cambiarles el estado de una vez (se me ocurre un action en los change_list respectivos. hay que ver que hacer con la tabla de bookingServices dentro de un booking)
 
-OK - booking permission to view booking payment details
-
-OK - booking payment details collapsed.
-
-OK - agregar filtros en la vista de marcar pagos de proveedor. (booking_ref, internal_ref, booking_name,
-datetime_from, datetime_to, confirmation_number)
-
-OK - hacer un js simple que haga que cuando se llena el campo de confirmation_number, el estado del servicio pase a "Confirmed" (supongo que sea en el onChange del campo confirmation_number)
-
-OK - opciones dentro de un pago ya realizado de visualizar un pdf o adjuntarlo y enviarlo por email al proveedor
-
 OK - agregar el campo location a los forms de los booking services para usarlo como forward al filtrar la lista de servicios segun location como mismo se hace ya con el provider
-
-OK - mostrar el campo "Place" solo para aquellos servicios que tengan "places"
-
-OK - pasar campo time a basebookingservice y oredenar por datetime_from y luego time
 
 OK - accesso a los diferentes modelos sin permiso de edicion. (creo que sobre eso ya habias hecho algo pero no estoy claro) el asunto es permitir acceso a los datos, tanto de proveedores como de servicios en el change_from de cierto servicio, similar al link de editar que hoy sale pero haciendo que sea solo lectura sin permiso de editar
 
@@ -38,10 +23,6 @@ OK - eliminar el link de "add_booking_pax" del inline de pax del booking. para e
 
 OK - concebir el mecanismo para crear las reglas de negocio para asignar los colores a los bookingServices en las diferentes change_list. (Ej. los servicios que no estan coordinados y faltan menos de 3 dias para su ejecucion deben estar rojos, es posible que tengamos que agregar el estado "en espera" para asignarlo a ciertos servicios que no se piden hasta estar proximos a la fecha de ejecusion. en estos casos, tambien deben resaltar cuando esten proximos a la fecha del servicio)
 
-OK - services de provider payment ordenados por fecha
-
-OK - Pasar la info de cuenta bancaria de las facturas a un campo de la oficina. De esa manera se puede cambiar en sistema la cuenta (con todos sus datos) que debe aparecer en cada factura. Mi sugerencia es utilizar un campo CK Editor para que soporte html (definir en el campo las etiquetas permitidas) para que con 1 solo campo se pueda lograr un texto con formato similar al que hoy aparece en la factura
-
 OK - Al agregar pax al rooming de una reserva, en aquellos bookingservices en los que se agregue ese pax, deben pasar a ‘Pending’ (a menos que estén cancelados. Esto aplica para todos los campos que modifican el estado de un bookingservice)
 
 OK - Debe haber una opción similar a la de agregar pax, que permita resetear la distribución del rooming de ciertos servicios a como aparece en el rooming general. (lo ideal sería que eso apareciera cuando se altera el rooming y no en un botón aparte. Algo asi como lo que pasa cuando se salva en un booking y se detectan servicios cuyo costo o precio difieren del calculado. De todos modos, al menos el botón de resetear rooming)
@@ -50,13 +31,9 @@ OK - Mejorar el mensaje de error que aparece en el changeForm de los booking par
 
 OK - Nueva vista para ver info de ProviderTransferDetail filtrada por servicio, location from, location to. Ver si se puede tener una lista de agencyDetails. La idea es poder buscar en los Servicios de Transfer, todos los que son desde o hasta el location A
 
-OK - poner base_service en base_booking_service
-
 OK - agregar unos detalles desplegables a la tabla de los servicios de un booking (similar al desplegable de la lista de bookings que muestra sus servicios). Ese desplegable servirá para mostrar los detalles demás detalles de ese servicio que no se muestran en la tabla (pickup, dropOff, hora, notas, addon, etc) en funcion del tipo de servicio. eso servirá para poder revisar todo lo referido a cada servicio sin tener que ir a otra página
 
 OK - services con details de varios services book data.
-
-OH - Ver si es puede hacer mas eficiente la carga de los inlines de los agencyDetails y ProviderDetails
 
 OK - metodos en servicios de configuracion para generar nuevos precios de catálogo a partir un otros precios ya definidos incrementando las fechas en un año
 
@@ -75,3 +52,5 @@ OK - metodos en servicios de configuracion para generar nuevos precios de catál
 - accion de pago a proveedores desde base booking services
 
 - sustituir catalogo de agencias por reglas que permitan calculo de precios a partir de costos
+
+- mejorar la lista de invoices (agregar filtro de cancelado?, fecha de servicios, link de cada registro al tipo de objeto correspondiente. (ex. bookingInvoice) y lista de actions con una action para cancelar en masa un grupo de facturas)
