@@ -31,28 +31,22 @@ from django.views import View
 
 from booking.common_site import (
     QuoteSiteModel,
-    QuoteAllotmentSiteModel, QuoteTransferSiteModel,
-    QuoteExtraSiteModel, QuotePackageSiteModel,
-    QuotePackageAllotmentSiteModel, QuotePackageTransferSiteModel,
-    QuotePackageExtraSiteModel, BookingSiteModel,
-    BookingAllotmentSiteModel, BookingTransferSiteModel, BookingExtraSiteModel,
-    BookingPackageSiteModel,
-    BookingPackageAllotmentSiteModel, BookingPackageTransferSiteModel,
-    BookingPackageExtraSiteModel,
+    NewQuoteAllotmentSiteModel, NewQuoteTransferSiteModel,
+    NewQuoteExtraSiteModel, QuoteExtraPackageSiteModel,
+    BookingSiteModel,
+    BookingProvidedAllotmentSiteModel, BookingProvidedTransferSiteModel, BookingProvidedExtraSiteModel,
+    BookingExtraPackageSiteModel,
     default_requests_mail_from, default_requests_mail_to,
     default_requests_mail_bcc, default_requests_mail_subject,
     default_requests_mail_body, default_mail_cc
 )
 from booking.constants import ACTIONS, SERVICE_STATUS_CANCELLED
 from booking.models import (
-    Package,
     Quote, QuotePaxVariant, QuoteService,
-    QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
-    QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
-    Booking, BookingService, BookingPackageService,
-    BookingPax, BookingServicePax,
-    BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
-    BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
+    NewQuoteAllotment, NewQuoteTransfer, NewQuoteExtra, QuoteExtraPackage,
+    Booking, BaseBookingService, BookingProvidedService,
+    BookingPax, BaseBookingServicePax,
+    BookingProvidedAllotment, BookingProvidedTransfer, BookingProvidedExtra, BookingExtraPackage,
     BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine, BookingInvoicePartial,
 )
 from booking.forms import EmailProviderForm
@@ -76,10 +70,10 @@ from reservas.admin import bookings_site
 # BookingService child objects from a BookingService list
 def _get_child_objects(services):
     TYPE_MODELS = {
-        'T': BookingTransfer,
-        'E': BookingExtra,
-        'A': BookingAllotment,
-        'P': BookingPackage,
+        'T': BookingProvidedTransfer,
+        'E': BookingProvidedExtra,
+        'A': BookingProvidedAllotment,
+        'P': BookingExtraPackage,
     }
     objs = []
     for service in services:
@@ -99,7 +93,7 @@ class BookingPaxAutocompleteView(autocomplete.Select2QuerySetView):
 
         values = list()
         if booking_service:
-            values = BookingServicePax.objects.filter(
+            values = BaseBookingServicePax.objects.filter(
                 booking_service=booking_service).values_list('booking_pax', flat=True)
 
         if booking:
@@ -141,10 +135,10 @@ class QuoteAmountsView(ModelChangeFormProcessorView):
         })
 
 
-class QuoteAllotmentAmountsView(ModelChangeFormProcessorView):
+class NewQuoteAllotmentAmountsView(ModelChangeFormProcessorView):
 
-    model = QuoteAllotment
-    common_sitemodel = QuoteAllotmentSiteModel
+    model = NewQuoteAllotment
+    common_sitemodel = NewQuoteAllotmentSiteModel
     common_site = bookings_site
 
     def process_data(self, quoteallotment, inlines):
@@ -167,10 +161,10 @@ class QuoteAllotmentAmountsView(ModelChangeFormProcessorView):
         })
 
 
-class QuoteTransferAmountsView(ModelChangeFormProcessorView):
+class NewQuoteTransferAmountsView(ModelChangeFormProcessorView):
 
-    model = QuoteTransfer
-    common_sitemodel = QuoteTransferSiteModel
+    model = NewQuoteTransfer
+    common_sitemodel = NewQuoteTransferSiteModel
     common_site = bookings_site
 
     def process_data(self, quotetransfer, inlines):
@@ -193,10 +187,10 @@ class QuoteTransferAmountsView(ModelChangeFormProcessorView):
         })
 
 
-class QuoteExtraAmountsView(ModelChangeFormProcessorView):
+class NewQuoteExtraAmountsView(ModelChangeFormProcessorView):
 
-    model = QuoteExtra
-    common_sitemodel = QuoteExtraSiteModel
+    model = NewQuoteExtra
+    common_sitemodel = NewQuoteExtraSiteModel
     common_site = bookings_site
 
     def process_data(self, quoteextra, inlines):
@@ -219,10 +213,10 @@ class QuoteExtraAmountsView(ModelChangeFormProcessorView):
         })
 
 
-class QuotePackageAmountsView(ModelChangeFormProcessorView):
+class QuoteExtraPackageAmountsView(ModelChangeFormProcessorView):
 
-    model = QuotePackage
-    common_sitemodel = QuotePackageSiteModel
+    model = QuoteExtraPackage
+    common_sitemodel = QuoteExtraPackageSiteModel
     common_site = bookings_site
 
     def process_data(self, quotepackage, inlines):
@@ -237,84 +231,6 @@ class QuotePackageAmountsView(ModelChangeFormProcessorView):
 
         code, message, results = BookingServices.find_quoteservice_amounts(
             quotepackage, variant_list)
-
-        return JsonResponse({
-            'code': code,
-            'message': message,
-            'results': results,
-        })
-
-
-class QuotePackageAllotmentAmountsView(ModelChangeFormProcessorView):
-
-    model = QuotePackageAllotment
-    common_sitemodel = QuotePackageAllotmentSiteModel
-    common_site = bookings_site
-
-    def process_data(self, quotepackageallotment, inlines):
-
-        variant_list = inlines[0]
-        if not variant_list:
-            return JsonResponse({
-                'code': 3,
-                'message': 'Pax Variants Missing',
-                'results': None,
-            })
-
-        code, message, results = BookingServices.find_quoteservice_amounts(
-            quotepackageallotment, variant_list)
-
-        return JsonResponse({
-            'code': code,
-            'message': message,
-            'results': results,
-        })
-
-
-class QuotePackageTransferAmountsView(ModelChangeFormProcessorView):
-
-    model = QuotePackageTransfer
-    common_sitemodel = QuotePackageTransferSiteModel
-    common_site = bookings_site
-
-    def process_data(self, quotepackagetransfer, inlines):
-
-        variant_list = inlines[0]
-        if not variant_list:
-            return JsonResponse({
-                'code': 3,
-                'message': 'Pax Variants Missing',
-                'results': None,
-            })
-
-        code, message, results = BookingServices.find_quoteservice_amounts(
-            quotepackagetransfer, variant_list)
-
-        return JsonResponse({
-            'code': code,
-            'message': message,
-            'results': results,
-        })
-
-
-class QuotePackageExtraAmountsView(ModelChangeFormProcessorView):
-
-    model = QuotePackageExtra
-    common_sitemodel = QuotePackageExtraSiteModel
-    common_site = bookings_site
-
-    def process_data(self, quotepackageextra, inlines):
-
-        variant_list = inlines[0]
-        if not variant_list:
-            return JsonResponse({
-                'code': 3,
-                'message': 'Pax Variants Missing',
-                'results': None,
-            })
-
-        code, message, results = BookingServices.find_quoteservice_amounts(
-            quotepackageextra, variant_list)
 
         return JsonResponse({
             'code': code,
@@ -403,7 +319,7 @@ class BookingPackageServiceAmountsView(ModelChangeFormProcessorView):
                 'price': None,
                 'price_message': 'Service Id Missing',
             }), None
-        pax_list = list(BookingServicePax.objects.filter(
+        pax_list = list(BaseBookingServicePax.objects.filter(
             booking_service=bookingpackageservice.booking_package_id).all())
         if not pax_list:
             return JsonResponse({
@@ -431,43 +347,43 @@ class BookingPackageServiceAmountsView(ModelChangeFormProcessorView):
 
 
 class BookingAllotmentAmountsView(BookingServiceAmountsView):
-    model = BookingAllotment
-    common_sitemodel = BookingAllotmentSiteModel
+    model = BookingProvidedAllotment
+    common_sitemodel = BookingProvidedAllotmentSiteModel
 
 
 class BookingTransferAmountsView(BookingServiceAmountsView):
-    model = BookingTransfer
-    common_sitemodel = BookingTransferSiteModel
+    model = BookingProvidedTransfer
+    common_sitemodel = BookingProvidedTransferSiteModel
 
 
 class BookingExtraAmountsView(BookingServiceAmountsView):
-    model = BookingExtra
-    common_sitemodel = BookingExtraSiteModel
+    model = BookingProvidedExtra
+    common_sitemodel = BookingProvidedExtraSiteModel
 
 
 class BookingExtraComponentAmountsView(BookingServiceAmountsView):
-    model = BookingExtra
-    common_sitemodel = BookingExtraSiteModel
+    model = BookingProvidedExtra
+    common_sitemodel = BookingProvidedExtraSiteModel
 
 
 class BookingPackageAmountsView(BookingServiceAmountsView):
-    model = BookingPackage
-    common_sitemodel = BookingPackageSiteModel
+    model = BookingExtraPackage
+    common_sitemodel = BookingExtraPackageSiteModel
 
 
 class BookingPackageAllotmentAmountsView(BookingPackageServiceAmountsView):
-    model = BookingPackageAllotment
-    common_sitemodel = BookingPackageAllotmentSiteModel
+    model = BookingProvidedAllotment
+    common_sitemodel = BookingProvidedAllotmentSiteModel
 
 
 class BookingPackageTransferAmountsView(BookingPackageServiceAmountsView):
-    model = BookingPackageTransfer
-    common_sitemodel = BookingPackageTransferSiteModel
+    model = BookingProvidedTransfer
+    common_sitemodel = BookingProvidedTransferSiteModel
 
 
 class BookingPackageExtraAmountsView(BookingPackageServiceAmountsView):
-    model = BookingPackageExtra
-    common_sitemodel = BookingPackageExtraSiteModel
+    model = BookingProvidedExtra
+    common_sitemodel = BookingProvidedExtraSiteModel
 
 
 class BookingTransferTimeView(ModelChangeFormProcessorView):
@@ -587,7 +503,7 @@ class BookingServiceUpdateView(View):
         if not services:
             messages.info(request, 'Booking Saved and no Service Updated')
         else:
-            booking_services = BookingService.objects.filter(pk__in=services)
+            booking_services = BaseBookingService.objects.filter(pk__in=services)
             BookingServices.update_bookingservices_amounts(booking_services)
             messages.info(request, 'Booking Saved and %s services updated' % len(services))
         stay_on_booking = request.GET.get('stay_on_booking', False)
@@ -607,7 +523,7 @@ class EmailProviderView(View):
         This will render the default email for certain provider
         allowing it to be customiced
         """
-        bs = BookingService.objects.get(id=id)
+        bs = BookingProvidedService.objects.get(id=id)
         form = EmailProviderForm(
             request.user,
             initial={
@@ -624,7 +540,7 @@ class EmailProviderView(View):
         return render(request, 'booking/email_provider_form.html', context)
 
     def post(self, request, id, *args, **kwargs):
-        booking_service = BookingService.objects.get(id=id)
+        booking_service = BookingProvidedService.objects.get(id=id)
         from_address = request.POST.get('from_address')
         to_address = request.POST.get('to_address')
         cc_address = request.POST.get('cc_address')
@@ -653,7 +569,7 @@ class EmailProviderPackageServiceView(View):
         This will render the default email for certain provider
         allowing it to be customiced
         """
-        bps = BookingPackageService.objects.get(id=id)
+        bps = BookingProvidedService.objects.get(id=id)
         provider = bps.provider
         if not provider:
             provider = bps.booking_package.provider
@@ -673,7 +589,7 @@ class EmailProviderPackageServiceView(View):
         return render(request, 'booking/email_provider_form.html', context)
 
     def post(self, request, id, *args, **kwargs):
-        bps = BookingPackageService.objects.get(id=id)
+        bps = BookingProvidedService.objects.get(id=id)
         from_address = request.POST.get('from_address')
         to_address = request.POST.get('to_address')
         cc_address = request.POST.get('cc_address')
@@ -704,7 +620,7 @@ class EmailConfirmationView(View):
         """
         bk = Booking.objects.get(id=id)
         # pick all non-cancelled services
-        services = BookingService.objects.filter(
+        services = BookingProvidedService.objects.filter(
             booking=bk.pk).exclude(status=SERVICE_STATUS_CANCELLED)
         # this is for the agency seller name (add also variable for email)
         client_name = ''
@@ -748,7 +664,7 @@ class EmailConfirmationView(View):
         return render(request, 'booking/email_provider_form.html', context)
 
     def post(self, request, id, *args, **kwargs):
-        booking_service = BookingService.objects.get(id=id)
+        booking_service = BaseBookingService.objects.get(id=id)
         from_address = request.POST.get('from_address')
         to_address = request.POST.get('to_address')
         cc_address = request.POST.get('cc_address')
@@ -1094,80 +1010,34 @@ class ServiceProvidersCostsView(ModelChangeFormProcessorView):
         })
 
 
-class BookingAllotmentProvidersCostsView(ServiceProvidersCostsView):
-    model = BookingAllotment
-    common_sitemodel = BookingAllotmentSiteModel
+class BookingProvidedAllotmentProvidersCostsView(ServiceProvidersCostsView):
+    model = BookingProvidedAllotment
+    common_sitemodel = BookingProvidedAllotmentSiteModel
 
 
-class BookingTransferProvidersCostsView(ServiceProvidersCostsView):
-    model = BookingTransfer
-    common_sitemodel = BookingTransferSiteModel
+class BookingProvidedTransferProvidersCostsView(ServiceProvidersCostsView):
+    model = BookingProvidedTransfer
+    common_sitemodel = BookingProvidedTransferSiteModel
 
 
-class BookingExtraProvidersCostsView(ServiceProvidersCostsView):
-    model = BookingExtra
-    common_sitemodel = BookingExtraSiteModel
+class BookingProvidedExtraProvidersCostsView(ServiceProvidersCostsView):
+    model = BookingProvidedExtra
+    common_sitemodel = BookingProvidedExtraSiteModel
 
 
-class BookingPackageAllotmentProvidersCostsView(ServiceProvidersCostsView):
-    model = BookingPackageAllotment
-    common_sitemodel = BookingPackageAllotmentSiteModel
+class NewQuoteAllotmentProvidersCostsView(ServiceProvidersCostsView):
+    model = NewQuoteAllotment
+    common_sitemodel = NewQuoteAllotmentSiteModel
 
 
-class BookingPackageTransferProvidersCostsView(ServiceProvidersCostsView):
-    model = BookingPackageTransfer
-    common_sitemodel = BookingPackageTransferSiteModel
+class NewQuoteTransferProvidersCostsView(ServiceProvidersCostsView):
+    model = NewQuoteTransfer
+    common_sitemodel = NewQuoteTransferSiteModel
 
 
-class BookingPackageExtraProvidersCostsView(ServiceProvidersCostsView):
-    model = BookingPackageExtra
-    common_sitemodel = BookingPackageExtraSiteModel
-
-
-class ServicePackageAutocompleteView(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
-            return Package.objects.none()
-        provider = self.forwarded.get('provider', None)
-        qs = Package.objects.filter(enabled=True).distinct()
-        if provider:
-            qs = qs.filter(
-                packageprovider__provider=provider,
-            )
-        if self.q:
-            qs = qs.filter(name__icontains=self.q)
-        return qs[:20]
-
-
-class QuoteAllotmentProvidersCostsView(ServiceProvidersCostsView):
-    model = QuoteAllotment
-    common_sitemodel = QuoteAllotmentSiteModel
-
-
-class QuoteTransferProvidersCostsView(ServiceProvidersCostsView):
-    model = QuoteTransfer
-    common_sitemodel = QuoteTransferSiteModel
-
-
-class QuoteExtraProvidersCostsView(ServiceProvidersCostsView):
-    model = QuoteExtra
-    common_sitemodel = QuoteExtraSiteModel
-
-
-class QuotePackageAllotmentProvidersCostsView(ServiceProvidersCostsView):
-    model = QuotePackageAllotment
-    common_sitemodel = QuotePackageAllotmentSiteModel
-
-
-class QuotePackageTransferProvidersCostsView(ServiceProvidersCostsView):
-    model = QuotePackageTransfer
-    common_sitemodel = QuotePackageTransferSiteModel
-
-
-class QuotePackageExtraProvidersCostsView(ServiceProvidersCostsView):
-    model = QuotePackageExtra
-    common_sitemodel = QuotePackageExtraSiteModel
+class NewQuoteExtraProvidersCostsView(ServiceProvidersCostsView):
+    model = NewQuoteExtra
+    common_sitemodel = NewQuoteExtraSiteModel
 
 
 class ServiceDetailsView(View):
@@ -1216,7 +1086,7 @@ class TransferServiceDetailsView(View):
         })
 
 
-class QuoteServiceBookDetailURLView(View):
+class NewQuoteServiceBookDetailURLView(View):
     def post(self, request, *args, **kwargs):
         parent_id = request.POST.get('parent_id', None)
         service_id = request.POST.get('service', None)
@@ -1225,17 +1095,17 @@ class QuoteServiceBookDetailURLView(View):
             service = Service.objects.get(id=service_id)
             if service.category == 'A':
                 return JsonResponse({
-                    'url': 'booking/quoteservicebookdetailallotment/add/?quote_service=%s&book_service=%s'
+                    'url': 'booking/newquoteservicebookdetailallotment/add/?quote_service=%s&book_service=%s'
                         % (parent_id, service_id),
                 })
             elif service.category == 'T':
                 return JsonResponse({
-                    'url': 'booking/quoteservicebookdetailtransfer/add/?quote_service=%s&book_service=%s'
+                    'url': 'booking/newquoteservicebookdetailtransfer/add/?quote_service=%s&book_service=%s'
                         % (parent_id, service_id),
                 })
             elif service.category == 'E':
                 return JsonResponse({
-                    'url': 'booking/quoteservicebookdetailextra/add/?quote_service=%s&book_service=%s'
+                    'url': 'booking/newquoteservicebookdetailextra/add/?quote_service=%s&book_service=%s'
                         % (parent_id, service_id),
                 })
         return JsonResponse({
@@ -1244,7 +1114,7 @@ class QuoteServiceBookDetailURLView(View):
 
 
 
-class BookingServiceBookDetailURLView(View):
+class BookingBookDetailURLView(View):
     def post(self, request, *args, **kwargs):
         parent_id = request.POST.get('parent_id', None)
         service_id = request.POST.get('service', None)
@@ -1252,17 +1122,17 @@ class BookingServiceBookDetailURLView(View):
             service = Service.objects.get(id=service_id)
             if service.category == 'A':
                 return JsonResponse({
-                    'url': 'booking/bookingservicebookdetailallotment/add/?booking_service=%s&book_service=%s'
+                    'url': 'booking/bookingbookdetailallotment/add/?booking_service=%s&book_service=%s'
                         % (parent_id, service_id),
                 })
             elif service.category == 'T':
                 return JsonResponse({
-                    'url': 'booking/bookingservicebookdetailtransfer/add/?booking_service=%s&book_service=%s'
+                    'url': 'booking/bookingbookdetailtransfer/add/?booking_service=%s&book_service=%s'
                         % (parent_id, service_id),
                 })
             elif service.category == 'E':
                 return JsonResponse({
-                    'url': 'booking/bookingservicebookdetailextra/add/?booking_service=%s&book_service=%s'
+                    'url': 'booking/bookingbookdetailextra/add/?booking_service=%s&book_service=%s'
                         % (parent_id, service_id),
                 })
         return JsonResponse({

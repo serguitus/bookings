@@ -98,29 +98,29 @@ PACKAGESERVICE_TYPES = {
 }
 
 QUOTESERVICE_TYPES = {
-    SERVICE_CATEGORY_ALLOTMENT: 'quoteallotment',
-    SERVICE_CATEGORY_TRANSFER: 'quotetransfer',
-    SERVICE_CATEGORY_EXTRA: 'quoteextra',
-    SERVICE_CATEGORY_PACKAGE: 'quotepackage',
+    SERVICE_CATEGORY_ALLOTMENT: 'newquoteallotment',
+    SERVICE_CATEGORY_TRANSFER: 'newquotetransfer',
+    SERVICE_CATEGORY_EXTRA: 'newquoteextra',
+    SERVICE_CATEGORY_PACKAGE: 'quoteextrapackage',
 }
 
 QUOTEPACKAGESERVICE_TYPES = {
-    SERVICE_CATEGORY_ALLOTMENT: 'quotepackageallotment',
-    SERVICE_CATEGORY_TRANSFER: 'quotepackagetransfer',
-    SERVICE_CATEGORY_EXTRA: 'quotepackageextra',
+    SERVICE_CATEGORY_ALLOTMENT: 'newquoteallotment',
+    SERVICE_CATEGORY_TRANSFER: 'newquotetransfer',
+    SERVICE_CATEGORY_EXTRA: 'newquoteextra',
 }
 
 BOOKINGSERVICE_TYPES = {
-    SERVICE_CATEGORY_ALLOTMENT: 'bookingallotment',
-    SERVICE_CATEGORY_TRANSFER: 'bookingtransfer',
-    SERVICE_CATEGORY_EXTRA: 'bookingextra',
-    SERVICE_CATEGORY_PACKAGE: 'bookingpackage',
+    SERVICE_CATEGORY_ALLOTMENT: 'bookingprovidedallotment',
+    SERVICE_CATEGORY_TRANSFER: 'bookingprovidedtransfer',
+    SERVICE_CATEGORY_EXTRA: 'bookingprovidedextra',
+    SERVICE_CATEGORY_PACKAGE: 'bookingextrapackage',
 }
 
 BOOKINGPACKAGESERVICE_TYPES = {
-    SERVICE_CATEGORY_ALLOTMENT: 'bookingpackageallotment',
-    SERVICE_CATEGORY_TRANSFER: 'bookingpackagetransfer',
-    SERVICE_CATEGORY_EXTRA: 'bookingpackageextra',
+    SERVICE_CATEGORY_ALLOTMENT: 'bookingprovidedallotment',
+    SERVICE_CATEGORY_TRANSFER: 'bookingprovidedtransfer',
+    SERVICE_CATEGORY_EXTRA: 'bookingprovidedextra',
 }
 
 ACTIONS = {

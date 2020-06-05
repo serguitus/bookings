@@ -4,13 +4,10 @@ from booking import views
 
 urlpatterns = [
     url(r'^quote-amounts/?', views.QuoteAmountsView.as_view(), name='quote_amounts'),
-    url(r'^quoteallotment-amounts/?', views.QuoteAllotmentAmountsView.as_view(), name='quoteallotment_amounts'),
-    url(r'^quotetransfer-amounts/?', views.QuoteTransferAmountsView.as_view(), name='quotetransfer_amounts'),
-    url(r'^quoteextra-amounts/?', views.QuoteExtraAmountsView.as_view(), name='quoteextra_amounts'),
-    url(r'^quotepackage-amounts/?', views.QuotePackageAmountsView.as_view(), name='quotepackage_amounts'),
-    url(r'^quotepackageallotment-amounts/?', views.QuotePackageAllotmentAmountsView.as_view(), name='quotepackageallotment_amounts'),
-    url(r'^quotepackagetransfer-amounts/?', views.QuotePackageTransferAmountsView.as_view(), name='quotepackagetransfer_amounts'),
-    url(r'^quotepackageextra-amounts/?', views.QuotePackageExtraAmountsView.as_view(), name='quotepackageextra_amounts'),
+    url(r'^quoteallotment-amounts/?', views.NewQuoteAllotmentAmountsView.as_view(), name='quoteallotment_amounts'),
+    url(r'^quotetransfer-amounts/?', views.NewQuoteTransferAmountsView.as_view(), name='quotetransfer_amounts'),
+    url(r'^quoteextra-amounts/?', views.NewQuoteExtraAmountsView.as_view(), name='quoteextra_amounts'),
+    url(r'^quotepackage-amounts/?', views.QuoteExtraPackageAmountsView.as_view(), name='quotepackage_amounts'),
 
     url(r'^booking-amounts/?', views.BookingAmountsView.as_view(), name='booking_amounts'),
     url(r'^bookingallotment-amounts/?', views.BookingAllotmentAmountsView.as_view(), name='bookingallotment_amounts'),
@@ -38,30 +35,24 @@ urlpatterns = [
 
     url(r'^updateservices/(?P<id>\d+)/?', views.BookingServiceUpdateView.as_view(), name='bookingservice_update'),
 
-    url(r'^bookingallotment-providers-costs/?', views.BookingAllotmentProvidersCostsView.as_view(), name='bookingallotment_providers_costs'),
-    url(r'^bookingtransfer-providers-costs/?', views.BookingTransferProvidersCostsView.as_view(), name='bookingtransfer_providers_costs'),
-    url(r'^bookingextra-providers-costs/?', views.BookingExtraProvidersCostsView.as_view(), name='bookingextra_providers_costs'),
-    url(r'^bookingpackageallotment-providers-costs/?', views.BookingPackageAllotmentProvidersCostsView.as_view(), name='bookingpackageallotment_providers_costs'),
-    url(r'^bookingpackagetransfer-providers-costs/?', views.BookingPackageTransferProvidersCostsView.as_view(), name='bookingpackagetransfer_providers_costs'),
-    url(r'^bookingpackageextra-providers-costs/?', views.BookingPackageExtraProvidersCostsView.as_view(), name='bookingpackageextra_providers_costs'),
+    url(r'^bookingallotment-providers-costs/?', views.BookingProvidedAllotmentProvidersCostsView.as_view(), name='bookingallotment_providers_costs'),
+    url(r'^bookingtransfer-providers-costs/?', views.BookingProvidedTransferProvidersCostsView.as_view(), name='bookingtransfer_providers_costs'),
+    url(r'^bookingextra-providers-costs/?', views.BookingProvidedExtraProvidersCostsView.as_view(), name='bookingextra_providers_costs'),
 
-    url(r'^quoteallotment-providers-costs/?', views.QuoteAllotmentProvidersCostsView.as_view(), name='quoteallotment_providers_costs'),
-    url(r'^quotetransfer-providers-costs/?', views.QuoteTransferProvidersCostsView.as_view(), name='quotetransfer_providers_costs'),
-    url(r'^quoteextra-providers-costs/?', views.QuoteExtraProvidersCostsView.as_view(), name='quoteextra_providers_costs'),
-    url(r'^quotepackageallotment-providers-costs/?', views.QuotePackageAllotmentProvidersCostsView.as_view(), name='quotepackageallotment_providers_costs'),
-    url(r'^quotepackagetransfer-providers-costs/?', views.QuotePackageTransferProvidersCostsView.as_view(), name='quotepackagetransfer_providers_costs'),
-    url(r'^quotepackageextra-providers-costs/?', views.QuotePackageExtraProvidersCostsView.as_view(), name='quotepackageextra_providers_costs'),
+    url(r'^quoteallotment-providers-costs/?', views.NewQuoteAllotmentProvidersCostsView.as_view(), name='quoteallotment_providers_costs'),
+    url(r'^quotetransfer-providers-costs/?', views.NewQuoteTransferProvidersCostsView.as_view(), name='quotetransfer_providers_costs'),
+    url(r'^quoteextra-providers-costs/?', views.NewQuoteExtraProvidersCostsView.as_view(), name='quoteextra_providers_costs'),
 
     url(r'^extra-service-details/?', views.ExtraServiceDetailsView.as_view(), name='extra-service-details'),
     url(r'^transfer-service-details/?', views.TransferServiceDetailsView.as_view(), name='transfer-service-details'),
 
     url(
         r'^quote_book_detail_url/?',
-        views.QuoteServiceBookDetailURLView.as_view(),
+        views.NewQuoteServiceBookDetailURLView.as_view(),
         name='quote_book_detail_url'),
     url(
         r'^booking_book_detail_url/?',
-        views.BookingServiceBookDetailURLView.as_view(),
+        views.BookingBookDetailURLView.as_view(),
         name='booking_book_detail_url'),
 
 ]

@@ -8,13 +8,8 @@ from django import forms
 from django.forms import widgets
 
 from booking.models import (
-    Package,
-    PackageAllotment, PackageTransfer, PackageExtra,
-    PackageProvider, AgencyPackageService,
-    Quote, QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
-    QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
-    Booking, BookingServicePax, BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
-    BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
+    Quote, NewQuoteAllotment, NewQuoteTransfer, NewQuoteExtra, QuoteExtraPackage,
+    Booking, BaseBookingServicePax, BookingProvidedAllotment, BookingProvidedTransfer, BookingProvidedExtra, BookingExtraPackage,
     ProviderBookingPayment,
 )
 
@@ -133,115 +128,6 @@ class PackageExtraInlineForm(forms.ModelForm, ServiceForm):
         }
 
 
-class PackageAllotmentForm(forms.ModelForm, ServiceForm):
-    class Meta:
-        model = PackageAllotment
-        fields = '__all__'
-        widgets = {
-            'service': autocomplete.ModelSelect2(
-                url='serviceallotment-autocomplete',
-                forward=['provider', 'search_location'],
-                ),
-            'room_type': autocomplete.ModelSelect2(
-                url='roomtype-autocomplete',
-                forward=['service'],
-                ),
-            'board_type': autocomplete.ListSelect2(
-                url='boardtype-autocomplete',
-                forward=['service']),
-            'service_addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
-                forward=['service'],
-                ),
-            'provider': autocomplete.ModelSelect2(
-                url='providerallotment-autocomplete',
-                forward=['service', 'room_type', 'board_type', 'service_addon'],
-                ),
-        }
-    id = forms.CharField(required=False, widget=forms.HiddenInput())
-
-
-class PackageTransferForm(forms.ModelForm, ServiceForm):
-    class Meta:
-        model = PackageTransfer
-        fields = ('__all__')
-        widgets = {
-            'service': autocomplete.ModelSelect2(
-                url='servicetransfer-autocomplete',
-                forward=['provider', 'search_location', 'location_from', 'location_to'],
-                ),
-            'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
-            'place_from': autocomplete.ModelSelect2(
-                url='place-autocomplete',
-                forward=['location_from'],
-                ),
-            'pickup': autocomplete.ModelSelect2(
-                url='pickup-autocomplete',
-                forward=['location_from', 'service'],
-                ),
-            'schedule_from': autocomplete.ModelSelect2(
-                url='arrival-autocomplete',
-                forward=['service', 'location_from'],
-                ),
-            'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
-            'place_to': autocomplete.ModelSelect2(
-                url='place-autocomplete',
-                forward=['location_to'],
-                ),
-            'dropoff': autocomplete.ModelSelect2(
-                url='dropoff-autocomplete',
-                forward=['location_to', 'service'],
-                ),
-            'schedule_to': autocomplete.ModelSelect2(
-                url='departure-autocomplete',
-                forward=['location_to'],
-                ),
-            'service_addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
-                forward=['service'],
-                ),
-            'provider': autocomplete.ModelSelect2(
-                url='providertransfer-autocomplete',
-                forward=['service', 'service_addon',
-                         'location_from', 'location_to'],
-                ),
-        }
-    id = forms.CharField(required=False, widget=forms.HiddenInput())
-
-
-class PackageExtraForm(forms.ModelForm, ServiceForm):
-    class Meta:
-        model = PackageExtra
-        fields = ('__all__')
-        widgets = {
-            'service': autocomplete.ModelSelect2(
-                url='serviceextra-autocomplete',
-                forward=['provider', 'search_location'],
-                ),
-            'addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
-                forward=['service'],
-                ),
-            'service_addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
-                forward=['service'],
-                ),
-            'provider': autocomplete.ModelSelect2(
-                url='providerextra-autocomplete',
-                forward=['service', 'service_addon'],
-                ),
-            'pickup_office': autocomplete.ModelSelect2(
-                url='carrentaloffice-autocomplete',
-                forward=['service',],
-                ),
-            'dropoff_office': autocomplete.ModelSelect2(
-                url='carrentaloffice-autocomplete',
-                forward=['service',],
-                ),
-        }
-    id = forms.CharField(required=False, widget=forms.HiddenInput())
-
-
 class QuotePackageAllotmentInlineForm(forms.ModelForm, ServiceForm):
     class Meta:
         fields = ('__all__')
@@ -270,7 +156,7 @@ class QuotePackageAllotmentInlineForm(forms.ModelForm, ServiceForm):
 
 class QuotePackageAllotmentForm(forms.ModelForm, ServiceForm):
     class Meta:
-        model = QuotePackageAllotment
+        model = NewQuoteAllotment
         fields = '__all__'
         widgets = {
             'quote_package': autocomplete.ModelSelect2(
@@ -321,7 +207,7 @@ class QuotePackageTransferInlineForm(forms.ModelForm, ServiceForm):
 
 class QuotePackageTransferForm(forms.ModelForm, ServiceForm):
     class Meta:
-        model = QuotePackageTransfer
+        model = NewQuoteTransfer
         fields = ('__all__')
         widgets = {
             'quote_package': autocomplete.ModelSelect2(
@@ -377,7 +263,7 @@ class QuotePackageExtraInlineForm(forms.ModelForm, ServiceForm):
 
 class QuotePackageExtraForm(forms.ModelForm, ServiceForm):
     class Meta:
-        model = QuotePackageExtra
+        model = NewQuoteExtra
         fields = ('__all__')
         widgets = {
             'quote_package': autocomplete.ModelSelect2(
@@ -410,7 +296,7 @@ class QuotePackageExtraForm(forms.ModelForm, ServiceForm):
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
-class QuoteAllotmentInlineForm(forms.ModelForm, ServiceForm):
+class NewQuoteAllotmentInlineForm(forms.ModelForm, ServiceForm):
     class Meta:
         fields = ('__all__')
         widgets = {
@@ -436,9 +322,9 @@ class QuoteAllotmentInlineForm(forms.ModelForm, ServiceForm):
         }
 
 
-class QuoteAllotmentForm(forms.ModelForm, ServiceForm):
+class NewQuoteAllotmentForm(forms.ModelForm, ServiceForm):
     class Meta:
-        model = QuoteAllotment
+        model = NewQuoteAllotment
         fields = '__all__'
         widgets = {
             'quote': autocomplete.ModelSelect2(
@@ -467,7 +353,7 @@ class QuoteAllotmentForm(forms.ModelForm, ServiceForm):
     nights = forms.IntegerField(initial=0)
 
 
-class QuoteTransferInlineForm(forms.ModelForm, ServiceForm):
+class NewQuoteTransferInlineForm(forms.ModelForm, ServiceForm):
     class Meta:
         fields = ('__all__')
         widgets = {
@@ -488,9 +374,9 @@ class QuoteTransferInlineForm(forms.ModelForm, ServiceForm):
         }
 
 
-class QuoteTransferForm(forms.ModelForm, ServiceForm):
+class NewQuoteTransferForm(forms.ModelForm, ServiceForm):
     class Meta:
-        model = QuoteTransfer
+        model = NewQuoteTransfer
         fields = ('__all__')
         widgets = {
             'booking': autocomplete.ModelSelect2(
@@ -513,7 +399,7 @@ class QuoteTransferForm(forms.ModelForm, ServiceForm):
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
-class QuoteExtraInlineForm(forms.ModelForm, ServiceForm):
+class NewQuoteExtraInlineForm(forms.ModelForm, ServiceForm):
     class Meta:
         fields = ('__all__')
         widgets = {
@@ -544,9 +430,9 @@ class QuoteExtraInlineForm(forms.ModelForm, ServiceForm):
         }
 
 
-class QuoteExtraForm(forms.ModelForm, ServiceForm):
+class NewQuoteExtraForm(forms.ModelForm, ServiceForm):
     class Meta:
-        model = QuoteExtra
+        model = NewQuoteExtra
         fields = ('__all__')
         widgets = {
             'booking': autocomplete.ModelSelect2(
@@ -580,7 +466,7 @@ class QuoteExtraForm(forms.ModelForm, ServiceForm):
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
-class QuotePackageInlineForm(forms.ModelForm, ServiceForm):
+class QuoteExtraPackageInlineForm(forms.ModelForm, ServiceForm):
     class Meta:
         fields = ('__all__')
         widgets = {
@@ -595,9 +481,9 @@ class QuotePackageInlineForm(forms.ModelForm, ServiceForm):
         }
 
 
-class QuotePackageForm(forms.ModelForm, ServiceForm):
+class QuoteExtraPackageForm(forms.ModelForm, ServiceForm):
     class Meta:
-        model = QuotePackage
+        model = QuoteExtraPackage
         fields = ('__all__')
         widgets = {
             'booking': autocomplete.ModelSelect2(
@@ -629,7 +515,7 @@ class BookingForm(forms.ModelForm, MailForm):
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
-class BookingServicePaxInlineForm(forms.ModelForm):
+class BaseBookingServicePaxInlineForm(forms.ModelForm):
     class Meta:
         fields = '__all__'
         widgets = {
@@ -641,7 +527,7 @@ class BookingServicePaxInlineForm(forms.ModelForm):
 
 class BookingAllotmentForm(forms.ModelForm, MailForm, ServiceForm):
     class Meta:
-        model = BookingAllotment
+        model = BookingProvidedAllotment
         fields = '__all__'
         widgets = {
             'booking': autocomplete.ModelSelect2(
@@ -675,7 +561,7 @@ class BookingAllotmentForm(forms.ModelForm, MailForm, ServiceForm):
 
 class BookingTransferForm(forms.ModelForm, MailForm, ServiceForm):
     class Meta:
-        model = BookingTransfer
+        model = BookingProvidedTransfer
         fields = ('__all__')
         widgets = {
             'booking': autocomplete.ModelSelect2(
@@ -727,7 +613,7 @@ class BookingTransferForm(forms.ModelForm, MailForm, ServiceForm):
 
 class BookingExtraForm(forms.ModelForm, MailForm, ServiceForm):
     class Meta:
-        model = BookingExtra
+        model = BookingProvidedExtra
         fields = ('__all__')
         widgets = {
             'booking': autocomplete.ModelSelect2(
@@ -766,7 +652,7 @@ class BookingExtraForm(forms.ModelForm, MailForm, ServiceForm):
 
 class BookingPackageForm(forms.ModelForm, MailForm, ServiceForm):
     class Meta:
-        model = BookingPackage
+        model = BookingExtraPackage
         fields = '__all__'
         widgets = {
             'booking': autocomplete.ModelSelect2(
@@ -788,7 +674,7 @@ class BookingPackageForm(forms.ModelForm, MailForm, ServiceForm):
 
 class BookingPackageAllotmentForm(forms.ModelForm, MailForm, ServiceForm):
     class Meta:
-        model = BookingPackageAllotment
+        model = BookingProvidedAllotment
         fields = '__all__'
         widgets = {
             'booking_package': autocomplete.ModelSelect2(
@@ -818,7 +704,7 @@ class BookingPackageAllotmentForm(forms.ModelForm, MailForm, ServiceForm):
 
 class BookingPackageTransferForm(forms.ModelForm, MailForm, ServiceForm):
     class Meta:
-        model = BookingPackageTransfer
+        model = BookingProvidedTransfer
         fields = ('__all__')
         widgets = {
             'booking_package': autocomplete.ModelSelect2(
@@ -867,7 +753,7 @@ class BookingPackageTransferForm(forms.ModelForm, MailForm, ServiceForm):
 
 class BookingPackageExtraForm(forms.ModelForm, MailForm, ServiceForm):
     class Meta:
-        model = BookingPackageExtra
+        model = BookingProvidedExtra
         fields = ('__all__')
         widgets = {
             'booking_package': autocomplete.ModelSelect2(
@@ -898,26 +784,6 @@ class BookingPackageExtraForm(forms.ModelForm, MailForm, ServiceForm):
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
-
-
-class PackageProviderForm(forms.ModelForm):
-    class Meta:
-        model = PackageProvider
-        fields = ('__all__')
-        widgets = {
-            'service': autocomplete.ModelSelect2(url='package-autocomplete'),
-            'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
-        }
-
-
-class AgencyPackageServiceForm(forms.ModelForm):
-    class Meta:
-        model = AgencyPackageService
-        fields = ('__all__')
-        widgets = {
-            'agency': autocomplete.ModelSelect2(url='agency-autocomplete'),
-            'service': autocomplete.ModelSelect2(url='package-autocomplete'),
-        }
 
 
 class EmailProviderForm(forms.Form):
@@ -1003,16 +869,6 @@ class VouchersConfigForm(MailForm):
     # id = forms.MultiValueField()
     # here comes also some inputs to select logo and other details
     office = forms.ModelChoiceField(queryset=Office.objects.all())
-
-
-class PackageForm(forms.ModelForm):
-    class Meta:
-        model = Package
-        fields = ('__all__')
-        widgets = {
-            'location': autocomplete.ModelSelect2(url='location-autocomplete'),
-            'description': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
-        }
 
 
 class ProviderBookingPaymentForm(forms.ModelForm, MailForm):
@@ -1109,7 +965,7 @@ class BookingExtraComponentInlineForm(forms.ModelForm):
             'component': autocomplete.ModelSelect2(url='extra-autocomplete'),
         }
 
-class QuoteServiceBookDetailAllotmentForm(forms.ModelForm, BaseBookDataForm):
+class NewQuoteServiceBookDetailAllotmentForm(forms.ModelForm, BaseBookDataForm):
     class Meta:
         fields = ('__all__')
         widgets = {
@@ -1134,7 +990,7 @@ class QuoteServiceBookDetailAllotmentForm(forms.ModelForm, BaseBookDataForm):
         }
 
 
-class QuoteServiceBookDetailTransferForm(forms.ModelForm, BaseBookDataForm):
+class NewQuoteServiceBookDetailTransferForm(forms.ModelForm, BaseBookDataForm):
     class Meta:
         fields = ('__all__')
         widgets = {
@@ -1154,7 +1010,7 @@ class QuoteServiceBookDetailTransferForm(forms.ModelForm, BaseBookDataForm):
         }
 
 
-class QuoteServiceBookDetailExtraForm(forms.ModelForm, BaseBookDataForm):
+class NewQuoteServiceBookDetailExtraForm(forms.ModelForm, BaseBookDataForm):
     class Meta:
         fields = ('__all__')
         widgets = {
@@ -1180,7 +1036,7 @@ class QuoteServiceBookDetailExtraForm(forms.ModelForm, BaseBookDataForm):
         }
 
 
-class BookingServiceBookDetailAllotmentForm(forms.ModelForm, BaseBookDataForm):
+class BookingBookDetailAllotmentForm(forms.ModelForm, BaseBookDataForm):
     class Meta:
         fields = ('__all__')
         widgets = {
@@ -1205,7 +1061,7 @@ class BookingServiceBookDetailAllotmentForm(forms.ModelForm, BaseBookDataForm):
         }
 
 
-class BookingServiceBookDetailTransferForm(forms.ModelForm, BaseBookDataForm):
+class BookingBookDetailTransferForm(forms.ModelForm, BaseBookDataForm):
     class Meta:
         fields = ('__all__')
         widgets = {
@@ -1225,7 +1081,7 @@ class BookingServiceBookDetailTransferForm(forms.ModelForm, BaseBookDataForm):
         }
 
 
-class BookingServiceBookDetailExtraForm(forms.ModelForm, BaseBookDataForm):
+class BookingBookDetailExtraForm(forms.ModelForm, BaseBookDataForm):
     class Meta:
         fields = ('__all__')
         widgets = {

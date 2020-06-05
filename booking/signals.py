@@ -8,16 +8,12 @@ from booking.constants import SERVICE_CATEGORY_PACKAGE, SERVICE_STATUS_PENDING
 from booking.models import (
     Quote, QuotePaxVariant,
     QuoteServicePaxVariant,
-    QuoteAllotment, QuoteTransfer, QuoteExtra,
-    QuotePackageServicePaxVariant,
-    QuotePackage, QuotePackageAllotment,
-    QuotePackageTransfer, QuotePackageExtra,
+    NewQuoteAllotment, NewQuoteTransfer, NewQuoteExtra,
+    QuoteExtraPackage,
     Booking, BookingPax, BookingInvoice,
-    BaseBookingService, BookingService, BookingServicePax,
-    BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
-    BookingPackageService, BookingPackageAllotment,
-    BookingPackageTransfer, BookingPackageExtra,
-    ProviderBookingPayment, ProviderBookingPaymentService,
+    BaseBookingService, BookingProvidedService, BaseBookingServicePax,
+    BookingProvidedAllotment, BookingProvidedTransfer, BookingProvidedExtra, BookingExtraPackage,
+    ProviderBookingPayment, ProviderPaymentBookingProvided,
 )
 from booking.services import BookingServices
 
@@ -59,7 +55,7 @@ def post_delete_quoteservice_paxvariant(sender, instance, **kwargs):
             BookingServices.update_quote_paxvariant_amounts(instance)
 
 
-@receiver(post_save, sender=QuoteAllotment)
+@receiver(post_save, sender=NewQuoteAllotment)
 def post_save_quoteallotment(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all'):
         with transaction.atomic(savepoint=False):
@@ -67,7 +63,7 @@ def post_save_quoteallotment(sender, instance, **kwargs):
             BookingServices.update_quote(instance)
 
 
-@receiver(post_save, sender=QuoteTransfer)
+@receiver(post_save, sender=NewQuoteTransfer)
 def post_save_quotetransfer(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all'):
         with transaction.atomic(savepoint=False):
@@ -75,7 +71,7 @@ def post_save_quotetransfer(sender, instance, **kwargs):
             BookingServices.update_quote(instance)
 
 
-@receiver(post_save, sender=QuoteExtra)
+@receiver(post_save, sender=NewQuoteExtra)
 def post_save_quoteextra(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all'):
         with transaction.atomic(savepoint=False):
@@ -83,7 +79,7 @@ def post_save_quoteextra(sender, instance, **kwargs):
             BookingServices.update_quote(instance)
 
 
-@receiver(post_save, sender=QuotePackage)
+@receiver(post_save, sender=QuoteExtraPackage)
 def post_save_quotepackage(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all'):
         with transaction.atomic(savepoint=False):
@@ -92,27 +88,7 @@ def post_save_quotepackage(sender, instance, **kwargs):
             BookingServices.update_quote(instance)
 
 
-@receiver(pre_save, sender=QuotePackageServicePaxVariant)
-def pre_save_setup_amounts(sender, instance, **kwargs):
-    if not hasattr(instance, 'avoid_all'):
-        BookingServices.setup_paxvariant_amounts(instance)
-
-
-@receiver(post_save, sender=QuotePackageServicePaxVariant)
-def post_save_quotepackage_service_paxvariant(sender, instance, **kwargs):
-    if not hasattr(instance, 'code_updated') and not hasattr(instance, 'avoid_all'):
-        with transaction.atomic(savepoint=False):
-            BookingServices.update_quotepackage_paxvariant_amounts(instance)
-
-
-@receiver(post_delete, sender=QuotePackageServicePaxVariant)
-def post_delete_quotepackage_service_paxvariant(sender, instance, **kwargs):
-    if not hasattr(instance, 'avoid_all'):
-        with transaction.atomic(savepoint=False):
-            BookingServices.update_quotepackage_paxvariant_amounts(instance)
-
-
-@receiver(post_save, sender=QuotePackageAllotment)
+@receiver(post_save, sender=NewQuoteAllotment)
 def post_save_quotepackage_allotment(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all'):
         with transaction.atomic(savepoint=False):
@@ -120,7 +96,7 @@ def post_save_quotepackage_allotment(sender, instance, **kwargs):
             BookingServices.update_quotepackage(instance)
 
 
-@receiver(post_save, sender=QuotePackageTransfer)
+@receiver(post_save, sender=NewQuoteTransfer)
 def post_save_quotepackage_transfer(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all'):
         with transaction.atomic(savepoint=False):
@@ -128,7 +104,7 @@ def post_save_quotepackage_transfer(sender, instance, **kwargs):
             BookingServices.update_quotepackage(instance)
 
 
-@receiver(post_save, sender=QuotePackageExtra)
+@receiver(post_save, sender=NewQuoteExtra)
 def post_save_quotepackage_extra(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all'):
         with transaction.atomic(savepoint=False):
@@ -138,152 +114,152 @@ def post_save_quotepackage_extra(sender, instance, **kwargs):
 
 # Booking
 
-@receiver((post_save, post_delete), sender=BookingServicePax)
+@receiver((post_save, post_delete), sender=BaseBookingServicePax)
 def post_save_post_delete_bookingservicepax(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_bookingservice_update'):
         with transaction.atomic(savepoint=False):
             BookingServices.update_bookingservice_amounts(instance.booking_service)
 
 
-@receiver(pre_save, sender=BookingAllotment)
+@receiver(pre_save, sender=BookingProvidedAllotment)
 def pre_save_bookingallotment(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_update'):
         BookingServices.setup_bookingservice_amounts(instance)
     BookingServices.validate_basebookingservice(instance)
 
 
-@receiver(pre_save, sender=BookingTransfer)
+@receiver(pre_save, sender=BookingProvidedTransfer)
 def pre_save_bookingtransfer(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_update'):
         BookingServices.setup_bookingservice_amounts(instance)
     BookingServices.validate_basebookingservice(instance)
 
 
-@receiver(pre_save, sender=BookingExtra)
+@receiver(pre_save, sender=BookingProvidedExtra)
 def pre_save_bookingextra(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_update'):
         BookingServices.setup_bookingservice_amounts(instance)
     BookingServices.validate_basebookingservice(instance)
 
 
-@receiver(pre_delete, sender=BookingService)
+@receiver(pre_delete, sender=BookingProvidedService)
 def pre_delete_bookingservice(sender, instance, **kwargs):
     if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
         raise ValidationError('Can not delete Booking Services that are Not Pending')
 
 
-@receiver(pre_delete, sender=BookingAllotment)
+@receiver(pre_delete, sender=BookingProvidedAllotment)
 def pre_delete_bookingallotment(sender, instance, **kwargs):
     if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
         raise ValidationError('Can not delete Booking Services that are Not Pending')
 
 
-@receiver(pre_delete, sender=BookingTransfer)
+@receiver(pre_delete, sender=BookingProvidedTransfer)
 def pre_delete_bookingtransfer(sender, instance, **kwargs):
     if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
         raise ValidationError('Can not delete Booking Services that are Not Pending')
 
 
-@receiver(pre_delete, sender=BookingExtra)
+@receiver(pre_delete, sender=BookingProvidedExtra)
 def pre_delete_bookingextra(sender, instance, **kwargs):
     if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
         raise ValidationError('Can not delete Booking Services that are Not Pending')
 
 
-@receiver(pre_delete, sender=BookingPackage)
+@receiver(pre_delete, sender=BookingExtraPackage)
 def pre_delete_bookingpackage(sender, instance, **kwargs):
     if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
         raise ValidationError('Can not delete Booking Services that are Not Pending')
 
 
-@receiver(pre_delete, sender=BookingPackageService)
+@receiver(pre_delete, sender=BookingProvidedService)
 def pre_delete_bookingpackageservice(sender, instance, **kwargs):
     if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
         raise ValidationError('Can not delete Booking Services that are Not Pending')
 
 
-@receiver(pre_delete, sender=BookingPackageAllotment)
+@receiver(pre_delete, sender=BookingProvidedAllotment)
 def pre_delete_bookingpackageallotment(sender, instance, **kwargs):
     if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
         raise ValidationError('Can not delete Booking Services that are Not Pending')
 
 
-@receiver(pre_delete, sender=BookingPackageTransfer)
+@receiver(pre_delete, sender=BookingProvidedTransfer)
 def pre_delete_bookingpackagetransfer(sender, instance, **kwargs):
     if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
         raise ValidationError('Can not delete Booking Services that are Not Pending')
 
 
-@receiver(pre_delete, sender=BookingPackageExtra)
+@receiver(pre_delete, sender=BookingProvidedExtra)
 def pre_delete_bookingpackageextra(sender, instance, **kwargs):
     if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
         raise ValidationError('Can not delete Booking Services that are Not Pending')
 
 
-@receiver((post_save, post_delete), sender=BookingAllotment)
+@receiver((post_save, post_delete), sender=BookingProvidedAllotment)
 def post_save_post_delete_bookingallotment(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_booking_update'):
         with transaction.atomic(savepoint=False):
             BookingServices.update_booking(instance)
 
 
-@receiver((post_save, post_delete), sender=BookingTransfer)
+@receiver((post_save, post_delete), sender=BookingProvidedTransfer)
 def post_save_post_delete_bookingtransfer(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_booking_update'):
         with transaction.atomic(savepoint=False):
             BookingServices.update_booking(instance)
 
 
-@receiver((post_save, post_delete), sender=BookingExtra)
+@receiver((post_save, post_delete), sender=BookingProvidedExtra)
 def post_save_post_delete_bookingextra(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_booking_update'):
         with transaction.atomic(savepoint=False):
             BookingServices.update_booking(instance)
 
 
-@receiver((post_save, post_delete), sender=BookingPackage)
+@receiver((post_save, post_delete), sender=BookingExtraPackage)
 def post_save_post_delete_bookingpackage(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_booking_update'):
         with transaction.atomic(savepoint=False):
             BookingServices.update_booking(instance)
 
 
-@receiver(pre_save, sender=BookingPackageAllotment)
+@receiver(pre_save, sender=BookingProvidedAllotment)
 def pre_save_bookingpackageallotment(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_update'):
         BookingServices.setup_bookingservice_amounts(instance)
     BookingServices.validate_basebookingservice(instance)
 
 
-@receiver(pre_save, sender=BookingPackageTransfer)
+@receiver(pre_save, sender=BookingProvidedTransfer)
 def pre_save_bookingpackagetransfer(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_update'):
         BookingServices.setup_bookingservice_amounts(instance)
     BookingServices.validate_basebookingservice(instance)
 
 
-@receiver(pre_save, sender=BookingPackageExtra)
+@receiver(pre_save, sender=BookingProvidedExtra)
 def pre_save_bookingpackageextra(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_update'):
         BookingServices.setup_bookingservice_amounts(instance)
     BookingServices.validate_basebookingservice(instance)
 
 
-@receiver((post_save, post_delete), sender=BookingPackageAllotment)
+@receiver((post_save, post_delete), sender=BookingProvidedAllotment)
 def post_save_post_delete_bookingpackageallotment(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_bookingpackage_update'):
         with transaction.atomic(savepoint=False):
             BookingServices.update_bookingpackage(instance)
 
 
-@receiver((post_save, post_delete), sender=BookingPackageTransfer)
+@receiver((post_save, post_delete), sender=BookingProvidedTransfer)
 def post_save_post_delete_bookingpackagetransfer(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_bookingpackage_update'):
         with transaction.atomic(savepoint=False):
             BookingServices.update_bookingpackage(instance)
 
 
-@receiver((post_save, post_delete), sender=BookingPackageExtra)
+@receiver((post_save, post_delete), sender=BookingProvidedExtra)
 def post_save_post_delete_bookingpackageextra(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_bookingpackage_update'):
         with transaction.atomic(savepoint=False):

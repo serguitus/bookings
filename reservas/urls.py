@@ -44,11 +44,9 @@ from config.views import (
 )
 from booking import urls as booking_urls
 from booking.views import (
-    PackageAutocompleteView, ProviderPackageAutocompleteView,
     PickUpAutocompleteView, DropOffAutocompleteView, PlaceAutocompleteView,
     ScheduleArrivalAutocompleteView, ScheduleDepartureAutocompleteView,
     QuotePaxVariantAutocompleteView, SellerAutocompleteView,
-    ServicePackageAutocompleteView,
 )
 
 from reservas.views import DisabledAutocompleteView
@@ -108,14 +106,6 @@ urlpatterns = [
         ServiceExtraAutocompleteView.as_view(),
         name='serviceextra-autocomplete',
     ),
-    url(r'^package-autocomplete/$',
-        PackageAutocompleteView.as_view(),
-        name='package-autocomplete',
-    ),
-    url(r'^servicepackage-autocomplete/$',
-        ServicePackageAutocompleteView.as_view(),
-        name='servicepackage-autocomplete',
-    ),
     url(r'^loanentity-autocomplete/$',
         LoanEntityAutocompleteView.as_view(),
         name='loanentity-autocomplete',
@@ -151,10 +141,6 @@ urlpatterns = [
     url(r'^providerextra-autocomplete/$',
         ProviderExtraAutocompleteView.as_view(),
         name='providerextra-autocomplete',
-    ),
-    url(r'^providerpackage-autocomplete/$',
-        ProviderPackageAutocompleteView.as_view(),
-        name='providerpackage-autocomplete',
     ),
     url(r'^roomtype-autocomplete/$',
         RoomTypeAutocompleteView.as_view(),

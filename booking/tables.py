@@ -9,9 +9,9 @@ from django.utils.safestring import mark_safe
 from booking.models import (
     PackageService,
     Quote, QuoteService, QuotePaxVariant, QuotePackageService,
-    QuoteServiceBookDetail,
+    NewQuoteServiceBookDetail,
     Booking, BaseBookingService, BookingPax, BookingPackageService,
-    BookingServiceBookDetail,
+    BookingBookDetail,
     ProviderBookingPayment, ProviderBookingPaymentService,
 )
 from booking.constants import (
@@ -505,9 +505,9 @@ class AddPaxBookingServicesTable(tables.Table):
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
 
-class QuoteServiceBookDetailTable(tables.Table):
+class NewQuoteServiceBookDetailTable(tables.Table):
     class Meta:
-        model = QuoteServiceBookDetail
+        model = NewQuoteServiceBookDetail
         template_name = 'booking/table/quotebookdetail_table.html'
         fields = ['name', 'description', 'base_service__category', 'datetime_from', 'time']
 
@@ -522,9 +522,9 @@ class QuoteServiceBookDetailTable(tables.Table):
         self.columns.hide('base_service__category')
 
 
-class BookingServiceBookDetailTable(tables.Table):
+class BookingBookDetailTable(tables.Table):
     class Meta:
-        model = BookingServiceBookDetail
+        model = BookingBookDetail
         template_name = 'booking/table/bookingbookdetail_table.html'
         fields = ['name', 'description', 'base_service__category', 'datetime_from', 'time']
 

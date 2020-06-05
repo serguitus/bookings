@@ -20,15 +20,14 @@ from accounting.models import Account
 from booking import constants
 from booking.models import (
     Quote, QuoteService, QuotePaxVariant, QuoteServicePaxVariant,
-    QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
-    QuoteServiceBookDetail,
-    QuoteServiceBookDetailAllotment, QuoteServiceBookDetailTransfer, QuoteServiceBookDetailExtra,
-    Booking, BookingPax, BaseBookingService, BookingServicePax, BookingPackage,
-    BookingService, BookingAllotment, BookingTransfer, BookingExtra,
+    NewQuoteAllotment, NewQuoteTransfer, NewQuoteExtra, QuoteExtraPackage,
+    NewQuoteServiceBookDetail, NewQuoteServiceBookDetailAllotment, NewQuoteServiceBookDetailTransfer, NewQuoteServiceBookDetailExtra,
+    Booking, BookingPax, BaseBookingService, BaseBookingServicePax, BookingExtraPackage,
+    BookingProvidedService, BookingProvidedAllotment, BookingProvidedTransfer, BookingProvidedExtra,
     BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine, BookingInvoicePartial,
-    BookingServiceBookDetail,
-    BookingServiceBookDetailAllotment, BookingServiceBookDetailTransfer, BookingServiceBookDetailExtra,
-    ProviderBookingPayment, ProviderBookingPaymentService,
+    BookingBookDetail,
+    BookingBookDetailAllotment, BookingBookDetailTransfer, BookingBookDetailExtra,
+    ProviderBookingPayment, ProviderPaymentBookingProvided,
 )
 
 from common.filters import parse_date
@@ -280,27 +279,27 @@ class BookingServices(object):
     @classmethod
     def build_bookingservice_details_from_quoteservice(
             cls, booking_service, quote_service):
-        for quotedetail_allotment in QuoteServiceBookDetailAllotment.objects.filter(
+        for quotedetail_allotment in NewQuoteServiceBookDetailAllotment.objects.filter(
                 quote_service_id=quote_service.id).all():
-            bookingdetail_allotment = BookingServiceBookDetailAllotment()
+            bookingdetail_allotment = BookingBookDetailAllotment()
             ConfigServices.copy_book_allotment_data(
                 dst_service=bookingdetail_allotment,
                 src_service=quotedetail_allotment)
             cls.build_book_detail_from_quote_detail(
                 bookingdetail_allotment, quotedetail_allotment, booking_service)
 
-        for quotedetail_transfer in QuoteServiceBookDetailTransfer.objects.filter(
+        for quotedetail_transfer in NewQuoteServiceBookDetailTransfer.objects.filter(
                 quote_service_id=quote_service.id).all():
-            bookingdetail_transfer = BookingServiceBookDetailTransfer()
+            bookingdetail_transfer = BookingBookDetailTransfer()
             ConfigServices.copy_book_transfer_data(
                 dst_service=bookingdetail_transfer,
                 src_service=quotedetail_transfer)
             cls.build_book_detail_from_quote_detail(
                 bookingdetail_transfer, quotedetail_transfer, booking_service)
 
-        for quotedetail_extra in QuoteServiceBookDetailExtra.objects.filter(
+        for quotedetail_extra in NewQuoteServiceBookDetailExtra.objects.filter(
                 quote_service_id=quote_service.id).all():
-            bookingdetail_extra = BookingServiceBookDetailExtra()
+            bookingdetail_extra = BookingBookDetailExtra()
             ConfigServices.copy_book_extra_data(
                 dst_service=bookingdetail_extra,
                 src_service=quotedetail_extra)
@@ -415,16 +414,16 @@ class BookingServices(object):
                         pax_list.append(service_pax)
 
                 # create bookingallotment list
-                for quote_allotment in QuoteAllotment.objects.filter(quote_id=quote.id).all():
-                    booking_allotment = BookingAllotment()
+                for quote_allotment in NewQuoteAllotment.objects.filter(quote_id=quote.id).all():
+                    booking_allotment = BookingProvidedAllotment()
                     ConfigServices.copy_book_allotment_data(
                         dst_service=booking_allotment, src_service=quote_allotment)
                     cls.build_bookingservice_from_quoteservice(
                         booking_allotment, quote_allotment, booking, pax_list, pax_variant, user)
 
                 # create bookingtransfer list
-                for quote_transfer in QuoteTransfer.objects.filter(quote_id=quote.id).all():
-                    booking_transfer = BookingTransfer()
+                for quote_transfer in NewQuoteTransfer.objects.filter(quote_id=quote.id).all():
+                    booking_transfer = BookingProvidedTransfer()
                     ConfigServices.copy_book_transfer_data(
                         dst_service=booking_transfer, src_service=quote_transfer)
                     booking_transfer.quantity = ConfigServices.get_service_quantity(
@@ -433,8 +432,8 @@ class BookingServices(object):
                         booking_transfer, quote_transfer, booking, pax_list, pax_variant, user)
 
                 # create bookingextra list
-                for quote_extra in QuoteExtra.objects.filter(quote_id=quote.id).all():
-                    booking_extra = BookingExtra()
+                for quote_extra in NewQuoteExtra.objects.filter(quote_id=quote.id).all():
+                    booking_extra = BookingProvidedExtra()
                     booking_extra.booking = booking
                     ConfigServices.copy_book_extra_data(
                         dst_service=booking_extra, src_service=quote_extra)
@@ -444,8 +443,8 @@ class BookingServices(object):
                         booking_transfer, quote_transfer, booking, pax_list, pax_variant, user)
 
                 # create bookingpackage list
-                for quote_package in QuotePackage.objects.filter(quote_id=quote.id).all():
-                    booking_package = BookingPackage()
+                for quote_package in QuoteExtraPackage.objects.filter(quote_id=quote.id).all():
+                    booking_package = BookingExtraPackage()
                     booking_package.booking = booking
                     # booking_package.conf_number = '< confirm number >'
                     booking_package.name = quote_package.name
@@ -474,7 +473,7 @@ class BookingServices(object):
                     cls.build_bookingservice_paxes(booking_package, pax_list, user)
 
                     # create bookingpackageallotment list
-                    for quotepackage_allotment in QuotePackageAllotment.objects.filter(
+                    for quotepackage_allotment in NewQuoteAllotment.objects.filter(
                             quote_package_id=quote_package.id).all():
                         bookingpackage_allotment = BookingPackageAllotment()
                         ConfigServices.copy_book_allotment_data(
@@ -485,7 +484,7 @@ class BookingServices(object):
                             pax_list, service_pax_variant)
 
                     # create bookingpackagetransfer list
-                    for quotepackage_transfer in QuotePackageTransfer.objects.filter(
+                    for quotepackage_transfer in NewQuoteTransfer.objects.filter(
                             quote_package_id=quote_package.id).all():
                         bookingpackage_transfer = BookingPackageTransfer()
                         ConfigServices.copy_book_transfer_data(
@@ -497,7 +496,7 @@ class BookingServices(object):
                             pax_list, service_pax_variant)
 
                     # create bookingextra list
-                    for quotepackage_extra in QuotePackageExtra.objects.filter(
+                    for quotepackage_extra in NewQuoteExtra.objects.filter(
                             quote_package_id=quote_package.id).all():
                         bookingpackage_extra = BookingPackageExtra()
                         ConfigServices.copy_book_extra_data(
@@ -652,25 +651,25 @@ class BookingServices(object):
 
         allotment_list = inline_allotment_list
         if not allotment_list:
-            allotment_list = list(QuoteAllotment.objects.filter(
+            allotment_list = list(NewQuoteAllotment.objects.filter(
                 quote=quote.id).exclude(
                     status=constants.SERVICE_STATUS_CANCELLED
                 ).all())
         transfer_list = inline_transfer_list
         if not transfer_list:
-            transfer_list = list(QuoteTransfer.objects.filter(
+            transfer_list = list(NewQuoteTransfer.objects.filter(
                 quote=quote.id).exclude(
                     status=constants.SERVICE_STATUS_CANCELLED
                 ).all())
         extra_list = inline_extra_list
         if not extra_list:
-            extra_list = list(QuoteExtra.objects.filter(
+            extra_list = list(NewQuoteExtra.objects.filter(
                 quote=quote.id).exclude(
                     status=constants.SERVICE_STATUS_CANCELLED
                 ).all())
         package_list = inline_package_list
         if not package_list:
-            package_list = list(QuotePackage.objects.filter(
+            package_list = list(QuoteExtraPackage.objects.filter(
                 quote=quote.id).exclude(
                     status=constants.SERVICE_STATUS_CANCELLED
                 ).all())
@@ -895,7 +894,7 @@ class BookingServices(object):
 
             variant_dict = dict()
 
-            if isinstance(quoteservice, (QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage, QuoteService)):
+            if isinstance(quoteservice, (NewQuoteAllotment, NewQuoteTransfer, NewQuoteExtra, QuoteExtraPackage, QuoteService)):
                 variant_dict.update({'quote_pax_variant': pax_variant.quote_pax_variant.id})
             else:
                 variant_dict.update({'quotepackage_pax_variant': pax_variant.quotepackage_pax_variant.id})
@@ -913,7 +912,7 @@ class BookingServices(object):
                         service_pax_variant=pax_variant,
                         manuals=True)
                 else:
-                    if isinstance(quoteservice, (QuoteAllotment, QuoteTransfer, QuoteExtra, QuoteService)):
+                    if isinstance(quoteservice, (NewQuoteAllotment, NewQuoteTransfer, NewQuoteExtra, QuoteService)):
                         quote_pax_variant = pax_variant.quote_pax_variant
                         agency = quoteservice.quote.agency
                         service_pax_variant = pax_variant
@@ -2025,17 +2024,17 @@ class BookingServices(object):
     def _quoteservice_costs(
             cls, quoteservice, date_from, date_to, cost_groups, provider):
         c, c_msg = None, "Unknown Service"
-        if isinstance(quoteservice, (QuoteAllotment, QuotePackageAllotment)):
+        if isinstance(quoteservice, (NewQuoteAllotment)):
             c, c_msg = ConfigServices.allotment_costs(
                 quoteservice.service, date_from, date_to, cost_groups, provider,
                 quoteservice.board_type, quoteservice.room_type_id,
                 quoteservice.service_addon_id)
-        if isinstance(quoteservice, (QuoteTransfer, QuotePackageTransfer)):
+        if isinstance(quoteservice, (NewQuoteTransfer)):
             c, c_msg = ConfigServices.transfer_costs(
                 quoteservice.service, date_from, date_to, cost_groups, provider,
                 quoteservice.location_from_id, quoteservice.location_to_id,
                 quoteservice.service_addon_id, quoteservice.quantity)
-        if isinstance(quoteservice, (QuoteExtra, QuotePackageExtra)):
+        if isinstance(quoteservice, (NewQuoteExtra)):
             c, c_msg = ConfigServices.extra_costs(
                 quoteservice.service, date_from, date_to, cost_groups, provider,
                 quoteservice.service_addon_id, quoteservice.quantity, quoteservice.parameter)
@@ -2046,17 +2045,17 @@ class BookingServices(object):
     def _quoteservice_prices(
             cls, quoteservice, date_from, date_to, price_groups, agency):
         p, p_msg = None, "Unknown Service"
-        if isinstance(quoteservice, (QuoteAllotment, QuotePackageAllotment)):
+        if isinstance(quoteservice, (NewQuoteAllotment)):
             p, p_msg = ConfigServices.allotment_prices(
                 quoteservice.service, date_from, date_to, price_groups, agency,
                 quoteservice.board_type, quoteservice.room_type_id,
                 quoteservice.service_addon_id)
-        if isinstance(quoteservice, (QuoteTransfer, QuotePackageTransfer)):
+        if isinstance(quoteservice, (NewQuoteTransfer)):
             p, p_msg = ConfigServices.transfer_prices(
                 quoteservice.service, date_from, date_to, price_groups, agency,
                 quoteservice.location_from_id, quoteservice.location_to_id,
                 quoteservice.service_addon_id, quoteservice.quantity)
-        if isinstance(quoteservice, (QuoteExtra, QuotePackageExtra)):
+        if isinstance(quoteservice, (NewQuoteExtra)):
             p, p_msg = ConfigServices.extra_prices(
                 quoteservice.service, date_from, date_to, price_groups, agency,
                 quoteservice.service_addon_id, quoteservice.quantity, quoteservice.parameter)
@@ -2551,7 +2550,7 @@ class BookingServices(object):
                 None, "Unknow Pax Variant", None, "Unknow Pax Variant", \
                 None, "Unknow Pax Variant", None, "Unknow Pax Variant"
 
-        if isinstance(service, (QuoteAllotment, QuoteTransfer, QuoteExtra)):
+        if isinstance(service, (NewQuoteAllotment, NewQuoteTransfer, NewQuoteExtra)):
             c1, c1_msg, p1, p1_msg, \
             c2, c2_msg, p2, p2_msg, \
             c3, c3_msg, p3, p3_msg, \
@@ -2567,7 +2566,7 @@ class BookingServices(object):
                 agency=service.quote.agency,
                 service_pax_variant=service_pax_variant,
                 manuals=for_update)
-        if isinstance(service, (QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra)):
+        if isinstance(service, (NewQuoteAllotment, NewQuoteTransfer, NewQuoteExtra)):
             c1, c1_msg, p1, p1_msg, \
             c2, c2_msg, p2, p2_msg, \
             c3, c3_msg, p3, p3_msg, \
@@ -2578,13 +2577,13 @@ class BookingServices(object):
                 service_pax_variant=service_pax_variant)
         elif isinstance(service, QuoteService):
             if service.service_type == constants.SERVICE_CATEGORY_ALLOTMENT:
-                service = QuoteAllotment.objects.get(pk=service.id)
+                service = NewQuoteAllotment.objects.get(pk=service.id)
             elif service.service_type == constants.SERVICE_CATEGORY_TRANSFER:
-                service = QuoteTransfer.objects.get(pk=service.id)
+                service = NewQuoteTransfer.objects.get(pk=service.id)
             elif service.service_type == constants.SERVICE_CATEGORY_EXTRA:
-                service = QuoteExtra.objects.get(pk=service.id)
+                service = NewQuoteExtra.objects.get(pk=service.id)
             elif service.service_type == constants.SERVICE_CATEGORY_PACKAGE:
-                service = QuotePackage.objects.get(pk=service.id)
+                service = QuoteExtraPackage.objects.get(pk=service.id)
                 return cls._find_quotepackage_amounts(
                     quote_pax_variant=quote_pax_variant,
                     package=service,
@@ -4294,11 +4293,11 @@ class BookingServices(object):
     def _clone_quote_service(cls, quote_service, quote):
         pax_variants = list(QuoteServicePaxVariant.objects.filter(
             quote_service=quote_service))
-        allotment_details = list(QuoteServiceBookDetailAllotment.objects.filter(
+        allotment_details = list(NewQuoteServiceBookDetailAllotment.objects.filter(
             quote_service=quote_service))
-        transfer_details = list(QuoteServiceBookDetailTransfer.objects.filter(
+        transfer_details = list(NewQuoteServiceBookDetailTransfer.objects.filter(
             quote_service=quote_service))
-        extra_details = list(QuoteServiceBookDetailExtra.objects.filter(
+        extra_details = list(NewQuoteServiceBookDetailExtra.objects.filter(
             quote_service=quote_service))
 
         quote_service.pk = None
@@ -4323,22 +4322,22 @@ class BookingServices(object):
 
         old_quote = Quote.objects.get(pk=old_quote_id)
 
-        allotments = list(QuoteAllotment.objects.filter(
+        allotments = list(NewQuoteAllotment.objects.filter(
             quote=old_quote))
         for service in allotments:
             cls._clone_quote_service(service, new_quote)
 
-        transfers = list(QuoteTransfer.objects.filter(
+        transfers = list(NewQuoteTransfer.objects.filter(
             quote=old_quote))
         for service in transfers:
             cls._clone_quote_service(service, new_quote)
 
-        extras = list(QuoteExtra.objects.filter(
+        extras = list(NewQuoteExtra.objects.filter(
             quote=old_quote))
         for service in extras:
             cls._clone_quote_service(service, new_quote)
 
-        packages = list(QuotePackage.objects.filter(
+        packages = list(QuoteExtraPackage.objects.filter(
             quote=old_quote))
         for service in packages:
             package_pk = service.pk
@@ -4346,17 +4345,17 @@ class BookingServices(object):
             cls._clone_quote_service(service, new_quote)
 
             # package services
-            allotments = list(QuotePackageAllotment.objects.filter(
+            allotments = list(NewQuoteAllotment.objects.filter(
                 quote_package=package_pk))
             for package_service in allotments:
                 cls._clone_quotepackage_service(package_service, service)
 
-            transfers = list(QuotePackageTransfer.objects.filter(
+            transfers = list(NewQuoteTransfer.objects.filter(
                 quote_package=package_pk))
             for package_service in transfers:
                 cls._clone_quotepackage_service(package_service, service)
 
-            extras = list(QuotePackageExtra.objects.filter(
+            extras = list(NewQuoteExtra.objects.filter(
                 quote_package=package_pk))
             for package_service in extras:
                 cls._clone_quotepackage_service(package_service, service)
@@ -4466,7 +4465,7 @@ class BookingServices(object):
     @classmethod
     def find_service_providers_costs(cls, service):
 
-        if isinstance(service, (QuoteAllotment, QuotePackageAllotment, BookingAllotment, BookingPackageAllotment)):
+        if isinstance(service, (NewQuoteAllotment, BookingProvidedAllotment)):
             detail_list = list(details_allotment_queryset(
                 service.service,
                 service.datetime_from,
@@ -4474,7 +4473,7 @@ class BookingServices(object):
                 service.room_type,
                 service.board_type,
                 service.service_addon))
-        elif isinstance(service, (QuoteTransfer, QuotePackageTransfer, BookingTransfer, BookingPackageTransfer)):
+        elif isinstance(service, (NewQuoteTransfer, BookingProvidedTransfer)):
             detail_list = list(details_transfer_queryset(
                 service.service,
                 service.datetime_from,
@@ -4482,7 +4481,7 @@ class BookingServices(object):
                 service.location_from,
                 service.location_to,
                 service.service_addon))
-        elif isinstance(service, (QuoteExtra, QuotePackageExtra, BookingExtra, BookingPackageExtra)):
+        elif isinstance(service, (NewQuoteExtra, BookingProvidedExtra)):
             detail_list = list(details_extra_queryset(
                 service.service,
                 service.datetime_from,
@@ -4520,11 +4519,11 @@ class BookingServices(object):
 
     @classmethod
     def _clone_booking_service(cls, booking_service, booking):
-        allotment_details = list(BookingServiceBookDetailAllotment.objects.filter(
+        allotment_details = list(BookingBookDetailAllotment.objects.filter(
             booking_service=booking_service))
-        transfer_details = list(BookingServiceBookDetailTransfer.objects.filter(
+        transfer_details = list(BookingBookDetailTransfer.objects.filter(
             booking_service=booking_service))
-        extra_details = list(BookingServiceBookDetailExtra.objects.filter(
+        extra_details = list(BookingBookDetailExtra.objects.filter(
             booking_service=booking_service))
 
         booking_service.pk = None
@@ -4938,14 +4937,14 @@ class BookingServices(object):
             return
 
         details = list(
-            QuoteServiceBookDetail.objects.filter(quote_service_id=quote_service.id).all())
+            NewQuoteServiceBookDetail.objects.filter(quote_service_id=quote_service.id).all())
         if details:
             return
 
         service = quote_service.service
         # create bookingallotment list
         for detail_allotment in ServiceBookDetailAllotment.objects.filter(service_id=service.id).all():
-            quote_service_detail_allotment = QuoteServiceBookDetailAllotment()
+            quote_service_detail_allotment = NewQuoteServiceBookDetailAllotment()
             quote_service_detail_allotment.quote_service = quote_service
             quote_service_detail_allotment.book_service = detail_allotment.book_service
             ConfigServices.copy_book_allotment_data(
@@ -4955,7 +4954,7 @@ class BookingServices(object):
             quote_service_detail_allotment.save()
         # create bookingtransfer list
         for detail_transfer in ServiceBookDetailTransfer.objects.filter(service_id=service.id).all():
-            quote_service_detail_transfer = QuoteServiceBookDetailTransfer()
+            quote_service_detail_transfer = NewQuoteServiceBookDetailTransfer()
             quote_service_detail_transfer.quote_service = quote_service
             quote_service_detail_transfer.book_service = detail_transfer.book_service
             ConfigServices.copy_book_transfer_data(
@@ -4965,7 +4964,7 @@ class BookingServices(object):
             quote_service_detail_transfer.save()
         # create bookingextra list
         for detail_extra in ServiceBookDetailExtra.objects.filter(service_id=service.id).all():
-            quote_service_detail_extra = QuoteServiceBookDetailExtra()
+            quote_service_detail_extra = NewQuoteServiceBookDetailExtra()
             quote_service_detail_extra.quote_service = quote_service
             quote_service_detail_extra.book_service = detail_extra.book_service
             ConfigServices.copy_book_extra_data(
@@ -4981,14 +4980,14 @@ class BookingServices(object):
             return
 
         details = list(
-            BookingServiceBookDetail.objects.filter(booking_service_id=booking_service.id).all())
+            BookingBookDetail.objects.filter(booking_service_id=booking_service.id).all())
         if details:
             return
 
         service = booking_service.service
         # create bookingallotment list
         for detail_allotment in ServiceBookDetailAllotment.objects.filter(service_id=service.id).all():
-            booking_service_detail_allotment = BookingServiceBookDetailAllotment()
+            booking_service_detail_allotment = BookingBookDetailAllotment()
             booking_service_detail_allotment.booking_service = booking_service
             booking_service_detail_allotment.book_service = detail_allotment.book_service
             ConfigServices.copy_book_allotment_data(
@@ -4998,7 +4997,7 @@ class BookingServices(object):
             booking_service_detail_allotment.save()
         # create bookingtransfer list
         for detail_transfer in ServiceBookDetailTransfer.objects.filter(service_id=service.id).all():
-            booking_service_detail_transfer = BookingServiceBookDetailTransfer()
+            booking_service_detail_transfer = BookingBookDetailTransfer()
             booking_service_detail_transfer.booking_service = booking_service
             booking_service_detail_transfer.book_service = detail_transfer.book_service
             ConfigServices.copy_book_transfer_data(
@@ -5008,7 +5007,7 @@ class BookingServices(object):
             booking_service_detail_transfer.save()
         # create bookingextra list
         for detail_extra in ServiceBookDetailExtra.objects.filter(service_id=service.id).all():
-            booking_service_detail_extra = BookingServiceBookDetailExtra()
+            booking_service_detail_extra = BookingBookDetailExtra()
             booking_service_detail_extra.booking_service = booking_service
             booking_service_detail_extra.book_service = detail_extra.book_service
             ConfigServices.copy_book_extra_data(

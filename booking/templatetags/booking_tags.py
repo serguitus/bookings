@@ -22,13 +22,13 @@ from booking.tables import (
     QuotePackageServiceTable,
     BookingServiceTable,
     QuoteConfirmationTable,
-    QuoteServiceBookDetailTable,
+    NewQuoteServiceBookDetailTable,
     BookingConfirmationTable, BookingServiceSummaryTable, BookingPaxTable,
     BookingVouchersTable,
     BookingServiceUpdateTable,
     BookingPackageServiceTable,
     BookingPackageServiceSummaryTable,
-    BookingServiceBookDetailTable,
+    BookingBookDetailTable,
     AddPaxBookingServicesTable,
     ProviderBookingPaymentTable,
     ProviderBookingPaymentServiceTable,
@@ -314,7 +314,7 @@ def get_distribution(booking_service):
 
 @register.simple_tag
 def quotebookdetail_table(quote_service):
-    table = QuoteServiceBookDetailTable(
+    table = NewQuoteServiceBookDetailTable(
         quote_service.quotebookdetail_set.all(),
         order_by=('datetime_from', 'time'))
     return table
@@ -322,7 +322,7 @@ def quotebookdetail_table(quote_service):
 
 @register.simple_tag
 def bookingbookdetail_table(booking_service):
-    table = BookingServiceBookDetailTable(
+    table = BookingBookDetailTable(
         booking_service.bookingbookdetail_booking_service.all(),
         order_by=('datetime_from', 'time'))
     return table

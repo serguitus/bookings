@@ -2,22 +2,22 @@ from django.contrib import admin
 
 # Register your models here.
 
-from booking.models import (Booking, BookingAllotment, BookingTransfer,
-                            BookingExtra)
+from booking.models import (Booking, BookingProvidedAllotment, BookingProvidedTransfer,
+                            BookingProvidedExtra)
 
 
 class BookingAllotmentInline(admin.TabularInline):
-    model = BookingAllotment
+    model = BookingProvidedAllotment
     classes = ('collapse',)
 
 
 class BookingTransferInline(admin.TabularInline):
-    model = BookingTransfer
+    model = BookingProvidedTransfer
     classes = ('collapse',)
 
 
 class BookingExtraInline(admin.TabularInline):
-    model = BookingExtra
+    model = BookingProvidedExtra
     classes = ('collapse',)
 
 
