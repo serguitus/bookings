@@ -1226,6 +1226,7 @@ class BaseServiceChangeList(ServiceChangeList):
         return qs.exclude(base_category=BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE)
 
 
+@admin.register(BaseBookingService, site=bookings_site)
 class BookingBaseServiceSiteModel(SiteModel):
     model_order = 1260
     menu_label = MENU_LABEL_BOOKING
@@ -2616,7 +2617,7 @@ bookings_site.register(Booking, BookingSiteModel)
 
 bookings_site.register(ExportBooking, ExportBookingSiteModel)
 
-bookings_site.register(BaseBookingService, BookingBaseServiceSiteModel)
+# bookings_site.register(BaseBookingService, BookingBaseServiceSiteModel)
 
 bookings_site.register(BookingProvidedService, BookingProvidedServiceSiteModel)
 
