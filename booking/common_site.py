@@ -2401,6 +2401,8 @@ def default_requests_mail_to(request, provider=None, booking=None):
 
 
 def default_requests_mail_bcc(request, provider=None, booking=None):
+    if provider and not provider.is_private:
+        return default_mail_bcc(request)
     return request.user.email or None
 
 

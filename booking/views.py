@@ -1243,7 +1243,6 @@ class QuoteServiceBookDetailURLView(View):
         })
 
 
-
 class BookingServiceBookDetailURLView(View):
     def post(self, request, *args, **kwargs):
         parent_id = request.POST.get('parent_id', None)
