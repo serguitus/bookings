@@ -10,7 +10,7 @@ from django.conf import settings
 from dal import autocomplete
 
 from config.models import (
-    Location, TransferZone, ServiceCategory, RoomType, Addon, AllotmentBoardType,
+    Location, ServiceCategory, RoomType, Addon, AllotmentBoardType,
     Service,
     Allotment, Transfer, Extra, CarRental, CarRentalOffice,
     ProviderAllotmentService, AgencyAllotmentService,
@@ -26,7 +26,7 @@ from django.template.loader import get_template
 from django.urls import reverse
 from django.views import View
 
-from finance.models import Agency, Provider
+from finance.models import Provider
 
 from reservas.custom_settings import ADDON_FOR_NO_ADDON
 
@@ -184,6 +184,7 @@ class CatalogAllotmentAddonAutocompleteView(autocomplete.Select2QuerySetView):
         if agency_service:
             agency_service = AgencyAllotmentService.objects.get(pk=agency_service)
             return qs.filter(serviceaddon__service=agency_service.service)
+        return qs
 
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
@@ -209,6 +210,7 @@ class CatalogTransferAddonAutocompleteView(autocomplete.Select2QuerySetView):
         if agency_service:
             agency_service = AgencyTransferService.objects.get(pk=agency_service)
             return qs.filter(serviceaddon__service=agency_service.service)
+        return qs
 
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
@@ -223,7 +225,7 @@ class CatalogTransferAddonAutocompleteView(autocomplete.Select2QuerySetView):
 
 class CatalogExtraAddonAutocompleteView(autocomplete.Select2QuerySetView):
     def get_base_queryset(self):
-        qs = Addon.objects.filter(enabled=True).all().distinct()
+        qs = Addon.objects.filter(enabled=True).distinct()
 
         provider_service = self.forwarded.get('provider_service', None)
         if provider_service:
@@ -234,6 +236,7 @@ class CatalogExtraAddonAutocompleteView(autocomplete.Select2QuerySetView):
         if agency_service:
             agency_service = AgencyExtraService.objects.get(pk=agency_service)
             return qs.filter(serviceaddon__service=agency_service.service)
+        return qs
 
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
@@ -727,7 +730,7 @@ class CarRentalOfficeAutocompleteView(autocomplete.Select2QuerySetView):
 class ServiceBookDetailURLView(View):
     def post(self, request, *args, **kwargs):
         parent_id = request.POST.get('parent_id', None)
-        service_id = request.POST.get('service', None)
+        service_id = request.POST.get('search_service', None)
         if parent_id and service_id:
             service = Service.objects.get(id=service_id)
             if service.category == 'A':

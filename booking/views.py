@@ -1247,7 +1247,7 @@ class QuoteServiceBookDetailURLView(View):
 class BookingServiceBookDetailURLView(View):
     def post(self, request, *args, **kwargs):
         parent_id = request.POST.get('parent_id', None)
-        service_id = request.POST.get('service', None)
+        service_id = request.POST.get('search_service', None)
         if parent_id and service_id:
             service = Service.objects.get(id=service_id)
             if service.category == 'A':

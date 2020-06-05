@@ -2,11 +2,11 @@ from __future__ import unicode_literals
 """
 config services
 """
-
 from datetime import date, timedelta, time, datetime
 from dateutil.relativedelta import relativedelta
 from django.db import IntegrityError
 from django.db.models import Q
+import math
 
 from config.constants import (
     SERVICE_CATEGORY_EXTRA, SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER,
@@ -27,7 +27,6 @@ from config.models import (
     Schedule, TransferInterval, TransferPickupTime,
 )
 from finance.models import Agency
-
 from reservas.custom_settings import ADDON_FOR_NO_ADDON
 
 
@@ -1584,7 +1583,8 @@ class ConfigServices(object):
 
     @classmethod
     def update_detail_amount(cls, detail_amount, diff_percent, diff_amount, min_diff, max_diff):
-        if diff_percent is None and diff_amount is None:
+        if (diff_percent is None or diff_percent == 0) and (
+            diff_amount is None or diff_amount == 0):
             return detail_amount
         if detail_amount is None:
             return None
@@ -1596,10 +1596,10 @@ class ConfigServices(object):
             diff += float(diff_amount)
         if min_diff is not None:
             if abs(diff) < abs(min_diff):
-                diff = float(decimal.Decimal(min_diff).copy_sign(diff))
+                diff = math.copysign(min_diff, diff)
         if max_diff is not None:
             if abs(diff) > abs(max_diff):
-                diff = float(decimal.Decimal(max_diff).copy_sign(diff))
+                diff = math.copysign(max_diff, diff)
         return round(0.499999 + result + diff)
 
     @classmethod
