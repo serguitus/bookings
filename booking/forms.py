@@ -1110,6 +1110,7 @@ class BookingExtraComponentInlineForm(forms.ModelForm):
             'component': autocomplete.ModelSelect2(url='extra-autocomplete'),
         }
 
+
 class QuoteServiceBookDetailAllotmentForm(forms.ModelForm, BaseBookDataForm):
     class Meta:
         fields = ('__all__')

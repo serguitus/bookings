@@ -1558,6 +1558,7 @@ class BaseBookingServiceSiteModel(SiteModel):
 
     @csrf_protect_m
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
+        """ changeform for BaseBookingService SiteModel """
         submit_action = request.POST.get('submit_action')
         if submit_action == '_send_mail':
             mail_from = request.POST.get('mail_from')
