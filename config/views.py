@@ -20,6 +20,7 @@ from config.models import (
 
 from django.contrib import messages
 from django.db.models import Q
+from django.db.models.functions import Length
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect
 from django.template.loader import get_template
@@ -103,7 +104,8 @@ class RoomTypeAutocompleteView(autocomplete.Select2QuerySetView):
 
         qs = self.get_base_queryset()
         if self.q:
-            qs = qs.filter(name__icontains=self.q)
+            qs = qs.filter(name__icontains=self.q).order_by(
+                Length('name').asc(), 'name')
         return qs[:20]
 
 
