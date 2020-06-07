@@ -1676,7 +1676,7 @@ class CommonChangeList(ChangeList):
                         # TopFilter class that has been registered for
                         # the type of the given field.
                         field, top_filter_class = top_filter, TopFilter.create
-                    if  isinstance(field, (list, tuple)):
+                    if isinstance(field, (list, tuple)):
                         if not isinstance(field[0], models.Field):
                             field_path = field[0]
                             field = list(
@@ -1685,7 +1685,6 @@ class CommonChangeList(ChangeList):
                         if not isinstance(field, models.Field):
                             field_path = field
                             field = get_fields_from_path(self.model, field_path)[-1]
-
                     lookup_params_count = len(lookup_params)
                     spec = top_filter_class(
                         field, request, lookup_params, hidden_params,
