@@ -57,10 +57,10 @@ from finance.models import (
 # BookingService child objects from a BookingService list
 def _get_child_objects(services):
     TYPE_MODELS = {
-        'BT': BookingTransfer,
-        'BE': BookingExtra,
-        'BA': BookingAllotment,
-        'BP': BookingPackage,
+        'BT': BookingProvidedTransfer,
+        'BE': BookingProvidedExtra,
+        'BA': BookingProvidedAllotment,
+        'BP': BookingExtraPackage,
         # 'PE': PackageExtra,
     }
     objs = []
@@ -935,7 +935,7 @@ class BookingExtraPackage(BaseBookingService, BookExtraData):
         return '%s pax' % self.rooming_list.count()
 
     def fill_data(self):
-        super(BookingExtrsPackage, self).fill_data()
+        super(BookingExtraPackage, self).fill_data()
         # setting name for this booking_service
         self.name = self.service.name
         self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE
@@ -945,7 +945,7 @@ class BookingExtraPackage(BaseBookingService, BookExtraData):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         with transaction.atomic(savepoint=False):
-            super(BookingPackage, self).save(force_insert, force_update, using, update_fields)
+            super(BookingExtraPackage, self).save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return self.__unicode__()
@@ -1033,7 +1033,7 @@ class BookingProvidedAllotment(BookingProvidedService, BookAllotmentData):
         super(BookingProvidedAllotment, self).fill_data()
         self.name = '%s' % (self.service,)
         if self.booking_package:
-            self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT
+            self.base_category = BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_ALLOTMENT
         else:
             self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT
         #self.service_type = SERVICE_CATEGORY_ALLOTMENT

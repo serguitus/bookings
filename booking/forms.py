@@ -525,12 +525,14 @@ class BaseBookingServicePaxInlineForm(forms.ModelForm):
         }
 
 
-class BookingAllotmentForm(forms.ModelForm, MailForm, ServiceForm):
+class BookingProvidedAllotmentForm(forms.ModelForm, MailForm, ServiceForm):
     class Meta:
         model = BookingProvidedAllotment
         fields = '__all__'
         widgets = {
             'booking': autocomplete.ModelSelect2(
+                url='disabled-autocomplete',),
+            'booking_package': autocomplete.ModelSelect2(
                 url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
                 url='serviceallotment-autocomplete',
@@ -559,12 +561,14 @@ class BookingAllotmentForm(forms.ModelForm, MailForm, ServiceForm):
     nights = forms.IntegerField(initial=0)
 
 
-class BookingTransferForm(forms.ModelForm, MailForm, ServiceForm):
+class BookingProvidedTransferForm(forms.ModelForm, MailForm, ServiceForm):
     class Meta:
         model = BookingProvidedTransfer
         fields = ('__all__')
         widgets = {
             'booking': autocomplete.ModelSelect2(
+                url='disabled-autocomplete',),
+            'booking_package': autocomplete.ModelSelect2(
                 url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
                 url='servicetransfer-autocomplete',
@@ -611,12 +615,14 @@ class BookingTransferForm(forms.ModelForm, MailForm, ServiceForm):
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
-class BookingExtraForm(forms.ModelForm, MailForm, ServiceForm):
+class BookingProvidedExtraForm(forms.ModelForm, MailForm, ServiceForm):
     class Meta:
         model = BookingProvidedExtra
         fields = ('__all__')
         widgets = {
             'booking': autocomplete.ModelSelect2(
+                url='disabled-autocomplete',),
+            'booking_package': autocomplete.ModelSelect2(
                 url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
                 url='serviceextra-autocomplete',
@@ -650,7 +656,7 @@ class BookingExtraForm(forms.ModelForm, MailForm, ServiceForm):
     nights = forms.IntegerField(initial=0)
 
 
-class BookingPackageForm(forms.ModelForm, MailForm, ServiceForm):
+class BookingExtraPackageForm(forms.ModelForm, MailForm, ServiceForm):
     class Meta:
         model = BookingExtraPackage
         fields = '__all__'
@@ -668,120 +674,6 @@ class BookingPackageForm(forms.ModelForm, MailForm, ServiceForm):
             'p_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
             'v_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
             'provider_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
-        }
-    id = forms.CharField(required=False, widget=forms.HiddenInput())
-
-
-class BookingPackageAllotmentForm(forms.ModelForm, MailForm, ServiceForm):
-    class Meta:
-        model = BookingProvidedAllotment
-        fields = '__all__'
-        widgets = {
-            'booking_package': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',),
-            'service': autocomplete.ModelSelect2(
-                url='serviceallotment-autocomplete',
-                forward=['provider', 'search_location'],
-                ),
-            'room_type': autocomplete.ModelSelect2(
-                url='roomtype-autocomplete',
-                forward=['service'],
-                ),
-            'board_type': autocomplete.ListSelect2(
-                url='boardtype-autocomplete',
-                forward=['service']),
-            'service_addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
-                forward=['service'],
-                ),
-            'provider': autocomplete.ModelSelect2(
-                url='providerallotment-autocomplete',
-                forward=['service', 'room_type', 'board_type', 'service_addon'],
-                ),
-        }
-    id = forms.CharField(required=False, widget=forms.HiddenInput())
-
-
-class BookingPackageTransferForm(forms.ModelForm, MailForm, ServiceForm):
-    class Meta:
-        model = BookingProvidedTransfer
-        fields = ('__all__')
-        widgets = {
-            'booking_package': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',),
-            'service': autocomplete.ModelSelect2(
-                url='servicetransfer-autocomplete',
-                forward=['provider', 'search_location', 'location_from', 'location_to'],
-                ),
-            'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
-            'place_from': autocomplete.ModelSelect2(
-                url='place-autocomplete',
-                forward=['location_from'],
-                ),
-            'pickup': autocomplete.ModelSelect2(
-                url='pickup-autocomplete',
-                forward=['location_from', 'service'],
-                ),
-            'schedule_from': autocomplete.ModelSelect2(
-                url='arrival-autocomplete',
-                forward=['service', 'location_from'],
-                ),
-            'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
-            'place_to': autocomplete.ModelSelect2(
-                url='place-autocomplete',
-                forward=['location_to'],
-                ),
-            'dropoff': autocomplete.ModelSelect2(
-                url='dropoff-autocomplete',
-                forward=['location_to', 'service'],
-                ),
-            'schedule_to': autocomplete.ModelSelect2(
-                url='departure-autocomplete',
-                forward=['location_to'],
-                ),
-            'service_addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
-                forward=['service'],
-                ),
-            'provider': autocomplete.ModelSelect2(
-                url='providertransfer-autocomplete',
-                forward=['service', 'location_from', 'location_to', 'service_addon'],
-                ),
-        }
-    id = forms.CharField(required=False, widget=forms.HiddenInput())
-
-
-class BookingPackageExtraForm(forms.ModelForm, MailForm, ServiceForm):
-    class Meta:
-        model = BookingProvidedExtra
-        fields = ('__all__')
-        widgets = {
-            'booking_package': autocomplete.ModelSelect2(
-                url='disabled-autocomplete',),
-            'service': autocomplete.ModelSelect2(
-                url='serviceextra-autocomplete',
-                forward=['provider', 'search_location'],
-                ),
-            'addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
-                forward=['service'],
-                ),
-            'service_addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
-                forward=['service'],
-                ),
-            'provider': autocomplete.ModelSelect2(
-                url='providerextra-autocomplete',
-                forward=['service', 'service_addon'],
-                ),
-            'pickup_office': autocomplete.ModelSelect2(
-                url='carrentaloffice-autocomplete',
-                forward=['service',],
-                ),
-            'dropoff_office': autocomplete.ModelSelect2(
-                url='carrentaloffice-autocomplete',
-                forward=['service',],
-                ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 

@@ -7,12 +7,11 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 from booking.models import (
-    PackageService,
-    Quote, QuoteService, QuotePaxVariant, QuotePackageService,
+    Quote, QuoteService, QuotePaxVariant,
     NewQuoteServiceBookDetail,
-    Booking, BaseBookingService, BookingPax, BookingPackageService,
+    Booking, BaseBookingService, BookingPax, BookingProvidedService,
     BookingBookDetail,
-    ProviderBookingPayment, ProviderBookingPaymentService,
+    ProviderBookingPayment, ProviderPaymentBookingProvided,
 )
 from booking.constants import (
     PACKAGESERVICE_TYPES, QUOTESERVICE_TYPES, QUOTEPACKAGESERVICE_TYPES,
@@ -24,23 +23,6 @@ from booking.constants import (
 from finance.models import (
     AgencyPayment,
 )
-
-
-class PackageServiceTable(tables.Table):
-    class Meta:
-        model = PackageService
-        template_name = 'booking/packageservice_list.html'
-        fields = ['name', 'service_type', 'days_after', 'days_duration']
-
-    def render_name(self, value, record):
-        obj_url = reverse(
-            'common:booking_%s_change' % (PACKAGESERVICE_TYPES[record.service_type]),
-            args=(quote(record.pk),)
-        )
-        return format_html('<a href="%s">%s</a>' % (obj_url, value))
-
-    def before_render(self, request):
-        self.columns.hide('service_type')
 
 
 class QuoteTable(tables.Table):
@@ -74,23 +56,6 @@ class QuoteServiceTable(tables.Table):
         self.columns.hide('service_type')
 
 
-class QuotePackageServiceTable(tables.Table):
-    class Meta:
-        model = QuotePackageService
-        template_name = 'booking/quotepackageservice_list.html'
-        fields = ['name', 'service_type', 'status', 'datetime_from', 'datetime_to']
-
-    def render_name(self, value, record):
-        obj_url = reverse(
-            'common:booking_%s_change' % (QUOTEPACKAGESERVICE_TYPES[record.service_type]),
-            args=(quote(record.pk),)
-        )
-        return format_html('<a href="%s">%s</a>' % (obj_url, value))
-
-    def before_render(self, request):
-        self.columns.hide('service_type')
-
-
 class QuotePaxVariantTable(tables.Table):
     class Meta:
         model = QuotePaxVariant
@@ -106,14 +71,14 @@ class QuotePaxVariantTable(tables.Table):
         ]
 
     def __init__(self, *args, **kwargs):
-        self.base_columns['utility_percent_single'].verbose_name='Util.SGL %'
-        self.base_columns['utility_single'].verbose_name='Util.SGL'
-        self.base_columns['utility_percent_double'].verbose_name='Util.DBL %'
-        self.base_columns['utility_double'].verbose_name='Util.DBL'
-        self.base_columns['utility_percent_triple'].verbose_name='Util.TPL %'
-        self.base_columns['utility_triple'].verbose_name='Util.TPL'
-        self.base_columns['utility_percent_qdrple'].verbose_name='Util.QPL %'
-        self.base_columns['utility_qdrple'].verbose_name='Util.QPL'
+        self.base_columns['utility_percent_single'].verbose_name = 'Util.SGL %'
+        self.base_columns['utility_single'].verbose_name = 'Util.SGL'
+        self.base_columns['utility_percent_double'].verbose_name = 'Util.DBL %'
+        self.base_columns['utility_double'].verbose_name = 'Util.DBL'
+        self.base_columns['utility_percent_triple'].verbose_name = 'Util.TPL %'
+        self.base_columns['utility_triple'].verbose_name = 'Util.TPL'
+        self.base_columns['utility_percent_qdrple'].verbose_name = 'Util.QPL %'
+        self.base_columns['utility_qdrple'].verbose_name = 'Util.QPL'
         super(QuotePaxVariantTable, self).__init__(*args, **kwargs)
 
 
@@ -125,8 +90,8 @@ class BookingTable(tables.Table):
                   'date_to', 'cost_amount', 'price_amount', 'utility_percent', 'utility']
 
     def __init__(self, *args, **kwargs):
-        self.base_columns['utility_percent'].verbose_name='Util.%'
-        self.base_columns['utility'].verbose_name='Util.'
+        self.base_columns['utility_percent'].verbose_name = 'Util.%'
+        self.base_columns['utility'].verbose_name = 'Util.'
         super(BookingTable, self).__init__(*args, **kwargs)
 
     def render_reference(self, value, record):
@@ -198,7 +163,7 @@ class AgencyPaymentTable(tables.Table):
         attrs = {'class': 'table table-hover table-sm'}
 
     def __init__(self, *args, **kwargs):
-        self.base_columns['name'].verbose_name='Payment'
+        self.base_columns['name'].verbose_name = 'Payment'
         super(AgencyPaymentTable, self).__init__(*args, **kwargs)
 
     def render_name(self, value, record):
@@ -218,8 +183,8 @@ class ProviderBookingPaymentTable(tables.Table):
         attrs = {'class': 'table table-hover table-sm'}
 
     def __init__(self, *args, **kwargs):
-        self.base_columns['services_amount'].verbose_name='Serv.Amount'
-        self.base_columns['currency_rate'].verbose_name='Rate'
+        self.base_columns['services_amount'].verbose_name = 'Serv.Amount'
+        self.base_columns['currency_rate'].verbose_name = 'Rate'
         super(ProviderBookingPaymentTable, self).__init__(*args, **kwargs)
 
     def render_name(self, value, record):
@@ -230,21 +195,22 @@ class ProviderBookingPaymentTable(tables.Table):
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
 
-class ProviderBookingPaymentServiceTable(tables.Table):
+class ProviderPaymentBookingProvidedTable(tables.Table):
     class Meta:
-        model = ProviderBookingPaymentService
+        model = ProviderPaymentBookingProvided
         template_name = 'booking/table/providerbookingpaymentservice_table.html'
-        fields = ['provider_service_booking', 'provider_service_name',
+        fields = [
+            'provider_service_booking', 'provider_service_name',
             'provider_service_datetime_from', 'provider_service_datetime_to',
             'provider_service_status', 'service_cost_amount_to_pay', 'service_cost_amount_paid',
             'amount_paid']
         attrs = {'class': 'table table-hover table-sm'}
 
     def __init__(self, *args, **kwargs):
-        self.base_columns['service_cost_amount_to_pay'].verbose_name='Serv.To Pay'
-        self.base_columns['service_cost_amount_paid'].verbose_name='Serv.Paid'
-        self.base_columns['amount_paid'].verbose_name='Paid'
-        super(ProviderBookingPaymentServiceTable, self).__init__(*args, **kwargs)
+        self.base_columns['service_cost_amount_to_pay'].verbose_name = 'Serv.To Pay'
+        self.base_columns['service_cost_amount_paid'].verbose_name = 'Serv.Paid'
+        self.base_columns['amount_paid'].verbose_name = 'Paid'
+        super(ProviderPaymentBookingProvidedTable, self).__init__(*args, **kwargs)
 
     def render_name(self, value, record):
         obj_url = reverse(
@@ -256,7 +222,7 @@ class ProviderBookingPaymentServiceTable(tables.Table):
 
 class ProviderBookingPaymentReportTable(tables.Table):
     class Meta:
-        model = ProviderBookingPaymentService
+        model = ProviderPaymentBookingProvided
         template_name = 'booking/table/providerbookingpaymentservice_table.html'
         fields = ['provider_service_booking',
                   'provider_service_name',
@@ -308,11 +274,11 @@ class BookingConfirmationTable(tables.Table):
         # self.base_columns['service_type'].verbose_name='Request emails'
         # self.base_columns['utility_percent'].verbose_name='Util.%'
         # self.base_columns['utility'].verbose_name='Util.'
-        self.base_columns['nights'].verbose_name='N'
-        self.base_columns['datetime_from'].verbose_name='FROM'
-        self.base_columns['datetime_to'].verbose_name='TO'
-        self.base_columns['description'].verbose_name='Pax'
-        self.base_columns['conf_number'].verbose_name='Conf.'
+        self.base_columns['nights'].verbose_name = 'N'
+        self.base_columns['datetime_from'].verbose_name = 'FROM'
+        self.base_columns['datetime_to'].verbose_name = 'TO'
+        self.base_columns['description'].verbose_name = 'Pax'
+        self.base_columns['conf_number'].verbose_name = 'Conf.'
         super(BookingConfirmationTable, self).__init__(*args, **kwargs)
 
 
@@ -336,8 +302,8 @@ class QuoteConfirmationTable(tables.Table):
         # self.base_columns['utility_percent'].verbose_name='Util.%'
         # self.base_columns['utility'].verbose_name='Util.'
         # self.base_columns['nights'].verbose_name='N'
-        self.base_columns['datetime_from'].verbose_name='FROM'
-        self.base_columns['datetime_to'].verbose_name='TO'
+        self.base_columns['datetime_from'].verbose_name = 'FROM'
+        self.base_columns['datetime_to'].verbose_name = 'TO'
         #self.base_columns['description'].verbose_name='Pax'
         #self.base_columns['conf_number'].verbose_name='Conf.'
         super(QuoteConfirmationTable, self).__init__(*args, **kwargs)
@@ -387,19 +353,19 @@ class BookingVouchersTable(tables.Table):
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
 
-class BookingPackageServiceTable(tables.Table):
+class BookingProvidedPackageServiceTable(tables.Table):
     class Meta:
-        model = BookingPackageService
-        template_name = 'booking/bookingpackageservice_list.html'
+        model = BookingProvidedService
+        template_name = 'booking/bookingprovidedservice_list.html'
         fields = [
             'name', 'datetime_from', 'datetime_to',
             'cost_amount', 'price_amount', 'utility_percent', 'utility',
             'provider', 'status', 'cost_amount_paid']
 
     def __init__(self, *args, **kwargs):
-        self.base_columns['utility_percent'].verbose_name='Util.%'
-        self.base_columns['utility'].verbose_name='Util.'
-        super(BookingPackageServiceTable, self).__init__(*args, **kwargs)
+        self.base_columns['utility_percent'].verbose_name = 'Util.%'
+        self.base_columns['utility'].verbose_name = 'Util.'
+        super(BookingProvidedServiceTable, self).__init__(*args, **kwargs)
 
     def render_name(self, value, record):
         obj_url = reverse(
@@ -411,7 +377,7 @@ class BookingPackageServiceTable(tables.Table):
 
 class BookingPackageServiceSummaryTable(tables.Table):
     class Meta:
-        model = BookingPackageService
+        model = BookingProvidedService
         template_name = 'booking/include/base_table.html'
         fields = [
             'name', 'datetime_from', 'datetime_to', 'provider', 'status']

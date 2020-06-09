@@ -472,10 +472,10 @@ class BookingServices(object):
                     # create bookingservicepax list
                     cls.build_bookingservice_paxes(booking_package, pax_list, user)
 
-                    # create bookingpackageallotment list
+                    # create bookingprovidedallotment list
                     for quotepackage_allotment in NewQuoteAllotment.objects.filter(
                             quote_package_id=quote_package.id).all():
-                        bookingpackage_allotment = BookingPackageAllotment()
+                        bookingpackage_allotment = BookingProvidedAllotment()
                         ConfigServices.copy_book_allotment_data(
                             dst_service=bookingpackage_allotment,
                             src_service=quotepackage_allotment)
@@ -486,7 +486,7 @@ class BookingServices(object):
                     # create bookingpackagetransfer list
                     for quotepackage_transfer in NewQuoteTransfer.objects.filter(
                             quote_package_id=quote_package.id).all():
-                        bookingpackage_transfer = BookingPackageTransfer()
+                        bookingpackage_transfer = BookingProvidedTransfer()
                         ConfigServices.copy_book_transfer_data(
                             dst_service=bookingpackage_transfer, src_service=quotepackage_transfer)
                         bookingpackage_transfer.quantity = ConfigServices.get_service_quantity(
@@ -498,7 +498,7 @@ class BookingServices(object):
                     # create bookingextra list
                     for quotepackage_extra in NewQuoteExtra.objects.filter(
                             quote_package_id=quote_package.id).all():
-                        bookingpackage_extra = BookingPackageExtra()
+                        bookingpackage_extra = BookingProvidedTransfer()
                         ConfigServices.copy_book_extra_data(
                             dst_service=bookingpackage_extra, src_service=quotepackage_extra)
                         bookingpackage_extra.quantity = ConfigServices.get_service_quantity(
@@ -1203,10 +1203,10 @@ class BookingServices(object):
     @classmethod
     def update_bookingservice_description(cls, booking_service):
         CLASSES = {
-            'T': BookingTransfer,
-            'E': BookingExtra,
-            'A': BookingAllotment,
-            'P': BookingPackage,
+            'T': BookingProvidedTransfer,
+            'E': BookingProvidedExtra,
+            'A': BookingProvidedAllotment,
+            'P': BookingExtraPackage,
         }
         service = CLASSES[booking_service.service_type].objects.get(id=booking_service.id)
         #service = getattr(CLASSES, booking_service.service_type).objects.get(
@@ -1695,9 +1695,9 @@ class BookingServices(object):
     @classmethod
     def _find_bookingservice_pax_list(cls, bookingservice):
         if isinstance(bookingservice, (
-                BookingAllotment, BookingTransfer, BookingExtra, BookingPackage, BaseBookingService)):
-            return list(BookingServicePax.objects.filter(booking_service=bookingservice.id).all())
-        return list(BookingServicePax.objects.filter(
+                BookingProvidedAllotment, BookingProvidedTransfer, BookingProvidedExtra, BookingExtraPackage, BookingProvidedService)):
+            return list(BaseBookingServicePax.objects.filter(booking_service=bookingservice.id).all())
+        return list(BaseBookingServicePax.objects.filter(
             booking_service=bookingservice.booking_package.id).all())
 
 
@@ -1725,7 +1725,7 @@ class BookingServices(object):
             service_provider = bookingpackage_service.provider
 
         cost, price = None, None
-        if isinstance(bookingpackage_service, BookingPackageAllotment):
+        if isinstance(bookingpackage_service, BookingProvidedAllotment):
             cost, cost_msg, price, price_msg = ConfigServices.allotment_amounts(
                 bookingpackage_service.service,
                 bookingpackage_service.datetime_from, bookingpackage_service.datetime_to,
@@ -1733,7 +1733,7 @@ class BookingServices(object):
                 bookingpackage_service.booking_package.booking.agency,
                 bookingpackage_service.board_type, bookingpackage_service.room_type_id,
                 bookingpackage_service.service_addon_id)
-        if isinstance(bookingpackage_service, BookingPackageTransfer):
+        if isinstance(bookingpackage_service, BookingProvidedTransfer):
             cost, cost_msg, price, price_msg = ConfigServices.transfer_amounts(
                 bookingpackage_service.service,
                 bookingpackage_service.datetime_from, bookingpackage_service.datetime_to,
@@ -1742,7 +1742,7 @@ class BookingServices(object):
                 bookingpackage_service.location_from_id, bookingpackage_service.location_to_id,
                 bookingpackage_service.service_addon_id,
                 bookingpackage_service.quantity)
-        if isinstance(bookingpackage_service, BookingPackageExtra):
+        if isinstance(bookingpackage_service, BookingProvidedTransfer):
             cost, cost_msg, price, price_msg = ConfigServices.extra_amounts(
                 bookingpackage_service.service,
                 bookingpackage_service.datetime_from, bookingpackage_service.datetime_to,
@@ -2993,19 +2993,19 @@ class BookingServices(object):
         if hasattr(booking, 'agency'):
             agency = booking.agency
 
-        allotment_list = list(BookingAllotment.objects.filter(
+        allotment_list = list(BookingProvidedAllotment.objects.filter(
             booking=booking.id).exclude(
                 status=constants.SERVICE_STATUS_CANCELLED
             ).all())
-        transfer_list = list(BookingTransfer.objects.filter(
+        transfer_list = list(BookingProvidedTransfer.objects.filter(
             booking=booking.id).exclude(
                 status=constants.SERVICE_STATUS_CANCELLED
             ).all())
-        extra_list = list(BookingExtra.objects.filter(
+        extra_list = list(BookingProvidedExtra.objects.filter(
             booking=booking.id).exclude(
                 status=constants.SERVICE_STATUS_CANCELLED
             ).all())
-        package_list = list(BookingPackage.objects.filter(
+        package_list = list(BookingExtraPackage.objects.filter(
             booking=booking.id).exclude(
                 status=constants.SERVICE_STATUS_CANCELLED
             ).all())
@@ -3176,7 +3176,7 @@ class BookingServices(object):
     @classmethod
     def _find_bookingservice_amounts(
             cls, bookingservice, cost_groups, price_groups, agency=None):
-        if isinstance(bookingservice, BookingAllotment):
+        if isinstance(bookingservice, BookingProvidedAllotment):
             if not agency:
                 agency = bookingservice.booking.agency
             cost, cost_msg, price, price_msg = ConfigServices.allotment_amounts(
@@ -3206,7 +3206,7 @@ class BookingServices(object):
                 cost_groups, price_groups,
                 bookingservice.provider, agency,
                 bookingservice.service_addon_id, bookingservice.quantity, bookingservice.parameter)
-        elif isinstance(bookingservice, BookingPackageAllotment):
+        elif isinstance(bookingservice, BookingProvidedAllotment):
             if not agency:
                 agency = bookingservice.booking_package.booking.agency
             service_provider = cls._find_bookingpackageservice_provider(bookingservice)
@@ -3217,7 +3217,7 @@ class BookingServices(object):
                 service_provider, agency,
                 bookingservice.board_type, bookingservice.room_type_id,
                 bookingservice.service_addon_id)
-        elif isinstance(bookingservice, BookingPackageTransfer):
+        elif isinstance(bookingservice, BookingProvidedTransfer):
             if not agency:
                 agency = bookingservice.booking_package.booking.agency
             service_provider = cls._find_bookingpackageservice_provider(bookingservice)
@@ -3229,7 +3229,7 @@ class BookingServices(object):
                 bookingservice.location_from_id, bookingservice.location_to_id,
                 bookingservice.service_addon_id,
                 bookingservice.quantity)
-        elif isinstance(bookingservice, BookingPackageExtra):
+        elif isinstance(bookingservice, BookingProvidedTransfer):
             if not agency:
                 agency = bookingservice.booking_package.booking.agency
             service_provider = cls._find_bookingpackageservice_provider(bookingservice)
@@ -3249,7 +3249,7 @@ class BookingServices(object):
 
     @classmethod
     def _find_bookingservice_cost(cls, bookingservice, cost_groups):
-        if isinstance(bookingservice, BookingAllotment):
+        if isinstance(bookingservice, BookingProvidedAllotment):
             cost, cost_msg = ConfigServices.allotment_costs(
                 bookingservice.service_id,
                 bookingservice.datetime_from, bookingservice.datetime_to,
@@ -3257,7 +3257,7 @@ class BookingServices(object):
                 bookingservice.provider,
                 bookingservice.board_type, bookingservice.room_type_id,
                 bookingservice.service_addon_id)
-        elif isinstance(bookingservice, BookingTransfer):
+        elif isinstance(bookingservice, BookingProvidedTransfer):
             cost, cost_msg = ConfigServices.transfer_costs(
                 bookingservice.service_id,
                 bookingservice.datetime_from, bookingservice.datetime_to,
@@ -3266,14 +3266,14 @@ class BookingServices(object):
                 bookingservice.location_from_id, bookingservice.location_to_id,
                 bookingservice.service_addon_id,
                 bookingservice.quantity)
-        elif isinstance(bookingservice, BookingExtra):
+        elif isinstance(bookingservice, BookingProvidedExtra):
             cost, cost_msg = ConfigServices.extra_costs(
                 bookingservice.service_id,
                 bookingservice.datetime_from, bookingservice.datetime_to,
                 cost_groups,
                 bookingservice.provider,
                 bookingservice.service_addon_id, bookingservice.quantity, bookingservice.parameter)
-        elif isinstance(bookingservice, BookingPackageAllotment):
+        elif isinstance(bookingservice, BookingProvidedAllotment):
             service_provider = cls._find_bookingpackageservice_provider(bookingservice)
             cost, cost_msg = ConfigServices.allotment_costs(
                 bookingservice.service,
@@ -3282,7 +3282,7 @@ class BookingServices(object):
                 service_provider,
                 bookingservice.board_type, bookingservice.room_type_id,
                 bookingservice.service_addon_id)
-        elif isinstance(bookingservice, BookingPackageTransfer):
+        elif isinstance(bookingservice, BookingProvidedTransfer):
             service_provider = cls._find_bookingpackageservice_provider(bookingservice)
             cost, cost_msg = ConfigServices.transfer_costs(
                 bookingservice.service,
@@ -3292,7 +3292,7 @@ class BookingServices(object):
                 bookingservice.location_from_id, bookingservice.location_to_id,
                 bookingservice.service_addon_id,
                 bookingservice.quantity)
-        elif isinstance(bookingservice, BookingPackageExtra):
+        elif isinstance(bookingservice, BookingProvidedExtra):
             service_provider = cls._find_bookingpackageservice_provider(bookingservice)
             cost, cost_msg = ConfigServices.extra_costs(
                 bookingservice.service,
@@ -3307,7 +3307,7 @@ class BookingServices(object):
 
     @classmethod
     def _find_bookingservice_price(cls, bookingservice, price_groups, agency=None):
-        if isinstance(bookingservice, BookingAllotment):
+        if isinstance(bookingservice, BookingProvidedAllotment):
             if not agency:
                 agency = bookingservice.booking.agency
             price, price_msg = ConfigServices.allotment_prices(
@@ -3317,7 +3317,7 @@ class BookingServices(object):
                 agency,
                 bookingservice.board_type, bookingservice.room_type_id,
                 bookingservice.service_addon_id)
-        elif isinstance(bookingservice, BookingTransfer):
+        elif isinstance(bookingservice, BookingProvidedTransfer):
             if not agency:
                 agency = bookingservice.booking.agency
             price, price_msg = ConfigServices.transfer_prices(
@@ -3328,7 +3328,7 @@ class BookingServices(object):
                 bookingservice.location_from_id, bookingservice.location_to_id,
                 bookingservice.service_addon_id,
                 bookingservice.quantity)
-        elif isinstance(bookingservice, BookingExtra):
+        elif isinstance(bookingservice, BookingProvidedExtra):
             if not agency:
                 agency = bookingservice.booking.agency
             price, price_msg = ConfigServices.extra_prices(
@@ -3337,7 +3337,7 @@ class BookingServices(object):
                 price_groups,
                 agency,
                 bookingservice.service_addon_id, bookingservice.quantity, bookingservice.parameter)
-        elif isinstance(bookingservice, BookingPackageAllotment):
+        elif isinstance(bookingservice, BookingProvidedAllotment):
             if not agency:
                 agency = bookingservice.booking_package.booking.agency
             price, price_msg = ConfigServices.allotment_prices(
@@ -3347,7 +3347,7 @@ class BookingServices(object):
                 agency,
                 bookingservice.board_type, bookingservice.room_type_id,
                 bookingservice.service_addon_id)
-        elif isinstance(bookingservice, BookingPackageTransfer):
+        elif isinstance(bookingservice, BookingProvidedTransfer):
             if not agency:
                 agency = bookingservice.booking_package.booking.agency
             price, price_msg = ConfigServices.transfer_prices(
@@ -3358,7 +3358,7 @@ class BookingServices(object):
                 bookingservice.location_from_id, bookingservice.location_to_id,
                 bookingservice.service_addon_id,
                 bookingservice.quantity)
-        elif isinstance(bookingservice, BookingPackageExtra):
+        elif isinstance(bookingservice, BookingProvidedExtra):
             if not agency:
                 agency = bookingservice.booking_package.booking.agency
             price, price_msg = ConfigServices.extra_prices(
@@ -3376,26 +3376,26 @@ class BookingServices(object):
 
     @classmethod
     def _find_booking_service(cls, bookingservice):
-        if isinstance(bookingservice, BaseBookingService):
+        if isinstance(bookingservice, BookingProvidedService):
             if bookingservice.service_type == constants.SERVICE_CATEGORY_ALLOTMENT:
-                bookingservice = cls._find_bookingservice(bookingservice, BookingAllotment.objects)
+                bookingservice = cls._find_bookingservice(bookingservice, BookingProvidedAllotment.objects)
             elif bookingservice.service_type == constants.SERVICE_CATEGORY_TRANSFER:
-                bookingservice = cls._find_bookingservice(bookingservice, BookingTransfer.objects)
+                bookingservice = cls._find_bookingservice(bookingservice, BookingProvidedTransfer.objects)
             elif bookingservice.service_type == constants.SERVICE_CATEGORY_EXTRA:
-                bookingservice = cls._find_bookingservice(bookingservice, BookingExtra.objects)
+                bookingservice = cls._find_bookingservice(bookingservice, BookingProvidedExtra.objects)
             elif bookingservice.service_type == constants.SERVICE_CATEGORY_PACKAGE:
-                bookingservice = cls._find_bookingservice(bookingservice, BookingPackage.objects)
+                bookingservice = cls._find_bookingservice(bookingservice, BookingExtraPackage.objects)
 
-        if isinstance(bookingservice, BookingPackageService):
+        if isinstance(bookingservice, BookingProvidedService):
             if bookingservice.service_type == constants.SERVICE_CATEGORY_ALLOTMENT:
                 bookingservice = cls._find_bookingservice(
-                    bookingservice, BookingPackageAllotment.objects)
+                    bookingservice, BookingProvidedAllotment.objects)
             elif bookingservice.service_type == constants.SERVICE_CATEGORY_TRANSFER:
                 bookingservice = cls._find_bookingservice(
-                    bookingservice, BookingPackageTransfer.objects)
+                    bookingservice, BookingProvidedTransfer.objects)
             elif bookingservice.service_type == constants.SERVICE_CATEGORY_EXTRA:
                 bookingservice = cls._find_bookingservice(
-                    bookingservice, BookingPackageExtra.objects)
+                    bookingservice, BookingProvidedExtra.objects)
 
         return bookingservice
 
@@ -3637,8 +3637,7 @@ class BookingServices(object):
         if hasattr(booking_service, 'avoid_update'):
             return
         if isinstance(booking_service, (
-                BookingAllotment, BookingTransfer, BookingExtra,
-                BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra)):
+                BookingProvidedAllotment, BookingProvidedTransfer, BookingProvidedExtra)):
             cost, cost_msg, price, price_msg = cls._find_bookingservice_update_amounts(
                 booking_service)
             cls._save_booking_service_amounts(booking_service, cost, price)
@@ -3647,7 +3646,7 @@ class BookingServices(object):
         elif isinstance(booking_service, BaseBookingService):
             if booking_service.service_type == constants.SERVICE_CATEGORY_ALLOTMENT:
                 bookingallotment = cls._find_bookingservice(
-                    booking_service, BookingAllotment.objects)
+                    booking_service, BookingProvidedAllotment.objects)
                 if not bookingallotment:
                     return
                 cost, cost_msg, price, price_msg = cls._find_bookingservice_update_amounts(
@@ -3681,10 +3680,10 @@ class BookingServices(object):
                 cls.update_bookingpackage_amounts(bookingpackage, True)
                 booking_service.cost_amount = bookingpackage.cost_amount
                 booking_service.price_amount = bookingpackage.price_amount
-        elif isinstance(booking_service, BookingPackageService):
+        elif isinstance(booking_service, BookingProvidedService):
             if booking_service.service_type == constants.SERVICE_CATEGORY_ALLOTMENT:
                 bookingpackageallotment = cls._find_bookingservice(
-                    booking_service, BookingPackageAllotment.objects)
+                    booking_service, BookingProvidedAllotment.objects)
                 if not bookingpackageallotment:
                     return
                 cost, cost_msg, price, price_msg = cls._find_bookingservice_update_amounts(
@@ -3694,7 +3693,7 @@ class BookingServices(object):
                 booking_service.price_amount = bookingpackageallotment.price_amount
             elif booking_service.service_type == constants.SERVICE_CATEGORY_TRANSFER:
                 bookingpackagetransfer = cls._find_bookingservice(
-                    booking_service, BookingPackageTransfer.objects)
+                    booking_service, BookingProvidedTransfer.objects)
                 if not bookingpackagetransfer:
                     return
                 cost, cost_msg, price, price_msg = cls._find_bookingservice_update_amounts(
@@ -3704,7 +3703,7 @@ class BookingServices(object):
                 booking_service.price_amount = bookingpackagetransfer.price_amount
             elif booking_service.service_type == constants.SERVICE_CATEGORY_EXTRA:
                 bookingpackageextra = cls._find_bookingservice(
-                    booking_service, BookingPackageExtra.objects)
+                    booking_service, BookingProvidedTransfer.objects)
                 if not bookingpackageextra:
                     return
                 cost, cost_msg, price, price_msg = cls._find_bookingservice_update_amounts(
@@ -3810,13 +3809,13 @@ class BookingServices(object):
         if agency is None:
             price, price_msg = None, "Missing Agency"
 
-        allotment_list = list(BookingPackageAllotment.objects.filter(
+        allotment_list = list(BookingProvidedAllotment.objects.filter(
             booking_package=bookingpackage.id).exclude(
                 status=constants.SERVICE_STATUS_CANCELLED).all())
-        transfer_list = list(BookingPackageTransfer.objects.filter(
+        transfer_list = list(BookingProvidedTransfer.objects.filter(
             booking_package=bookingpackage.id).exclude(
                 status=constants.SERVICE_STATUS_CANCELLED).all())
-        extra_list = list(BookingPackageExtra.objects.filter(
+        extra_list = list(BookingProvidedTransfer.objects.filter(
             booking_package=bookingpackage.id).exclude(
                 status=constants.SERVICE_STATUS_CANCELLED).all())
         if ((not allotment_list) and (not transfer_list) and (not extra_list)):
@@ -3900,7 +3899,7 @@ class BookingServices(object):
         if avoid_package_services:
             return False
         services = list(
-            BookingPackageService.objects.filter(booking_package_id=bookingpackage.id).all())
+            BookingProvidedService.objects.filter(booking_package_id=bookingpackage.id).all())
         if services:
             return False
 
@@ -3911,7 +3910,7 @@ class BookingServices(object):
             bookingpackage.save(update_fields=['time'])
         # create bookingallotment list
         for package_allotment in PackageAllotment.objects.filter(package_id=package.id).all():
-            booking_package_allotment = BookingPackageAllotment()
+            booking_package_allotment = BookingProvidedAllotment()
             booking_package_allotment.booking_package = bookingpackage
             # TODO see if we can automate confirmation numbers some way
             # booking_package_allotment.conf_number = ''
@@ -3924,7 +3923,7 @@ class BookingServices(object):
 
         # create bookingtransfer list
         for package_transfer in PackageTransfer.objects.filter(package_id=package.id).all():
-            booking_package_transfer = BookingPackageTransfer()
+            booking_package_transfer = BookingProvidedTransfer()
             booking_package_transfer.booking_package = bookingpackage
             # booking_package_transfer.conf_number = '< confirm number >'
             cls._copy_package_info(
@@ -3936,7 +3935,7 @@ class BookingServices(object):
 
         # create bookingextra list
         for package_extra in PackageExtra.objects.filter(package_id=package.id).all():
-            booking_package_extra = BookingPackageExtra()
+            booking_package_extra = BookingProvidedTransfer()
             booking_package_extra.booking_package = bookingpackage
             # booking_package_extra.conf_number = '< confirm number >'
             cls._copy_package_info(
@@ -3956,13 +3955,13 @@ class BookingServices(object):
             bookingpackage = obj
 
         if not cls.sync_bookingpackage_services(bookingpackage):
-            allotment_list = list(BookingPackageAllotment.objects.filter(
+            allotment_list = list(BookingProvidedAllotment.objects.filter(
                 booking_package=bookingpackage.id).exclude(
                     status=constants.SERVICE_STATUS_CANCELLED).all())
-            transfer_list = list(BookingPackageTransfer.objects.filter(
+            transfer_list = list(BookingProvidedTransfer.objects.filter(
                 booking_package=bookingpackage.id).exclude(
                     status=constants.SERVICE_STATUS_CANCELLED).all())
-            extra_list = list(BookingPackageExtra.objects.filter(
+            extra_list = list(BookingProvidedTransfer.objects.filter(
                 booking_package=bookingpackage.id).exclude(
                     status=constants.SERVICE_STATUS_CANCELLED).all())
             if allotment_list:
@@ -4228,7 +4227,7 @@ class BookingServices(object):
                     providerallotmentservice__providerallotmentdetail__board_type=bookingservice.board_type,
                     providerallotmentservice__providerallotmentdetail__addon=addon,
                 )
-            elif isinstance(bookingservice, (BookingTransfer, BookingPackageTransfer)) \
+            elif isinstance(bookingservice, (BookingTransfer, BookingProvidedTransfer)) \
                     and bookingservice.location_from and bookingservice.location_to:
                 qs = qs.filter(
                     Q(providertransferservice__service=bookingservice.service)
@@ -4247,7 +4246,7 @@ class BookingServices(object):
                         )
                     )
                 )
-            elif isinstance(bookingservice, (BookingExtra, BookingPackageExtra)):
+            elif isinstance(bookingservice, (BookingExtra, BookingProvidedTransfer)):
                 qs = qs.filter(
                     providerextraservice__service=bookingservice.service,
                     providerextraservice__providerextradetail__addon=addon,
@@ -4604,17 +4603,17 @@ class BookingServices(object):
             cls._clone_booking_service(service, new_booking)
 
             # package services
-            allotments = list(BookingPackageAllotment.objects.filter(
+            allotments = list(BookingProvidedAllotment.objects.filter(
                 booking_package=package_pk))
             for package_service in allotments:
                 cls._clone_bookingpackage_service(package_service, service)
 
-            transfers = list(BookingPackageTransfer.objects.filter(
+            transfers = list(BookingProvidedTransfer.objects.filter(
                 booking_package=package_pk))
             for package_service in transfers:
                 cls._clone_bookingpackage_service(package_service, service)
 
-            extras = list(BookingPackageExtra.objects.filter(
+            extras = list(BookingProvidedTransfer.objects.filter(
                 booking_package=package_pk))
             for package_service in extras:
                 cls._clone_bookingpackage_service(package_service, service)
