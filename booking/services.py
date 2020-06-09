@@ -4645,19 +4645,19 @@ class BookingServices(object):
     @classmethod
     def booking_provider_payment_services(cls, request, form, payment_id):
         db_payment = ProviderBookingPayment.objects.get(pk=payment_id)
-        payment_services = ProviderBookingPaymentService.objects.filter(
+        payment_services = ProviderPaymentBookingProvided.objects.filter(
             provider_payment=db_payment).order_by(
                 'provider_service__datetime_from', 'provider_service__time')
         booking_services = list()
         if db_payment.status == STATUS_DRAFT:
-            booking_services = BaseBookingService.objects.filter(
+            booking_services = BookingProvidedService.objects.filter(
                 provider=db_payment.provider
             ).exclude(
                 base_service__category=SERVICE_CATEGORY_PACKAGE
             ).exclude(
                 cost_amount_to_pay=F('cost_amount_paid')
             ).exclude(
-                providerbookingpaymentservice__provider_payment=db_payment
+                providerpaymentbookingprovided__provider_payment=db_payment
             ).order_by(
                 'datetime_from', 'time', 'datetime_to')
 
@@ -4745,7 +4745,7 @@ class BookingServices(object):
         if db_payment.status == STATUS_DRAFT:
             if payment.status == STATUS_DRAFT or payment.status == STATUS_READY:
 
-                db_payment_services = ProviderBookingPaymentService.objects.select_for_update().filter(
+                db_payment_services = ProviderPaymentBookingProvided.objects.select_for_update().filter(
                     provider_payment_id=payment.id)
 
                 payment_services = list()
@@ -4795,7 +4795,7 @@ class BookingServices(object):
                     if booking_service.provider.id != payment.provider.id:
                         continue
 
-                    payment_service, created = ProviderBookingPaymentService.objects.update_or_create(
+                    payment_service, created = ProviderPaymentBookingProvided.objects.update_or_create(
                         provider_payment_id=payment.id,
                         provider_service_id=booking_service.id,
                         defaults={
@@ -4842,7 +4842,7 @@ class BookingServices(object):
 
         elif db_payment.status == STATUS_READY:
             if payment.status == STATUS_CANCELLED:
-                db_payment_services = ProviderBookingPaymentService.objects.select_for_update().filter(
+                db_payment_services = ProviderPaymentBookingProvided.objects.select_for_update().filter(
                     provider_payment_id=db_payment.id)
                 for db_payment_service in db_payment_services:
                     # update booking service removing paid amount

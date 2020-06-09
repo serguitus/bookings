@@ -198,7 +198,7 @@ class ProviderBookingPaymentTable(tables.Table):
 class ProviderPaymentBookingProvidedTable(tables.Table):
     class Meta:
         model = ProviderPaymentBookingProvided
-        template_name = 'booking/table/providerbookingpaymentservice_table.html'
+        template_name = 'booking/table/providerpaymentbookingprovided_table.html'
         fields = [
             'provider_service_booking', 'provider_service_name',
             'provider_service_datetime_from', 'provider_service_datetime_to',
@@ -223,7 +223,7 @@ class ProviderPaymentBookingProvidedTable(tables.Table):
 class ProviderBookingPaymentReportTable(tables.Table):
     class Meta:
         model = ProviderPaymentBookingProvided
-        template_name = 'booking/table/providerbookingpaymentservice_table.html'
+        template_name = 'booking/table/providerpaymentbookingprovided_table.html'
         fields = ['provider_service_booking',
                   'provider_service_name',
                   'provider_service_ref', 'service_cost_amount_to_pay',

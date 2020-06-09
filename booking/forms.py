@@ -780,7 +780,7 @@ class ProviderBookingPaymentForm(forms.ModelForm, MailForm):
         }
 
 
-class ProviderBookingPaymentServiceForm(forms.Form):
+class ProviderPaymentBookingProvidedForm(forms.Form):
     service_payment_id = forms.CharField(required=False,
                                          widget=forms.HiddenInput())
     service_id = forms.CharField(required=False, widget=forms.HiddenInput())
@@ -816,7 +816,7 @@ class ProviderBookingPaymentServiceForm(forms.Form):
             attrs={'style':'text-align: right; width: 100px;'}))
 
 
-class ProviderBookingPaymentServiceReadonlyForm(forms.Form):
+class ProviderPaymentBookingProvidedReadonlyForm(forms.Form):
     service_payment_id = forms.CharField(required=False,
                                          widget=forms.HiddenInput())
     service_id = forms.CharField(required=False, widget=forms.HiddenInput())

@@ -51,8 +51,8 @@ from booking.constants import (
     BOOTSTRAP_STYLE_BOOKING_STATUS_MAPPING, BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT, BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA, BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE,
-    BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_ALLOTMENT, BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_TRANSFER,
-    BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_EXTRA
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT, BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_TRANSFER,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA
 )
 from booking.forms import (
     EmailPopupForm,
@@ -73,7 +73,7 @@ from booking.forms import (
     BookingBookDetailExtraForm,
     VouchersConfigForm,
     ProviderBookingPaymentForm,
-    ProviderBookingPaymentServiceForm, ProviderBookingPaymentServiceReadonlyForm,
+    ProviderPaymentBookingProvidedForm, ProviderPaymentBookingProvidedReadonlyForm,
 )
 from booking.models import (
     BaseBookingService,
@@ -1165,11 +1165,11 @@ class ServiceChangeList(BookingServiceStatusChangeList):
             model_name = 'bookingprovidedextra'
         elif base_category == BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE:
             model_name = 'bookingextrapackage'
-        elif base_category == BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_ALLOTMENT:
+        elif base_category == BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT:
             model_name = 'bookingprovidedallotment'
-        elif base_category == BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_TRANSFER:
+        elif base_category == BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_TRANSFER:
             model_name = 'bookingprovidedtransfer'
-        elif base_category == BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_EXTRA:
+        elif base_category == BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA:
             model_name = 'bookingprovidedextra'
         else:
             model_name = self.opts.app_label.model_name
@@ -1915,9 +1915,9 @@ class ProviderBookingPaymentSiteModel(SiteModel):
             if 'formset_services' not in context:
                 context['formset_services'] = BookingServices.booking_provider_payment_services(request, form, object_id)
             if obj.status == STATUS_DRAFT:
-                ServicesFormSet = formset_factory(ProviderBookingPaymentServiceForm, extra=0)
+                ServicesFormSet = formset_factory(ProviderPaymentBookingProvidedForm, extra=0)
             else:
-                ServicesFormSet = formset_factory(ProviderBookingPaymentServiceReadonlyForm, extra=0)
+                ServicesFormSet = formset_factory(ProviderPaymentBookingProvidedReadonlyForm, extra=0)
             services_formset = ServicesFormSet(initial=list(context['formset_services']))
 
             context.update(dict(services_formset=services_formset))
@@ -1927,7 +1927,7 @@ class ProviderBookingPaymentSiteModel(SiteModel):
     def save_model(self, request, obj, form, change):
         if obj. pk:
             # disable save of agencyinvoice object
-            ServicesFormSet = formset_factory(ProviderBookingPaymentServiceForm)
+            ServicesFormSet = formset_factory(ProviderPaymentBookingProvidedForm)
             services_formset = ServicesFormSet(request.POST)
             if services_formset.is_valid():
                 BookingServices.save_payment(
@@ -2022,7 +2022,7 @@ class ProviderBookingPaymentSiteModel(SiteModel):
 
     def _build_provider_payment_pdf(self, payment):
         template = get_template("booking/pdf/provider_payment.html")
-        # services = ProviderBookingPaymentService.objects.filter(provider_payment=payment)
+        # services = ProviderPaymentBookingProvided.objects.filter(provider_payment=payment)
         context = {
             # 'pagesize': 'Letter',
             'payment': payment,
@@ -2219,7 +2219,7 @@ def default_provider_payment_mail_subject(request, payment=None):
 def default_provider_payment_mail_body(request, payment=None):
     if payment:
         provider = payment.provider
-        services = list(ProviderBookingPaymentService.objects.filter(
+        services = list(ProviderPaymentBookingProvided.objects.filter(
             provider_payment=payment).order_by('provider_service__datetime_from'))
     else:
         services = []

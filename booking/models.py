@@ -20,9 +20,9 @@ from booking.constants import (
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE,
-    BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_ALLOTMENT,
-    BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_TRANSFER,
-    BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_EXTRA,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_TRANSFER,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA,
     QUOTE_STATUS_LIST, QUOTE_STATUS_DRAFT,
     BOOKING_STATUS_LIST, BOOKING_STATUS_PENDING,
     SERVICE_STATUS_LIST, SERVICE_STATUS_PENDING, SERVICE_STATUS_REQUEST, SERVICE_STATUS_CANCELLED,
@@ -57,11 +57,13 @@ from finance.models import (
 # BookingService child objects from a BookingService list
 def _get_child_objects(services):
     TYPE_MODELS = {
+        'BA': BookingProvidedAllotment,
         'BT': BookingProvidedTransfer,
         'BE': BookingProvidedExtra,
-        'BA': BookingProvidedAllotment,
         'BP': BookingExtraPackage,
-        # 'PE': PackageExtra,
+        'PA': BookingProvidedAllotment,
+        'PT': BookingProvidedTransfer,
+        'PE': BookingProvidedExtra,
     }
     objs = []
     for service in services:
@@ -1203,7 +1205,7 @@ class BookingBookDetailExtra(BookingBookDetail, BookExtraData):
 
 class ProviderPaymentBookingProvided(models.Model):
     """
-    ProviderBookingPaymentService
+    ProviderPaymentBookingProvided
     """
     class Meta:
         verbose_name = 'Provider Booking Payment'

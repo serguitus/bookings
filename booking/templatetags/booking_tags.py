@@ -72,14 +72,14 @@ def agencypayment_table(booking):
 def providerbookingpayment_table(service):
     table = ProviderBookingPaymentTable(
         ProviderBookingPayment.objects.filter(
-            providerbookingpaymentservice__provider_service=service),
+            providerpaymentbookingprovided__provider_service=service),
         order_by=('date',),
     )
     return table
 
 
 @register.simple_tag
-def providerbookingpaymentservice_table(payment):
+def providerpaymentbookingprovided_table(payment):
     table = ProviderPaymentBookingProvidedTable(
         ProviderPaymentBookingProvided.objects.filter(provider_payment=payment),
         # TODO el parametro order_by no funciona aqui. al parecer el
