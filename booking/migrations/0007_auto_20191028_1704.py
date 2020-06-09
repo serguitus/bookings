@@ -19,9 +19,9 @@ def update_base_booking_data(apps, schema_editor):
                 constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE]:
             bs = BookingService.objects.get(pk=bbs.id)
         elif bbs.base_category in [
-                constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT,
-                constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_TRANSFER,
-                constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA]:
+                constants.BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_ALLOTMENT,
+                constants.BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_TRANSFER,
+                constants.BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_EXTRA]:
             bs = BookingPackageService.objects.get(pk=bbs.id)
         else:
             continue

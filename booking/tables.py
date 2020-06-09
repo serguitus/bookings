@@ -353,7 +353,7 @@ class BookingVouchersTable(tables.Table):
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
 
-class BookingProvidedPackageServiceTable(tables.Table):
+class BookingExtraPackageServiceTable(tables.Table):
     class Meta:
         model = BookingProvidedService
         template_name = 'booking/bookingprovidedservice_list.html'
@@ -375,7 +375,7 @@ class BookingProvidedPackageServiceTable(tables.Table):
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
 
-class BookingPackageServiceSummaryTable(tables.Table):
+class BookingExtraPackageServiceSummaryTable(tables.Table):
     class Meta:
         model = BookingProvidedService
         template_name = 'booking/include/base_table.html'
