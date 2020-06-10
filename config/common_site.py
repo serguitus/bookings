@@ -585,7 +585,7 @@ class CatalogService(SiteModel):
                         continue
 
     # A base action to use in all children
-    def extend_catalog_prices(self, request, queryset):
+    def extend_catalog_prices(self, request, queryset, title=None):
         form = None
         if 'apply' in request.POST:
             form = ExtendCatalogForm(request.POST)
@@ -630,7 +630,7 @@ class CatalogService(SiteModel):
         context = {
             'form': form,
             'items': queryset,
-            'title': 'Generate Provider costs for following year'}
+            'title': title or 'Generate Provider costs for following year'}
         context.update(self.get_model_extra_context(request))
         return render(request, 'config/catalog_extend_dates.html', context)
 
@@ -668,7 +668,8 @@ class ProviderAllotmentServiceSiteModel(CatalogService):
     list_display = ('service', 'provider', 'date_from', 'date_to',)
     top_filters = (
         ('service', AllotmentTopFilter), ('provider', ProviderTopFilter),
-        ('date_to', DateTopFilter))
+        'service__service_category',
+        ('date_to', DateToTopFilter))
     inlines = [ProviderAllotmentDetailInline]
     ordering = ['service', 'provider', '-date_from']
     list_select_related = ('service', 'provider')
@@ -715,15 +716,22 @@ class ProviderAllotmentServiceSiteModel(CatalogService):
 
 class ProviderAllotmentDetailSiteModel(SiteModel):
     recent_allowed = False
-    fields = (
-        'provider_service',
-        ('room_type', 'board_type', 'addon'),
-        ('pax_range_min', 'pax_range_max'),
-        ('ad_1_amount', 'ch_1_ad_1_amount', 'ch_2_ad_1_amount'), #, 'ch_3_ad_1_amount',),
-        ('ad_2_amount', 'ch_1_ad_2_amount', 'ch_2_ad_2_amount',), # 'ch_3_ad_2_amount',),
-        ('ad_3_amount', 'ch_1_ad_3_amount', 'ch_2_ad_3_amount',), # 'ch_3_ad_3_amount',),
-        ('ad_4_amount', 'ch_1_ad_4_amount',), # 'ch_2_ad_3_amount',), # 'ch_3_ad_3_amount',),
-        # ('ch_1_ad_0_amount', 'ch_2_ad_0_amount', 'ch_3_ad_0_amount',),
+    fieldsets = (
+        (None, {
+            'fields':(
+                'provider_service',
+                ('room_type', 'board_type', 'addon'),
+                ('pax_range_min', 'pax_range_max'),
+                ('single_supplement', 'third_pax_discount'),
+                ('ad_1_amount', 'ch_1_ad_1_amount', 'ch_2_ad_1_amount'), #, 'ch_3_ad_1_amount'
+                ('ad_2_amount', 'ch_1_ad_2_amount', 'ch_2_ad_2_amount',), # 'ch_3_ad_2_amount'
+                ('ad_3_amount', 'ch_1_ad_3_amount', 'ch_2_ad_3_amount',), # 'ch_3_ad_3_amount'
+                ('ad_4_amount', 'ch_1_ad_4_amount',), # 'ch_2_ad_3_amount', 'ch_3_ad_3_amount',),
+                # ('ch_1_ad_0_amount', 'ch_2_ad_0_amount', 'ch_3_ad_0_amount',),
+                ),
+            'classes': ('catalogue-detail',)
+            }
+        ),
     )
     list_display = (
         'provider_service', 'room_type', 'board_type', 'addon',
@@ -904,8 +912,8 @@ class ProviderExtraServiceSiteModel(CatalogService):
     save_as = True
 
     actions = ['rewrite_agency_amounts',
-                'update_agency_amounts',
-                'extend_catalog_prices']
+               'update_agency_amounts',
+               'extend_catalog_prices']
 
     def rewrite_agency_amounts(self, request, queryset):
         ConfigServices.generate_agency_extras_amounts_from_providers_extras(
@@ -1003,7 +1011,8 @@ class AgencyAllotmentServiceSiteModel(CatalogService):
     list_display = ('agency', 'service', 'date_from', 'date_to',)
     top_filters = (
         ('service', AllotmentTopFilter), ('agency', AgencyTopFilter),
-        ('date_to', DateTopFilter))
+        'service__service_category',
+        ('date_to', DateToTopFilter))
     inlines = [AgencyAllotmentDetailInline]
     ordering = ['service', 'agency', '-date_from']
     list_select_related = ('agency', 'service')
@@ -1011,6 +1020,15 @@ class AgencyAllotmentServiceSiteModel(CatalogService):
     add_form_template = 'config/catalog_service_change_form.html'
     change_form_template = 'config/catalog_service_change_form.html'
     save_as = True
+    actions = ['extend_catalog_prices']
+
+    def extend_catalog_prices(self, request, queryset):
+        title = 'Generate Agency Prices for listed services on next year'
+        return super(AgencyAllotmentServiceSiteModel, self).extend_catalog_prices(
+            request,
+            queryset,
+            title)
+    extend_catalog_prices.short_description = 'Extend selected Costs 1 year'
 
     def get_details_model(self):
         return AgencyAllotmentDetail
@@ -1109,6 +1127,15 @@ class AgencyTransferServiceSiteModel(CatalogService):
     add_form_template = 'config/catalog_service_change_form.html'
     change_form_template = 'config/catalog_service_change_form.html'
     save_as = True
+    actions = ['extend_catalog_prices']
+
+    def extend_catalog_prices(self, request, queryset):
+        title = 'Generate Agency Prices for listed services on next year'
+        return super(AgencyTransferServiceSiteModel, self).extend_catalog_prices(
+            request,
+            queryset,
+            title)
+    extend_catalog_prices.short_description = 'Extend selected Costs 1 year'
 
     def get_details_model(self):
         return AgencyTransferDetail
@@ -1195,6 +1222,15 @@ class AgencyExtraServiceSiteModel(CatalogService):
     add_form_template = 'config/catalog_service_change_form.html'
     change_form_template = 'config/catalog_service_change_form.html'
     save_as = True
+    actions = ['extend_catalog_prices']
+
+    def extend_catalog_prices(self, request, queryset):
+        title = 'Generate Agency Prices for listed services on next year'
+        return super(AgencyExtraServiceSiteModel, self).extend_catalog_prices(
+            request,
+            queryset,
+            title)
+    extend_catalog_prices.short_description = 'Extend selected Costs 1 year'
 
     def get_details_model(self):
         return AgencyExtraDetail
@@ -1206,7 +1242,7 @@ class AgencyExtraServiceSiteModel(CatalogService):
             fields=[
                 'addon',
                 'pax_range_min', 'pax_range_max',
-                'ad_1_amount',],
+                'ad_1_amount'],
             extra=1,
         )
 

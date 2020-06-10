@@ -21,7 +21,7 @@ class AccountingServiceTestCase(TestCase):
             balance=100)
         # test_balance = test_account.balance
 
-        test_account.fix_balance()
+        # test_account.fix_balance()
 
         self.assertEqual(test_account.balance, 0)
 
@@ -79,8 +79,8 @@ class AccountingServiceTestCase(TestCase):
             amount=test_amount4
         )
 
-        test_account1.fix_balance()
-        test_account2.fix_balance()
+        # test_account1.fix_balance()
+        # test_account2.fix_balance()
 
         self.assertEqual(test_account1.balance, test_amount1 - test_amount3)
         self.assertEqual(test_account2.balance, test_amount2 - test_amount4)
