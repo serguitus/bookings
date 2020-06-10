@@ -584,7 +584,7 @@ class EmailProviderPackageServiceView(View):
             message='Email  sent successfully.',
             extra_tags='', fail_silently=False)
         return HttpResponseRedirect(
-            reverse('common:booking_bookingpackage_change', args=(bps.booking_package.id,)))
+            reverse('common:booking_bookingextrapackage_change', args=(bps.booking_package.id,)))
 
 
 class EmailConfirmationView(View):

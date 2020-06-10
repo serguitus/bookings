@@ -14,9 +14,6 @@ urlpatterns = [
     url(r'^bookingtransfer-amounts/?', views.BookingProvidedTransferAmountsView.as_view(), name='bookingtransfer_amounts'),
     url(r'^bookingextra-amounts/?', views.BookingProvidedExtraAmountsView.as_view(), name='bookingextra_amounts'),
     url(r'^bookingpackage-amounts/?', views.BookingExtraPackageAmountsView.as_view(), name='bookingpackage_amounts'),
-    url(r'^bookingpackageallotment-amounts/?', views.BookingProvidedAllotmentAmountsView.as_view(), name='bookingpackageallotment_amounts'),
-    url(r'^bookingpackagetransfer-amounts/?', views.BookingProvidedTransferAmountsView.as_view(), name='bookingpackagetransfer_amounts'),
-    url(r'^bookingpackageextra-amounts/?', views.BookingProvidedTransferAmountsView.as_view(), name='bookingpackageextra_amounts'),
 
     url(r'^bookingtransfer-time/?', views.BookingTransferTimeView.as_view(), name='bookingtransfer_time'),
     url(r'^bookingtransfer-schedule-from/?', views.BookingTransferScheduleFromView.as_view(), name='bookingtransfer_schedule_from'),
