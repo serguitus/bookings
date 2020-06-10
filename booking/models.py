@@ -733,6 +733,12 @@ class BookingPax(models.Model):
             return '%s' % (self.pax_name)
 
 
+class InvoicedManager(models.Manager):
+    def get_queryset(self):
+        return super(InvoicedManager, self).get_queryset().filter(
+            base_category__in=['BA', 'BT', 'BE', 'BP'])
+
+
 class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
     """
     Base Booking Service
@@ -763,6 +769,10 @@ class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
     cost_amount_paid = models.DecimalField(
         max_digits=10, decimal_places=2, default=0.00, verbose_name='Paid')
     has_payment = models.BooleanField(default=False)
+
+    # Managers
+    objects = models.Manager()
+    invoiced_objects = InvoicedManager()
 
     @property
     def utility(self):
