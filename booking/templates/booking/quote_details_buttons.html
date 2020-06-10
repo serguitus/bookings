@@ -1,9 +1,9 @@
 <div id="detail-buttons">
     <span class="detail-buttons">
-        <a class="btn btn-success" href="{% url 'common:booking_quoteallotment_add' %}?quote={{ current.id }}">+ Accomodation</a>
-        <a class="btn btn-success" href="{% url 'common:booking_quotetransfer_add' %}?quote={{ current.id }}">+ Transfer</a>
-        <a class="btn btn-success" href="{% url 'common:booking_quoteextra_add' %}?quote={{ current.id }}">+ Extra</a>
-        <a class="btn btn-success" href="{% url 'common:booking_quotepackage_add' %}?quote={{ current.id }}">+ Package</a>
+        <a class="btn btn-success" href="{% url 'common:booking_newquoteallotment_add' %}?quote={{ current.id }}">+ Accomodation</a>
+        <a class="btn btn-success" href="{% url 'common:booking_newquotetransfer_add' %}?quote={{ current.id }}">+ Transfer</a>
+        <a class="btn btn-success" href="{% url 'common:booking_newquoteextra_add' %}?quote={{ current.id }}">+ Extra</a>
+        <a class="btn btn-success" href="{% url 'common:booking_quoteextrapackage_add' %}?quote={{ current.id }}">+ Package</a>
         {% include "booking/emails/popup_button.html" with btn_label='Send Quote' %}
         <a class="btn btn-primary" href="{% url 'common:booking_quote_booking_build' current.id %}">Build Booking</a>
     </span>

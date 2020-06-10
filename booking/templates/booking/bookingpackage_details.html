@@ -3,7 +3,7 @@
 
 {# buttons to add new bookingServices to the current booking #}
 {% include 'booking/bookingextrapackage_details_buttons.html' %}
-{% bookingextrapackage_services_summary_table current as table %}
+{% bookingextrapackage_services_summary_table current request as table %}
 <div class="bookingextrapackage_services-container">
     {% render_table table %}
 </div>
