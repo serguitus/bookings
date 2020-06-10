@@ -669,7 +669,7 @@ class ProviderAllotmentServiceSiteModel(CatalogService):
     top_filters = (
         ('service', AllotmentTopFilter), ('provider', ProviderTopFilter),
         'service__service_category',
-        ('date_to', DateToTopFilter))
+        ('date_to', DateTopFilter))
     inlines = [ProviderAllotmentDetailInline]
     ordering = ['service', 'provider', '-date_from']
     list_select_related = ('service', 'provider')
@@ -1012,7 +1012,7 @@ class AgencyAllotmentServiceSiteModel(CatalogService):
     top_filters = (
         ('service', AllotmentTopFilter), ('agency', AgencyTopFilter),
         'service__service_category',
-        ('date_to', DateToTopFilter))
+        ('date_to', DateTopFilter))
     inlines = [AgencyAllotmentDetailInline]
     ordering = ['service', 'agency', '-date_from']
     list_select_related = ('agency', 'service')

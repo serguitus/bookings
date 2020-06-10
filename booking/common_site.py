@@ -13,6 +13,7 @@ from common.sites import SiteModel, CommonChangeList
 from common.templatetags.common_utils import common_add_preserved_filters
 
 from django.conf import settings
+from django.contrib import admin
 from django.contrib import messages
 from django.contrib.admin.options import csrf_protect_m
 from django.contrib.admin.utils import quote
@@ -40,9 +41,9 @@ from booking.constants import (
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE,
-    BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_ALLOTMENT,
-    BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_TRANSFER,
-    BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_EXTRA
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_TRANSFER,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA
 )
 from booking.forms import (
     EmailPopupForm,
