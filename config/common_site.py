@@ -13,8 +13,7 @@ from common.sites import SiteModel, CommonTabularInline, CommonStackedInline, Co
 from common.filters import DateFilter
 
 from config.constants import (
-    SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER, SERVICE_CATEGORY_EXTRA,
-    SERVICE_CATEGORY_PACKAGE)
+    SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER, SERVICE_CATEGORY_EXTRA)
 
 from config.forms import (
     ProviderAllotmentServiceForm, ProviderAllotmentDetailForm, ProviderAllotmentDetailInlineForm,
@@ -207,14 +206,6 @@ class ServiceChangeList(CommonChangeList):
             model_name = 'transfer'
         elif category == SERVICE_CATEGORY_EXTRA:
             model_name = 'extra'
-        elif category == SERVICE_CATEGORY_PACKAGE:
-            return reverse(
-                '%s:%s_%s_change' % (
-                    self.model_admin.admin_site.site_namespace,
-                    'booking',
-                    'package'),
-                args=(quote(pk),),
-                current_app=self.model_admin.admin_site.name)
         else:
             model_name = self.opts.app_label.model_name
         return reverse(

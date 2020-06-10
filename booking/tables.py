@@ -14,11 +14,10 @@ from booking.models import (
     ProviderBookingPayment, ProviderPaymentBookingProvided,
 )
 from booking.constants import (
-    PACKAGESERVICE_TYPES, QUOTESERVICE_TYPES, QUOTEPACKAGESERVICE_TYPES,
+    PACKAGESERVICE_TYPES, QUOTESERVICE_TYPES,
     BOOKINGSERVICE_TYPES,
-    BOOKINGPACKAGESERVICE_TYPES,
     BOOTSTRAP_STYLE_QUOTE_STATUS_MAPPING, BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING,
-    QUOTE_BOOK_DETAIL_CATEGORIES, BOOKING_BOOK_DETAIL_CATEGORIES)
+    QUOTE_BOOK_DETAIL_CATEGORIES)
 
 from finance.models import (
     AgencyPayment,
@@ -47,7 +46,7 @@ class QuoteServiceTable(tables.Table):
 
     def render_name(self, value, record):
         obj_url = reverse(
-            'common:booking_%s_change' % (QUOTESERVICE_TYPES[record.service_type]),
+            'common:booking_%s_change' % (QUOTESERVICE_TYPES[record.base_category]),
             args=(quote(record.pk),)
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
@@ -90,7 +89,7 @@ class QuoteExtraPackageServiceTable(tables.Table):
 
     def render_name(self, value, record):
         obj_url = reverse(
-            'common:booking_%s_change' % (QUOTEPACKAGESERVICE_TYPES[record.service_type]),
+            'common:booking_quoteextrapackage_change',
             args=(quote(record.pk),)
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
@@ -156,7 +155,7 @@ class BookingServiceTable(tables.Table):
 
     def render_name(self, value, record):
         obj_url = reverse(
-            'common:booking_%s_change' % (BOOKINGSERVICE_TYPES[record.service_type]),
+            'common:booking_%s_change' % (BOOKINGSERVICE_TYPES[record.base_category]),
             args=(quote(record.pk),)
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
@@ -364,7 +363,7 @@ class BookingVouchersTable(tables.Table):
 
     def render_name(self, value, record):
         obj_url = reverse(
-            'common:booking_%s_change' % (BOOKINGSERVICE_TYPES[record.service_type]),
+            'common:booking_%s_change' % (BOOKINGSERVICE_TYPES[record.base_category]),
             args=(quote(record.pk),)
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
@@ -386,7 +385,7 @@ class BookingExtraPackageServiceTable(tables.Table):
 
     def render_name(self, value, record):
         obj_url = reverse(
-            'common:booking_%s_change' % (BOOKINGPACKAGESERVICE_TYPES[record.service_type]),
+            'common:booking_bookingextrapackage_change',
             args=(quote(record.pk),)
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
@@ -433,7 +432,7 @@ class BookingServiceUpdateTable(tables.Table):
 
     def render_name(self, value, record):
         obj_url = reverse(
-            'common:booking_%s_change' % (BOOKINGSERVICE_TYPES[record.service_type]),
+            'common:booking_%s_change' % (BOOKINGSERVICE_TYPES[record.base_category]),
             args=(quote(record.pk),)
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
@@ -482,7 +481,7 @@ class AddPaxBookingServicesTable(tables.Table):
 
     def render_name(self, value, record):
         obj_url = reverse(
-            'common:booking_%s_change' % (BOOKINGSERVICE_TYPES[record.service_type]),
+            'common:booking_%s_change' % (BOOKINGSERVICE_TYPES[record.base_category]),
             args=(quote(record.pk),)
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
@@ -513,7 +512,7 @@ class BookingBookDetailTable(tables.Table):
 
     def render_name(self, value, record):
         obj_url = reverse(
-            'common:booking_%s_change' % (BOOKING_BOOK_DETAIL_CATEGORIES[record.base_service.category]),
+            'common:booking_%s_change' % (BOOKINGSERVICE_TYPES[record.base_category]),
             args=(quote(record.pk),)
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))

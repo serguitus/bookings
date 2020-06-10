@@ -14,7 +14,6 @@ from accounting.constants import CURRENCIES, CURRENCY_CUC
 from accounting.models import Account
 
 from booking.constants import (
-    SERVICE_CATEGORY_PACKAGE, SERVICE_CATEGORIES,
     BASE_BOOKING_SERVICE_CATEGORIES,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER,
@@ -23,6 +22,20 @@ from booking.constants import (
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_TRANSFER,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_ALLOTMENT,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_TRANSFER,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_EXTRA,
+    QUOTE_SERVICE_CATEGORIES,
+    QUOTE_SERVICE_CATEGORY_QUOTE_ALLOTMENT,
+    QUOTE_SERVICE_CATEGORY_QUOTE_TRANSFER,
+    QUOTE_SERVICE_CATEGORY_QUOTE_EXTRA,
+    QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE,
+    QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE_ALLOTMENT,
+    QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE_TRANSFER,
+    QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE_EXTRA,
+    QUOTE_SERVICE_CATEGORY_QUOTE_DETAIL_ALLOTMENT,
+    QUOTE_SERVICE_CATEGORY_QUOTE_DETAIL_TRANSFER,
+    QUOTE_SERVICE_CATEGORY_QUOTE_DETAIL_EXTRA,
     QUOTE_STATUS_LIST, QUOTE_STATUS_DRAFT,
     BOOKING_STATUS_LIST, BOOKING_STATUS_PENDING,
     SERVICE_STATUS_LIST, SERVICE_STATUS_PENDING, SERVICE_STATUS_REQUEST, SERVICE_STATUS_CANCELLED,
@@ -286,6 +299,8 @@ class QuoteService(BookServiceData, DateInterval):
     provider = models.ForeignKey(Provider, blank=True, null=True)
     status = models.CharField(
         max_length=5, choices=QUOTE_STATUS_LIST, default=QUOTE_STATUS_DRAFT)
+    base_category = models.CharField(
+        max_length=5, choices=QUOTE_SERVICE_CATEGORIES, blank=True, null=True)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.validate_date_interval()
@@ -329,8 +344,8 @@ class QuoteExtraPackage(QuoteService, BookExtraData):
     def fill_data(self):
         # setting name for this quote_service
         self.name = self.service.name
-        #self.service_type = SERVICE_CATEGORY_PACKAGE
         self.base_service = self.service
+        self.base_category = QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         with transaction.atomic(savepoint=False):
@@ -375,6 +390,10 @@ class NewQuoteAllotment(QuoteProvidedService, BookAllotmentData):
         #self.service_type = SERVICE_CATEGORY_ALLOTMENT
         self.time = time(23, 59, 59)
         self.base_service = self.service
+        if self.quote_package:
+            self.base_category = QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE_ALLOTMENT
+        else:
+            self.base_category = QUOTE_SERVICE_CATEGORY_QUOTE_ALLOTMENT
 
 
 class NewQuoteTransfer(QuoteProvidedService, BookTransferData):
@@ -394,6 +413,10 @@ class NewQuoteTransfer(QuoteProvidedService, BookTransferData):
                                        self.location_to.short_name or self.location_to)
         #self.service_type = SERVICE_CATEGORY_TRANSFER
         self.base_service = self.service
+        if self.quote_package:
+            self.base_category = QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE_TRANSFER
+        else:
+            self.base_category = QUOTE_SERVICE_CATEGORY_QUOTE_TRANSFER
 
 
 class NewQuoteExtra(QuoteProvidedService, BookExtraData):
@@ -411,6 +434,10 @@ class NewQuoteExtra(QuoteProvidedService, BookExtraData):
         self.name = self.service.name
         #self.service_type = SERVICE_CATEGORY_EXTRA
         self.base_service = self.service
+        if self.quote_package:
+            self.base_category = QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE_EXTRA
+        else:
+            self.base_category = QUOTE_SERVICE_CATEGORY_QUOTE_EXTRA
 
 
 class NewQuoteServiceBookDetail(QuoteService):
@@ -446,6 +473,7 @@ class NewQuoteServiceBookDetailAllotment(NewQuoteServiceBookDetail, BookAllotmen
         super(NewQuoteServiceBookDetailAllotment, self).fill_data()
         self.name = '%s - %s' % (self.quote_service, self.book_service)
         self.time = time(23, 59, 59)
+        self.base_category = QUOTE_SERVICE_CATEGORY_QUOTE_DETAIL_ALLOTMENT
 
 
 class NewQuoteServiceBookDetailTransfer(NewQuoteServiceBookDetail, BookTransferData):
@@ -464,6 +492,7 @@ class NewQuoteServiceBookDetailTransfer(NewQuoteServiceBookDetail, BookTransferD
             self.quote_service, self.book_service,
             self.location_from.short_name or self.location_from,
             self.location_to.short_name or self.location_to)
+        self.base_category = QUOTE_SERVICE_CATEGORY_QUOTE_DETAIL_TRANSFER
 
 
 class NewQuoteServiceBookDetailExtra(NewQuoteServiceBookDetail, BookExtraData):
@@ -479,6 +508,7 @@ class NewQuoteServiceBookDetailExtra(NewQuoteServiceBookDetail, BookExtraData):
         self.base_service = self.book_service
         super(NewQuoteServiceBookDetailExtra, self).fill_data()
         self.name = '%s - %s' % (self.quote_service, self.book_service)
+        self.base_category = QUOTE_SERVICE_CATEGORY_QUOTE_DETAIL_EXTRA
 
 
 class BookingInvoice(AgencyInvoice):
@@ -945,7 +975,6 @@ class BookingExtraPackage(BaseBookingService, BookExtraData):
         # setting name for this booking_service
         self.name = self.service.name
         self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE
-        #self.service_type = SERVICE_CATEGORY_PACKAGE
         self.description = self.build_description()
         # TODO define a location for packages to show
 
@@ -1040,7 +1069,7 @@ class BookingProvidedAllotment(BookingProvidedService, BookAllotmentData):
         super(BookingProvidedAllotment, self).fill_data()
         self.name = '%s' % (self.service,)
         if self.booking_package:
-            self.base_category = BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_ALLOTMENT
+            self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT
         else:
             self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT
         #self.service_type = SERVICE_CATEGORY_ALLOTMENT
@@ -1171,6 +1200,7 @@ class BookingBookDetailAllotment(BookingBookDetail, BookAllotmentData):
     def fill_data(self):
         self.base_service = self.book_service
         super(Booking.BookDetailAllotment, self).fill_data()
+        self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_ALLOTMENT
         self.name = '%s - %s' % (self.booking_service, self.book_service)
         self.time = time(23, 59, 59)
 
@@ -1187,6 +1217,7 @@ class BookingBookDetailTransfer(BookingBookDetail, BookTransferData):
     def fill_data(self):
         self.base_service = self.book_service
         super(BookingBookDetailTransfer, self).fill_data()
+        self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_TRANSFER
         self.name = '%s - %s (%s -> %s)' % (
             self.booking_service, self.book_service,
             self.location_from.short_name or self.location_from,
@@ -1205,6 +1236,7 @@ class BookingBookDetailExtra(BookingBookDetail, BookExtraData):
     def fill_data(self):
         self.base_service = self.book_service
         super(BookingBookDetailExtra, self).fill_data()
+        self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_EXTRA
         self.name = '%s - %s' % (self.booking_service, self.book_service)
 
 

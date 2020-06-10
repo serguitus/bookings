@@ -1478,26 +1478,26 @@ class BookingPackageServiceSiteModel(SiteModel):
 
     def response_post_delete(self, request, obj):
         if hasattr(obj, 'booking_package') and obj.booking_package:
-            return redirect(reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
+            return redirect(reverse('common:booking_bookingextrapackage_change', args=[obj.booking_package.pk]))
         booking_package = request.POST.get('booking_package')
         if booking_package:
-            return redirect(reverse('common:booking_bookingpackage_change', args=[booking_package]))
+            return redirect(reverse('common:booking_bookingextrapackage_change', args=[booking_package]))
         return super(BookingPackageServiceSiteModel, self).response_post_delete(request, obj)
 
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'booking_package') and obj.booking_package:
-            return redirect(reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
+            return redirect(reverse('common:booking_bookingextrapackage_change', args=[obj.booking_package.pk]))
         booking_package = request.POST.get('booking_package')
         if booking_package:
-            return redirect(reverse('common:booking_bookingpackage_change', args=[booking_package]))
+            return redirect(reverse('common:booking_bookingextrapackage_change', args=[booking_package]))
         return super(BookingPackageServiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
         if hasattr(obj, 'booking_package') and obj.booking_package:
-            return redirect(reverse('common:booking_bookingpackage_change', args=[obj.booking_package.pk]))
+            return redirect(reverse('common:booking_bookingextrapackage_change', args=[obj.booking_package.pk]))
         booking_package = request.POST.get('booking_package')
         if booking_package:
-            return redirect(reverse('common:booking_bookingpackage_change', args=[booking_package]))
+            return redirect(reverse('common:booking_bookingextrapackage_change', args=[booking_package]))
         return super(BookingPackageServiceSiteModel, self).response_post_save_change(request, obj)
 
     def delete_model(self, request, obj):

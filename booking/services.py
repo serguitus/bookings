@@ -32,7 +32,7 @@ from booking.models import (
 
 from common.filters import parse_date
 
-from config.constants import AMOUNTS_FIXED, SERVICE_CATEGORY_PACKAGE
+from config.constants import AMOUNTS_FIXED
 from config.models import (
     ServiceBookDetail, ServiceBookDetailAllotment,
     ServiceBookDetailTransfer, ServiceBookDetailExtra,
@@ -2307,7 +2307,7 @@ class BookingServices(object):
                     quote_service_pax_variant.save()
                 cls.update_quote_paxvariant_amounts(quote_service_pax_variant, user)
 
-                if quote_service.service_type == constants.SERVICE_CATEGORY_PACKAGE:
+                if quote_service.base_category == constants.QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE:
                     # verify on all services if pax variant exists
                     quotepackage_services = list(QuoteProvidedService.objects.all().filter(
                         quote_package=quote_service.id))
@@ -2582,7 +2582,7 @@ class BookingServices(object):
                 service = NewQuoteTransfer.objects.get(pk=service.id)
             elif service.service_type == constants.SERVICE_CATEGORY_EXTRA:
                 service = NewQuoteExtra.objects.get(pk=service.id)
-            elif service.service_type == constants.SERVICE_CATEGORY_PACKAGE:
+            elif service.base_category == constants.QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE:
                 service = QuoteExtraPackage.objects.get(pk=service.id)
                 return cls._find_quotepackage_amounts(
                     quote_pax_variant=quote_pax_variant,
@@ -2900,7 +2900,7 @@ class BookingServices(object):
 
         date_from = None
         date_to = None
-        for service in quote_package.quotepackage_services.all():
+        for service in quote_package.quoteprovidedservice_set.all():
             if not service.status is constants.SERVICE_STATUS_CANCELLED:
                 # date_from
                 if service.datetime_from is not None:
@@ -3383,7 +3383,7 @@ class BookingServices(object):
                 bookingservice = cls._find_bookingservice(bookingservice, BookingProvidedTransfer.objects)
             elif bookingservice.service_type == constants.SERVICE_CATEGORY_EXTRA:
                 bookingservice = cls._find_bookingservice(bookingservice, BookingProvidedExtra.objects)
-            elif bookingservice.service_type == constants.SERVICE_CATEGORY_PACKAGE:
+            elif bookingservice.base_category == constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE:
                 bookingservice = cls._find_bookingservice(bookingservice, BookingExtraPackage.objects)
 
         if isinstance(bookingservice, BookingProvidedService):
@@ -3673,7 +3673,7 @@ class BookingServices(object):
                 cls._save_booking_service_amounts(bookingextra, cost, price)
                 booking_service.cost_amount = bookingextra.cost_amount
                 booking_service.price_amount = bookingextra.price_amount
-            elif booking_service.service_type == constants.SERVICE_CATEGORY_PACKAGE:
+            elif booking_service.base_category == constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE:
                 bookingpackage = cls._find_bookingservice(booking_service, BookingPackage.objects)
                 if not bookingpackage:
                     return
@@ -4653,7 +4653,7 @@ class BookingServices(object):
             booking_services = BookingProvidedService.objects.filter(
                 provider=db_payment.provider
             ).exclude(
-                base_service__category=SERVICE_CATEGORY_PACKAGE
+                base_category=constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE
             ).exclude(
                 cost_amount_to_pay=F('cost_amount_paid')
             ).exclude(

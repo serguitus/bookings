@@ -4,7 +4,7 @@ from django.db import transaction
 from django.db.models.signals import pre_save, post_save, pre_delete, post_delete
 from django.dispatch import receiver
 
-from booking.constants import SERVICE_CATEGORY_PACKAGE, SERVICE_STATUS_PENDING
+from booking.constants import SERVICE_STATUS_PENDING
 from booking.models import (
     Quote, QuotePaxVariant,
     QuoteServicePaxVariant,
