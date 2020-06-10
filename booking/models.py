@@ -626,9 +626,9 @@ class Booking(models.Model):
     @property
     def utility_compact(self):
         return '{} ({}%)'.format(utility(self.cost_amount,
-                                        self.price_amount),
-                                utility_percent(self.cost_amount,
-                                                self.price_amount))
+                                         self.price_amount),
+                                 utility_percent(self.cost_amount,
+                                                 self.price_amount))
     utility_compact.fget.short_description = 'Util.'
 
     def internal_reference(self):
@@ -935,7 +935,7 @@ class BookingExtraPackage(BaseBookingService, BookExtraData):
         return '%s pax' % self.rooming_list.count()
 
     def fill_data(self):
-        super(BookingExtrsPackage, self).fill_data()
+        super(BookingExtraPackage, self).fill_data()
         # setting name for this booking_service
         self.name = self.service.name
         self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE
@@ -957,6 +957,7 @@ class BookingExtraPackage(BaseBookingService, BookExtraData):
 class BookingProvidedService(BaseBookingService):
     """
     Booking Provided Service
+    This is for services that will be paid to a provider
     """
     class Meta:
         verbose_name = 'Booking Provided Service'

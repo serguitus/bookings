@@ -19,7 +19,7 @@ class AccountingServiceTestCase(TestCase):
             name='Test Account',
             currency=CURRENCY_CUC,
             balance=100)
-        test_balance = test_account.balance
+        # test_balance = test_account.balance
 
         test_account.fix_balance()
 

@@ -1,18 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-"""
-Config Models
-"""
+# Config Models
+from datetime import time
+
 from django.db import models
 
 from config.constants import (
     ROOM_CAPACITIES, BOARD_TYPES, AMOUNTS_BY_PAX,
-    SERVICE_CATEGORIES, SERVICE_CATEGORY_PACKAGE,
+    SERVICE_CATEGORIES,
     SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER, SERVICE_CATEGORY_EXTRA,
-    PACKAGE_AMOUNTS_TYPES, ALLOTMENT_AMOUNTS_TYPES, TRANSFER_AMOUNTS_TYPES, EXTRA_AMOUNTS_TYPES,
+    ALLOTMENT_AMOUNTS_TYPES, TRANSFER_AMOUNTS_TYPES, EXTRA_AMOUNTS_TYPES,
     EXTRA_PARAMETER_TYPES, EXTRA_PARAMETER_TYPE_HOURS,)
-
-from datetime import time
 
 from finance.models import Agency, Provider
 
@@ -297,7 +295,7 @@ class BookServiceData(models.Model):
         blank=True, null=True, verbose_name='Location')
     new_provider = models.ForeignKey(
         Provider, blank=True, null=True, related_name='%(class)s_provider')
-    service_addon  = models.ForeignKey(
+    service_addon = models.ForeignKey(
         Addon, related_name='%(class)s_service_addon', blank=True, null=True, verbose_name='Addon')
     time = models.TimeField(blank=True, null=True)
 
@@ -505,7 +503,7 @@ class ProviderAllotmentDetail(AmountDetail):
         verbose_name_plural = 'Accomodation Provider Details'
         unique_together = (
             ('provider_service', 'room_type', 'board_type', 'addon',
-            'pax_range_min', 'pax_range_max'),)
+             'pax_range_min', 'pax_range_max'),)
     provider_service = models.ForeignKey(ProviderAllotmentService)
     room_type = models.ForeignKey(RoomType)
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
@@ -517,7 +515,7 @@ class ProviderAllotmentDetail(AmountDetail):
 
     def __str__(self):
         return 'Cost for {} ({})'.format(self.provider_service,
-                                            self.room_type)
+                                         self.room_type)
 
 
 class AgencyAllotmentService(AgencyCatalogue):
@@ -531,10 +529,11 @@ class AgencyAllotmentService(AgencyCatalogue):
     service = models.ForeignKey(Allotment)
 
     def __str__(self):
-        return '{} for {} ({} to {})'.format(self.service,
-                                            self.agency,
-                                            self.date_from,
-                                            self.date_to)
+        return '{} for {} ({} to {})'.format(
+            self.service,
+            self.agency,
+            self.date_from,
+            self.date_to)
 
 
 
@@ -551,7 +550,7 @@ class AgencyAllotmentDetail(AmountDetail):
         verbose_name_plural = 'Accomodation Agency Details'
         unique_together = (
             ('agency_service', 'room_type', 'board_type', 'addon',
-            'pax_range_min', 'pax_range_max'),)
+             'pax_range_min', 'pax_range_max'),)
     agency_service = models.ForeignKey(AgencyAllotmentService)
     room_type = models.ForeignKey(RoomType)
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
@@ -561,7 +560,7 @@ class AgencyAllotmentDetail(AmountDetail):
 
     def __str__(self):
         return 'Price for {} ({})'.format(self.agency_service,
-                                        self.room_type)
+                                          self.room_type)
 
 class TransferZone(models.Model):
     """
@@ -634,7 +633,7 @@ class ProviderTransferDetail(AmountDetail, RouteData):
         verbose_name_plural = 'Transfer Provider Details'
         unique_together = (
             ('provider_service', 'location_from', 'location_to', 'addon',
-            'pax_range_min', 'pax_range_max'),)
+             'pax_range_min', 'pax_range_max'),)
     provider_service = models.ForeignKey(ProviderTransferService)
     addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
     pax_range_min = models.SmallIntegerField(default=0)
@@ -642,7 +641,7 @@ class ProviderTransferDetail(AmountDetail, RouteData):
 
     def __str__(self):
         return 'Cost for {} ({})'.format(self.provider_service,
-                                        self.addon)
+                                         self.addon)
 
     @property
     def cost_type(self):
@@ -662,10 +661,11 @@ class AgencyTransferService(AgencyCatalogue):
     service = models.ForeignKey(Transfer)
 
     def __str__(self):
-        return '{} for {} ({} to {})'.format(self.service,
-                                            self.agency,
-                                            self.date_from,
-                                            self.date_to)
+        return '{} for {} ({} to {})'.format(
+            self.service,
+            self.agency,
+            self.date_from,
+            self.date_to)
 
     def get_detail_objects(self):
         return self.agencytransferdetail_set.all()
@@ -687,8 +687,9 @@ class AgencyTransferDetail(AmountDetail, RouteData):
     pax_range_max = models.SmallIntegerField(default=0)
 
     def __str__(self):
-        return 'Price for {} ({})'.format(self.agency_service,
-                                        self.addon)
+        return 'Price for {} ({})'.format(
+            self.agency_service,
+            self.addon)
 
 class ProviderExtraService(ProviderCatalogue):
     """

@@ -6,10 +6,10 @@ from booking.models import (
     Booking,
     BaseBookingService,
     QuoteService,
-    BookingTransfer,
-    BookingAllotment,
-    BookingExtra,
-    BookingPackage,
+    BookingProvidedTransfer,
+    BookingProvidedAllotment,
+    BookingProvidedExtra,
+    BookingExtraPackage,
     BookingPackageTransfer,
     BookingPackageAllotment,
     BookingPackageExtra,
@@ -227,19 +227,19 @@ def render_service(booking_service, provider=None):
         if hasattr(booking_service, 'booking_package'):
             bs = BookingPackageTransfer.objects.get(id=booking_service.id)
         else:
-            bs = BookingTransfer.objects.get(id=booking_service.id)
+            bs = BookingProvidedTransfer.objects.get(id=booking_service.id)
     elif booking_service.service_type == 'A':
         # Accomodation service
         if hasattr(booking_service, 'booking_package'):
             bs = BookingPackageAllotment.objects.get(id=booking_service.id)
         else:
-            bs = BookingAllotment.objects.get(id=booking_service.id)
+            bs = BookingProvidedAllotment.objects.get(id=booking_service.id)
     elif booking_service.service_type == 'E':
         # Extra Service
         if hasattr(booking_service, 'booking_package'):
             bs = BookingPackageExtra.objects.get(id=booking_service.id)
         else:
-            bs = BookingExtra.objects.get(id=booking_service.id)
+            bs = BookingProvidedExtra.objects.get(id=booking_service.id)
     elif booking_service.service_type == 'P':
         # Package Service
         bs = BookingPackage.objects.get(id=booking_service.id)
@@ -257,13 +257,13 @@ def render_confirmed_service(booking_service):
     """
     if booking_service.service_type == 'T':
         # Transfer service
-        bs = BookingTransfer.objects.get(id=booking_service.id)
+        bs = BookingProvidedTransfer.objects.get(id=booking_service.id)
     elif booking_service.service_type == 'A':
         # Accomodation service
-        bs = BookingAllotment.objects.get(id=booking_service.id)
+        bs = BookingProvidedAllotment.objects.get(id=booking_service.id)
     elif booking_service.service_type == 'E':
         # Extra Service
-        bs = BookingExtra.objects.get(id=booking_service.id)
+        bs = BookingProvidedExtra.objects.get(id=booking_service.id)
     elif booking_service.service_type == 'P':
         # Package Service
         bs = BookingPackage.objects.get(id=booking_service.id)
