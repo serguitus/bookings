@@ -7,7 +7,7 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 from booking.models import (
-    Quote, QuoteService, QuotePaxVariant,
+    Quote, QuoteService, QuotePaxVariant, QuoteProvidedService,
     NewQuoteServiceBookDetail,
     Booking, BaseBookingService, BookingPax, BookingProvidedService,
     BookingBookDetail,
@@ -80,6 +80,23 @@ class QuotePaxVariantTable(tables.Table):
         self.base_columns['utility_percent_qdrple'].verbose_name = 'Util.QPL %'
         self.base_columns['utility_qdrple'].verbose_name = 'Util.QPL'
         super(QuotePaxVariantTable, self).__init__(*args, **kwargs)
+
+
+class QuoteExtraPackageServiceTable(tables.Table):
+    class Meta:
+        model = QuoteProvidedService
+        template_name = 'booking/quotepackageservice_list.html'
+        fields = ['name', 'service_type', 'status', 'datetime_from', 'datetime_to']
+
+    def render_name(self, value, record):
+        obj_url = reverse(
+            'common:booking_%s_change' % (QUOTEPACKAGESERVICE_TYPES[record.service_type]),
+            args=(quote(record.pk),)
+        )
+        return format_html('<a href="%s">%s</a>' % (obj_url, value))
+
+    def before_render(self, request):
+        self.columns.hide('service_type')
 
 
 class BookingTable(tables.Table):

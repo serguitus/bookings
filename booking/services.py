@@ -2309,7 +2309,7 @@ class BookingServices(object):
 
                 if quote_service.service_type == constants.SERVICE_CATEGORY_PACKAGE:
                     # verify on all services if pax variant exists
-                    quotepackage_services = list(QuotePackageService.objects.all().filter(
+                    quotepackage_services = list(QuoteProvidedService.objects.all().filter(
                         quote_package=quote_service.id))
 
                     for quotepackage_service in quotepackage_services:
@@ -2334,7 +2334,7 @@ class BookingServices(object):
     def sync_quotepackage_paxvariants(cls, quotepackage):
         cls.sync_quote_paxvariants(quotepackage.quote)
 
-        quotepackage_services = list(QuotePackageService.objects.all().filter(
+        quotepackage_services = list(QuoteProvidedService.objects.all().filter(
             quote_package=quotepackage.id))
         quotepackage_paxvariants = list(QuoteServicePaxVariant.objects.all().filter(
             quote_service=quotepackage.id))

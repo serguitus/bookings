@@ -13,7 +13,7 @@ from booking.models import (
     ProviderPaymentBookingProvided,
 )
 from booking.tables import (
-    QuoteServiceTable, QuotePaxVariantTable,
+    QuoteServiceTable, QuotePaxVariantTable, QuoteExtraPackageServiceTable,
     QuoteConfirmationTable,
     NewQuoteServiceBookDetailTable,
     BookingServiceTable,
@@ -48,6 +48,14 @@ def quotepaxvariant_table(quote):
     table = QuotePaxVariantTable(
         quote.quote_paxvariants.all(),
         order_by=('pax_quantity',))
+    return table
+
+
+@register.simple_tag
+def quoteextrapackageservice_table(quotepackage):
+    table = QuoteExtraPackageServiceTable(
+        quotepackage.quoteprovidedservice_set.all(),
+        order_by=('datetime_from', 'time', 'datetime_to'))
     return table
 
 

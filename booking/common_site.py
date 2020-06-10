@@ -586,31 +586,31 @@ class QuotePackageServiceSiteModel(SiteModel):
     def response_post_delete(self, request, obj):
         if hasattr(obj, 'quote_package') and obj.quote_package:
             return redirect(
-                reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
+                reverse('common:booking_quoteextrapackage_change', args=[obj.quote_package.pk]))
         quote_package = request.POST.get('quote_package')
         if quote_package:
             return redirect(
-                reverse('common:booking_quotepackage_change', args=[quote_package]))
+                reverse('common:booking_quoteextrapackage_change', args=[quote_package]))
         return super(QuotePackageServiceSiteModel, self).response_post_delete(request, obj)
 
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'quote_package') and obj.quote_package:
             return redirect(
-                reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
+                reverse('common:booking_quoteextrapackage_change', args=[obj.quote_package.pk]))
         quote_package = request.POST.get('quote_package')
         if quote_package:
             return redirect(
-                reverse('common:booking_quotepackage_change', args=[quote_package]))
+                reverse('common:booking_quoteextrapackage_change', args=[quote_package]))
         return super(QuotePackageServiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
         if hasattr(obj, 'quote_package') and obj.quote_package:
             return redirect(
-                reverse('common:booking_quotepackage_change', args=[obj.quote_package.pk]))
+                reverse('common:booking_quoteextrapackage_change', args=[obj.quote_package.pk]))
         quote_package = request.POST.get('quote_package')
         if quote_package:
             return redirect(
-                reverse('common:booking_quotepackage_change', args=[quote_package]))
+                reverse('common:booking_quoteextrapackage_change', args=[quote_package]))
         return super(QuotePackageServiceSiteModel, self).response_post_save_change(request, obj)
 
     def delete_model(self, request, obj):
@@ -630,7 +630,7 @@ class QuoteServicePaxVariantInline(CommonStackedInline):
     model = QuoteServicePaxVariant
     extra = 0
     fields = [
-        ('quotepackage_pax_variant'),
+        ('quote_pax_variant'),
         ('manual_costs', 'manual_prices'),
         ('cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single'),
         ('cost_double_amount', 'price_double_amount', 'utility_percent_double', 'utility_double'),
@@ -649,7 +649,7 @@ class QuoteServicePaxVariantInline(CommonStackedInline):
         return False
 
     def get_readonly_fields(self, request, obj=None):
-        readonly_fields = super(QuotePackageServicePaxVariantInline, self).get_readonly_fields(request, obj) or []
+        readonly_fields = super(QuoteServicePaxVariantInline, self).get_readonly_fields(request, obj) or []
 
         if not request.user.has_perm("booking.change_amounts"):
             return readonly_fields + [
