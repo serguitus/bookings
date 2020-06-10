@@ -1,7 +1,7 @@
 {% load booking_tags %}
 {% load render_table from django_tables2 %}
 
-{% providerbookingpaymentservice_table current as table %}
-<div class="providerbookingpaymentservices-container">
+{% providerpaymentbookingprovided_table current as table %}
+<div class="providerpaymentbookingprovidedservices-container">
     {% render_table table %}
 </div>

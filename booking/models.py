@@ -20,9 +20,9 @@ from booking.constants import (
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE,
-    BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_ALLOTMENT,
-    BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_TRANSFER,
-    BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_EXTRA,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_TRANSFER,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA,
     QUOTE_STATUS_LIST, QUOTE_STATUS_DRAFT,
     BOOKING_STATUS_LIST, BOOKING_STATUS_PENDING,
     SERVICE_STATUS_LIST, SERVICE_STATUS_PENDING, SERVICE_STATUS_REQUEST, SERVICE_STATUS_CANCELLED,
@@ -57,11 +57,13 @@ from finance.models import (
 # BookingService child objects from a BookingService list
 def _get_child_objects(services):
     TYPE_MODELS = {
-        'BT': BookingTransfer,
-        'BE': BookingExtra,
-        'BA': BookingAllotment,
-        'BP': BookingPackage,
-        # 'PE': PackageExtra,
+        'BA': BookingProvidedAllotment,
+        'BT': BookingProvidedTransfer,
+        'BE': BookingProvidedExtra,
+        'BP': BookingExtraPackage,
+        'PA': BookingProvidedAllotment,
+        'PT': BookingProvidedTransfer,
+        'PE': BookingProvidedExtra,
     }
     objs = []
     for service in services:
@@ -945,7 +947,7 @@ class BookingExtraPackage(BaseBookingService, BookExtraData):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         with transaction.atomic(savepoint=False):
-            super(BookingPackage, self).save(force_insert, force_update, using, update_fields)
+            super(BookingExtraPackage, self).save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return self.__unicode__()
@@ -1034,7 +1036,7 @@ class BookingProvidedAllotment(BookingProvidedService, BookAllotmentData):
         super(BookingProvidedAllotment, self).fill_data()
         self.name = '%s' % (self.service,)
         if self.booking_package:
-            self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT
+            self.base_category = BASE_BOOKING_SERVICE_CATEGORY_PACKAGE_ALLOTMENT
         else:
             self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT
         #self.service_type = SERVICE_CATEGORY_ALLOTMENT
@@ -1204,7 +1206,7 @@ class BookingBookDetailExtra(BookingBookDetail, BookExtraData):
 
 class ProviderPaymentBookingProvided(models.Model):
     """
-    ProviderBookingPaymentService
+    ProviderPaymentBookingProvided
     """
     class Meta:
         verbose_name = 'Provider Booking Payment'

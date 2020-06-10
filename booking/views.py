@@ -346,42 +346,22 @@ class BookingPackageServiceAmountsView(ModelChangeFormProcessorView):
         })
 
 
-class BookingAllotmentAmountsView(BookingServiceAmountsView):
-    model = BookingProvidedAllotment
-    common_sitemodel = BookingProvidedAllotmentSiteModel
-
-
-class BookingTransferAmountsView(BookingServiceAmountsView):
-    model = BookingProvidedTransfer
-    common_sitemodel = BookingProvidedTransferSiteModel
-
-
-class BookingExtraAmountsView(BookingServiceAmountsView):
-    model = BookingProvidedExtra
-    common_sitemodel = BookingProvidedExtraSiteModel
-
-
-class BookingExtraComponentAmountsView(BookingServiceAmountsView):
-    model = BookingProvidedExtra
-    common_sitemodel = BookingProvidedExtraSiteModel
-
-
-class BookingPackageAmountsView(BookingServiceAmountsView):
+class BookingExtraPackageAmountsView(BookingServiceAmountsView):
     model = BookingExtraPackage
     common_sitemodel = BookingExtraPackageSiteModel
 
 
-class BookingPackageAllotmentAmountsView(BookingPackageServiceAmountsView):
+class BookingProvidedAllotmentAmountsView(BookingPackageServiceAmountsView):
     model = BookingProvidedAllotment
     common_sitemodel = BookingProvidedAllotmentSiteModel
 
 
-class BookingPackageTransferAmountsView(BookingPackageServiceAmountsView):
+class BookingProvidedTransferAmountsView(BookingPackageServiceAmountsView):
     model = BookingProvidedTransfer
     common_sitemodel = BookingProvidedTransferSiteModel
 
 
-class BookingPackageExtraAmountsView(BookingPackageServiceAmountsView):
+class BookingProvidedExtraAmountsView(BookingPackageServiceAmountsView):
     model = BookingProvidedExtra
     common_sitemodel = BookingProvidedExtraSiteModel
 

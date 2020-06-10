@@ -9,29 +9,22 @@ from booking.models import (
     BookingProvidedTransfer,
     BookingProvidedAllotment,
     BookingProvidedExtra,
-    BookingExtraPackage,
-    BookingPackageTransfer,
-    BookingPackageAllotment,
-    BookingPackageExtra,
-    BookingPackage, ProviderBookingPayment,
-    ProviderBookingPaymentService,
+    BookingExtraPackage, ProviderBookingPayment,
+    ProviderPaymentBookingProvided,
 )
 from booking.tables import (
-    PackageServiceTable,
     QuoteServiceTable, QuotePaxVariantTable,
-    QuotePackageServiceTable,
-    BookingServiceTable,
     QuoteConfirmationTable,
     NewQuoteServiceBookDetailTable,
+    BookingServiceTable,
+    BookingExtraPackageServiceTable, BookingExtraPackageServiceSummaryTable,
     BookingConfirmationTable, BookingServiceSummaryTable, BookingPaxTable,
     BookingVouchersTable,
     BookingServiceUpdateTable,
-    BookingPackageServiceTable,
-    BookingPackageServiceSummaryTable,
     BookingBookDetailTable,
     AddPaxBookingServicesTable,
     ProviderBookingPaymentTable,
-    ProviderBookingPaymentServiceTable,
+    ProviderPaymentBookingProvidedTable,
     ProviderBookingPaymentReportTable,
     AgencyPaymentTable,
 )
@@ -40,22 +33,6 @@ from booking.services import BookingServices
 from finance.models import AgencyPayment
 
 register = template.Library()
-
-
-@register.simple_tag
-def packageservice_table(package):
-    table = PackageServiceTable(
-        package.package_services.all(),
-        order_by=('days_after', 'days_duration'))
-    return table
-
-
-@register.simple_tag
-def quotepackage_table(quotepackage):
-    table = QuotePackageServiceTable(
-        quotepackage.quotepackage_services.all(),
-        order_by=('datetime_from', 'time', 'datetime_to'))
-    return table
 
 
 @register.simple_tag
@@ -96,16 +73,16 @@ def agencypayment_table(booking):
 def providerbookingpayment_table(service):
     table = ProviderBookingPaymentTable(
         ProviderBookingPayment.objects.filter(
-            providerbookingpaymentservice__provider_service=service),
+            providerpaymentbookingprovided__provider_service=service),
         order_by=('date',),
     )
     return table
 
 
 @register.simple_tag
-def providerbookingpaymentservice_table(payment):
-    table = ProviderBookingPaymentServiceTable(
-        ProviderBookingPaymentService.objects.filter(provider_payment=payment),
+def providerpaymentbookingprovided_table(payment):
+    table = ProviderPaymentBookingProvidedTable(
+        ProviderPaymentBookingProvided.objects.filter(provider_payment=payment),
         # TODO el parametro order_by no funciona aqui. al parecer el
         # orden del queryset es el que cuenta aqui
         order_by=('datetime_from', 'time', 'datetime_to'),
@@ -116,7 +93,7 @@ def providerbookingpaymentservice_table(payment):
 @register.simple_tag
 def providerbookingpaymentreport_table(payment):
     table = ProviderBookingPaymentReportTable(
-        ProviderBookingPaymentService.objects.filter(
+        ProviderPaymentBookingProvided.objects.filter(
             provider_payment=payment).order_by(
                 'provider_service__datetime_from',
                 'provider_service__datetime_to'),
@@ -189,23 +166,15 @@ def booking_pax_table(booking):
 
 
 @register.simple_tag
-def bookingpackage_table(bookingpackage):
-    table = BookingPackageServiceTable(
-        bookingpackage.booking_package_services.all(),
-        order_by=('datetime_from', 'time', 'datetime_to'))
-    return table
-
-
-@register.simple_tag
-def bookingpackage_services_summary_table(bookingpackage, request):
+def bookingextrapackage_services_summary_table(bookingpackage, request):
     bp_id = request.GET.get('booking_package')
     if bookingpackage:
-        table = BookingPackageServiceSummaryTable(
+        table = BookingExtraPackageServiceSummaryTable(
             bookingpackage.booking_package_services.all(),
             order_by=('datetime_from', 'time', 'datetime_to'))
     elif bp_id:
-        bookingpackage = BookingPackage.objects.get(id=bp_id)
-        table = BookingPackageServiceSummaryTable(
+        bookingpackage = BookingExtraPackage.objects.get(id=bp_id)
+        table = BookingExtraPackageServiceSummaryTable(
             bookingpackage.booking_package_services.all(),
             order_by=('datetime_from', 'time', 'datetime_to'))
     else:
@@ -225,24 +194,24 @@ def render_service(booking_service, provider=None):
     if booking_service.service_type == 'T':
         # Transfer service
         if hasattr(booking_service, 'booking_package'):
-            bs = BookingPackageTransfer.objects.get(id=booking_service.id)
+            bs = BookingProvidedTransfer.objects.get(id=booking_service.id)
         else:
             bs = BookingProvidedTransfer.objects.get(id=booking_service.id)
     elif booking_service.service_type == 'A':
         # Accomodation service
         if hasattr(booking_service, 'booking_package'):
-            bs = BookingPackageAllotment.objects.get(id=booking_service.id)
+            bs = BookingProvidedAllotment.objects.get(id=booking_service.id)
         else:
             bs = BookingProvidedAllotment.objects.get(id=booking_service.id)
     elif booking_service.service_type == 'E':
         # Extra Service
         if hasattr(booking_service, 'booking_package'):
-            bs = BookingPackageExtra.objects.get(id=booking_service.id)
+            bs = BookingProvidedExtra.objects.get(id=booking_service.id)
         else:
             bs = BookingProvidedExtra.objects.get(id=booking_service.id)
     elif booking_service.service_type == 'P':
         # Package Service
-        bs = BookingPackage.objects.get(id=booking_service.id)
+        bs = BookingExtraPackage.objects.get(id=booking_service.id)
     c.update({'bs': bs})
     if provider:
         c.update({'provider': provider})
@@ -266,7 +235,7 @@ def render_confirmed_service(booking_service):
         bs = BookingProvidedExtra.objects.get(id=booking_service.id)
     elif booking_service.service_type == 'P':
         # Package Service
-        bs = BookingPackage.objects.get(id=booking_service.id)
+        bs = BookingExtraPackage.objects.get(id=booking_service.id)
 
     return {
         'bs': bs,
