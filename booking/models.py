@@ -892,7 +892,7 @@ class BaseBookingServicePax(models.Model):
         verbose_name_plural = 'Booking Service Rooming'
     version = AutoIncVersionField()
     booking_pax = models.ForeignKey(BookingPax)
-    booking_service = models.ForeignKey(BaseBookingService, related_name='paxes')
+    booking_service = models.ForeignKey(BaseBookingService, related_name='rooming_list')
     group = models.SmallIntegerField(verbose_name='Room')
     cost_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost')
