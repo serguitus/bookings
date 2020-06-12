@@ -3,15 +3,15 @@
 
 {% block detail %}
     {% with current.get_child_object as service %}
-        {% if service.service_type == 'E' %}{# Extra service #}
+        {% if service.base_service.category == 'E' %}{# Extra service #}
             Time: {{ service.time }}
-        {% elif service.service_type == 'T' %}{# Transfer service #}
+        {% elif service.base_service.category == 'T' %}{# Transfer service #}
             <div>Time: {{ service.time }}</div>
             <div>Pick Up: {% if service.pickup %}{{ service.pickup }}
             {% elif service.place_from %}{{ service.place_from }}{% endif %}</div>
             <div>Drop Off: {% if service.dropoff %}{{ service.dropoff }}
             {% elif service.place_to %}{{ service.place_to }}{% endif %}</div>
-        {% elif service.service_type == 'A' %}{# Accommodation service #}
+        {% elif service.base_service.category == 'A' %}{# Accommodation service #}
             Booking Info
         {% endif %}
     {% endwith %}

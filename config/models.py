@@ -292,8 +292,7 @@ class BookServiceData(models.Model):
     base_location = models.ForeignKey(
         Location, related_name='%(class)s_base_location',
         blank=True, null=True, verbose_name='Location')
-    new_provider = models.ForeignKey(
-        Provider, blank=True, null=True, related_name='%(class)s_provider')
+    provider = models.ForeignKey(Provider, blank=True, null=True)
     service_addon = models.ForeignKey(
         Addon, related_name='%(class)s_service_addon', blank=True, null=True, verbose_name='Addon')
     time = models.TimeField(blank=True, null=True)

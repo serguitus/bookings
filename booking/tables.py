@@ -14,7 +14,7 @@ from booking.models import (
     ProviderBookingPayment, ProviderPaymentBookingProvided,
 )
 from booking.constants import (
-    PACKAGESERVICE_TYPES, QUOTESERVICE_TYPES,
+    QUOTESERVICE_TYPES,
     BOOKINGSERVICE_TYPES,
     BOOTSTRAP_STYLE_QUOTE_STATUS_MAPPING, BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING,
     QUOTE_BOOK_DETAIL_CATEGORIES)
@@ -42,7 +42,7 @@ class QuoteServiceTable(tables.Table):
     class Meta:
         model = QuoteService
         template_name = 'booking/table/quoteservice_table.html'
-        fields = ['name', 'service_type', 'status', 'datetime_from', 'datetime_to']
+        fields = ['name', 'base_category', 'status', 'datetime_from', 'datetime_to']
 
     def render_name(self, value, record):
         obj_url = reverse(
@@ -52,7 +52,7 @@ class QuoteServiceTable(tables.Table):
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
     def before_render(self, request):
-        self.columns.hide('service_type')
+        self.columns.hide('base_category')
 
 
 class QuotePaxVariantTable(tables.Table):
@@ -85,17 +85,17 @@ class QuoteExtraPackageServiceTable(tables.Table):
     class Meta:
         model = QuoteProvidedService
         template_name = 'booking/quotepackageservice_list.html'
-        fields = ['name', 'service_type', 'status', 'datetime_from', 'datetime_to']
+        fields = ['name', 'base_category', 'status', 'datetime_from', 'datetime_to']
 
     def render_name(self, value, record):
         obj_url = reverse(
-            'common:booking_quoteextrapackage_change',
+            'common:booking_%s_change' % (QUOTESERVICE_TYPES[record.base_category]),
             args=(quote(record.pk),)
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
     def before_render(self, request):
-        self.columns.hide('service_type')
+        self.columns.hide('base_category')
 
 
 class BookingTable(tables.Table):
@@ -140,7 +140,6 @@ class BookingServiceTable(tables.Table):
         }
 
     def __init__(self, *args, **kwargs):
-        # self.base_columns['service_type'].verbose_name='Request emails'
         # self.base_columns['utility_percent'].verbose_name='Util.%'
         # self.base_columns['utility'].verbose_name='Util.'
         self.base_columns['nights'].verbose_name = 'N'
@@ -160,15 +159,12 @@ class BookingServiceTable(tables.Table):
         )
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
-    def render_service_type(self, value, record):
+    def render_base_category(self, value, record):
         email_url = reverse(
             'send_service_request',
             args=(record.pk,)
         )
         return format_html('<a class="btn btn-primary" href="%s">Request</a>' % (email_url))
-
-    #    def before_render(self, request):
-    #        self.columns.hide('service_type')
 
 
 class AgencyPaymentTable(tables.Table):
@@ -287,7 +283,6 @@ class BookingConfirmationTable(tables.Table):
         }
 
     def __init__(self, *args, **kwargs):
-        # self.base_columns['service_type'].verbose_name='Request emails'
         # self.base_columns['utility_percent'].verbose_name='Util.%'
         # self.base_columns['utility'].verbose_name='Util.'
         self.base_columns['nights'].verbose_name = 'N'
@@ -314,7 +309,6 @@ class QuoteConfirmationTable(tables.Table):
         }
 
     def __init__(self, *args, **kwargs):
-        # self.base_columns['service_type'].verbose_name='Request emails'
         # self.base_columns['utility_percent'].verbose_name='Util.%'
         # self.base_columns['utility'].verbose_name='Util.'
         # self.base_columns['nights'].verbose_name='N'
@@ -358,7 +352,6 @@ class BookingVouchersTable(tables.Table):
                                })
 
     def __init__(self, *args, **kwargs):
-        # self.base_columns['service_type'].verbose_name='Request emails'
         super(BookingVouchersTable, self).__init__(*args, **kwargs)
 
     def render_name(self, value, record):

@@ -287,6 +287,12 @@ class QuotePaxVariant(PaxVariantAmounts):
         return '%s pax' % (self.pax_quantity)
 
 
+class QuoteInvoicedServiceManager(models.Manager):
+    def get_queryset(self):
+        return super(QuoteInvoicedServiceManager, self).get_queryset().filter(
+            base_category__in=['QA', 'QT', 'QE', 'QP'])
+
+
 class QuoteService(BookServiceData, DateInterval):
     """
     Quote Service
@@ -296,11 +302,17 @@ class QuoteService(BookServiceData, DateInterval):
         verbose_name_plural = 'Quote Services'
         default_permissions = ('add', 'change',)
     quote = models.ForeignKey(Quote, related_name='quote_services')
-    provider = models.ForeignKey(Provider, blank=True, null=True)
     status = models.CharField(
         max_length=5, choices=QUOTE_STATUS_LIST, default=QUOTE_STATUS_DRAFT)
     base_category = models.CharField(
         max_length=5, choices=QUOTE_SERVICE_CATEGORIES, blank=True, null=True)
+
+    # Managers
+    objects = models.Manager()
+    invoiced_objects = QuoteInvoicedServiceManager()
+
+    def fill_data(self):
+        pass
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.validate_date_interval()
@@ -347,10 +359,6 @@ class QuoteExtraPackage(QuoteService, BookExtraData):
         self.base_service = self.service
         self.base_category = QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        with transaction.atomic(savepoint=False):
-            super(QuoteExtraPackage, self).save(force_insert, force_update, using, update_fields)
-
     def __str__(self):
         return '%s - %s' % (self.quote, self.service)
 
@@ -365,11 +373,8 @@ class QuoteProvidedService(QuoteService):
         default_permissions = ('add', 'change',)
     quote_package = models.ForeignKey(QuoteExtraPackage, blank=True, null=True)
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.validate_date_interval()
-        self.fill_data()
-        # Call the "real" save() method.
-        super(QuoteProvidedService, self).save(force_insert, force_update, using, update_fields)
+    def fill_data(self):
+        super(QuoteProvidedService, self).fill_data()
 
     def __str__(self):
         return '%s' % (self.base_service)
@@ -387,7 +392,6 @@ class NewQuoteAllotment(QuoteProvidedService, BookAllotmentData):
 
     def fill_data(self):
         self.name = '%s' % (self.service,)
-        #self.service_type = SERVICE_CATEGORY_ALLOTMENT
         self.time = time(23, 59, 59)
         self.base_service = self.service
         if self.quote_package:
@@ -411,7 +415,6 @@ class NewQuoteTransfer(QuoteProvidedService, BookTransferData):
         self.name = '%s (%s -> %s)' % (self.service,
                                        self.location_from.short_name or self.location_from,
                                        self.location_to.short_name or self.location_to)
-        #self.service_type = SERVICE_CATEGORY_TRANSFER
         self.base_service = self.service
         if self.quote_package:
             self.base_category = QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE_TRANSFER
@@ -432,7 +435,6 @@ class NewQuoteExtra(QuoteProvidedService, BookExtraData):
     def fill_data(self):
         # setting name for this booking_service
         self.name = self.service.name
-        #self.service_type = SERVICE_CATEGORY_EXTRA
         self.base_service = self.service
         if self.quote_package:
             self.base_category = QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE_EXTRA
@@ -451,12 +453,6 @@ class NewQuoteServiceBookDetail(QuoteService):
 
     def fill_data(self):
         pass
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.fill_data()
-        # Call the "real" save() method.
-        super(NewQuoteServiceBookDetail, self).save(
-            force_insert, force_update, using, update_fields)
 
 
 class NewQuoteServiceBookDetailAllotment(NewQuoteServiceBookDetail, BookAllotmentData):
@@ -766,7 +762,11 @@ class BookingPax(models.Model):
 class InvoicedManager(models.Manager):
     def get_queryset(self):
         return super(InvoicedManager, self).get_queryset().filter(
-            base_category__in=['BA', 'BT', 'BE', 'BP'])
+            base_category__in=[
+                BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT,
+                BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER,
+                BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA,
+                BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE])
 
 
 class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
@@ -779,7 +779,6 @@ class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
         verbose_name_plural = 'Base Bookings Services'
         ordering = ['provider', 'base_service__category']
     booking = models.ForeignKey(Booking, related_name='base_booking_services')
-    provider = models.ForeignKey(Provider, blank=True, null=True)
     status = models.CharField(
         max_length=5, choices=SERVICE_STATUS_LIST, default=SERVICE_STATUS_PENDING)
     # This holds the confirmation number when it exists
@@ -793,7 +792,7 @@ class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
     manual_cost = models.BooleanField(default=False)
     manual_price = models.BooleanField(default=False)
     base_category = models.CharField(
-        max_length=5, choices=BASE_BOOKING_SERVICE_CATEGORIES, blank=True, null=True)
+        max_length=5, choices=BASE_BOOKING_SERVICE_CATEGORIES)
     cost_amount_to_pay = models.DecimalField(
         max_digits=10, decimal_places=2, default=0.00)
     cost_amount_paid = models.DecimalField(
@@ -1082,7 +1081,6 @@ class BookingProvidedAllotment(BookingProvidedService, BookAllotmentData):
             self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT
         else:
             self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT
-        #self.service_type = SERVICE_CATEGORY_ALLOTMENT
         self.description = self.build_description()
         self.time = time(23, 59, 59)
         self.base_service = self.service
@@ -1127,7 +1125,6 @@ class BookingProvidedTransfer(BookingProvidedService, BookTransferData):
             self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_TRANSFER
         else:
             self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER
-        #self.service_type = SERVICE_CATEGORY_TRANSFER
         self.description = self.build_description()
         self.base_service = self.service
         self.base_location = self.service.location
@@ -1160,7 +1157,6 @@ class BookingProvidedExtra(BookingProvidedService, BookExtraData):
             self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA
         else:
             self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA
-        #self.service_type = SERVICE_CATEGORY_EXTRA
         self.description = self.build_description()
         self.base_service = self.service
         self.base_location = self.service.location

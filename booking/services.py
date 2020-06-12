@@ -584,7 +584,6 @@ class BookingServices(object):
             # provider_invoice
 
             # name auto
-            # service_type auto
             cls._copy_package_info(
                 dst_package=quote_package_allotment, src_package=package_allotment)
             quote_package_allotment.room_type = package_allotment.room_type
@@ -603,7 +602,6 @@ class BookingServices(object):
             # price_comment
             # provider_invoice
             # name auto
-            # service_type auto
             cls._copy_package_info(
                 dst_package=quote_package_transfer, src_package=package_transfer)
             # time
@@ -630,7 +628,6 @@ class BookingServices(object):
             # price_comment
             # provider_invoice
             # name auto
-            # service_type auto
             cls._copy_package_info(
                 dst_package=quote_package_extra, src_package=package_extra)
             quote_package_extra.service_addon = package_extra.service_addon
@@ -1203,14 +1200,15 @@ class BookingServices(object):
     @classmethod
     def update_bookingservice_description(cls, booking_service):
         CLASSES = {
-            'T': BookingProvidedTransfer,
-            'E': BookingProvidedExtra,
-            'A': BookingProvidedAllotment,
-            'P': BookingExtraPackage,
+            BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER: BookingProvidedTransfer,
+            BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA: BookingProvidedExtra,
+            BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT: BookingProvidedAllotment,
+            BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE: BookingExtraPackage,
+            BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_TRANSFER: BookingProvidedTransfer,
+            BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA: BookingProvidedExtra,
+            BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT: BookingProvidedAllotment,
         }
-        service = CLASSES[booking_service.service_type].objects.get(id=booking_service.id)
-        #service = getattr(CLASSES, booking_service.service_type).objects.get(
-        #    id=booking_service.id)
+        service = CLASSES[booking_service.base_category].objects.get(id=booking_service.id)
         service.description = service.build_description()
         service.save()
 
@@ -2576,11 +2574,11 @@ class BookingServices(object):
                 agency=service.quote_package.quote.agency,
                 service_pax_variant=service_pax_variant)
         elif isinstance(service, QuoteService):
-            if service.service_type == constants.SERVICE_CATEGORY_ALLOTMENT:
+            if service.base_service.category == constants.SERVICE_CATEGORY_ALLOTMENT:
                 service = NewQuoteAllotment.objects.get(pk=service.id)
-            elif service.service_type == constants.SERVICE_CATEGORY_TRANSFER:
+            elif service.base_service.category == constants.SERVICE_CATEGORY_TRANSFER:
                 service = NewQuoteTransfer.objects.get(pk=service.id)
-            elif service.service_type == constants.SERVICE_CATEGORY_EXTRA:
+            elif service.base_service.category == constants.SERVICE_CATEGORY_EXTRA:
                 service = NewQuoteExtra.objects.get(pk=service.id)
             elif service.base_category == constants.QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE:
                 service = QuoteExtraPackage.objects.get(pk=service.id)
@@ -2604,11 +2602,11 @@ class BookingServices(object):
                 agency=service.quote.agency,
                 service_pax_variant=service_pax_variant)
         elif isinstance(service, QuotePackageService):
-            if service.service_type == constants.SERVICE_CATEGORY_ALLOTMENT:
+            if service.base_service.category == constants.SERVICE_CATEGORY_ALLOTMENT:
                 service = QuotePackageAllotment.objects.get(pk=service.id)
-            elif service.service_type == constants.SERVICE_CATEGORY_TRANSFER:
+            elif service.base_service.category == constants.SERVICE_CATEGORY_TRANSFER:
                 service = QuotePackageTransfer.objects.get(pk=service.id)
-            elif service.service_type == constants.SERVICE_CATEGORY_EXTRA:
+            elif service.base_service.category == constants.SERVICE_CATEGORY_EXTRA:
                 service = QuotePackageExtra.objects.get(pk=service.id)
             else:
                 return None, "Unknow Service", None, "Unknow Service", \
@@ -3377,23 +3375,23 @@ class BookingServices(object):
     @classmethod
     def _find_booking_service(cls, bookingservice):
         if isinstance(bookingservice, BookingProvidedService):
-            if bookingservice.service_type == constants.SERVICE_CATEGORY_ALLOTMENT:
+            if bookingservice.base_service.category == constants.SERVICE_CATEGORY_ALLOTMENT:
                 bookingservice = cls._find_bookingservice(bookingservice, BookingProvidedAllotment.objects)
-            elif bookingservice.service_type == constants.SERVICE_CATEGORY_TRANSFER:
+            elif bookingservice.base_service.category == constants.SERVICE_CATEGORY_TRANSFER:
                 bookingservice = cls._find_bookingservice(bookingservice, BookingProvidedTransfer.objects)
-            elif bookingservice.service_type == constants.SERVICE_CATEGORY_EXTRA:
+            elif bookingservice.base_service.category == constants.SERVICE_CATEGORY_EXTRA:
                 bookingservice = cls._find_bookingservice(bookingservice, BookingProvidedExtra.objects)
             elif bookingservice.base_category == constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE:
                 bookingservice = cls._find_bookingservice(bookingservice, BookingExtraPackage.objects)
 
         if isinstance(bookingservice, BookingProvidedService):
-            if bookingservice.service_type == constants.SERVICE_CATEGORY_ALLOTMENT:
+            if bookingservice.base_service.category == constants.SERVICE_CATEGORY_ALLOTMENT:
                 bookingservice = cls._find_bookingservice(
                     bookingservice, BookingProvidedAllotment.objects)
-            elif bookingservice.service_type == constants.SERVICE_CATEGORY_TRANSFER:
+            elif bookingservice.base_service.category == constants.SERVICE_CATEGORY_TRANSFER:
                 bookingservice = cls._find_bookingservice(
                     bookingservice, BookingProvidedTransfer.objects)
-            elif bookingservice.service_type == constants.SERVICE_CATEGORY_EXTRA:
+            elif bookingservice.base_service.category == constants.SERVICE_CATEGORY_EXTRA:
                 bookingservice = cls._find_bookingservice(
                     bookingservice, BookingProvidedExtra.objects)
 
@@ -3644,7 +3642,7 @@ class BookingServices(object):
         elif isinstance(booking_service, BookingPackage):
             cls.update_bookingpackage_amounts(booking_service)
         elif isinstance(booking_service, BaseBookingService):
-            if booking_service.service_type == constants.SERVICE_CATEGORY_ALLOTMENT:
+            if booking_service.base_service.category == constants.SERVICE_CATEGORY_ALLOTMENT:
                 bookingallotment = cls._find_bookingservice(
                     booking_service, BookingProvidedAllotment.objects)
                 if not bookingallotment:
@@ -3654,7 +3652,7 @@ class BookingServices(object):
                 cls._save_booking_service_amounts(bookingallotment, cost, price)
                 booking_service.cost_amount = bookingallotment.cost_amount
                 booking_service.price_amount = bookingallotment.price_amount
-            elif booking_service.service_type == constants.SERVICE_CATEGORY_TRANSFER:
+            elif booking_service.base_service.category == constants.SERVICE_CATEGORY_TRANSFER:
                 bookingtransfer = cls._find_bookingservice(
                     booking_service, BookingTransfer.objects)
                 if not bookingtransfer:
@@ -3664,7 +3662,7 @@ class BookingServices(object):
                 cls._save_booking_service_amounts(bookingtransfer, cost, price)
                 booking_service.cost_amount = bookingtransfer.cost_amount
                 booking_service.price_amount = bookingtransfer.price_amount
-            elif booking_service.service_type == constants.SERVICE_CATEGORY_EXTRA:
+            elif booking_service.base_service.category == constants.SERVICE_CATEGORY_EXTRA:
                 bookingextra = cls._find_bookingservice(booking_service, BookingExtra.objects)
                 if not bookingextra:
                     return
@@ -3681,7 +3679,7 @@ class BookingServices(object):
                 booking_service.cost_amount = bookingpackage.cost_amount
                 booking_service.price_amount = bookingpackage.price_amount
         elif isinstance(booking_service, BookingProvidedService):
-            if booking_service.service_type == constants.SERVICE_CATEGORY_ALLOTMENT:
+            if booking_service.base_service.category == constants.SERVICE_CATEGORY_ALLOTMENT:
                 bookingpackageallotment = cls._find_bookingservice(
                     booking_service, BookingProvidedAllotment.objects)
                 if not bookingpackageallotment:
@@ -3691,7 +3689,7 @@ class BookingServices(object):
                 cls._save_booking_service_amounts(bookingpackageallotment, cost, price)
                 booking_service.cost_amount = bookingpackageallotment.cost_amount
                 booking_service.price_amount = bookingpackageallotment.price_amount
-            elif booking_service.service_type == constants.SERVICE_CATEGORY_TRANSFER:
+            elif booking_service.base_service.category == constants.SERVICE_CATEGORY_TRANSFER:
                 bookingpackagetransfer = cls._find_bookingservice(
                     booking_service, BookingProvidedTransfer.objects)
                 if not bookingpackagetransfer:
@@ -3701,7 +3699,7 @@ class BookingServices(object):
                 cls._save_booking_service_amounts(bookingpackagetransfer, cost, price)
                 booking_service.cost_amount = bookingpackagetransfer.cost_amount
                 booking_service.price_amount = bookingpackagetransfer.price_amount
-            elif booking_service.service_type == constants.SERVICE_CATEGORY_EXTRA:
+            elif booking_service.base_service.category == constants.SERVICE_CATEGORY_EXTRA:
                 bookingpackageextra = cls._find_bookingservice(
                     booking_service, BookingProvidedTransfer.objects)
                 if not bookingpackageextra:

@@ -40,7 +40,13 @@ from booking.common_site import (
     default_requests_mail_bcc, default_requests_mail_subject,
     default_requests_mail_body, default_mail_cc
 )
-from booking.constants import ACTIONS, SERVICE_STATUS_CANCELLED
+from booking.constants import (
+    ACTIONS, SERVICE_STATUS_CANCELLED,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE,
+)
 from booking.models import (
     Quote, QuotePaxVariant, QuoteService,
     NewQuoteAllotment, NewQuoteTransfer, NewQuoteExtra, QuoteExtraPackage,
@@ -70,14 +76,14 @@ from reservas.admin import bookings_site
 # BookingService child objects from a BookingService list
 def _get_child_objects(services):
     TYPE_MODELS = {
-        'T': BookingProvidedTransfer,
-        'E': BookingProvidedExtra,
-        'A': BookingProvidedAllotment,
-        'P': BookingExtraPackage,
+        BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER: BookingProvidedTransfer,
+        BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA: BookingProvidedExtra,
+        BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT: BookingProvidedAllotment,
+        BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE: BookingExtraPackage,
     }
     objs = []
     for service in services:
-        obj = TYPE_MODELS[service.service_type].objects.get(id=service.id)
+        obj = TYPE_MODELS[service.base_category].objects.get(id=service.id)
         objs.append(obj)
     return objs
 

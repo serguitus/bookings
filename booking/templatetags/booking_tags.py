@@ -199,25 +199,25 @@ def render_service(booking_service, provider=None):
     """
     bs = None
     c = {}
-    if booking_service.service_type == 'T':
+    if booking_service.base_service.category == 'T':
         # Transfer service
         if hasattr(booking_service, 'booking_package'):
             bs = BookingProvidedTransfer.objects.get(id=booking_service.id)
         else:
             bs = BookingProvidedTransfer.objects.get(id=booking_service.id)
-    elif booking_service.service_type == 'A':
+    elif booking_service.base_service.category == 'A':
         # Accomodation service
         if hasattr(booking_service, 'booking_package'):
             bs = BookingProvidedAllotment.objects.get(id=booking_service.id)
         else:
             bs = BookingProvidedAllotment.objects.get(id=booking_service.id)
-    elif booking_service.service_type == 'E':
+    elif booking_service.base_service.category == 'E':
         # Extra Service
         if hasattr(booking_service, 'booking_package'):
             bs = BookingProvidedExtra.objects.get(id=booking_service.id)
         else:
             bs = BookingProvidedExtra.objects.get(id=booking_service.id)
-    elif booking_service.service_type == 'P':
+    elif booking_service.base_category == 'BP':
         # Package Service
         bs = BookingExtraPackage.objects.get(id=booking_service.id)
     c.update({'bs': bs})
@@ -232,16 +232,16 @@ def render_confirmed_service(booking_service):
     Renders some html into Confirmation emails depending on
     booking_service type
     """
-    if booking_service.service_type == 'T':
+    if booking_service.base_service.category == 'T':
         # Transfer service
         bs = BookingProvidedTransfer.objects.get(id=booking_service.id)
-    elif booking_service.service_type == 'A':
+    elif booking_service.base_service.category == 'A':
         # Accomodation service
         bs = BookingProvidedAllotment.objects.get(id=booking_service.id)
-    elif booking_service.service_type == 'E':
+    elif booking_service.base_service.category == 'E':
         # Extra Service
         bs = BookingProvidedExtra.objects.get(id=booking_service.id)
-    elif booking_service.service_type == 'P':
+    elif booking_service.base_category == 'BP':
         # Package Service
         bs = BookingExtraPackage.objects.get(id=booking_service.id)
 

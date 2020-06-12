@@ -472,11 +472,11 @@ class QuoteExtraPackageInlineForm(forms.ModelForm, ServiceForm):
         fields = ('__all__')
         widgets = {
             'service': autocomplete.ModelSelect2(
-                url='servicepackage-autocomplete',
+                url='serviceextra-autocomplete',
                 forward=['provider', 'search_location'],
                 ),
             'provider': autocomplete.ModelSelect2(
-                url='providerpackage-autocomplete',
+                url='providerextra-autocomplete',
                 forward=['service'],
                 ),
         }
@@ -490,11 +490,11 @@ class QuoteExtraPackageForm(forms.ModelForm, ServiceForm):
             'booking': autocomplete.ModelSelect2(
                 url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
-                url='servicepackage-autocomplete',
+                url='serviceextra-autocomplete',
                 forward=['provider', 'search_location'],
                 ),
             'provider': autocomplete.ModelSelect2(
-                url='providerpackage-autocomplete',
+                url='providerextra-autocomplete',
                 forward=['service'],
                 ),
         }
@@ -665,11 +665,11 @@ class BookingExtraPackageForm(forms.ModelForm, MailForm, ServiceForm):
             'booking': autocomplete.ModelSelect2(
                 url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
-                url='servicepackage-autocomplete',
+                url='serviceextra-autocomplete',
                 forward=['provider', 'search_location'],
                 ),
             'provider': autocomplete.ModelSelect2(
-                url='providerpackage-autocomplete',
+                url='providerextra-autocomplete',
                 forward=['service'],
                 ),
             'p_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),

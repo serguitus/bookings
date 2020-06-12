@@ -14,13 +14,13 @@ def migrate_new_data(apps, schema_editor):
     QuoteExtraPackage = apps.get_model('booking', 'QuoteExtraPackage')
 
     for service in NewQuoteAllotment.objects.all():
-        service.save()
+        service.save(force_update=True, update_fields=("base_category",))
     for service in NewQuoteTransfer.objects.all():
-        service.save()
+        service.save(force_update=True, update_fields=("base_category",))
     for service in NewQuoteExtra.objects.all():
-        service.save()
+        service.save(force_update=True, update_fields=("base_category",))
     for service in QuoteExtraPackage.objects.all():
-        service.save()
+        service.save(force_update=True, update_fields=("base_category",))
 
 
 def backwards_function(apps, schema_editor):

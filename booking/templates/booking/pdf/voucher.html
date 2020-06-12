@@ -102,14 +102,14 @@
                                 <tr class="voucher-title-1">
                                     <td width="40%"><b>Client:</b> {{ service.full_booking_name }}</td>
                                     <td width="20%">
-                                    {% if service.service_type == 'A' %}
+                                    {% if service.base_service.category == 'A' %}
                                         <b>Adults:</b> {{ service.adult_quantity }}
                                     {% else %}
                                         <b>Pax:</b> {{ service.pax_quantity }}
                                     {% endif %}
                                     </td>
                                     <td width="20%">
-                                    {% if service.service_type == 'A' and service.child_quantity %}
+                                    {% if service.base_service.category == 'A' and service.child_quantity %}
                                         <b>Children:</b> {{ service.child_quantity }}
                                     {% endif %}
                                     </td>
@@ -124,7 +124,7 @@
                                 <tr>
                                     <td class="voucher-content-1"" width="25%"><b>From: </b>{{ service.datetime_from }}</td>
                                     <td class="voucher-content-1"" width="25%">{% if service.datetime_to %}<b>To: </b>{{ service.datetime_to }}{% endif %}</td>
-                                    <td class="voucher-content-1"" width="25%">{% if service.time and not service.service_type == 'A' %}<b>Pickup Time:</b> {{ service.time|time:"H:i" }}{% elif service.booking_package.time %}<b>Pickup Time:</b> {{ service.booking_package.time|time:"H:i" }}{% endif %}</td>
+                                    <td class="voucher-content-1"" width="25%">{% if service.time and not service.base_service.category == 'A' %}<b>Pickup Time:</b> {{ service.time|time:"H:i" }}{% elif service.booking_package.time %}<b>Pickup Time:</b> {{ service.booking_package.time|time:"H:i" }}{% endif %}</td>
                                     <td class="voucher-content-1" width="25%"><b>Confirm. </b>{% if service.conf_number %}{{ service.conf_number }}{% else %}OK{% endif %}</td>
                                 </tr>
                                 <tr class="voucher-content-2">
@@ -132,13 +132,13 @@
                                         <b>Service:</b> {{ service.name }} [{{ service.description }}]
                                     </td>
                                 </tr>
-                                {% if service.service_type == 'A' and service.service.address %}
+                                {% if service.base_service.category == 'A' and service.service.address %}
                                 <tr>
                                     <td class="voucher-content-3" colspan="4">
                                         <b>Address:</b> {{ service.service.address }}
                                     </td>
                                 </tr>
-                                {% elif service.service_type == 'E' and service.pickup_office %}
+                                {% elif service.base_service.category == 'E' and service.pickup_office %}
                                 <tr>
                                     <td class="voucher-content-3" colspan="4">
                                         <table>

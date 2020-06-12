@@ -114,14 +114,14 @@ def _get_voucher_services(services):
     for booking_service in booking_services:
         if isinstance(booking_service, BookingExtraPackage) and booking_service.voucher_detail:
             PACKAGE_MODELS = {
-                'T': BookingProvidedTransfer,
-                'E': BookingProvidedExtra,
-                'A': BookingProvidedAllotment,
+                BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_TRANSFER: BookingProvidedTransfer,
+                BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA: BookingProvidedExtra,
+                BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT: BookingProvidedAllotment,
             }
             package_services = list(BookingProvidedService.objects.filter(
                 booking_package=booking_service).exclude(status=SERVICE_STATUS_CANCELLED))
             for package_service in package_services:
-                service = PACKAGE_MODELS[package_service.service_type].objects.get(
+                service = PACKAGE_MODELS[package_service.base_category].objects.get(
                     id=package_service.id)
                 objs.append(service)
         else:
