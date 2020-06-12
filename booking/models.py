@@ -305,7 +305,7 @@ class QuoteService(BookServiceData, DateInterval):
     status = models.CharField(
         max_length=5, choices=QUOTE_STATUS_LIST, default=QUOTE_STATUS_DRAFT)
     base_category = models.CharField(
-        max_length=5, choices=QUOTE_SERVICE_CATEGORIES, blank=True, null=True)
+        max_length=5, choices=QUOTE_SERVICE_CATEGORIES)
 
     # Managers
     objects = models.Manager()

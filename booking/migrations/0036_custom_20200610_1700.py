@@ -14,12 +14,25 @@ def migrate_new_data(apps, schema_editor):
     QuoteExtraPackage = apps.get_model('booking', 'QuoteExtraPackage')
 
     for service in NewQuoteAllotment.objects.all():
+        if service.quote_package:
+            service.base_category = "PA"
+        else:
+            service.base_category = "QA"
         service.save(force_update=True, update_fields=("base_category",))
     for service in NewQuoteTransfer.objects.all():
+        if service.quote_package:
+            service.base_category = "PT"
+        else:
+            service.base_category = "QT"
         service.save(force_update=True, update_fields=("base_category",))
     for service in NewQuoteExtra.objects.all():
+        if service.quote_package:
+            service.base_category = "PE"
+        else:
+            service.base_category = "QE"
         service.save(force_update=True, update_fields=("base_category",))
     for service in QuoteExtraPackage.objects.all():
+        service.base_category = "QP"
         service.save(force_update=True, update_fields=("base_category",))
 
 
