@@ -4,7 +4,7 @@ from django import template
 from booking.constants import SERVICE_STATUS_CANCELLED
 from booking.models import (
     Booking,
-    BaseBookingService,
+    BaseBookingService, BookingProvidedService,
     QuoteService,
     BookingProvidedTransfer,
     BookingProvidedAllotment,
@@ -302,4 +302,22 @@ def bookingbookdetail_table(booking_service):
     table = BookingBookDetailTable(
         booking_service.bookingbookdetail_booking_service.all(),
         order_by=('datetime_from', 'time'))
+    return table
+
+
+@register.simple_tag
+def bookingpackage_services_summary_table(bookingpackage, request):
+    bp_id = request.GET.get('booking_package')
+    if bookingpackage:
+        table = BookingPackageServiceSummaryTable(
+            bookingpackage.booking_package_services.all(),
+            order_by=('datetime_from', 'time', 'datetime_to'))
+    elif bp_id:
+        bookingpackage = BookingExtraPackage.objects.get(id=bp_id)
+        table = BookingPackageServiceSummaryTable(
+            bookingpackage.booking_package_services.all(),
+            order_by=('datetime_from', 'time', 'datetime_to'))
+    else:
+        table = BookingServiceSummaryTable(
+            BookingProvidedService.objects.none())
     return table
