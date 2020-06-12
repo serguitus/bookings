@@ -167,7 +167,7 @@
                                                     <b>Pickup:</b> {{ service.pickup }}<br>
                                                     <b>Address:</b> {{ service.pickup.address }}
                                                 {% elif service.place_from %}
-                                                    <b>Pickup:</b> {{ service.place_from }}<br>
+                                                    <b>Pickup:</b> {{ service.location_from }}. {{ service.place_from }}<br>
                                                     {% if service.schedule_from %}<b>Flight:</b> {{ service.schedule_from }}@{{ service.schedule_time_from|time:"H:i" }}{% endif %}
                                                 {% endif %}
                                                 </td>
@@ -176,7 +176,7 @@
                                                     <b>Drop-off:</b> {{ service.dropoff }}<br>
                                                     <b>Address:</b> {{ service.dropoff.address }}
                                                 {% elif service.place_to %}
-                                                    <b>Drop-off:</b> {{ service.place_to }}<br>
+                                                    <b>Drop-off:</b> {{ service.location_to }}. {{ service.place_to }}<br>
                                                     {% if service.schedule_to %}<b>Flight:</b> {{ service.schedule_to }}@{{ service.schedule_time_to|time:"H:i" }}{% endif %}
                                                 {% endif %}
                                                 </td>
