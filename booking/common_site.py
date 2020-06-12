@@ -1402,7 +1402,7 @@ class BookingBaseServiceSiteModel(SiteModel):
     ordering = ('datetime_from', 'booking__reference', 'name',)
     list_details_template = 'booking/basebookingservice_details.html'
     change_details_template = 'booking/basebookingservice_details.html'
-    totalsum_list = ['cost_amount', 'price_amount']
+    totalsum_list = ['cost_amount', 'price_amount', 'cost_amount_pending']
 
     def get_changelist(self, request, **kwargs):
         """
