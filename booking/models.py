@@ -865,9 +865,11 @@ class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
         return self.booking.p_notes or ''
     booking_general_notes.short_description = 'General Booking Notes'
 
+    @property
     def cost_amount_pending(self):
         return self.cost_amount_to_pay - self.cost_amount_paid
-    cost_amount_pending.short_description = 'Pending'
+    cost_amount_pending.fget.short_description = 'Pending'
+
 
     def get_child_object(self):
         return _get_child_objects([self])[0]
