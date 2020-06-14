@@ -19,7 +19,7 @@ from accounting.models import Account
 
 from booking import constants
 from booking.models import (
-    Quote, QuoteService, QuotePaxVariant, QuoteServicePaxVariant,
+    Quote, QuoteService, QuoteProvidedService, QuotePaxVariant, QuoteServicePaxVariant,
     NewQuoteAllotment, NewQuoteTransfer, NewQuoteExtra, QuoteExtraPackage,
     NewQuoteServiceBookDetail, NewQuoteServiceBookDetailAllotment, NewQuoteServiceBookDetailTransfer, NewQuoteServiceBookDetailExtra,
     Booking, BookingPax, BaseBookingService, BaseBookingServicePax, BookingExtraPackage,
@@ -34,8 +34,8 @@ from common.filters import parse_date
 
 from config.constants import AMOUNTS_FIXED
 from config.models import (
-    ServiceBookDetail, ServiceBookDetailAllotment,
-    ServiceBookDetailTransfer, ServiceBookDetailExtra,
+    ServiceBookDetail,
+    ServiceBookDetailAllotment, ServiceBookDetailTransfer, ServiceBookDetailExtra,
     ProviderAllotmentDetail, ProviderTransferDetail, ProviderExtraDetail)
 from config.services import ConfigServices
 from config.views import (
@@ -567,14 +567,14 @@ class BookingServices(object):
             return
 
         services = list(
-            QuotePackageService.objects.filter(quote_package_id=quote_package.id).all())
+            QuoteProvidedService.objects.filter(quote_package_id=quote_package.id).all())
         if services:
             return
 
         package = quote_package.service
         # create bookingallotment list
-        for package_allotment in PackageAllotment.objects.filter(package_id=package.id).all():
-            quote_package_allotment = QuotePackageAllotment()
+        for package_allotment in ServiceBookDetailAllotment.objects.filter(service_id=package.id).all():
+            quote_package_allotment = NewQuoteAllotment()
             quote_package_allotment.quote_package = quote_package
             # quote_package_allotment.conf_number = '< confirm number >'
             # cost_amount
@@ -592,8 +592,8 @@ class BookingServices(object):
             quote_package_allotment.save()
 
         # create bookingtransfer list
-        for package_transfer in PackageTransfer.objects.filter(package_id=package.id).all():
-            quote_package_transfer = QuotePackageTransfer()
+        for package_transfer in ServiceBookDetailTransfer.objects.filter(service_id=package.id).all():
+            quote_package_transfer = NewQuoteTransfer()
             quote_package_transfer.quote_package = quote_package
             # quote_package_transfer.conf_number = '< confirm number >'
             # cost_amount
@@ -618,8 +618,8 @@ class BookingServices(object):
             quote_package_transfer.save()
 
         # create bookingextra list
-        for package_extra in PackageExtra.objects.filter(package_id=package.id).all():
-            quote_package_extra = QuotePackageExtra()
+        for package_extra in ServiceBookDetailExtra.objects.filter(service_id=package.id).all():
+            quote_package_extra = NewQuoteExtra()
             quote_package_extra.quote_package = quote_package
             # quote_package_extra.conf_number = '< confirm number >'
             # cost_amount
@@ -1215,7 +1215,7 @@ class BookingServices(object):
     @classmethod
     def _find_service_pax_variant(cls, service, quote_pax_variant, service_pax_variant):
         if service_pax_variant is None:
-            if isinstance(service, QuotePackageService):
+            if isinstance(service, QuoteProvidedService) and service.quote_package:
                 try:
                     return QuoteServicePaxVariant.objects.get(
                         quote_service=service.quote_package.id,
@@ -1274,27 +1274,27 @@ class BookingServices(object):
             package.price_by_package_catalogue = False
 
         if hasattr(package, 'id') and package.id:
-            if not isinstance(package, QuotePackage):
-                package = QuotePackage.objects.get(pk=package.id)
+            if not isinstance(package, QuoteExtraPackage):
+                package = QuoteExtraPackage.objects.get(pk=package.id)
             allotment_list = list(
-                QuotePackageAllotment.objects.filter(
+                NewQuoteAllotment.objects.filter(
                     quote_package=package.id).exclude(
                         status=constants.SERVICE_STATUS_CANCELLED).all())
             transfer_list = list(
-                QuotePackageTransfer.objects.filter(
+                NewQuoteTransfer.objects.filter(
                     quote_package=package.id).exclude(
                         status=constants.SERVICE_STATUS_CANCELLED).all())
             extra_list = list(
-                QuotePackageExtra.objects.filter(
+                NewQuoteExtra.objects.filter(
                     quote_package=package.id).exclude(
                         status=constants.SERVICE_STATUS_CANCELLED).all())
         else:
             allotment_list = list(
-                PackageAllotment.objects.filter(package=package.service_id).all())
+                ServiceBookDetailAllotment.objects.filter(service=package.service_id).all())
             transfer_list = list(
-                PackageTransfer.objects.filter(package=package.service_id).all())
+                ServiceBookDetailTransfer.objects.filter(service=package.service_id).all())
             extra_list = list(
-                PackageExtra.objects.filter(package=package.service_id).all())
+                ServiceBookDetailExtra.objects.filter(service=package.service_id).all())
 
         if allotment_list:
             for allotment in allotment_list:
@@ -1375,10 +1375,10 @@ class BookingServices(object):
                         except QuoteServicePaxVariant.DoesNotExist as ex:
                             continue
                         try:
-                            packageservice_paxvariant = QuotePackageServicePaxVariant.objects.get(
+                            packageservice_paxvariant = QuoteServicePaxVariant.objects.get(
                                 quotepackage_pax_variant=quoteservice_paxvariant.id,
-                                quotepackage_service=transfer.id)
-                        except QuotePackageServicePaxVariant.DoesNotExist as ex:
+                                quote_service=transfer.id)
+                        except QuoteServicePaxVariant.DoesNotExist as ex:
                             continue
                     if isinstance(transfer, PackageTransfer):
                         days_after = transfer.days_after
@@ -1390,7 +1390,7 @@ class BookingServices(object):
                             if days_duration is None:
                                 days_duration = 0
                             date_to = date_from + timedelta(days=days_duration)
-                        packageservice_paxvariant = QuotePackageServicePaxVariant()
+                        packageservice_paxvariant = QuoteServicePaxVariant()
 
                     c1, c1_msg, c2, c2_msg, c3, c3_msg, c4, c4_msg = cls._find_quoteservice_costs(
                         pax_quantity=quote_pax_variant.pax_quantity,
@@ -1441,7 +1441,7 @@ class BookingServices(object):
                         provider = extra.provider
                     date_from = None
                     date_to = None
-                    if isinstance(extra, QuotePackageExtra):
+                    if isinstance(extra, NewQuoteExtra):
                         date_from = extra.datetime_from
                         date_to = extra.datetime_to
                         try:
@@ -1451,12 +1451,12 @@ class BookingServices(object):
                         except QuoteServicePaxVariant.DoesNotExist as ex:
                             continue
                         try:
-                            packageservice_paxvariant = QuotePackageServicePaxVariant.objects.get(
-                                quotepackage_pax_variant=quoteservice_paxvariant.id,
-                                quotepackage_service=extra.id)
-                        except QuotePackageServicePaxVariant.DoesNotExist as ex:
+                            packageservice_paxvariant = QuoteServicePaxVariant.objects.get(
+                                quote_pax_variant=quoteservice_paxvariant.quote_pax_variant,
+                                quote_service=package)
+                        except QuoteServicePaxVariant.DoesNotExist as ex:
                             continue
-                    if isinstance(extra, PackageExtra):
+                    if isinstance(extra, ServiceBookDetailExtra):
                         days_after = extra.days_after
                         if days_after is None:
                             days_after = 0
@@ -1466,7 +1466,7 @@ class BookingServices(object):
                             if days_duration is None:
                                 days_duration = 0
                             date_to = date_from + timedelta(days=days_duration)
-                        packageservice_paxvariant = QuotePackageServicePaxVariant()
+                        packageservice_paxvariant = QuoteServicePaxVariant()
                     c1, c1_msg, c2, c2_msg, c3, c3_msg, c4, c4_msg = cls._find_quoteservice_costs(
                         pax_quantity=quote_pax_variant.pax_quantity,
                         quoteservice=extra,
@@ -1814,10 +1814,7 @@ class BookingServices(object):
 
     @classmethod
     def _find_free_paxes(cls, quoteservice_pax_variant):
-        if isinstance(quoteservice_pax_variant, QuotePackageServicePaxVariant):
-            service_pax_variant = quoteservice_pax_variant.quotepackage_pax_variant
-        else:
-            service_pax_variant = quoteservice_pax_variant
+        service_pax_variant = quoteservice_pax_variant
 
         free_cost_single, free_cost_double, free_cost_triple, free_cost_qdrple = 0, 0, 0, 0
         free_price_single, free_price_double, free_price_triple, free_price_qdrple = 0, 0, 0, 0
@@ -1849,10 +1846,7 @@ class BookingServices(object):
             cls, amount_single, amount_double, amount_triple, amount_qdrple,
             pax_quantity, quoteservice_pax_variant, for_cost):
 
-        if isinstance(quoteservice_pax_variant, QuotePackageServicePaxVariant):
-            service_pax_variant = quoteservice_pax_variant.quotepackage_pax_variant
-        else:
-            service_pax_variant = quoteservice_pax_variant
+        service_pax_variant = quoteservice_pax_variant
 
         a1, a2, a3, a4 = amount_single, amount_double, amount_triple, amount_qdrple
         a1_msg, a2_msg, a3_msg, a4_msg = None, None, None, None
@@ -2463,75 +2457,6 @@ class BookingServices(object):
 
 
     @classmethod
-    def update_quotepackageservice_paxvariants_amounts(cls, quotepackage_service):
-        if hasattr(quotepackage_service, "avoid_sync_paxvariants"):
-            return
-
-        quote_package = quotepackage_service.quote_package
-        # find pax variants
-        quotepackage_pax_variants = list(QuoteServicePaxVariant.objects.all().filter(quote_service=quote_package.id))
-        # for each quote pax variant get or create
-        for quotepackage_pax_variant in quotepackage_pax_variants:
-            defaults = cls._calculate_default_paxvariant_amounts(
-                quotepackage_service,
-                quotepackage_pax_variant)
-            try:
-                obj = QuotePackageServicePaxVariant.objects.get(
-                    quotepackage_service_id=quotepackage_service.id,
-                    quotepackage_pax_variant_id=quotepackage_pax_variant.id)
-                if obj.manual_costs and obj.manual_prices:
-                    continue
-                fields = []
-                if not obj.manual_costs:
-                    if not cls._equals_amounts(obj.cost_single_amount, defaults['cost_single_amount']):
-                        fields.append('cost_single_amount')
-                        obj.cost_single_amount = defaults['cost_single_amount']
-
-                    if not cls._equals_amounts(obj.cost_double_amount, defaults['cost_double_amount']):
-                        fields.append('cost_double_amount')
-                        obj.cost_double_amount = defaults['cost_double_amount']
-
-                    if not cls._equals_amounts(obj.cost_triple_amount, defaults['cost_triple_amount']):
-                        fields.append('cost_triple_amount')
-                        obj.cost_triple_amount = defaults['cost_triple_amount']
-
-                    if not cls._equals_amounts(obj.cost_qdrple_amount, defaults['cost_qdrple_amount']):
-                        fields.append('cost_qdrple_amount')
-                        obj.cost_qdrple_amount = defaults['cost_qdrple_amount']
-
-                if not obj.manual_prices:
-                    if not cls._equals_amounts(obj.price_single_amount, defaults['price_single_amount']):
-                        fields.append('price_single_amount')
-                        obj.price_single_amount = defaults['price_single_amount']
-
-                    if not cls._equals_amounts(obj.price_double_amount, defaults['price_double_amount']):
-                        fields.append('price_double_amount')
-                        obj.price_double_amount = defaults['price_double_amount']
-
-                    if not cls._equals_amounts(obj.price_triple_amount, defaults['price_triple_amount']):
-                        fields.append('price_triple_amount')
-                        obj.price_triple_amount = defaults['price_triple_amount']
-
-                    if not cls._equals_amounts(obj.price_qdrple_amount, defaults['price_qdrple_amount']):
-                        fields.append('price_qdrple_amount')
-                        obj.price_qdrple_amount = defaults['price_qdrple_amount']
-
-                if fields:
-                    obj.save(update_fields=fields)
-                    cls.update_quotepackage_paxvariant_amounts(quotepackage_pax_variant)
-
-            except QuotePackageServicePaxVariant.DoesNotExist:
-                new_values = {
-                    'quotepackage_service_id': quotepackage_service.id,
-                    'quotepackage_pax_variant_id': quotepackage_pax_variant.id}
-                new_values.update(defaults)
-                obj = QuotePackageServicePaxVariant(**new_values)
-                obj.save()
-                cls.update_quotepackage_paxvariant_amounts(quotepackage_pax_variant)
-                cls.update_quote_paxvariant_amounts(quotepackage_pax_variant.quote_pax_variant)
-
-
-    @classmethod
     def _find_paxvariant_amounts(cls, service, pax_variant, for_update=False):
         if isinstance(pax_variant, QuotePaxVariant):
             quote_pax_variant = pax_variant
@@ -2557,7 +2482,7 @@ class BookingServices(object):
                 quoteservice=service,
                 agency=service.quote.agency,
                 service_pax_variant=service_pax_variant)
-        elif isinstance(service, QuotePackage):
+        elif isinstance(service, QuoteExtraPackage):
             return cls._find_quotepackage_amounts(
                 quote_pax_variant=quote_pax_variant,
                 package=service,
@@ -2600,26 +2525,6 @@ class BookingServices(object):
                 quote_pax_variant=quote_pax_variant,
                 quoteservice=service,
                 agency=service.quote.agency,
-                service_pax_variant=service_pax_variant)
-        elif isinstance(service, QuotePackageService):
-            if service.base_service.category == constants.SERVICE_CATEGORY_ALLOTMENT:
-                service = QuotePackageAllotment.objects.get(pk=service.id)
-            elif service.base_service.category == constants.SERVICE_CATEGORY_TRANSFER:
-                service = QuotePackageTransfer.objects.get(pk=service.id)
-            elif service.base_service.category == constants.SERVICE_CATEGORY_EXTRA:
-                service = QuotePackageExtra.objects.get(pk=service.id)
-            else:
-                return None, "Unknow Service", None, "Unknow Service", \
-                    None, "Unknow Service", None, "Unknow Service", \
-                    None, "Unknow Service", None, "Unknow Service", \
-                    None, "Unknow Service", None, "Unknow Service"
-            c1, c1_msg, p1, p1_msg, \
-            c2, c2_msg, p2, p2_msg, \
-            c3, c3_msg, p3, p3_msg, \
-            c4, c4_msg, p4, p4_msg = cls._find_amounts_for_quoteservice(
-                quote_pax_variant=quote_pax_variant,
-                quoteservice=service,
-                agency=service.quote_package.quote.agency,
                 service_pax_variant=service_pax_variant)
         else:
             return None, "Unknow Service", None, "Unknow Service", \
@@ -4904,16 +4809,45 @@ class BookingServices(object):
 
 
     @classmethod
+    def delete_quotepackage(cls, package):
+        cls.delete_quotepackage_services(package)
+        package.delete()
+
+
+    @classmethod
     def delete_quotepackage_services(cls, package):
-        services = QuotePackageAllotment.objects.filter(quote_package=package);
+        services = NewQuoteAllotment.objects.filter(quote_package=package);
         for service in services:
-            service.delete()
-        services = QuotePackageTransfer.objects.filter(quote_package=package);
+            cls.delete_quoteservice(service)
+
+        services = NewQuoteTransfer.objects.filter(quote_package=package);
         for service in services:
-            service.delete()
-        services = QuotePackageExtra.objects.filter(quote_package=package);
+            cls.delete_quoteservice(service)
+
+        services = NewQuoteExtra.objects.filter(quote_package=package);
         for service in services:
-            service.delete()
+            cls.delete_quoteservice(service)
+
+
+    @classmethod
+    def delete_quoteservice(cls, service):
+        cls.delete_quoteservice_details(service)
+        service.delete()
+
+
+    @classmethod
+    def delete_quoteservice_details(cls, service):
+        details = NewQuoteBookDetailAllotment.objects.filter(quote_service=service);
+        for detail in details:
+            detail.delete()
+
+        details = NewQuoteBookDetailTransfer.objects.filter(quote_service=service);
+        for detail in details:
+            detail.delete()
+
+        services = NewQuoteBookDetailExtra.objects.filter(quote_service=service);
+        for detail in details:
+            detail.delete()
 
 
     @classmethod

@@ -38,7 +38,8 @@ register = template.Library()
 @register.simple_tag
 def quoteservice_table(quote):
     table = QuoteServiceTable(
-        quote.quote_services.all(),
+        QuoteService.invoiced_objects.filter(quote=quote),
+        #quote.quote_services.all(),
         order_by=('datetime_from', 'time', 'datetime_to'))
     return table
 
@@ -292,7 +293,7 @@ def get_distribution(booking_service):
 @register.simple_tag
 def quotebookdetail_table(quote_service):
     table = NewQuoteServiceBookDetailTable(
-        quote_service.quotebookdetail_set.all(),
+        quote_service.newquoteservicebookdetail_provided.all(),
         order_by=('datetime_from', 'time'))
     return table
 
