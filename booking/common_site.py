@@ -702,7 +702,7 @@ class BookingSiteModel(SiteModel):
         ]
         return urlpatterns + urls
 
-    def config_vouchers(self, request, id, extra_context=None):
+    def config_vouchers(self, request, booking_id, extra_context=None):
         """ this handles configuration form to build vouchers"""
 
         def _add_initial_email_form(request, booking, context):
@@ -724,7 +724,7 @@ class BookingSiteModel(SiteModel):
             })
         context = {}
         context.update({'title': 'Vouchers Booking'})
-        bk = Booking.objects.get(id=id)
+        bk = Booking.objects.get(id=booking_id)
         if request.method == 'GET':
             form = VouchersConfigForm()
             context.update(self.get_model_extra_context(request))
@@ -760,7 +760,7 @@ class BookingSiteModel(SiteModel):
             })
             # use this two parameters to call methods to build pdf
             # it should return the pisa object to add it to the response object
-            result, pdf = self._build_vouchers(id, ids, context)
+            result, pdf = self._build_vouchers(booking_id, ids, context)
             if result.err:
                 # there was an error. show an error message
                 messages.add_message(
@@ -770,7 +770,7 @@ class BookingSiteModel(SiteModel):
                 form = VouchersConfigForm()
                 context.update(self.get_model_extra_context(request))
                 context.update(extra_context or {})
-                context.update({'current': Booking.objects.get(id=id)})
+                context.update({'current': Booking.objects.get(id=booking_id)})
                 context.update({'form': form})
                 return render(request, 'booking/voucher_config.html', context)
             submit_action = request.POST.get('submit_action')
@@ -795,7 +795,7 @@ class BookingSiteModel(SiteModel):
                     request=request, level=messages.SUCCESS,
                     message='Vouchers mail  sent successfully.',
                     extra_tags='', fail_silently=False)
-                return redirect(reverse('common:booking_booking_change', args=[id]))
+                return redirect(reverse('common:booking_booking_change', args=[booking_id]))
             return HttpResponse(pdf.getvalue(), content_type='application/pdf')
 
     def add_booking_pax(self, request, id, extra_context=None):

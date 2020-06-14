@@ -88,30 +88,6 @@ def post_save_quotepackage(sender, instance, **kwargs):
             BookingServices.update_quote(instance)
 
 
-@receiver(post_save, sender=NewQuoteAllotment)
-def post_save_quotepackage_allotment(sender, instance, **kwargs):
-    if not hasattr(instance, 'avoid_all'):
-        with transaction.atomic(savepoint=False):
-            BookingServices.update_quotepackageservice_paxvariants_amounts(instance)
-            BookingServices.update_quotepackage(instance)
-
-
-@receiver(post_save, sender=NewQuoteTransfer)
-def post_save_quotepackage_transfer(sender, instance, **kwargs):
-    if not hasattr(instance, 'avoid_all'):
-        with transaction.atomic(savepoint=False):
-            BookingServices.update_quotepackageservice_paxvariants_amounts(instance)
-            BookingServices.update_quotepackage(instance)
-
-
-@receiver(post_save, sender=NewQuoteExtra)
-def post_save_quotepackage_extra(sender, instance, **kwargs):
-    if not hasattr(instance, 'avoid_all'):
-        with transaction.atomic(savepoint=False):
-            BookingServices.update_quotepackageservice_paxvariants_amounts(instance)
-            BookingServices.update_quotepackage(instance)
-
-
 # Booking
 
 @receiver((post_save, post_delete), sender=BaseBookingServicePax)

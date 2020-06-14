@@ -1,8 +1,10 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 """
 Booking models
 """
+
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 from concurrency.fields import AutoIncVersionField
 
 from django.core.exceptions import ValidationError
@@ -50,6 +52,7 @@ from config.models import (
     BookServiceData, BookAllotmentData, BookTransferData, BookExtraData,
     RoomType, Location, Place, Schedule, Addon, CarRentalOffice,
     Service, Allotment, Transfer, Extra,
+    ServiceBookDetailAllotment, ServiceBookDetailTransfer, ServiceBookDetailExtra,
     AmountDetail, AgencyCatalogue, ProviderCatalogue,
 )
 
@@ -89,17 +92,17 @@ def _get_child_objects(services):
 # QuoteService child objects from a QuoteService list
 def _get_quote_child_objects(services):
     TYPE_MODELS = {
-        'T': NewQuoteTransfer,
-        'E': NewQuoteExtra,
-        'A': NewQuoteAllotment,
-        'P': QuoteExtraPackage,
-        #'PA': QuotePackageAllotment,
-        #'PT': QuotePackageTransfer,
-        #'PE': QuotePackageExtra,
+        'QA': NewQuoteAllotment,
+        'QT': NewQuoteTransfer,
+        'QE': NewQuoteExtra,
+        'QP': QuoteExtraPackage,
+        'PA': NewQuoteAllotment,
+        'PT': NewQuoteTransfer,
+        'PE': NewQuoteExtra,
     }
     objs = []
     for service in services:
-        obj = TYPE_MODELS[service.base_service.category].objects.get(id=service.id)
+        obj = TYPE_MODELS[service.base_category].objects.get(id=service.id)
         objs.append(obj)
     return objs
 
@@ -372,9 +375,6 @@ class QuoteProvidedService(QuoteService):
         verbose_name_plural = 'Quote Services'
         default_permissions = ('add', 'change',)
     quote_package = models.ForeignKey(QuoteExtraPackage, blank=True, null=True)
-
-    def fill_data(self):
-        super(QuoteProvidedService, self).fill_data()
 
     def __str__(self):
         return '%s' % (self.base_service)
