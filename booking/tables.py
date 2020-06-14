@@ -58,7 +58,7 @@ class QuoteServiceTable(tables.Table):
 class QuotePaxVariantTable(tables.Table):
     class Meta:
         model = QuotePaxVariant
-        template_name = 'booking/table/quoteservice_table.html'
+        template_name = 'booking/table/details_table.html'
         fields = [
             'pax_quantity',
             'cost_single_amount', 'cost_double_amount', 'cost_triple_amount', 'cost_qdrple_amount',
@@ -483,7 +483,7 @@ class AddPaxBookingServicesTable(tables.Table):
 class NewQuoteServiceBookDetailTable(tables.Table):
     class Meta:
         model = NewQuoteServiceBookDetail
-        template_name = 'booking/table/quotebookdetail_table.html'
+        template_name = 'booking/table/quoteservicebookdetail_table.html'
         fields = ['name', 'description', 'base_service__category', 'datetime_from', 'time']
 
     def render_name(self, value, record):

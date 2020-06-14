@@ -297,38 +297,14 @@ class QuotePackageExtraForm(forms.ModelForm, ServiceForm):
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
-class NewQuoteAllotmentInlineForm(forms.ModelForm, ServiceForm):
-    class Meta:
-        fields = ('__all__')
-        widgets = {
-            'service': autocomplete.ModelSelect2(
-                url='serviceallotment-autocomplete',
-                forward=['provider', 'search_location'],
-                ),
-            'room_type': autocomplete.ModelSelect2(
-                url='roomtype-autocomplete',
-                forward=['service'],
-                ),
-            'board_type': autocomplete.ListSelect2(
-                url='boardtype-autocomplete',
-                forward=['service']),
-            'service_addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
-                forward=['service'],
-                ),
-            'provider': autocomplete.ModelSelect2(
-                url='providerallotment-autocomplete',
-                forward=['service', 'room_type', 'board_type', 'service_addon'],
-                ),
-        }
-
-
 class NewQuoteAllotmentForm(forms.ModelForm, ServiceForm):
     class Meta:
         model = NewQuoteAllotment
         fields = '__all__'
         widgets = {
             'quote': autocomplete.ModelSelect2(
+                url='disabled-autocomplete',),
+            'quote_package': autocomplete.ModelSelect2(
                 url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
                 url='serviceallotment-autocomplete',
@@ -354,33 +330,14 @@ class NewQuoteAllotmentForm(forms.ModelForm, ServiceForm):
     nights = forms.IntegerField(initial=0)
 
 
-class NewQuoteTransferInlineForm(forms.ModelForm, ServiceForm):
-    class Meta:
-        fields = ('__all__')
-        widgets = {
-            'service': autocomplete.ModelSelect2(
-                url='servicetransfer-autocomplete',
-                forward=['provider', 'search_location', 'location_from', 'location_to'],
-                ),
-            'location_from': autocomplete.ModelSelect2(url='location-autocomplete'),
-            'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
-            'service_addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
-                forward=['service'],
-                ),
-            'provider': autocomplete.ModelSelect2(
-                url='providertransfer-autocomplete',
-                forward=['service', 'location_from', 'location_to', 'service_addon'],
-                ),
-        }
-
-
 class NewQuoteTransferForm(forms.ModelForm, ServiceForm):
     class Meta:
         model = NewQuoteTransfer
         fields = ('__all__')
         widgets = {
-            'booking': autocomplete.ModelSelect2(
+            'quote': autocomplete.ModelSelect2(
+                url='disabled-autocomplete',),
+            'quote_package': autocomplete.ModelSelect2(
                 url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
                 url='servicetransfer-autocomplete',
@@ -400,43 +357,14 @@ class NewQuoteTransferForm(forms.ModelForm, ServiceForm):
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
-class NewQuoteExtraInlineForm(forms.ModelForm, ServiceForm):
-    class Meta:
-        fields = ('__all__')
-        widgets = {
-            'service': autocomplete.ModelSelect2(
-                url='serviceextra-autocomplete',
-                forward=['provider', 'search_location'],
-                ),
-            'addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
-                forward=['service'],
-                ),
-            'service_addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
-                forward=['service'],
-                ),
-            'provider': autocomplete.ModelSelect2(
-                url='providerextra-autocomplete',
-                forward=['service', 'service_addon'],
-                ),
-            'pickup_office': autocomplete.ModelSelect2(
-                url='carrentaloffice-autocomplete',
-                forward=['service',],
-                ),
-            'dropoff_office': autocomplete.ModelSelect2(
-                url='carrentaloffice-autocomplete',
-                forward=['service',],
-                ),
-        }
-
-
 class NewQuoteExtraForm(forms.ModelForm, ServiceForm):
     class Meta:
         model = NewQuoteExtra
         fields = ('__all__')
         widgets = {
-            'booking': autocomplete.ModelSelect2(
+            'quote': autocomplete.ModelSelect2(
+                url='disabled-autocomplete',),
+            'quote_package': autocomplete.ModelSelect2(
                 url='disabled-autocomplete',),
             'service': autocomplete.ModelSelect2(
                 url='serviceextra-autocomplete',
@@ -465,21 +393,6 @@ class NewQuoteExtraForm(forms.ModelForm, ServiceForm):
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
-
-
-class QuoteExtraPackageInlineForm(forms.ModelForm, ServiceForm):
-    class Meta:
-        fields = ('__all__')
-        widgets = {
-            'service': autocomplete.ModelSelect2(
-                url='serviceextra-autocomplete',
-                forward=['provider', 'search_location'],
-                ),
-            'provider': autocomplete.ModelSelect2(
-                url='providerextra-autocomplete',
-                forward=['service'],
-                ),
-        }
 
 
 class QuoteExtraPackageForm(forms.ModelForm, ServiceForm):
