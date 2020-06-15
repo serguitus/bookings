@@ -1529,10 +1529,10 @@ class BookingProvidedTransferSiteModel(BookingProvidedServiceSiteModel):
         ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'booking_package', 'service__name',)
     form = BookingProvidedTransferForm
-    add_form_template = 'booking/bookingpackagetransfer_change_form.html'
-    change_form_template = 'booking/bookingpackagetransfer_change_form.html'
-    list_details_template = 'booking/bookingpackagetransfer_details.html'
-    change_details_template = 'booking/bookingpackagetransfer_details.html'
+    add_form_template = 'booking/bookingprovidedtransfer_change_form.html'
+    change_form_template = 'booking/bookingprovidedtransfer_change_form.html'
+    list_details_template = 'booking/bookingprovidedtransfer_details.html'
+    change_details_template = 'booking/bookingprovidedtransfer_details.html'
 
 
 class BookingProvidedExtraSiteModel(BookingProvidedServiceSiteModel):
