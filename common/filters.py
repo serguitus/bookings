@@ -4,7 +4,8 @@ from datetime import datetime
 
 from django import forms
 from django.contrib.admin.filters import FieldListFilter, DateFieldListFilter
-from django.contrib.admin.utils import lookup_needs_distinct
+from django.contrib.admin.utils import (lookup_needs_distinct,
+    get_model_from_relation, get_fields_from_path)
 from django.contrib.admin.widgets import AdminDateWidget
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models
@@ -235,7 +236,14 @@ class ForeignKeyFilter(TopFilter):
             field, request, params, hidden_params, model, model_admin, field_path)
 
         if self.filter_queryset is None:
-            self.filter_queryset = getattr(model, self.field_path).get_queryset()
+            # check if there is some lookup field in field_path
+            # and get proper QuerySet
+            target_model = model
+            fields = get_fields_from_path(self.model, field_path)
+            if len(fields) > 1:
+                target_model = get_model_from_relation(fields[-2])
+
+            self.filter_queryset = getattr(target_model, self.field.name).get_queryset()
 
         field = forms.ModelChoiceField(
             queryset=self.filter_queryset,
