@@ -5,19 +5,11 @@ Config Views
 """
 
 import os
-from django.conf import settings
 
 from dal import autocomplete
+from urllib.parse import urlencode
 
-from config.models import (
-    Location, ServiceCategory, RoomType, Addon, AllotmentBoardType,
-    Service,
-    Allotment, Transfer, Extra, CarRental, CarRentalOffice,
-    ProviderAllotmentService, AgencyAllotmentService,
-    ProviderTransferService, AgencyTransferService,
-    ProviderExtraService, AgencyExtraService,
-)
-
+from django.conf import settings
 from django.contrib import messages
 from django.db.models import Q
 from django.db.models.functions import Length
@@ -27,6 +19,14 @@ from django.template.loader import get_template
 from django.urls import reverse
 from django.views import View
 
+from config.models import (
+    Location, ServiceCategory, RoomType, Addon, AllotmentBoardType,
+    Service,
+    Allotment, Transfer, Extra, CarRental, CarRentalOffice,
+    ProviderAllotmentService, AgencyAllotmentService,
+    ProviderTransferService, AgencyTransferService,
+    ProviderExtraService, AgencyExtraService,
+)
 from finance.models import Provider
 
 from reservas.custom_settings import ADDON_FOR_NO_ADDON
@@ -735,21 +735,26 @@ class ServiceBookDetailURLView(View):
         service_id = request.POST.get('search_service', None)
         if parent_id and service_id:
             service = Service.objects.get(id=service_id)
+            querystring = urlencode({
+                'service': parent_id,
+                'book_service': service_id,
+            })
             if service.category == 'A':
-                return JsonResponse({
-                    'url': 'config/servicebookdetailallotment/add/?service=%s&book_service=%s'
-                        % (parent_id, service_id),
-                })
+                return redirect('{}?{}'.format(
+                    reverse(
+                        'common:config_servicebookdetailallotment_add'),
+                    querystring))
             elif service.category == 'T':
-                return JsonResponse({
-                    'url': 'config/servicebookdetailtransfer/add/?service=%s&book_service=%s'
-                        % (parent_id, service_id),
-                })
+                return redirect('{}?{}'.format(
+                    reverse(
+                        'common:config_servicebookdetailtransfer_add'),
+                    querystring))
             elif service.category == 'E':
-                return JsonResponse({
-                    'url': 'config/servicebookdetailextra/add/?service=%s&book_service=%s'
-                        % (parent_id, service_id),
-                })
-        return JsonResponse({
-            'error': 'Empty value Current: %s - Detail: %s' % (parent_id, service_id),
-        })
+                return redirect('{}?{}'.format(
+                    reverse(
+                        'common:config_servicebookdetailextra_add'),
+                    querystring))
+        if not service_id:
+            messages.error(request, "You didn't choose any service")
+        parent = Service.objects.get(id=parent_id)
+        return redirect(parent)

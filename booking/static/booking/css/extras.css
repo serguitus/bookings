@@ -158,6 +158,10 @@ div.readonly {
     max-width: 160px;
 }
 
+.field-details div.readonly{
+    max-width: 400px;
+}
+
 /* exception for field Booking.p_notes */
 div.field-booking_general_notes div.readonly{
     max-width: 100%;

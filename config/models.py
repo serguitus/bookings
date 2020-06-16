@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from datetime import time
 from django.db import models
+from django.urls import reverse
 
 from config.constants import (
     SERVICE_CATEGORIES,
@@ -16,6 +17,21 @@ from config.constants import (
 from finance.models import Agency, Provider
 
 from reservas.custom_settings import ADDON_FOR_NO_ADDON
+
+
+# Utility method to get a list of
+# Service child objects from a Service list
+def _get_child_objects(services):
+    TYPE_MODELS = {
+        SERVICE_CATEGORY_TRANSFER: Transfer,
+        SERVICE_CATEGORY_EXTRA: Extra,
+        SERVICE_CATEGORY_ALLOTMENT: Allotment,
+    }
+    objs = []
+    for service in services:
+        obj = TYPE_MODELS[service.category].objects.get(id=service.id)
+        objs.append(obj)
+    return objs
 
 
 class Location(models.Model):
@@ -202,6 +218,9 @@ class Service(models.Model):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return _get_child_objects([self])[0].get_absolute_url()
+
 
 class ServiceAddon(models.Model):
     """
@@ -351,6 +370,9 @@ class Extra(Service):
             return '%s (Hours)' % self.name
         return '%s' % self.name
 
+    def get_absolute_url(self):
+        return reverse('common:config_extra_change', args=[self.id])
+
 
 class ExtraSupplement(ServiceSupplement):
     """
@@ -477,6 +499,9 @@ class Allotment(Service):
         super(Allotment, self).fill_data()
         self.category = SERVICE_CATEGORY_ALLOTMENT
         self.grouping = True
+
+    def get_absolute_url(self):
+        return reverse('common:config_allotment_change', args=[self.id])
 
 
 class AllotmentRoomType(models.Model):
@@ -640,6 +665,9 @@ class Transfer(Service):
         super(Transfer, self).fill_data()
         self.category = SERVICE_CATEGORY_TRANSFER
         self.grouping = False
+
+    def get_absolute_url(self):
+        return reverse('common:config_transfer_change', args=[self.id])
 
 
 class TransferZone(models.Model):

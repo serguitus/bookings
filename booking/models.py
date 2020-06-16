@@ -1070,6 +1070,9 @@ class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
         self.validate_date_interval()
         super(BaseBookingService, self).save(force_insert, force_update, using, update_fields)
 
+    def get_absolute_url(self):
+        return self.get_child_object().get_absolute_url()
+
 
 class BookingService(BaseBookingService):
     """
@@ -1351,6 +1354,9 @@ class BookingAllotment(BookingService, BookAllotmentData):
                 booking_pax__pax_age__lt=self.service.child_age).count()
         return 0
 
+    def get_absolute_url(self):
+        return reverse('common:booking_bookingallotment_change', args=[self.id])
+
 
 class BookingTransfer(BookingService, BookTransferData):
     """
@@ -1383,6 +1389,9 @@ class BookingTransfer(BookingService, BookTransferData):
 
     def __str__(self):
         return self.__unicode__()
+
+    def get_absolute_url(self):
+        return reverse('common:booking_bookingtransfer_change', args=[self.id])
 
 
 class BookingTransferSupplement(BookingServiceSupplement):
@@ -1423,6 +1432,9 @@ class BookingExtra(BookingService, BookExtraData):
 
     def __str__(self):
         return self.__unicode__()
+
+    def get_absolute_url(self):
+        return reverse('common:booking_bookingextra_change', args=[self.id])
 
 
 class BookingExtraComponent(models.Model):

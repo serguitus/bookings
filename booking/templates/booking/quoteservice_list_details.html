@@ -2,7 +2,8 @@
 {% load render_table from django_tables2 %}
 
 {% quoteservicebookdetail_table current as table %}
-{% include 'booking/include/quoteservice_book_details_buttons.html' %}
+{% include 'booking/include/quoteservice_book_details_buttons.html' with service_id=current.id %}
+{% if table.paginated_rows %}
 <div class="quoteservicebookdetails-container">
     {% render_table table %}
-</div>
+</div>{% endif %}

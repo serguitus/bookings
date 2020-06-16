@@ -49,7 +49,7 @@ from booking.models import (
     Quote, QuotePaxVariant, QuoteService,
     QuoteAllotment, QuoteTransfer, QuoteExtra, QuotePackage,
     QuotePackageAllotment, QuotePackageTransfer, QuotePackageExtra,
-    Booking, BookingService, BookingPackageService,
+    Booking, BaseBookingService, BookingService, BookingPackageService,
     BookingPax, BookingServicePax,
     BookingAllotment, BookingTransfer, BookingExtra, BookingPackage,
     BookingPackageAllotment, BookingPackageTransfer, BookingPackageExtra,
@@ -1254,21 +1254,27 @@ class BookingServiceBookDetailURLView(View):
         service_id = request.POST.get('search_service', None)
         if parent_id and service_id:
             service = Service.objects.get(id=service_id)
+            querystring = urlencode({
+                'booking_service': parent_id,
+                'book_service': service_id,
+            })
             if service.category == 'A':
-                return JsonResponse({
-                    'url': 'booking/bookingservicebookdetailallotment/add/?booking_service=%s&book_service=%s'
-                        % (parent_id, service_id),
-                })
+                return redirect('{}?{}'.format(
+                    reverse(
+                        'common:booking_bookingservicebookdetailallotment_add'),
+                    querystring))
             elif service.category == 'T':
-                return JsonResponse({
-                    'url': 'booking/bookingservicebookdetailtransfer/add/?booking_service=%s&book_service=%s'
-                        % (parent_id, service_id),
-                })
+                return redirect('{}?{}'.format(
+                    reverse(
+                        'common:booking_bookingservicebookdetailtransfer_add'),
+                    querystring))
             elif service.category == 'E':
-                return JsonResponse({
-                    'url': 'booking/bookingservicebookdetailextra/add/?booking_service=%s&book_service=%s'
-                        % (parent_id, service_id),
-                })
-        return JsonResponse({
-            'error': 'Empty value Current: %s - Detail: %s' % (parent_id, service_id),
-        })
+                return redirect('{}?{}'.format(
+                    reverse(
+                        'common:booking_bookingservicebookdetailextra_add'),
+                    querystring))
+        # if here, there was a trouble. redirect to previous page
+        if not service_id:
+            messages.error(request, "You didn't choose any service")
+        parent = BaseBookingService.objects.get(id=parent_id)
+        return redirect(parent)
