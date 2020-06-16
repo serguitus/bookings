@@ -6,8 +6,10 @@
 {% block detail %}
     {{ super }}
     {% include 'booking/include/bookingservice_book_details_buttons.html' %}
+    {% bookingservicebookdetail_table current as table %}
+    {% if table.paginated_rows %}
     <div class="bookingservicebookdetails-container">
-        {% bookingservicebookdetail_table current as table %}
         {% render_table table %}
     </div>
+    {% endif %}
 {% endblock detail %}

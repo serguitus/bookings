@@ -17,7 +17,7 @@ except ImportError:
 from xhtml2pdf import pisa
 
 from dal import autocomplete
-
+from urllib.parse import urlencode
 # from dateutil.parser import parse
 
 from django.core.exceptions import ValidationError
@@ -1219,28 +1219,33 @@ class TransferServiceDetailsView(View):
 class QuoteServiceBookDetailURLView(View):
     def post(self, request, *args, **kwargs):
         parent_id = request.POST.get('parent_id', None)
-        service_id = request.POST.get('service', None)
+        service_id = request.POST.get('search_service', None)
+        parent = QuoteService.objects.get(id=parent_id)
         if parent_id and service_id:
-            parent = QuoteService.objects.get(id=parent_id)
             service = Service.objects.get(id=service_id)
+            querystring = urlencode({
+                'quote_service': parent_id,
+                'book_service': service_id,
+            })
             if service.category == 'A':
-                return JsonResponse({
-                    'url': 'booking/quoteservicebookdetailallotment/add/?quote_service=%s&book_service=%s'
-                        % (parent_id, service_id),
-                })
+                return redirect('{}?{}'.format(
+                    reverse(
+                        'common:booking_quoteservicebookdetailallotment_add'),
+                    querystring))
             elif service.category == 'T':
-                return JsonResponse({
-                    'url': 'booking/quoteservicebookdetailtransfer/add/?quote_service=%s&book_service=%s'
-                        % (parent_id, service_id),
-                })
+                return redirect('{}?{}'.format(
+                    reverse(
+                        'common:booking_quoteservicebookdetailtransfer_add'),
+                    querystring))
             elif service.category == 'E':
-                return JsonResponse({
-                    'url': 'booking/quoteservicebookdetailextra/add/?quote_service=%s&book_service=%s'
-                        % (parent_id, service_id),
-                })
-        return JsonResponse({
-            'error': 'Empty value Current: %s - Detail: %s' % (parent_id, service_id),
-        })
+                return redirect('{}?{}'.format(
+                    reverse(
+                        'common:booking_quoteservicebookdetailextra_add'),
+                    querystring))
+        # if here, there was a trouble. redirect to previous page
+        if not service_id:
+            messages.error(request, "You didn't choose any service")
+        return redirect(parent)
 
 
 class BookingServiceBookDetailURLView(View):

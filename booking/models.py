@@ -5,10 +5,11 @@ Booking models
 """
 from concurrency.fields import AutoIncVersionField
 
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models.query_utils import Q
-from django.contrib.auth.models import User
+from django.urls import reverse
 
 from accounting.constants import CURRENCIES, CURRENCY_CUC
 from accounting.models import Account
@@ -378,6 +379,8 @@ class QuoteService(BookServiceData, DateInterval):
     def __str__(self):
         return '%s' % (self.base_service)
 
+    def get_absolute_url(self):
+        return _get_quote_child_objects([self])[0].get_absolute_url()
 
 
 class QuoteServicePaxVariant(PaxVariantAmounts):
@@ -413,6 +416,9 @@ class QuoteAllotment(QuoteService, BookAllotmentData):
         self.time = time(23, 59, 59)
         self.base_service = self.service
 
+    def get_absolute_url(self):
+        return reverse('common:booking_quoteallotment_change', args=[self.id])
+
 
 class QuoteTransfer(QuoteService, BookTransferData):
     """
@@ -432,6 +438,10 @@ class QuoteTransfer(QuoteService, BookTransferData):
         #self.service_type = SERVICE_CATEGORY_TRANSFER
         self.base_service = self.service
 
+    def get_absolute_url(self):
+        return reverse('common:booking_quotetransfer_change', args=[self.id])
+
+
 
 class QuoteExtra(QuoteService, BookExtraData):
     """
@@ -448,6 +458,9 @@ class QuoteExtra(QuoteService, BookExtraData):
         self.name = self.service.name
         #self.service_type = SERVICE_CATEGORY_EXTRA
         self.base_service = self.service
+
+    def get_absolute_url(self):
+        return reverse('common:booking_quoteextra_change', args=[self.id])
 
 
 class QuoteExtraComponent(models.Model):
@@ -1036,7 +1049,6 @@ class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
     def cost_amount_pending(self):
         return self.cost_amount_to_pay - self.cost_amount_paid
     cost_amount_pending.fget.short_description = 'Pending'
-
 
     def get_child_object(self):
         return _get_child_objects([self])[0]
