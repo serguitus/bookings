@@ -50,5 +50,9 @@ urlpatterns = [
         r'^booking_book_detail_url/?',
         views.BookingBookDetailURLView.as_view(),
         name='booking_book_detail_url'),
+    url(
+        r'^booking_add_service/?',
+        views.BookingAddServiceView.as_view(),
+        name='booking_add_service'),
 
 ]

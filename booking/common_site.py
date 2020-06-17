@@ -964,6 +964,17 @@ class BookingSiteModel(SiteModel):
                 form_url=form_url,
                 extra_context=extra_context)
 
+    def changeform_context(self, request, form, obj,
+                           formsets, inline_instances,
+                           add, opts, object_id, to_field,
+                           form_validated=None, extra_context=None):
+        search_service_form = SearchServiceForm()
+        context = dict(search_service_form=search_service_form)
+        context.update(extra_context or {})
+        return super(BookingSiteModel, self).changeform_context(
+            request, form, obj, formsets, inline_instances,
+            add, opts, object_id, to_field, form_validated, context)
+
     def _build_invoice_pdf(self, invoice):
         template = get_template("booking/pdf/invoice.html")
         details = BookingInvoiceDetail.objects.filter(invoice=invoice)
@@ -1467,7 +1478,8 @@ class BookingProvidedAllotmentSiteModel(BookingProvidedServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                'booking_package', ('service', 'search_location'), ('status', 'conf_number'),
+                'booking_package', ('service', 'search_location'),
+                ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to'),
                 ('room_type', 'board_type'),
                 ('manual_cost', 'provider'),

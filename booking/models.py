@@ -741,6 +741,9 @@ class Booking(models.Model):
         return self.rooming_list.count()
     pax_count.fget.short_description = 'Pax'
 
+    def get_absolute_url(self):
+        return reverse('common:booking_booking_change', args=[self.id])
+
 
 class BookingPax(models.Model):
     """

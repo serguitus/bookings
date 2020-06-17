@@ -3,7 +3,6 @@
 {% load static %}
 
 {% block head_extra %}
-  {% include 'config/include/load_service_id.html' with service_id=object_id %}
   {{ block.super }}
   <script type="text/javascript" src="{% static 'booking/js/bookingtransfer.js' %}"></script>
   <script type="text/javascript" src="{% static 'booking/js/bookingservicetransfer.js' %}"></script>
