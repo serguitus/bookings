@@ -229,6 +229,7 @@ class PaxVariantAmounts(models.Model):
         return utility_percent(self.cost_qgrple_amount, self.price_qdrple_amount)
     utility_percent_qdrple.fget.short_description = 'Util.QPL %'
 
+
 class Quote(models.Model):
     """
     Quote
@@ -265,6 +266,9 @@ class Quote(models.Model):
         return '%s - %s %s - %s (%s)' % (
             self.agency.name, self.reference,
             self.date_from, self.date_to, self.get_status_display())
+
+    def get_absolute_url(self):
+        return reverse('common:booking_quote_change', args=[self.id])
 
 
 class QuotePaxVariant(PaxVariantAmounts):

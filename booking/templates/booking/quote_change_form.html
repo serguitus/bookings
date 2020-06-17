@@ -6,5 +6,10 @@
   {{ block.super }}
   <script type="text/javascript" src="{% static 'booking/js/quote.js' %}"></script>
   <script type="text/javascript" src="{% static 'booking/js/mail_popup.js' %}"></script>
+  <script type="text/javascript" src="{% static 'config/js/add_service_detail.js' %}"></script>
 {% endblock head_extra %}
+{% block content %}
+  {{ block.super }}
+  {% include 'config/include/search_service_dialog.html' with form=search_service_form %}
+{% endblock content %}
 

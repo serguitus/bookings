@@ -1,3 +1,4 @@
+var add_service_url = base_url + 'booking/quote_add_service/';
 var quote_amounts_url = base_url + 'booking/quote-amounts/';
 var quote_form_selector = '#quote_form';
 

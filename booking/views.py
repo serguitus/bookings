@@ -1166,3 +1166,35 @@ class BookingAddServiceView(View):
             messages.error(request, "You didn't choose any service")
         parent = Booking.objects.get(id=booking_id)
         return redirect(parent)
+
+
+class QuoteAddServiceView(View):
+    def post(self, request, *args, **kwargs):
+        quote_id = request.POST.get('parent_id', None)
+        service_id = request.POST.get('search_service', None)
+        if quote_id and service_id:
+            service = Service.objects.get(id=service_id)
+            querystring = urlencode({
+                'quote': quote_id,
+                'service': service_id,
+            })
+            if service.category == 'A':
+                return redirect('{}?{}'.format(
+                    reverse(
+                        'common:booking_newquoteallotment_add'),
+                    querystring))
+            elif service.category == 'T':
+                return redirect('{}?{}'.format(
+                    reverse(
+                        'common:booking_newquotetransfer_add'),
+                    querystring))
+            elif service.category == 'E':
+                return redirect('{}?{}'.format(
+                    reverse(
+                        'common:booking_newquoteextra_add'),
+                    querystring))
+        # if here, there was a trouble. redirect to previous page
+        if not service_id:
+            messages.error(request, "You didn't choose any service")
+        parent = Quote.objects.get(id=quote_id)
+        return redirect(parent)

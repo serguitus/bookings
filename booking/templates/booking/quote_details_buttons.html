@@ -1,5 +1,6 @@
 <div id="detail-buttons">
     <span class="detail-buttons">
+        <a class="btn btn-success" href="#" data-toggle="modal" data-target="#searchServiceModal" data-service_id="{{ current.id }}">Add Service</a>
         <a class="btn btn-success" href="{% url 'common:booking_newquoteallotment_add' %}?quote={{ current.id }}">+ Accomodation</a>
         <a class="btn btn-success" href="{% url 'common:booking_newquotetransfer_add' %}?quote={{ current.id }}">+ Transfer</a>
         <a class="btn btn-success" href="{% url 'common:booking_newquoteextra_add' %}?quote={{ current.id }}">+ Extra</a>
