@@ -1170,14 +1170,11 @@ class BookingAddServiceView(View):
 
 class QuoteAddServiceView(View):
     def post(self, request, *args, **kwargs):
-        quote_id = request.POST.get('parent_id', None)
+        parent_id = request.POST.get('parent_id', None)
         service_id = request.POST.get('search_service', None)
-        if quote_id and service_id:
+        if parent_id and service_id:
             service = Service.objects.get(id=service_id)
-            querystring = urlencode({
-                'quote': quote_id,
-                'service': service_id,
-            })
+            querystring = self.build_querystring(parent_id, service_id)
             if service.category == 'A':
                 return redirect('{}?{}'.format(
                     reverse(
@@ -1196,5 +1193,26 @@ class QuoteAddServiceView(View):
         # if here, there was a trouble. redirect to previous page
         if not service_id:
             messages.error(request, "You didn't choose any service")
-        parent = Quote.objects.get(id=quote_id)
+        parent = self.get_parent_obj(parent_id)
         return redirect(parent)
+
+    def build_querystring(self, parent_id, service_id):
+        return urlencode(
+            {'quote': parent_id,
+             'service': service_id})
+
+    def get_parent_obj(self, parent_id):
+        return Quote.objects.get(id=parent_id)
+
+
+class QuoteAddPackageServiceView(QuoteAddServiceView):
+    def build_querystring(self, parent_id, service_id):
+        qp = QuoteExtraPackage.objects.get(id=parent_id)
+        quote = qp.quote_id
+        return urlencode(
+            {'quote': quote,
+             'service': service_id,
+             'quote_package': parent_id})
+
+    def get_parent_obj(self, parent_id):
+        return QuoteExtraPackage.objects.get(id=parent_id)

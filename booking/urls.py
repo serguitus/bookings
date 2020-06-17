@@ -58,5 +58,9 @@ urlpatterns = [
         r'^quote_add_service/?',
         views.QuoteAddServiceView.as_view(),
         name='quote_add_service'),
+    url(
+        r'^quote_add_package_service/?',
+        views.QuoteAddPackageServiceView.as_view(),
+        name='quote_add_package_service'),
 
 ]
