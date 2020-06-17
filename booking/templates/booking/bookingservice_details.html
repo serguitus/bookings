@@ -5,9 +5,11 @@
 
 {% block detail %}
     {{ super }}
-    {% include 'booking/include/booking_book_details_buttons.html' %}
+    {% include 'booking/include/booking_book_details_buttons.html' with service_id=current.id %}
+    {% bookingbookdetail_table current as table %}
+    {% if table.paginated_rows %}
     <div class="bookingbookdetails-container">
-        {% bookingbookdetail_table current as table %}
         {% render_table table %}
     </div>
+    {% endif %}
 {% endblock detail %}

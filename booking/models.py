@@ -7,10 +7,11 @@ from __future__ import unicode_literals
 
 from concurrency.fields import AutoIncVersionField
 
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models.query_utils import Q
-from django.contrib.auth.models import User
+from django.urls import reverse
 
 from accounting.constants import CURRENCIES, CURRENCY_CUC
 from accounting.models import Account
@@ -326,6 +327,8 @@ class QuoteService(BookServiceData, DateInterval):
     def __str__(self):
         return '%s' % (self.base_service)
 
+    def get_absolute_url(self):
+        return _get_quote_child_objects([self])[0].get_absolute_url()
 
 class QuoteServicePaxVariant(PaxVariantAmounts):
     """
@@ -365,6 +368,9 @@ class QuoteExtraPackage(QuoteService, BookExtraData):
     def __str__(self):
         return '%s - %s' % (self.quote, self.service)
 
+    def get_absolute_url(self):
+        return reverse('common:booking_quoteextrapackage_change', args=[self.id])
+
 
 class QuoteProvidedService(QuoteService):
     """
@@ -399,6 +405,9 @@ class NewQuoteAllotment(QuoteProvidedService, BookAllotmentData):
         else:
             self.base_category = QUOTE_SERVICE_CATEGORY_QUOTE_ALLOTMENT
 
+    def get_absolute_url(self):
+        return reverse('common:booking_newquoteallotment_change', args=[self.id])
+
 
 class NewQuoteTransfer(QuoteProvidedService, BookTransferData):
     """
@@ -421,6 +430,9 @@ class NewQuoteTransfer(QuoteProvidedService, BookTransferData):
         else:
             self.base_category = QUOTE_SERVICE_CATEGORY_QUOTE_TRANSFER
 
+    def get_absolute_url(self):
+        return reverse('common:booking_newquotetransfer_change', args=[self.id])
+
 
 class NewQuoteExtra(QuoteProvidedService, BookExtraData):
     """
@@ -440,6 +452,9 @@ class NewQuoteExtra(QuoteProvidedService, BookExtraData):
             self.base_category = QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE_EXTRA
         else:
             self.base_category = QUOTE_SERVICE_CATEGORY_QUOTE_EXTRA
+
+    def get_absolute_url(self):
+        return reverse('common:booking_newquoteextra_change', args=[self.id])
 
 
 class NewQuoteServiceBookDetail(QuoteService):
@@ -870,7 +885,6 @@ class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
         return self.cost_amount_to_pay - self.cost_amount_paid
     cost_amount_pending.fget.short_description = 'Pending'
 
-
     def get_child_object(self):
         return _get_child_objects([self])[0]
 
@@ -890,6 +904,9 @@ class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
         self.validate()
         self.validate_date_interval()
         super(BaseBookingService, self).save(force_insert, force_update, using, update_fields)
+
+    def get_absolute_url(self):
+        return self.get_child_object().get_absolute_url()
 
 
 class ProviderBookingPayment(Withdraw):
@@ -1102,6 +1119,9 @@ class BookingProvidedAllotment(BookingProvidedService, BookAllotmentData):
                 booking_pax__pax_age__lt=self.service.child_age).count()
         return 0
 
+    def get_absolute_url(self):
+        return reverse('common:booking_bookingallotment_change', args=[self.id])
+
 
 class BookingProvidedTransfer(BookingProvidedService, BookTransferData):
     """
@@ -1137,6 +1157,9 @@ class BookingProvidedTransfer(BookingProvidedService, BookTransferData):
     def __str__(self):
         return self.__unicode__()
 
+    def get_absolute_url(self):
+        return reverse('common:booking_bookingtransfer_change', args=[self.id])
+
 
 class BookingProvidedExtra(BookingProvidedService, BookExtraData):
     """
@@ -1168,6 +1191,9 @@ class BookingProvidedExtra(BookingProvidedService, BookExtraData):
 
     def __str__(self):
         return self.__unicode__()
+
+    def get_absolute_url(self):
+        return reverse('common:booking_bookingextra_change', args=[self.id])
 
 
 class BookingBookDetail(BaseBookingService):

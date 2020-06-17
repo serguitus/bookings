@@ -158,6 +158,10 @@ div.readonly {
     max-width: 160px;
 }
 
+.field-details div.readonly{
+    max-width: 400px;
+}
+
 /* exception for field Booking.p_notes */
 div.field-booking_general_notes div.readonly{
     max-width: 100%;
@@ -207,6 +211,11 @@ button.booking_payments>span.booking_payments.glyphicon:before {
 button.booking_payments.collapsed>span.booking_payments.glyphicon:before {
     content: "\e114";
 }
+
+.add-details{
+    margin-bottom: 10px;
+}
+
 .add-details a.btn-agency_service_detail_add, .add-details a.btn-provider_service_detail_add {
     color: white;
 }

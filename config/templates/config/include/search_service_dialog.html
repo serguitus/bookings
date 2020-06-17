@@ -8,13 +8,13 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form class="search_service" method="post" novalidate>{% csrf_token %}
+                <form id="searchServiceForm" class="search_service" method="post" novalidate>{% csrf_token %}
                     {{ form }}
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button id="add_service_dialog_btn" type="button" class="btn btn-success">Add</button>
+                <button id="add_service_dialog_btn" type="submit" form="searchServiceForm" class="btn btn-success">Add</button>
             </div>
         </div>
     </div>

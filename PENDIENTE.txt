@@ -57,3 +57,5 @@ OK - metodos en servicios de configuracion para generar nuevos precios de catál
 - Posibilidad de subir archivos de contratos por proveedores y mostrar tabla de links con estos en cierta vista de ese proveedor. la idea es poder tener acceso a los contratos de todos los servicios.
 
 - hacer Tests, Tests y más Tests... :)
+
+- verificar si bookingservice.has_payment se pone a False si se cancelan todos los pagos de un servicio. actualmente solo veo que se pone a True cuando se efectua un pago pero no veo que se revierta el estado si se cancelan todos los pagos de ese servicio.
