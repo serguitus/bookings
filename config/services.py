@@ -1169,68 +1169,6 @@ class ConfigServices(object):
 
 
     @classmethod
-    def package_price(
-            cls, service_id, date_from, date_to, price_groups, agency):
-        service = Service.objects.get(pk=service_id)
-
-        if date_from is None and date_to is None:
-            return None, 'Both Dates are Missing'
-        if date_from is None:
-            date_from = date_to
-        if date_to is None:
-            date_to = date_from
-
-        # agency price
-        # obtain details order by date_from asc, date_to desc
-        if price_groups is None and service.amounts_type == constants.PACKAGE_AMOUNTS_BY_PAX:
-            price = None
-            price_message = 'Paxes Missing'
-        elif agency is None:
-            price = None
-            price_message = 'Agency Not Found'
-        else:
-            if service.pax_range:
-                price = 0
-                price_message = ''
-                # each group can have different details
-                for group in price_groups:
-                    paxes = group[0] + group[1]
-                    queryset = cls._get_agency_queryset(
-                        AgencyPackageDetail.objects,
-                        agency.id, service_id, date_from, date_to)
-                    # pax range filtering
-                    queryset = queryset.filter(
-                        (Q(pax_range_min=0) & Q(pax_range_max__gte=paxes)) |
-                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max__gte=paxes)) |
-                        (Q(pax_range_min__lte=paxes) & Q(pax_range_max=0)) |
-                        (Q(pax_range_min=0) & Q(pax_range_max=0))
-                    )
-                    detail_list = list(queryset)
-                    group_price, group_price_message = cls._find_package_group_price(
-                        service, date_from, date_to, group, detail_list
-                    )
-                    if group_price:
-                        price += group_price
-                        price_message = group_price_message
-                    else:
-                        price = None
-                        price_message = group_price_message
-                        break
-            else:
-                queryset = cls._get_agency_queryset(
-                    AgencyPackageDetail.objects,
-                    agency.id, service_id, date_from, date_to)
-
-                detail_list = list(queryset)
-
-                price, price_message = cls._find_package_groups_price(
-                    service, date_from, date_to, price_groups, detail_list
-                )
-
-        return price, price_message
-
-
-    @classmethod
     def find_groups_amount(
             cls, amount_for_provider, service, date_from, date_to, groups,
             quantity, parameter, detail_list):

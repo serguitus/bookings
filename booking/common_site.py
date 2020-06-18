@@ -419,8 +419,7 @@ class QuoteExtraPackageSiteModel(QuoteServiceSiteModel):
     fields = (
         'quote',
         ('service', 'search_location', 'status'),
-        ('datetime_from', 'datetime_to'),
-        ('provider', 'price_by_package_catalogue'), 'id')
+        ('datetime_from', 'datetime_to', 'price_by_package_catalogue'), 'id')
     list_display = (
         'quote', 'service', 'datetime_from', 'datetime_to', 'status',)
     top_filters = ('service', 'quote__reference',

@@ -1541,6 +1541,9 @@ class BookingServices(object):
         elif package.price_by_package_catalogue:
             date_from = package.datetime_from
             date_to = package.datetime_to
+            addon_id = package.service_addon_id
+            quantity = package.quantity
+            parameter = package.parameter
 
             price_1, price_1_msg, \
             price_2, price_2_msg, \
@@ -1551,6 +1554,9 @@ class BookingServices(object):
                 date_from=date_from,
                 date_to=date_to,
                 agency=agency,
+                addon_id=addon_id,
+                parameter=parameter,
+                quantity=quantity,
                 service_pax_variant=service_pax_variant)
 
         return cost_1, cost_1_msg, price_1, price_1_msg, \
@@ -2232,10 +2238,12 @@ class BookingServices(object):
 
     @classmethod
     def _find_quotepackage_catalog_prices(
-            cls, pax_quantity, service, date_from, date_to, agency, service_pax_variant):
+            cls, pax_quantity, service, date_from, date_to, agency, addon_id, parameter, quantity, service_pax_variant):
         total_free_cost, total_free_price = cls._find_free_paxes(service_pax_variant)
-        p1, p1_msg = ConfigService.package_price(
-            service, date_from, date_to, ({0:pax_quantity, 1:0},), agency)
+        p1, p1_msg = ConfigServices.extra_prices(
+            service, date_from, date_to, ({0:pax_quantity, 1:0},), agency,
+            addon_id, quantity, parameter
+        )
         if p1 is not None:
             p1 = cls._round_price(cls._adjust_price(p1, pax_quantity, total_free_price))
         p2, p2_msg, p3, p3_msg, p4, p4_msg = p1, p1_msg, p1, p1_msg, p1, p1_msg
@@ -2489,11 +2497,11 @@ class BookingServices(object):
                 service_pax_variant=service_pax_variant,
                 manuals=for_update)
         elif isinstance(service, QuoteService):
-            if service.base_service.category == constants.SERVICE_CATEGORY_ALLOTMENT:
+            if service.base_category == constants.QUOTE_SERVICE_CATEGORY_QUOTE_ALLOTMENT:
                 service = NewQuoteAllotment.objects.get(pk=service.id)
-            elif service.base_service.category == constants.SERVICE_CATEGORY_TRANSFER:
+            elif service.base_category == constants.QUOTE_SERVICE_CATEGORY_QUOTE_TRANSFER:
                 service = NewQuoteTransfer.objects.get(pk=service.id)
-            elif service.base_service.category == constants.SERVICE_CATEGORY_EXTRA:
+            elif service.base_category == constants.QUOTE_SERVICE_CATEGORY_QUOTE_EXTRA:
                 service = NewQuoteExtra.objects.get(pk=service.id)
             elif service.base_category == constants.QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE:
                 service = QuoteExtraPackage.objects.get(pk=service.id)
@@ -3656,11 +3664,13 @@ class BookingServices(object):
 
         if bookingpackage.price_by_package_catalogue:
             price_groups = cls.find_groups(bookingpackage, bookingpackage.service, False)
-            price, price_msg = ConfigServices.package_price(
+            price, price_msg = ConfigServices.extra_prices(
                 bookingpackage.service.id,
                 bookingpackage.datetime_from, bookingpackage.datetime_to,
                 price_groups,
-                bookingpackage.booking.agency)
+                bookingpackage.booking.agency,
+                bookingpackage.service_addon_id,
+                bookingpackage.quantity, bookingpackage.parameter)
 
         if bookingpackage.manual_price:
             price = bookingpackage.bookingpackage.price_amount
