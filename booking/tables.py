@@ -305,7 +305,7 @@ class QuoteConfirmationTable(tables.Table):
                  'border': '1'}
         row_attrs = {
             'class': lambda record: '{}'.format(
-                BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING[record.status]),
+                BOOTSTRAP_STYLE_QUOTE_STATUS_MAPPING[record.status]),
         }
 
     def __init__(self, *args, **kwargs):

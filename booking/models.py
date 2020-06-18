@@ -226,7 +226,7 @@ class PaxVariantAmounts(models.Model):
 
     @property
     def utility_percent_qdrple(self):
-        return utility_percent(self.cost_qgrple_amount, self.price_qdrple_amount)
+        return utility_percent(self.cost_qdrple_amount, self.price_qdrple_amount)
     utility_percent_qdrple.fget.short_description = 'Util.QPL %'
 
 

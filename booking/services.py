@@ -556,7 +556,6 @@ class BookingServices(object):
 
         cls.build_date_interval_data(
             dst_service=dst_package, src_service=src_package)
-        dst_package.status = constants.SERVICE_STATUS_PENDING
         dst_package.service = src_package.service
         dst_package.service_addon = src_package.service_addon
 
@@ -586,6 +585,7 @@ class BookingServices(object):
             # name auto
             cls._copy_package_info(
                 dst_package=quote_package_allotment, src_package=package_allotment)
+            quote_package_allotment.status = constants.QUOTE_STATUS_DRAFT
             quote_package_allotment.room_type = package_allotment.room_type
             quote_package_allotment.board_type = package_allotment.board_type
             quote_package_allotment.service_addon = package_allotment.service_addon
@@ -604,6 +604,7 @@ class BookingServices(object):
             # name auto
             cls._copy_package_info(
                 dst_package=quote_package_transfer, src_package=package_transfer)
+            quote_package_transfer.status = constants.QUOTE_STATUS_DRAFT
             # time
             # quantity auto
             quote_package_transfer.location_from = package_transfer.location_from
@@ -630,6 +631,7 @@ class BookingServices(object):
             # name auto
             cls._copy_package_info(
                 dst_package=quote_package_extra, src_package=package_extra)
+            quote_package_extra.status = constants.QUOTE_STATUS_DRAFT
             quote_package_extra.service_addon = package_extra.service_addon
             quote_package_extra.time = package_extra.time
             quote_package_extra.quantity = package_extra.quantity
@@ -898,7 +900,7 @@ class BookingServices(object):
             if not hasattr(quoteservice, 'service'):
                 variant_dict.update({'total': cls._no_service_dict()})
             else:
-                if isinstance(quoteservice, QuotePackage):
+                if isinstance(quoteservice, QuoteExtraPackage):
                     c1, c1_msg, p1, p1_msg, \
                     c2, c2_msg, p2, p2_msg, \
                     c3, c3_msg, p3, p3_msg, \
@@ -2305,9 +2307,9 @@ class BookingServices(object):
                         quote_package=quote_service.id))
 
                     for quotepackage_service in quotepackage_services:
-                        quotepackage_service_pax_variant, created = QuotePackageServicePaxVariant.objects.update_or_create(
-                            quotepackage_pax_variant_id=quote_service_pax_variant.id,
-                            quotepackage_service_id=quotepackage_service.id,
+                        quotepackage_service_pax_variant, created = QuoteServicePaxVariant.objects.update_or_create(
+                            quote_pax_variant_id=quote_pax_variant.id,
+                            quote_service_id=quotepackage_service.id,
                         )
                         if created:
                             cls.update_quotepackage_paxvariant_amounts(
@@ -2341,7 +2343,7 @@ class BookingServices(object):
     def sync_quotepackage_children_paxvariants(cls, quotepackage_pax_variant):
         quotepackage = quotepackage_pax_variant.quote_service
         # verify on all services if pax variant exists
-        quotepackage_services = list(QuotePackageService.objects.all().filter(
+        quotepackage_services = list(QuoteProvidedService.objects.all().filter(
             quote_package=quotepackage.id))
         cls._sync_quotepackage_children_paxvariants(quotepackage_pax_variant, quotepackage_services)
 
@@ -2351,9 +2353,9 @@ class BookingServices(object):
             cls, quotepackage_pax_variant, quotepackage_services):
         for quotepackage_service in quotepackage_services:
             try:
-                quotepackage_service_pax_variant, created = QuotePackageServicePaxVariant.objects.get_or_create(
-                    quotepackage_pax_variant_id=quotepackage_pax_variant.id,
-                    quotepackage_service_id=quotepackage_service.id,
+                quotepackage_service_pax_variant, created = QuoteServicePaxVariant.objects.get_or_create(
+                    quote_pax_variant_id=quotepackage_pax_variant.id,
+                    quote_service_id=quotepackage_service.id,
                 )
                 if created:
                     cls.update_quotepackage_paxvariant_amounts(quotepackage_service_pax_variant)
@@ -2464,9 +2466,6 @@ class BookingServices(object):
         elif isinstance(pax_variant, QuoteServicePaxVariant):
             quote_pax_variant = pax_variant.quote_pax_variant
             service_pax_variant = pax_variant
-        elif isinstance(pax_variant, QuotePackageServicePaxVariant):
-            quote_pax_variant = pax_variant.quotepackage_pax_variant.quote_pax_variant
-            service_pax_variant = pax_variant.quotepackage_pax_variant
         else:
             return None, "Unknow Pax Variant", None, "Unknow Pax Variant", \
                 None, "Unknow Pax Variant", None, "Unknow Pax Variant", \
@@ -2489,15 +2488,6 @@ class BookingServices(object):
                 agency=service.quote.agency,
                 service_pax_variant=service_pax_variant,
                 manuals=for_update)
-        if isinstance(service, (NewQuoteAllotment, NewQuoteTransfer, NewQuoteExtra)):
-            c1, c1_msg, p1, p1_msg, \
-            c2, c2_msg, p2, p2_msg, \
-            c3, c3_msg, p3, p3_msg, \
-            c4, c4_msg, p4, p4_msg = cls._find_amounts_for_quoteservice(
-                quote_pax_variant=quote_pax_variant,
-                quoteservice=service,
-                agency=service.quote_package.quote.agency,
-                service_pax_variant=service_pax_variant)
         elif isinstance(service, QuoteService):
             if service.base_service.category == constants.SERVICE_CATEGORY_ALLOTMENT:
                 service = NewQuoteAllotment.objects.get(pk=service.id)
@@ -2578,9 +2568,9 @@ class BookingServices(object):
                 quotepackage_service,
                 quotepackage_pax_variant)
             try:
-                obj = QuotePackageServicePaxVariant.objects.get(
-                    quotepackage_service_id=quotepackage_service.id,
-                    quotepackage_pax_variant_id=quotepackage_pax_variant.id)
+                obj = QuoteServicePaxVariant.objects.get(
+                    quote_service_id=quotepackage_service.id,
+                    quote_pax_variant_id=quotepackage_pax_variant.id)
                 if obj.manual_costs and obj.manual_prices:
                     continue
                 fields = []
@@ -2622,12 +2612,12 @@ class BookingServices(object):
                     obj.save(update_fields=fields)
                     cls.update_quotepackage_paxvariant_amounts(obj)
 
-            except QuotePackageServicePaxVariant.DoesNotExist:
+            except QuoteServicePaxVariant.DoesNotExist:
                 new_values = {
-                    'quotepackage_service_id': quotepackage_service.id,
-                    'quotepackage_pax_variant_id': quotepackage_pax_variant.id}
+                    'quote_service_id': quotepackage_service.id,
+                    'quote_pax_variant_id': quotepackage_pax_variant.id}
                 new_values.update(defaults)
-                obj = QuotePackageServicePaxVariant(**new_values)
+                obj = QuoteServicePaxVariant(**new_values)
                 obj.save()
                 cls.update_quotepackage_paxvariant_amounts(obj)
 
@@ -2646,9 +2636,7 @@ class BookingServices(object):
 
     @classmethod
     def update_quote_paxvariant_amounts(cls, pax_variant, user=None):
-        if isinstance(pax_variant, QuotePackageServicePaxVariant):
-            quote_pax_variant = pax_variant.quotepackage_pax_variant.quote_pax_variant
-        elif isinstance(pax_variant, QuoteServicePaxVariant):
+        if isinstance(pax_variant, QuoteServicePaxVariant):
             quote_pax_variant = pax_variant.quote_pax_variant
         else:
             quote_pax_variant = pax_variant
@@ -2682,10 +2670,8 @@ class BookingServices(object):
 
     @classmethod
     def update_quotepackage_paxvariant_amounts(cls, pax_variant):
-        if isinstance(pax_variant, QuotePackageServicePaxVariant):
-            quotepackage_pax_variant = pax_variant.quotepackage_pax_variant
-        else:
-            quotepackage_pax_variant = pax_variant
+
+        quotepackage_pax_variant = pax_variant
 
         c1, c1_msg, p1, p1_msg, \
         c2, c2_msg, p2, p2_msg, \
@@ -2835,9 +2821,6 @@ class BookingServices(object):
         if isinstance(pax_variant, QuoteServicePaxVariant):
             service = pax_variant.quote_service
             quote_pax_variant = pax_variant.quote_pax_variant
-        elif isinstance(pax_variant, QuotePackageServicePaxVariant):
-            service = pax_variant.quotepackage_service
-            quote_pax_variant = pax_variant.quotepackage_pax_variant.quote_pax_variant
         else:
             return False
 
@@ -3819,6 +3802,7 @@ class BookingServices(object):
             # booking_package_allotment.conf_number = ''
             cls._copy_package_info(
                 dst_package=booking_package_allotment, src_package=package_allotment)
+            booking_package_allotment.status = constants.SERVICE_STATUS_PENDING
             ConfigServices.copy_book_allotment_data(
                 dst_service=booking_package_allotment, src_service=package_allotment)
             cls.setup_bookingservice_amounts(booking_package_allotment)
@@ -3831,6 +3815,7 @@ class BookingServices(object):
             # booking_package_transfer.conf_number = '< confirm number >'
             cls._copy_package_info(
                 dst_package=booking_package_transfer, src_package=package_transfer)
+            booking_package_transfer.status = constants.SERVICE_STATUS_PENDING
             ConfigServices.copy_book_transfer_data(
                 dst_service=booking_package_transfer, src_service=package_transfer)
             cls.setup_bookingservice_amounts(booking_package_transfer)
@@ -3843,6 +3828,7 @@ class BookingServices(object):
             # booking_package_extra.conf_number = '< confirm number >'
             cls._copy_package_info(
                 dst_package=booking_package_extra, src_package=package_extra)
+            booking_package_extra.status = constants.SERVICE_STATUS_PENDING
             ConfigServices.copy_book_extra_data(
                 dst_service=booking_package_extra, src_service=package_extra)
             cls.setup_bookingservice_amounts(booking_package_extra)
@@ -4267,8 +4253,8 @@ class BookingServices(object):
 
     @classmethod
     def _clone_quotepackage_service(cls, package_service, package):
-        pax_variants = list(QuotePackageServicePaxVariant.objects.filter(
-            quotepackage_service=package_service))
+        pax_variants = list(QuoteServicePaxVariant.objects.filter(
+            quote_service=package_service))
         package_service.pk = None
         package_service.id = None
         package_service.quote_package = package

@@ -330,25 +330,25 @@ class QuoteServiceSiteModel(SiteModel):
     def response_post_delete(self, request, obj):
         if hasattr(obj, 'quote') and obj.quote:
             return redirect(reverse('common:booking_quote_change', args=[obj.quote.pk]))
-        quote = request.POST.get('quote')
-        if quote:
-            return redirect(reverse('common:booking_quote_change', args=[quote]))
+        quote_obj = request.POST.get('quote')
+        if quote_obj:
+            return redirect(reverse('common:booking_quote_change', args=[quote_obj]))
         return super(QuoteServiceSiteModel, self).response_post_delete(request, obj)
 
     def response_post_save_add(self, request, obj):
         if hasattr(obj, 'quote') and obj.quote:
             return redirect(reverse('common:booking_quote_change', args=[obj.quote.pk]))
-        quote = request.POST.get('quote')
-        if quote:
-            return redirect(reverse('common:booking_quote_change', args=[quote]))
+        quote_obj = request.POST.get('quote')
+        if quote_obj:
+            return redirect(reverse('common:booking_quote_change', args=[quote_obj]))
         return super(QuoteServiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
         if hasattr(obj, 'quote') and obj.quote:
             return redirect(reverse('common:booking_quote_change', args=[obj.quote.pk]))
-        quote = request.POST.get('quote')
-        if quote:
-            return redirect(reverse('common:booking_quote_change', args=[quote]))
+        quote_obj = request.POST.get('quote')
+        if quote_obj:
+            return redirect(reverse('common:booking_quote_change', args=[quote_obj]))
         return super(QuoteServiceSiteModel, self).response_post_save_change(request, obj)
 
     def delete_model(self, request, obj):
@@ -557,7 +557,7 @@ class NewQuoteTransferSiteModel(QuoteServiceSiteModel):
         ('quote', 'quote_package'), ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to'),
         ('location_from', 'location_to'), 'service_addon',
         'provider', 'id')
-    list_display = ('quote', 'name', 'service_addon', 'datetime_from', 'status',)
+    list_display = ('quote', 'quote_package', 'name', 'service_addon', 'datetime_from', 'status',)
     top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote__reference', 'service__name',)
     form = NewQuoteTransferForm
@@ -579,7 +579,7 @@ class NewQuoteExtraSiteModel(QuoteServiceSiteModel):
         ('pickup_office', 'dropoff_office',),
         'provider', 'description', 'id')
     list_display = (
-        'quote', 'service', 'service_addon', 'quantity', 'parameter',
+        'quote', 'quote_package', 'service', 'service_addon', 'quantity', 'parameter',
         'datetime_from', 'datetime_to', 'time', 'status',)
     top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote__reference', 'service__name',)
