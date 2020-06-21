@@ -4,7 +4,7 @@ from django.db import transaction
 from django.db.models.signals import pre_save, post_save, pre_delete, post_delete
 from django.dispatch import receiver
 
-from booking.constants import SERVICE_STATUS_PENDING
+from booking.constants import SERVICE_STATUS_PENDING, QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE
 from booking.models import (
     Quote, QuotePaxVariant,
     QuoteServicePaxVariant,
@@ -44,7 +44,8 @@ def pre_save_quoteservice_paxvariant_setup_amounts(sender, instance, **kwargs):
 def post_save_quoteservice_paxvariant(sender, instance, **kwargs):
     if not hasattr(instance, 'avoid_all'):
         with transaction.atomic(savepoint=False):
-            BookingServices.sync_quotepackage_children_paxvariants(instance)
+            if instance.quote_service.base_category == QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE:
+                BookingServices.sync_quotepackage_children_paxvariants(instance)
             BookingServices.update_quote_paxvariant_amounts(instance)
 
 
@@ -57,26 +58,17 @@ def post_delete_quoteservice_paxvariant(sender, instance, **kwargs):
 
 @receiver(post_save, sender=NewQuoteAllotment)
 def post_save_quoteallotment(sender, instance, **kwargs):
-    if not hasattr(instance, 'avoid_all'):
-        with transaction.atomic(savepoint=False):
-            BookingServices.update_quoteservice_paxvariants_amounts(instance)
-            BookingServices.update_quote(instance)
+    post_save_quoteservice(instance)
 
 
 @receiver(post_save, sender=NewQuoteTransfer)
 def post_save_quotetransfer(sender, instance, **kwargs):
-    if not hasattr(instance, 'avoid_all'):
-        with transaction.atomic(savepoint=False):
-            BookingServices.update_quoteservice_paxvariants_amounts(instance)
-            BookingServices.update_quote(instance)
+    post_save_quoteservice(instance)
 
 
 @receiver(post_save, sender=NewQuoteExtra)
 def post_save_quoteextra(sender, instance, **kwargs):
-    if not hasattr(instance, 'avoid_all'):
-        with transaction.atomic(savepoint=False):
-            BookingServices.update_quoteservice_paxvariants_amounts(instance)
-            BookingServices.update_quote(instance)
+    post_save_quoteservice(instance)
 
 
 @receiver(post_save, sender=QuoteExtraPackage)
@@ -85,6 +77,16 @@ def post_save_quotepackage(sender, instance, **kwargs):
         with transaction.atomic(savepoint=False):
             BookingServices.update_quoteservice_paxvariants_amounts(instance)
             BookingServices.sync_quotepackage_services(instance)
+            BookingServices.update_quote(instance)
+
+
+def post_save_quoteservice(instance):
+    if not hasattr(instance, 'avoid_all'):
+        with transaction.atomic(savepoint=False):
+            BookingServices.update_quoteservice_paxvariants_amounts(instance)
+            if instance.quote_package:
+                BookingServices.update_quotepackage_service_pax_variants_amounts(instance)
+                BookingServices.update_quotepackage(instance)
             BookingServices.update_quote(instance)
 
 

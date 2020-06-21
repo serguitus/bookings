@@ -334,6 +334,19 @@ class QuoteService(BookServiceData, DateInterval):
     def get_absolute_url(self):
         return _get_quote_child_objects([self])[0].get_absolute_url()
 
+
+class QuoteInvoicedServicePaxVariantManager(models.Manager):
+    def get_queryset(self):
+        return super(QuoteInvoicedServicePaxVariantManager, self).get_queryset().filter(
+            quote_service__base_category__in=['QA', 'QT', 'QE', 'QP'])
+
+
+class QuoteProvidedServicePaxVariantManager(models.Manager):
+    def get_queryset(self):
+        return super(QuoteProvidedServicePaxVariantManager, self).get_queryset().filter(
+            quote_service__base_category__in=['QA', 'QT', 'QE', 'PA', 'PT', 'PE'])
+
+
 class QuoteServicePaxVariant(PaxVariantAmounts):
     """
     Quote Service Pax Variant
@@ -346,6 +359,11 @@ class QuoteServicePaxVariant(PaxVariantAmounts):
     quote_service = models.ForeignKey(QuoteService, related_name='quoteservice_paxvariants')
     manual_costs = models.BooleanField(default=False, verbose_name='Manual Costs')
     manual_prices = models.BooleanField(default=False, verbose_name='Manual Prices')
+
+    # Managers
+    objects = models.Manager()
+    invoiced_objects = QuoteInvoicedServicePaxVariantManager()
+    provided_objects = QuoteProvidedServicePaxVariantManager()
 
     def __str__(self):
         return self.quote_pax_variant.__str__()

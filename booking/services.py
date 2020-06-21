@@ -2353,7 +2353,8 @@ class BookingServices(object):
         # verify on all services if pax variant exists
         quotepackage_services = list(QuoteProvidedService.objects.all().filter(
             quote_package=quotepackage.id))
-        cls._sync_quotepackage_children_paxvariants(quotepackage_pax_variant, quotepackage_services)
+        if quotepackage_services:
+            cls._sync_quotepackage_children_paxvariants(quotepackage_pax_variant, quotepackage_services)
 
 
     @classmethod
@@ -2362,7 +2363,7 @@ class BookingServices(object):
         for quotepackage_service in quotepackage_services:
             try:
                 quotepackage_service_pax_variant, created = QuoteServicePaxVariant.objects.get_or_create(
-                    quote_pax_variant_id=quotepackage_pax_variant.id,
+                    quote_pax_variant_id=quotepackage_pax_variant.quote_pax_variant.id,
                     quote_service_id=quotepackage_service.id,
                 )
                 if created:
@@ -2578,7 +2579,7 @@ class BookingServices(object):
             try:
                 obj = QuoteServicePaxVariant.objects.get(
                     quote_service_id=quotepackage_service.id,
-                    quote_pax_variant_id=quotepackage_pax_variant.id)
+                    quote_pax_variant_id=quotepackage_pax_variant.quote_pax_variant.id)
                 if obj.manual_costs and obj.manual_prices:
                     continue
                 fields = []
@@ -2623,7 +2624,7 @@ class BookingServices(object):
             except QuoteServicePaxVariant.DoesNotExist:
                 new_values = {
                     'quote_service_id': quotepackage_service.id,
-                    'quote_pax_variant_id': quotepackage_pax_variant.id}
+                    'quote_pax_variant_id': quotepackage_pax_variant.quote_pax_variant.id}
                 new_values.update(defaults)
                 obj = QuoteServicePaxVariant(**new_values)
                 obj.save()
@@ -2649,12 +2650,19 @@ class BookingServices(object):
         else:
             quote_pax_variant = pax_variant
 
-        quoteservice_pax_variants = list(
-            QuoteServicePaxVariant.objects.all().filter(
+        provided_pax_variants = list(
+            QuoteServicePaxVariant.provided_objects.filter(
                 quote_pax_variant=quote_pax_variant.id).exclude(
                     quote_service__status=constants.SERVICE_STATUS_CANCELLED))
 
-        c1, c2, c3, c4, p1, p2, p3, p4 = cls._totalize_pax_variants(quoteservice_pax_variants)
+        c1, c2, c3, c4 = cls._totalize_pax_variants_costs(provided_pax_variants)
+
+        invoiced_pax_variants = list(
+            QuoteServicePaxVariant.invoiced_objects.filter(
+                quote_pax_variant=quote_pax_variant.id).exclude(
+                    quote_service__status=constants.SERVICE_STATUS_CANCELLED))
+
+        p1, p2, p3, p4 = cls._totalize_pax_variants_prices(invoiced_pax_variants)
 
         fields = cls._build_pax_variant_fields(quote_pax_variant, c1, c2, c3, c4, p1, p2, p3, p4)
         if fields:
@@ -2679,15 +2687,22 @@ class BookingServices(object):
     @classmethod
     def update_quotepackage_paxvariant_amounts(cls, pax_variant):
 
-        quotepackage_pax_variant = pax_variant
+        if pax_variant.quote_service.base_category == constants.QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE:
+            package = pax_variant.quote_service
+            quotepackage_pax_variant = pax_variant
+        else:
+            service = QuoteProvidedService.objects.get(pk=pax_variant.quote_service)
+            package = service.quote_package
+            quotepackage_pax_variant = cls._find_service_pax_variant(
+                package, pax_variant.quote_pax_variant, None)
 
         c1, c1_msg, p1, p1_msg, \
         c2, c2_msg, p2, p2_msg, \
         c3, c3_msg, p3, p3_msg, \
         c4, c4_msg, p4, p4_msg = cls._find_quotepackage_amounts(
-            quote_pax_variant=quotepackage_pax_variant.quote_pax_variant,
-            package=quotepackage_pax_variant.quote_service,
-            agency=quotepackage_pax_variant.quote_pax_variant.quote.agency,
+            quote_pax_variant=pax_variant.quote_pax_variant,
+            package=package,
+            agency=pax_variant.quote_pax_variant.quote.agency,
             service_pax_variant=quotepackage_pax_variant,
             manuals=True)
 
@@ -2698,26 +2713,35 @@ class BookingServices(object):
             cls.update_quote_paxvariant_amounts(quotepackage_pax_variant)
 
 
-
     @classmethod
-    def _totalize_pax_variants(cls, pax_variants):
+    def _totalize_pax_variants_costs(cls, pax_variants):
         if pax_variants:
-            c1, c2, c3, c4, p1, p2, p3, p4 = 0, 0, 0, 0, 0, 0, 0, 0
+            c1, c2, c3, c4 = 0, 0, 0, 0
             for pax_variant in pax_variants:
                 c1 = cls.totalize(c1, pax_variant.cost_single_amount)
                 c2 = cls.totalize(c2, pax_variant.cost_double_amount)
                 c3 = cls.totalize(c3, pax_variant.cost_triple_amount)
                 c4 = cls.totalize(c4, pax_variant.cost_qdrple_amount)
+            return  cls._round_cost(c1), cls._round_cost(c2), cls._round_cost(c3), cls._round_cost(c4)
+        return None, None, None, None
+
+
+    @classmethod
+    def _totalize_pax_variants_prices(cls, pax_variants):
+        if pax_variants:
+            p1, p2, p3, p4 = 0, 0, 0, 0
+            for pax_variant in pax_variants:
                 p1 = cls.totalize(p1, pax_variant.price_single_amount)
                 p2 = cls.totalize(p2, pax_variant.price_double_amount)
                 p3 = cls.totalize(p3, pax_variant.price_triple_amount)
                 p4 = cls.totalize(p4, pax_variant.price_qdrple_amount)
-            return  cls._round_cost(c1), cls._round_cost(c2), cls._round_cost(c3), cls._round_cost(c4), \
-                cls._round_price(p1), cls._round_price(p2), cls._round_price(p3), cls._round_price(p4)
-        return None, None, None, None, None, None, None, None
+            return  cls._round_price(p1), cls._round_price(p2), cls._round_price(p3), cls._round_price(p4)
+        return None, None, None, None
+
 
     @classmethod
     def _build_pax_variant_fields(cls, pax_variant, c1, c2, c3, c4, p1, p2, p3, p4):
+
         fields = []
         if not cls._equals_amounts(pax_variant.cost_single_amount, c1):
             fields.append('cost_single_amount')
