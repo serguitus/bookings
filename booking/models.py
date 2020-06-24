@@ -489,7 +489,7 @@ class NewQuoteServiceBookDetail(QuoteService):
     quote_service = models.ForeignKey(QuoteProvidedService, related_name='newquoteservicebookdetail_provided')
 
     def fill_data(self):
-        pass
+        self.quote = self.quote_service.quote
 
 
 class NewQuoteServiceBookDetailAllotment(NewQuoteServiceBookDetail, BookAllotmentData):
