@@ -15,6 +15,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 #                               MEDIA_ROOT, MEDIA_URL,
 #                               EMAIL_BACKEND)
 from .custom_settings import *
+import datetime
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -154,3 +155,21 @@ CKEDITOR_CONFIGS = {
 }
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+#  #####  THIS IS FOR THE API AND ANGULAR APP ###
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+}
+
+JWT_AUTH = {
+    'JWT_ALLOW_REFRESH': True,
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=3600),
+}
+#  ##### END OF THE SETTINGS FOR THE API AND ANGULAR APP ###
