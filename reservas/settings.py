@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django_tables2',
     'totalsum',
     'crispy_forms',
+    'rest_framework',
     # 'django_pdb',
 
     'django.contrib.admin',
@@ -49,6 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'api',
     'common',
     'accounting',
     'finance',

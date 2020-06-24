@@ -28,16 +28,18 @@ from finance.views import (
     AgencyAutocompleteView, AgencyContactAutocompleteView,
     ProviderAutocompleteView,
 )
+from api import urls as api_urls
 from config import urls as config_urls
 from config.views import (
-    LocationAutocompleteView, ZoneTransferAutocompleteView, ServiceCategoryAutocompleteView,
-    RoomTypeAutocompleteView, BoardTypeAutocompleteView,
-    AllotmentAutocompleteView, ProviderAllotmentAutocompleteView,
-    TransferAutocompleteView, ProviderTransferAutocompleteView,
-    AddonAutocompleteView,
+    LocationAutocompleteView, ZoneTransferAutocompleteView,
+    ServiceCategoryAutocompleteView, RoomTypeAutocompleteView,
+    BoardTypeAutocompleteView, AllotmentAutocompleteView,
+    ProviderAllotmentAutocompleteView, TransferAutocompleteView,
+    ProviderTransferAutocompleteView, AddonAutocompleteView,
     ExtraAutocompleteView, ProviderExtraAutocompleteView,
-    ServiceAutocompleteView, ServiceAllotmentAutocompleteView, ServiceTransferAutocompleteView,
-    ServiceExtraAutocompleteView, CarRentalAutocompleteView, CarRentalOfficeAutocompleteView,
+    ServiceAutocompleteView, ServiceAllotmentAutocompleteView,
+    ServiceTransferAutocompleteView, ServiceExtraAutocompleteView,
+    CarRentalAutocompleteView, CarRentalOfficeAutocompleteView,
     CatalogAllotmentAddonAutocompleteView,
     CatalogTransferAddonAutocompleteView,
     CatalogExtraAddonAutocompleteView,
@@ -51,7 +53,8 @@ from booking.views import (
     ServicePackageAutocompleteView,
 )
 
-from reservas.views import DisabledAutocompleteView
+from reservas.views import (DisabledAutocompleteView,
+                            AngularAppView)
 
 
 urlpatterns = [
@@ -59,6 +62,7 @@ urlpatterns = [
     url(r'^reservas/', reservas_admin.urls),
 
     url(r'^%s/' % (bookings_site.name), bookings_site.urls),
+    url(r'^api/', include(api_urls)),
 
     url(r'^account-autocomplete/$',
         AccountAutocompleteView.as_view(),
@@ -225,5 +229,9 @@ urlpatterns = [
     url(r'^disabled-autocomplete/$',
         DisabledAutocompleteView.as_view(),
         name='disabled-autocomplete',
+    ),
+    url(r'^app/$',
+        AngularAppView.as_view(),
+        name='angular-app',
     ),
 ]
