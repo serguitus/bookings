@@ -154,7 +154,7 @@ INVOICE_FORMATS = (
 )
 
 QUOTE_BOOK_DETAIL_CATEGORIES = {
-    SERVICE_CATEGORY_ALLOTMENT: 'quotebookdetailallotment',
-    SERVICE_CATEGORY_TRANSFER: 'quotebookdetailtransfer',
-    SERVICE_CATEGORY_EXTRA: 'quotebookdetailextra',
+    SERVICE_CATEGORY_ALLOTMENT: 'newquoteservicebookdetailallotment',
+    SERVICE_CATEGORY_TRANSFER: 'newquoteservicebookdetailtransfer',
+    SERVICE_CATEGORY_EXTRA: 'newquoteservicebookdetailextra',
 }
