@@ -589,6 +589,135 @@ class NewQuoteExtraSiteModel(QuoteServiceSiteModel):
     inlines = [QuoteServicePaxVariantInline]
 
 
+class BaseQuoteServiceBookDetailSiteModel(SiteModel):
+    def response_post_delete(self, request, obj):
+        if hasattr(obj, 'quote_service') and obj.quote_service:
+            if obj.quote_service.base_service.category == 'A':
+                return redirect(reverse(
+                    'common:booking_newquoteallotment_change', args=[obj.quote_service.pk]))
+            elif obj.quote_service.base_service.category == 'T':
+                return redirect(reverse(
+                    'common:booking_newquotetransfer_change', args=[obj.quote_service.pk]))
+            elif obj.quote_service.base_service.category == 'E':
+                return redirect(reverse(
+                    'common:booking_newquoteextra_change', args=[obj.quote_service.pk]))
+        quote_service = request.POST.get('quote_service')
+        if quote_service:
+            quote_service = QuoteService.objects.get(id=quote_service)
+            if quote_service.base_service.category == 'A':
+                return redirect(reverse(
+                    'common:booking_newquoteallotment_change', args=[quote_service.pk]))
+            elif quote_service.base_service.category == 'T':
+                return redirect(reverse(
+                    'common:booking_newquotetransfer_change', args=[quote_service.pk]))
+            elif quote_service.base_service.category == 'E':
+                return redirect(reverse(
+                    'common:booking_newquoteextra_change', args=[quote_service.pk]))
+        return super(BaseQuoteServiceBookDetailSiteModel, self).response_post_delete(request, obj)
+
+    def response_post_save_add(self, request, obj):
+        if hasattr(obj, 'quote_service') and obj.quote_service:
+            if obj.quote_service.base_service.category == 'A':
+                return redirect(reverse(
+                    'common:booking_newquoteallotment_change', args=[obj.quote_service.pk]))
+            elif obj.quote_service.base_service.category == 'T':
+                return redirect(reverse(
+                    'common:booking_newquotetransfer_change', args=[obj.quote_service.pk]))
+            elif obj.quote_service.base_service.category == 'E':
+                return redirect(reverse(
+                    'common:booking_newquoteextra_change', args=[obj.quote_service.pk]))
+        quote_service = request.POST.get('quote_service')
+        if quote_service:
+            quote_service = QuoteService.objects.get(id=quote_service)
+            if quote_service.base_service.category == 'A':
+                return redirect(reverse(
+                    'common:booking_newquoteallotment_change', args=[quote_service.pk]))
+            elif quote_service.base_service.category == 'T':
+                return redirect(reverse(
+                    'common:booking_newquotetransfer_change', args=[quote_service.pk]))
+            elif quote_service.base_service.category == 'E':
+                return redirect(reverse(
+                    'common:booking_newquoteextra_change', args=[quote_service.pk]))
+        return super(BaseQuoteServiceBookDetailSiteModel, self).response_post_save_add(request, obj)
+
+    def response_post_save_change(self, request, obj):
+        if hasattr(obj, 'quote_service') and obj.quote_service:
+            if obj.quote_service.base_service.category == 'A':
+                return redirect(reverse(
+                    'common:booking_newquoteallotment_change', args=[obj.quote_service.pk]))
+            elif obj.quote_service.base_service.category == 'T':
+                return redirect(reverse(
+                    'common:booking_newquotetransfer_change', args=[obj.quote_service.pk]))
+            elif obj.quote_service.base_service.category == 'E':
+                return redirect(reverse(
+                    'common:booking_newquoteextra_change', args=[obj.quote_service.pk]))
+        quote_service = request.POST.get('quote_service')
+        if quote_service:
+            quote_service = QuoteService.objects.get(id=quote_service)
+            if quote_service.base_service.category == 'A':
+                return redirect(reverse(
+                    'common:booking_newquoteallotment_change', args=[quote_service.pk]))
+            elif quote_service.base_service.category == 'T':
+                return redirect(reverse(
+                    'common:booking_newquotetransfer_change', args=[quote_service.pk]))
+            elif quote_service.base_service.category == 'E':
+                return redirect(reverse(
+                    'common:booking_newquoteextra_change', args=[quote_service.pk]))
+        return super(BaseQuoteServiceBookDetailSiteModel, self).response_post_save_change(request, obj)
+
+
+class NewQuoteServiceBookDetailAllotmentSiteModel(BaseQuoteServiceBookDetailSiteModel):
+    fields = [
+        'quote_service',
+        ('book_service', 'search_location'),
+        ('datetime_from', 'datetime_to'),
+        ('room_type', 'board_type'),
+        'time',
+        'service_addon',]
+    list_display = (
+        'quote_service', 'book_service', 'datetime_from', 'datetime_to',
+        'room_type', 'board_type', 'service_addon',)
+    top_filters = ('quote_service',)
+    ordering = ['quote_service__name', 'datetime_from', 'time']
+    form = NewQuoteServiceBookDetailAllotmentForm
+
+
+class NewQuoteServiceBookDetailTransferSiteModel(BaseQuoteServiceBookDetailSiteModel):
+    fields = [
+        'quote_service',
+        ('book_service', 'search_location'),
+        ('datetime_from', 'datetime_to'),
+        ('location_from', 'location_to'),
+        ('pickup', 'dropoff'),
+        ('place_from', 'place_to'),
+        ('schedule_from', 'schedule_to'),
+        ('schedule_time_from', 'schedule_time_to'),
+        ('time', 'quantity'),
+        'service_addon',]
+    list_display = (
+        'quote_service', 'book_service', 'datetime_from', 'datetime_to',
+        'location_from', 'location_to', 'quantity', 'service_addon')
+    top_filters = ('quote_service',)
+    ordering = ['quote_service__name', 'datetime_from', 'time']
+    form = NewQuoteServiceBookDetailTransferForm
+
+
+class NewQuoteServiceBookDetailExtraSiteModel(BaseQuoteServiceBookDetailSiteModel):
+    fields = [
+        'quote_service',
+        ('book_service', 'search_location'),
+        ('datetime_from', 'datetime_to'),
+        ('pickup_office', 'dropoff_office'),
+        ('time', 'parameter', 'quantity'),
+        'service_addon',]
+    list_display = (
+        'quote_service', 'book_service', 'datetime_from', 'datetime_to',
+        'parameter', 'quantity', 'pickup_office', 'dropoff_office', 'service_addon')
+    top_filters = ('quote_service',)
+    ordering = ['quote_service__name', 'datetime_from', 'time']
+    form = NewQuoteServiceBookDetailExtraForm
+
+
 # Starts Booking Section
 
 class BookingPaxInline(CommonTabularInline):
@@ -2175,135 +2304,6 @@ class ExportBookingSiteModel(SiteModel):
         Returns the ChangeList class for use on the changelist page.
         """
         return ExportBookingChangeList
-
-
-class BaseQuoteServiceBookDetailSiteModel(SiteModel):
-    def response_post_delete(self, request, obj):
-        if hasattr(obj, 'quote_service') and obj.quote_service:
-            if obj.quote_service.base_service.category == 'A':
-                return redirect(reverse(
-                    'common:booking_newquoteallotment_change', args=[obj.quote_service.pk]))
-            elif obj.quote_service.base_service.category == 'T':
-                return redirect(reverse(
-                    'common:booking_newquotetransfer_change', args=[obj.quote_service.pk]))
-            elif obj.quote_service.base_service.category == 'E':
-                return redirect(reverse(
-                    'common:booking_newquoteextra_change', args=[obj.quote_service.pk]))
-        quote_service = request.POST.get('quote_service')
-        if quote_service:
-            quote_service = QuoteService.objects.get(id=quote_service)
-            if quote_service.base_service.category == 'A':
-                return redirect(reverse(
-                    'common:booking_newquoteallotment_change', args=[quote_service.pk]))
-            elif quote_service.base_service.category == 'T':
-                return redirect(reverse(
-                    'common:booking_newquotetransfer_change', args=[quote_service.pk]))
-            elif quote_service.base_service.category == 'E':
-                return redirect(reverse(
-                    'common:booking_newquoteextra_change', args=[quote_service.pk]))
-        return super(BaseQuoteServiceBookDetailSiteModel, self).response_post_delete(request, obj)
-
-    def response_post_save_add(self, request, obj):
-        if hasattr(obj, 'quote_service') and obj.quote_service:
-            if obj.quote_service.base_service.category == 'A':
-                return redirect(reverse(
-                    'common:booking_newquoteallotment_change', args=[obj.quote_service.pk]))
-            elif obj.quote_service.base_service.category == 'T':
-                return redirect(reverse(
-                    'common:booking_newquotetransfer_change', args=[obj.quote_service.pk]))
-            elif obj.quote_service.base_service.category == 'E':
-                return redirect(reverse(
-                    'common:booking_newquoteextra_change', args=[obj.quote_service.pk]))
-        quote_service = request.POST.get('quote_service')
-        if quote_service:
-            quote_service = QuoteService.objects.get(id=quote_service)
-            if quote_service.base_service.category == 'A':
-                return redirect(reverse(
-                    'common:booking_newquoteallotment_change', args=[quote_service.pk]))
-            elif quote_service.base_service.category == 'T':
-                return redirect(reverse(
-                    'common:booking_newquotetransfer_change', args=[quote_service.pk]))
-            elif quote_service.base_service.category == 'E':
-                return redirect(reverse(
-                    'common:booking_newquoteextra_change', args=[quote_service.pk]))
-        return super(BaseQuoteServiceBookDetailSiteModel, self).response_post_save_add(request, obj)
-
-    def response_post_save_change(self, request, obj):
-        if hasattr(obj, 'quote_service') and obj.quote_service:
-            if obj.quote_service.base_service.category == 'A':
-                return redirect(reverse(
-                    'common:booking_newquoteallotment_change', args=[obj.quote_service.pk]))
-            elif obj.quote_service.base_service.category == 'T':
-                return redirect(reverse(
-                    'common:booking_newquotetransfer_change', args=[obj.quote_service.pk]))
-            elif obj.quote_service.base_service.category == 'E':
-                return redirect(reverse(
-                    'common:booking_newquoteextra_change', args=[obj.quote_service.pk]))
-        quote_service = request.POST.get('quote_service')
-        if quote_service:
-            quote_service = QuoteService.objects.get(id=quote_service)
-            if quote_service.base_service.category == 'A':
-                return redirect(reverse(
-                    'common:booking_newquoteallotment_change', args=[quote_service.pk]))
-            elif quote_service.base_service.category == 'T':
-                return redirect(reverse(
-                    'common:booking_newquotetransfer_change', args=[quote_service.pk]))
-            elif quote_service.base_service.category == 'E':
-                return redirect(reverse(
-                    'common:booking_newquoteextra_change', args=[quote_service.pk]))
-        return super(BaseQuoteServiceBookDetailSiteModel, self).response_post_save_change(request, obj)
-
-
-class NewQuoteServiceBookDetailAllotmentSiteModel(BaseQuoteServiceBookDetailSiteModel):
-    fields = [
-        'quote_service',
-        ('book_service', 'search_location'),
-        ('datetime_from', 'datetime_to'),
-        ('room_type', 'board_type'),
-        'time',
-        'service_addon',]
-    list_display = (
-        'quote_service', 'book_service', 'datetime_from', 'datetime_to',
-        'room_type', 'board_type', 'service_addon',)
-    top_filters = ('quote_service',)
-    ordering = ['quote_service__name', 'datetime_from', 'time']
-    form = NewQuoteServiceBookDetailAllotmentForm
-
-
-class NewQuoteServiceBookDetailTransferSiteModel(BaseQuoteServiceBookDetailSiteModel):
-    fields = [
-        'quote_service',
-        ('book_service', 'search_location'),
-        ('datetime_from', 'datetime_to'),
-        ('location_from', 'location_to'),
-        ('pickup', 'dropoff'),
-        ('place_from', 'place_to'),
-        ('schedule_from', 'schedule_to'),
-        ('schedule_time_from', 'schedule_time_to'),
-        ('time', 'quantity'),
-        'service_addon',]
-    list_display = (
-        'quote_service', 'book_service', 'datetime_from', 'datetime_to',
-        'location_from', 'location_to', 'quantity', 'service_addon')
-    top_filters = ('quote_service',)
-    ordering = ['quote_service__name', 'datetime_from', 'time']
-    form = NewQuoteServiceBookDetailTransferForm
-
-
-class NewQuoteServiceBookDetailExtraSiteModel(BaseQuoteServiceBookDetailSiteModel):
-    fields = [
-        'quote_service',
-        ('book_service', 'search_location'),
-        ('datetime_from', 'datetime_to'),
-        ('pickup_office', 'dropoff_office'),
-        ('time', 'parameter', 'quantity'),
-        'service_addon',]
-    list_display = (
-        'quote_service', 'book_service', 'datetime_from', 'datetime_to',
-        'parameter', 'quantity', 'pickup_office', 'dropoff_office', 'service_addon')
-    top_filters = ('quote_service',)
-    ordering = ['quote_service__name', 'datetime_from', 'time']
-    form = NewQuoteServiceBookDetailExtraForm
 
 
 class BaseBookingBookDetailSiteModel(SiteModel):
