@@ -135,9 +135,9 @@ QUOTESERVICE_TYPES = {
     QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE_ALLOTMENT: 'newquoteallotment',
     QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE_TRANSFER: 'newquotetransfer',
     QUOTE_SERVICE_CATEGORY_QUOTE_PACKAGE_EXTRA: 'newquoteextra',
-    QUOTE_SERVICE_CATEGORY_QUOTE_DETAIL_ALLOTMENT: 'newquotebookdetailallotment',
-    QUOTE_SERVICE_CATEGORY_QUOTE_DETAIL_TRANSFER: 'newquotebookdetailtransfer',
-    QUOTE_SERVICE_CATEGORY_QUOTE_DETAIL_EXTRA: 'newquotebookdetailextra',
+    QUOTE_SERVICE_CATEGORY_QUOTE_DETAIL_ALLOTMENT: 'newquoteservicebookdetailallotment',
+    QUOTE_SERVICE_CATEGORY_QUOTE_DETAIL_TRANSFER: 'newquoteservicebookdetailtransfer',
+    QUOTE_SERVICE_CATEGORY_QUOTE_DETAIL_EXTRA: 'newquoteservicebookdetailextra',
 }
 
 ACTIONS = {
@@ -154,7 +154,7 @@ INVOICE_FORMATS = (
 )
 
 QUOTE_BOOK_DETAIL_CATEGORIES = {
-    SERVICE_CATEGORY_ALLOTMENT: 'quotebookdetailallotment',
-    SERVICE_CATEGORY_TRANSFER: 'quotebookdetailtransfer',
-    SERVICE_CATEGORY_EXTRA: 'quotebookdetailextra',
+    SERVICE_CATEGORY_ALLOTMENT: 'newquoteservicebookdetailallotment',
+    SERVICE_CATEGORY_TRANSFER: 'newquoteservicebookdetailtransfer',
+    SERVICE_CATEGORY_EXTRA: 'newquoteservicebookdetailextra',
 }
