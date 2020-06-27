@@ -948,7 +948,7 @@ class BookingSiteModel(SiteModel):
         )
         if request.method == 'POST':
             formset = PaxFormSet(request.POST, prefix='form')
-            bookingservices = BookingService.objects.filter(booking=id)
+            bookingservices = BaseBookingService.invoiced_objects.filter(booking=id)
             current_rooming = BookingPax.objects.filter(booking=id)
             if formset.is_valid():
                 booking = Booking.objects.get(pk=id)
@@ -973,7 +973,7 @@ class BookingSiteModel(SiteModel):
             # GET request
             formset = PaxFormSet(prefix='form',
                                  queryset=BookingPax.objects.none())
-            bookingservices = BookingService.objects.filter(booking=id)
+            bookingservices = BaseBookingService.invoiced_objects.filter(booking=id)
             current_rooming = BookingPax.objects.filter(booking=id)
 
         context = {}
@@ -990,7 +990,7 @@ class BookingSiteModel(SiteModel):
         # This helper builds the PDF object with all vouchers
         template = get_template("booking/pdf/voucher.html")
         booking = Booking.objects.get(id=bk)
-        services = BookingService.objects.filter(id__in=service_ids). \
+        services = BaseBookingService.objects.filter(id__in=service_ids). \
                    order_by('datetime_from', 'time', 'datetime_to'). \
                    prefetch_related('rooming_list')
         objs = _get_voucher_services(services)
@@ -1387,7 +1387,7 @@ class BaseBookingServiceSiteModel(SiteModel):
                 subject=request.POST.get('mail_subject'),
                 body=request.POST.get('mail_body'))
             email.send()
-            bs = BookingService.objects.get(pk=object_id)
+            bs = BaseBookingService.objects.get(pk=object_id)
             services = find_provider_requests_services(request, bs.provider, bs.booking)
             for service in services:
                 if service.status == SERVICE_STATUS_PENDING:
@@ -1400,7 +1400,7 @@ class BaseBookingServiceSiteModel(SiteModel):
             return redirect(reverse('common:booking_%s_change' % self.model._meta.model_name, args=[object_id]))
         else:
             if object_id:
-                bs = BookingService.objects.get(pk=object_id)
+                bs = BaseBookingService.objects.get(pk=object_id)
                 if not extra_context:
                     extra_context = dict()
                 extra_context.update({
@@ -1417,7 +1417,7 @@ class BaseBookingServiceSiteModel(SiteModel):
 
     @csrf_protect_m
     def delete_view(self, request, object_id, extra_context=None):
-        bookingservice = BookingService.objects.get(pk=object_id)
+        bookingservice = BaseBookingService.objects.get(pk=object_id)
         if bookingservice.status == SERVICE_STATUS_PENDING:
             return super(BaseBookingServiceSiteModel, self).delete_view(request, object_id, extra_context)
         messages.add_message(
@@ -1627,7 +1627,7 @@ class BookingProvidedAllotmentSiteModel(BookingProvidedServiceSiteModel):
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide', 'show')})
     )
-    list_display = ('booking_package', 'name', 'datetime_from',
+    list_display = ('name', 'booking_package', 'datetime_from',
                     'datetime_to', 'cost_amount', 'manual_cost',
                     'price_amount', 'manual_price', 'utility_percent',
                     'utility', 'status', 'cost_amount_paid')
@@ -1667,7 +1667,7 @@ class BookingProvidedTransferSiteModel(BookingProvidedServiceSiteModel):
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide', 'show')})
     )
-    list_display = ('booking_package', 'name', 'service_addon',
+    list_display = ('name', 'booking_package', 'service_addon',
                     'datetime_from', 'time',
                     'cost_amount', 'manual_cost', 'price_amount',
                     'manual_price', 'utility_percent',
@@ -1707,7 +1707,7 @@ class BookingProvidedExtraSiteModel(BookingProvidedServiceSiteModel):
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide', 'show')})
     )
-    list_display = ('booking_package', 'name', 'service_addon',
+    list_display = ('name', 'booking_package', 'service_addon',
                     'quantity', 'parameter',
                     'datetime_from', 'datetime_to', 'time',
                     'cost_amount', 'manual_cost',
@@ -1744,10 +1744,10 @@ class BookingExtraPackageSiteModel(BaseBookingServiceSiteModel):
                 'price_amount', 'utility_percent', 'utility', 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
-        ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
+        ('Notes', {'fields': ('p_notes', 'new_v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide', 'show')})
     )
-    list_display = ['booking', 'name', 'datetime_from', 'datetime_to',
+    list_display = ['name', 'booking', 'datetime_from', 'datetime_to',
             'cost_amount', 'price_amount', 'utility_percent', 'utility', 'status']
     top_filters = ['booking__name', 'service', 'booking__reference',
                    ('datetime_from', DateTopFilter), 'status']
@@ -2320,7 +2320,7 @@ class BaseBookingBookDetailSiteModel(SiteModel):
                     'common:booking_bookingprovidedextra_change', args=[obj.booking_service.pk]))
         booking_service = request.POST.get('booking_service')
         if booking_service:
-            booking_service = BookingService.objects.get(id=booking_service)
+            booking_service = BaseBookingService.objects.get(id=booking_service)
             if booking_service.base_service.category == 'A':
                 return redirect(reverse(
                     'common:booking_bookingprovidedallotment_change', args=[booking_service.pk]))
@@ -2345,7 +2345,7 @@ class BaseBookingBookDetailSiteModel(SiteModel):
                     'common:booking_bookingprovidedextra_change', args=[obj.booking_service.pk]))
         booking_service = request.POST.get('booking_service')
         if booking_service:
-            booking_service = BookingService.objects.get(id=booking_service)
+            booking_service = BaseBookingService.objects.get(id=booking_service)
             if booking_service.base_service.category == 'A':
                 return redirect(reverse(
                     'common:booking_bookingprovidedallotment_change', args=[booking_service.pk]))
@@ -2370,7 +2370,7 @@ class BaseBookingBookDetailSiteModel(SiteModel):
                     'common:booking_bookingprovidedextra_change', args=[obj.booking_service.pk]))
         booking_service = request.POST.get('booking_service')
         if booking_service:
-            booking_service = BookingService.objects.get(id=booking_service)
+            booking_service = BaseBookingService.objects.get(id=booking_service)
             if booking_service.base_service.category == 'A':
                 return redirect(reverse(
                     'common:booking_bookingprovidedallotment_change', args=[booking_service.pk]))

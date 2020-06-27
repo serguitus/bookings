@@ -1102,7 +1102,7 @@ class BookingServices(object):
         status = constants.SERVICE_STATUS_NOSHOW
         services = False
         cancelled = True
-        for service in bookingpackage.booking_package_services.all():
+        for service in bookingpackage.bookingprovidedservice_set.all():
             services = True
             # date_from_min
             if (service.datetime_from is not None

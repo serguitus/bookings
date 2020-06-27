@@ -5,7 +5,7 @@
 
 {% block detail %}
     {{ super }}
-    {% include 'booking/include/booking_book_details_buttons.html' with service_id=current.id %}
+    {% include 'booking/include/bookingservice_book_details_buttons.html' with service_id=current.id %}
     {% bookingbookdetail_table current as table %}
     {% if table.paginated_rows %}
     <div class="bookingbookdetails-container">
