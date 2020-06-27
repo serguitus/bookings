@@ -1146,14 +1146,11 @@ class BookingBookDetailURLView(View):
 
 class BookingAddServiceView(View):
     def post(self, request, *args, **kwargs):
-        booking_id = request.POST.get('parent_id', None)
+        parent_id = request.POST.get('parent_id', None)
         service_id = request.POST.get('search_service', None)
-        if booking_id and service_id:
+        if parent_id and service_id:
             service = Service.objects.get(id=service_id)
-            querystring = urlencode({
-                'booking': booking_id,
-                'service': service_id,
-            })
+            querystring = self.build_querystring(parent_id, service_id)
             if service.category == 'A':
                 return redirect('{}?{}'.format(
                     reverse(
@@ -1172,8 +1169,16 @@ class BookingAddServiceView(View):
         # if here, there was a trouble. redirect to previous page
         if not service_id:
             messages.error(request, "You didn't choose any service")
-        parent = Booking.objects.get(id=booking_id)
+        parent = self.get_parent_obj(parent_id)
         return redirect(parent)
+
+    def build_querystring(self, parent_id, service_id):
+        return urlencode(
+            {'booking': parent_id,
+             'service': service_id})
+
+    def get_parent_obj(self, parent_id):
+        return Booking.objects.get(id=parent_id)
 
 
 class QuoteAddServiceView(View):
@@ -1224,3 +1229,16 @@ class QuoteAddPackageServiceView(QuoteAddServiceView):
 
     def get_parent_obj(self, parent_id):
         return QuoteExtraPackage.objects.get(id=parent_id)
+
+
+class BookingAddPackageServiceView(BookingAddServiceView):
+    def build_querystring(self, parent_id, service_id):
+        bp = BookingExtraPackage.objects.get(id=parent_id)
+        booking = bp.booking_id
+        return urlencode(
+            {'booking': booking,
+             'service': service_id,
+             'booking_package': parent_id})
+
+    def get_parent_obj(self, parent_id):
+        return BookingExtraPackage.objects.get(id=parent_id)
