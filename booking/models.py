@@ -486,13 +486,16 @@ class NewQuoteServiceBookDetail(QuoteService):
     class Meta:
         verbose_name = 'Quote Provided Service Book Detail'
         verbose_name_plural = 'Quotes Provided Services Book Details'
-    quote_service = models.ForeignKey(QuoteProvidedService, related_name='newquoteservicebookdetail_provided')
+    quote_service = models.ForeignKey(
+        QuoteProvidedService,
+        related_name='newquoteservicebookdetail_provided')
 
     def fill_data(self):
         self.quote = self.quote_service.quote
 
 
-class NewQuoteServiceBookDetailAllotment(NewQuoteServiceBookDetail, BookAllotmentData):
+class NewQuoteServiceBookDetailAllotment(NewQuoteServiceBookDetail,
+                                         BookAllotmentData):
     """
     Quote Provided Service Book Detail Allotment
     """
@@ -1053,6 +1056,7 @@ class BookingProvidedService(BaseBookingService):
         ordering = ['datetime_from', 'datetime_to', 'time']
 
     booking_package = models.ForeignKey(BookingExtraPackage,
+                                        related_name='booking_package_services',
                                         blank=True,
                                         null=True)
 

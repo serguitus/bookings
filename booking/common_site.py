@@ -1264,7 +1264,7 @@ class BookingProvidedServiceSiteModel(SiteModel):
                 'cost_amount', 'manual_price', 'price_amount',
                 'utility_percent', 'utility')
         }),
-        ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
+        ('Notes', {'fields': ('p_notes', 'new_v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide', 'show')})
     )
 
