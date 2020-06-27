@@ -1264,7 +1264,7 @@ class BookingProvidedServiceSiteModel(SiteModel):
                 'cost_amount', 'manual_price', 'price_amount',
                 'utility_percent', 'utility')
         }),
-        ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
+        ('Notes', {'fields': ('p_notes', 'new_v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide', 'show')})
     )
 
@@ -1400,7 +1400,7 @@ class BaseBookingServiceSiteModel(SiteModel):
             return redirect(reverse('common:booking_%s_change' % self.model._meta.model_name, args=[object_id]))
         else:
             if object_id:
-                bs = BookingService.objects.get(pk=object_id)
+                bs = BaseBookingService.objects.get(pk=object_id)
                 if not extra_context:
                     extra_context = dict()
                 extra_context.update({
@@ -1744,7 +1744,7 @@ class BookingExtraPackageSiteModel(BaseBookingServiceSiteModel):
                 'price_amount', 'utility_percent', 'utility', 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
-        ('Notes', {'fields': ('p_notes', 'v_notes', 'provider_notes'),
+        ('Notes', {'fields': ('p_notes', 'new_v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide', 'show')})
     )
     list_display = ['booking', 'name', 'datetime_from', 'datetime_to',
