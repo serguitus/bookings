@@ -811,6 +811,7 @@ class BookingSiteModel(SiteModel):
     inlines = [BookingPaxInline]
     form = BookingForm
     add_form_template = 'booking/booking_change_form.html'
+    change_list_template = 'booking/booking_change_list.html'
     change_form_template = 'booking/booking_change_form.html'
     totalsum_list = ['cost_amount', 'price_amount',
                      'invoiced_amount', 'utility',
@@ -1101,6 +1102,14 @@ class BookingSiteModel(SiteModel):
                 object_id=object_id,
                 form_url=form_url,
                 extra_context=extra_context)
+
+    @csrf_protect_m
+    def changelist_view(self, request, extra_context=None):
+        search_service_form = SearchServiceForm()
+        context = dict(search_service_form=search_service_form)
+        context.update(extra_context or {})
+        return super(BookingSiteModel, self).changelist_view(
+            request, context)
 
     def changeform_context(self, request, form, obj,
                            formsets, inline_instances,
