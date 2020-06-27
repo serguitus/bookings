@@ -63,7 +63,7 @@ def quoteextrapackageservice_table(quotepackage):
 @register.simple_tag
 def bookingservice_table(booking):
     table = BookingServiceTable(
-        BaseBookingService.objects.filter(booking=booking),
+        BaseBookingService.invoiced_objects.filter(booking=booking),
         order_by=('datetime_from', 'time', 'datetime_to'))
     return table
 
@@ -131,16 +131,16 @@ def booking_services_summary_table(booking, request):
     b_id = request.GET.get('booking')
     if booking:
         table = BookingServiceSummaryTable(
-            BaseBookingService.objects.filter(booking=booking),
+            BaseBookingService.invoiced_objects.filter(booking=booking),
             order_by=('datetime_from', 'time', 'datetime_to'))
     elif b_id:
         booking = Booking.objects.get(id=b_id)
         table = BookingServiceSummaryTable(
-            BaseBookingService.objects.filter(booking=booking),
+            BaseBookingService.invoiced_objects.filter(booking=booking),
             order_by=('datetime_from', 'time', 'datetime_to'))
     else:
         table = BookingServiceSummaryTable(
-            BaseBookingService.objects.none())
+            BaseBookingService.invoiced_objects.none())
     return table
 
 
@@ -179,12 +179,12 @@ def bookingextrapackage_services_summary_table(bookingpackage, request):
     bp_id = request.GET.get('booking_package')
     if bookingpackage:
         table = BookingExtraPackageServiceSummaryTable(
-            bookingpackage.booking_package_services.all(),
+            bookingpackage.bookingprovidedservice_set.all(),
             order_by=('datetime_from', 'time', 'datetime_to'))
     elif bp_id:
         bookingpackage = BookingExtraPackage.objects.get(id=bp_id)
         table = BookingExtraPackageServiceSummaryTable(
-            bookingpackage.booking_package_services.all(),
+            bookingpackage.bookingprovidedservice_set.all(),
             order_by=('datetime_from', 'time', 'datetime_to'))
     else:
         table = BookingServiceSummaryTable(
@@ -310,13 +310,13 @@ def bookingbookdetail_table(booking_service):
 def bookingpackage_services_summary_table(bookingpackage, request):
     bp_id = request.GET.get('booking_package')
     if bookingpackage:
-        table = BookingPackageServiceSummaryTable(
-            bookingpackage.booking_package_services.all(),
+        table = BookingExtraPackageServiceSummaryTable(
+            bookingpackage.bookingprovidedservice_set.all(),
             order_by=('datetime_from', 'time', 'datetime_to'))
     elif bp_id:
         bookingpackage = BookingExtraPackage.objects.get(id=bp_id)
-        table = BookingPackageServiceSummaryTable(
-            bookingpackage.booking_package_services.all(),
+        table = BookingExtraPackageServiceSummaryTable(
+            bookingpackage.bookingprovidedservice_set.all(),
             order_by=('datetime_from', 'time', 'datetime_to'))
     else:
         table = BookingServiceSummaryTable(
