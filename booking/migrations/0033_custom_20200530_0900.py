@@ -65,7 +65,7 @@ def copy_booking_service(new_service, service):
     new_service.manual_price = service.manual_price
     new_service.p_notes = service.p_notes
     if hasattr(service, 'v_notes'):
-        new_service.v_notes = service.v_notes
+        new_service.new_v_notes = service.v_notes
 
 
 def build_new_booking_allotment(new_service, service):
