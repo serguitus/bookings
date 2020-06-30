@@ -40,6 +40,9 @@ def migrate_package(apps, schema_editor):
     BookingServicePax = apps.get_model('booking', 'BookingServicePax')
     BaseBookingServicePax = apps.get_model('booking', 'BaseBookingServicePax')
 
+    ProviderBookingPaymentService = apps.get_model('booking', 'ProviderBookingPaymentService')
+    ProviderPaymentBookingProvided = apps.get_model('booking', 'ProviderPaymentBookingProvided')
+
     for package in Package.objects.all():
         new_extra = Extra()
         build_new_extra(new_extra, package)
@@ -118,6 +121,54 @@ def migrate_package(apps, schema_editor):
                 new_package_service.booking_package = new_service
                 new_package_service.save()
 
+            # migration for payments on package services.
+            # payments on other types of service done at booking 0034_custom.
+            for pay_service in ProviderBookingPaymentService.objects.filter(provider_service=service):
+                new_pay_service = ProviderPaymentBookingProvided()
+                new_pay_service.provider_payment_id = pay_service.provider_payment_id
+
+                # created dummy cancelled service to support payment
+                new_cancelled_booking_extra_service = BookingProvidedExtra()
+
+                new_cancelled_booking_extra_service.booking_id = service.booking_id
+                new_cancelled_booking_extra_service.booking_package = new_service
+                new_cancelled_booking_extra_service.provider_id = service.provider_id
+                new_cancelled_booking_extra_service.conf_number = service.conf_number
+                # provider service now points to extra replacing package
+                new_cancelled_booking_extra_service.base_service_id = new_extra.id
+                new_cancelled_booking_extra_service.name = service.name
+                new_cancelled_booking_extra_service.description = service.description
+                new_cancelled_booking_extra_service.time = service.time
+                new_cancelled_booking_extra_service.datetime_from = service.datetime_from
+                new_cancelled_booking_extra_service.datetime_to = service.datetime_to
+                new_cancelled_booking_extra_service.base_location_id = service.base_location_id
+                new_cancelled_booking_extra_service.service_addon_id = service.service_addon_id
+                new_cancelled_booking_extra_service.status = 'CN'
+                new_cancelled_booking_extra_service.base_category = 'PE'
+                new_cancelled_booking_extra_service.cost_amount = 0.0
+                new_cancelled_booking_extra_service.cost_amount_to_pay = 0.0
+                new_cancelled_booking_extra_service.cost_amount_paid = 0.0
+                new_cancelled_booking_extra_service.has_payment = True
+                new_cancelled_booking_extra_service.cost_comments = service.cost_comments
+                new_cancelled_booking_extra_service.manual_cost = service.manual_cost
+                new_cancelled_booking_extra_service.price_amount = service.price_amount
+                new_cancelled_booking_extra_service.price_comments = service.price_comments
+                new_cancelled_booking_extra_service.manual_price = service.manual_price
+                new_cancelled_booking_extra_service.p_notes = "NO TOCAR: SERVICIO GENERADO PARA MIGRACION DE PACKAGES - " + service.p_notes
+
+                new_cancelled_booking_extra_service.parameter = 0
+                new_cancelled_booking_extra_service.quantity = 1
+                new_cancelled_booking_extra_service.version = 0
+
+                new_cancelled_booking_extra_service.service = new_extra
+                new_cancelled_booking_extra_service.save()
+
+                new_pay_service.provider_service_id = new_cancelled_booking_extra_service.id
+
+                new_pay_service.amount_paid = pay_service.amount_paid
+                new_pay_service.service_cost_amount_to_pay = pay_service.service_cost_amount_to_pay
+                new_pay_service.service_cost_amount_paid = pay_service.service_cost_amount_paid
+                new_pay_service.save()
 
 
 def build_new_extra(new_extra, package):

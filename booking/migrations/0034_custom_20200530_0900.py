@@ -11,7 +11,8 @@ def migrate_new_data(apps, schema_editor):
     ProviderBookingPaymentService = apps.get_model('booking', 'ProviderBookingPaymentService')
     ProviderPaymentBookingProvided = apps.get_model('booking', 'ProviderPaymentBookingProvided')
 
-    for pay_service in ProviderBookingPaymentService.objects.all():
+    # provider payments for packages are excluded here. migrated on config 0018_custom.
+    for pay_service in ProviderBookingPaymentService.objects.exclude(provider_service__base_category='BP'):
         new_pay_service = ProviderPaymentBookingProvided()
         new_pay_service.provider_payment_id = pay_service.provider_payment_id
         new_pay_service.provider_service_id = pay_service.provider_service_id
