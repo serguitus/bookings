@@ -21,7 +21,9 @@ class AccountingServiceTestCase(TestCase):
             balance=100)
         # test_balance = test_account.balance
         self.assertEqual(test_account.balance, 100)
-        test_account.fix_balance()
+        status, balance = test_account.check_balance()
+        self.assertFalse(status)
+        test_account.recalculate_balance()
         self.assertEqual(test_account.balance, 0)
 
     def test_account_fix_balance_with_movements(self):
@@ -78,8 +80,8 @@ class AccountingServiceTestCase(TestCase):
             amount=test_amount4
         )
 
-        # test_account1.fix_balance()
-        # test_account2.fix_balance()
+        test_account1.recalculate_balance()
+        test_account2.recalculate_balance()
 
         self.assertEqual(test_account1.balance, test_amount1 - test_amount3)
         self.assertEqual(test_account2.balance, test_amount2 - test_amount4)

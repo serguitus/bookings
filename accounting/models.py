@@ -4,7 +4,8 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from accounting.constants import (
-    CURRENCIES, CURRENCY_CUC, MOVEMENT_TYPES, MOVEMENT_TYPE_INPUT)
+    CURRENCIES, CURRENCY_CUC, MOVEMENT_TYPES, MOVEMENT_TYPE_INPUT,
+    MOVEMENT_TYPE_OUTPUT)
 
 
 class Account(models.Model):
@@ -37,6 +38,38 @@ class Account(models.Model):
             self.refresh_from_db()
         finally:
             cursor.close()
+
+    def check_balance(self):
+        """
+        Computes the balance of the account with the database movements
+        To check the balance is correct
+        """
+        all_movs = OperationMovement.objects.filter(account_id=self.id)
+        sum_in = all_movs.filter(
+            movement_type=MOVEMENT_TYPE_INPUT).aggregate(
+                models.Sum('amount'))
+        sum_out = all_movs.filter(
+            movement_type=MOVEMENT_TYPE_OUTPUT).aggregate(
+                models.Sum('amount'))
+        total_in = sum_in['amount__sum'] or 0
+        total_out = sum_out['amount__sum'] or 0
+        if self.balance == total_in - total_out:
+            # everything is fine
+            return True, self.balance
+        return False, total_in - total_out
+
+    def recalculate_balance(self):
+        """ computes and updates self.balance if wrong
+        returns:
+        False: nothing changed.
+        True: balance updated
+        """
+        status, balance = self.check_balance()
+        if not status:
+            self.balance = balance
+            self.save()
+            return 1
+        return 0
 
     @classmethod
     def fix_balances(cls):
