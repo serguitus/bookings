@@ -178,6 +178,7 @@ class QuoteSiteModel(SiteModel):
     form = QuoteForm
     add_form_template = 'booking/quote_change_form.html'
     change_form_template = 'booking/quote_change_form.html'
+    change_list_template = 'booking/quote_change_list.html'
     save_as = True
 
     def get_urls(self):
@@ -241,6 +242,13 @@ class QuoteSiteModel(SiteModel):
         return super(QuoteSiteModel, self).response_add_saveasnew(
             request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue)
 
+    @csrf_protect_m
+    def changelist_view(self, request, extra_context=None):
+        search_service_form = SearchServiceForm()
+        context = dict(search_service_form=search_service_form)
+        context.update(extra_context or {})
+        return super(QuoteSiteModel, self).changelist_view(
+            request, context)
 
     @csrf_protect_m
     def changeform_view(self, request, object_id=None,
