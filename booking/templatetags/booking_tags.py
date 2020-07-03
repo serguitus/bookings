@@ -179,7 +179,7 @@ def bookingextrapackage_services_summary_table(bookingpackage, request):
     bp_id = request.GET.get('booking_package')
     if bookingpackage:
         table = BookingExtraPackageServiceSummaryTable(
-            bookingpackage.bookingprovidedservice_set.all(),
+            bookingpackage.booking_package_services.all(),
             order_by=('datetime_from', 'time', 'datetime_to'))
     elif bp_id:
         bookingpackage = BookingExtraPackage.objects.get(id=bp_id)
@@ -311,7 +311,7 @@ def bookingpackage_services_summary_table(bookingpackage, request):
     bp_id = request.GET.get('booking_package')
     if bookingpackage:
         table = BookingExtraPackageServiceSummaryTable(
-            bookingpackage.bookingprovidedservice_set.all(),
+            bookingpackage.booking_package_services.all(),
             order_by=('datetime_from', 'time', 'datetime_to'))
     elif bp_id:
         bookingpackage = BookingExtraPackage.objects.get(id=bp_id)

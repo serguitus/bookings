@@ -150,49 +150,34 @@ def pre_delete_bookingpackage(sender, instance, **kwargs):
         raise ValidationError('Can not delete Booking Services that are Not Pending')
 
 
-@receiver(pre_delete, sender=BookingProvidedService)
-def pre_delete_bookingpackageservice(sender, instance, **kwargs):
-    if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
-        raise ValidationError('Can not delete Booking Services that are Not Pending')
-
-
-@receiver(pre_delete, sender=BookingProvidedAllotment)
-def pre_delete_bookingpackageallotment(sender, instance, **kwargs):
-    if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
-        raise ValidationError('Can not delete Booking Services that are Not Pending')
-
-
-@receiver(pre_delete, sender=BookingProvidedTransfer)
-def pre_delete_bookingpackagetransfer(sender, instance, **kwargs):
-    if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
-        raise ValidationError('Can not delete Booking Services that are Not Pending')
-
-
-@receiver(pre_delete, sender=BookingProvidedExtra)
-def pre_delete_bookingpackageextra(sender, instance, **kwargs):
-    if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
-        raise ValidationError('Can not delete Booking Services that are Not Pending')
-
-
 @receiver((post_save, post_delete), sender=BookingProvidedAllotment)
 def post_save_post_delete_bookingallotment(sender, instance, **kwargs):
-    if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_booking_update'):
+    if not hasattr(instance, 'avoid_all'):
         with transaction.atomic(savepoint=False):
-            BookingServices.update_booking(instance)
+            if not hasattr(instance, 'avoid_booking_update'):
+                BookingServices.update_booking(instance)
+            if not hasattr(instance, 'avoid_bookingpackage_update'):
+                BookingServices.update_bookingpackage(instance)
 
 
 @receiver((post_save, post_delete), sender=BookingProvidedTransfer)
 def post_save_post_delete_bookingtransfer(sender, instance, **kwargs):
-    if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_booking_update'):
+    if not hasattr(instance, 'avoid_all'):
         with transaction.atomic(savepoint=False):
-            BookingServices.update_booking(instance)
+            if not hasattr(instance, 'avoid_booking_update'):
+                BookingServices.update_booking(instance)
+            if not not hasattr(instance, 'avoid_bookingpackage_update'):
+                BookingServices.update_bookingpackage(instance)
 
 
 @receiver((post_save, post_delete), sender=BookingProvidedExtra)
 def post_save_post_delete_bookingextra(sender, instance, **kwargs):
-    if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_booking_update'):
+    if not hasattr(instance, 'avoid_all'):
         with transaction.atomic(savepoint=False):
-            BookingServices.update_booking(instance)
+            if not hasattr(instance, 'avoid_booking_update'):
+                BookingServices.update_booking(instance)
+            if not hasattr(instance, 'avoid_bookingpackage_update'):
+                BookingServices.update_bookingpackage(instance)
 
 
 @receiver((post_save, post_delete), sender=BookingExtraPackage)
@@ -202,51 +187,8 @@ def post_save_post_delete_bookingpackage(sender, instance, **kwargs):
             BookingServices.update_booking(instance)
 
 
-@receiver(pre_save, sender=BookingProvidedAllotment)
-def pre_save_bookingpackageallotment(sender, instance, **kwargs):
-    if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_update'):
-        BookingServices.setup_bookingservice_amounts(instance)
-    BookingServices.validate_basebookingservice(instance)
-
-
-@receiver(pre_save, sender=BookingProvidedTransfer)
-def pre_save_bookingpackagetransfer(sender, instance, **kwargs):
-    if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_update'):
-        BookingServices.setup_bookingservice_amounts(instance)
-    BookingServices.validate_basebookingservice(instance)
-
-
-@receiver(pre_save, sender=BookingProvidedExtra)
-def pre_save_bookingpackageextra(sender, instance, **kwargs):
-    if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_update'):
-        BookingServices.setup_bookingservice_amounts(instance)
-    BookingServices.validate_basebookingservice(instance)
-
-
-@receiver((post_save, post_delete), sender=BookingProvidedAllotment)
-def post_save_post_delete_bookingpackageallotment(sender, instance, **kwargs):
-    if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_bookingpackage_update'):
-        with transaction.atomic(savepoint=False):
-            BookingServices.update_bookingpackage(instance)
-
-
-@receiver((post_save, post_delete), sender=BookingProvidedTransfer)
-def post_save_post_delete_bookingpackagetransfer(sender, instance, **kwargs):
-    if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_bookingpackage_update'):
-        with transaction.atomic(savepoint=False):
-            BookingServices.update_bookingpackage(instance)
-
-
-@receiver((post_save, post_delete), sender=BookingProvidedExtra)
-def post_save_post_delete_bookingpackageextra(sender, instance, **kwargs):
-    if not hasattr(instance, 'avoid_all') and not hasattr(instance, 'avoid_bookingpackage_update'):
-        with transaction.atomic(savepoint=False):
-            BookingServices.update_bookingpackage(instance)
-
-
 @receiver((post_save), sender=BookingInvoice)
 def post_save_bookinginvoice(sender, instance, **kwargs):
     if not instance.document_number:
-        instance.document_number = '{}-{}'.format(instance.invoice_booking.id,
-                                                  instance.id)
+        instance.document_number = '{}-{}'.format(instance.invoice_booking.id, instance.id)
         instance.save()
