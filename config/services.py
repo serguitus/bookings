@@ -114,6 +114,7 @@ class ConfigServices(object):
                         addon_id=detail.addon_id,
                         pax_range_min=detail.pax_range_min,
                         pax_range_max=detail.pax_range_max,
+                        not_reversible=detail.not_reversible,
                         defaults=cls.calculate_default_amounts(
                             detail, src_agency.gain_percent, dst_agency.gain_percent)
                     )
@@ -126,6 +127,7 @@ class ConfigServices(object):
                         addon_id=detail.addon_id,
                         pax_range_min=detail.pax_range_min,
                         pax_range_max=detail.pax_range_max,
+                        not_reversible=detail.not_reversible,
                         defaults=cls.calculate_default_amounts(
                             detail, src_agency.gain_percent, dst_agency.gain_percent)
                     )
@@ -1530,6 +1532,7 @@ class ConfigServices(object):
                     addon_id=detail.addon_id,
                     pax_range_min=detail.pax_range_min,
                     pax_range_max=detail.pax_range_max,
+                    not_reversible=False,
                     defaults=cls.calculate_default_amounts(
                         detail, 0, dst_agency.gain_percent)
                 )
@@ -1542,6 +1545,7 @@ class ConfigServices(object):
                     addon_id=detail.addon_id,
                     pax_range_min=detail.pax_range_min,
                     pax_range_max=detail.pax_range_max,
+                    not_reversible=False,
                     defaults=cls.calculate_default_amounts(
                         detail, 0, dst_agency.gain_percent)
                 )
