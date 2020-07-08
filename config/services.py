@@ -140,6 +140,7 @@ class ConfigServices(object):
                         addon_id=detail.addon_id,
                         pax_range_min=detail.pax_range_min,
                         pax_range_max=detail.pax_range_max,
+                        not_reversible=detail.not_reversible,
                         defaults=cls.calculate_default_amounts(
                             detail, src_agency.gain_percent, dst_agency.gain_percent)
                     )
@@ -152,6 +153,7 @@ class ConfigServices(object):
                         addon_id=detail.addon_id,
                         pax_range_min=detail.pax_range_min,
                         pax_range_max=detail.pax_range_max,
+                        not_reversible=detail.not_reversible,
                         defaults=cls.calculate_default_amounts(
                             detail, src_agency.gain_percent, dst_agency.gain_percent)
                     )
@@ -1704,6 +1706,7 @@ class ConfigServices(object):
                     addon_id=detail.addon_id,
                     pax_range_min=detail.pax_range_min,
                     pax_range_max=detail.pax_range_max,
+                    not_reversible=False,
                     defaults=cls.calculate_default_amounts(
                         detail, 0, dst_agency.gain_percent)
                 )
@@ -1716,6 +1719,7 @@ class ConfigServices(object):
                     addon_id=detail.addon_id,
                     pax_range_min=detail.pax_range_min,
                     pax_range_max=detail.pax_range_max,
+                    not_reversible=False,
                     defaults=cls.calculate_default_amounts(
                         detail, 0, dst_agency.gain_percent)
                 )
@@ -1907,38 +1911,83 @@ class ConfigServices(object):
             'agency_service__date_from', '-agency_service__date_to')
         return list(qs)
 
-
     @classmethod
-    def list_allotment_details(cls, allotment, agency, date_from, date_to):
-        qs = AgencyAllotmentDetail.objects.all()
-        qs = qs.filter(
-            agency_service__agency=agency,
-            agency_service__service=allotment.id)
-        if date_from:
-            qs = qs.filter(agency_service__date_to__gte=date_from)
-        if date_to:
-            qs = qs.filter(agency_service__date_from__lte=date_to)
-        qs = qs.order_by(
-            'board_type', 'room_type', 'addon', 'pax_range_min', '-pax_range_max',
-            'agency_service__date_from', '-agency_service__date_to')
+    def list_transfer_details(cls, transfer, agency, date_from='', date_to=''):
+        # raw_sql collect transfer routes with their reverses excluding
+        # not_reversible routes and explicitly specified ones
+        raw_sql = """
+        SELECT sq_pd.*
+        FROM
+        (
+        SELECT
+            atd.id, atd.location_from_id, atd.location_to_id,
+            ats.date_from, atd.ad_1_amount
+          FROM `config_agencytransferdetail` atd
+          JOIN `config_agencytransferservice` ats
+            ON ats.id = atd.`agency_service_id`
+          JOIN `config_location` l1
+            ON l1.id = atd.location_from_id
+          JOIN `config_location` l2
+            ON l2.id = atd.location_to_id
+          WHERE
+            ats.service_id = %s AND ats.agency_id = %s
+            AND ats.date_to >= %s AND ats.date_from <= %s
+        UNION
+        SELECT
+            atd1.id, l2.id AS location_from_id, l1.id AS location_to_id,
+            ats.date_from, atd1.ad_1_amount
+          FROM
+            `config_agencytransferdetail` atd1
+          JOIN `config_agencytransferservice` ats
+            ON ats.id = atd1.`agency_service_id`
+          JOIN `config_location` l1
+            ON l1.id = atd1.location_from_id
+          JOIN `config_location` l2
+            ON l2.id = atd1.location_to_id
+          LEFT JOIN `config_agencytransferdetail` atd2
+            ON atd2.`agency_service_id` = atd1.`agency_service_id`
+            AND atd2.`location_from_id` = atd1.`location_to_id`
+            AND atd2.`location_to_id` = atd1.`location_from_id`
+          WHERE
+            atd2.id IS NULL
+            AND ats.service_id = %s AND ats.agency_id = %s
+            AND ats.date_to >= %s AND ats.date_from <= %s
+            AND atd1.not_reversible = FALSE
+        ) sq_pd
+        ORDER BY
+          sq_pd.location_from_id,
+          sq_pd.location_to_id,
+          sq_pd.date_from """
+        qs = AgencyTransferDetail.objects.raw(raw_sql,
+                                              [transfer.id,
+                                               agency.id,
+                                               date_from,
+                                               date_to,
+                                               transfer.id,
+                                               agency.id,
+                                               date_from,
+                                               date_to])
+        # qs = AgencyTransferDetail.objects.annotate(
+        #     origin=F('location_from__name'),
+        #     destination=F('location_to__name'))
+        # qs = qs.filter(
+        #     agency_service__agency=agency,
+        #     agency_service__service=transfer.id)
+        # if date_from:
+        #     qs = qs.filter(agency_service__date_to__gte=date_from)
+        # if date_to:
+        #     qs = qs.filter(agency_service__date_from__lte=date_to)
+        # reversed_qs = qs.filter(not_reversible=False)#.annotate(
+        #     origin=F('location_to__name'),
+        #     destination=F('location_from__name'))
+        # print(qs.count())
+        # print(reversed_qs.count())
+        # qs = qs.union(reversed_qs, all=True)
+        # print(qs[6].__dict__)
+        # qs = qs.order_by(
+        #     'origin', 'destination', 'addon', 'pax_range_min', '-pax_range_max',
+        #     'agency_service__date_from', '-agency_service__date_to')
         return list(qs)
-
-
-    @classmethod
-    def list_transfer_details(cls, transfer, agency, date_from, date_to):
-        qs = AgencyTransferDetail.objects.all()
-        qs = qs.filter(
-            agency_service__agency=agency,
-            agency_service__service=transfer.id)
-        if date_from:
-            qs = qs.filter(agency_service__date_to__gte=date_from)
-        if date_to:
-            qs = qs.filter(agency_service__date_from__lte=date_to)
-        qs = qs.order_by(
-            'location_from', 'location_to', 'addon', 'pax_range_min', '-pax_range_max',
-            'agency_service__date_from', '-agency_service__date_to')
-        return list(qs)
-
 
     @classmethod
     def list_extra_details(cls, extra, agency, date_from, date_to):
@@ -1954,7 +2003,6 @@ class ConfigServices(object):
             'addon', 'pax_range_min', '-pax_range_max',
             'agency_service__date_from', '-agency_service__date_to')
         return list(qs)
-
 
     @classmethod
     def list_package_details(cls, package, agency, date_from, date_to):

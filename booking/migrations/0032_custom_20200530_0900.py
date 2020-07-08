@@ -100,7 +100,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('booking', '0031_auto_20200530_0818'),
-        ('config', '0018_custom_20200530_0900'),
+        ('config', '0019_custom_20200530_0900'),
     ]
 
     operations = [

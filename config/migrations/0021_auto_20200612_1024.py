@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('finance', '0013_auto_20200530_0818'),
-        ('config', '0019_auto_20200610_1646'),
+        ('config', '0020_auto_20200610_1646'),
     ]
 
     operations = [

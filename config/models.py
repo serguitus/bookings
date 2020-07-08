@@ -711,12 +711,17 @@ class AgencyTransferDetail(AmountDetail, RouteData):
     addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
     pax_range_min = models.SmallIntegerField(default=0)
     pax_range_max = models.SmallIntegerField(default=0)
+    not_reversible = models.BooleanField(default=False)
 
     def __str__(self):
         return 'Price for {} ({})'.format(
             self.agency_service,
             self.addon)
 
+    @property
+    def reversible(self):
+        """ convenience filter to inverse values at tables """
+        return not self.not_reversible
 class ProviderExtraService(ProviderCatalogue):
     """
     ProviderExtraService

@@ -1088,7 +1088,7 @@ class AgencyTransferDetailInline(CommonTabularInline):
     model = AgencyTransferDetail
     extra = 0
     fields = (
-        ('location_from', 'location_to', 'addon'),
+        ('location_from', 'location_to', 'not_reversible', 'addon'),
         ('pax_range_min', 'pax_range_max'),
         ('ad_1_amount', 'ch_1_ad_1_amount'),
     )
@@ -1148,7 +1148,7 @@ class AgencyTransferDetailSiteModel(SiteModel):
     fields = (
         'agency_service',
         ('location_from', 'location_to', 'addon'),
-        ('pax_range_min', 'pax_range_max'),
+        ('pax_range_min', 'pax_range_max', 'not_reversible'),
         ('ad_1_amount', 'ch_1_ad_1_amount'))
     list_display = (
         'agency_service', 'location_from', 'location_to', 'addon',

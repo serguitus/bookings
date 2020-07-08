@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('booking', '0031_auto_20200530_0818'),
         ('finance', '0013_auto_20200530_0818'),
-        ('config', '0016_auto_20200328_2020'),
+        ('config', '0017_agencytransferdetail_not_reversible'),
     ]
 
     operations = [

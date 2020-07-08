@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('config', '0019_auto_20200610_1646'),
+        ('config', '0020_auto_20200610_1646'),
         ('booking', '0036_custom_20200610_1700'),
     ]
 
