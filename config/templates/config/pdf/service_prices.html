@@ -90,9 +90,8 @@
         {% setvar detail.room_type.name as prev_room %}
         {% setvar detail.addon.name as prev_addon %}
     {% endfor %}
-{% endif %}
 
-{% if service.category == 'T' %}
+{% elif service.category == 'T' %}
     <tr>
         {% if service.pax_range %}
             <td colspan="7" class="bold-top-line">
@@ -113,7 +112,7 @@
         {% endif %}
         <td class="top-line date-content"><b>From</b></td>
         <td class="top-line date-content"><b>To</b></td>
-        <td class="top-line amount-content"><b>SGL</b></td>
+        <td class="top-line amount-content"><b>Price</b></td>
     </tr>
     {% setvar '' as prev_from %}
     {% setvar '' as prev_to %}
@@ -170,9 +169,8 @@
         {% setvar detail.location_to.name as prev_to %}
         {% setvar detail.addon.name as prev_addon %}
     {% endfor %}
-{% endif %}
 
-{% if service.category == 'E' %}
+{% elif service.category == 'E' %}
     <tr>
         {% if service.pax_range %}
             <td colspan="5" class="bold-top-line">
@@ -224,9 +222,8 @@
         </tr>
         {% setvar detail.addon.name as prev_addon %}
     {% endfor %}
-{% endif %}
 
-{% if service.category == 'P' %}
+{% elif service.category == 'P' %}
     <tr>
         {% if service.pax_range %}
             <td colspan="5" class="bold-top-line">

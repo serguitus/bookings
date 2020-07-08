@@ -138,7 +138,8 @@ class AgencyTransferDetailTable(ProviderTransferDetailTable):
         attrs = {'class': 'table table-hover table-condensed'}
         model = AgencyTransferDetail
         fields = [
-            'edit', 'location_from', 'location_to', 'addon', 'pax_range_min', 'pax_range_max',
+            'edit', 'location_from', 'location_to', 'reversible', 'addon',
+            'pax_range_min', 'pax_range_max',
             'ad_1_amount', 'ch_1_ad_1_amount']
 
     edit = tables.TemplateColumn(
@@ -147,6 +148,8 @@ class AgencyTransferDetailTable(ProviderTransferDetailTable):
             "edit_url": 'common:config_agencytransferdetail_change'
         },
         verbose_name='Edit')
+    reversible = tables.BooleanColumn()
+
 
 
 class AgencyExtraDetailTable(ProviderExtraDetailTable):
