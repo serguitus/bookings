@@ -331,7 +331,8 @@ class BookServiceData(models.Model):
 
     @property
     def service_location(self):
-        return self.base_location.name
+        if self.base_location:
+            return self.base_location.name
 
 
 class BookAllotmentData(models.Model):

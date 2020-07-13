@@ -8,8 +8,10 @@ from django import forms
 from django.forms import widgets
 
 from booking.models import (
-    Quote, NewQuoteAllotment, NewQuoteTransfer, NewQuoteExtra, QuoteExtraPackage,
-    Booking, BaseBookingServicePax, BookingProvidedAllotment, BookingProvidedTransfer, BookingProvidedExtra, BookingExtraPackage,
+    Quote, NewQuoteAllotment, NewQuoteTransfer,
+    NewQuoteExtra, QuoteExtraPackage,
+    Booking, BaseBookingServicePax, BookingProvidedAllotment,
+    BookingProvidedTransfer, BookingProvidedExtra, BookingExtraPackage,
     ProviderBookingPayment,
 )
 
@@ -217,11 +219,11 @@ class NewQuoteExtraForm(forms.ModelForm, ServiceForm):
             'description': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
             'pickup_office': autocomplete.ModelSelect2(
                 url='carrentaloffice-autocomplete',
-                forward=['service',],
+                forward=['service'],
                 ),
             'dropoff_office': autocomplete.ModelSelect2(
                 url='carrentaloffice-autocomplete',
-                forward=['service',],
+                forward=['service'],
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())

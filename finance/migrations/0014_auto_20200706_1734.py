@@ -9,7 +9,7 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('finance', '0012_finantialdocument_content_ref'),
+        ('finance', '0013_auto_20200530_0818'),
     ]
 
     operations = [

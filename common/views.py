@@ -1,6 +1,7 @@
 from django.forms.formsets import DELETION_FIELD_NAME
 from django.views import View
 
+
 class ModelChangeFormProcessorView(View):
 
     model = None
