@@ -365,17 +365,17 @@ class BookingExtraPackageAmountsView(BookingServiceAmountsView):
     common_sitemodel = BookingExtraPackageSiteModel
 
 
-class BookingProvidedAllotmentAmountsView(BookingPackageServiceAmountsView):
+class BookingProvidedAllotmentAmountsView(BookingServiceAmountsView):
     model = BookingProvidedAllotment
     common_sitemodel = BookingProvidedAllotmentSiteModel
 
 
-class BookingProvidedTransferAmountsView(BookingPackageServiceAmountsView):
+class BookingProvidedTransferAmountsView(BookingServiceAmountsView):
     model = BookingProvidedTransfer
     common_sitemodel = BookingProvidedTransferSiteModel
 
 
-class BookingProvidedExtraAmountsView(BookingPackageServiceAmountsView):
+class BookingProvidedExtraAmountsView(BookingServiceAmountsView):
     model = BookingProvidedExtra
     common_sitemodel = BookingProvidedExtraSiteModel
 

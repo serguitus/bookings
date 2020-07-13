@@ -3294,26 +3294,20 @@ class BookingServices(object):
 
     @classmethod
     def _find_booking_service(cls, bookingservice):
-        if isinstance(bookingservice, BookingProvidedService):
-            if bookingservice.base_service.category == constants.SERVICE_CATEGORY_ALLOTMENT:
-                bookingservice = cls._find_bookingservice(bookingservice, BookingProvidedAllotment.objects)
-            elif bookingservice.base_service.category == constants.SERVICE_CATEGORY_TRANSFER:
-                bookingservice = cls._find_bookingservice(bookingservice, BookingProvidedTransfer.objects)
-            elif bookingservice.base_service.category == constants.SERVICE_CATEGORY_EXTRA:
-                bookingservice = cls._find_bookingservice(bookingservice, BookingProvidedExtra.objects)
-            elif bookingservice.base_category == constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE:
-                bookingservice = cls._find_bookingservice(bookingservice, BookingExtraPackage.objects)
-
-        if isinstance(bookingservice, BookingProvidedService):
-            if bookingservice.base_service.category == constants.SERVICE_CATEGORY_ALLOTMENT:
-                bookingservice = cls._find_bookingservice(
-                    bookingservice, BookingProvidedAllotment.objects)
-            elif bookingservice.base_service.category == constants.SERVICE_CATEGORY_TRANSFER:
-                bookingservice = cls._find_bookingservice(
-                    bookingservice, BookingProvidedTransfer.objects)
-            elif bookingservice.base_service.category == constants.SERVICE_CATEGORY_EXTRA:
-                bookingservice = cls._find_bookingservice(
-                    bookingservice, BookingProvidedExtra.objects)
+        if bookingservice.base_category in [
+                constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT,
+                constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT]:
+            bookingservice = cls._find_bookingservice(bookingservice, BookingProvidedAllotment.objects)
+        elif bookingservice.base_category in [
+                constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER,
+                constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_TRANSFER]:
+            bookingservice = cls._find_bookingservice(bookingservice, BookingProvidedTransfer.objects)
+        elif bookingservice.base_category in [
+                constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA,
+                constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA]:
+            bookingservice = cls._find_bookingservice(bookingservice, BookingProvidedExtra.objects)
+        elif bookingservice.base_category == constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE:
+            bookingservice = cls._find_bookingservice(bookingservice, BookingExtraPackage.objects)
 
         return bookingservice
 
@@ -3632,16 +3626,27 @@ class BookingServices(object):
 
 
     @classmethod
-    def _totalize_services(cls, services, update_services=False):
+    def _totalize_services_cost(cls, services, update_services=False):
         if services:
-            cost, price = 0, 0
+            cost = 0
             for service in services:
                 if update_services:
                     cls.update_bookingservice_amounts(service)
                 cost = cls.totalize(cost, service.cost_amount)
+            return  cls._round_cost(cost)
+        return None
+
+
+    @classmethod
+    def _totalize_services_price(cls, services, update_services=False):
+        if services:
+            price = 0
+            for service in services:
+                if update_services:
+                    cls.update_bookingservice_amounts(service)
                 price = cls.totalize(price, service.price_amount)
-            return  cls._round_cost(cost), cls._round_cost(price)
-        return None, None
+            return  cls._round_price(price)
+        return None
 
 
     @classmethod
@@ -3650,12 +3655,19 @@ class BookingServices(object):
             booking = obj
         else:
             booking = obj.booking
-        booking_services = list(
-            BaseBookingService.objects.all().filter(
+
+        booking_provided_services = list(
+            BookingProvidedService.objects.all().filter(
                 booking=booking.id).exclude(
                     status=constants.SERVICE_STATUS_CANCELLED))
 
-        cost, price = cls._totalize_services(booking_services)
+        booking_invoiced_services = list(
+            BaseBookingService.invoiced_objects.all().filter(
+                booking=booking.id).exclude(
+                    status=constants.SERVICE_STATUS_CANCELLED))
+
+        cost = cls._totalize_services_cost(booking_provided_services)
+        price = cls._totalize_services_price(booking_invoiced_services)
 
         if booking.is_package_price:
             price, price_msg = cls._find_booking_package_price(booking)

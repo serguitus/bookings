@@ -1014,8 +1014,7 @@ class BookingSiteModel(SiteModel):
         return result, pdf
 
     def response_change(self, request, obj):
-        bookingservices = BookingServices. \
-                          find_bookingservices_with_different_amounts(obj)
+        bookingservices = BookingServices.find_bookingservices_with_different_amounts(obj)
         if bookingservices:
             # make a new GET request to show list of services to update
             redirect_url = reverse('bookingservice_update', args=[obj.id])
@@ -1301,6 +1300,7 @@ class BookingProvidedServiceSiteModel(SiteModel):
     list_details_template = 'booking/bookingservice_details.html'
     change_details_template = 'booking/bookingservice_details.html'
     totalsum_list = ['cost_amount', 'price_amount']
+    inlines = [BaseBookingServicePaxInline]
 
     def get_changelist(self, request, **kwargs):
         """
@@ -1633,7 +1633,7 @@ class BookingProvidedAllotmentSiteModel(BookingProvidedServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                'booking_package', ('service', 'search_location'),
+                'booking', 'booking_package', ('service', 'search_location'),
                 ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to'),
                 ('room_type', 'board_type'),
@@ -1644,7 +1644,7 @@ class BookingProvidedAllotmentSiteModel(BookingProvidedServiceSiteModel):
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide', 'show')})
     )
-    list_display = ('name', 'booking_package', 'datetime_from',
+    list_display = ('name', 'booking', 'booking_package', 'datetime_from',
                     'datetime_to', 'cost_amount', 'manual_cost',
                     'price_amount', 'manual_price', 'utility_percent',
                     'utility', 'status', 'cost_amount_paid')
@@ -1653,6 +1653,7 @@ class BookingProvidedAllotmentSiteModel(BookingProvidedServiceSiteModel):
                    'booking_package__booking__reference', 'conf_number',
                    ('datetime_from', DateTopFilter), 'status')
     ordering = ('datetime_from', 'booking_package', 'service__name',)
+    save_as = True
     form = BookingProvidedAllotmentForm
     add_form_template = 'booking/bookingprovidedallotment_change_form.html'
     change_form_template = 'booking/bookingprovidedallotment_change_form.html'
@@ -1670,7 +1671,7 @@ class BookingProvidedTransferSiteModel(BookingProvidedServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                'booking_package', ('service', 'search_location'), ('status', 'conf_number'),
+                'booking', 'booking_package', ('service', 'search_location'), ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
                 ('location_from', 'place_from'),
                 ('pickup', 'schedule_from', 'schedule_time_from'),
@@ -1684,7 +1685,7 @@ class BookingProvidedTransferSiteModel(BookingProvidedServiceSiteModel):
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide', 'show')})
     )
-    list_display = ('name', 'booking_package', 'service_addon',
+    list_display = ('name', 'booking', 'booking_package', 'service_addon',
                     'datetime_from', 'time',
                     'cost_amount', 'manual_cost', 'price_amount',
                     'manual_price', 'utility_percent',
@@ -1712,7 +1713,7 @@ class BookingProvidedExtraSiteModel(BookingProvidedServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                'booking_package', ('service', 'search_location'), ('status', 'conf_number'),
+                'booking', 'booking_package', ('service', 'search_location'), ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
                 'service_addon',
                 ('quantity', 'parameter'),
@@ -1724,7 +1725,7 @@ class BookingProvidedExtraSiteModel(BookingProvidedServiceSiteModel):
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide', 'show')})
     )
-    list_display = ('name', 'booking_package', 'service_addon',
+    list_display = ('name', 'booking', 'booking_package', 'service_addon',
                     'quantity', 'parameter',
                     'datetime_from', 'datetime_to', 'time',
                     'cost_amount', 'manual_cost',

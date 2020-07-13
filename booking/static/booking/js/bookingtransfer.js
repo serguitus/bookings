@@ -1,5 +1,5 @@
 var bookingservice_amounts_url = base_url + 'booking/bookingtransfer-amounts/';
-var service_form_selector = '#bookingtransfer_form';
+var service_form_selector = '#bookingprovidedtransfer_form';
 var providers_costs_url = base_url + 'booking/bookingtransfer-providers-costs/';
 var book_details_url = base_url + 'booking/transfer-service-details/';
 
