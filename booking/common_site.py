@@ -1763,10 +1763,10 @@ class BookingProvidedExtraSiteModel(BookingProvidedServiceSiteModel):
         ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'booking_package', 'service__name',)
     form = BookingProvidedExtraForm
-    add_form_template = 'booking/bookingpackageextra_change_form.html'
-    change_form_template = 'booking/bookingpackageextra_change_form.html'
-    list_details_template = 'booking/bookingpackageextra_details.html'
-    change_details_template = 'booking/bookingpackageextra_details.html'
+    add_form_template = 'booking/bookingextra_change_form.html'
+    change_form_template = 'booking/bookingextra_change_form.html'
+    list_details_template = 'booking/bookingextra_details.html'
+    change_details_template = 'booking/bookingextra_details.html'
 
 
 class BookingExtraPackageSiteModel(BaseBookingServiceSiteModel):

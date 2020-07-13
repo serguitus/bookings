@@ -254,7 +254,7 @@ class QuoteExtraPackageAmountsView(ModelChangeFormProcessorView):
 
 
 class BookingAmountsView(ModelChangeFormProcessorView):
-    
+
     model = Booking
     common_sitemodel = BookingSiteModel
     common_site = bookings_site

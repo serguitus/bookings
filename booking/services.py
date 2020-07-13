@@ -725,7 +725,9 @@ class BookingServices(object):
                     c2, c2_msg, p2, p2_msg, \
                     c3, c3_msg, p3, p3_msg, \
                     c4, c4_msg, p4, p4_msg = cls._find_amounts_for_quoteservice(
-                        quote_pax_variant=pax_variant, quoteservice=allotment, agency=agency,
+                        quote_pax_variant=pax_variant,
+                        quoteservice=allotment,
+                        agency=agency,
                         manuals=True)
 
                     # service amounts
