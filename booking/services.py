@@ -1093,6 +1093,9 @@ class BookingServices(object):
         else:
             return
 
+        if bookingpackage is None:
+            return
+
         cost = 0
         price = 0
         date_from = None
@@ -4552,6 +4555,7 @@ class BookingServices(object):
                 booking_package=package_pk))
             for package_service in extras:
                 cls._clone_bookingpackage_service(package_service, service)
+
             cls.update_bookingpackage(service)
 
         cls.update_booking(new_booking)

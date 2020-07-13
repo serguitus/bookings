@@ -166,7 +166,7 @@ def post_save_post_delete_bookingtransfer(sender, instance, **kwargs):
         with transaction.atomic(savepoint=False):
             if not hasattr(instance, 'avoid_booking_update'):
                 BookingServices.update_booking(instance)
-            if not not hasattr(instance, 'avoid_bookingpackage_update'):
+            if not hasattr(instance, 'avoid_bookingpackage_update'):
                 BookingServices.update_bookingpackage(instance)
 
 

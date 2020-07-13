@@ -1322,6 +1322,30 @@ class BookingProvidedServiceSiteModel(SiteModel):
 
     confirmed_services.short_description = "Confirm Services"
 
+    def response_post_delete(self, request, obj):
+        if hasattr(obj, 'booking') and obj.booking:
+            return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
+        booking_obj = request.POST.get('booking')
+        if booking_obj:
+            return redirect(reverse('common:booking_booking_change', args=[booking_obj]))
+        return super(BookingProvidedServiceSiteModel, self).response_post_delete(request, obj)
+
+    def response_post_save_add(self, request, obj):
+        if hasattr(obj, 'booking') and obj.booking:
+            return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
+        booking_obj = request.POST.get('booking')
+        if booking_obj:
+            return redirect(reverse('common:booking_booking_change', args=[booking_obj]))
+        return super(BookingProvidedServiceSiteModel, self).response_post_save_add(request, obj)
+
+    def response_post_save_change(self, request, obj):
+        if hasattr(obj, 'booking') and obj.booking:
+            return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
+        booking_obj = request.POST.get('booking')
+        if booking_obj:
+            return redirect(reverse('common:booking_booking_change', args=[booking_obj]))
+        return super(BookingProvidedServiceSiteModel, self).response_post_save_change(request, obj)
+
 
 class BaseBookingServiceSiteModel(SiteModel):
 
@@ -1635,7 +1659,7 @@ class BookingProvidedAllotmentSiteModel(BookingProvidedServiceSiteModel):
             'fields': (
                 'booking', 'booking_package', ('service', 'search_location'),
                 ('status', 'conf_number'),
-                ('datetime_from', 'datetime_to'),
+                ('datetime_from', 'nights', 'datetime_to'),
                 ('room_type', 'board_type'),
                 ('manual_cost', 'provider'),
                 'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility', 'id', 'version',
@@ -1714,7 +1738,7 @@ class BookingProvidedExtraSiteModel(BookingProvidedServiceSiteModel):
         (None, {
             'fields': (
                 'booking', 'booking_package', ('service', 'search_location'), ('status', 'conf_number'),
-                ('datetime_from', 'datetime_to', 'time'),
+                ('datetime_from', 'nights', 'datetime_to', 'time'),
                 'service_addon',
                 ('quantity', 'parameter'),
                 ('pickup_office', 'dropoff_office',),
@@ -1738,7 +1762,7 @@ class BookingProvidedExtraSiteModel(BookingProvidedServiceSiteModel):
          'booking_package__booking__reference',
         ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'booking_package', 'service__name',)
-    form = BookingProvidedTransferForm
+    form = BookingProvidedExtraForm
     add_form_template = 'booking/bookingpackageextra_change_form.html'
     change_form_template = 'booking/bookingpackageextra_change_form.html'
     list_details_template = 'booking/bookingpackageextra_details.html'
