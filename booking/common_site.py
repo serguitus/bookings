@@ -1781,7 +1781,7 @@ class BookingExtraPackageSiteModel(BaseBookingServiceSiteModel):
             'fields': (
                 ('booking', 'voucher_detail'), ('service', 'search_location'), ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
-                ('provider'), 'cost_amount',
+                'cost_amount',
                 ('manual_price', 'price_by_package_catalogue'),
                 'price_amount', 'utility_percent', 'utility', 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
@@ -1803,7 +1803,7 @@ class BookingExtraPackageSiteModel(BaseBookingServiceSiteModel):
 
     def save_related(self, request, form, formsets, change):
         with transaction.atomic(savepoint=False):
-            super(BookingPackageSiteModel, self).save_related(request, form, formsets, change)
+            super(BookingExtraPackageSiteModel, self).save_related(request, form, formsets, change)
             obj = self.save_form(request, form, change)
             BookingServices.update_bookingpackageservices_amounts(obj)
 

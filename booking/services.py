@@ -1207,13 +1207,13 @@ class BookingServices(object):
     @classmethod
     def update_bookingservice_description(cls, booking_service):
         CLASSES = {
-            BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER: BookingProvidedTransfer,
-            BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA: BookingProvidedExtra,
-            BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT: BookingProvidedAllotment,
-            BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE: BookingExtraPackage,
-            BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_TRANSFER: BookingProvidedTransfer,
-            BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA: BookingProvidedExtra,
-            BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT: BookingProvidedAllotment,
+            constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER: BookingProvidedTransfer,
+            constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA: BookingProvidedExtra,
+            constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT: BookingProvidedAllotment,
+            constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE: BookingExtraPackage,
+            constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_TRANSFER: BookingProvidedTransfer,
+            constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA: BookingProvidedExtra,
+            constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT: BookingProvidedAllotment,
         }
         service = CLASSES[booking_service.base_category].objects.get(id=booking_service.id)
         service.description = service.build_description()
@@ -3687,6 +3687,19 @@ class BookingServices(object):
         if fields:
             booking.code_updated = True
             booking.save(update_fields=fields)
+
+
+    @classmethod
+    def _totalize_services(cls, services, update_services=False):
+        if services:
+            cost, price = 0, 0
+            for service in services:
+                if update_services:
+                    cls.update_bookingservice_amounts(service)
+                cost = cls.totalize(cost, service.cost_amount)
+                price = cls.totalize(price, service.price_amount)
+            return  cls._round_cost(cost), cls._round_cost(price)
+        return None, None
 
 
     @classmethod
