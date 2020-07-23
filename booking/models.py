@@ -1060,6 +1060,9 @@ class BookingProvidedService(BaseBookingService):
                                         blank=True,
                                         null=True)
 
+    def __str__(self):
+        return '%s' % (self.base_service)
+
 
 class BookingProvidedAllotment(BookingProvidedService, BookAllotmentData):
     """

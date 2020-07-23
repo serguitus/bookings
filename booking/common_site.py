@@ -1346,6 +1346,16 @@ class BookingProvidedServiceSiteModel(SiteModel):
             return redirect(reverse('common:booking_booking_change', args=[booking_obj]))
         return super(BookingProvidedServiceSiteModel, self).response_post_save_change(request, obj)
 
+    def changeform_context(
+            self, request, form, obj, formsets, inline_instances,
+            add, opts, object_id, to_field, form_validated=None, extra_context=None):
+        search_service_form = SearchServiceForm()
+        context = dict(search_service_form=search_service_form)
+        context.update(extra_context or {})
+        return super(BookingProvidedServiceSiteModel, self).changeform_context(
+            request, form, obj, formsets, inline_instances,
+            add, opts, object_id, to_field, form_validated, context)
+
 
 class BaseBookingServiceSiteModel(SiteModel):
 
