@@ -2119,18 +2119,9 @@ def default_requests_mail_subject(request, provider=None, booking=None):
 
 def find_provider_requests_services(request, provider=None, booking=None):
     if provider:
-        services = list(BookingService.objects.filter(
+        services = list(BookingProvidedService.objects.filter(
             booking=booking,
             provider=provider).exclude(status='CN').all())
-        package_services = list(BookingPackageService.objects.filter(
-            Q(booking_package__booking=booking)
-            & (
-                Q(provider=provider)
-                | (
-                    Q(booking_package__provider=provider) & Q(provider__isnull=True)
-                )
-            )).all())
-        services.extend(package_services)
         try:
             services.sort(key=lambda x: x.datetime_from)
         except TypeError:

@@ -17,7 +17,7 @@ from booking.tables import (
     QuoteConfirmationTable,
     NewQuoteServiceBookDetailTable,
     BookingServiceTable,
-    BookingExtraPackageServiceTable, BookingExtraPackageServiceSummaryTable,
+    BookingExtraPackageServiceSummaryTable,
     BookingConfirmationTable, BookingServiceSummaryTable, BookingPaxTable,
     BookingVouchersTable,
     BookingServiceUpdateTable,

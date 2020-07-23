@@ -289,14 +289,26 @@ class BookingServiceAmountsView(ModelChangeFormProcessorView):
                 'price': None,
                 'price_message': 'Service Id Missing',
             }), None
-        pax_list = inlines[0]
-        if not pax_list:
-            return JsonResponse({
-                'cost': None,
-                'cost_message': 'Paxes Missing',
-                'price': None,
-                'price_message': 'Paxes Missing',
-            }), pax_list
+        if hasattr(bookingservice, 'booking_package_id') and bookingservice.booking_package_id is not None:
+            pax_list = list(BaseBookingServicePax.objects.filter(
+                booking_service=bookingservice.booking_package_id).all())
+            if not pax_list:
+                return JsonResponse({
+                    'cost': None,
+                    'cost_message': 'Paxes Missing',
+                    'price': None,
+                    'price_message': 'Paxes Missing',
+                }), pax_list
+        else:
+            pax_list = inlines[0]
+            if not pax_list:
+                return JsonResponse({
+                    'cost': None,
+                    'cost_message': 'Paxes Missing',
+                    'price': None,
+                    'price_message': 'Paxes Missing',
+                }), pax_list
+
         return None, pax_list
 
     def process_data(self, bookingservice, inlines):
@@ -307,51 +319,6 @@ class BookingServiceAmountsView(ModelChangeFormProcessorView):
 
         cost, cost_msg, price, price_msg = BookingServices.find_bookingservice_amounts(
             bookingservice, pax_list)
-        return JsonResponse({
-            'cost': cost,
-            'cost_message': cost_msg,
-            'price': price,
-            'price_message': price_msg,
-        })
-
-
-class BookingPackageServiceAmountsView(ModelChangeFormProcessorView):
-    common_site = bookings_site
-
-    def verify(self, bookingpackageservice):
-        if not hasattr(bookingpackageservice, 'booking_package') or not bookingpackageservice.booking_package:
-            return JsonResponse({
-                'cost': None,
-                'cost_message': 'BookingPackage Id Missing',
-                'price': None,
-                'price_message': 'BookingPackage Id Missing',
-            }), None
-        if not hasattr(bookingpackageservice, 'service') or not bookingpackageservice.service:
-            return JsonResponse({
-                'cost': None,
-                'cost_message': 'Service Id Missing',
-                'price': None,
-                'price_message': 'Service Id Missing',
-            }), None
-        pax_list = list(BaseBookingServicePax.objects.filter(
-            booking_service=bookingpackageservice.booking_package_id).all())
-        if not pax_list:
-            return JsonResponse({
-                'cost': None,
-                'cost_message': 'Paxes Missing',
-                'price': None,
-                'price_message': 'Paxes Missing',
-            }), pax_list
-        return None, pax_list
-
-    def process_data(self, bookingpackageservice, inlines):
-
-        response, pax_list = self.verify(bookingpackageservice)
-        if response:
-            return response
-
-        cost, cost_msg, price, price_msg = BookingServices.find_bookingservice_amounts(
-            bookingpackageservice, pax_list)
         return JsonResponse({
             'cost': cost,
             'cost_message': cost_msg,

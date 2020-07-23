@@ -362,28 +362,6 @@ class BookingVouchersTable(tables.Table):
         return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
 
-class BookingExtraPackageServiceTable(tables.Table):
-    class Meta:
-        model = BookingProvidedService
-        template_name = 'booking/bookingprovidedservice_list.html'
-        fields = [
-            'name', 'datetime_from', 'datetime_to',
-            'cost_amount', 'price_amount', 'utility_percent', 'utility',
-            'provider', 'status', 'cost_amount_paid']
-
-    def __init__(self, *args, **kwargs):
-        self.base_columns['utility_percent'].verbose_name = 'Util.%'
-        self.base_columns['utility'].verbose_name = 'Util.'
-        super(BookingProvidedServiceTable, self).__init__(*args, **kwargs)
-
-    def render_name(self, value, record):
-        obj_url = reverse(
-            'common:booking_bookingextrapackage_change',
-            args=(quote(record.pk),)
-        )
-        return format_html('<a href="%s">%s</a>' % (obj_url, value))
-
-
 class BookingExtraPackageServiceSummaryTable(tables.Table):
     class Meta:
         model = BookingProvidedService
@@ -394,6 +372,13 @@ class BookingExtraPackageServiceSummaryTable(tables.Table):
         row_attrs = {
             'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING[record.status]),
         }
+
+    def render_name(self, value, record):
+        obj_url = reverse(
+            'common:booking_%s_change' % (BOOKINGSERVICE_TYPES[record.base_category]),
+            args=(quote(record.pk),)
+        )
+        return format_html('<a href="%s">%s</a>' % (obj_url, value))
 
 
 class BookingServiceUpdateTable(tables.Table):

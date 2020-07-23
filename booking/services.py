@@ -1705,11 +1705,12 @@ class BookingServices(object):
 
     @classmethod
     def _find_bookingservice_pax_list(cls, bookingservice):
+
         if isinstance(bookingservice, (
-                BookingProvidedAllotment, BookingProvidedTransfer, BookingProvidedExtra, BookingExtraPackage, BookingProvidedService)):
-            return list(BaseBookingServicePax.objects.filter(booking_service=bookingservice.id).all())
-        return list(BaseBookingServicePax.objects.filter(
-            booking_service=bookingservice.booking_package.id).all())
+                BookingProvidedAllotment, BookingProvidedTransfer, BookingProvidedExtra, BookingProvidedService)):
+            if bookingservice.booking_package_id is not None:
+                return list(BaseBookingServicePax.objects.filter(booking_service=bookingservice.booking_package_id).all())
+        return list(BaseBookingServicePax.objects.filter(booking_service=bookingservice.id).all())
 
 
     @classmethod
