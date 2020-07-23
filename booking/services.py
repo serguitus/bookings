@@ -248,7 +248,7 @@ class BookingServices(object):
     @classmethod
     def build_bookingservice_paxes(cls, bookingservice, pax_list, user=None):
         for service_pax in pax_list:
-            bookingservice_pax = BookingServicePax()
+            bookingservice_pax = BaseBookingServicePax()
             bookingservice_pax.booking_service = bookingservice
             bookingservice_pax.booking_pax = service_pax.booking_pax
             bookingservice_pax.group = service_pax.group
@@ -408,7 +408,7 @@ class BookingServices(object):
                         booking_pax.avoid_booking_update = True
                         booking_pax.save()
 
-                        service_pax = BookingServicePax()
+                        service_pax = BaseBookingServicePax()
                         service_pax.booking_pax = booking_pax
                         service_pax.group = booking_pax.pax_group
                         pax_list.append(service_pax)
@@ -959,7 +959,7 @@ class BookingServices(object):
         if booking_service is None:
             return None, None
         pax_list = list(
-            BookingServicePax.objects.filter(booking_service=booking_service.id))
+            BaseBookingServicePax.objects.filter(booking_service=booking_service.id))
         return cls.find_bookingservice_paxes_groups(pax_list, service, for_cost)
 
 
@@ -3752,7 +3752,7 @@ class BookingServices(object):
         transfer_list = list(BookingProvidedTransfer.objects.filter(
             booking_package=bookingpackage.id).exclude(
                 status=constants.SERVICE_STATUS_CANCELLED).all())
-        extra_list = list(BookingProvidedTransfer.objects.filter(
+        extra_list = list(BookingProvidedExtra.objects.filter(
             booking_package=bookingpackage.id).exclude(
                 status=constants.SERVICE_STATUS_CANCELLED).all())
         if ((not allotment_list) and (not transfer_list) and (not extra_list)):
@@ -3765,11 +3765,15 @@ class BookingServices(object):
                 else:
                     price, price_msg = bookingpackage.price_amount, None
             else:
-                price, price_msg = BookingServices.package_price(
-                    bookingpackage.service_id,
+                price, price_msg = ConfigServices.extra_prices(
+                    bookingpackage.service,
                     bookingpackage.datetime_from, bookingpackage.datetime_to,
                     cls.find_groups(bookingpackage, bookingpackage.service, False),
-                    agency)
+                    agency,
+                    bookingpackage.service_addon_id,
+                    bookingpackage.quantity,
+                    bookingpackage.parameter
+                )
             if allotment_list:
                 for allotment in allotment_list:
                     c, c_msg = cls.find_bookingservice_update_cost(allotment)
@@ -3889,7 +3893,7 @@ class BookingServices(object):
 
     @classmethod
     def update_bookingpackageservices_amounts(cls, obj):
-        if isinstance(obj, BookingServicePax):
+        if isinstance(obj, BaseBookingServicePax):
             bookingpackage = obj.booking_service
         else:
             bookingpackage = obj
@@ -4383,7 +4387,7 @@ class BookingServices(object):
         if bookingservice.status != constants.SERVICE_STATUS_PENDING:
             bookingservice.status = constants.SERVICE_STATUS_PENDING
             bookingservice.save(update_fields=['status'])
-        bookingservice_pax = BookingServicePax()
+        bookingservice_pax = BaseBookingServicePax()
         bookingservice_pax.booking_service = bookingservice
         bookingservice_pax.booking_pax = booking_pax
         bookingservice_pax.group = booking_pax.pax_group
