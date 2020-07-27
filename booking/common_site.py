@@ -1758,12 +1758,12 @@ class BookingPackageServiceSiteModel(SiteModel):
                 extra_context.update(
                     {
                         'modal_title': 'Provider Requests Mail',
-                        'default_mail_from': default_requests_mail_from(request, provider, bps.booking()),
-                        'default_mail_to': default_requests_mail_to(request, provider, bps.booking()),
+                        'default_mail_from': default_requests_mail_from(request, provider, bps.booking),
+                        'default_mail_to': default_requests_mail_to(request, provider, bps.booking),
                         'default_mail_cc': '',
-                        'default_mail_bcc': default_requests_mail_bcc(request, provider, bps.booking()),
-                        'default_mail_subject': default_requests_mail_subject(request, provider, bps.booking()),
-                        'default_mail_body': default_requests_mail_body(request, provider, bps.booking()),
+                        'default_mail_bcc': default_requests_mail_bcc(request, provider, bps.booking),
+                        'default_mail_subject': default_requests_mail_subject(request, provider, bps.booking),
+                        'default_mail_body': default_requests_mail_body(request, provider, bps.booking),
                     })
 
             return super(BookingPackageServiceSiteModel, self).changeform_view(request, object_id, form_url, extra_context)

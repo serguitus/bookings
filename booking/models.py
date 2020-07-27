@@ -1513,8 +1513,8 @@ class BookingPackageService(BaseBookingService):
         # Call the "real" save() method.
         super(BookingPackageService, self).save(force_insert, force_update, using, update_fields)
 
-    def booking(self):
-        return self.booking_package.booking
+    #def booking(self):
+    #    return self.booking_package.booking
 
     def rooming_list(self):
         return self.booking_package.rooming_list
