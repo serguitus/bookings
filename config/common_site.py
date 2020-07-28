@@ -507,14 +507,13 @@ class TransferSiteModel(BaseServiceSiteModel):
     form = ServiceForm
 
 
-
 class ExtraSiteModel(BaseServiceSiteModel):
     model_order = 6130
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = MENU_LABEL_CONFIG_GROUP
     fields = ('name', 'service_category', 'location',
               ('cost_type', 'parameter_type'), 'max_capacity',
-              'pax_range',
+              ('pax_range', 'default_as_package'),
               ('child_discount_percent', 'child_age', 'infant_age'),
               ('car_rental', 'enabled'),)
     list_display = ('name', 'service_category', 'location', 'cost_type',

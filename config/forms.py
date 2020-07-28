@@ -485,9 +485,10 @@ class SearchServiceForm(forms.Form):
         required=False,
         widget=autocomplete.ModelSelect2(
             url='location-autocomplete',
-            attrs={'dropdownParent': '#searchServiceModal'},
+            attrs={'dropdownParent': '#searchServiceModal',
+                   'data-placeholder': 'Filter by Location'},
         ),
-        label='Search Location',
+        label='',
     )
     search_service = forms.ModelChoiceField(
         queryset=Service.objects.all(),
@@ -495,11 +496,30 @@ class SearchServiceForm(forms.Form):
         required=True,
         widget=autocomplete.ModelSelect2(
             url='service-autocomplete',
-            attrs={'dropdownParent': '#searchServiceModal'},
+            attrs={'dropdownParent': '#searchServiceModal',
+                   'data-placeholder': 'Select Service to add'},
             forward=['current_service_id', 'search_service_location'],
         ),
-        label='Service',
+        label='',
     )
+    make_package = forms.BooleanField(required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            Row(
+                Column('search_service_location', css_class='form-group col-md-6 mb-0'),
+                Column('search_service', css_class='form-group col-md-6 mb-0'),
+                # css_class='form-row'
+            ),
+            Row(
+                Column('make_package', css_class='form-group col-md-12 mb-0'),
+                css_class='package-checkbox'
+            ),
+            'parent_id',
+        )
 
 
 class ExtendCatalogForm(forms.Form):

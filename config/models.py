@@ -212,6 +212,7 @@ class Service(models.Model):
     location = models.ForeignKey(Location, blank=True, null=True)
     new_time = models.TimeField(blank=True, null=True)
     enabled = models.BooleanField(default=True)
+    default_as_package = models.BooleanField(default=False)
 
     def __init__(self, *args, **kwargs):
         # Call the "real" __init__ method.
@@ -431,43 +432,62 @@ class AmountDetail(models.Model):
     class Meta:
         abstract = True
     ad_1_amount = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='SGL')
+        max_digits=8, decimal_places=2, blank=True, null=True,
+        verbose_name='SGL')
     ad_2_amount = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='DBL')
+        max_digits=8, decimal_places=2, blank=True, null=True,
+        verbose_name='DBL')
     ad_3_amount = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='TPL')
+        max_digits=8, decimal_places=2, blank=True, null=True,
+        verbose_name='TPL')
     ad_4_amount = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='QAD')
+        max_digits=8, decimal_places=2, blank=True, null=True,
+        verbose_name='QAD')
     ch_1_ad_0_amount = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1st CHD')
+        max_digits=8, decimal_places=2, blank=True, null=True,
+        verbose_name='1st CHD')
     ch_1_ad_1_amount = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1st CHD')
+        max_digits=8, decimal_places=2, blank=True, null=True,
+        verbose_name='1st CHD')
     ch_1_ad_2_amount = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1st CHD')
+        max_digits=8, decimal_places=2, blank=True, null=True,
+        verbose_name='1st CHD')
     ch_1_ad_3_amount = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1st CHD')
+        max_digits=8, decimal_places=2, blank=True, null=True,
+        verbose_name='1st CHD')
     ch_1_ad_4_amount = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='1st CHD')
+        max_digits=8, decimal_places=2, blank=True, null=True,
+        verbose_name='1st CHD')
     ch_2_ad_0_amount = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2nd CHD')
+        max_digits=8, decimal_places=2, blank=True, null=True,
+        verbose_name='2nd CHD')
     ch_2_ad_1_amount = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2nd CHD')
+        max_digits=8, decimal_places=2, blank=True, null=True,
+        verbose_name='2nd CHD')
     ch_2_ad_2_amount = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2nd CHD')
+        max_digits=8, decimal_places=2, blank=True, null=True,
+        verbose_name='2nd CHD')
     ch_2_ad_3_amount = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2nd CHD')
+        max_digits=8, decimal_places=2, blank=True, null=True,
+        verbose_name='2nd CHD')
     ch_2_ad_4_amount = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='2nd CHD')
+        max_digits=8, decimal_places=2, blank=True, null=True,
+        verbose_name='2nd CHD')
     ch_3_ad_0_amount = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3rd CHD')
+        max_digits=8, decimal_places=2, blank=True, null=True,
+        verbose_name='3rd CHD')
     ch_3_ad_1_amount = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3rd CHD')
+        max_digits=8, decimal_places=2, blank=True, null=True,
+        verbose_name='3rd CHD')
     ch_3_ad_2_amount = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3rd CHD')
+        max_digits=8, decimal_places=2, blank=True, null=True,
+        verbose_name='3rd CHD')
     ch_3_ad_3_amount = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3rd CHD')
+        max_digits=8, decimal_places=2, blank=True, null=True,
+        verbose_name='3rd CHD')
     ch_3_ad_4_amount = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, verbose_name='3rd CHD')
+        max_digits=8, decimal_places=2, blank=True, null=True,
+        verbose_name='3rd CHD')
 
 
 class AllotmentRoomType(models.Model):
@@ -537,8 +557,10 @@ class ProviderAllotmentDetail(AmountDetail):
     addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
     pax_range_min = models.SmallIntegerField(default=0)
     pax_range_max = models.SmallIntegerField(default=0)
-    single_supplement = models.IntegerField(blank=True, null=True, verbose_name='SGL Suppl.')
-    third_pax_discount = models.IntegerField(blank=True, null=True, verbose_name='TPL Dscnt %')
+    single_supplement = models.IntegerField(blank=True, null=True,
+                                            verbose_name='SGL Suppl.')
+    third_pax_discount = models.IntegerField(blank=True, null=True,
+                                             verbose_name='TPL Dscnt %')
 
     def __str__(self):
         return 'Cost for {} ({})'.format(self.provider_service,
@@ -561,8 +583,6 @@ class AgencyAllotmentService(AgencyCatalogue):
             self.agency,
             self.date_from,
             self.date_to)
-
-
 
     def get_detail_objects(self):
         return self.agencyallotmentdetail_set.all()
@@ -588,6 +608,7 @@ class AgencyAllotmentDetail(AmountDetail):
     def __str__(self):
         return 'Price for {} ({})'.format(self.agency_service,
                                           self.room_type)
+
 
 class TransferZone(models.Model):
     """
@@ -723,6 +744,8 @@ class AgencyTransferDetail(AmountDetail, RouteData):
     def reversible(self):
         """ convenience filter to inverse values at tables """
         return not self.not_reversible
+
+
 class ProviderExtraService(ProviderCatalogue):
     """
     ProviderExtraService

@@ -1769,7 +1769,7 @@ class BookingProvidedExtraSiteModel(BookingProvidedServiceSiteModel):
     top_filters = (
         ('booking_package__booking__name', 'Booking'),
         ('name', 'Service'),
-         'booking_package__booking__reference',
+        'booking_package__booking__reference',
         ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'booking_package', 'service__name',)
     form = BookingProvidedExtraForm

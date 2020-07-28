@@ -597,6 +597,18 @@ class ServiceAutocompleteView(autocomplete.Select2QuerySetView):
             qs = qs.filter(name__icontains=self.q)
         return qs[:20]
 
+    def get_results(self, context):
+        """Return data for the 'results' key of the response."""
+        return [
+            {
+                'id': self.get_result_value(result),
+                'text': self.get_result_label(result),
+                'selected_text': self.get_selected_result_label(result),
+                'service_type': result.category,
+                'default_as_package': result.default_as_package,
+            } for result in context['object_list']
+        ]
+
 
 class ServiceAllotmentAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):

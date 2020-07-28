@@ -1,3 +1,4 @@
+{% load crispy_forms_tags %}
 <div id="searchServiceModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="searchServiceModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -9,7 +10,7 @@
             </div>
             <div class="modal-body">
                 <form id="searchServiceForm" class="search_service" method="post" novalidate>{% csrf_token %}
-                    {{ form }}
+                    {% crispy form %}
                 </form>
             </div>
             <div class="modal-footer">
