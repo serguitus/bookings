@@ -1166,6 +1166,12 @@ class QuoteAddServiceView(View):
                         'common:booking_newquotetransfer_add'),
                     querystring))
             elif service.category == 'E':
+                make_package = request.POST.get('make_package', False)
+                if make_package:
+                    return redirect('{}?{}'.format(
+                        reverse(
+                            'common:booking_quoteextrapackage_add'),
+                        querystring))
                 return redirect('{}?{}'.format(
                     reverse(
                         'common:booking_newquoteextra_add'),

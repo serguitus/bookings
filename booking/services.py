@@ -556,7 +556,7 @@ class BookingServices(object):
 
         cls.build_date_interval_data(
             dst_service=dst_package, src_service=src_package)
-        dst_package.service = src_package.service
+        dst_package.service = src_package.book_service
         dst_package.service_addon = src_package.service_addon
 
 
@@ -4921,6 +4921,9 @@ class BookingServices(object):
     @classmethod
     def sync_quoteservice_details(cls, quote_service):
         if hasattr(quote_service, "avoid_sync_details"):
+            return
+
+        if isinstance(quote_service, QuoteExtraPackage):
             return
 
         details = list(
