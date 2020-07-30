@@ -928,10 +928,14 @@ class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
         elif self.cost_amount is not None:
             self.cost_amount_to_pay = self.cost_amount
 
+    def fill_data(self):
+        pass
+
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.validate()
-        self.validate_date_interval()
-        super(BaseBookingService, self).save(force_insert, force_update, using, update_fields)
+        with transaction.atomic(savepoint=False):
+            self.fill_data()
+            self.validate()
+            super(BaseBookingService, self).save(force_insert, force_update, using, update_fields)
 
     def get_absolute_url(self):
         return self.get_child_object().get_absolute_url()
@@ -957,9 +961,10 @@ class ProviderBookingPayment(Withdraw):
             self.date, self.provider, account, self.amount, account.get_currency_display())
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.fill_data()
-        # Call the "real" save() method.
-        super(ProviderBookingPayment, self).save(force_insert, force_update, using, update_fields)
+        with transaction.atomic(savepoint=False):
+            self.fill_data()
+            # Call the "real" save() method.
+            super(ProviderBookingPayment, self).save(force_insert, force_update, using, update_fields)
 
     def delete(self, using=None, keep_parents=False):
         if self.status != STATUS_DRAFT:
@@ -994,9 +999,10 @@ class BaseBookingServicePax(models.Model):
         pass
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.fill_data()
-        # Call the "real" save() method.
-        super(BaseBookingServicePax, self).save(force_insert, force_update, using, update_fields)
+        with transaction.atomic(savepoint=False):
+            self.fill_data()
+            # Call the "real" save() method.
+            super(BaseBookingServicePax, self).save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return self.__unicode__()
@@ -1029,14 +1035,11 @@ class BookingExtraPackage(BaseBookingService, BookExtraData):
     def fill_data(self):
         super(BookingExtraPackage, self).fill_data()
         # setting name for this booking_service
+        self.base_service = self.service
         self.name = self.service.name
         self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE
         self.description = self.build_description()
         # TODO define a location for packages to show
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        with transaction.atomic(savepoint=False):
-            super(BookingExtraPackage, self).save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return self.__unicode__()
@@ -1059,6 +1062,14 @@ class BookingProvidedService(BaseBookingService):
                                         related_name='booking_package_services',
                                         blank=True,
                                         null=True)
+
+    def validate(self):
+        if self.booking_id and self.booking_package and self.booking_id != self.booking_package.booking_id:
+            raise ValidationError(
+                '%s Booking does not match parent package Booking' % (self.name))
+        else:
+            self.booking = self.booking_package.booking
+        super(BookingProvidedService, self).validate()
 
     def __str__(self):
         return '%s' % (self.base_service)

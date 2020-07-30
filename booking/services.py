@@ -3859,13 +3859,19 @@ class BookingServices(object):
             return False
 
         package = bookingpackage.service
-        if bookingpackage.time is None and not package.time is None:
-            bookingpackage.refresh_from_db(fields=['version'])
-            bookingpackage.time = package.time
-            bookingpackage.save(update_fields=['time'])
+
+
+        # TODO time for packages (extras)
+        #if bookingpackage.time is None and not package.time is None:
+        #    bookingpackage.refresh_from_db(fields=['version'])
+        #    bookingpackage.time = package.time
+        #    bookingpackage.save(update_fields=['time'])
+
+
         # create bookingallotment list
-        for package_allotment in PackageAllotment.objects.filter(package_id=package.id).all():
+        for package_allotment in ServiceBookDetailAllotment.objects.filter(service_id=package.id).all():
             booking_package_allotment = BookingProvidedAllotment()
+            booking_package_allotment.booking = bookingpackage.booking
             booking_package_allotment.booking_package = bookingpackage
             # TODO see if we can automate confirmation numbers some way
             # booking_package_allotment.conf_number = ''
@@ -3878,8 +3884,9 @@ class BookingServices(object):
             booking_package_allotment.save()
 
         # create bookingtransfer list
-        for package_transfer in PackageTransfer.objects.filter(package_id=package.id).all():
+        for package_transfer in ServiceBookDetailTransfer.objects.filter(service_id=package.id).all():
             booking_package_transfer = BookingProvidedTransfer()
+            booking_package_transfer.booking = bookingpackage.booking
             booking_package_transfer.booking_package = bookingpackage
             # booking_package_transfer.conf_number = '< confirm number >'
             cls._copy_package_info(
@@ -3891,8 +3898,9 @@ class BookingServices(object):
             booking_package_transfer.save()
 
         # create bookingextra list
-        for package_extra in PackageExtra.objects.filter(package_id=package.id).all():
-            booking_package_extra = BookingProvidedTransfer()
+        for package_extra in ServiceBookDetailExtra.objects.filter(service_id=package.id).all():
+            booking_package_extra = BookingProvidedExtra()
+            booking_package_extra.booking = bookingpackage.booking
             booking_package_extra.booking_package = bookingpackage
             # booking_package_extra.conf_number = '< confirm number >'
             cls._copy_package_info(
@@ -4967,6 +4975,9 @@ class BookingServices(object):
     @classmethod
     def sync_bookingservice_details(cls, booking_service):
         if hasattr(booking_service, "avoid_sync_details"):
+            return
+
+        if isinstance(booking_service, BookingExtraPackage):
             return
 
         details = list(

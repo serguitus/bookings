@@ -1129,6 +1129,12 @@ class BookingAddServiceView(View):
                         'common:booking_bookingprovidedtransfer_add'),
                     querystring))
             elif service.category == 'E':
+                make_package = request.POST.get('make_package', False)
+                if make_package == 'on':
+                    return redirect('{}?{}'.format(
+                        reverse(
+                            'common:booking_bookingextrapackage_add'),
+                        querystring))
                 return redirect('{}?{}'.format(
                     reverse(
                         'common:booking_bookingprovidedextra_add'),
@@ -1167,7 +1173,7 @@ class QuoteAddServiceView(View):
                     querystring))
             elif service.category == 'E':
                 make_package = request.POST.get('make_package', False)
-                if make_package:
+                if make_package == 'on':
                     return redirect('{}?{}'.format(
                         reverse(
                             'common:booking_quoteextrapackage_add'),
