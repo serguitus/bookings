@@ -1,16 +1,5 @@
 <div id="detail-buttons">
     <span class="add-services">
-        <span class="dropdown">
-            <a id="dropdownMenu" role="button" data-toggle="dropdown" class="btn btn-success" data-target="#">
-                Add Service <span class="caret"></span>
-            </a>
-    	    <ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
-                <li><a href="{% url 'common:booking_bookingprovidedallotment_add' %}?booking={{ current.id }}">New Accomodation</a></li>
-                <li><a href="{% url 'common:booking_bookingprovidedtransfer_add' %}?booking={{ current.id }}">New Transfer</a></li>
-                <li><a href="{% url 'common:booking_bookingprovidedextra_add' %}?booking={{ current.id }}">New Extra</a></li>
-                <li><a href="{% url 'common:booking_bookingextrapackage_add' %}?booking={{ current.id }}">New Package</a></li>
-            </ul>
-        </span>
         <a class="btn btn-success" href="#" data-toggle="modal" data-target="#searchServiceModal" data-service_id="{{ current.id }}">Add Service</a>
         <a class="btn btn-success" href="{% url 'common:booking_booking_add_booking_pax' current.id %}">Update Rooming</a>
         <a class="btn btn-primary" href="{% url 'send_booking_confirmation' current.id %}">Confirmation</a>
