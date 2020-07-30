@@ -1,4 +1,3 @@
-(function ($){
 $(document).ready(function(){
 
   var make_package_check = $('#div_id_make_package')
@@ -10,7 +9,7 @@ $(document).ready(function(){
   jQuery('#id_parent_id').val(parent_id)
   });
 
-  $('#id_search_service').on('select2:select', function (e) {
+  django.jQuery('#id_search_service').on('select2:select', function (e) {
     let data = e.params.data;
     let make_package_input = $('input#id_make_package')
     if(data['service_type'] == 'E'){
@@ -28,4 +27,3 @@ $(document).ready(function(){
   make_package_check.hide()
 });
 
-})(django.jQuery);
