@@ -255,7 +255,6 @@ class QuoteSiteModel(SiteModel):
                         form_url='', extra_context=None):
         if request.method == 'POST':
             if 'submit_action' in request.POST and request.POST['submit_action'] == '_send_mail':
-                quote = Quote.objects.get(id=object_id)
                 mail_from = request.POST.get('mail_from')
                 to_list = _build_mail_address_list(request.POST.get('mail_to'))
                 cc_list = _build_mail_address_list(request.POST.get('mail_cc'))
@@ -1301,6 +1300,8 @@ class BookingProvidedServiceSiteModel(SiteModel):
     change_details_template = 'booking/bookingservice_details.html'
     totalsum_list = ['cost_amount', 'price_amount']
     inlines = [BaseBookingServicePaxInline]
+
+    custom_actions_template = 'booking/emails/email_button.html'
 
     def get_changelist(self, request, **kwargs):
         """
