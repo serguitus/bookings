@@ -1357,6 +1357,51 @@ class BookingProvidedServiceSiteModel(SiteModel):
             request, form, obj, formsets, inline_instances,
             add, opts, object_id, to_field, form_validated, context)
 
+    @csrf_protect_m
+    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
+        """ changeform for BaseBookingService SiteModel """
+        submit_action = request.POST.get('submit_action')
+        if submit_action == '_send_mail':
+            mail_from = request.POST.get('mail_from')
+            to_list = _build_mail_address_list(request.POST.get('mail_to'))
+            cc_list = _build_mail_address_list(request.POST.get('mail_cc'))
+            bcc_list = _build_mail_address_list(request.POST.get('mail_bcc'))
+            email = EmailMessage(
+                from_email=mail_from,
+                to=to_list,
+                cc=cc_list,
+                bcc=bcc_list,
+                subject=request.POST.get('mail_subject'),
+                body=request.POST.get('mail_body'))
+            email.send()
+            bs = BookingProvidedService.objects.get(pk=object_id)
+            services = find_provider_requests_services(request, bs.provider, bs.booking)
+            for service in services:
+                if service.status == SERVICE_STATUS_PENDING:
+                    service.status = SERVICE_STATUS_REQUEST
+                    service.save(update_fields=['status'])
+            messages.add_message(
+                request=request, level=messages.SUCCESS,
+                message='Requests mail  sent successfully.',
+                extra_tags='', fail_silently=False)
+            return redirect(reverse('common:booking_%s_change' % self.model._meta.model_name, args=[object_id]))
+        else:
+            if object_id:
+                bs = BookingProvidedService.objects.get(pk=object_id)
+                if not extra_context:
+                    extra_context = dict()
+                extra_context.update({
+                    'modal_title': 'Provider Requests Mail',
+                    'default_mail_from': default_requests_mail_from(request, bs.provider, bs.booking),
+                    'default_mail_to': default_requests_mail_to(request, bs.provider, bs.booking),
+                    'default_mail_cc': '',
+                    'default_mail_bcc': default_requests_mail_bcc(request, bs.provider, bs.booking),
+                    'default_mail_subject': default_requests_mail_subject(request, bs.provider, bs.booking),
+                    'default_mail_body': default_requests_mail_body(request, bs.provider, bs.booking),
+                })
+
+            return super(BookingProvidedServiceSiteModel, self).changeform_view(request, object_id, form_url, extra_context)
+
 
 class BaseBookingServiceSiteModel(SiteModel):
 
