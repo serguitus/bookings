@@ -124,6 +124,7 @@ def common_add_preserved_filters(context, url, popup=False, to_field=None):
     parsed_url[4] = urlencode(merged_qs)
     return urlunparse(parsed_url)
 
+
 def _items_for_result(cl, result, form, namespace='common'):
     """
     Generates the actual list of data.
@@ -191,7 +192,11 @@ def _items_for_result(cl, result, form, namespace='common'):
             except NoReverseMatch:
                 link_or_text = result_repr
             else:
-                url = common_add_preserved_filters({'preserved_filters': cl.preserved_filters, 'opts': cl.opts}, url)
+                url = common_add_preserved_filters(
+                    {
+                        'preserved_filters': cl.preserved_filters,
+                        'opts': cl.opts},
+                    url)
                 # Convert the pk to something that can be used in Javascript.
                 # Problem cases are long ints (23L) and non-ASCII strings.
                 if cl.to_field:

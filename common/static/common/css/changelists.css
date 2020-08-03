@@ -400,3 +400,10 @@ ul.object-tools {
 #btn_topfilters_collapse.collapsed  span.glyphicon:before {
     content: "\e114";
 }
+
+/* custom style to highlight accounting differences */
+.div-changelist .accounting-diff {
+    border-color: red;
+    border-style: dotted;
+    border-width: medium;
+}

@@ -1610,7 +1610,6 @@ class CommonChangeList(ChangeList):
             list_filter, date_hierarchy, search_fields, list_select_related,
             list_per_page, list_max_show_all, list_editable, model_admin)
 
-
     def row_classes_for_result(self, result):
         return ''
 
