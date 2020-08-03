@@ -22,7 +22,7 @@ from django.db import transaction
 from django.db.models.query_utils import Q
 from django.forms import formset_factory
 from django.forms.models import modelformset_factory
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect, reverse
 from django.template.loader import get_template
 from django.utils.functional import curry
@@ -108,7 +108,8 @@ from booking.top_filters import (
 
 from common.sites import CommonStackedInline, CommonTabularInline
 
-from config.forms import SearchServiceForm
+from config.forms import SearchServiceForm, ExtendCatalogForm
+from config.services import ConfigServices
 from config.top_filters import LocationTopFilter
 
 from finance.constants import STATUS_DRAFT, STATUS_READY, STATUS_CANCELLED
@@ -2114,6 +2115,62 @@ class AgencyPackageServiceSiteModel(SiteModel):
     ordering = ['service', 'agency', '-date_from']
     form = AgencyPackageServiceForm
     save_as = True
+    actions = ['extend_catalog_prices']
+
+    def extend_catalog_prices(self, request, queryset, title=None):
+        form = None
+        if 'apply' in request.POST:
+            form = ExtendCatalogForm(request.POST)
+            if form.is_valid():
+                max_util = form.cleaned_data['max_util']
+                min_util = form.cleaned_data['min_util']
+                increase_percent = form.cleaned_data['diff_percent']
+                increase_value = form.cleaned_data['diff_value']
+                if (increase_percent is None or increase_percent == '') and (
+                        increase_value is None or increase_value == ''):
+                    # either increment should be specified!
+                    messages.error(request,
+                                   'Either Percent or Absolute increment'
+                                   ' must be specified')
+                    return HttpResponseRedirect(request.get_full_path())
+
+                results = ConfigServices.next_year_catalog_amounts(
+                    catalog_model=self.model,
+                    catalog_service_ids=queryset.values_list('pk', flat=True),
+                    diff_percent=increase_percent,
+                    diff_amount=increase_value,
+                    min_diff=min_util,
+                    max_diff=max_util)
+                for message in results['services_error_messages']:
+                    messages.error(request, message)
+                for message in results['details_error_messages']:
+                    messages.error(request, message)
+                if results['services_error_count']:
+                    messages.error(
+                        request,
+                        '{} services had problems while processing'.format(
+                            results['services_error_count']))
+                if results['details_error_count']:
+                    messages.error(
+                        request,
+                        '{} Details had problems while processing'.format(
+                            results['details_error_count']))
+                if results['services_success_count']:
+                    self.message_user(
+                        request,
+                        "A total of {} Services and {} Details were successfully generated".format(
+                            results['services_success_count'],
+                            results['details_success_count']))
+                return HttpResponseRedirect(request.get_full_path())
+        if not form:
+            form = ExtendCatalogForm(initial={
+                '_selected_action': queryset.values_list('pk', flat=True)})
+        context = {
+            'form': form,
+            'items': queryset,
+            'title': title or 'Generate package prices for following year'}
+        context.update(self.get_model_extra_context(request))
+        return render(request, 'config/catalog_extend_dates.html', context)
 
 
 class BookingInvoiceDetailInline(CommonTabularInline):

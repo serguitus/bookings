@@ -1675,6 +1675,8 @@ class AgencyPackageService(AgencyCatalogue):
     def __str__(self):
         return 'Ag.Package - %s : %s' % (self.agency, self.service)
 
+    def get_detail_objects(self):
+        return self.agencypackagedetail_set.all()
 
 class AgencyPackageDetail(AmountDetail):
     """
