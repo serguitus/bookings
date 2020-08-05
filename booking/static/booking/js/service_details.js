@@ -1,4 +1,4 @@
-
+(function($){
 function get_book_details(){
   if (typeof book_details_url !== 'undefined') {
     $.ajax({
@@ -47,3 +47,5 @@ $(document).ready(function(){
   });
   get_book_details();
 });
+
+})(django.jQuery)

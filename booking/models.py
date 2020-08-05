@@ -1064,11 +1064,12 @@ class BookingProvidedService(BaseBookingService):
                                         null=True)
 
     def validate(self):
-        if self.booking_id and self.booking_package and self.booking_id != self.booking_package.booking_id:
-            raise ValidationError(
-                '%s Booking does not match parent package Booking' % (self.name))
-        else:
-            self.booking = self.booking_package.booking
+        if self.booking_id and self.booking_package:
+            if self.booking_id != self.booking_package.booking_id:
+                raise ValidationError(
+                    '%s Booking does not match parent package Booking' % (self.name))
+            else:
+                self.booking = self.booking_package.booking
         super(BookingProvidedService, self).validate()
 
     def __str__(self):
