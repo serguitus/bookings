@@ -2950,12 +2950,16 @@ class BookingServices(object):
                 if not hasattr(allotment, 'service'):
                     error_msg = "%s - Missing Allotment Service" % allotment
                     return None, error_msg, None, error_msg
-                c, c_msg, p, p_msg = cls._find_bookingservice_update_amounts(
-                    bookingservice=allotment, agency=agency)
-                if c is None:
-                    c_msg = "%s - %s" % (allotment, c_msg)
-                if p is None:
-                    p_msg = "%s - %s" % (allotment, p_msg)
+                # amounts for packaged services are obtained at booking package
+                c, c_msg, p, p_msg = 0, None, 0, None
+                # verify if is not packaged
+                if allotment.booking_pakage is None:
+                    c, c_msg, p, p_msg = cls._find_bookingservice_update_amounts(
+                        bookingservice=allotment, agency=agency)
+                    if c is None:
+                        c_msg = "%s - %s" % (allotment, c_msg)
+                    if p is None:
+                        p_msg = "%s - %s" % (allotment, p_msg)
                 cost, cost_msg = cls._merge_costs(cost, cost_msg, c, c_msg)
                 price, price_msg = cls._merge_prices(price, price_msg, p, p_msg, )
                 if cost is None and price is None:
@@ -2968,12 +2972,16 @@ class BookingServices(object):
                 if not hasattr(transfer, 'service'):
                     error_msg = "%s - Missing Transfer Service" % transfer
                     return None, error_msg, None, error_msg
-                c, c_msg, p, p_msg = cls._find_bookingservice_update_amounts(
-                    bookingservice=transfer, agency=agency)
-                if c is None:
-                    c_msg = "%s - %s" % (transfer, c_msg)
-                if p is None:
-                    p_msg = "%s - %s" % (transfer, p_msg)
+                # amounts for packaged services are obtained at booking package
+                c, c_msg, p, p_msg = 0, None, 0, None
+                # verify if is not packaged
+                if transfer.booking_pakage is None:
+                    c, c_msg, p, p_msg = cls._find_bookingservice_update_amounts(
+                        bookingservice=transfer, agency=agency)
+                    if c is None:
+                        c_msg = "%s - %s" % (transfer, c_msg)
+                    if p is None:
+                        p_msg = "%s - %s" % (transfer, p_msg)
                 cost, cost_msg = cls._merge_costs(cost, cost_msg, c, c_msg)
                 price, price_msg = cls._merge_prices(price, price_msg, p, p_msg, )
                 if cost is None and price is None:
@@ -2986,12 +2994,16 @@ class BookingServices(object):
                 if not hasattr(extra, 'service'):
                     error_msg = "%s - Missing Extra Service" % extra
                     return None, error_msg, None, error_msg
-                c, c_msg, p, p_msg = cls._find_bookingservice_update_amounts(
-                    bookingservice=extra, agency=agency)
-                if c is None:
-                    c_msg = "%s - %s" % (extra, c_msg)
-                if p is None:
-                    p_msg = "%s - %s" % (extra, p_msg)
+                # amounts for packaged services are obtained at booking package
+                c, c_msg, p, p_msg = 0, None, 0, None
+                # verify if is not packaged
+                if extra.booking_pakage is None:
+                    c, c_msg, p, p_msg = cls._find_bookingservice_update_amounts(
+                        bookingservice=extra, agency=agency)
+                    if c is None:
+                        c_msg = "%s - %s" % (extra, c_msg)
+                    if p is None:
+                        p_msg = "%s - %s" % (extra, p_msg)
                 cost, cost_msg = cls._merge_costs(cost, cost_msg, c, c_msg)
                 price, price_msg = cls._merge_prices(price, price_msg, p, p_msg, )
                 if cost is None and price is None:
