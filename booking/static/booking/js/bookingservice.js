@@ -1,3 +1,4 @@
+(function($){
 $(document).ready(function(){
 
   $('div.field-box.field-provider>div.related-widget-wrapper').after('<a id="btn-costs" title="Costs" data-toggle="modal" data-target="#popup-costs" class="btn btn-costs fa fa-dollar" href="#"></a>');
@@ -303,3 +304,4 @@ function days_diff(date1, date2) {
     return Math.floor((Date.UTC(dt2.getFullYear(), dt2.getMonth(), dt2.getDate()) - Date.UTC(dt1.getFullYear(), dt1.getMonth(), dt1.getDate()) ) /(1000 * 60 * 60 * 24));
 }
 /* END OF HELPER METHODS FOR NIGHTS HANDLING LOGIC */
+})(django.jQuery);

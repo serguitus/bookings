@@ -1,4 +1,5 @@
-var time_autofilled = false;
+(function($){
+  var time_autofilled = false;
 
 $(document).ready(function(){
   $( service_form_selector + ' #id_time').after("<button class='btn btn-success btn-copy btn-copy-time'><<</button><span class='computed-value'>Calculated: <b data-computed=time>N/A</b></span>");
@@ -205,3 +206,4 @@ $(document).ready(function(){
   })
 
 });
+})(django.jQuery)
