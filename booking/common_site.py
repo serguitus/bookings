@@ -1320,6 +1320,16 @@ class BookingSiteModel(SiteModel):
         return super(BookingSiteModel, self).response_add_saveasnew(
             request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue)
 
+    def extra_invoiced_amount_css_classes(self, obj):
+        """
+        extra_fieldname_css_clases function adds css clases to specified
+        field cell in change_list table
+        """
+        if obj.price_amount and obj.invoiced_amount:
+            if obj.price_amount != obj.invoiced_amount:
+                return 'accounting-diff'
+        return ''
+
 
 def _build_mail_address_list(addresses):
     mail_address_list = addresses.replace(';', ' ').replace(',', ' ').split()

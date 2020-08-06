@@ -142,6 +142,9 @@ def _items_for_result(cl, result, form, namespace='common'):
     for field_index, field_name in enumerate(cl.list_display):
         empty_value_display = cl.model_admin.get_empty_value_display()
         row_classes = ['field-%s' % _coerce_field_name(field_name, field_index)]
+        if hasattr(cl.model_admin, 'extra_{}_css_classes'.format(field_name)):
+            row_classes.append(getattr(cl.model_admin,
+                                       'extra_{}_css_classes'.format(field_name))(result))
         try:
             f, attr, value = lookup_field(field_name, result, cl.model_admin)
         except ObjectDoesNotExist:
