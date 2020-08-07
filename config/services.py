@@ -4,7 +4,7 @@ config services
 """
 from datetime import date, timedelta, time, datetime
 from dateutil.relativedelta import relativedelta
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.db.models import Q
 import math
 
@@ -1877,7 +1877,13 @@ class ConfigServices(object):
         for catalog_service_id in catalog_service_ids:
             try:
                 catalog_service = catalog_model.objects.get(id=catalog_service_id)
-                tmp_success_count, tmp_error_count, tmp_error_messages = cls.next_year_catalog_service_amounts(catalog_service, diff_percent, diff_amount, min_diff, max_diff)
+                with transaction.atomic():
+                    tmp_success_count, tmp_error_count, tmp_error_messages = \
+                        cls.next_year_catalog_service_amounts(
+                            catalog_service, diff_percent,
+                            diff_amount,
+                            min_diff,
+                            max_diff)
                 details_success_count += tmp_success_count
                 details_error_count += tmp_error_count
                 details_error_messages.extend(tmp_error_messages)

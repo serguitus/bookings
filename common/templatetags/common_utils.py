@@ -124,6 +124,7 @@ def common_add_preserved_filters(context, url, popup=False, to_field=None):
     parsed_url[4] = urlencode(merged_qs)
     return urlunparse(parsed_url)
 
+
 def _items_for_result(cl, result, form, namespace='common'):
     """
     Generates the actual list of data.
@@ -141,6 +142,9 @@ def _items_for_result(cl, result, form, namespace='common'):
     for field_index, field_name in enumerate(cl.list_display):
         empty_value_display = cl.model_admin.get_empty_value_display()
         row_classes = ['field-%s' % _coerce_field_name(field_name, field_index)]
+        if hasattr(cl.model_admin, 'extra_{}_css_classes'.format(field_name)):
+            row_classes.append(getattr(cl.model_admin,
+                                       'extra_{}_css_classes'.format(field_name))(result))
         try:
             f, attr, value = lookup_field(field_name, result, cl.model_admin)
         except ObjectDoesNotExist:
@@ -191,7 +195,11 @@ def _items_for_result(cl, result, form, namespace='common'):
             except NoReverseMatch:
                 link_or_text = result_repr
             else:
-                url = common_add_preserved_filters({'preserved_filters': cl.preserved_filters, 'opts': cl.opts}, url)
+                url = common_add_preserved_filters(
+                    {
+                        'preserved_filters': cl.preserved_filters,
+                        'opts': cl.opts},
+                    url)
                 # Convert the pk to something that can be used in Javascript.
                 # Problem cases are long ints (23L) and non-ASCII strings.
                 if cl.to_field:

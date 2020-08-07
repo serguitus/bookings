@@ -1263,7 +1263,7 @@ class BookingBookDetail(BaseBookingService):
         return self.__unicode__()
 
     def __unicode__(self):
-        return self.name
+        return '%s : %s' % (self.name, self.booking)
 
 
 class BookingBookDetailAllotment(BookingBookDetail, BookAllotmentData):

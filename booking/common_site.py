@@ -23,7 +23,7 @@ from django.db import transaction
 from django.db.models.query_utils import Q
 from django.forms import formset_factory
 from django.forms.models import modelformset_factory
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect, reverse
 from django.template.loader import get_template
 from django.utils.functional import curry
@@ -88,7 +88,7 @@ from booking.top_filters import (
 
 from common.sites import CommonStackedInline, CommonTabularInline
 
-from config.forms import SearchServiceForm
+from config.forms import SearchServiceForm, ExtendCatalogForm
 from config.services import ConfigServices
 from config.top_filters import DateTopFilter, LocationTopFilter, PackageTopFilter
 
@@ -1156,6 +1156,16 @@ class BookingSiteModel(SiteModel):
         return super(BookingSiteModel, self).response_add_saveasnew(
             request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue)
 
+    def extra_invoiced_amount_css_classes(self, obj):
+        """
+        extra_fieldname_css_clases function adds css clases to specified
+        field cell in change_list table
+        """
+        if obj.price_amount and obj.invoiced_amount:
+            if obj.price_amount != obj.invoiced_amount:
+                return 'accounting-diff'
+        return ''
+
 
 def _build_mail_address_list(addresses):
     mail_address_list = addresses.replace(';', ' ').replace(',', ' ').split()
@@ -1678,12 +1688,12 @@ class BookingPackageServiceSiteModel(SiteModel):
                 extra_context.update(
                     {
                         'modal_title': 'Provider Requests Mail',
-                        'default_mail_from': default_requests_mail_from(request, provider, bps.booking()),
-                        'default_mail_to': default_requests_mail_to(request, provider, bps.booking()),
+                        'default_mail_from': default_requests_mail_from(request, provider, bps.booking),
+                        'default_mail_to': default_requests_mail_to(request, provider, bps.booking),
                         'default_mail_cc': '',
-                        'default_mail_bcc': default_requests_mail_bcc(request, provider, bps.booking()),
-                        'default_mail_subject': default_requests_mail_subject(request, provider, bps.booking()),
-                        'default_mail_body': default_requests_mail_body(request, provider, bps.booking()),
+                        'default_mail_bcc': default_requests_mail_bcc(request, provider, bps.booking),
+                        'default_mail_subject': default_requests_mail_subject(request, provider, bps.booking),
+                        'default_mail_body': default_requests_mail_body(request, provider, bps.booking),
                     })
 
             return super(BookingPackageServiceSiteModel, self).changeform_view(request, object_id, form_url, extra_context)
