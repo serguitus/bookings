@@ -2953,7 +2953,7 @@ class BookingServices(object):
                 # amounts for packaged services are obtained at booking package
                 c, c_msg, p, p_msg = 0, None, 0, None
                 # verify if is not packaged
-                if allotment.booking_pakage is None:
+                if allotment.booking_package is None:
                     c, c_msg, p, p_msg = cls._find_bookingservice_update_amounts(
                         bookingservice=allotment, agency=agency)
                     if c is None:
@@ -2975,7 +2975,7 @@ class BookingServices(object):
                 # amounts for packaged services are obtained at booking package
                 c, c_msg, p, p_msg = 0, None, 0, None
                 # verify if is not packaged
-                if transfer.booking_pakage is None:
+                if transfer.booking_package is None:
                     c, c_msg, p, p_msg = cls._find_bookingservice_update_amounts(
                         bookingservice=transfer, agency=agency)
                     if c is None:
@@ -2997,7 +2997,7 @@ class BookingServices(object):
                 # amounts for packaged services are obtained at booking package
                 c, c_msg, p, p_msg = 0, None, 0, None
                 # verify if is not packaged
-                if extra.booking_pakage is None:
+                if extra.booking_package is None:
                     c, c_msg, p, p_msg = cls._find_bookingservice_update_amounts(
                         bookingservice=extra, agency=agency)
                     if c is None:
