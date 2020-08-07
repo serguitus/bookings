@@ -213,6 +213,7 @@ class Service(models.Model):
     new_time = models.TimeField(blank=True, null=True)
     enabled = models.BooleanField(default=True)
     default_as_package = models.BooleanField(default=False)
+    is_internal = models.BooleanField(default=False)
 
     def __init__(self, *args, **kwargs):
         # Call the "real" __init__ method.
