@@ -839,7 +839,7 @@ class BookingSiteModel(SiteModel):
         info = self.model._meta.app_label, self.model._meta.model_name
         urls = super(BookingSiteModel, self).get_urls()
         urlpatterns = [
-            self.build_url(r'^voucher/(?P<id>\d+)/config/?',
+            self.build_url(r'^voucher/(?P<booking_id>\d+)/config/?',
                            self.config_vouchers,
                            '%s_%s_config_vouchers' % info),
             self.build_url(r'^(?P<id>\d+)/add_pax/?',
