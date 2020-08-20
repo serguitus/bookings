@@ -5,7 +5,7 @@ config services
 from datetime import date, timedelta, time, datetime
 from dateutil.relativedelta import relativedelta
 from django.db import IntegrityError, transaction
-from django.db.models import Q
+from django.db.models import Q, Count
 import math
 
 from config.constants import (
@@ -44,12 +44,119 @@ class ConfigServices(object):
         cls._copy_transfers(src_agency, dst_agency, is_update)
         cls._copy_extras(src_agency, dst_agency, is_update)
 
+    @classmethod
+    def _copy_catalogue_services(cls, src_agency, dst_agency, is_update,
+                                 service_model, detail_set_name, detail_model):
+        """
+        [Param] src_agency: id of the source agency to take prices from
+        [Param] dst_agency: id of the destination agency to add prices to
+        [Param] is_update: boolean. True if existing prices remain untouched
+        [Param] service_model: the child model to get services from (ex. AgencyExtraService)
+        [Param] detail_set_name: the queryset of related details. (ex. AgencyExtraService.agencyextradetail_set)
+        [Param] detail_model: the child model to get price details from (ex. AgencyExtraDetail) 
+        """
+        # find agencyservice list
+        if is_update:
+            # first get unique field sets for all services of those agencies
+            src_services = service_model.objects.filter(
+                agency__in=[src_agency, dst_agency]).values(
+                    'date_from',
+                    'date_to',
+                    'service')
+            # now find those that are not present for both agencies
+            src_not_dup_services = src_services.annotate(
+                count=Count('service')).filter(count__lt=2)
+            if not src_not_dup_services.count():
+                # no service to update here. inform and exit
+                return
+            src_services_unique_fields = src_not_dup_services.values(
+                'service', 'date_from', 'date_to')
+            # build the list of items to filter by
+            filter_list = None
+            for s in src_services_unique_fields:
+                if filter_list:
+                    filter_list |= Q(**s)
+                else:
+                    filter_list = Q(**s)
+            # finally get the list of src services to generate from
+            src_agency_services = service_model.objects.filter(
+                agency=src_agency).filter(filter_list)
+            for src_service in src_agency_services:
+                dst_service = service_model.objects.create(
+                    agency_id=dst_agency.id,
+                    date_from=src_service.date_from,
+                    date_to=src_service.date_to,
+                    service_id=src_service.service_id
+                )
+                for detail in getattr(src_service, detail_set_name).all():
+                    detail.pk = None
+                    detail.id = None
+                    detail.agency_service = dst_service
+                    detail.save()
+        return
 
     @classmethod
     def _copy_allotments(cls, src_agency, dst_agency, is_update):
         # find agencyservice list
-        src_agency_services = AgencyAllotmentService.objects.filter(agency=src_agency.id)
+        cls._copy_catalogue_services(src_agency, dst_agency, is_update,
+                                 AgencyAllotmentService,
+                                 "agencyallotmentdetail_set",
+                                 AgencyAllotmentDetail)
+        # done with the new AgencyAllotmentServices
+        # now check for other pending AgencyAllotmentDetails
+        if is_update:
+            src_details = AgencyAllotmentDetail.objects.filter(
+                agency_service__agency__in=[src_agency, dst_agency]).values(
+                    'agency_service__service',
+                    'agency_service__date_from',
+                    'agency_service__date_to',
+                    'room_type',
+                    'board_type',
+                    'addon',
+                    'pax_range_min',
+                    'pax_range_max'
+                )
+            src_not_dup_details = src_details.annotate(count=Count(
+                'agency_service__service')).filter(count__lt=2)
+            if not src_not_dup_details.count():
+                # no detail to update here. inform and exit
+                return
+            src_details_unique_fields = src_not_dup_details.values(
+                'agency_service__service',
+                'agency_service__date_from',
+                'agency_service__date_to',
+                'addon',
+                'room_type',
+                'board_type',
+                'pax_range_min',
+                'pax_range_max'
+            )
+            # build the list of items to filter by
+            detail_filter_list = None
+            for s in src_details_unique_fields:
+                if detail_filter_list:
+                    detail_filter_list |= Q(**s)
+                else:
+                    detail_filter_list = Q(**s)
+            src_agency_details = AgencyAllotmentDetail.objects.filter(
+                agency_service__agency=src_agency).filter(
+                    detail_filter_list).select_related('agency_service')
+            for src_detail in src_agency_details:
+                dst_service = AgencyAllotmentService.objects.get(
+                    agency=dst_agency,
+                    service=src_detail.agency_service.service,
+                    date_from=src_detail.agency_service.date_from,
+                    date_to=src_detail.agency_service.date_to)
+                # now drop ids to create a new detail refering dst_service
+                src_detail.pk = None
+                src_detail.id = None
+                src_detail.agency_service = dst_service
+                src_detail.save()
+            return
+        # Done with updating prices. if recreating all, proceed below
+        # TODO. move this to an async task. Django-Q or Celery
         # for each agencyservice create agencyservice
+        src_agency_services = AgencyAllotmentService.objects.filter(agency=src_agency.id)
         for src_agency_service in src_agency_services:
             dst_agency_service, created = AgencyAllotmentService.objects.get_or_create(
                 agency_id=dst_agency.id,
@@ -90,6 +197,64 @@ class ConfigServices(object):
 
     @classmethod
     def _copy_transfers(cls, src_agency, dst_agency, is_update):
+        cls._copy_catalogue_services(src_agency, dst_agency, is_update,
+                                 AgencyTransferService,
+                                 "agencytransferdetail_set",
+                                 AgencyTransferDetail)
+        # done with the new AgencyAllotmentServices
+        # now check for other pending AgencyAllotmentDetails
+        # find agencyservice list
+        if is_update:
+            src_details = AgencyTransferDetail.objects.filter(
+                agency_service__agency__in=[src_agency, dst_agency]).values(
+                    'agency_service__service',
+                    'agency_service__date_from',
+                    'agency_service__date_to',
+                    'location_from',
+                    'location_to',
+                    'addon',
+                    'pax_range_min',
+                    'pax_range_max'
+                )
+            src_not_dup_details = src_details.annotate(count=Count(
+                'agency_service__service')).filter(count__lt=2)
+            if not src_not_dup_details.count():
+                # no detail to update here. (TODO: notify user) and exit
+                return
+            src_details_unique_fields = src_not_dup_details.values(
+                'agency_service__service',
+                'agency_service__date_from',
+                'agency_service__date_to',
+                'addon',
+                'location_from',
+                'location_to',
+                'pax_range_min',
+                'pax_range_max'
+            )
+            # build the list of items to filter by
+            detail_filter_list = None
+            for s in src_details_unique_fields:
+                if detail_filter_list:
+                    detail_filter_list |= Q(**s)
+                else:
+                    detail_filter_list = Q(**s)
+            src_agency_details = AgencyTransferDetail.objects.filter(
+                agency_service__agency=src_agency).filter(
+                    detail_filter_list).select_related('agency_service')
+            for src_detail in src_agency_details:
+                dst_service = AgencyTransferService.objects.get(
+                    agency=dst_agency,
+                    service=src_detail.agency_service.service,
+                    date_from=src_detail.agency_service.date_from,
+                    date_to=src_detail.agency_service.date_to)
+                # now drop ids to create a new detail refering dst_service
+                src_detail.pk = None
+                src_detail.id = None
+                src_detail.agency_service = dst_service
+                src_detail.save()
+            return
+        # Done with updating prices. if recreating all, proceed below
+        # TODO. move this to an async task. Django-Q or Celery
         # find agencyservice list
         src_agency_services = list(AgencyTransferService.objects.filter(agency=src_agency.id))
         # for each agencyservice create agencyservice
@@ -135,6 +300,57 @@ class ConfigServices(object):
 
     @classmethod
     def _copy_extras(cls, src_agency, dst_agency, is_update):
+        cls._copy_catalogue_services(src_agency, dst_agency, is_update,
+                                 AgencyExtraService,
+                                 "agencyextradetail_set",
+                                 AgencyExtraDetail)
+        # done with the new AgencyExtraServices
+        # now check for other pending AgencyExtraDetails
+        # find agencyservice list
+        if is_update:
+            src_details = AgencyExtraDetail.objects.filter(
+                agency_service__agency__in=[src_agency, dst_agency]).values(
+                    'agency_service__service',
+                    'agency_service__date_from',
+                    'agency_service__date_to',
+                    'addon',
+                    'pax_range_min',
+                    'pax_range_max'
+                )
+            src_not_dup_details = src_details.annotate(count=Count(
+                'agency_service__service')).filter(count__lt=2)
+            src_details_unique_fields = src_not_dup_details.values(
+                'agency_service__service',
+                'agency_service__date_from',
+                'agency_service__date_to',
+                'addon',
+                'pax_range_min',
+                'pax_range_max'
+            )
+            # build the list of items to filter by
+            detail_filter_list = None
+            for s in src_details_unique_fields:
+                if detail_filter_list:
+                    detail_filter_list |= Q(**s)
+                else:
+                    detail_filter_list = Q(**s)
+            src_agency_details = AgencyExtraDetail.objects.filter(
+                agency_service__agency=src_agency).filter(
+                    detail_filter_list).select_related('agency_service')
+            for src_detail in src_agency_details:
+                dst_service = AgencyExtraService.objects.get(
+                    agency=dst_agency,
+                    service=src_detail.agency_service.service,
+                    date_from=src_detail.agency_service.date_from,
+                    date_to=src_detail.agency_service.date_to)
+                # now drop ids to create a new detail refering dst_service
+                src_detail.pk = None
+                src_detail.id = None
+                src_detail.agency_service = dst_service
+                src_detail.save()
+            return
+        # Done with updating prices. if recreating all, proceed below
+        # TODO. move this to an async task. Django-Q or Celery
         # find agencyservice list
         src_agency_services = list(AgencyExtraService.objects.filter(agency=src_agency.id))
         # for each agencyservice create agencyservice
