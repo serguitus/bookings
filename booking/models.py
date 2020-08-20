@@ -1513,8 +1513,8 @@ class BookingPackageService(BaseBookingService):
         # Call the "real" save() method.
         super(BookingPackageService, self).save(force_insert, force_update, using, update_fields)
 
-    def booking(self):
-        return self.booking_package.booking
+    #def booking(self):
+    #    return self.booking_package.booking
 
     def rooming_list(self):
         return self.booking_package.rooming_list
@@ -1675,6 +1675,8 @@ class AgencyPackageService(AgencyCatalogue):
     def __str__(self):
         return 'Ag.Package - %s : %s' % (self.agency, self.service)
 
+    def get_detail_objects(self):
+        return self.agencypackagedetail_set.all()
 
 class AgencyPackageDetail(AmountDetail):
     """
