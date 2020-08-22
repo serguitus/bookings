@@ -210,7 +210,14 @@ class BookingServices(object):
 
             # obtain lines
             booking_service_list = BaseBookingService.objects.filter(
-                booking=booking.id).exclude(status=constants.SERVICE_STATUS_CANCELLED).all()
+                booking=booking.id).exclude(
+                    status=constants.SERVICE_STATUS_CANCELLED).filter(
+                        base_category__in=[
+                            constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT,
+                            constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER,
+                            constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA,
+                            constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE]
+                    ).order_by('datetime_from', 'datetime_to')
             for booking_service in booking_service_list:
                 invoice_line = BookingInvoiceLine()
                 invoice_line.invoice = invoice
