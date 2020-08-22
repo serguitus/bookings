@@ -146,8 +146,49 @@ def booking_services_summary_table(booking, request):
 
 @register.simple_tag
 def vouchers_table(booking):
+    # get all the ids by child classes
+    allotment_ids = list(BookingProvidedAllotment.vouched_objects.filter(
+        booking=booking).filter(
+            booking_package__isnull=True).values_list(
+                'id', flat=True))
+    transfer_ids = list(BookingProvidedTransfer.vouched_objects.filter(
+        booking=booking).filter(
+            booking_package__isnull=True).values_list(
+                'id', flat=True))
+    extra_ids = list(BookingProvidedExtra.vouched_objects.filter(
+        booking=booking).filter(
+            booking_package__isnull=True).values_list(
+                'id', flat=True))
+    packages = list(BookingExtraPackage.objects.filter(
+        booking=booking).exclude(
+            voucher_detail=True).values_list(
+                'id', flat=True))
+    package_allotment = list(BookingProvidedAllotment.vouched_objects.filter(
+        booking=booking).filter(
+            booking_package__isnull=False,
+            booking_package__voucher_detail=True).values_list(
+                'id', flat=True))
+    package_transfer = list(BookingProvidedTransfer.vouched_objects.filter(
+        booking=booking).filter(
+            booking_package__isnull=False,
+            booking_package__voucher_detail=True).values_list(
+                'id', flat=True))
+    package_extra = list(BookingProvidedExtra.vouched_objects.filter(
+        booking=booking).filter(
+            booking_package__isnull=False,
+            booking_package__voucher_detail=True).values_list(
+                'id', flat=True))
+    # merge all the ids...
+    provided_ids = list(set(
+        allotment_ids + transfer_ids + extra_ids))
+    package_services = list(set(
+        package_allotment + package_transfer + package_extra))
+    unique_ids = list(set(
+        provided_ids + packages + package_services))
+    # now get the table of BaseBookingServices with those ids
     table = BookingVouchersTable(
-        BaseBookingService.objects.filter(booking=booking).exclude(status=SERVICE_STATUS_CANCELLED),
+        BaseBookingService.objects.filter(
+            id__in=unique_ids),
         order_by=('datetime_from', 'time', 'datetime_to'))
     return table
 

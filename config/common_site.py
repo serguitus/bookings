@@ -494,7 +494,7 @@ class TransferSiteModel(BaseServiceSiteModel):
     menu_group = MENU_LABEL_CONFIG_GROUP
     fields = (
         ('name', 'service_category'), ('cost_type', 'max_capacity', 'is_shared'),
-        ('pax_range', 'has_pickup_time', 'is_ticket'),
+        ('pax_range', 'has_pickup_time', 'is_ticket', 'is_internal'),
         ('child_discount_percent', 'child_age', 'infant_age'), 'enabled',)
     list_display = ('name', 'cost_type', 'max_capacity', 'is_shared', 'is_ticket', 'enabled',
                     'infant_age', 'child_age')
@@ -513,7 +513,7 @@ class ExtraSiteModel(BaseServiceSiteModel):
     menu_group = MENU_LABEL_CONFIG_GROUP
     fields = ('name', 'service_category', 'location',
               ('cost_type', 'parameter_type'), 'max_capacity',
-              ('pax_range', 'default_as_package'),
+              ('pax_range', 'is_internal', 'default_as_package'),
               ('child_discount_percent', 'child_age', 'infant_age'),
               ('car_rental', 'enabled'),)
     list_display = ('name', 'service_category', 'location', 'cost_type',

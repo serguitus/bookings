@@ -812,6 +812,12 @@ class InvoicedManager(models.Manager):
                 BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE])
 
 
+class VouchedManager(models.Manager):
+    def get_queryset(self):
+        return super(VouchedManager, self).get_queryset().filter(
+            service__is_internal=False).exclude(status=SERVICE_STATUS_CANCELLED)
+
+
 class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
     """
     Base Booking Service
@@ -1086,6 +1092,10 @@ class BookingProvidedAllotment(BookingProvidedService, BookAllotmentData):
     service = models.ForeignKey(Allotment)
     version = AutoIncVersionField()
 
+    # Managers
+    objects = models.Manager()
+    vouched_objects = VouchedManager()
+
     def __unicode__(self):
         return '%s (%s - %s)' % (self.name,
                                  self.datetime_from, self.datetime_to)
@@ -1177,6 +1187,10 @@ class BookingProvidedTransfer(BookingProvidedService, BookTransferData):
     service = models.ForeignKey(Transfer)
     version = AutoIncVersionField()
 
+    # Managers
+    objects = models.Manager()
+    vouched_objects = VouchedManager()
+
     def build_description(self):
         return '%s pax' % self.rooming_list.count()
 
@@ -1214,6 +1228,10 @@ class BookingProvidedExtra(BookingProvidedService, BookExtraData):
         verbose_name_plural = 'Booking Extras'
     service = models.ForeignKey(Extra, related_name='%(class)s_service')
     version = AutoIncVersionField()
+
+    # Managers
+    objects = models.Manager()
+    vouched_objects = VouchedManager()
 
     def build_description(self):
         return '%s pax' % self.rooming_list.count()
