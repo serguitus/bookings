@@ -3681,29 +3681,10 @@ class BookingServices(object):
         else:
             booking = obj.booking
 
-        booking_provided_services = list(
-            BookingProvidedService.objects.all().filter(
-                booking=booking.id).exclude(
-                    status=constants.SERVICE_STATUS_CANCELLED))
-
-        booking_invoiced_services = list(
-            BaseBookingService.invoiced_objects.all().filter(
-                booking=booking.id).exclude(
-                    status=constants.SERVICE_STATUS_CANCELLED))
-
-        cost = cls._totalize_services_cost(booking_provided_services)
-        price = cls._totalize_services_price(booking_invoiced_services)
-
-        if booking.is_package_price:
-            price, price_msg = cls._find_booking_package_price(booking)
-
         fields = []
-        if not cls._equals_amounts(booking.cost_amount, cost):
-            fields.append('cost_amount')
-            booking.cost_amount = cost
-        if not cls._equals_amounts(booking.price_amount, price):
-            fields.append('price_amount')
-            booking.price_amount = price
+
+        cls._set_update_booking_amounts(booking, fields)
+
         if fields:
             booking.code_updated = True
             booking.save(update_fields=fields)
@@ -3972,8 +3953,6 @@ class BookingServices(object):
         else:
             return
 
-        cost = 0
-        price = 0
         date_from = None
         date_to = None
         date_from_min = None
@@ -4007,18 +3986,6 @@ class BookingServices(object):
                 if (service.datetime_to is not None
                         and (date_to is None or date_to < service.datetime_to)):
                     date_to = service.datetime_to
-                # cost
-                if not cost is None:
-                    if service.cost_amount is None:
-                        cost = None
-                    else:
-                        cost += service.cost_amount
-                # price
-                if not price is None:
-                    if service.price_amount is None:
-                        price = None
-                    else:
-                        price += service.price_amount
                 # status
                 # pending sets always pending
                 if service.status == constants.SERVICE_STATUS_PENDING:
@@ -4052,9 +4019,6 @@ class BookingServices(object):
                 date_to = date_to_max
         else:
             status = constants.BOOKING_STATUS_PENDING
-        # verify package prices
-        if booking.is_package_price:
-            price, price_msg = cls._find_booking_package_price(booking)
 
         fields = []
         if booking.date_from != date_from:
@@ -4066,15 +4030,39 @@ class BookingServices(object):
         if booking.status != status:
             fields.append('status')
             booking.status = status
+
+        cls._set_update_booking_amounts(booking, fields)
+
+        if fields:
+            booking.save(update_fields=fields)
+
+
+    @classmethod
+    def _set_update_booking_amounts(cls, booking, fields):
+
+        booking_provided_services = list(
+            BookingProvidedService.objects.all().filter(
+                booking=booking.id).exclude(
+                    status=constants.SERVICE_STATUS_CANCELLED))
+
+        booking_invoiced_services = list(
+            BaseBookingService.invoiced_objects.all().filter(
+                booking=booking.id).exclude(
+                    status=constants.SERVICE_STATUS_CANCELLED))
+
+        cost = cls._totalize_services_cost(booking_provided_services)
+        price = cls._totalize_services_price(booking_invoiced_services)
+
+        # verify package prices
+        if booking.is_package_price:
+            price, price_msg = cls._find_booking_package_price(booking)
+
         if not cls._equals_amounts(booking.cost_amount, cost):
             fields.append('cost_amount')
             booking.cost_amount = cost
         if not cls._equals_amounts(booking.price_amount, price):
             fields.append('price_amount')
             booking.price_amount = price
-
-        if fields:
-            booking.save(update_fields=fields)
 
 
     @classmethod
