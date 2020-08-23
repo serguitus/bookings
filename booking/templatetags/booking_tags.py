@@ -53,7 +53,7 @@ def packageservice_table(package):
 @register.simple_tag
 def quotepackage_table(quotepackage):
     table = QuotePackageServiceTable(
-        quotepackage.quotepackage_services.all(),
+        quotepackage.quotepackageservice_set.all(),
         order_by=('datetime_from', 'time', 'datetime_to'))
     return table
 

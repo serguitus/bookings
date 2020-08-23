@@ -527,7 +527,7 @@ class QuotePackageService(BookServiceData, DateInterval):
         verbose_name = 'Quote Package Service'
         verbose_name_plural = 'Quotes Packages Services'
         default_permissions = ('add', 'change',)
-    quote_package = models.ForeignKey(QuotePackage, related_name='%(class)s_quote_package')
+    quote_package = models.ForeignKey(QuotePackage)
     provider = models.ForeignKey(Provider, blank=True, null=True)
     status = models.CharField(
         max_length=5, choices=QUOTE_STATUS_LIST, default=QUOTE_STATUS_DRAFT)

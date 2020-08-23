@@ -3190,7 +3190,7 @@ class BookingServices(object):
 
         date_from = None
         date_to = None
-        for service in quote_package.quotepackage_services.all():
+        for service in quote_package.quotepackageservice_set.all():
             if not service.status is constants.SERVICE_STATUS_CANCELLED:
                 # date_from
                 if service.datetime_from is not None:
