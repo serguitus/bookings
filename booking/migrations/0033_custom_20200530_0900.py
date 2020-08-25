@@ -58,12 +58,17 @@ def copy_booking_service(new_service, service):
     new_service.base_category = service.base_category
     new_service.service_addon_id = service.service_addon_id
     new_service.cost_amount = service.cost_amount
+    new_service.cost_amount_paid = service.cost_amount_paid
+    new_service.cost_amount_to_pay = service.cost_amount_to_pay
     new_service.cost_comments = service.cost_comments
     new_service.manual_cost = service.manual_cost
     new_service.price_amount = service.price_amount
     new_service.price_comments = service.price_comments
     new_service.manual_price = service.manual_price
+    new_service.conf_number = service.conf_number
+    new_service.has_payment = service.has_payment
     new_service.p_notes = service.p_notes
+    new_service.provider_notes = service.provider_notes
     if hasattr(service, 'v_notes'):
         new_service.new_v_notes = service.v_notes
 
