@@ -42,20 +42,30 @@ class InternalReferenceTopFilter(filters.TextFilter):
         return queryset
 
 
-class PaidTopFilter(filters.BooleanFilter):
+class PaidTopFilter(filters.SingleChoicesFilter):
     filter_title = 'Paid'
     filter_field_path = 'paid'
+    choices = (
+        ('A', 'All'),
+        ('P', 'Paid'),
+        ('U', 'Unpaid'),
+        ('O', 'Owed'),
+    )
 
     def queryset(self, request, queryset):
         search_option = self._values[0]
-        if search_option == "True":
-            queryset = queryset.exclude(cost_amount_to_pay=0)
-            queryset = queryset.filter(cost_amount_to_pay=F('cost_amount_paid'))
-        if search_option == "False":
-            queryset = queryset.filter(
-                Q(cost_amount_to_pay=0)
-                |
-                ~Q(cost_amount_to_pay=F('cost_amount_paid')))
+        if search_option:
+            if search_option == ["P"]:
+                queryset = queryset.exclude(cost_amount_to_pay=0)
+                queryset = queryset.filter(cost_amount_to_pay=F('cost_amount_paid'))
+            if search_option == ["U"]:
+                queryset = queryset.filter(
+                    Q(cost_amount_to_pay=0)
+                    |
+                    ~Q(cost_amount_to_pay=F('cost_amount_paid')))
+            if search_option == ["O"]:
+                queryset = queryset.filter(
+                    ~Q(cost_amount_to_pay=F('cost_amount_paid')))
 
         queryset = queryset.distinct()
         return queryset
