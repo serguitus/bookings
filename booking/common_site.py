@@ -2273,12 +2273,14 @@ class ProviderBookingPaymentSiteModel(SiteModel):
             )
         }),
     )
-    list_display = ('provider', 'details', 'account', 'services_amount',
+    list_display = ('provider', 'details', 'account',
                     'amount', 'date', 'status')
     readonly_fields = ['services_amount']
     add_readonly_fields = ['status']
 
     top_filters = ('provider', 'details', 'account', 'status', 'date',)
+
+    totalsum_list = ('amount',)
 
     #recent_allowed = True
     form = ProviderBookingPaymentForm
