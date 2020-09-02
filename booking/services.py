@@ -4424,17 +4424,6 @@ class BookingServices(object):
 
 
     @classmethod
-    def next_year_package_prices(cls, agency_service_ids, percent=None, amount=None):
-        for agency_service_id in agency_service_ids:
-            try:
-                agency_service = AgencyPackageService.objects.get(agency_service_id)
-                ConfigServices.next_year_price(
-                    AgencyPackageDetail.objects, agency_service, percent, amount)
-            except Error as ex:
-                print('EXCEPTION booking services - next_year_package_prices : ' + ex.__str__())
-
-
-    @classmethod
     def find_service_providers_costs(cls, service):
 
         if isinstance(service, (NewQuoteAllotment, BookingProvidedAllotment)):

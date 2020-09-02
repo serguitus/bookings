@@ -21,6 +21,8 @@ from django.utils.translation import ugettext as _, ungettext
 from django.utils import six
 from functools import partial
 
+from config.services import ConfigServices
+
 from finance.constants import BOOTSTRAP_STYLE_FINANCE_DOCUMENT_STATUS_MAPPING
 from finance.forms import (
     AccountingForm, CurrencyExchangeForm, TransferForm,

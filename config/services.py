@@ -40,7 +40,6 @@ class ConfigServices(object):
         cls._copy_allotments(src_agency, dst_agency, is_update)
         cls._copy_transfers(src_agency, dst_agency, is_update)
         cls._copy_extras(src_agency, dst_agency, is_update)
-        cls._copy_packages(src_agency, dst_agency, is_update)
 
 
     @classmethod
@@ -405,45 +404,6 @@ class ConfigServices(object):
                 else:
                     # rewrite - modify if exists
                     agency_detail, created = AgencyExtraDetail.objects.update_or_create(
-                        agency_service_id=dst_agency_service.id,
-                        addon_id=detail.addon_id,
-                        pax_range_min=detail.pax_range_min,
-                        pax_range_max=detail.pax_range_max,
-                        defaults=cls.calculate_default_amounts(
-                            detail, src_agency.gain_percent, dst_agency.gain_percent)
-                    )
-
-
-    @classmethod
-    def _copy_packages(cls, src_agency, dst_agency, is_update):
-        # find agencyservice list
-        src_agency_services = list(AgencyPackageService.objects.filter(agency=src_agency.id))
-        # for each agencyservice create agencyservice
-        for src_agency_service in src_agency_services:
-            dst_agency_service, created = AgencyPackageService.objects.get_or_create(
-                agency_id=dst_agency.id,
-                date_from=src_agency_service.date_from,
-                date_to=src_agency_service.date_to,
-                service_id=src_agency_service.service_id
-            )
-            # find details
-            details = list(
-                AgencyPackageDetail.objects.filter(agency_service=src_agency_service))
-            # for each src agency detail create dst agency detail
-            for detail in details:
-                if is_update:
-                    # update - dont modify if exists
-                    agency_detail, created = AgencyPackageDetail.objects.get_or_create(
-                        agency_service_id=dst_agency_service.id,
-                        addon_id=detail.addon_id,
-                        pax_range_min=detail.pax_range_min,
-                        pax_range_max=detail.pax_range_max,
-                        defaults=cls.calculate_default_amounts(
-                            detail, src_agency.gain_percent, dst_agency.gain_percent)
-                    )
-                else:
-                    # rewrite - modify if exists
-                    agency_detail, created = AgencyPackageDetail.objects.update_or_create(
                         agency_service_id=dst_agency_service.id,
                         addon_id=detail.addon_id,
                         pax_range_min=detail.pax_range_min,
