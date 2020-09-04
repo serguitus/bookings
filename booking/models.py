@@ -378,8 +378,8 @@ class QuoteExtraPackage(QuoteService, BookExtraData):
         verbose_name_plural = 'Quotes Packages'
         default_permissions = ('add', 'change',)
     service = models.ForeignKey(Extra)
-    price_by_package_catalogue = models.BooleanField(
-        default=False, verbose_name='Prices By Catalogue')
+    price_by_catalog = models.BooleanField(
+        default=False, verbose_name='Use Catalog Price')
 
     def fill_data(self):
         # setting name for this quote_service
@@ -402,6 +402,10 @@ class QuoteProvidedService(QuoteService):
         verbose_name = 'Quote Provided Service'
         verbose_name_plural = 'Quote Services'
         default_permissions = ('add', 'change',)
+    cost_by_catalog = models.BooleanField(
+        default=False, verbose_name='Use Catalog Cost')
+    price_by_catalog = models.BooleanField(
+        default=False, verbose_name='Use Catalog Price')
     quote_package = models.ForeignKey(QuoteExtraPackage, blank=True, null=True)
 
     def __str__(self):
@@ -1031,8 +1035,8 @@ class BookingExtraPackage(BaseBookingService, BookExtraData):
         verbose_name_plural = 'Bookings Packages'
     version = AutoIncVersionField()
     service = models.ForeignKey(Extra, related_name='%(class)s_service')
-    price_by_package_catalogue = models.BooleanField(
-        default=True, verbose_name='Use Catalogue Price')
+    price_by_catalog = models.BooleanField(
+        default=True, verbose_name='Use Catalog Price')
     voucher_detail = models.BooleanField(default=False)
 
     def build_description(self):
@@ -1064,10 +1068,13 @@ class BookingProvidedService(BaseBookingService):
         verbose_name_plural = 'Booking Provided Services'
         ordering = ['datetime_from', 'datetime_to', 'time']
 
-    booking_package = models.ForeignKey(BookingExtraPackage,
-                                        related_name='booking_package_services',
-                                        blank=True,
-                                        null=True)
+    cost_by_catalog = models.BooleanField(
+        default=True, verbose_name='Use Catalog Cost')
+    price_by_catalog = models.BooleanField(
+        default=True, verbose_name='Use Catalog Price')
+
+    booking_package = models.ForeignKey(
+        BookingExtraPackage, related_name='booking_package_services', blank=True, null=True)
 
     def validate(self):
         if self.booking_id and self.booking_package:

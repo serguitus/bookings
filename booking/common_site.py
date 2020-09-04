@@ -426,7 +426,7 @@ class QuoteExtraPackageSiteModel(QuoteServiceSiteModel):
     fields = (
         'quote',
         ('service', 'search_location', 'status'),
-        ('datetime_from', 'datetime_to', 'price_by_package_catalogue'), 'id')
+        ('datetime_from', 'datetime_to', 'price_by_catalog'), 'id')
     list_display = (
         'quote', 'service', 'datetime_from', 'datetime_to', 'status',)
     top_filters = ('service', 'quote__reference',
@@ -1848,7 +1848,7 @@ class BookingExtraPackageSiteModel(BaseBookingServiceSiteModel):
                 ('booking', 'voucher_detail'), ('service', 'search_location'), ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
                 'cost_amount',
-                ('manual_price', 'price_by_package_catalogue'),
+                ('manual_price', 'price_by_catalog'),
                 'price_amount', 'utility_percent', 'utility', 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),

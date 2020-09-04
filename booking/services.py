@@ -1284,8 +1284,8 @@ class BookingServices(object):
         if not quote_pax_variant:
             quote_pax_variant = service_pax_variant.quote_pax_variant
 
-        if not hasattr(package, 'price_by_package_catalogue'):
-            package.price_by_package_catalogue = False
+        if not hasattr(package, 'price_by_catalog'):
+            package.price_by_catalog = False
 
         if hasattr(package, 'id') and package.id:
             if not isinstance(package, QuoteExtraPackage):
@@ -1349,7 +1349,7 @@ class BookingServices(object):
                         cost_3, cost_3_msg, c3, c3_msg,
                         cost_4, cost_4_msg, c4, c4_msg)
 
-                    if not quote_pax_variant.price_percent and not package.price_by_package_catalogue:
+                    if not quote_pax_variant.price_percent and not package.price_by_catalog:
                         p1, p1_msg, p2, p2_msg, p3, p3_msg, p4, p4_msg = cls._find_quoteservice_prices(
                             pax_quantity=quote_pax_variant.pax_quantity,
                             quoteservice=allotment,
@@ -1425,7 +1425,7 @@ class BookingServices(object):
                         cost_3, cost_3_msg, c3, c3_msg,
                         cost_4, cost_4_msg, c4, c4_msg)
 
-                    if not quote_pax_variant.price_percent and not package.price_by_package_catalogue:
+                    if not quote_pax_variant.price_percent and not package.price_by_catalog:
                         p1, p1_msg, p2, p2_msg, p3, p3_msg, p4, p4_msg = cls._find_quoteservice_prices(
                             pax_quantity=quote_pax_variant.pax_quantity,
                             quoteservice=transfer,
@@ -1499,7 +1499,7 @@ class BookingServices(object):
                         cost_3, cost_3_msg, c3, c3_msg,
                         cost_4, cost_4_msg, c4, c4_msg)
 
-                    if not quote_pax_variant.price_percent and not package.price_by_package_catalogue:
+                    if not quote_pax_variant.price_percent and not package.price_by_catalog:
                         p1, p1_msg, p2, p2_msg, p3, p3_msg, p4, p4_msg = cls._find_quoteservice_prices(
                             pax_quantity=quote_pax_variant.pax_quantity,
                             quoteservice=extra,
@@ -1550,7 +1550,7 @@ class BookingServices(object):
                 price_4_msg = None
             else:
                 price_4, price_4_msg = None, 'Cost QPL for % is empty'
-        elif package.price_by_package_catalogue:
+        elif package.price_by_catalog:
             date_from = package.datetime_from
             date_to = package.datetime_to
             addon_id = package.service_addon_id
@@ -3717,7 +3717,7 @@ class BookingServices(object):
 
         cost, price = cls._totalize_services(bookingpackage_services, update_services)
 
-        if bookingpackage.price_by_package_catalogue:
+        if bookingpackage.price_by_catalog:
             price_groups = cls.find_groups(bookingpackage, bookingpackage.service, False)
             price, price_msg = ConfigServices.extra_prices(
                 bookingpackage.service.id,
@@ -3772,7 +3772,7 @@ class BookingServices(object):
         if ((not allotment_list) and (not transfer_list) and (not extra_list)):
             return None, "Booking Package Empty", None, "Booking Package Empty"
 
-        if agency and bookingpackage.price_by_package_catalogue:
+        if agency and bookingpackage.price_by_catalog:
             if manuals and bookingpackage.manual_price:
                 if bookingpackage.price_amount is None:
                     price, price_msg = None, "Missing Manual Price"
