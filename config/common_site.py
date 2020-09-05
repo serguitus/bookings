@@ -782,6 +782,7 @@ class ProviderTransferServiceSiteModel(CatalogService):
     list_display = ('service', 'provider', 'date_from', 'date_to',)
     top_filters = (
         ('service', TransferTopFilter), ('provider', ProviderTopFilter),
+        'service__service_category',
         ('date_to', DateTopFilter),
         ProviderTransferLocationTopFilter, ProviderTransferLocationAdditionalTopFilter)
     inlines = [ProviderTransferDetailInline]
@@ -892,6 +893,7 @@ class ProviderExtraServiceSiteModel(CatalogService):
     list_display = ('service', 'provider', 'date_from', 'date_to',)
     top_filters = (
         ('service', ExtraTopFilter), ('provider', ProviderTopFilter),
+        'service__service_category',
         ('date_to', DateTopFilter))
     inlines = [ProviderExtraDetailInline]
     ordering = ['service', 'provider', '-date_from']
@@ -1108,6 +1110,7 @@ class AgencyTransferServiceSiteModel(CatalogService):
     list_display = ('agency', 'service', 'date_from', 'date_to',)
     top_filters = (
         ('service', TransferTopFilter), ('agency', AgencyTopFilter),
+        'service__service_category',
         ('date_to', DateTopFilter),
         AgencyTransferLocationTopFilter, AgencyTransferLocationAdditionalTopFilter)
     inlines = [AgencyTransferDetailInline]
@@ -1204,6 +1207,7 @@ class AgencyExtraServiceSiteModel(CatalogService):
     list_display = ('agency', 'service', 'date_from', 'date_to',)
     top_filters = (
         ('service', ExtraTopFilter), ('agency', AgencyTopFilter),
+        'service__service_category',
         ('date_to', DateTopFilter))
     inlines = [AgencyExtraDetailInline]
     ordering = ['service', 'agency', '-date_from']
