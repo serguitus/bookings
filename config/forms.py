@@ -365,6 +365,12 @@ class ExtraForm(forms.ModelForm):
         widgets = {
             'car_rental': autocomplete.ModelSelect2(url='carrental-autocomplete'),
             'location': autocomplete.ModelSelect2(url='location-autocomplete'),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'cols': 80,
+                'rows': 5,
+                'placeholder': 'Service description...',
+            }),
         }
 
 
