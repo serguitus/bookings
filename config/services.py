@@ -30,6 +30,17 @@ from finance.models import Agency
 from reservas.custom_settings import ADDON_FOR_NO_ADDON
 
 
+# helper function to compare Q objects until migration to Django2
+# which actually implements __eq__ for Q objects
+# once migrated, use normal comparison and remove this function
+def compare_q(q1 , q2):
+        return (
+            q1.__class__ == q2.__class__ and
+            (q1.connector, q1.negated) == (q2.connector, q2.negated) and
+            q1.children == q2.children
+        )
+
+
 class ConfigServices(object):
     """
     ConfigServices
@@ -157,12 +168,13 @@ class ConfigServices(object):
                 'pax_range_max'
             )
             # build the list of items to filter by
-            detail_filter_list = None
+            # default to filter None
+            detail_filter_list = Q(pk__in=[])
             for s in src_details_unique_fields:
-                if detail_filter_list:
-                    detail_filter_list |= Q(**s)
-                else:
+                if compare_q(detail_filter_list, Q(pk__in=[])):
                     detail_filter_list = Q(**s)
+                else:
+                    detail_filter_list |= Q(**s)
             src_agency_details = AgencyAllotmentDetail.objects.filter(
                 agency_service__agency=src_agency).filter(
                     detail_filter_list).select_related('agency_service')
@@ -257,12 +269,13 @@ class ConfigServices(object):
                 'pax_range_max'
             )
             # build the list of items to filter by
-            detail_filter_list = None
+            # default to filter None
+            detail_filter_list = Q(pk__in=[])
             for s in src_details_unique_fields:
-                if detail_filter_list:
-                    detail_filter_list |= Q(**s)
-                else:
+                if compare_q(detail_filter_list, Q(pk__in=[])):
                     detail_filter_list = Q(**s)
+                else:
+                    detail_filter_list |= Q(**s)
             src_agency_details = AgencyTransferDetail.objects.filter(
                 agency_service__agency=src_agency).filter(
                     detail_filter_list).select_related('agency_service')
@@ -353,12 +366,13 @@ class ConfigServices(object):
                 'pax_range_max'
             )
             # build the list of items to filter by
-            detail_filter_list = None
+            # default to filter None
+            detail_filter_list = Q(pk__in=[])
             for s in src_details_unique_fields:
-                if detail_filter_list:
-                    detail_filter_list |= Q(**s)
-                else:
+                if compare_q(detail_filter_list, Q(pk__in=[])):
                     detail_filter_list = Q(**s)
+                else:
+                    detail_filter_list |= Q(**s)
             src_agency_details = AgencyExtraDetail.objects.filter(
                 agency_service__agency=src_agency).filter(
                     detail_filter_list).select_related('agency_service')
