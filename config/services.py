@@ -13,7 +13,7 @@ from config.constants import (
     AMOUNTS_FIXED, AMOUNTS_BY_PAX,
     EXTRA_PARAMETER_TYPE_HOURS, EXTRA_PARAMETER_TYPE_DAYS,
     EXTRA_PARAMETER_TYPE_NIGHTS, EXTRA_PARAMETER_TYPE_STAY,
-    ERROR_INVALID_SERVICE_CATEGORY)
+    ERROR_INVALID_SERVICE_CATEGORY, ERROR_NO_COST_FOUND)
 from config.models import (
     Allotment,
     ProviderAllotmentService, ProviderAllotmentDetail,
@@ -683,7 +683,7 @@ class ConfigServices(object):
                         )
                     )
                     if not detail_list:
-                        return None, "Cost Not Found"
+                        return None, ERROR_NO_COST_FOUND % (service, provider, date_from)
                     group_cost, group_cost_message = cls.find_group_amount(
                         True, service, date_from, date_to, group,
                         quantity, None, detail_list
@@ -712,7 +712,7 @@ class ConfigServices(object):
                     )
                 )
                 if not detail_list:
-                    return None, "Cost Not Found"
+                    return None, ERROR_NO_COST_FOUND % (service, provider, date_from)
                 cost, cost_message = cls.find_groups_amount(
                     True, service, date_from, date_to, cost_groups,
                     quantity, None, detail_list
@@ -907,7 +907,7 @@ class ConfigServices(object):
                                 location_to_id=location_from_id,
                                 location_from_id=location_to_id))
                         if not detail_list:
-                            return None, "Cost Not Found"
+                            return None, ERROR_NO_COST_FOUND % (service, provider, date_from)
                         group_cost, group_cost_message = cls.find_groups_amount(
                             True, service, date_from, date_to, cost_groups,
                             quantity, None, detail_list
@@ -945,7 +945,7 @@ class ConfigServices(object):
                             location_to_id=location_from_id,
                             location_from_id=location_to_id))
                     if not detail_list:
-                        return None, "Cost Not Found"
+                        return None, ERROR_NO_COST_FOUND % (service, provider, date_from)
                     cost, cost_message = cls.find_groups_amount(
                         True, service, date_from, date_to, cost_groups,
                         quantity, None, detail_list
@@ -1150,7 +1150,7 @@ class ConfigServices(object):
 
                     detail_list = list(queryset)
                     if not detail_list:
-                        return None, "Cost Not Found"
+                        return None, ERROR_NO_COST_FOUND % (service, provider, date_from)
                     group_cost, group_cost_message = cls.find_group_amount(
                         True, service, date_from, date_to, group,
                         quantity, parameter, detail_list
@@ -1174,7 +1174,7 @@ class ConfigServices(object):
 
                 detail_list = list(queryset)
                 if not detail_list:
-                    return None, "Cost Not Found"
+                    return None, ERROR_NO_COST_FOUND % (service, provider, date_from)
                 cost, cost_message = cls.find_groups_amount(
                     True, service, date_from, date_to, cost_groups,
                     quantity, parameter, detail_list
