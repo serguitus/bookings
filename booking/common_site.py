@@ -543,7 +543,7 @@ class NewQuoteAllotmentSiteModel(QuoteServiceSiteModel):
 
     fields = (
         ('quote', 'quote_package'), ('service', 'search_location', 'status'), ('datetime_from', 'nights', 'datetime_to'),
-        'room_type', 'board_type', 'provider', 'id')
+        ('room_type', 'board_type'), ('provider','cost_by_catalog','price_by_catalog'), 'id')
     list_display = ('quote', 'quote_package', 'service', 'datetime_from', 'datetime_to', 'status',)
     top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote__reference', 'service__name',)
@@ -562,7 +562,7 @@ class NewQuoteTransferSiteModel(QuoteServiceSiteModel):
     fields = (
         ('quote', 'quote_package'), ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to'),
         ('location_from', 'location_to'), 'service_addon',
-        'provider', 'id')
+        ('provider','cost_by_catalog','price_by_catalog'), 'id')
     list_display = ('quote', 'quote_package', 'name', 'service_addon', 'datetime_from', 'status',)
     top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote__reference', 'service__name',)
@@ -583,7 +583,7 @@ class NewQuoteExtraSiteModel(QuoteServiceSiteModel):
         ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to', 'time'),
         ('service_addon'), ('quantity', 'parameter'),
         ('pickup_office', 'dropoff_office',),
-        'provider', 'description', 'id')
+        ('provider','cost_by_catalog','price_by_catalog'), 'description', 'id')
     list_display = (
         'quote', 'quote_package', 'service', 'service_addon', 'quantity', 'parameter',
         'datetime_from', 'datetime_to', 'time', 'status',)
@@ -1285,8 +1285,11 @@ class BookingProvidedServiceSiteModel(SiteModel):
             'fields': (
                 'booking', ('name', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'service_addon'),
-                ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount',
+                'provider',
+                ('manual_cost', 'cost_by_catalog'),
+                'cost_amount',
+                ('manual_price', 'price_by_catalog'),
+                'price_amount',
                 'utility_percent', 'utility')
         }),
         ('Notes', {'fields': ('p_notes', 'new_v_notes', 'provider_notes'),
@@ -1727,8 +1730,12 @@ class BookingProvidedAllotmentSiteModel(BookingProvidedServiceSiteModel):
                 ('status', 'conf_number'),
                 ('datetime_from', 'nights', 'datetime_to'),
                 ('room_type', 'board_type'),
-                ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility', 'id', 'version',
+                'provider',
+                ('manual_cost', 'cost_by_catalog'),
+                'cost_amount',
+                ('manual_price', 'price_by_catalog'),
+                'price_amount',
+                'utility_percent', 'utility', 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
@@ -1768,8 +1775,12 @@ class BookingProvidedTransferSiteModel(BookingProvidedServiceSiteModel):
                 ('location_to', 'place_to'),
                 ('dropoff', 'schedule_to', 'schedule_time_to'),
                 'service_addon',
-                ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility', 'id', 'version',
+                'provider',
+                ('manual_cost', 'cost_by_catalog'),
+                'cost_amount',
+                ('manual_price', 'price_by_catalog'),
+                'price_amount',
+                'utility_percent', 'utility', 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
@@ -1803,13 +1814,19 @@ class BookingProvidedExtraSiteModel(BookingProvidedServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                'booking', 'booking_package', ('service', 'search_location'), ('status', 'conf_number'),
+                'booking', 'booking_package',
+                ('service', 'search_location'),
+                ('status', 'conf_number'),
                 ('datetime_from', 'nights', 'datetime_to', 'time'),
                 'service_addon',
                 ('quantity', 'parameter'),
-                ('pickup_office', 'dropoff_office',),
-                ('manual_cost', 'provider'),
-                'cost_amount', 'manual_price', 'price_amount', 'utility_percent', 'utility', 'id', 'version',
+                ('pickup_office', 'dropoff_office'),
+                'provider',
+                ('manual_cost', 'cost_by_catalog'),
+                'cost_amount',
+                ('manual_price', 'price_by_catalog'),
+                'price_amount',
+                'utility_percent', 'utility', 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'provider_notes'),
@@ -1845,12 +1862,15 @@ class BookingExtraPackageSiteModel(BaseBookingServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                ('booking', 'voucher_detail'), ('service', 'search_location'), ('status', 'conf_number'),
+                ('booking', 'voucher_detail'),
+                ('service', 'search_location'),
+                ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
                 'cost_amount',
                 ('manual_price', 'price_by_catalog'),
                 'price_amount', 'utility_percent', 'utility', 'id', 'version',
-                'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
+                'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject',
+                'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'new_v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide', 'show')})

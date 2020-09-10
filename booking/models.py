@@ -1276,6 +1276,7 @@ class BookingBookDetail(BaseBookingService):
         BookingProvidedService, related_name='%(class)s_booking_service')
 
     def fill_data(self):
+        self.booking = self.booking_service.booking
         self.location = self.base_service.location
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
