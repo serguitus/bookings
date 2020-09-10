@@ -516,6 +516,7 @@ class ExtraSiteModel(BaseServiceSiteModel):
               ('pax_range', 'is_internal', 'default_as_package'),
               ('child_discount_percent', 'child_age', 'infant_age'),
               ('car_rental', 'enabled'),
+              'included_services',
               'description')
     list_display = ('name', 'service_category', 'location', 'cost_type',
                     'parameter_type', 'max_capacity', 'enabled',
