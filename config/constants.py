@@ -88,4 +88,4 @@ PAX_TYPES = (
 )
 
 ERROR_INVALID_SERVICE_CATEGORY = 'Invalid Service Category %s'
-ERROR_NO_EXTRA_COST_FOUND = 'Cost Not Found for Service %s - Provider %s - Date %s'
+ERROR_NO_COST_FOUND = 'Cost Not Found for Service %s - Provider %s - Date %s'
