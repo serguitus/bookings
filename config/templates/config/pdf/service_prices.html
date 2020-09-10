@@ -15,7 +15,6 @@
     <tr>
         <td class="top-line"><b>Board</b></td>
         <td class="top-line"><b>Room</b></td>
-        <td class="top-line addon-content"><b>Addon</b></td>
         {% if service.pax_range %}
             <td class="top-line pax-range-content"><b>Pax Range</b></td>
         {% endif %}
@@ -48,16 +47,6 @@
             {% if print_top_line %}
                 <td class="top-line">
                     {{ detail.room_type.name }}
-                </td>
-            {% else %}
-                <td></td>
-            {% endif %}
-            {% if not print_top_line and detail.addon.name != prev_addon %}
-                {% setvar True as print_top_line %}
-            {% endif %}
-            {% if print_top_line %}
-                <td class="top-line">
-                    {{ detail.addon.name }}
                 </td>
             {% else %}
                 <td></td>
@@ -104,8 +93,8 @@
         {% endif %}
     </tr>
     <tr>
-        <td class="top-line"><b>Location From</b></td>
-        <td class="top-line"><b>Location To</b></td>
+        <td class="top-line"><b>Origin</b></td>
+        <td class="top-line"><b>Destination</b></td>
         <td class="top-line addon-content"><b>Addon</b></td>
         {% if service.pax_range %}
             <td class="top-line pax-range-content"><b>Pax Range</b></td>
@@ -175,10 +164,16 @@
         {% if service.pax_range %}
             <td colspan="5" class="bold-top-line">
                 <b>Service:</b> {{ service.name }}
+                {% if service.description %}
+                    <br>{{ service.description }}
+                {% endif %}
             </td>
         {% else %}
             <td colspan="4" class="bold-top-line">
                 <b>Service:</b> {{ service.name }}
+                {% if service.description %}
+                    <br>{{ service.description }}
+                {% endif %}
             </td>
         {% endif %}
     </tr>
@@ -189,7 +184,7 @@
         {% endif %}
         <td class="top-line date-content"><b>From</b></td>
         <td class="top-line date-content"><b>To</b></td>
-        <td class="top-line amount-content"><b>SGL</b></td>
+        <td class="top-line amount-content"><b>Price</b></td>
     </tr>
     {% setvar '' as prev_addon %}
     {% for detail in details %}
