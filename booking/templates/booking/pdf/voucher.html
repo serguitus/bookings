@@ -184,6 +184,12 @@
                                         </table>
                                     </td>
                                 </tr>
+                                {% elif service.service.included_services %}
+                                <tr>
+                                    <td class="voucher-content-3" colspan="4">
+                                      {{ service.service.included_services}}
+                                    </td>
+                                </tr>
                                 {% else %}
                                 <tr>
                                     <td class="voucher-content-3" colspan="4">
@@ -198,7 +204,6 @@
                     </tr>
                     <tr class="voucher-notes">
                         <td colspan="3">
-                        {% if service.service.included_services %}{{ service.service.included_services }}{% endif %}
                         {% if service.new_v_notes %}{{ service.new_v_notes }}{% endif %}</td>
                     </tr>
                     <tr class="voucher-footer">
