@@ -1713,10 +1713,11 @@ class BookingServices(object):
     @classmethod
     def _find_bookingservice_pax_list(cls, bookingservice):
 
-        if isinstance(bookingservice, (
-                BookingProvidedAllotment, BookingProvidedTransfer, BookingProvidedExtra, BookingProvidedService)):
+        if isinstance(bookingservice, (BookingProvidedService)):
             if bookingservice.booking_package_id is not None:
-                return list(BaseBookingServicePax.objects.filter(booking_service=bookingservice.booking_package_id).all())
+                return list(
+                    BaseBookingServicePax.objects.filter(
+                        booking_service=bookingservice.booking_package_id).all())
         return list(BaseBookingServicePax.objects.filter(booking_service=bookingservice.id).all())
 
 
@@ -2028,13 +2029,13 @@ class BookingServices(object):
     def _quoteservice_amounts(
             cls, quoteservice, date_from, date_to, cost_groups, price_groups, provider, agency):
 
-        c, c_msg = cls._any_service_costs(quoteservice, date_from, date_to, cost_groups, provider)
+        c, c_msg = cls._any_quoteservice_costs(quoteservice, date_from, date_to, cost_groups, provider)
         p, p_msg = cls._quoteservice_prices(quoteservice, date_from, date_to, price_groups, agency)
         return cls._round_cost(c), c_msg, cls._round_price(p), p_msg
 
 
     @classmethod
-    def _any_service_costs(
+    def _any_quoteservice_costs(
             cls, any_service, date_from, date_to, cost_groups, provider):
         c, c_msg = None, "Unknown Service"
         service = None
@@ -2113,13 +2114,13 @@ class BookingServices(object):
 
         if grouping:
             # grouping means passing 1,2,3,4 as pax quantity
-            c1, c1_msg = cls._any_service_costs(
+            c1, c1_msg = cls._any_quoteservice_costs(
                 quoteservice, date_from, date_to, ({0:1, 1:0},), provider)
-            c2, c2_msg = cls._any_service_costs(
+            c2, c2_msg = cls._any_quoteservice_costs(
                 quoteservice, date_from, date_to, ({0:2, 1:0},), provider)
-            c3, c3_msg = cls._any_service_costs(
+            c3, c3_msg = cls._any_quoteservice_costs(
                 quoteservice, date_from, date_to, ({0:3, 1:0},), provider)
-            c4, c4_msg = cls._any_service_costs(
+            c4, c4_msg = cls._any_quoteservice_costs(
                 quoteservice, date_from, date_to, ({0:4, 1:0},), provider)
 
             c1, c1_msg, c2, c2_msg, c3, c3_msg, c4, c4_msg = cls._adjust_group_free_amounts(
@@ -2128,7 +2129,7 @@ class BookingServices(object):
             # no grouping means passing total pax quantity
             total_free_cost, total_free_price = cls._find_free_paxes(service_pax_variant)
 
-            c1, c1_msg = cls._any_service_costs(
+            c1, c1_msg = cls._any_quoteservice_costs(
                 quoteservice, date_from, date_to,
                 ({0:pax_quantity, 1:0},),
                 provider)

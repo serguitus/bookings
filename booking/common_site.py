@@ -1814,11 +1814,13 @@ class BookingProvidedExtraSiteModel(BookingProvidedServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                'booking', 'booking_package', ('service', 'search_location'), ('status', 'conf_number'),
+                'booking', 'booking_package',
+                ('service', 'search_location'),
+                ('status', 'conf_number'),
                 ('datetime_from', 'nights', 'datetime_to', 'time'),
                 'service_addon',
                 ('quantity', 'parameter'),
-                ('pickup_office', 'dropoff_office',),
+                ('pickup_office', 'dropoff_office'),
                 'provider',
                 ('manual_cost', 'cost_by_catalog'),
                 'cost_amount',
@@ -1860,12 +1862,15 @@ class BookingExtraPackageSiteModel(BaseBookingServiceSiteModel):
     fieldsets = (
         (None, {
             'fields': (
-                ('booking', 'voucher_detail'), ('service', 'search_location'), ('status', 'conf_number'),
+                ('booking', 'voucher_detail'),
+                ('service', 'search_location'),
+                ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
                 'cost_amount',
                 ('manual_price', 'price_by_catalog'),
                 'price_amount', 'utility_percent', 'utility', 'id', 'version',
-                'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
+                'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject',
+                'mail_body')
         }),
         ('Notes', {'fields': ('p_notes', 'new_v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide', 'show')})
