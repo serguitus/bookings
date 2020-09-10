@@ -478,8 +478,8 @@ class AllotmentSiteModel(BaseServiceSiteModel):
               ('child_discount_percent', 'child_age', 'infant_age'))
     list_display = ('name', 'service_category', 'phone',
                     'location', 'is_shared_point', 'enabled',)
-    top_filters = ('name', ('location', LocationTopFilter),
-                   ('service_category', ServiceCategoryTopFilter),
+    top_filters = ('name', ('service_category', ServiceCategoryTopFilter),
+                   ('location', LocationTopFilter),
                    'is_shared_point', 'enabled')
     ordering = ['enabled', 'name']
     inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline,
@@ -499,8 +499,8 @@ class TransferSiteModel(BaseServiceSiteModel):
     list_display = ('name', 'cost_type', 'max_capacity', 'is_shared', 'is_ticket', 'enabled',
                     'infant_age', 'child_age')
     top_filters = (
-        'name', ('service_category', ServiceCategoryTopFilter), 'is_shared', 'enabled',
-        AgencyTransferLocationTopFilter)
+        'name', ('service_category', ServiceCategoryTopFilter),
+        AgencyTransferLocationTopFilter, 'is_shared', 'enabled')
     ordering = ['enabled', 'name']
     inlines = [ServiceAddonInline]
     actions = ['export_prices']
@@ -521,7 +521,8 @@ class ExtraSiteModel(BaseServiceSiteModel):
                     'parameter_type', 'max_capacity', 'enabled',
                     'pax_range', 'has_pax_range',
                     'infant_age', 'child_age')
-    top_filters = (('service_category', ServiceCategoryTopFilter), 'name',)
+    top_filters = ('name', ('service_category', ServiceCategoryTopFilter),
+                   ('location', LocationTopFilter))
     ordering = ['enabled', 'name']
     inlines = [ServiceAddonInline]
     actions = ['export_prices']
