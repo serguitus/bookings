@@ -1415,6 +1415,15 @@ class BookingProvidedServiceSiteModel(SiteModel):
 
             return super(BookingProvidedServiceSiteModel, self).changeform_view(request, object_id, form_url, extra_context)
 
+    def save_related(self, request, form, formsets, change):
+        with transaction.atomic(savepoint=False):
+            super(BookingProvidedServiceSiteModel, self).save_related(request, form, formsets, change)
+            obj = self.save_form(request, form, change)
+            if not change:
+                BookingServices.sync_bookingservice_details(obj)
+            BookingServices.update_bookingservice_amounts(obj)
+            BookingServices.update_bookingservice_description(obj)
+
 
 class BaseBookingServiceSiteModel(SiteModel):
 
