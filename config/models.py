@@ -226,7 +226,7 @@ class Service(models.Model):
     new_time = models.TimeField(blank=True, null=True)
     enabled = models.BooleanField(default=True)
     default_as_package = models.BooleanField(default=False)
-    is_internal = models.BooleanField(default=False)
+    is_internal = models.BooleanField(default=False, verbose_name='No Voucher')
 
     def __init__(self, *args, **kwargs):
         # Call the "real" __init__ method.
@@ -569,8 +569,8 @@ class ProviderAllotmentService(ProviderCatalogue):
     ProviderAccomodationService
     """
     class Meta:
-        verbose_name = 'Accomodation Service Provider'
-        verbose_name_plural = 'Accomodation Service Providers'
+        verbose_name = 'Accomodation Cost'
+        verbose_name_plural = 'Accomodation Costs'
         unique_together = (('provider', 'service', 'date_from', 'date_to'),)
     service = models.ForeignKey(Allotment, on_delete=models.CASCADE)
 
@@ -589,8 +589,8 @@ class ProviderAllotmentDetail(AmountDetail):
     ProviderAccomodationDetail
     """
     class Meta:
-        verbose_name = 'Accomodation Provider Detail'
-        verbose_name_plural = 'Accomodation Provider Details'
+        verbose_name = 'Accomodation Cost Detail'
+        verbose_name_plural = 'Accomodation Cost Details'
         unique_together = (
             ('provider_service', 'room_type', 'board_type', 'addon',
              'pax_range_min', 'pax_range_max'),)
@@ -617,8 +617,8 @@ class AgencyAllotmentService(AgencyCatalogue):
     AgencyAccomodationService
     """
     class Meta:
-        verbose_name = 'Accomodation Service Agency'
-        verbose_name_plural = 'Accomodation Service Agencies'
+        verbose_name = 'Accomodation Price'
+        verbose_name_plural = 'Accomodation Prices'
         unique_together = (('agency', 'service', 'date_from', 'date_to'),)
     service = models.ForeignKey(Allotment, on_delete=models.CASCADE)
 
@@ -638,8 +638,8 @@ class AgencyAllotmentDetail(AmountDetail):
     AgencyAccomodationDetail
     """
     class Meta:
-        verbose_name = 'Accomodation Agency Detail'
-        verbose_name_plural = 'Accomodation Agency Details'
+        verbose_name = 'Accomodation Price Detail'
+        verbose_name_plural = 'Accomodation Price Details'
         unique_together = (
             ('agency_service', 'room_type', 'board_type', 'addon',
              'pax_range_min', 'pax_range_max'),)
@@ -705,8 +705,8 @@ class ProviderTransferService(ProviderCatalogue):
     ProviderTransferService
     """
     class Meta:
-        verbose_name = 'Transfer Service Provider'
-        verbose_name_plural = 'Transfer Service Providers'
+        verbose_name = 'Transfer Cost'
+        verbose_name_plural = 'Transfer Cost'
         unique_together = (('provider', 'service', 'date_from', 'date_to'),)
     service = models.ForeignKey(Transfer, on_delete=models.CASCADE)
 
@@ -726,8 +726,8 @@ class ProviderTransferDetail(AmountDetail, RouteData):
     ProviderTransferDetail
     """
     class Meta:
-        verbose_name = 'Transfer Provider Detail'
-        verbose_name_plural = 'Transfer Provider Details'
+        verbose_name = 'Transfer Cost Detail'
+        verbose_name_plural = 'Transfer Cost Details'
         unique_together = (
             ('provider_service', 'location_from', 'location_to', 'addon',
              'pax_range_min', 'pax_range_max'),)
@@ -754,8 +754,8 @@ class AgencyTransferService(AgencyCatalogue):
     AgencyTransferService
     """
     class Meta:
-        verbose_name = 'Transfer Service Agency'
-        verbose_name_plural = 'Transfer Service Agencies'
+        verbose_name = 'Transfer Price'
+        verbose_name_plural = 'Transfer Prices'
         unique_together = (('agency', 'service', 'date_from', 'date_to'),)
     service = models.ForeignKey(Transfer, on_delete=models.CASCADE)
 
@@ -775,8 +775,8 @@ class AgencyTransferDetail(AmountDetail, RouteData):
     AgencyTransferDetail
     """
     class Meta:
-        verbose_name = 'Transfer Agency Detail'
-        verbose_name_plural = 'Transfer Agency Details'
+        verbose_name = 'Transfer Price Detail'
+        verbose_name_plural = 'Transfer Price Details'
         unique_together = ((
             'agency_service', 'location_from', 'location_to', 'addon',
             'pax_range_min', 'pax_range_max'),)
@@ -805,8 +805,8 @@ class ProviderExtraService(ProviderCatalogue):
     ProviderExtraService
     """
     class Meta:
-        verbose_name = 'Provider Extra Service'
-        verbose_name_plural = 'Providers Extras Services'
+        verbose_name = 'Extra Cost'
+        verbose_name_plural = 'Extra Costs'
         unique_together = (('provider', 'service', 'date_from', 'date_to'),)
     service = models.ForeignKey(Extra, on_delete=models.CASCADE)
 
@@ -822,8 +822,8 @@ class ProviderExtraDetail(AmountDetail):
     ProviderExtraDetail
     """
     class Meta:
-        verbose_name = 'Provider Extra Detail'
-        verbose_name_plural = 'Providers Extras Details'
+        verbose_name = 'Extra Cost Detail'
+        verbose_name_plural = 'Extra Cost Details'
         unique_together = ('provider_service',
                            'addon',
                            'pax_range_min',
@@ -842,8 +842,8 @@ class AgencyExtraService(AgencyCatalogue):
     AgencyExtraService
     """
     class Meta:
-        verbose_name = 'Agency Extra Service'
-        verbose_name_plural = 'Agency Extras Services'
+        verbose_name = 'Extra Price'
+        verbose_name_plural = 'Extras Prices'
         unique_together = (('agency', 'service', 'date_from', 'date_to'),)
     service = models.ForeignKey(Extra, on_delete=models.CASCADE)
 
@@ -859,8 +859,8 @@ class AgencyExtraDetail(AmountDetail):
     AgencyExtraDetail
     """
     class Meta:
-        verbose_name = 'Agency Extra Detail'
-        verbose_name_plural = 'Agencies Extra Details'
+        verbose_name = 'Extra Price Detail'
+        verbose_name_plural = 'Extra Price Details'
         unique_together = ('agency_service',
                            'addon',
                            'pax_range_min',
