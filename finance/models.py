@@ -90,7 +90,7 @@ class FinantialDocumentHistory(models.Model):
     class Meta:
         verbose_name = 'Finantial Document History'
         verbose_name_plural = 'Finantials Documents History'
-    document = models.ForeignKey(FinantialDocument)
+    document = models.ForeignKey(FinantialDocument, on_delete=models.CASCADE)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -107,16 +107,20 @@ class FinantialDocumentHistory(models.Model):
 class AccountingDocument(models.Model):
     class Meta:
         abstract = True
-    account = models.ForeignKey(Account)
-    current_operation = models.ForeignKey(Operation, blank=True, null=True)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    current_operation = models.ForeignKey(Operation,
+                                          on_delete=models.CASCADE,
+                                          blank=True, null=True)
 
 
 class AccountingDocumentHistory(models.Model):
     class Meta:
         verbose_name = 'Accounting Document History'
         verbose_name_plural = 'Accountings Documents History'
-    document = models.ForeignKey(FinantialDocument)
-    operation = models.ForeignKey(Operation)
+    document = models.ForeignKey(FinantialDocument,
+                                 on_delete=models.CASCADE)
+    operation = models.ForeignKey(Operation,
+                                  on_delete=models.CASCADE)
 
 
 class MatchingDocument(models.Model):
@@ -169,6 +173,7 @@ class CurrencyExchange(FinantialDocument, AccountingDocument):
         verbose_name = 'Currency Exchange'
         verbose_name_plural = 'Currencies Exchanges'
     exchange_account = models.ForeignKey(Account,
+                                         on_delete=models.CASCADE,
                                          related_name='exchange_account',
                                          verbose_name='Origin Account')
     exchange_amount = models.DecimalField(max_digits=10, decimal_places=2,
@@ -190,6 +195,7 @@ class Transfer(FinantialDocument, AccountingDocument):
         verbose_name = 'Transfer'
         verbose_name_plural = 'Transfers'
     transfer_account = models.ForeignKey(Account,
+                                         on_delete=models.CASCADE,
                                          related_name='transfer_account',
                                          verbose_name='Origin Account')
     operation_cost = models.DecimalField(max_digits=10,
@@ -231,7 +237,7 @@ class LoanEntityCurrency(SummaryModel):
         verbose_name = 'Loan Entity Currency'
         verbose_name_plural = 'Loans Entities Currencies'
         unique_together = (('loan_entity', 'currency',),)
-    loan_entity = models.ForeignKey(LoanEntity)
+    loan_entity = models.ForeignKey(LoanEntity, on_delete=models.CASCADE)
     currency = models.CharField(max_length=5, choices=CURRENCIES)
 
     def __str__(self):
@@ -382,7 +388,7 @@ class LoanEntityDocument(LoanDocument):
         verbose_name = 'Loan Entity Document'
         verbose_name_plural = 'Loans Entities Documents'
         permissions = (('match', 'Match Document'),)
-    loan_entity = models.ForeignKey(LoanEntity)
+    loan_entity = models.ForeignKey(LoanEntity, on_delete=models.CASCADE)
 
 
 class LoanEntityDeposit(LoanEntityDocument):
@@ -498,8 +504,10 @@ class LoanEntityMatch(models.Model):
         verbose_name = 'Loan Entity Match'
         verbose_name_plural = 'Loans Entities Matches'
         unique_together = (('loan_entity_deposit', 'loan_entity_withdraw',),)
-    loan_entity_deposit = models.ForeignKey(LoanEntityDeposit)
-    loan_entity_withdraw = models.ForeignKey(LoanEntityWithdraw)
+    loan_entity_deposit = models.ForeignKey(LoanEntityDeposit,
+                                            on_delete=models.CASCADE)
+    loan_entity_withdraw = models.ForeignKey(LoanEntityWithdraw,
+                                             on_delete=models.CASCADE)
     matched_amount = models.DecimalField(max_digits=10, decimal_places=2)
 
 
@@ -508,7 +516,7 @@ class LoanAccount(SummaryModel):
         verbose_name = 'Loan Account'
         verbose_name_plural = 'Loans Accounts'
         unique_together = (('account',),)
-    account = models.ForeignKey(Account)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.account.__str__()
@@ -650,7 +658,7 @@ class LoanAccountDocument(LoanDocument):
         verbose_name = 'Loan Account document'
         verbose_name_plural = 'Loans Accounts Documents'
         permissions = (('match', 'Match Document'),)
-    loan_account = models.ForeignKey(LoanAccount)
+    loan_account = models.ForeignKey(LoanAccount, on_delete=models.CASCADE)
 
 
 class LoanAccountDeposit(LoanAccountDocument):
@@ -766,8 +774,10 @@ class LoanAccountMatch(models.Model):
         verbose_name = 'Loan Account Match'
         verbose_name_plural = 'Loans Accounts Matches'
         unique_together = (('loan_account_deposit', 'loan_account_withdraw',),)
-    loan_account_deposit = models.ForeignKey(LoanAccountDeposit)
-    loan_account_withdraw = models.ForeignKey(LoanAccountWithdraw)
+    loan_account_deposit = models.ForeignKey(LoanAccountDeposit,
+                                             on_delete=models.CASCADE)
+    loan_account_withdraw = models.ForeignKey(LoanAccountWithdraw,
+                                              on_delete=models.CASCADE)
     matched_amount = models.DecimalField(max_digits=10, decimal_places=2)
 
 
@@ -793,7 +803,7 @@ class AgencyContact(models.Model):
         verbose_name = 'Agency Contact'
         verbose_name_plural = 'Agencies Contacts'
         unique_together = (('agency', 'name',),)
-    agency = models.ForeignKey(Agency)
+    agency = models.ForeignKey(Agency, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
     email = models.EmailField()
 
@@ -806,7 +816,7 @@ class AgencyCopyContact(models.Model):
         verbose_name = 'Agency Copy Contact'
         verbose_name_plural = 'Agency CC Contacts'
         unique_together = (('agency', 'name',),)
-    agency = models.ForeignKey(Agency)
+    agency = models.ForeignKey(Agency, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
     email = models.EmailField()
 
@@ -819,7 +829,7 @@ class AgencyBillingContact(models.Model):
         verbose_name = 'Agency Billing Contact'
         verbose_name_plural = 'Agency Billing Contacts'
         unique_together = (('agency', 'name',),)
-    agency = models.ForeignKey(Agency)
+    agency = models.ForeignKey(Agency, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
     email = models.EmailField()
 
@@ -832,7 +842,7 @@ class AgencyCurrency(SummaryModel):
         verbose_name = 'Agency Currency'
         verbose_name_plural = 'Agencies Currencies'
         unique_together = (('agency', 'currency',),)
-    agency = models.ForeignKey(Agency)
+    agency = models.ForeignKey(Agency, on_delete=models.CASCADE)
     currency = models.CharField(max_length=5, choices=CURRENCIES)
 
 
@@ -841,7 +851,7 @@ class AgencyDocument(FinantialDocument, MatchingDocument):
         verbose_name = 'Agency Document'
         verbose_name_plural = 'Agencies Documents'
         permissions = (('match', 'Match Document'),)
-    agency = models.ForeignKey(Agency)
+    agency = models.ForeignKey(Agency, on_delete=models.CASCADE)
 
 
 class AgencyDebitDocument(AgencyDocument):
@@ -999,8 +1009,10 @@ class AgencyDocumentMatch(models.Model):
         verbose_name = 'Agency Document Match'
         verbose_name_plural = 'Agencies Documents Matches'
         unique_together = (('credit_document', 'debit_document',),)
-    credit_document = models.ForeignKey(AgencyCreditDocument)
-    debit_document = models.ForeignKey(AgencyDebitDocument)
+    credit_document = models.ForeignKey(AgencyCreditDocument,
+                                        on_delete=models.CASCADE)
+    debit_document = models.ForeignKey(AgencyDebitDocument,
+                                       on_delete=models.CASCADE)
     matched_amount = models.DecimalField(max_digits=10, decimal_places=2)
 
 
@@ -1034,7 +1046,7 @@ class ProviderCurrency(SummaryModel):
         verbose_name = 'Provider Currency'
         verbose_name_plural = 'Providers Currencies'
         unique_together = (('provider', 'currency',),)
-    provider = models.ForeignKey(Provider)
+    provider = models.ForeignKey(Provider, on_delete=models.CASCADE)
     currency = models.CharField(max_length=5, choices=CURRENCIES)
 
 
@@ -1043,7 +1055,7 @@ class ProviderDocument(FinantialDocument, MatchingDocument):
         verbose_name = 'Provider Document'
         verbose_name_plural = 'Providers Documents'
         permissions = (('match', 'Match Document'),)
-    provider = models.ForeignKey(Provider)
+    provider = models.ForeignKey(Provider, on_delete=models.CASCADE)
 
 
 class ProviderDebitDocument(ProviderDocument):
@@ -1198,6 +1210,8 @@ class ProviderDocumentMatch(models.Model):
         verbose_name = 'Provider Document Match'
         verbose_name_plural = 'Providers Documents Matches'
         unique_together = (('credit_document', 'debit_document',),)
-    credit_document = models.ForeignKey(ProviderCreditDocument)
-    debit_document = models.ForeignKey(ProviderDebitDocument)
+    credit_document = models.ForeignKey(ProviderCreditDocument,
+                                        on_delete=models.CASCADE)
+    debit_document = models.ForeignKey(ProviderDebitDocument,
+                                       on_delete=models.CASCADE)
     matched_amount = models.DecimalField(max_digits=10, decimal_places=2)
