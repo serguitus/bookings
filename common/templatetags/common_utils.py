@@ -33,7 +33,7 @@ def substract_days(value, arg):
 def substract(value, arg):
     return value - arg
 
-@register.assignment_tag
+@register.simple_tag
 def setvar(val=None):
     return val
 

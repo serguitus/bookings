@@ -43,7 +43,7 @@ from xhtml2pdf import pisa
 class LocationAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Location.objects.none()
         qs = Location.objects.filter(enabled=True).all()
         if self.q:
@@ -54,7 +54,7 @@ class LocationAutocompleteView(autocomplete.Select2QuerySetView):
 class ZoneTransferAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Transfer.objects.none()
         qs = Transfer.objects.filter(has_pickup_time=True)
         if self.q:
@@ -65,7 +65,7 @@ class ZoneTransferAutocompleteView(autocomplete.Select2QuerySetView):
 class ServiceCategoryAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return ServiceCategory.objects.none()
         qs = ServiceCategory.objects.all()
         if self.q:
@@ -99,7 +99,7 @@ class RoomTypeAutocompleteView(autocomplete.Select2QuerySetView):
 
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return RoomType.objects.none()
 
         qs = self.get_base_queryset()
@@ -153,7 +153,7 @@ class BoardTypeAutocompleteView(autocomplete.Select2ListView):
 class AddonAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Addon.objects.none()
         qs = Addon.objects.filter(enabled=True).all().distinct()
 
@@ -190,7 +190,7 @@ class CatalogAllotmentAddonAutocompleteView(autocomplete.Select2QuerySetView):
 
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Addon.objects.none()
 
         qs = self.get_base_queryset()
@@ -216,7 +216,7 @@ class CatalogTransferAddonAutocompleteView(autocomplete.Select2QuerySetView):
 
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Addon.objects.none()
 
         qs = self.get_base_queryset()
@@ -242,7 +242,7 @@ class CatalogExtraAddonAutocompleteView(autocomplete.Select2QuerySetView):
 
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Addon.objects.none()
 
         qs = self.get_base_queryset()
@@ -254,7 +254,7 @@ class CatalogExtraAddonAutocompleteView(autocomplete.Select2QuerySetView):
 class AllotmentAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Allotment.objects.none()
         qs = Allotment.objects.filter(enabled=True).all()
         if self.q:
@@ -331,7 +331,7 @@ def provider_allotment_queryset(
 
 class ProviderAllotmentAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Provider.objects.none()
 
         service = self.forwarded.get('service', None)
@@ -345,7 +345,7 @@ class ProviderAllotmentAutocompleteView(autocomplete.Select2QuerySetView):
 class TransferAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Transfer.objects.none()
         qs = Transfer.objects.filter(enabled=True).all()
         if self.q:
@@ -468,7 +468,7 @@ def provider_transfer_queryset(
 
 class ProviderTransferAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Provider.objects.none()
 
         service = self.forwarded.get('service', None)
@@ -482,7 +482,7 @@ class ProviderTransferAutocompleteView(autocomplete.Select2QuerySetView):
 class ExtraAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Extra.objects.none()
         qs = Extra.objects.filter(enabled=True).all()
         if self.q:
@@ -517,7 +517,7 @@ def provider_extra_queryset(service, addon=None, text=None):
 
 class ProviderExtraAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Provider.objects.none()
         qs = Provider.objects.filter(enabled=True).all().distinct()
 
@@ -574,7 +574,7 @@ def render_prices_pdf(request, extra_context=None):
 class ServiceAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Service.objects.none()
         current_service_id = self.forwarded.get('current_service_id', None)
         qs = Service.objects.filter(enabled=True).distinct()
@@ -613,7 +613,7 @@ class ServiceAutocompleteView(autocomplete.Select2QuerySetView):
 class ServiceAllotmentAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Allotment.objects.none()
         provider = self.forwarded.get('provider', None)
         location = self.forwarded.get('search_location', None)
@@ -634,7 +634,7 @@ class ServiceAllotmentAutocompleteView(autocomplete.Select2QuerySetView):
 class ServiceTransferAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Transfer.objects.none()
         provider = self.forwarded.get('provider', None)
         location = self.forwarded.get('search_location', None)
@@ -686,7 +686,7 @@ class ServiceTransferAutocompleteView(autocomplete.Select2QuerySetView):
 class ServiceExtraAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Extra.objects.none()
         provider = self.forwarded.get('provider', None)
         location = self.forwarded.get('search_location', None)
@@ -707,7 +707,7 @@ class ServiceExtraAutocompleteView(autocomplete.Select2QuerySetView):
 class CarRentalAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return CarRental.objects.none()
         qs = CarRental.objects.all()
         if self.q:
@@ -718,7 +718,7 @@ class CarRentalAutocompleteView(autocomplete.Select2QuerySetView):
 class CarRentalOfficeAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return CarRentalOffice.objects.none()
 
         book_service = self.forwarded.get('book_service', None)

@@ -18,7 +18,7 @@ from finance.constants import STATUS_READY
 class AccountAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Account.objects.none()
         qs = Account.objects.filter(enabled=True).all()
         if self.q:
@@ -29,7 +29,7 @@ class AccountAutocompleteView(autocomplete.Select2QuerySetView):
 class CUCAccountAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Account.objects.none()
         qs = Account.objects.filter(enabled=True, currency=CURRENCY_CUC).all()
         if self.q:
@@ -40,7 +40,7 @@ class CUCAccountAutocompleteView(autocomplete.Select2QuerySetView):
 class LoanEntityAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return LoanEntity.objects.none()
         qs = LoanEntity.objects.all()
         if self.q:
@@ -51,7 +51,7 @@ class LoanEntityAutocompleteView(autocomplete.Select2QuerySetView):
 class LoanAccountAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return LoanAccount.objects.none()
         qs = LoanAccount.objects.filter(account__enabled=True).all()
         if self.q:
@@ -62,7 +62,7 @@ class LoanAccountAutocompleteView(autocomplete.Select2QuerySetView):
 class AgencyAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Agency.objects.none()
         qs = Agency.objects.all()
         if self.q:
@@ -73,7 +73,7 @@ class AgencyAutocompleteView(autocomplete.Select2QuerySetView):
 class AgencyContactAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return AgencyContact.objects.none()
         qs = AgencyContact.objects.all()
         agency = self.forwarded.get('agency', None)
@@ -93,7 +93,7 @@ class AgencyContactAutocompleteView(autocomplete.Select2QuerySetView):
 class ProviderAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Provider.objects.none()
         qs = Provider.objects.all()
         if self.q:
