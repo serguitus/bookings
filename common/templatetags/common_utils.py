@@ -13,7 +13,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.template.context import Context
 from django.urls import NoReverseMatch, Resolver404, get_script_prefix, resolve
-from django.utils.deprecation import RemovedInDjango20Warning
 from django.utils.encoding import force_text
 from django.utils.html import format_html
 from django.utils.http import urlencode
@@ -156,17 +155,8 @@ def _items_for_result(cl, result, form, namespace='common'):
                     row_classes.append('action-checkbox')
                 if field_name == 'details_button':
                     row_classes.append('details-button')
-                allow_tags = getattr(attr, 'allow_tags', False)
                 boolean = getattr(attr, 'boolean', False)
                 result_repr = display_for_value(value, empty_value_display, boolean)
-                if allow_tags:
-                    warnings.warn(
-                        "Deprecated allow_tags attribute used on field {}. "
-                        "Use django.utils.html.format_html(), format_html_join(), "
-                        "or django.utils.safestring.mark_safe() instead.".format(field_name),
-                        RemovedInDjango20Warning
-                    )
-                    result_repr = mark_safe(result_repr)
                 if isinstance(value, (datetime.date, datetime.time)):
                     row_classes.append('nowrap')
             else:

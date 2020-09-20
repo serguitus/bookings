@@ -414,7 +414,7 @@ class QuotePackagePaxVariantInline(CommonStackedInline):
     verbose_name_plural = 'Paxes Variants'
     can_delete = False
 
-    def has_add_permission(self,request):
+    def has_add_permission(self,request, obj):
         return False
 
 
@@ -518,7 +518,7 @@ class QuoteServicePaxVariantInline(CommonStackedInline):
         'utility_percent_triple', 'utility_percent_qdrple',
         'utility_single', 'utility_double', 'utility_triple', 'utility_qdrple']
 
-    def has_add_permission(self,request):
+    def has_add_permission(self,request, obj):
         return False
 
     def get_readonly_fields(self, request, obj=None):
