@@ -200,7 +200,7 @@ class Service(models.Model):
         verbose_name_plural = 'Services'
         unique_together = (('category', 'name'),)
     name = models.CharField(max_length=150)
-    description = models.CharField(max_length=1000, blank=True, null=True)
+    description = models.CharField(max_length=3000, blank=True, null=True)
     included_services = models.CharField(max_length=500, blank=True, null=True)
     service_category = models.ForeignKey(
         ServiceCategory, blank=True, null=True, verbose_name='Category')
