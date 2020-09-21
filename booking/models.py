@@ -239,7 +239,7 @@ class Quote(models.Model):
         verbose_name_plural = 'Quotes'
         default_permissions = ('add', 'change',)
     description = models.CharField(max_length=1000)
-    agency = models.ForeignKey(Agency)
+    agency = models.ForeignKey(Agency, on_delete=models.CASCADE)
     reference = models.CharField(max_length=250)
     date_from = models.DateField(blank=True, null=True)
     date_to = models.DateField(blank=True, null=True)
@@ -252,7 +252,7 @@ class Quote(models.Model):
         max_length=2000, blank=True, null=True, verbose_name='Program')
     history = models.CharField(
         max_length=2000, blank=True, null=True, verbose_name='History')
-    seller = models.ForeignKey(User, blank=True, null=True)
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
 
     def fill_data(self):
         pass
@@ -279,7 +279,7 @@ class QuotePaxVariant(PaxVariantAmounts):
         verbose_name = 'Quote Pax'
         verbose_name_plural = 'Quotes Pax'
         unique_together = (('quote', 'pax_quantity'),)
-    quote = models.ForeignKey(Quote, related_name='quote_paxvariants')
+    quote = models.ForeignKey(Quote, on_delete=models.CASCADE, related_name='quote_paxvariants')
     pax_quantity = models.SmallIntegerField()
     price_percent = models.SmallIntegerField(blank=True, null=True, verbose_name='Price %')
     extra_single_amount = models.DecimalField(
@@ -309,7 +309,7 @@ class QuoteService(BookServiceData, DateInterval):
         verbose_name = 'Quote Service'
         verbose_name_plural = 'Quote Services'
         default_permissions = ('add', 'change',)
-    quote = models.ForeignKey(Quote, related_name='quote_services')
+    quote = models.ForeignKey(Quote, on_delete=models.CASCADE, related_name='quote_services')
     status = models.CharField(
         max_length=5, choices=QUOTE_STATUS_LIST, default=QUOTE_STATUS_DRAFT)
     base_category = models.CharField(
@@ -355,8 +355,8 @@ class QuoteServicePaxVariant(PaxVariantAmounts):
         verbose_name = 'Quote Service Pax Variant'
         verbose_name_plural = 'Quote Services Pax Variants'
         unique_together = (('quote_pax_variant', 'quote_service'),)
-    quote_pax_variant = models.ForeignKey(QuotePaxVariant, verbose_name='Pax Variant')
-    quote_service = models.ForeignKey(QuoteService, related_name='quoteservice_paxvariants')
+    quote_pax_variant = models.ForeignKey(QuotePaxVariant, on_delete=models.CASCADE, verbose_name='Pax Variant')
+    quote_service = models.ForeignKey(QuoteService, on_delete=models.CASCADE, related_name='quoteservice_paxvariants')
     manual_costs = models.BooleanField(default=False, verbose_name='Manual Costs')
     manual_prices = models.BooleanField(default=False, verbose_name='Manual Prices')
 
@@ -377,7 +377,7 @@ class QuoteExtraPackage(QuoteService, BookExtraData):
         verbose_name = 'Quote Package'
         verbose_name_plural = 'Quotes Packages'
         default_permissions = ('add', 'change',)
-    service = models.ForeignKey(Extra)
+    service = models.ForeignKey(Extra, on_delete=models.CASCADE)
     price_by_catalog = models.BooleanField(
         default=False, verbose_name='Use Catalog Price')
 
@@ -406,7 +406,7 @@ class QuoteProvidedService(QuoteService):
         default=False, verbose_name='Use Catalog Cost')
     price_by_catalog = models.BooleanField(
         default=False, verbose_name='Use Catalog Price')
-    quote_package = models.ForeignKey(QuoteExtraPackage, blank=True, null=True)
+    quote_package = models.ForeignKey(QuoteExtraPackage, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return '%s' % (self.base_service)
@@ -420,7 +420,7 @@ class NewQuoteAllotment(QuoteProvidedService, BookAllotmentData):
         verbose_name = 'Quote Accomodation'
         verbose_name_plural = 'Quotes Accomodations'
         default_permissions = ('add', 'change',)
-    service = models.ForeignKey(Allotment)
+    service = models.ForeignKey(Allotment, on_delete=models.CASCADE)
 
     def fill_data(self):
         self.name = '%s' % (self.service,)
@@ -443,7 +443,7 @@ class NewQuoteTransfer(QuoteProvidedService, BookTransferData):
         verbose_name = 'Quote Transfer'
         verbose_name_plural = 'Quotes Transfers'
         default_permissions = ('add', 'change',)
-    service = models.ForeignKey(Transfer)
+    service = models.ForeignKey(Transfer, on_delete=models.CASCADE)
 
     def fill_data(self):
         # setting name for this booking_service
@@ -468,7 +468,7 @@ class NewQuoteExtra(QuoteProvidedService, BookExtraData):
         verbose_name = 'Quote Extra'
         verbose_name_plural = 'Quotes Extras'
         default_permissions = ('add', 'change',)
-    service = models.ForeignKey(Extra, related_name='%(class)s_service')
+    service = models.ForeignKey(Extra, on_delete=models.CASCADE, related_name='%(class)s_service')
 
     def fill_data(self):
         # setting name for this booking_service
@@ -492,6 +492,7 @@ class NewQuoteServiceBookDetail(QuoteService):
         verbose_name_plural = 'Quotes Provided Services Book Details'
     quote_service = models.ForeignKey(
         QuoteProvidedService,
+        on_delete=models.CASCADE,
         related_name='newquoteservicebookdetail_provided')
 
     def fill_data(self):
@@ -506,7 +507,7 @@ class NewQuoteServiceBookDetailAllotment(NewQuoteServiceBookDetail,
     class Meta:
         verbose_name = 'Quote ProvidedService Book Detail Allotment'
         verbose_name_plural = 'Quotes Provided Services Book Details Allotments'
-    book_service = models.ForeignKey(Allotment)
+    book_service = models.ForeignKey(Allotment, on_delete=models.CASCADE)
 
     def fill_data(self):
         self.base_service = self.book_service
@@ -523,7 +524,7 @@ class NewQuoteServiceBookDetailTransfer(NewQuoteServiceBookDetail, BookTransferD
     class Meta:
         verbose_name = 'Quote Provided Service Book Detail Transfer'
         verbose_name_plural = 'Quotes Provided Services Book Details Transfers'
-    book_service = models.ForeignKey(Transfer)
+    book_service = models.ForeignKey(Transfer, on_delete=models.CASCADE)
 
     def fill_data(self):
         self.base_service = self.book_service
@@ -542,7 +543,7 @@ class NewQuoteServiceBookDetailExtra(NewQuoteServiceBookDetail, BookExtraData):
     class Meta:
         verbose_name = 'Quote Provided Service Book Detail Extra'
         verbose_name_plural = 'Quotes Provided Services Book Details Extras'
-    book_service = models.ForeignKey(Extra)
+    book_service = models.ForeignKey(Extra, on_delete=models.CASCADE)
 
     def fill_data(self):
         self.base_service = self.book_service
@@ -558,7 +559,7 @@ class BookingInvoice(AgencyInvoice):
     class Meta:
         verbose_name = 'Booking Invoice'
         verbose_name_plural = 'Bookings Invoices'
-    invoice_booking = models.ForeignKey('Booking')
+    invoice_booking = models.ForeignKey('Booking', on_delete=models.CASCADE)
     booking_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     currency_rate = models.DecimalField(max_digits=10, decimal_places=4, default=1.00)
     booking_name = models.CharField(max_length=100, blank=True, null=True)
@@ -566,12 +567,12 @@ class BookingInvoice(AgencyInvoice):
     date_from = models.DateField(blank=True, null=True)
     date_to = models.DateField(blank=True, null=True)
     cash_amount = models.DecimalField(decimal_places=2, max_digits=9, default=0.0)
-    office = models.ForeignKey(Office, blank=True, null=True)
+    office = models.ForeignKey(Office, on_delete=models.CASCADE, blank=True, null=True)
     issued_name = models.CharField(max_length=60, blank=True, null=True)
     date_issued = models.DateField(blank=True, null=True)
-    office = models.ForeignKey(Office, blank=True, null=True)
-    content_format = models.CharField(
-        max_length=1, choices=INVOICE_FORMATS, default=INVOICE_FORMAT_COMPACT)
+    content_format = models.CharField(max_length=1,
+                                      choices=INVOICE_FORMATS,
+                                      default=INVOICE_FORMAT_COMPACT)
 
     def __str__(self):
         return self.__unicode__()
@@ -597,7 +598,7 @@ class BookingInvoiceLine(models.Model):
     class Meta:
         verbose_name = 'Booking Invoice Line'
         verbose_name_plural = 'Bookings Invoices Lines'
-    invoice = models.ForeignKey(BookingInvoice)
+    invoice = models.ForeignKey(BookingInvoice, on_delete=models.CASCADE)
     bookingservice_name = models.CharField(max_length=100, blank=True, null=True)
     service_name = models.CharField(max_length=100, blank=True, null=True)
     date_from = models.DateField(blank=True, null=True)
@@ -612,7 +613,7 @@ class BookingInvoiceDetail(models.Model):
     class Meta:
         verbose_name = 'Booking Invoice Detail'
         verbose_name_plural = 'Bookings Invoices Details'
-    invoice = models.ForeignKey(BookingInvoice)
+    invoice = models.ForeignKey(BookingInvoice, on_delete=models.CASCADE)
     description = models.CharField(max_length=100, blank=True, null=True)
     detail = models.CharField(max_length=100, blank=True, null=True)
     date_from = models.DateField(blank=True, null=True)
@@ -624,7 +625,7 @@ class BookingInvoicePartial(models.Model):
     class Meta:
         verbose_name = 'Booking Invoice Partial'
         verbose_name_plural = 'Bookings Invoices Partials'
-    invoice = models.ForeignKey(BookingInvoice)
+    invoice = models.ForeignKey(BookingInvoice, on_delete=models.CASCADE)
     pax_name = models.CharField(max_length=100, blank=True, null=True)
     is_free = models.BooleanField(default=False)
     detail2 = models.CharField(max_length=100, blank=True, null=True)
@@ -648,7 +649,7 @@ class Booking(models.Model):
 
     version = AutoIncVersionField()
     name = models.CharField(max_length=100)
-    agency = models.ForeignKey(Agency)
+    agency = models.ForeignKey(Agency, on_delete=models.CASCADE)
     reference = models.CharField(max_length=25, blank=True, null=True, verbose_name='TTOO Ref')
     date_from = models.DateField(blank=True, null=True)
     date_to = models.DateField(blank=True, null=True)
@@ -666,7 +667,10 @@ class Booking(models.Model):
                                        null=True,
                                        verbose_name='Price')
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
-    invoice = models.ForeignKey(BookingInvoice, blank=True, null=True)
+    invoice = models.ForeignKey(BookingInvoice,
+                                on_delete=models.CASCADE,
+                                blank=True,
+                                null=True)
     is_package_price = models.BooleanField(default=False,
                                            verbose_name='Package Price')
     package_sgl_price_amount = models.DecimalField(
@@ -681,8 +685,10 @@ class Booking(models.Model):
     # a field to add global notes to a booking
     p_notes = models.CharField(
         max_length=1000, blank=True, null=True, verbose_name='Private Notes')
-    seller = models.ForeignKey(User)
-    agency_contact = models.ForeignKey(AgencyContact, blank=True, null=True,
+    seller = models.ForeignKey(User, on_delete=models.CASCADE)
+    agency_contact = models.ForeignKey(AgencyContact,
+                                       on_delete=models.CASCADE,
+                                       blank=True, null=True,
                                        verbose_name='Contact')
 
     @property
@@ -784,7 +790,9 @@ class BookingPax(models.Model):
         unique_together = (('booking', 'pax_name'),)
         ordering = ['pax_group']
     version = AutoIncVersionField( )
-    booking = models.ForeignKey(Booking, related_name='rooming_list')
+    booking = models.ForeignKey(Booking,
+                                on_delete=models.CASCADE,
+                                related_name='rooming_list')
     pax_name = models.CharField(max_length=50)
     pax_age = models.SmallIntegerField(blank=True, null=True, verbose_name='Age')
     pax_group = models.SmallIntegerField(verbose_name='Room')
@@ -831,7 +839,9 @@ class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
         verbose_name = 'Base Booking Service'
         verbose_name_plural = 'Base Bookings Services'
         ordering = ['provider', 'base_service__category']
-    booking = models.ForeignKey(Booking, related_name='base_booking_services')
+    booking = models.ForeignKey(Booking,
+                                on_delete=models.CASCADE,
+                                related_name='base_booking_services')
     status = models.CharField(
         max_length=5, choices=SERVICE_STATUS_LIST, default=SERVICE_STATUS_PENDING)
     # This holds the confirmation number when it exists
@@ -960,7 +970,7 @@ class ProviderBookingPayment(Withdraw):
         verbose_name_plural = 'Payments to Providers'
         ordering = ['-date']
 
-    provider = models.ForeignKey(Provider)
+    provider = models.ForeignKey(Provider, on_delete=models.CASCADE)
     services_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     currency_rate = models.DecimalField(max_digits=10, decimal_places=4, default=1.00)
 
@@ -992,8 +1002,10 @@ class BaseBookingServicePax(models.Model):
         verbose_name = 'Booking Service Pax'
         verbose_name_plural = 'Booking Service Rooming'
     version = AutoIncVersionField()
-    booking_pax = models.ForeignKey(BookingPax)
-    booking_service = models.ForeignKey(BaseBookingService, related_name='rooming_list')
+    booking_pax = models.ForeignKey(BookingPax, on_delete=models.CASCADE)
+    booking_service = models.ForeignKey(BaseBookingService,
+                                        on_delete=models.CASCADE,
+                                        related_name='rooming_list')
     group = models.SmallIntegerField(verbose_name='Room')
     cost_amount = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='Cost')
@@ -1034,7 +1046,9 @@ class BookingExtraPackage(BaseBookingService, BookExtraData):
         verbose_name = 'Booking Package'
         verbose_name_plural = 'Bookings Packages'
     version = AutoIncVersionField()
-    service = models.ForeignKey(Extra, related_name='%(class)s_service')
+    service = models.ForeignKey(Extra,
+                                on_delete=models.CASCADE,
+                                related_name='%(class)s_service')
     price_by_catalog = models.BooleanField(
         default=True, verbose_name='Use Catalog Price')
     voucher_detail = models.BooleanField(default=False)
@@ -1074,7 +1088,10 @@ class BookingProvidedService(BaseBookingService):
         default=True, verbose_name='Use Catalog Price')
 
     booking_package = models.ForeignKey(
-        BookingExtraPackage, related_name='booking_package_services', blank=True, null=True)
+        BookingExtraPackage,
+        on_delete=models.CASCADE,
+        related_name='booking_package_services',
+        blank=True, null=True)
 
     def validate(self):
         if self.booking_id and self.booking_package:
@@ -1096,7 +1113,7 @@ class BookingProvidedAllotment(BookingProvidedService, BookAllotmentData):
     class Meta:
         verbose_name = 'Booking Accomodation'
         verbose_name_plural = 'Bookings Accomodations'
-    service = models.ForeignKey(Allotment)
+    service = models.ForeignKey(Allotment, on_delete=models.CASCADE)
     version = AutoIncVersionField()
 
     # Managers
@@ -1191,7 +1208,7 @@ class BookingProvidedTransfer(BookingProvidedService, BookTransferData):
     class Meta:
         verbose_name = 'Booking Transfer'
         verbose_name_plural = 'Booking Transfers'
-    service = models.ForeignKey(Transfer)
+    service = models.ForeignKey(Transfer, on_delete=models.CASCADE)
     version = AutoIncVersionField()
 
     # Managers
@@ -1233,7 +1250,9 @@ class BookingProvidedExtra(BookingProvidedService, BookExtraData):
     class Meta:
         verbose_name = 'Booking Extra'
         verbose_name_plural = 'Booking Extras'
-    service = models.ForeignKey(Extra, related_name='%(class)s_service')
+    service = models.ForeignKey(Extra,
+                                on_delete=models.CASCADE,
+                                related_name='%(class)s_service')
     version = AutoIncVersionField()
 
     # Managers
@@ -1273,7 +1292,9 @@ class BookingBookDetail(BaseBookingService):
         verbose_name = 'Booking Service Book Detail'
         verbose_name_plural = 'Bookings Services Book Details'
     booking_service = models.ForeignKey(
-        BookingProvidedService, related_name='%(class)s_booking_service')
+        BookingProvidedService,
+        on_delete=models.CASCADE,
+        related_name='%(class)s_booking_service')
 
     def fill_data(self):
         self.booking = self.booking_service.booking
@@ -1299,7 +1320,7 @@ class BookingBookDetailAllotment(BookingBookDetail, BookAllotmentData):
     class Meta:
         verbose_name = 'Booking Service Book Detail Allotment'
         verbose_name_plural = 'Bookings Services Book Details Allotments'
-    book_service = models.ForeignKey(Allotment)
+    book_service = models.ForeignKey(Allotment, on_delete=models.CASCADE)
 
     def fill_data(self):
         self.base_service = self.book_service
@@ -1316,7 +1337,7 @@ class BookingBookDetailTransfer(BookingBookDetail, BookTransferData):
     class Meta:
         verbose_name = 'Booking Service Book Detail Transfer'
         verbose_name_plural = 'Bookings Services Book Details Transfers'
-    book_service = models.ForeignKey(Transfer)
+    book_service = models.ForeignKey(Transfer, on_delete=models.CASCADE)
 
     def fill_data(self):
         self.base_service = self.book_service
@@ -1335,7 +1356,7 @@ class BookingBookDetailExtra(BookingBookDetail, BookExtraData):
     class Meta:
         verbose_name = 'Booking Service Book Detail Extra'
         verbose_name_plural = 'Bookings Services Book Details Extras'
-    book_service = models.ForeignKey(Extra)
+    book_service = models.ForeignKey(Extra, on_delete=models.CASCADE)
 
     def fill_data(self):
         self.base_service = self.book_service
@@ -1352,11 +1373,19 @@ class ProviderPaymentBookingProvided(models.Model):
         verbose_name = 'Provider Booking Payment'
         verbose_name_plural = 'Providers Bookings Payments'
         unique_together = (('provider_payment', 'provider_service'),)
-    provider_payment = models.ForeignKey(ProviderBookingPayment)
-    provider_service = models.ForeignKey(BookingProvidedService)
-    service_cost_amount_to_pay = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    service_cost_amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    provider_payment = models.ForeignKey(ProviderBookingPayment,
+                                         on_delete=models.CASCADE)
+    provider_service = models.ForeignKey(BookingProvidedService,
+                                         on_delete=models.CASCADE)
+    service_cost_amount_to_pay = models.DecimalField(max_digits=10,
+                                                     decimal_places=2,
+                                                     default=0.00)
+    service_cost_amount_paid = models.DecimalField(max_digits=10,
+                                                   decimal_places=2,
+                                                   default=0.00)
+    amount_paid = models.DecimalField(max_digits=10,
+                                      decimal_places=2,
+                                      default=0.00)
 
     @property
     def provider_service_booking(self):
