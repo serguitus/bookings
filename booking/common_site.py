@@ -2437,6 +2437,9 @@ class ExportBookingSiteModel(SiteModel):
 
 
 class BaseBookingBookDetailSiteModel(SiteModel):
+    readonly_fields = ['utility_percent', 'utility']
+    ordering = ['booking_service__name', 'datetime_from', 'time']
+
     def response_post_delete(self, request, obj):
         if hasattr(obj, 'booking_service') and obj.booking_service:
             if obj.booking_service.base_service.category == 'A':
@@ -2520,13 +2523,20 @@ class BookingBookDetailAllotmentSiteModel(BaseBookingBookDetailSiteModel):
         ('datetime_from', 'datetime_to'),
         ('room_type', 'board_type'),
         'time',
-        'service_addon',]
+        'service_addon',
+        'provider',
+        'manual_cost',
+        'cost_amount',
+        'manual_price',
+        'price_amount',
+        'utility_percent', 'utility']
     list_display = (
         'booking_service', 'book_service', 'datetime_from', 'datetime_to',
         'room_type', 'board_type', 'service_addon',)
     top_filters = ('booking_service',)
-    ordering = ['booking_service__name', 'datetime_from', 'time']
     form = BookingBookDetailAllotmentForm
+    add_form_template = 'booking/bookingdetailallotment_change_form.html'
+    change_form_template = 'booking/bookingdetailallotment_change_form.html'
 
 
 class BookingBookDetailTransferSiteModel(BaseBookingBookDetailSiteModel):
@@ -2540,13 +2550,20 @@ class BookingBookDetailTransferSiteModel(BaseBookingBookDetailSiteModel):
         ('schedule_from', 'schedule_to'),
         ('schedule_time_from', 'schedule_time_to'),
         ('time', 'quantity'),
-        'service_addon',]
+        'service_addon',
+        'provider',
+        'manual_cost',
+        'cost_amount',
+        'manual_price',
+        'price_amount',
+        'utility_percent', 'utility']
     list_display = (
         'booking_service', 'book_service', 'datetime_from', 'datetime_to',
         'location_from', 'location_to', 'quantity', 'service_addon')
     top_filters = ('booking_service',)
-    ordering = ['booking_service__name', 'datetime_from', 'time']
     form = BookingBookDetailTransferForm
+    add_form_template = 'booking/bookingdetailtransfer_change_form.html'
+    change_form_template = 'booking/bookingdetailtransfer_change_form.html'
 
 
 class BookingBookDetailExtraSiteModel(BaseBookingBookDetailSiteModel):
@@ -2556,13 +2573,20 @@ class BookingBookDetailExtraSiteModel(BaseBookingBookDetailSiteModel):
         ('datetime_from', 'datetime_to'),
         ('pickup_office', 'dropoff_office'),
         ('time', 'parameter', 'quantity'),
-        'service_addon',]
+        'service_addon',
+        'provider',
+        'manual_cost',
+        'cost_amount',
+        'manual_price',
+        'price_amount',
+        'utility_percent', 'utility']
     list_display = (
         'booking_service', 'book_service', 'datetime_from', 'datetime_to',
         'parameter', 'quantity', 'pickup_office', 'dropoff_office', 'service_addon')
     top_filters = ('booking_service',)
-    ordering = ['booking_service__name', 'datetime_from', 'time']
     form = BookingBookDetailExtraForm
+    add_form_template = 'booking/bookingdetailextra_change_form.html'
+    change_form_template = 'booking/bookingdetailextra_change_form.html'
 
 
 # Starts Registration Section

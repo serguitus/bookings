@@ -1,0 +1,10 @@
+{% extends "booking/bookingdetail_change_form.html" %}
+
+{% load static %}
+
+{% block head_extra %}
+  {{ block.super }}
+  <script type="text/javascript" src="{% static 'booking/js/bookingdetailtransfer.js' %}"></script>
+  <script type="text/javascript" src="{% static 'booking/js/bookingservicetransfer.js' %}"></script>
+  <script type="text/javascript" src="{% static 'booking/js/bookingservice_change.js' %}"></script>
+{% endblock head_extra %}

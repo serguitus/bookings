@@ -15,6 +15,10 @@ urlpatterns = [
     url(r'^bookingextra-amounts/?', views.BookingProvidedExtraAmountsView.as_view(), name='bookingextra_amounts'),
     url(r'^bookingpackage-amounts/?', views.BookingExtraPackageAmountsView.as_view(), name='bookingpackage_amounts'),
 
+    url(r'^bookingdetailallotment-amounts/?', views.BookingDetailAllotmentAmountsView.as_view(), name='bookingallotment_amounts'),
+    url(r'^bookingdetailtransfer-amounts/?', views.BookingDetailTransferAmountsView.as_view(), name='bookingtransfer_amounts'),
+    url(r'^bookingdetailextra-amounts/?', views.BookingDetailExtraAmountsView.as_view(), name='bookingextra_amounts'),
+
     url(r'^bookingtransfer-time/?', views.BookingTransferTimeView.as_view(), name='bookingtransfer_time'),
     url(r'^bookingtransfer-schedule-from/?', views.BookingTransferScheduleFromView.as_view(), name='bookingtransfer_schedule_from'),
     url(r'^bookingtransfer-schedule-to/?', views.BookingTransferScheduleToView.as_view(), name='bookingtransfer_schedule_to'),

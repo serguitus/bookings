@@ -34,8 +34,11 @@ from booking.common_site import (
     NewQuoteAllotmentSiteModel, NewQuoteTransferSiteModel,
     NewQuoteExtraSiteModel, QuoteExtraPackageSiteModel,
     BookingSiteModel,
-    BookingProvidedAllotmentSiteModel, BookingProvidedTransferSiteModel, BookingProvidedExtraSiteModel,
+    BookingProvidedAllotmentSiteModel, BookingProvidedTransferSiteModel,
+    BookingProvidedExtraSiteModel,
     BookingExtraPackageSiteModel,
+    BookingBookDetailAllotmentSiteModel, BookingBookDetailTransferSiteModel,
+    BookingBookDetailExtraSiteModel,
     default_requests_mail_from, default_requests_mail_to,
     default_requests_mail_bcc, default_requests_mail_subject,
     default_requests_mail_body, default_mail_cc
@@ -57,6 +60,7 @@ from booking.models import (
     Booking, BaseBookingService, BookingProvidedService,
     BookingPax, BaseBookingServicePax,
     BookingProvidedAllotment, BookingProvidedTransfer, BookingProvidedExtra, BookingExtraPackage,
+    BookingBookDetailAllotment, BookingBookDetailTransfer, BookingBookDetailExtra,
     BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine, BookingInvoicePartial,
 )
 from booking.forms import EmailProviderForm
@@ -345,6 +349,21 @@ class BookingProvidedTransferAmountsView(BookingServiceAmountsView):
 class BookingProvidedExtraAmountsView(BookingServiceAmountsView):
     model = BookingProvidedExtra
     common_sitemodel = BookingProvidedExtraSiteModel
+
+
+class BookingDetailAllotmentAmountsView(BookingServiceAmountsView):
+    model = BookingBookDetailAllotment
+    common_sitemodel = BookingBookDetailAllotmentSiteModel
+
+
+class BookingDetailTransferAmountsView(BookingServiceAmountsView):
+    model = BookingBookDetailTransfer
+    common_sitemodel = BookingBookDetailTransferSiteModel
+
+
+class BookingDetailExtraAmountsView(BookingServiceAmountsView):
+    model = BookingBookDetailExtra
+    common_sitemodel = BookingBookDetailExtraSiteModel
 
 
 class BookingTransferTimeView(ModelChangeFormProcessorView):
