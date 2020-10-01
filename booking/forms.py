@@ -302,7 +302,7 @@ class BookingProvidedAllotmentForm(forms.ModelForm, MailForm, ServiceForm):
                 forward=['service', 'room_type', 'board_type', 'service_addon'],
                 ),
             'p_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
-            'v_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
+            'new_v_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
             'provider_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
@@ -357,7 +357,7 @@ class BookingProvidedTransferForm(forms.ModelForm, MailForm, ServiceForm):
                 forward=['service', 'location_from', 'location_to', 'service_addon'],
                 ),
             'p_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
-            'v_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
+            'new_v_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
             'provider_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
@@ -389,7 +389,7 @@ class BookingProvidedExtraForm(forms.ModelForm, MailForm, ServiceForm):
                 forward=['service', 'service_addon'],
                 ),
             'p_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
-            'v_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
+            'new_v_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
             'provider_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
             'pickup_office': autocomplete.ModelSelect2(
                 url='carrentaloffice-autocomplete',
@@ -420,7 +420,7 @@ class BookingExtraPackageForm(forms.ModelForm, MailForm, ServiceForm):
                 forward=['service'],
                 ),
             'p_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
-            'v_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
+            'new_v_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
             'provider_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())

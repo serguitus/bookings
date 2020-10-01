@@ -13,7 +13,7 @@ $(document).ready(function(){
   label.html(label.html() + '<a id="btn-bookingpackage-services-summary" title="Booking Package Services Summary" data-toggle="modal" data-target="#bookingpackage_services_summary" class="btn btn-bookingpackage-services-summary fa fa-eye" href="#"></a>');
 
   // check if there are notes on bookingServices to Expand collapsed notes
-  if($('#id_v_notes').val() || $('#id_p_notes').val() || $('#id_provider_notes').val()){
+  if($('#id_new_v_notes').val() || $('#id_p_notes').val() || $('#id_provider_notes').val()){
     $('#fieldsetcollapser0.collapse-toggle').click();
   }
 

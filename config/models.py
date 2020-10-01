@@ -57,7 +57,8 @@ class Place(models.Model):
         verbose_name = 'Place'
         verbose_name_plural = 'Places'
         unique_together = (('location', 'name',),)
-    location = models.ForeignKey(Location)
+    location = models.ForeignKey(Location,
+                                 on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
 
     def __str__(self):
@@ -72,9 +73,13 @@ class TransferInterval(models.Model):
         verbose_name = 'Transfer Interval'
         verbose_name_plural = 'Transfers Intervals'
         unique_together = (('location', 't_location_from',),)
-    location = models.ForeignKey(Location)
+    location = models.ForeignKey(Location,
+                                 on_delete=models.CASCADE)
     t_location_from = models.ForeignKey(
-        Location, related_name='t_location_from', verbose_name='Location From')
+        Location,
+        on_delete=models.CASCADE,
+        related_name='t_location_from',
+        verbose_name='Location From')
     interval = models.TimeField()
 
 
@@ -86,7 +91,7 @@ class Schedule(models.Model):
         verbose_name = 'Schedule'
         verbose_name_plural = 'Schedules'
         unique_together = (('location', 'number', 'is_arrival'),)
-    location = models.ForeignKey(Location)
+    location = models.ForeignKey(Location, on_delete=models.CASCADE)
     number = models.CharField(max_length=20)
     is_arrival = models.BooleanField()
     time = models.TimeField()
@@ -163,7 +168,7 @@ class CarRentalOffice(models.Model):
         verbose_name = 'Car Rental Office'
         verbose_name_plural = 'Cars Rentals Offices'
         unique_together = (('car_rental', 'office',),)
-    car_rental = models.ForeignKey(CarRental)
+    car_rental = models.ForeignKey(CarRental, on_delete=models.CASCADE)
     office = models.CharField(max_length=60)
 
     def __str__(self):
@@ -186,9 +191,11 @@ class RouteData(models.Model):
     class Meta:
         abstract = True
     location_from = models.ForeignKey(
-        Location, related_name='%(class)s_location_from', verbose_name='Location from')
+        Location, on_delete=models.CASCADE,
+        related_name='%(class)s_location_from', verbose_name='Location from')
     location_to = models.ForeignKey(
-        Location, related_name='%(class)s_location_to', verbose_name='Location to')
+        Location, on_delete=models.CASCADE,
+        related_name='%(class)s_location_to', verbose_name='Location to')
 
 
 class Service(models.Model):
@@ -200,20 +207,26 @@ class Service(models.Model):
         verbose_name_plural = 'Services'
         unique_together = (('category', 'name'),)
     name = models.CharField(max_length=150)
-    description = models.CharField(max_length=1000, blank=True, null=True)
+    description = models.CharField(max_length=3000, blank=True, null=True)
+    included_services = models.CharField(max_length=500, blank=True, null=True)
     service_category = models.ForeignKey(
-        ServiceCategory, blank=True, null=True, verbose_name='Category')
+        ServiceCategory,
+        on_delete=models.CASCADE,
+        blank=True, null=True,
+        verbose_name='Category')
     category = models.CharField(max_length=5, choices=SERVICE_CATEGORIES)
     grouping = models.BooleanField(default=False)
     pax_range = models.BooleanField(default=False)
     child_age = models.IntegerField(blank=True, null=True)
     child_discount_percent = models.IntegerField(blank=True, null=True)
     infant_age = models.IntegerField(default=2, blank=True, null=True)
-    location = models.ForeignKey(Location, blank=True, null=True)
+    location = models.ForeignKey(Location,
+                                 on_delete=models.CASCADE,
+                                 blank=True, null=True)
     new_time = models.TimeField(blank=True, null=True)
     enabled = models.BooleanField(default=True)
     default_as_package = models.BooleanField(default=False)
-    is_internal = models.BooleanField(default=False)
+    is_internal = models.BooleanField(default=False, verbose_name='No Voucher')
 
     def __init__(self, *args, **kwargs):
         # Call the "real" __init__ method.
@@ -294,7 +307,9 @@ class Extra(Service):
         max_length=5, choices=EXTRA_PARAMETER_TYPES)
     has_pax_range = models.BooleanField(default=False)
     max_capacity = models.IntegerField(blank=True, null=True)
-    car_rental = models.ForeignKey(CarRental, blank=True, null=True)
+    car_rental = models.ForeignKey(CarRental,
+                                   on_delete=models.CASCADE,
+                                   blank=True, null=True)
 
     def fill_data(self):
         super(Extra, self).fill_data()
@@ -318,13 +333,23 @@ class BookServiceData(models.Model):
         abstract = True
     name = models.CharField(max_length=250, default='Detail')
     description = models.CharField(max_length=1000, blank=True, null=True)
-    base_service = models.ForeignKey(Service, related_name='%(class)s_base_service')
+    base_service = models.ForeignKey(Service,
+                                     on_delete=models.CASCADE,
+                                     related_name='%(class)s_base_service')
     base_location = models.ForeignKey(
-        Location, related_name='%(class)s_base_location',
-        blank=True, null=True, verbose_name='Location')
-    provider = models.ForeignKey(Provider, blank=True, null=True)
+        Location,
+        on_delete=models.CASCADE,
+        related_name='%(class)s_base_location',
+        blank=True, null=True,
+        verbose_name='Location')
+    provider = models.ForeignKey(Provider,
+                                 on_delete=models.CASCADE,
+                                 blank=True, null=True)
     service_addon = models.ForeignKey(
-        Addon, related_name='%(class)s_service_addon', blank=True, null=True, verbose_name='Addon')
+        Addon, on_delete=models.CASCADE,
+        related_name='%(class)s_service_addon',
+        blank=True, null=True,
+        verbose_name='Addon')
     time = models.TimeField(blank=True, null=True)
 
     @property
@@ -343,7 +368,8 @@ class BookAllotmentData(models.Model):
     """
     class Meta:
         abstract = True
-    room_type = models.ForeignKey(RoomType, related_name='%(class)s_room_type')
+    room_type = models.ForeignKey(RoomType, on_delete=models.CASCADE,
+                                  related_name='%(class)s_room_type')
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
 
 
@@ -355,16 +381,28 @@ class BookTransferData(RouteData):
         abstract = True
     quantity = models.SmallIntegerField(default=1)
     place_from = models.ForeignKey(
-        Place, related_name='%(class)s_place_from', blank=True, null=True)
+        Place, on_delete=models.CASCADE,
+        related_name='%(class)s_place_from',
+        blank=True, null=True)
     schedule_from = models.ForeignKey(
-        Schedule, related_name='%(class)s_schedule_from', blank=True, null=True)
+        Schedule, on_delete=models.CASCADE,
+        related_name='%(class)s_schedule_from',
+        blank=True, null=True)
     pickup = models.ForeignKey(
-        Allotment, related_name='%(class)s_pickup', null=True, blank=True)
-    place_to = models.ForeignKey(Place, related_name='%(class)s_place_to', blank=True, null=True)
+        Allotment, on_delete=models.CASCADE,
+        related_name='%(class)s_pickup',
+        null=True, blank=True)
+    place_to = models.ForeignKey(Place, on_delete=models.CASCADE,
+                                 related_name='%(class)s_place_to',
+                                 blank=True, null=True)
     schedule_to = models.ForeignKey(
-        Schedule, related_name='%(class)s_schedule_to', blank=True, null=True)
+        Schedule, on_delete=models.CASCADE,
+        related_name='%(class)s_schedule_to',
+        blank=True, null=True)
     dropoff = models.ForeignKey(
-        Allotment, related_name='%(class)s_dropoff', null=True, blank=True)
+        Allotment, on_delete=models.CASCADE,
+        related_name='%(class)s_dropoff',
+        null=True, blank=True)
     schedule_time_from = models.TimeField(blank=True, null=True)
     schedule_time_to = models.TimeField(blank=True, null=True)
 
@@ -378,9 +416,13 @@ class BookExtraData(models.Model):
     quantity = models.SmallIntegerField(default=1)
     parameter = models.SmallIntegerField(default=0, verbose_name='Hours')
     pickup_office = models.ForeignKey(
-        CarRentalOffice, related_name='%(class)s_pickup_office', blank=True, null=True)
+        CarRentalOffice, on_delete=models.CASCADE,
+        related_name='%(class)s_pickup_office',
+        blank=True, null=True)
     dropoff_office = models.ForeignKey(
-        CarRentalOffice, related_name='%(class)s_dropoff_office', blank=True, null=True)
+        CarRentalOffice, on_delete=models.CASCADE,
+        related_name='%(class)s_dropoff_office',
+        blank=True, null=True)
 
 
 class ServiceAddon(models.Model):
@@ -391,8 +433,8 @@ class ServiceAddon(models.Model):
         verbose_name = 'Service Addon'
         verbose_name_plural = 'Services Addons'
         unique_together = (('service', 'addon',),)
-    service = models.ForeignKey(Service)
-    addon = models.ForeignKey(Addon)
+    service = models.ForeignKey(Service, on_delete=models.CASCADE)
+    addon = models.ForeignKey(Addon, on_delete=models.CASCADE)
 
     def __str__(self):
         return '%s for %s' % (self.addon, self.service)
@@ -404,7 +446,7 @@ class ProviderCatalogue(models.Model):
     """
     class Meta:
         abstract = True
-    provider = models.ForeignKey(Provider)
+    provider = models.ForeignKey(Provider, on_delete=models.CASCADE)
     date_from = models.DateField()
     date_to = models.DateField()
 
@@ -418,7 +460,7 @@ class AgencyCatalogue(models.Model):
     """
     class Meta:
         abstract = True
-    agency = models.ForeignKey(Agency)
+    agency = models.ForeignKey(Agency, on_delete=models.CASCADE)
     date_from = models.DateField()
     date_to = models.DateField()
 
@@ -499,8 +541,8 @@ class AllotmentRoomType(models.Model):
         verbose_name = 'Allotment Room Type'
         verbose_name_plural = 'Allotments Rooms Types'
         unique_together = (('allotment', 'room_type', 'room_capacity'),)
-    allotment = models.ForeignKey(Allotment)
-    room_type = models.ForeignKey(RoomType)
+    allotment = models.ForeignKey(Allotment, on_delete=models.CASCADE)
+    room_type = models.ForeignKey(RoomType, on_delete=models.CASCADE)
     room_capacity = models.CharField(max_length=5, choices=ROOM_CAPACITIES)
 
     def __str__(self):
@@ -515,7 +557,7 @@ class AllotmentBoardType(models.Model):
         verbose_name = 'Accomodation Board Type'
         verbose_name_plural = 'Accomodation Board Types'
         unique_together = (('allotment', 'board_type'),)
-    allotment = models.ForeignKey(Allotment)
+    allotment = models.ForeignKey(Allotment, on_delete=models.CASCADE)
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
 
     def __str__(self):
@@ -527,10 +569,10 @@ class ProviderAllotmentService(ProviderCatalogue):
     ProviderAccomodationService
     """
     class Meta:
-        verbose_name = 'Accomodation Service Provider'
-        verbose_name_plural = 'Accomodation Service Providers'
+        verbose_name = 'Accomodation Cost'
+        verbose_name_plural = 'Accomodation Costs'
         unique_together = (('provider', 'service', 'date_from', 'date_to'),)
-    service = models.ForeignKey(Allotment)
+    service = models.ForeignKey(Allotment, on_delete=models.CASCADE)
 
     def __str__(self):
         return '{} by {} ({} to {})'.format(self.service,
@@ -547,15 +589,17 @@ class ProviderAllotmentDetail(AmountDetail):
     ProviderAccomodationDetail
     """
     class Meta:
-        verbose_name = 'Accomodation Provider Detail'
-        verbose_name_plural = 'Accomodation Provider Details'
+        verbose_name = 'Accomodation Cost Detail'
+        verbose_name_plural = 'Accomodation Cost Details'
         unique_together = (
             ('provider_service', 'room_type', 'board_type', 'addon',
              'pax_range_min', 'pax_range_max'),)
-    provider_service = models.ForeignKey(ProviderAllotmentService)
-    room_type = models.ForeignKey(RoomType)
+    provider_service = models.ForeignKey(ProviderAllotmentService,
+                                         on_delete=models.CASCADE)
+    room_type = models.ForeignKey(RoomType, on_delete=models.CASCADE)
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
-    addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
+    addon = models.ForeignKey(Addon, on_delete=models.CASCADE,
+                              default=ADDON_FOR_NO_ADDON)
     pax_range_min = models.SmallIntegerField(default=0)
     pax_range_max = models.SmallIntegerField(default=0)
     single_supplement = models.IntegerField(blank=True, null=True,
@@ -573,10 +617,10 @@ class AgencyAllotmentService(AgencyCatalogue):
     AgencyAccomodationService
     """
     class Meta:
-        verbose_name = 'Accomodation Service Agency'
-        verbose_name_plural = 'Accomodation Service Agencies'
+        verbose_name = 'Accomodation Price'
+        verbose_name_plural = 'Accomodation Prices'
         unique_together = (('agency', 'service', 'date_from', 'date_to'),)
-    service = models.ForeignKey(Allotment)
+    service = models.ForeignKey(Allotment, on_delete=models.CASCADE)
 
     def __str__(self):
         return '{} for {} ({} to {})'.format(
@@ -594,15 +638,17 @@ class AgencyAllotmentDetail(AmountDetail):
     AgencyAccomodationDetail
     """
     class Meta:
-        verbose_name = 'Accomodation Agency Detail'
-        verbose_name_plural = 'Accomodation Agency Details'
+        verbose_name = 'Accomodation Price Detail'
+        verbose_name_plural = 'Accomodation Price Details'
         unique_together = (
             ('agency_service', 'room_type', 'board_type', 'addon',
              'pax_range_min', 'pax_range_max'),)
-    agency_service = models.ForeignKey(AgencyAllotmentService)
-    room_type = models.ForeignKey(RoomType)
+    agency_service = models.ForeignKey(AgencyAllotmentService,
+                                       on_delete=models.CASCADE)
+    room_type = models.ForeignKey(RoomType, on_delete=models.CASCADE)
     board_type = models.CharField(max_length=5, choices=BOARD_TYPES)
-    addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
+    addon = models.ForeignKey(Addon, on_delete=models.CASCADE,
+                              default=ADDON_FOR_NO_ADDON)
     pax_range_min = models.SmallIntegerField(default=0)
     pax_range_max = models.SmallIntegerField(default=0)
 
@@ -620,7 +666,7 @@ class TransferZone(models.Model):
         verbose_name_plural = 'Transfers Zones'
         unique_together = (('transfer', 'name',),)
     name = models.CharField(max_length=50)
-    transfer = models.ForeignKey(Transfer)
+    transfer = models.ForeignKey(Transfer, on_delete=models.CASCADE)
     ordering = ['transfer', 'name']
 
     def __str__(self):
@@ -635,8 +681,10 @@ class TransferPickupTime(models.Model):
         verbose_name = 'Transfer Pickup Time'
         verbose_name_plural = 'Transfer Pickups Times'
         unique_together = (('transfer_zone', 'location',),)
-    transfer_zone = models.ForeignKey(TransferZone, verbose_name='Pickup Zone')
-    location = models.ForeignKey(Location, verbose_name='Dropoff Location')
+    transfer_zone = models.ForeignKey(TransferZone, on_delete=models.CASCADE,
+                                      verbose_name='Pickup Zone')
+    location = models.ForeignKey(Location, on_delete=models.CASCADE,
+                                 verbose_name='Dropoff Location')
     pickup_time = models.TimeField()
 
 
@@ -648,8 +696,8 @@ class AllotmentTransferZone(models.Model):
         verbose_name = 'Allotment Transfer Zone'
         verbose_name_plural = 'Allotments Transfers Zones'
         unique_together = (('allotment', 'transfer_zone'),)
-    allotment = models.ForeignKey(Allotment)
-    transfer_zone = models.ForeignKey(TransferZone)
+    allotment = models.ForeignKey(Allotment, on_delete=models.CASCADE)
+    transfer_zone = models.ForeignKey(TransferZone, on_delete=models.CASCADE)
 
 
 class ProviderTransferService(ProviderCatalogue):
@@ -657,10 +705,10 @@ class ProviderTransferService(ProviderCatalogue):
     ProviderTransferService
     """
     class Meta:
-        verbose_name = 'Transfer Service Provider'
-        verbose_name_plural = 'Transfer Service Providers'
+        verbose_name = 'Transfer Cost'
+        verbose_name_plural = 'Transfer Cost'
         unique_together = (('provider', 'service', 'date_from', 'date_to'),)
-    service = models.ForeignKey(Transfer)
+    service = models.ForeignKey(Transfer, on_delete=models.CASCADE)
 
     def __str__(self):
         return '{} by {} ({} to {})'.format(self.service,
@@ -678,13 +726,15 @@ class ProviderTransferDetail(AmountDetail, RouteData):
     ProviderTransferDetail
     """
     class Meta:
-        verbose_name = 'Transfer Provider Detail'
-        verbose_name_plural = 'Transfer Provider Details'
+        verbose_name = 'Transfer Cost Detail'
+        verbose_name_plural = 'Transfer Cost Details'
         unique_together = (
             ('provider_service', 'location_from', 'location_to', 'addon',
              'pax_range_min', 'pax_range_max'),)
-    provider_service = models.ForeignKey(ProviderTransferService)
-    addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
+    provider_service = models.ForeignKey(ProviderTransferService,
+                                         on_delete=models.CASCADE)
+    addon = models.ForeignKey(Addon, on_delete=models.CASCADE,
+                              default=ADDON_FOR_NO_ADDON)
     pax_range_min = models.SmallIntegerField(default=0)
     pax_range_max = models.SmallIntegerField(default=0)
 
@@ -704,10 +754,10 @@ class AgencyTransferService(AgencyCatalogue):
     AgencyTransferService
     """
     class Meta:
-        verbose_name = 'Transfer Service Agency'
-        verbose_name_plural = 'Transfer Service Agencies'
+        verbose_name = 'Transfer Price'
+        verbose_name_plural = 'Transfer Prices'
         unique_together = (('agency', 'service', 'date_from', 'date_to'),)
-    service = models.ForeignKey(Transfer)
+    service = models.ForeignKey(Transfer, on_delete=models.CASCADE)
 
     def __str__(self):
         return '{} for {} ({} to {})'.format(
@@ -725,13 +775,16 @@ class AgencyTransferDetail(AmountDetail, RouteData):
     AgencyTransferDetail
     """
     class Meta:
-        verbose_name = 'Transfer Agency Detail'
-        verbose_name_plural = 'Transfer Agency Details'
+        verbose_name = 'Transfer Price Detail'
+        verbose_name_plural = 'Transfer Price Details'
         unique_together = ((
             'agency_service', 'location_from', 'location_to', 'addon',
             'pax_range_min', 'pax_range_max'),)
-    agency_service = models.ForeignKey(AgencyTransferService)
-    addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
+    agency_service = models.ForeignKey(AgencyTransferService,
+                                       on_delete=models.CASCADE)
+    addon = models.ForeignKey(Addon,
+                              on_delete=models.CASCADE,
+                              default=ADDON_FOR_NO_ADDON)
     pax_range_min = models.SmallIntegerField(default=0)
     pax_range_max = models.SmallIntegerField(default=0)
     not_reversible = models.BooleanField(default=False)
@@ -752,10 +805,10 @@ class ProviderExtraService(ProviderCatalogue):
     ProviderExtraService
     """
     class Meta:
-        verbose_name = 'Provider Extra Service'
-        verbose_name_plural = 'Providers Extras Services'
+        verbose_name = 'Extra Cost'
+        verbose_name_plural = 'Extra Costs'
         unique_together = (('provider', 'service', 'date_from', 'date_to'),)
-    service = models.ForeignKey(Extra)
+    service = models.ForeignKey(Extra, on_delete=models.CASCADE)
 
     def __str__(self):
         return 'Prov.Extra - %s : %s' % (self.provider, self.service)
@@ -769,14 +822,17 @@ class ProviderExtraDetail(AmountDetail):
     ProviderExtraDetail
     """
     class Meta:
-        verbose_name = 'Provider Extra Detail'
-        verbose_name_plural = 'Providers Extras Details'
+        verbose_name = 'Extra Cost Detail'
+        verbose_name_plural = 'Extra Cost Details'
         unique_together = ('provider_service',
                            'addon',
                            'pax_range_min',
                            'pax_range_max')
-    provider_service = models.ForeignKey(ProviderExtraService)
-    addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
+    provider_service = models.ForeignKey(ProviderExtraService,
+                                         on_delete=models.CASCADE)
+    addon = models.ForeignKey(Addon,
+                              on_delete=models.CASCADE,
+                              default=ADDON_FOR_NO_ADDON)
     pax_range_min = models.SmallIntegerField(default=0)
     pax_range_max = models.SmallIntegerField(default=0)
 
@@ -786,10 +842,10 @@ class AgencyExtraService(AgencyCatalogue):
     AgencyExtraService
     """
     class Meta:
-        verbose_name = 'Agency Extra Service'
-        verbose_name_plural = 'Agency Extras Services'
+        verbose_name = 'Extra Price'
+        verbose_name_plural = 'Extras Prices'
         unique_together = (('agency', 'service', 'date_from', 'date_to'),)
-    service = models.ForeignKey(Extra)
+    service = models.ForeignKey(Extra, on_delete=models.CASCADE)
 
     def __str__(self):
         return 'Ag.Extra - %s : %s' % (self.agency, self.service)
@@ -803,14 +859,17 @@ class AgencyExtraDetail(AmountDetail):
     AgencyExtraDetail
     """
     class Meta:
-        verbose_name = 'Agency Extra Detail'
-        verbose_name_plural = 'Agencies Extra Details'
+        verbose_name = 'Extra Price Detail'
+        verbose_name_plural = 'Extra Price Details'
         unique_together = ('agency_service',
                            'addon',
                            'pax_range_min',
                            'pax_range_max')
-    agency_service = models.ForeignKey(AgencyExtraService)
-    addon = models.ForeignKey(Addon, default=ADDON_FOR_NO_ADDON)
+    agency_service = models.ForeignKey(AgencyExtraService,
+                                       on_delete=models.CASCADE)
+    addon = models.ForeignKey(Addon,
+                              on_delete=models.CASCADE,
+                              default=ADDON_FOR_NO_ADDON)
     pax_range_min = models.SmallIntegerField(default=0)
     pax_range_max = models.SmallIntegerField(default=0)
 
@@ -826,7 +885,9 @@ class ServiceBookDetail(BookServiceData, RelativeInterval):
     class Meta:
         verbose_name = 'Service Detail'
         verbose_name_plural = 'Services Details'
-    service = models.ForeignKey(Service, related_name='%(class)s_service')
+    service = models.ForeignKey(Service,
+                                on_delete=models.CASCADE,
+                                related_name='%(class)s_service')
 
     def fill_data(self):
         pass
@@ -844,7 +905,8 @@ class ServiceBookDetailAllotment(ServiceBookDetail, BookAllotmentData):
     class Meta:
         verbose_name = 'Service Book Detail Accomodation'
         verbose_name_plural = 'Services Book Details Accomodations'
-    book_service = models.ForeignKey(Allotment)
+    book_service = models.ForeignKey(Allotment,
+                                     on_delete=models.CASCADE)
 
     def fill_data(self):
         self.base_service = self.book_service
@@ -860,7 +922,8 @@ class ServiceBookDetailTransfer(ServiceBookDetail, BookTransferData):
     class Meta:
         verbose_name = 'Service Book Detail Transfer'
         verbose_name_plural = 'Services Book Details Transfers'
-    book_service = models.ForeignKey(Transfer)
+    book_service = models.ForeignKey(Transfer,
+                                     on_delete=models.CASCADE)
 
     def fill_data(self):
         self.base_service = self.book_service
@@ -878,7 +941,8 @@ class ServiceBookDetailExtra(ServiceBookDetail, BookExtraData):
     class Meta:
         verbose_name = 'Service Book Detail Extra'
         verbose_name_plural = 'Services Book Details Extras'
-    book_service = models.ForeignKey(Extra)
+    book_service = models.ForeignKey(Extra,
+                                     on_delete=models.CASCADE)
 
     def fill_data(self):
         self.base_service = self.book_service

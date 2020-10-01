@@ -117,9 +117,9 @@ class OperationMovement(models.Model):
         indexes = [
             models.Index(fields=['account']),
         ]
-    operation = models.ForeignKey(Operation)
+    operation = models.ForeignKey(Operation, on_delete=models.CASCADE)
     movement_type = models.CharField(max_length=5, choices=MOVEMENT_TYPES)
-    account = models.ForeignKey(Account)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
     amount = models.DecimalField(default=0.0, max_digits=9, decimal_places=2)
 
     def __str__(self):
