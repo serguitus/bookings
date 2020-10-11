@@ -12,7 +12,8 @@ from booking.models import (
     NewQuoteExtra, QuoteExtraPackage,
     Booking, BaseBookingServicePax, BookingProvidedAllotment,
     BookingProvidedTransfer, BookingProvidedExtra, BookingExtraPackage,
-    ProviderBookingPayment,
+    ProviderBookingPayment, BookingBookDetailAllotment,
+    BookingBookDetailExtra, BookingBookDetailTransfer
 )
 
 from config.forms import BaseBookDataForm
@@ -679,6 +680,7 @@ class NewQuoteServiceBookDetailExtraForm(forms.ModelForm, BaseBookDataForm):
 
 class BookingBookDetailAllotmentForm(forms.ModelForm, BaseBookDataForm):
     class Meta:
+        model = BookingBookDetailAllotment
         fields = ('__all__')
         widgets = {
             'booking_service': autocomplete.ModelSelect2(
@@ -704,6 +706,7 @@ class BookingBookDetailAllotmentForm(forms.ModelForm, BaseBookDataForm):
 
 class BookingBookDetailTransferForm(forms.ModelForm, BaseBookDataForm):
     class Meta:
+        model = BookingBookDetailTransfer
         fields = ('__all__')
         widgets = {
             'booking_service': autocomplete.ModelSelect2(
@@ -724,6 +727,7 @@ class BookingBookDetailTransferForm(forms.ModelForm, BaseBookDataForm):
 
 class BookingBookDetailExtraForm(forms.ModelForm, BaseBookDataForm):
     class Meta:
+        model = BookingBookDetailExtra
         fields = ('__all__')
         widgets = {
             'booking_service': autocomplete.ModelSelect2(

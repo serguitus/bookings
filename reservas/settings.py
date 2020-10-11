@@ -31,16 +31,16 @@ SECRET_KEY = '0wp56g2aw)9r2094mh0w+t5$wk213$jz#tc@_m&euj95+-w0rt'
 # Application definition
 
 INSTALLED_APPS = [
-#    'admin_tools',
-#    'admin_tools.theming',
-#    'admin_tools.menu',
-#    'admin_tools.dashboard',
+    # 'admin_tools',
+    # 'admin_tools.theming',
+    # 'admin_tools.menu',
+    # 'admin_tools.dashboard',
+    # 'django_pdb',
     'dal',
     'dal_select2',
     'django_tables2',
     'totalsum',
     'crispy_forms',
-    # 'django_pdb',
 
     'django.contrib.admin',
     'django.contrib.auth',
