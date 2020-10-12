@@ -1206,7 +1206,7 @@ class ServiceChangeList(BookingServiceStatusChangeList):
         elif base_category == BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_EXTRA:
             model_name = 'bookingbookdetailextra'
         else:
-            model_name = self.opts.app_label.model_name
+            model_name = self.opts.model_name
         return reverse(
             '%s:%s_%s_change' % (
                 self.model_admin.admin_site.site_namespace,
