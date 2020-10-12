@@ -43,7 +43,10 @@ from booking.constants import (
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_TRANSFER,
-    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_ALLOTMENT,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_TRANSFER,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_EXTRA
 )
 from booking.forms import (
     EmailPopupForm,
@@ -1196,6 +1199,12 @@ class ServiceChangeList(BookingServiceStatusChangeList):
             model_name = 'bookingprovidedtransfer'
         elif base_category == BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA:
             model_name = 'bookingprovidedextra'
+        elif base_category == BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_ALLOTMENT:
+            model_name = 'bookingbookdetailallotment'
+        elif base_category == BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_TRANSFER:
+            model_name = 'bookingbookdetailtransfer'
+        elif base_category == BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_EXTRA:
+            model_name = 'bookingbookdetailextra'
         else:
             model_name = self.opts.app_label.model_name
         return reverse(
