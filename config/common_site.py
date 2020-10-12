@@ -520,7 +520,7 @@ class ExtraSiteModel(BaseServiceSiteModel):
               'description')
     list_display = ('name', 'service_category', 'location', 'cost_type',
                     'parameter_type', 'max_capacity', 'enabled',
-                    'pax_range', 'has_pax_range',
+                    'pax_range',
                     'infant_age', 'child_age')
     top_filters = ('name', ('service_category', ServiceCategoryTopFilter),
                    ('location', LocationTopFilter))
