@@ -701,6 +701,10 @@ class BookingBookDetailAllotmentForm(forms.ModelForm, BaseBookDataForm):
                 url='addon-autocomplete',
                 forward=['book_service'],
                 ),
+            'provider': autocomplete.ModelSelect2(
+                url='providerallotment-autocomplete',
+                forward=['book_service'],
+                ),
         }
 
 
@@ -720,6 +724,10 @@ class BookingBookDetailTransferForm(forms.ModelForm, BaseBookDataForm):
             'location_to': autocomplete.ModelSelect2(url='location-autocomplete'),
             'service_addon': autocomplete.ModelSelect2(
                 url='addon-autocomplete',
+                forward=['book_service'],
+                ),
+            'provider': autocomplete.ModelSelect2(
+                url='providertransfer-autocomplete',
                 forward=['book_service'],
                 ),
         }
@@ -748,5 +756,9 @@ class BookingBookDetailExtraForm(forms.ModelForm, BaseBookDataForm):
             'dropoff_office': autocomplete.ModelSelect2(
                 url='carrentaloffice-autocomplete',
                 forward=['boo_service',],
+                ),
+            'provider': autocomplete.ModelSelect2(
+                url='providerextra-autocomplete',
+                forward=['book_service'],
                 ),
         }

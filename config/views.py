@@ -335,6 +335,8 @@ class ProviderAllotmentAutocompleteView(autocomplete.Select2QuerySetView):
             return Provider.objects.none()
 
         service = self.forwarded.get('service', None)
+        if not service:
+            service = self.forwarded.get('book_service', None)
         room_type = self.forwarded.get('room_type', None)
         board_type = self.forwarded.get('board_type', None)
         addon = self.forwarded.get('service_addon', None)
@@ -472,6 +474,8 @@ class ProviderTransferAutocompleteView(autocomplete.Select2QuerySetView):
             return Provider.objects.none()
 
         service = self.forwarded.get('service', None)
+        if not service:
+            service = self.forwarded.get('book_service', None)
         location_from = self.forwarded.get('location_from', None)
         location_to = self.forwarded.get('location_to', None)
         addon = self.forwarded.get('service_addon', None)
@@ -522,6 +526,8 @@ class ProviderExtraAutocompleteView(autocomplete.Select2QuerySetView):
         qs = Provider.objects.filter(enabled=True).all().distinct()
 
         service = self.forwarded.get('service', None)
+        if not service:
+            service = self.forwarded.get('book_service', None)
         addon = self.forwarded.get('service_addon', None)
 
         return provider_extra_queryset(service, addon, self.q)

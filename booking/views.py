@@ -351,17 +351,63 @@ class BookingProvidedExtraAmountsView(BookingServiceAmountsView):
     common_sitemodel = BookingProvidedExtraSiteModel
 
 
-class BookingDetailAllotmentAmountsView(BookingServiceAmountsView):
+class BookingServiceDetailAmountsView(ModelChangeFormProcessorView):
+    common_site = bookings_site
+
+    def verify(self, bookingservicedetail):
+        if not hasattr(bookingservicedetail, 'booking_service') or not bookingservicedetail.booking_service:
+            return JsonResponse({
+                'cost': None,
+                'cost_message': 'Booking Service Id Missing',
+                'price': None,
+                'price_message': 'Booking Service Id Missing',
+            }), None
+        if not hasattr(bookingservicedetail, 'book_service') or not bookingservicedetail.book_service:
+            return JsonResponse({
+                'cost': None,
+                'cost_message': 'Service Id Missing',
+                'price': None,
+                'price_message': 'Service Id Missing',
+            }), None
+        pax_list = list(BaseBookingServicePax.objects.filter(
+            booking_service=bookingservicedetail.booking_service_id).all())
+        if not pax_list:
+            return JsonResponse({
+                'cost': None,
+                'cost_message': 'Paxes Missing',
+                'price': None,
+                'price_message': 'Paxes Missing',
+            }), pax_list
+
+        return None, pax_list
+
+    def process_data(self, bookingservicedetail, inlines):
+
+        response, pax_list = self.verify(bookingservicedetail)
+        if response:
+            return response
+
+        cost, cost_msg, price, price_msg = BookingServices.find_bookingservice_amounts(
+            bookingservicedetail, pax_list)
+        return JsonResponse({
+            'cost': cost,
+            'cost_message': cost_msg,
+            'price': price,
+            'price_message': price_msg,
+        })
+
+
+class BookingDetailAllotmentAmountsView(BookingServiceDetailAmountsView):
     model = BookingBookDetailAllotment
     common_sitemodel = BookingBookDetailAllotmentSiteModel
 
 
-class BookingDetailTransferAmountsView(BookingServiceAmountsView):
+class BookingDetailTransferAmountsView(BookingServiceDetailAmountsView):
     model = BookingBookDetailTransfer
     common_sitemodel = BookingBookDetailTransferSiteModel
 
 
-class BookingDetailExtraAmountsView(BookingServiceAmountsView):
+class BookingDetailExtraAmountsView(BookingServiceDetailAmountsView):
     model = BookingBookDetailExtra
     common_sitemodel = BookingBookDetailExtraSiteModel
 

@@ -2449,6 +2449,11 @@ class BaseBookingBookDetailSiteModel(SiteModel):
     readonly_fields = ['utility_percent', 'utility']
     ordering = ['booking_service__name', 'datetime_from', 'time']
 
+    def save_model(self, request, obj, form, change):
+        # overrides base class method
+        BookingServices.setup_bookingservice_amounts(obj)
+        obj.save()
+
     def response_post_delete(self, request, obj):
         if hasattr(obj, 'booking_service') and obj.booking_service:
             if obj.booking_service.base_service.category == 'A':

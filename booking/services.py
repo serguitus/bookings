@@ -1714,6 +1714,11 @@ class BookingServices(object):
     @classmethod
     def _find_bookingservice_pax_list(cls, bookingservice):
 
+        if isinstance(bookingservice, (BookingBookDetail)):
+            if bookingservice.booking_service_id is not None:
+                return list(
+                    BaseBookingServicePax.objects.filter(
+                        booking_service=bookingservice.booking_service_id).all())
         if isinstance(bookingservice, (BookingProvidedService)):
             if bookingservice.booking_package_id is not None:
                 return list(
@@ -3129,14 +3134,24 @@ class BookingServices(object):
         if not pax_list:
             pax_list = cls._find_bookingservice_pax_list(bookingservice)
 
-        if bookingservice.cost_by_catalog:
+        if not hasattr(bookingservice, "cost_by_catalog"):
+            # detail
+            bookingservicedetail = bookingservice
+            provider = bookingservicedetail.provider
+            if not provider:
+                provider = bookingservicedetail.booking_service.provider
+            return cls._find_bookingservice_catalog_cost(
+                bookingservicedetail,
+                bookingservicedetail.datetime_from, bookingservicedetail.datetime_to,
+                pax_list, provider)
+        elif bookingservice.cost_by_catalog:
             return cls._find_bookingservice_catalog_cost(
                 bookingservice,
                 bookingservice.datetime_from, bookingservice.datetime_to,
                 pax_list, bookingservice.provider)
         else:
             agency = bookingservice.booking.agency
-            cost, cost_msg, price, price_msg = cls._find_bookingservice_details_amounts(
+            cost, cost_msg, price, price_msg = cls._find_bookingservice_amounts_by_details(
                 bookingservice, pax_list, agency)
             return cost, cost_msg
 
@@ -3152,15 +3167,25 @@ class BookingServices(object):
             pax_list = cls._find_bookingservice_pax_list(bookingservice)
 
         if not agency:
-            agency = bookingservice.booking.agency
+            if hasattr(bookingservice, "booking"):
+                agency = bookingservice.booking.agency
+            else:
+                # detail
+                agency = bookingservice.booking_service.booking.agency
 
-        if bookingservice.price_by_catalog:
+        if not hasattr(bookingservice, "price_by_catalog"):
+            # detail
+            return cls._find_bookingservice_catalog_price(
+                bookingservice,
+                bookingservice.datetime_from, bookingservice.datetime_to,
+                pax_list, agency)
+        elif bookingservice.price_by_catalog:
             return cls._find_bookingservice_catalog_price(
                 bookingservice,
                 bookingservice.datetime_from, bookingservice.datetime_to,
                 pax_list, agency)
         else:
-            cost, cost_msg, price, price_msg = cls._find_bookingservice_details_amounts(
+            cost, cost_msg, price, price_msg = cls._find_bookingservice_amounts_by_details(
                 bookingservice, pax_list, agency)
             return price, price_msg
 
@@ -3252,7 +3277,7 @@ class BookingServices(object):
 
 
     @classmethod
-    def _find_bookingservice_details_amounts(
+    def _find_bookingservice_amounts_by_details(
             cls, bookingservice, pax_list, agency):
 
         cost, cost_msg, price, price_msg = 0, None, 0, None
@@ -3260,7 +3285,7 @@ class BookingServices(object):
         if agency is None:
             price, price_msg = None, "Missing Agency"
 
-        # verify if quoteservice already exists
+        # verify if bookingservice already exists
         if hasattr(bookingservice, 'id') and bookingservice.id:
             # details from bookingservice details
             allotment_list = list(BookingBookDetailAllotment.objects.filter(
