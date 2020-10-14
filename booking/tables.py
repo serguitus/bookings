@@ -486,7 +486,7 @@ class BookingBookDetailTable(tables.Table):
     class Meta:
         model = BookingBookDetail
         template_name = 'booking/table/bookingbookdetail_table.html'
-        fields = ['name', 'description', 'base_service__category', 'datetime_from', 'time']
+        fields = ['name', 'description', 'cost_amount', 'price_amount', 'base_service__category', 'datetime_from', 'time']
 
     def render_name(self, value, record):
         obj_url = reverse(

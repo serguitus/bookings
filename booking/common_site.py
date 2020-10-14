@@ -2454,6 +2454,12 @@ class BaseBookingBookDetailSiteModel(SiteModel):
         BookingServices.setup_bookingservice_amounts(obj)
         obj.save()
 
+    def save_related(self, request, form, formsets, change):
+        with transaction.atomic(savepoint=False):
+            super(BaseBookingBookDetailSiteModel, self).save_related(request, form, formsets, change)
+            obj = self.save_form(request, form, change)
+            BookingServices.update_bookingservice_amounts(obj.booking_service)
+
     def response_post_delete(self, request, obj):
         if hasattr(obj, 'booking_service') and obj.booking_service:
             if obj.booking_service.base_service.category == 'A':
