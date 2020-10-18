@@ -1424,14 +1424,31 @@ class BookingProvidedServiceSiteModel(SiteModel):
 
             return super(BookingProvidedServiceSiteModel, self).changeform_view(request, object_id, form_url, extra_context)
 
+    def save_model(self, request, obj, form, change):
+        with transaction.atomic(savepoint=False):
+            BookingServices.setup_bookingservice_amounts(obj)
+            BookingServices.validate_basebookingservice(obj)
+            super(BookingProvidedServiceSiteModel, self).save_model(request, obj, form, change)
+            BookingServices.update_bookingpackage(obj)
+            BookingServices.update_booking(obj)
+
     def save_related(self, request, form, formsets, change):
         with transaction.atomic(savepoint=False):
-            super(BookingProvidedServiceSiteModel, self).save_related(request, form, formsets, change)
+            super(BookingProvidedServiceSiteModel, self).save_related(
+                request, form, formsets, change)
             obj = self.save_form(request, form, change)
             if not change:
                 BookingServices.sync_bookingservice_details(obj)
             BookingServices.update_bookingservice_amounts(obj)
             BookingServices.update_bookingservice_description(obj)
+
+    def delete_model(self, request, obj):
+        with transaction.atomic(savepoint=False):
+            if obj.has_payment or obj.status != SERVICE_STATUS_PENDING:
+                raise ValidationError('Can not delete Booking Services that are Not Pending')
+            super(BookingProvidedServiceSiteModel, self).delete_model(request, obj)
+            BookingServices.update_bookingpackage(obj)
+            BookingServices.update_booking(obj)
 
 
 class BaseBookingServiceSiteModel(SiteModel):
@@ -1593,145 +1610,6 @@ class BaseBookingServiceSiteModel(SiteModel):
         return super(BaseBookingServiceSiteModel, self).changeform_context(
             request, form, obj, formsets, inline_instances,
             add, opts, object_id, to_field, form_validated, context)
-
-
-class BookingPackageServiceSiteModel(SiteModel):
-
-    custom_actions_template = 'booking/emails/email_button.html'
-
-    def get_changelist(self, request, **kwargs):
-        """
-        Returns the ChangeList class for use on the changelist page.
-        """
-        return BookingServiceStatusChangeList
-
-    def get_readonly_fields(self, request, obj=None):
-        readonly_fields = super(BookingPackageServiceSiteModel, self).get_readonly_fields(request, obj) or []
-
-        if not request.user.has_perm("booking.change_amounts"):
-            return readonly_fields + ['manual_cost', 'cost_amount', 'manual_price', 'price_amount']
-
-        return readonly_fields
-
-    def response_post_delete(self, request, obj):
-        if hasattr(obj, 'booking_package') and obj.booking_package:
-            return redirect(reverse('common:booking_bookingextrapackage_change', args=[obj.booking_package.pk]))
-        booking_package = request.POST.get('booking_package')
-        if booking_package:
-            return redirect(reverse('common:booking_bookingextrapackage_change', args=[booking_package]))
-        return super(BookingPackageServiceSiteModel, self).response_post_delete(request, obj)
-
-    def response_post_save_add(self, request, obj):
-        if hasattr(obj, 'booking_package') and obj.booking_package:
-            return redirect(reverse('common:booking_bookingextrapackage_change', args=[obj.booking_package.pk]))
-        booking_package = request.POST.get('booking_package')
-        if booking_package:
-            return redirect(reverse('common:booking_bookingextrapackage_change', args=[booking_package]))
-        return super(BookingPackageServiceSiteModel, self).response_post_save_add(request, obj)
-
-    def response_post_save_change(self, request, obj):
-        if hasattr(obj, 'booking_package') and obj.booking_package:
-            return redirect(reverse('common:booking_bookingextrapackage_change', args=[obj.booking_package.pk]))
-        booking_package = request.POST.get('booking_package')
-        if booking_package:
-            return redirect(reverse('common:booking_bookingextrapackage_change', args=[booking_package]))
-        return super(BookingPackageServiceSiteModel, self).response_post_save_change(request, obj)
-
-    def delete_model(self, request, obj):
-        with transaction.atomic(savepoint=False):
-            super(BookingPackageServiceSiteModel, self).delete_model(request, obj)
-            BookingServices.update_bookingpackage_amounts(obj)
-            BookingServices.update_bookingpackage(obj)
-
-    def save_model(self, request, obj, form, change):
-        # overrides base class method
-        BookingServices.setup_bookingservice_amounts(obj)
-        obj.save()
-
-    def save_related(self, request, form, formsets, change):
-        with transaction.atomic(savepoint=False):
-            super(BookingPackageServiceSiteModel, self).save_related(request, form, formsets, change)
-            obj = self.save_form(request, form, change)
-            BookingServices.update_bookingpackage_amounts(obj)
-
-    actions = ['coordinated_services', 'confirmed_services', ]
-
-    def coordinated_services(self, request, queryset):
-        services = list(queryset.all())
-        BookingServices.set_services_status(services, SERVICE_STATUS_COORDINATED)
-
-    coordinated_services.short_description = "Coordinated Services"
-
-    def confirmed_services(self, request, queryset):
-        services = list(queryset.all())
-        BookingServices.set_services_status(services, SERVICE_STATUS_CONFIRMED)
-
-    confirmed_services.short_description = "Confirmed Services"
-
-    @csrf_protect_m
-    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
-        submit_action = request.POST.get('submit_action')
-        if submit_action == '_send_mail':
-            mail_from = request.POST.get('mail_from')
-            to_list = _build_mail_address_list(request.POST.get('mail_to'))
-            cc_list = _build_mail_address_list(request.POST.get('mail_cc'))
-            bcc_list = _build_mail_address_list(request.POST.get('mail_bcc'))
-            email = EmailMessage(
-                from_email=mail_from,
-                to=to_list,
-                cc=cc_list,
-                bcc=bcc_list,
-                subject=request.POST.get('mail_subject'),
-                body=request.POST.get('mail_body'))
-            email.send()
-            bps = BookingPackageService.objects.get(pk=object_id)
-            provider = bps.provider
-            if not provider:
-                provider = bps.booking_package.provider
-            services = find_provider_requests_services(request, provider, bps.booking)
-            for service in services:
-                if service.status == SERVICE_STATUS_PENDING:
-                    service.status = SERVICE_STATUS_REQUEST
-                    service.save(update_fields=['status'])
-            messages.add_message(
-                request=request, level=messages.SUCCESS,
-                message='Requests mail  sent successfully.',
-                extra_tags='', fail_silently=False)
-            return redirect(reverse('common:booking_%s_change' % self.model._meta.model_name, args=[object_id]))
-        else:
-            if object_id:
-                bps = BookingPackageService.objects.get(pk=object_id)
-                provider = bps.provider
-                if not provider:
-                    provider = bps.booking_package.provider
-                if not extra_context:
-                    extra_context = dict()
-                extra_context.update(
-                    {
-                        'modal_title': 'Provider Requests Mail',
-                        'default_mail_from': default_requests_mail_from(request, provider, bps.booking),
-                        'default_mail_to': default_requests_mail_to(request, provider, bps.booking),
-                        'default_mail_cc': '',
-                        'default_mail_bcc': default_requests_mail_bcc(request, provider, bps.booking),
-                        'default_mail_subject': default_requests_mail_subject(request, provider, bps.booking),
-                        'default_mail_body': default_requests_mail_body(request, provider, bps.booking),
-                    })
-
-            return super(BookingPackageServiceSiteModel, self).changeform_view(request, object_id, form_url, extra_context)
-
-    @csrf_protect_m
-    def delete_view(self, request, object_id, extra_context=None):
-        bookingpackageservice = BookingPackageService.objects.get(pk=object_id)
-        if bookingpackageservice.status == SERVICE_STATUS_PENDING:
-            return super(BookingPackageServiceSiteModel, self).delete_view(request, object_id, extra_context)
-        messages.add_message(
-            request=request, level=messages.ERROR,
-            message='Only Pending Service can be Deleted. You can set Status to Cancelled.',
-            extra_tags='', fail_silently=False)
-        return redirect(reverse(
-            'common:%s_%s_change' % (self.model._meta.app_label,
-                                     self.model._meta.model_name),
-            args=[object_id]))
 
 
 class BookingProvidedAllotmentSiteModel(BookingProvidedServiceSiteModel):
@@ -1905,11 +1783,23 @@ class BookingExtraPackageSiteModel(BaseBookingServiceSiteModel):
     add_form_template = 'booking/bookingpackage_change_form.html'
     change_form_template = 'booking/bookingpackage_change_form.html'
 
+    def save_model(self, request, obj, form, change):
+        with transaction.atomic(savepoint=False):
+            super(BookingExtraPackageSiteModel, self).save_model(request, obj, form, change)
+            BookingServices.update_booking(obj)
+
     def save_related(self, request, form, formsets, change):
         with transaction.atomic(savepoint=False):
             super(BookingExtraPackageSiteModel, self).save_related(request, form, formsets, change)
             obj = self.save_form(request, form, change)
             BookingServices.update_bookingpackageservices_amounts(obj)
+
+    def delete_model(self, request, obj):
+        with transaction.atomic(savepoint=False):
+            if obj.has_payment or obj.status != SERVICE_STATUS_PENDING:
+                raise ValidationError('Can not delete Booking Services that are Not Pending')
+            super(BookingExtraPackageSiteModel, self).delete_model(request, obj)
+            BookingServices.update_booking(obj)
 
 
 class BookingInvoiceDetailInline(CommonTabularInline):
@@ -2458,6 +2348,11 @@ class BaseBookingBookDetailSiteModel(SiteModel):
         with transaction.atomic(savepoint=False):
             super(BaseBookingBookDetailSiteModel, self).save_related(request, form, formsets, change)
             obj = self.save_form(request, form, change)
+            BookingServices.update_bookingservice_amounts(obj.booking_service)
+
+    def delete_model(self, request, obj):
+        with transaction.atomic(savepoint=False):
+            super(BaseBookingBookDetailSiteModel, self).delete_model(request, obj)
             BookingServices.update_bookingservice_amounts(obj.booking_service)
 
     def response_post_delete(self, request, obj):
