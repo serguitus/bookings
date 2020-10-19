@@ -2268,3 +2268,53 @@ class ConfigServices(object):
         dst_service.dropoff_office = src_service.dropoff_office
         dst_service.quantity = src_service.quantity
         dst_service.parameter = src_service.parameter
+
+
+    @classmethod
+    def clone_catalog_details(cls, old_id, new_catalog_service):
+
+        if isinstance(new_catalog_service, ProviderAllotmentService):
+            CatalogServiceClass = ProviderAllotmentService
+            CatalogDetailClass = ProviderAllotmentDetail
+            filter_field = 'provider_service'
+        elif isinstance(new_catalog_service, ProviderTransferService):
+            CatalogServiceClass = ProviderTransferService
+            CatalogDetailClass = ProviderTransferDetail
+            filter_field = 'provider_service'
+        elif isinstance(new_catalog_service, ProviderExtraService):
+            CatalogServiceClass = ProviderExtraService
+            CatalogDetailClass = ProviderExtraDetail
+            filter_field = 'provider_service'
+        elif isinstance(new_catalog_service, AgencyAllotmentService):
+            CatalogServiceClass = AgencyAllotmentService
+            CatalogDetailClass = AgencyAllotmentDetail
+            filter_field = 'agency_service'
+        elif isinstance(new_catalog_service, AgencyTransferService):
+            CatalogServiceClass = AgencyTransferService
+            CatalogDetailClass = AgencyTransferDetail
+            filter_field = 'agency_service'
+        elif isinstance(new_catalog_service, AgencyExtraService):
+            CatalogServiceClass = AgencyExtraService
+            CatalogDetailClass = AgencyExtraDetail
+            filter_field = 'agency_service'
+        else:
+            return
+
+        old_catalog_service = CatalogServiceClass.objects.get(pk=old_id)
+        details = list(CatalogDetailClass.objects.filter(**{filter_field: old_catalog_service}))
+        for detail in details:
+            cls._clone_catalog_detail(detail, new_catalog_service)
+
+
+    @classmethod
+    def _clone_catalog_detail(cls, catalog_detail, catalog_service):
+
+        catalog_detail.pk = None
+        catalog_detail.id = None
+        if hasattr(catalog_detail, 'provider_service'):
+            catalog_detail.provider_service = catalog_service
+            catalog_detail.provider_service_id = catalog_service.pk
+        else :
+            catalog_detail.agency_service = catalog_service
+            catalog_detail.agency_service_id = catalog_service.pk
+        catalog_detail.save()
