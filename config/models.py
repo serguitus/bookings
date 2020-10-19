@@ -20,14 +20,9 @@ from reservas.custom_settings import ADDON_FOR_NO_ADDON
 # Utility method to get a list of
 # Service child objects from a Service list
 def _get_child_objects(services):
-    TYPE_MODELS = {
-        SERVICE_CATEGORY_TRANSFER: Transfer,
-        SERVICE_CATEGORY_EXTRA: Extra,
-        SERVICE_CATEGORY_ALLOTMENT: Allotment,
-    }
     objs = []
     for service in services:
-        obj = TYPE_MODELS[service.category].objects.get(id=service.id)
+        obj = SERVICE_MODELS[service.category].objects.get(id=service.id)
         objs.append(obj)
     return objs
 
@@ -948,3 +943,9 @@ class ServiceBookDetailExtra(ServiceBookDetail, BookExtraData):
         self.base_service = self.book_service
         super(ServiceBookDetailExtra, self).fill_data()
         self.name = '%s - %s' % (self.service, self.book_service)
+
+SERVICE_MODELS = {
+    SERVICE_CATEGORY_ALLOTMENT: Allotment,
+    SERVICE_CATEGORY_TRANSFER: Transfer,
+    SERVICE_CATEGORY_EXTRA: Extra,
+}
