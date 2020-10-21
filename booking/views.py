@@ -62,6 +62,7 @@ from booking.models import (
     BookingProvidedAllotment, BookingProvidedTransfer, BookingProvidedExtra, BookingExtraPackage,
     BookingBookDetailAllotment, BookingBookDetailTransfer, BookingBookDetailExtra,
     BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine, BookingInvoicePartial,
+    get_bookingservice_objects,
 )
 from booking.forms import EmailProviderForm
 from booking.services import BookingServices
@@ -78,26 +79,6 @@ from config.services import ConfigServices
 from finance.models import Provider, Office
 
 from reservas.admin import bookings_site
-
-
-# Utility method to get a list of
-# BookingService child objects from a BookingService list
-def _get_child_objects(services):
-    TYPE_MODELS = {
-        BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER: BookingProvidedTransfer,
-        BASE_BOOKING_SERVICE_CATEGORY_BOOKING_EXTRA: BookingProvidedExtra,
-        BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT: BookingProvidedAllotment,
-        BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE: BookingExtraPackage,
-        BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT: BookingProvidedAllotment,
-        BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_TRANSFER: BookingProvidedTransfer,
-        BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA: BookingProvidedExtra,
-
-    }
-    objs = []
-    for service in services:
-        obj = TYPE_MODELS[service.base_category].objects.get(id=service.id)
-        objs.append(obj)
-    return objs
 
 
 class BookingPaxAutocompleteView(autocomplete.Select2QuerySetView):
@@ -479,7 +460,7 @@ def booking_list(request, instance):
 #     template = get_template("booking/pdf/voucher.html")
 #     booking = Booking.objects.get(id=id)
 #     services = BookingService.objects.filter(id__in=[2, 1, 3, 4, 9, 10])
-#     objs = _get_child_objects(services)
+#     objs = get_bookingservice_objects(services)
 #     context = {'pagesize': 'Letter',
 #                'booking': booking,
 #                'office': Office.objects.get(id=1),
@@ -658,7 +639,7 @@ class EmailConfirmationView(View):
         if bk.agency_contact:
             client_email = bk.agency_contact.email or ''
         rooming = bk.rooming_list.all()
-        objs = _get_child_objects(services)
+        objs = get_bookingservice_objects(services)
         subj = 'Service Confirmation %s' % bk.name
         if bk.reference:
             subj += ' (%s)' % bk.reference
