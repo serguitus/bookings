@@ -82,7 +82,7 @@ from booking.models import (
     BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine,
     BookingInvoicePartial,
     ProviderBookingPayment, ProviderPaymentBookingProvided,
-    _get_child_objects, _get_quote_child_objects,
+    get_bookingservice_objects, get_quoteservice_objects,
 )
 from booking.services import BookingServices
 from booking.top_filters import (
@@ -110,7 +110,7 @@ MENU_GROUP_LABEL_PACKAGE_SERVICES = 'Package Services By Type'
 
 def _get_voucher_services(services):
     objs = []
-    booking_services = _get_child_objects(services)
+    booking_services = get_bookingservice_objects(services)
     for booking_service in booking_services:
         if isinstance(booking_service, BookingExtraPackage) and booking_service.voucher_detail:
             PACKAGE_MODELS = {
@@ -2339,7 +2339,7 @@ def default_quote_mail_subject(request, quote=None):
 def default_quote_mail_body(request, quote=None):
     dest = 'Customer'
     # quote_services = QuoteService.objects.filter(id=quote.id)
-    # child_services = _get_quote_child_objects(quote_services)
+    # child_services = get_quoteservice_objects(quote_services)
     pax_minimums = quote.quote_paxvariants.all()
     context = {
         'user': request.user,
