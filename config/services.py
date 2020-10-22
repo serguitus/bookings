@@ -206,30 +206,17 @@ class ConfigServices(object):
                 AgencyAllotmentDetail.objects.filter(agency_service=src_agency_service))
             # for each src agency detail create dst agency detail
             for detail in details:
-                if is_update:
-                    # update - dont modify if exists
-                    agency_detail, created = AgencyAllotmentDetail.objects.get_or_create(
-                        agency_service_id=dst_agency_service.id,
-                        room_type_id=detail.room_type_id,
-                        board_type=detail.board_type,
-                        addon_id=detail.addon_id,
-                        pax_range_min=detail.pax_range_min,
-                        pax_range_max=detail.pax_range_max,
-                        defaults=cls.calculate_default_amounts(
-                            detail, src_agency.gain_percent, dst_agency.gain_percent)
-                    )
-                else:
-                    # rewrite - modify if exists
-                    agency_detail, created = AgencyAllotmentDetail.objects.update_or_create(
-                        agency_service_id=dst_agency_service.id,
-                        room_type_id=detail.room_type_id,
-                        board_type=detail.board_type,
-                        addon_id=detail.addon_id,
-                        pax_range_min=detail.pax_range_min,
-                        pax_range_max=detail.pax_range_max,
-                        defaults=cls.calculate_default_amounts(
-                            detail, src_agency.gain_percent, dst_agency.gain_percent)
-                    )
+                # rewrite - modify if exists
+                agency_detail, created = AgencyAllotmentDetail.objects.update_or_create(
+                    agency_service_id=dst_agency_service.id,
+                    room_type_id=detail.room_type_id,
+                    board_type=detail.board_type,
+                    addon_id=detail.addon_id,
+                    pax_range_min=detail.pax_range_min,
+                    pax_range_max=detail.pax_range_max,
+                    defaults=cls.calculate_default_amounts(
+                        detail, src_agency.gain_percent, dst_agency.gain_percent)
+                )
 
 
     @classmethod
@@ -308,32 +295,18 @@ class ConfigServices(object):
                 AgencyTransferDetail.objects.filter(agency_service=src_agency_service))
             # for each src agency detail create dst agency detail
             for detail in details:
-                if is_update:
-                    # update - dont modify if exists
-                    agency_detail, created = AgencyTransferDetail.objects.get_or_create(
-                        agency_service_id=dst_agency_service.id,
-                        location_from_id=detail.location_from_id,
-                        location_to_id=detail.location_to_id,
-                        addon_id=detail.addon_id,
-                        pax_range_min=detail.pax_range_min,
-                        pax_range_max=detail.pax_range_max,
-                        not_reversible=detail.not_reversible,
-                        defaults=cls.calculate_default_amounts(
-                            detail, src_agency.gain_percent, dst_agency.gain_percent)
-                    )
-                else:
-                    # rewrite - modify if exists
-                    agency_detail, created = AgencyTransferDetail.objects.update_or_create(
-                        agency_service_id=dst_agency_service.id,
-                        location_from_id=detail.location_from_id,
-                        location_to_id=detail.location_to_id,
-                        addon_id=detail.addon_id,
-                        pax_range_min=detail.pax_range_min,
-                        pax_range_max=detail.pax_range_max,
-                        not_reversible=detail.not_reversible,
-                        defaults=cls.calculate_default_amounts(
-                            detail, src_agency.gain_percent, dst_agency.gain_percent)
-                    )
+                # rewrite - modify if exists
+                agency_detail, created = AgencyTransferDetail.objects.update_or_create(
+                    agency_service_id=dst_agency_service.id,
+                    location_from_id=detail.location_from_id,
+                    location_to_id=detail.location_to_id,
+                    addon_id=detail.addon_id,
+                    pax_range_min=detail.pax_range_min,
+                    pax_range_max=detail.pax_range_max,
+                    not_reversible=detail.not_reversible,
+                    defaults=cls.calculate_default_amounts(
+                        detail, src_agency.gain_percent, dst_agency.gain_percent)
+                )
 
 
     @classmethod
@@ -405,26 +378,15 @@ class ConfigServices(object):
                 AgencyExtraDetail.objects.filter(agency_service=src_agency_service))
             # for each src agency detail create dst agency detail
             for detail in details:
-                if is_update:
-                    # update - dont modify if exists
-                    agency_detail, created = AgencyExtraDetail.objects.get_or_create(
-                        agency_service_id=dst_agency_service.id,
-                        addon_id=detail.addon_id,
-                        pax_range_min=detail.pax_range_min,
-                        pax_range_max=detail.pax_range_max,
-                        defaults=cls.calculate_default_amounts(
-                            detail, src_agency.gain_percent, dst_agency.gain_percent)
-                    )
-                else:
-                    # rewrite - modify if exists
-                    agency_detail, created = AgencyExtraDetail.objects.update_or_create(
-                        agency_service_id=dst_agency_service.id,
-                        addon_id=detail.addon_id,
-                        pax_range_min=detail.pax_range_min,
-                        pax_range_max=detail.pax_range_max,
-                        defaults=cls.calculate_default_amounts(
-                            detail, src_agency.gain_percent, dst_agency.gain_percent)
-                    )
+                # rewrite - modify if exists
+                agency_detail, created = AgencyExtraDetail.objects.update_or_create(
+                    agency_service_id=dst_agency_service.id,
+                    addon_id=detail.addon_id,
+                    pax_range_min=detail.pax_range_min,
+                    pax_range_max=detail.pax_range_max,
+                    defaults=cls.calculate_default_amounts(
+                        detail, src_agency.gain_percent, dst_agency.gain_percent)
+                )
 
 
     @classmethod
