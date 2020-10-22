@@ -128,6 +128,8 @@ class ConfigServices(object):
                     detail.pk = None
                     detail.id = None
                     detail.agency_service = dst_service
+                    detail.__dict__.update(cls.calculate_default_amounts(
+                        detail, src_agency.gain_percent, dst_agency.gain_percent))
                     detail.save()
         return
 
@@ -188,6 +190,8 @@ class ConfigServices(object):
                 src_detail.pk = None
                 src_detail.id = None
                 src_detail.agency_service = dst_service
+                src_detail.__dict__.update(cls.calculate_default_amounts(
+                        src_detail, src_agency.gain_percent, dst_agency.gain_percent))
                 src_detail.save()
             return
         # Done with updating prices. if recreating all, proceed below
@@ -276,6 +280,8 @@ class ConfigServices(object):
                 src_detail.pk = None
                 src_detail.id = None
                 src_detail.agency_service = dst_service
+                src_detail.__dict__.update(cls.calculate_default_amounts(
+                        src_detail, src_agency.gain_percent, dst_agency.gain_percent))
                 src_detail.save()
             return
         # Done with updating prices. if recreating all, proceed below
@@ -359,6 +365,8 @@ class ConfigServices(object):
                 src_detail.pk = None
                 src_detail.id = None
                 src_detail.agency_service = dst_service
+                src_detail.__dict__.update(cls.calculate_default_amounts(
+                        src_detail, src_agency.gain_percent, dst_agency.gain_percent))
                 src_detail.save()
             return
         # Done with updating prices. if recreating all, proceed below
