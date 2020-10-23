@@ -3137,7 +3137,7 @@ class BookingServices(object):
             pax_list = cls._find_bookingservice_pax_list(bookingservice)
 
         if not hasattr(bookingservice, "cost_by_catalog"):
-            # detail
+            # is detail
             bookingservicedetail = bookingservice
             provider = bookingservicedetail.provider
             if not provider:
@@ -3172,11 +3172,11 @@ class BookingServices(object):
             if hasattr(bookingservice, "booking"):
                 agency = bookingservice.booking.agency
             else:
-                # detail
+                # is detail
                 agency = bookingservice.booking_service.booking.agency
 
         if not hasattr(bookingservice, "price_by_catalog"):
-            # detail
+            # is detail
             return cls._find_bookingservice_catalog_price(
                 bookingservice,
                 bookingservice.datetime_from, bookingservice.datetime_to,
@@ -3316,36 +3316,74 @@ class BookingServices(object):
         if not service_list:
             return None, "Service Details Empty", None, "Service Details Empty"
 
-        for service in service_list:
-            cost_groups = BookingServices.find_bookingservice_paxes_groups(
-                pax_list, bookingservice.service, True)
-            date_from = None
-            date_to = None
-            if isinstance(service, ServiceBookDetail):
-                days_after = service.days_after
+        if hasattr(bookingservice, 'id') and bookingservice.id:
+            # booking service details
+            for bookingservicedetail in service_list:
+
+                c, c_msg, p, p_msg = None, None, None, None
+
+                if cost_msg is None:
+                    if bookingservicedetail.manual_cost is None:
+                        bookingservicedetail.manual_cost = False
+
+                    if bookingservicedetail.manual_cost:
+                        c = bookingservicedetail.cost_amount
+                        if c is None:
+                            c_msg = "Missing Manual Cost"
+                    else:
+                        c, c_msg = cls._find_bookingservice_cost(bookingservicedetail, pax_list)
+                    cost, cost_msg = cls._merge_costs(cost, cost_msg, c, c_msg)
+
+                if price_msg is None:
+                    if bookingservicedetail.manual_price is None:
+                        bookingservicedetail.manual_price = False
+
+                    if bookingservicedetail.manual_price:
+                        price = bookingservicedetail.price_amount
+                        price_msg = None
+                        if price is None:
+                            price_msg = "Missing Manual Price"
+                    else:
+                        p, p_msg = cls._find_bookingservice_price(
+                            bookingservicedetail, pax_list, agency)
+                    price, price_msg = cls._merge_prices(price, price_msg, p, p_msg)
+
+                if cost is None and price is None:
+                    return cost, cost_msg, price, price_msg
+        else:
+            # configured service details
+            for service_detail in service_list:
+
+                c, c_msg, p, p_msg = None, None, None, None
+
+                provider = bookingservice.provider
+                if service_detail.provider:
+                    provider = service_detail.provider
+
+                date_from = None
+                date_to = None
+                days_after = service_detail.days_after
                 if days_after is None:
                     days_after = 0
                 if not bookingservice.datetime_from is None:
                     date_from = bookingservice.datetime_from + timedelta(days=days_after)
-                    days_duration = service.days_duration
+                    days_duration = service_detail.days_duration
                     if days_duration is None:
                         days_duration = 0
                     date_to = date_from + timedelta(days=days_duration)
-            else:
-                date_from = service.datetime_from
-                date_to = service.datetime_to
+    
+                if cost_msg is None:
+                    c, c_msg = cls._find_bookingservice_catalog_cost(
+                        service_detail, date_from, date_to, pax_list, provider)
+                    cost, cost_msg = cls._merge_costs(cost, cost_msg, c, c_msg)
 
-            provider = bookingservice.provider
-            if service.provider:
-                provider = service.provider
-            c, c_msg = cls._find_bookingservice_catalog_cost(
-                service, date_from, date_to, pax_list, provider)
-            p, p_msg = cls._find_bookingservice_catalog_price(
-                service, date_from, date_to, pax_list, agency)
-            cost, cost_msg = cls._merge_costs(cost, cost_msg, c, c_msg)
-            price, price_msg = cls._merge_prices(price, price_msg, p, p_msg)
-            if cost is None and price is None:
-                return cost, cost_msg, price, price_msg
+                if price_msg is None:
+                    p, p_msg = cls._find_bookingservice_catalog_price(
+                        service_detail, date_from, date_to, pax_list, agency)
+                    price, price_msg = cls._merge_prices(price, price_msg, p, p_msg)
+
+                if cost is None and price is None:
+                    return cost, cost_msg, price, price_msg
 
         return cost, cost_msg, price, price_msg
 
