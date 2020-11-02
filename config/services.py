@@ -128,6 +128,8 @@ class ConfigServices(object):
                     detail.pk = None
                     detail.id = None
                     detail.agency_service = dst_service
+                    detail.__dict__.update(cls.calculate_default_amounts(
+                        detail, src_agency.gain_percent, dst_agency.gain_percent))
                     detail.save()
         return
 
@@ -188,6 +190,8 @@ class ConfigServices(object):
                 src_detail.pk = None
                 src_detail.id = None
                 src_detail.agency_service = dst_service
+                src_detail.__dict__.update(cls.calculate_default_amounts(
+                        src_detail, src_agency.gain_percent, dst_agency.gain_percent))
                 src_detail.save()
             return
         # Done with updating prices. if recreating all, proceed below
@@ -206,30 +210,17 @@ class ConfigServices(object):
                 AgencyAllotmentDetail.objects.filter(agency_service=src_agency_service))
             # for each src agency detail create dst agency detail
             for detail in details:
-                if is_update:
-                    # update - dont modify if exists
-                    agency_detail, created = AgencyAllotmentDetail.objects.get_or_create(
-                        agency_service_id=dst_agency_service.id,
-                        room_type_id=detail.room_type_id,
-                        board_type=detail.board_type,
-                        addon_id=detail.addon_id,
-                        pax_range_min=detail.pax_range_min,
-                        pax_range_max=detail.pax_range_max,
-                        defaults=cls.calculate_default_amounts(
-                            detail, src_agency.gain_percent, dst_agency.gain_percent)
-                    )
-                else:
-                    # rewrite - modify if exists
-                    agency_detail, created = AgencyAllotmentDetail.objects.update_or_create(
-                        agency_service_id=dst_agency_service.id,
-                        room_type_id=detail.room_type_id,
-                        board_type=detail.board_type,
-                        addon_id=detail.addon_id,
-                        pax_range_min=detail.pax_range_min,
-                        pax_range_max=detail.pax_range_max,
-                        defaults=cls.calculate_default_amounts(
-                            detail, src_agency.gain_percent, dst_agency.gain_percent)
-                    )
+                # rewrite - modify if exists
+                agency_detail, created = AgencyAllotmentDetail.objects.update_or_create(
+                    agency_service_id=dst_agency_service.id,
+                    room_type_id=detail.room_type_id,
+                    board_type=detail.board_type,
+                    addon_id=detail.addon_id,
+                    pax_range_min=detail.pax_range_min,
+                    pax_range_max=detail.pax_range_max,
+                    defaults=cls.calculate_default_amounts(
+                        detail, src_agency.gain_percent, dst_agency.gain_percent)
+                )
 
 
     @classmethod
@@ -289,6 +280,8 @@ class ConfigServices(object):
                 src_detail.pk = None
                 src_detail.id = None
                 src_detail.agency_service = dst_service
+                src_detail.__dict__.update(cls.calculate_default_amounts(
+                        src_detail, src_agency.gain_percent, dst_agency.gain_percent))
                 src_detail.save()
             return
         # Done with updating prices. if recreating all, proceed below
@@ -308,32 +301,18 @@ class ConfigServices(object):
                 AgencyTransferDetail.objects.filter(agency_service=src_agency_service))
             # for each src agency detail create dst agency detail
             for detail in details:
-                if is_update:
-                    # update - dont modify if exists
-                    agency_detail, created = AgencyTransferDetail.objects.get_or_create(
-                        agency_service_id=dst_agency_service.id,
-                        location_from_id=detail.location_from_id,
-                        location_to_id=detail.location_to_id,
-                        addon_id=detail.addon_id,
-                        pax_range_min=detail.pax_range_min,
-                        pax_range_max=detail.pax_range_max,
-                        not_reversible=detail.not_reversible,
-                        defaults=cls.calculate_default_amounts(
-                            detail, src_agency.gain_percent, dst_agency.gain_percent)
-                    )
-                else:
-                    # rewrite - modify if exists
-                    agency_detail, created = AgencyTransferDetail.objects.update_or_create(
-                        agency_service_id=dst_agency_service.id,
-                        location_from_id=detail.location_from_id,
-                        location_to_id=detail.location_to_id,
-                        addon_id=detail.addon_id,
-                        pax_range_min=detail.pax_range_min,
-                        pax_range_max=detail.pax_range_max,
-                        not_reversible=detail.not_reversible,
-                        defaults=cls.calculate_default_amounts(
-                            detail, src_agency.gain_percent, dst_agency.gain_percent)
-                    )
+                # rewrite - modify if exists
+                agency_detail, created = AgencyTransferDetail.objects.update_or_create(
+                    agency_service_id=dst_agency_service.id,
+                    location_from_id=detail.location_from_id,
+                    location_to_id=detail.location_to_id,
+                    addon_id=detail.addon_id,
+                    pax_range_min=detail.pax_range_min,
+                    pax_range_max=detail.pax_range_max,
+                    not_reversible=detail.not_reversible,
+                    defaults=cls.calculate_default_amounts(
+                        detail, src_agency.gain_percent, dst_agency.gain_percent)
+                )
 
 
     @classmethod
@@ -386,6 +365,8 @@ class ConfigServices(object):
                 src_detail.pk = None
                 src_detail.id = None
                 src_detail.agency_service = dst_service
+                src_detail.__dict__.update(cls.calculate_default_amounts(
+                        src_detail, src_agency.gain_percent, dst_agency.gain_percent))
                 src_detail.save()
             return
         # Done with updating prices. if recreating all, proceed below
@@ -405,26 +386,15 @@ class ConfigServices(object):
                 AgencyExtraDetail.objects.filter(agency_service=src_agency_service))
             # for each src agency detail create dst agency detail
             for detail in details:
-                if is_update:
-                    # update - dont modify if exists
-                    agency_detail, created = AgencyExtraDetail.objects.get_or_create(
-                        agency_service_id=dst_agency_service.id,
-                        addon_id=detail.addon_id,
-                        pax_range_min=detail.pax_range_min,
-                        pax_range_max=detail.pax_range_max,
-                        defaults=cls.calculate_default_amounts(
-                            detail, src_agency.gain_percent, dst_agency.gain_percent)
-                    )
-                else:
-                    # rewrite - modify if exists
-                    agency_detail, created = AgencyExtraDetail.objects.update_or_create(
-                        agency_service_id=dst_agency_service.id,
-                        addon_id=detail.addon_id,
-                        pax_range_min=detail.pax_range_min,
-                        pax_range_max=detail.pax_range_max,
-                        defaults=cls.calculate_default_amounts(
-                            detail, src_agency.gain_percent, dst_agency.gain_percent)
-                    )
+                # rewrite - modify if exists
+                agency_detail, created = AgencyExtraDetail.objects.update_or_create(
+                    agency_service_id=dst_agency_service.id,
+                    addon_id=detail.addon_id,
+                    pax_range_min=detail.pax_range_min,
+                    pax_range_max=detail.pax_range_max,
+                    defaults=cls.calculate_default_amounts(
+                        detail, src_agency.gain_percent, dst_agency.gain_percent)
+                )
 
 
     @classmethod
@@ -2268,3 +2238,53 @@ class ConfigServices(object):
         dst_service.dropoff_office = src_service.dropoff_office
         dst_service.quantity = src_service.quantity
         dst_service.parameter = src_service.parameter
+
+
+    @classmethod
+    def clone_catalog_details(cls, old_id, new_catalog_service):
+
+        if isinstance(new_catalog_service, ProviderAllotmentService):
+            CatalogServiceClass = ProviderAllotmentService
+            CatalogDetailClass = ProviderAllotmentDetail
+            filter_field = 'provider_service'
+        elif isinstance(new_catalog_service, ProviderTransferService):
+            CatalogServiceClass = ProviderTransferService
+            CatalogDetailClass = ProviderTransferDetail
+            filter_field = 'provider_service'
+        elif isinstance(new_catalog_service, ProviderExtraService):
+            CatalogServiceClass = ProviderExtraService
+            CatalogDetailClass = ProviderExtraDetail
+            filter_field = 'provider_service'
+        elif isinstance(new_catalog_service, AgencyAllotmentService):
+            CatalogServiceClass = AgencyAllotmentService
+            CatalogDetailClass = AgencyAllotmentDetail
+            filter_field = 'agency_service'
+        elif isinstance(new_catalog_service, AgencyTransferService):
+            CatalogServiceClass = AgencyTransferService
+            CatalogDetailClass = AgencyTransferDetail
+            filter_field = 'agency_service'
+        elif isinstance(new_catalog_service, AgencyExtraService):
+            CatalogServiceClass = AgencyExtraService
+            CatalogDetailClass = AgencyExtraDetail
+            filter_field = 'agency_service'
+        else:
+            return
+
+        old_catalog_service = CatalogServiceClass.objects.get(pk=old_id)
+        details = list(CatalogDetailClass.objects.filter(**{filter_field: old_catalog_service}))
+        for detail in details:
+            cls._clone_catalog_detail(detail, new_catalog_service)
+
+
+    @classmethod
+    def _clone_catalog_detail(cls, catalog_detail, catalog_service):
+
+        catalog_detail.pk = None
+        catalog_detail.id = None
+        if hasattr(catalog_detail, 'provider_service'):
+            catalog_detail.provider_service = catalog_service
+            catalog_detail.provider_service_id = catalog_service.pk
+        else :
+            catalog_detail.agency_service = catalog_service
+            catalog_detail.agency_service_id = catalog_service.pk
+        catalog_detail.save()

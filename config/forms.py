@@ -53,6 +53,7 @@ class ProviderAllotmentServiceForm(forms.ModelForm):
             'service': autocomplete.ModelSelect2(url='allotment-autocomplete'),
             'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
         }
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
 class ProviderAllotmentDetailForm(forms.ModelForm):
@@ -119,6 +120,7 @@ class ProviderTransferServiceForm(forms.ModelForm):
             'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
             'service': autocomplete.ModelSelect2(url='transfer-autocomplete'),
         }
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
 class ProviderTransferDetailForm(forms.ModelForm):
@@ -171,6 +173,7 @@ class ProviderExtraServiceForm(forms.ModelForm):
             'provider': autocomplete.ModelSelect2(url='provider-autocomplete'),
             'service': autocomplete.ModelSelect2(url='extra-autocomplete'),
         }
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
 class ProviderExtraDetailForm(forms.ModelForm):
@@ -215,6 +218,7 @@ class AgencyAllotmentServiceForm(forms.ModelForm):
             'agency': autocomplete.ModelSelect2(url='agency-autocomplete'),
             'service': autocomplete.ModelSelect2(url='allotment-autocomplete'),
         }
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
 class AgencyAllotmentDetailForm(forms.ModelForm):
@@ -262,6 +266,7 @@ class AgencyTransferServiceForm(forms.ModelForm):
             'agency': autocomplete.ModelSelect2(url='agency-autocomplete'),
             'service': autocomplete.ModelSelect2(url='transfer-autocomplete'),
         }
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
 class AgencyTransferDetailForm(forms.ModelForm):
@@ -301,6 +306,7 @@ class AgencyExtraServiceForm(forms.ModelForm):
             'agency': autocomplete.ModelSelect2(url='agency-autocomplete'),
             'service': autocomplete.ModelSelect2(url='extra-autocomplete'),
         }
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
 class AgencyExtraDetailForm(forms.ModelForm):

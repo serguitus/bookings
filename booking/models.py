@@ -73,38 +73,20 @@ from finance.models import (
 
 # Utility method to get a list of
 # BookingService child objects from a BookingService list
-def _get_child_objects(services):
-    TYPE_MODELS = {
-        'BA': BookingProvidedAllotment,
-        'BT': BookingProvidedTransfer,
-        'BE': BookingProvidedExtra,
-        'BP': BookingExtraPackage,
-        'PA': BookingProvidedAllotment,
-        'PT': BookingProvidedTransfer,
-        'PE': BookingProvidedExtra,
-    }
+def get_bookingservice_objects(services):
     objs = []
     for service in services:
-        obj = TYPE_MODELS[service.base_category].objects.get(id=service.id)
+        obj = BOOKINGSERVICE_MODELS[service.base_category].objects.get(id=service.id)
         objs.append(obj)
     return objs
 
 
 # Utility method to get a list of
 # QuoteService child objects from a QuoteService list
-def _get_quote_child_objects(services):
-    TYPE_MODELS = {
-        'QA': NewQuoteAllotment,
-        'QT': NewQuoteTransfer,
-        'QE': NewQuoteExtra,
-        'QP': QuoteExtraPackage,
-        'PA': NewQuoteAllotment,
-        'PT': NewQuoteTransfer,
-        'PE': NewQuoteExtra,
-    }
+def get_quoteservice_objects(services):
     objs = []
     for service in services:
-        obj = TYPE_MODELS[service.base_category].objects.get(id=service.id)
+        obj = QUOTESERVICE_MODELS[service.base_category].objects.get(id=service.id)
         objs.append(obj)
     return objs
 
@@ -333,7 +315,7 @@ class QuoteService(BookServiceData, DateInterval):
         return '%s' % (self.base_service)
 
     def get_absolute_url(self):
-        return _get_quote_child_objects([self])[0].get_absolute_url()
+        return get_quoteservice_objects([self])[0].get_absolute_url()
 
 
 class QuoteInvoicedServicePaxVariantManager(models.Manager):
@@ -881,21 +863,21 @@ class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
 
     def booking_name(self):
         # gets booking.name for this bookingservice
-        child_service = _get_child_objects([self])[0]
+        child_service = get_bookingservice_objects([self])[0]
         if child_service.base_category in ['PA', 'PE', 'PT']:
             return child_service.booking_package.booking.name
         return child_service.booking.name
 
     def booking_agency_ref(self):
         # gets booking.reference for this bookingservice
-        child_service = _get_child_objects([self])[0]
+        child_service = get_bookingservice_objects([self])[0]
         if child_service.base_category in ['PA', 'PE', 'PT']:
             return child_service.booking_package.booking.reference
         return child_service.booking.reference
 
     def service_pax_count(self):
         # gets rooming_list count for this bookingservice
-        child_service = _get_child_objects([self])[0]
+        child_service = get_bookingservice_objects([self])[0]
         if child_service.base_category in ['PA', 'PE', 'PT']:
             pax_count = child_service.booking_package.rooming_list.count()
         else:
@@ -936,8 +918,8 @@ class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
         return self.cost_amount_to_pay - self.cost_amount_paid
     cost_amount_pending.fget.short_description = 'Pending'
 
-    def get_child_object(self):
-        return _get_child_objects([self])[0]
+    def get_bookingservice_object(self):
+        return get_bookingservice_objects([self])[0]
 
     def validate(self):
         self.validate_date_interval()
@@ -961,7 +943,7 @@ class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
             super(BaseBookingService, self).save(force_insert, force_update, using, update_fields)
 
     def get_absolute_url(self):
-        return self.get_child_object().get_absolute_url()
+        return self.get_bookingservice_object().get_absolute_url()
 
 
 class ProviderBookingPayment(Withdraw):
@@ -1445,3 +1427,30 @@ class ProviderPaymentBookingProvided(models.Model):
     def __str__(self):
         return '%s : %s (%s)' % (
             self.provider_payment, self.provider_service, self.amount_paid)
+
+
+QUOTESERVICE_MODELS = {
+    'QA': NewQuoteAllotment,
+    'QT': NewQuoteTransfer,
+    'QE': NewQuoteExtra,
+    'QP': QuoteExtraPackage,
+    'PA': NewQuoteAllotment,
+    'PT': NewQuoteTransfer,
+    'PE': NewQuoteExtra,
+    'DA': NewQuoteServiceBookDetailAllotment,
+    'DT': NewQuoteServiceBookDetailTransfer,
+    'DE': NewQuoteServiceBookDetailExtra,
+}
+
+BOOKINGSERVICE_MODELS = {
+    'BA': BookingProvidedAllotment,
+    'BT': BookingProvidedTransfer,
+    'BE': BookingProvidedExtra,
+    'BP': BookingExtraPackage,
+    'PA': BookingProvidedAllotment,
+    'PT': BookingProvidedTransfer,
+    'PE': BookingProvidedExtra,
+    'DA': BookingBookDetailAllotment,
+    'DT': BookingBookDetailTransfer,
+    'DE': BookingBookDetailExtra,
+}

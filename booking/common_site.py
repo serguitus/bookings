@@ -43,7 +43,10 @@ from booking.constants import (
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_TRANSFER,
-    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_ALLOTMENT,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_TRANSFER,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_EXTRA
 )
 from booking.forms import (
     EmailPopupForm,
@@ -79,7 +82,7 @@ from booking.models import (
     BookingInvoice, BookingInvoiceDetail, BookingInvoiceLine,
     BookingInvoicePartial,
     ProviderBookingPayment, ProviderPaymentBookingProvided,
-    _get_child_objects, _get_quote_child_objects,
+    get_bookingservice_objects, get_quoteservice_objects,
 )
 from booking.services import BookingServices
 from booking.top_filters import (
@@ -107,7 +110,7 @@ MENU_GROUP_LABEL_PACKAGE_SERVICES = 'Package Services By Type'
 
 def _get_voucher_services(services):
     objs = []
-    booking_services = _get_child_objects(services)
+    booking_services = get_bookingservice_objects(services)
     for booking_service in booking_services:
         if isinstance(booking_service, BookingExtraPackage) and booking_service.voucher_detail:
             PACKAGE_MODELS = {
@@ -1196,8 +1199,14 @@ class ServiceChangeList(BookingServiceStatusChangeList):
             model_name = 'bookingprovidedtransfer'
         elif base_category == BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA:
             model_name = 'bookingprovidedextra'
+        elif base_category == BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_ALLOTMENT:
+            model_name = 'bookingbookdetailallotment'
+        elif base_category == BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_TRANSFER:
+            model_name = 'bookingbookdetailtransfer'
+        elif base_category == BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_EXTRA:
+            model_name = 'bookingbookdetailextra'
         else:
-            model_name = self.opts.app_label.model_name
+            model_name = self.opts.model_name
         return reverse(
             '%s:%s_%s_change' % (
                 self.model_admin.admin_site.site_namespace,
@@ -2330,7 +2339,7 @@ def default_quote_mail_subject(request, quote=None):
 def default_quote_mail_body(request, quote=None):
     dest = 'Customer'
     # quote_services = QuoteService.objects.filter(id=quote.id)
-    # child_services = _get_quote_child_objects(quote_services)
+    # child_services = get_quoteservice_objects(quote_services)
     pax_minimums = quote.quote_paxvariants.all()
     context = {
         'user': request.user,

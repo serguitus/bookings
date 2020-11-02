@@ -627,6 +627,15 @@ class CatalogService(SiteModel):
         context.update(self.get_model_extra_context(request))
         return render(request, 'config/catalog_extend_dates.html', context)
 
+    def response_add_saveasnew(
+            self, request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue=None):
+        id = request.POST.get('id')
+        if id and obj:
+            ConfigServices.clone_catalog_details(id, obj)
+
+        return super(CatalogService, self).response_add_saveasnew(
+            request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue)
+
 
 class ProviderAllotmentDetailInline(CommonTabularInline):
     model = ProviderAllotmentDetail
@@ -657,7 +666,7 @@ class ProviderAllotmentServiceSiteModel(CatalogService):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Costs Catalogue'
     #recent_allowed = True
-    fields = ('provider', 'service', 'date_from', 'date_to',)
+    fields = ('provider', 'service', 'date_from', 'date_to', 'id',)
     list_display = ('service', 'provider', 'date_from', 'date_to',)
     top_filters = (
         ('service', AllotmentTopFilter), ('provider', ProviderTopFilter),
@@ -781,7 +790,7 @@ class ProviderTransferServiceSiteModel(CatalogService):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Costs Catalogue'
     #recent_allowed = True
-    fields = ('provider', 'service', 'date_from', 'date_to',)
+    fields = ('provider', 'service', 'date_from', 'date_to', 'id',)
     list_display = ('service', 'provider', 'date_from', 'date_to',)
     top_filters = (
         ('service', TransferTopFilter), ('provider', ProviderTopFilter),
@@ -892,7 +901,7 @@ class ProviderExtraServiceSiteModel(CatalogService):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Costs Catalogue'
     #recent_allowed = True
-    fields = ('provider', 'service', 'date_from', 'date_to',)
+    fields = ('provider', 'service', 'date_from', 'date_to', 'id',)
     list_display = ('service', 'provider', 'date_from', 'date_to',)
     top_filters = (
         ('service', ExtraTopFilter), ('provider', ProviderTopFilter),
@@ -1002,7 +1011,7 @@ class AgencyAllotmentServiceSiteModel(CatalogService):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Selling Prices Catalogue'
     #recent_allowed = True
-    fields = ('agency', 'service', 'date_from', 'date_to',)
+    fields = ('agency', 'service', 'date_from', 'date_to', 'id',)
     list_display = ('agency', 'service', 'date_from', 'date_to',)
     top_filters = (
         ('service', AllotmentTopFilter), ('agency', AgencyTopFilter),
@@ -1109,7 +1118,7 @@ class AgencyTransferServiceSiteModel(CatalogService):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Selling Prices Catalogue'
     #recent_allowed = True
-    fields = ('agency', 'service', 'date_from', 'date_to',)
+    fields = ('agency', 'service', 'date_from', 'date_to', 'id',)
     list_display = ('agency', 'service', 'date_from', 'date_to',)
     top_filters = (
         ('service', TransferTopFilter), ('agency', AgencyTopFilter),
@@ -1206,7 +1215,7 @@ class AgencyExtraServiceSiteModel(CatalogService):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Selling Prices Catalogue'
     #recent_allowed = True
-    fields = ('agency', 'service', 'date_from', 'date_to')
+    fields = ('agency', 'service', 'date_from', 'date_to', 'id',)
     list_display = ('agency', 'service', 'date_from', 'date_to',)
     top_filters = (
         ('service', ExtraTopFilter), ('agency', AgencyTopFilter),
