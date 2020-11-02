@@ -1304,7 +1304,8 @@ class SiteModel(TotalsumAdmin):
                 request, self.model, list_display,
                 list_display_links, list_filter, top_filters, self.date_hierarchy,
                 search_fields, list_select_related, self.list_per_page,
-                self.list_max_show_all, self.list_editable, self
+                self.list_max_show_all, self.list_editable, self,
+                self.get_sortable_by(request)
             )
             cl.list_details_template = self.list_details_template
 
@@ -1599,7 +1600,7 @@ class CommonChangeList(ChangeList):
 
     def __init__(self, request, model, list_display, list_display_links,
                  list_filter, top_filters, date_hierarchy, search_fields, list_select_related,
-                 list_per_page, list_max_show_all, list_editable, model_admin):
+                 list_per_page, list_max_show_all, list_editable, model_admin, sortable_by):
         self.top_filters = top_filters
         self.hidden_params = dict(request.GET.items())
         if SEARCH_VAR in self.hidden_params:
@@ -1608,7 +1609,7 @@ class CommonChangeList(ChangeList):
         super(CommonChangeList, self).__init__(
             request, model, list_display, list_display_links,
             list_filter, date_hierarchy, search_fields, list_select_related,
-            list_per_page, list_max_show_all, list_editable, model_admin)
+            list_per_page, list_max_show_all, list_editable, model_admin, sortable_by)
 
     def row_classes_for_result(self, result):
         return ''

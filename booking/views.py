@@ -83,7 +83,7 @@ from reservas.admin import bookings_site
 
 class BookingPaxAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return BookingPax.objects.none()
         qs = BookingPax.objects.all()
 
@@ -723,7 +723,7 @@ def _find_address_list(str_address=''):
 class PickUpAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Allotment.objects.none()
         qs = Allotment.objects.filter(enabled=True).all()
 
@@ -745,7 +745,7 @@ class PickUpAutocompleteView(autocomplete.Select2QuerySetView):
 class DropOffAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Allotment.objects.none()
         qs = Allotment.objects.filter(enabled=True).all()
 
@@ -767,7 +767,7 @@ class DropOffAutocompleteView(autocomplete.Select2QuerySetView):
 class PlaceAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Place.objects.none()
         qs = Place.objects.all()
 
@@ -791,7 +791,7 @@ class PlaceAutocompleteView(autocomplete.Select2QuerySetView):
 class ScheduleArrivalAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Schedule.objects.none()
 
         service = self.forwarded.get('service', None)
@@ -822,7 +822,7 @@ class ScheduleArrivalAutocompleteView(autocomplete.Select2QuerySetView):
 class ScheduleDepartureAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Schedule.objects.none()
         qs = Schedule.objects.filter(is_arrival=False).all()
 
@@ -858,7 +858,7 @@ def booking_actions(request, id):
 class SellerAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return User.objects.none()
         qs = User.objects.filter(
             is_staff=True,
@@ -871,7 +871,7 @@ class SellerAutocompleteView(autocomplete.Select2QuerySetView):
 class PackageAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Package.objects.none()
         qs = Package.objects.filter(enabled=True).all()
         if self.q:
@@ -881,7 +881,7 @@ class PackageAutocompleteView(autocomplete.Select2QuerySetView):
 
 class ProviderPackageAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return Provider.objects.none()
         qs = Provider.objects.filter(enabled=True).all().distinct()
 
@@ -899,7 +899,7 @@ class ProviderPackageAutocompleteView(autocomplete.Select2QuerySetView):
 class QuotePaxVariantAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             return QuotePaxVariant.objects.none()
         qs = QuotePaxVariant.objects.all()
 
