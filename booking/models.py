@@ -12,6 +12,7 @@ from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models.query_utils import Q
 from django.urls import reverse
+from django.utils.html import format_html
 
 from accounting.constants import CURRENCIES, CURRENCY_CUC
 from accounting.models import Account
@@ -727,9 +728,11 @@ class Booking(models.Model):
         # this shows a waring sign with mouse-over message
         # for bookings with private notes
         if self.p_notes:
-            return '<a href="#" data-toggle="tooltip" title="%s"><span class="fa fa-exclamation-circle" aria-hidden="true"></span></a>' % self.p_notes
+            return format_html(
+                '<a href="#" data-toggle="tooltip" title="{}"> \
+                    <span class="fa fa-exclamation-circle" aria-hidden="true"> \
+                    </span></a>', self.p_notes)
 
-    has_notes.allow_tags = True
     has_notes.short_description = 'Notes'
 
     @property
