@@ -3320,8 +3320,7 @@ class BookingServices(object):
             # booking service details
             for bookingservicedetail in service_list:
 
-                c, c_msg, p, p_msg = None, None, None, None
-
+                c, c_msg = None, None
                 if cost_msg is None:
                     if bookingservicedetail.manual_cost is None:
                         bookingservicedetail.manual_cost = False
@@ -3334,15 +3333,15 @@ class BookingServices(object):
                         c, c_msg = cls._find_bookingservice_cost(bookingservicedetail, pax_list)
                     cost, cost_msg = cls._merge_costs(cost, cost_msg, c, c_msg)
 
+                p, p_msg = None, None
                 if price_msg is None:
                     if bookingservicedetail.manual_price is None:
                         bookingservicedetail.manual_price = False
 
                     if bookingservicedetail.manual_price:
-                        price = bookingservicedetail.price_amount
-                        price_msg = None
-                        if price is None:
-                            price_msg = "Missing Manual Price"
+                        p = bookingservicedetail.price_amount
+                        if p is None:
+                            p_msg = "Missing Manual Price"
                     else:
                         p, p_msg = cls._find_bookingservice_price(
                             bookingservicedetail, pax_list, agency)
