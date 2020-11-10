@@ -397,6 +397,7 @@ class QuoteServiceSiteModel(SiteModel):
 class QuotePackagePaxVariantInline(CommonStackedInline):
     model = QuoteServicePaxVariant
     extra = 0
+    max_num = 0
     fields = [
         ('quote_pax_variant'),
         ('free_cost_single', 'free_price_single'),
@@ -416,9 +417,6 @@ class QuotePackagePaxVariantInline(CommonStackedInline):
     ]
     verbose_name_plural = 'Paxes Variants'
     can_delete = False
-
-    def has_add_permission(self,request, obj):
-        return False
 
 
 class QuoteExtraPackageSiteModel(QuoteServiceSiteModel):
@@ -501,6 +499,7 @@ class QuotePackageServiceSiteModel(SiteModel):
 class QuoteServicePaxVariantInline(CommonStackedInline):
     model = QuoteServicePaxVariant
     extra = 0
+    max_num = 0
     fields = [
         ('quote_pax_variant'),
         ('free_cost_single', 'free_price_single'),
@@ -520,9 +519,6 @@ class QuoteServicePaxVariantInline(CommonStackedInline):
         'utility_percent_single', 'utility_percent_double',
         'utility_percent_triple', 'utility_percent_qdrple',
         'utility_single', 'utility_double', 'utility_triple', 'utility_qdrple']
-
-    def has_add_permission(self,request, obj):
-        return False
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super(QuoteServicePaxVariantInline, self).get_readonly_fields(request, obj) or []
