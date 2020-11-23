@@ -31,7 +31,7 @@ from finance.views import (
 from config import urls as config_urls
 from config.views import (
     LocationAutocompleteView, ZoneTransferAutocompleteView, ServiceCategoryAutocompleteView,
-    RoomTypeAutocompleteView, BoardTypeAutocompleteView,
+    ChainAutocompleteView, RoomTypeAutocompleteView, BoardTypeAutocompleteView,
     AllotmentAutocompleteView, ProviderAllotmentAutocompleteView,
     TransferAutocompleteView, ProviderTransferAutocompleteView,
     AddonAutocompleteView,
@@ -113,6 +113,10 @@ urlpatterns = [
     url(r'^loanaccount-autocomplete/$',
         LoanAccountAutocompleteView.as_view(),
         name='loanaccount-autocomplete',
+    ),
+    url(r'^chain-autocomplete/$',
+        ChainAutocompleteView.as_view(),
+        name='chain-autocomplete',
     ),
     url(r'^location-autocomplete/$',
         LocationAutocompleteView.as_view(),

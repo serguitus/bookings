@@ -20,7 +20,7 @@ from django.urls import reverse
 from django.views import View
 
 from config.models import (
-    Location, ServiceCategory, RoomType, Addon, AllotmentBoardType,
+    Location, ServiceCategory, Chain, RoomType, Addon, AllotmentBoardType,
     Service,
     Allotment, Transfer, Extra, CarRental, CarRentalOffice,
     ProviderAllotmentService, AgencyAllotmentService,
@@ -68,6 +68,17 @@ class ServiceCategoryAutocompleteView(autocomplete.Select2QuerySetView):
         if not self.request.user.is_authenticated:
             return ServiceCategory.objects.none()
         qs = ServiceCategory.objects.all()
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs[:20]
+
+
+class ChainAutocompleteView(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated:
+            return Chain.objects.none()
+        qs = Chain.objects.all()
         if self.q:
             qs = qs.filter(name__icontains=self.q)
         return qs[:20]

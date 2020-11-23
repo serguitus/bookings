@@ -243,13 +243,26 @@ class Service(models.Model):
         return _get_child_objects([self])[0].get_absolute_url()
 
 
+class Chain(models.Model):
+    """
+    Chain
+    """
+    class Meta:
+        verbose_name = 'Chain'
+        verbose_name_plural = 'Chains'
+    name = models.CharField(max_length=150)
+
+    def __str__(self):
+        return self.name
+
+
 class Allotment(Service):
     """
     Accomodation
     """
     class Meta:
         verbose_name = 'Accomodation'
-        verbose_name_plural = 'Accomodation'
+        verbose_name_plural = 'Accomodations'
     cost_type = models.CharField(
         max_length=5, choices=ALLOTMENT_AMOUNTS_TYPES, default=AMOUNTS_BY_PAX)
     time_from = models.TimeField(default='16:00')
@@ -257,6 +270,8 @@ class Allotment(Service):
     address = models.CharField(max_length=75, blank=True, null=True)
     phone = models.CharField(max_length=30, blank=True, null=True)
     is_shared_point = models.BooleanField(default=False)
+    chain = models.ForeignKey(
+        Chain, on_delete=models.CASCADE, blank=True, null=True)
 
     def fill_data(self):
         super(Allotment, self).fill_data()
