@@ -450,29 +450,35 @@ class ServiceAddon(models.Model):
         return '%s for %s' % (self.addon, self.service)
 
 
-class ProviderCatalogue(models.Model):
+class Catalog(models.Model):
+    class Meta:
+        abstract = True
+    contract_code = models.CharField(max_length=40, blank=True, null=True)
+    booked_from = models.DateField(blank=True, null=True)
+    booked_to = models.DateField(blank=True, null=True)
+    date_from = models.DateField()
+    date_to = models.DateField()
+
+
+class ProviderCatalogue(Catalog):
     """
     ProviderCatalogue
     """
     class Meta:
         abstract = True
     provider = models.ForeignKey(Provider, on_delete=models.CASCADE)
-    date_from = models.DateField()
-    date_to = models.DateField()
 
     def get_detail_objects(self):
         return None
 
 
-class AgencyCatalogue(models.Model):
+class AgencyCatalogue(Catalog):
     """
     AgencyCatalogue
     """
     class Meta:
         abstract = True
     agency = models.ForeignKey(Agency, on_delete=models.CASCADE)
-    date_from = models.DateField()
-    date_to = models.DateField()
 
     def get_detail_objects(self):
         return None
