@@ -387,6 +387,10 @@ class ExtraForm(forms.ModelForm):
 
 
 class ServiceForm(forms.ModelForm):
+    class Meta:
+        widgets = {
+            'chain': autocomplete.ModelSelect2(url='chain-autocomplete')
+        }
     search_location = forms.ModelChoiceField(
         queryset=Location.objects.all(),
         empty_label='',
