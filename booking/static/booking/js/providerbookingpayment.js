@@ -13,14 +13,14 @@ $(document).ready(function () {
 
   $('#id_currency_rate').on('change', function (e) {
     e.preventDefault();
-    total_amount = Number($('div.field-box.field-services_amount div.readonly').html());
+    total_amount = Number($('div.fieldBox.field-services_amount div.readonly').html());
     rate = Number($('#id_currency_rate').val());
     $('#id_amount').val((total_amount * rate).toFixed(2));
   });
 
   $('#id_amount').on('change', function (e) {
     e.preventDefault();
-    total_amount = Number($('div.field-box.field-services_amount div.readonly').html());
+    total_amount = Number($('div.fieldBox.field-services_amount div.readonly').html());
     amount = Number($('#id_amount').val());
     $('#id_currency_rate').val((amount / total_amount).toFixed(4));
   });
@@ -52,7 +52,7 @@ $(document).ready(function () {
       amount = Number($('#id_form-' + idx + '-amount_paid').val());
       total_amount += amount;
     });
-    $('div.field-box.field-services_amount div.readonly').html(total_amount.toFixed(2));
+    $('div.fieldBox.field-services_amount div.readonly').html(total_amount.toFixed(2));
     rate = Number($('#id_currency_rate').val());
     $('#id_amount').val((total_amount * rate).toFixed(2));
   }

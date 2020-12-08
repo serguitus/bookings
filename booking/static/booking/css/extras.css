@@ -168,7 +168,7 @@ div.field-booking_general_notes div.readonly{
     font-weight: 700;
 }
 
-.inline-group .aligned div.form-row label, .inline-group .aligned div.field-box label {
+.inline-group .aligned div.form-row label, .inline-group .aligned div.fieldBox label {
     width: 100px;
 }
 

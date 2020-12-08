@@ -1,7 +1,7 @@
 (function($){
 $(document).ready(function(){
 
-  $('div.field-box.field-provider>div.related-widget-wrapper').after('<a id="btn-costs" title="Costs" data-toggle="modal" data-target="#popup-costs" class="btn btn-costs fa fa-dollar" href="#"></a>');
+  $('div.fieldBox.field-provider>div.related-widget-wrapper').after('<a id="btn-costs" title="Costs" data-toggle="modal" data-target="#popup-costs" class="btn btn-costs fa fa-dollar" href="#"></a>');
 
   $('#btn-costs').on('click', function (e) {
     get_providers_costs();

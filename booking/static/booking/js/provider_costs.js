@@ -24,6 +24,9 @@ function update_providers_costs(data){
     html += "<th>Provider</th>";
     html += "<th style='padding-left: 20px; text-align: center;'>From</th>";
     html += "<th style='padding-left: 20px; text-align: center;'>To</th>";
+    html += "<th style='padding-left: 20px; text-align: center;'>Booked From</th>";
+    html += "<th style='padding-left: 20px; text-align: center;'>Booked To</th>";
+    html += "<th style='padding-left: 20px; text-align: center;'>Contract</th>";
     html += "<th style='padding-left: 20px; text-align: center;'>Pax Min</th>";
     html += "<th style='padding-left: 20px; text-align: center;'>Pax Max</th>";
     html += "<th style='padding-left: 20px; text-align: right;'>SGL</th>";
@@ -37,6 +40,9 @@ function update_providers_costs(data){
       html += "<td>" + line.provider_name + "</td>";
       html += "<td style='padding-left: 20px; text-align: center;'>" + line.date_from + "</td>";
       html += "<td style='padding-left: 20px; text-align: center;'>" + line.date_to + "</td>";
+      html += "<td style='padding-left: 20px; text-align: center;'>" + (line.booked_from ? line.booked_from : '') + "</td>";
+      html += "<td style='padding-left: 20px; text-align: center;'>" + (line.booked_to ? line.booked_to : '') + "</td>";
+      html += "<td style='padding-left: 20px; text-align: center;'>" + (line.contract_code ? line.contract_code : '') + "</td>";
       html += "<td style='padding-left: 20px; text-align: center;'>" + line.pax_range_min + "</td>";
       html += "<td style='padding-left: 20px; text-align: center;'>" + line.pax_range_max + "</td>";
       html += "<td style='padding-left: 20px; text-align: right;'>" + (line.sgl_cost ? line.sgl_cost : '') + "</td>";
