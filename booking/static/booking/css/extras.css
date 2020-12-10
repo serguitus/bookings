@@ -155,6 +155,7 @@ td.original div.inline-change-link {
 }
 
 div.readonly {
+    display: flex;
     max-width: 160px;
 }
 

@@ -305,6 +305,12 @@ class BookingProvidedAllotmentForm(forms.ModelForm, MailForm, ServiceForm):
             'p_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
             'new_v_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
             'provider_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
+            'contract_code': autocomplete.ListSelect2(
+                url='allotmentcontract-autocomplete',
+                forward=[
+                    'booking', 'provider', 'service', 'date_from', 'date_to',
+                    'service_addon', 'room_type', 'board_type'],
+                ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
     nights = forms.IntegerField(initial=0)
@@ -360,6 +366,12 @@ class BookingProvidedTransferForm(forms.ModelForm, MailForm, ServiceForm):
             'p_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
             'new_v_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
             'provider_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
+            'contract_code': autocomplete.ListSelect2(
+                url='transfercontract-autocomplete',
+                forward=[
+                    'booking', 'provider', 'service', 'date_from', 'date_to',
+                    'service_addon', 'location_from', 'location_to'],
+                ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
@@ -376,10 +388,6 @@ class BookingProvidedExtraForm(forms.ModelForm, MailForm, ServiceForm):
             'service': autocomplete.ModelSelect2(
                 url='serviceextra-autocomplete',
                 forward=['provider', 'search_location'],
-                ),
-            'addon': autocomplete.ModelSelect2(
-                url='addon-autocomplete',
-                forward=['service'],
                 ),
             'service_addon': autocomplete.ModelSelect2(
                 url='addon-autocomplete',
@@ -399,6 +407,12 @@ class BookingProvidedExtraForm(forms.ModelForm, MailForm, ServiceForm):
             'dropoff_office': autocomplete.ModelSelect2(
                 url='carrentaloffice-autocomplete',
                 forward=['service',],
+                ),
+            'contract_code': autocomplete.ListSelect2(
+                url='extracontract-autocomplete',
+                forward=[
+                    'booking', 'provider', 'service', 'date_from', 'date_to',
+                    'service_addon'],
                 ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
@@ -705,6 +719,12 @@ class BookingBookDetailAllotmentForm(forms.ModelForm, BaseBookDataForm):
                 url='providerallotment-autocomplete',
                 forward=['book_service'],
                 ),
+            'contract_code': autocomplete.ListSelect2(
+                url='allotmentcontract-autocomplete',
+                forward=[
+                    'booking_service', 'provider', 'book_service', 'date_from', 'date_to',
+                    'service_addon', 'room_type', 'board_type'],
+                ),
         }
 
 
@@ -729,6 +749,12 @@ class BookingBookDetailTransferForm(forms.ModelForm, BaseBookDataForm):
             'provider': autocomplete.ModelSelect2(
                 url='providertransfer-autocomplete',
                 forward=['book_service'],
+                ),
+            'contract_code': autocomplete.ListSelect2(
+                url='transfercontract-autocomplete',
+                forward=[
+                    'booking_service', 'provider', 'book_service', 'date_from', 'date_to',
+                    'service_addon', 'location_from', 'location_to'],
                 ),
         }
 
@@ -760,5 +786,11 @@ class BookingBookDetailExtraForm(forms.ModelForm, BaseBookDataForm):
             'provider': autocomplete.ModelSelect2(
                 url='providerextra-autocomplete',
                 forward=['book_service'],
+                ),
+            'contract_code': autocomplete.ListSelect2(
+                url='extracontract-autocomplete',
+                forward=[
+                    'booking_service', 'provider', 'book_service', 'date_from', 'date_to',
+                    'service_addon'],
                 ),
         }
