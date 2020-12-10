@@ -39,6 +39,10 @@ urlpatterns = [
     url(r'^bookingtransfer-providers-costs/?', views.BookingProvidedTransferProvidersCostsView.as_view(), name='bookingtransfer_providers_costs'),
     url(r'^bookingextra-providers-costs/?', views.BookingProvidedExtraProvidersCostsView.as_view(), name='bookingextra_providers_costs'),
 
+    url(r'^bookingdetailallotment-providers-costs/?', views.BookingDetailAllotmentProvidersCostsView.as_view(), name='bookingdetailallotment_providers_costs'),
+    url(r'^bookingdetailtransfer-providers-costs/?', views.BookingDetailTransferProvidersCostsView.as_view(), name='bookingdetailtransfer_providers_costs'),
+    url(r'^bookingdetailextra-providers-costs/?', views.BookingDetailExtraProvidersCostsView.as_view(), name='bookingdetailextra_providers_costs'),
+
     url(r'^quoteallotment-providers-costs/?', views.NewQuoteAllotmentProvidersCostsView.as_view(), name='quoteallotment_providers_costs'),
     url(r'^quotetransfer-providers-costs/?', views.NewQuoteTransferProvidersCostsView.as_view(), name='quotetransfer_providers_costs'),
     url(r'^quoteextra-providers-costs/?', views.NewQuoteExtraProvidersCostsView.as_view(), name='quoteextra_providers_costs'),

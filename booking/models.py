@@ -1185,7 +1185,7 @@ class BookingProvidedAllotment(BookingProvidedService, BookAllotmentData):
         return 0
 
     def get_absolute_url(self):
-        return reverse('common:booking_bookingallotment_change', args=[self.id])
+        return reverse('common:booking_bookingprovidedallotment_change', args=[self.id])
 
 
 class BookingProvidedTransfer(BookingProvidedService, BookTransferData):
@@ -1227,7 +1227,7 @@ class BookingProvidedTransfer(BookingProvidedService, BookTransferData):
         return self.__unicode__()
 
     def get_absolute_url(self):
-        return reverse('common:booking_bookingtransfer_change', args=[self.id])
+        return reverse('common:booking_bookingprovidedtransfer_change', args=[self.id])
 
 
 class BookingProvidedExtra(BookingProvidedService, BookExtraData):
@@ -1268,7 +1268,7 @@ class BookingProvidedExtra(BookingProvidedService, BookExtraData):
         return self.__unicode__()
 
     def get_absolute_url(self):
-        return reverse('common:booking_bookingextra_change', args=[self.id])
+        return reverse('common:booking_bookingprovidedextra_change', args=[self.id])
 
 
 class BookingBookDetail(BaseBookingService):

@@ -4442,30 +4442,30 @@ class BookingServices(object):
 
 
     @classmethod
-    def find_service_providers_costs(cls, service):
+    def find_service_providers_costs(cls, booking_service, service):
 
-        if isinstance(service, (NewQuoteAllotment, BookingProvidedAllotment)):
+        if isinstance(booking_service, (NewQuoteAllotment, BookingProvidedAllotment, BookingBookDetailAllotment)):
             detail_list = list(details_allotment_queryset(
-                service.service,
-                service.datetime_from,
-                service.datetime_to,
-                service.room_type,
-                service.board_type,
-                service.service_addon))
-        elif isinstance(service, (NewQuoteTransfer, BookingProvidedTransfer)):
+                service,
+                booking_service.datetime_from,
+                booking_service.datetime_to,
+                booking_service.room_type,
+                booking_service.board_type,
+                booking_service.service_addon))
+        elif isinstance(booking_service, (NewQuoteTransfer, BookingProvidedTransfer, BookingBookDetailTransfer)):
             detail_list = list(details_transfer_queryset(
-                service.service,
-                service.datetime_from,
-                service.datetime_to,
-                service.location_from,
-                service.location_to,
-                service.service_addon))
-        elif isinstance(service, (NewQuoteExtra, BookingProvidedExtra)):
+                service,
+                booking_service.datetime_from,
+                booking_service.datetime_to,
+                booking_service.location_from,
+                booking_service.location_to,
+                booking_service.service_addon))
+        elif isinstance(booking_service, (NewQuoteExtra, BookingProvidedExtra, BookingBookDetailExtra)):
             detail_list = list(details_extra_queryset(
-                service.service,
-                service.datetime_from,
-                service.datetime_to,
-                service.service_addon))
+                service,
+                booking_service.datetime_from,
+                booking_service.datetime_to,
+                booking_service.service_addon))
         else:
             return list()
 
@@ -4476,6 +4476,9 @@ class BookingServices(object):
                 'provider_name': detail.provider_service.provider.name,
                 'date_from': detail.provider_service.date_from,
                 'date_to': detail.provider_service.date_to,
+                'booked_from': detail.provider_service.booked_from,
+                'booked_to': detail.provider_service.booked_to,
+                'contract_code': detail.provider_service.contract_code,
                 'pax_range_min': detail.pax_range_min,
                 'pax_range_max': detail.pax_range_max,
                 'sgl_cost': detail.ad_1_amount,

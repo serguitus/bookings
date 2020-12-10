@@ -1002,21 +1002,19 @@ class BookingInvoiceCancelView(View):
 class ServiceProvidersCostsView(ModelChangeFormProcessorView):
     common_site = bookings_site
 
-    def verify(self, service):
-        if not hasattr(service, 'service') or not service.service:
+    def process_data(self, booking_service, inlines):
+
+        if hasattr(booking_service, 'service') and booking_service.service:
+            service = booking_service.service
+        elif hasattr(booking_service, 'book_service') and booking_service.book_service:
+            service = booking_service.book_service
+        else:
             return JsonResponse({
                 'cost': None,
                 'cost_message': 'Service Id Missing',
             })
-        return None
 
-    def process_data(self, service, inlines):
-    
-        response = self.verify(service)
-        if response:
-            return response
-
-        costs = BookingServices.find_service_providers_costs(service)
+        costs = BookingServices.find_service_providers_costs(booking_service, service)
         return JsonResponse({
             'costs': costs,
         })
@@ -1035,6 +1033,21 @@ class BookingProvidedTransferProvidersCostsView(ServiceProvidersCostsView):
 class BookingProvidedExtraProvidersCostsView(ServiceProvidersCostsView):
     model = BookingProvidedExtra
     common_sitemodel = BookingProvidedExtraSiteModel
+
+
+class BookingDetailAllotmentProvidersCostsView(ServiceProvidersCostsView):
+    model = BookingBookDetailAllotment
+    common_sitemodel = BookingBookDetailAllotmentSiteModel
+
+
+class BookingDetailTransferProvidersCostsView(ServiceProvidersCostsView):
+    model = BookingBookDetailTransfer
+    common_sitemodel = BookingProvidedTransferSiteModel
+
+
+class BookingDetailExtraProvidersCostsView(ServiceProvidersCostsView):
+    model = BookingBookDetailExtra
+    common_sitemodel = BookingBookDetailExtraSiteModel
 
 
 class NewQuoteAllotmentProvidersCostsView(ServiceProvidersCostsView):
