@@ -1825,6 +1825,9 @@ class ConfigServices(object):
             agency_id=dst_agency.id,
             date_from=src_provider_service.date_from,
             date_to=src_provider_service.date_to,
+            booked_from=src_provider_service.booked_from,
+            booked_to=src_provider_service.booked_to,
+            contract_code=src_provider_service.contract_code,
             service_id=src_provider_service.service_id
         )
         # find details
@@ -1864,6 +1867,9 @@ class ConfigServices(object):
             agency_id=dst_agency.id,
             date_from=src_provider_service.date_from,
             date_to=src_provider_service.date_to,
+            booked_from=src_provider_service.booked_from,
+            booked_to=src_provider_service.booked_to,
+            contract_code=src_provider_service.contract_code,
             service_id=src_provider_service.service_id
         )
         # find details
@@ -1905,6 +1911,9 @@ class ConfigServices(object):
             agency_id=dst_agency.id,
             date_from=src_provider_service.date_from,
             date_to=src_provider_service.date_to,
+            booked_from=src_provider_service.booked_from,
+            booked_to=src_provider_service.booked_to,
+            contract_code=src_provider_service.contract_code,
             service_id=src_provider_service.service_id
         )
         # find details
@@ -1970,6 +1979,10 @@ class ConfigServices(object):
             new_catalog_service.date_from = new_catalog_service.date_from + one_year
         if new_catalog_service.date_to:
             new_catalog_service.date_to = new_catalog_service.date_to + one_year
+        if new_catalog_service.booked_from:
+            new_catalog_service.booked_from = new_catalog_service.booked_from + one_year
+        if new_catalog_service.booked_to:
+            new_catalog_service.booked_to = new_catalog_service.booked_to + one_year
         new_catalog_service.save()
 
         details_success_count = 0
