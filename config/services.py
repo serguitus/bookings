@@ -602,18 +602,18 @@ class ConfigServices(object):
         # provider cost
         cost, cost_message = cls.allotment_costs(
             service_id, date_from, date_to, cost_groups,
-            provider, board_type, room_type_id, addon_id, quantity)
+            provider, booked, contract_code, board_type, room_type_id, addon_id, quantity)
 
         # agency price
         price, price_message = cls.allotment_prices(
             service_id, date_from, date_to, price_groups,
-            agency, board_type, room_type_id, addon_id, quantity)
+            agency, booked, contract_code, board_type, room_type_id, addon_id, quantity)
 
         return cost, cost_message, price, price_message
 
     @classmethod
     def allotment_costs(
-            cls, service_id, date_from, date_to, cost_groups, provider,
+            cls, service_id, date_from, date_to, cost_groups, provider, booked, contract_code,
             board_type, room_type_id, addon_id=None, quantity=None):
         if room_type_id is None or room_type_id == '':
             return None, 'Room Missing'
@@ -645,7 +645,7 @@ class ConfigServices(object):
                         continue
                     queryset = cls._get_provider_queryset(
                         ProviderAllotmentDetail.objects,
-                        provider.id, service_id, date_from, date_to)
+                        provider.id, service_id, date_from, date_to, booked, contract_code)
                     # pax range filtering
                     queryset = queryset.filter(
                         (Q(pax_range_min=0) & Q(pax_range_max__gte=paxes)) |
@@ -682,7 +682,7 @@ class ConfigServices(object):
             else:
                 queryset = cls._get_provider_queryset(
                     ProviderAllotmentDetail.objects,
-                    provider.id, service_id, date_from, date_to)
+                    provider.id, service_id, date_from, date_to, booked, contract_code)
                 # addon filtering
                 if addon_id:
                     queryset = queryset.filter(addon_id=addon_id)
@@ -706,7 +706,7 @@ class ConfigServices(object):
 
     @classmethod
     def allotment_prices(
-            cls, service_id, date_from, date_to, price_groups, agency,
+            cls, service_id, date_from, date_to, price_groups, agency, booked, contract_code,
             board_type, room_type_id, addon_id=None, quantity=None):
         if room_type_id is None or room_type_id == '':
             return None, 'Room Missing'
@@ -738,7 +738,7 @@ class ConfigServices(object):
                         continue
                     queryset = cls._get_agency_queryset(
                         AgencyAllotmentDetail.objects,
-                        agency.id, service_id, date_from, date_to)
+                        agency.id, service_id, date_from, date_to, booked, contract_code)
                     # pax range filtering
                     queryset = queryset.filter(
                         (Q(pax_range_min=0) & Q(pax_range_max__gte=paxes)) |
@@ -775,7 +775,7 @@ class ConfigServices(object):
             else:
                 queryset = cls._get_agency_queryset(
                     AgencyAllotmentDetail.objects,
-                    agency.id, service_id, date_from, date_to)
+                    agency.id, service_id, date_from, date_to, booked, contract_code)
                 # addon filtering
                 if addon_id:
                     queryset = queryset.filter(addon_id=addon_id)
@@ -815,19 +815,19 @@ class ConfigServices(object):
         # provider cost
         cost, cost_message = cls.transfer_costs(
             service_id, date_from, date_to, cost_groups,
-            provider, location_from_id, location_to_id, addon_id, quantity)
+            provider, booked, contract_code, location_from_id, location_to_id, addon_id, quantity)
 
         # agency price
         price, price_message = cls.transfer_prices(
             service_id, date_from, date_to, price_groups,
-            agency, location_from_id, location_to_id, addon_id, quantity)
+            agency, booked, contract_code, location_from_id, location_to_id, addon_id, quantity)
 
         return cost, cost_message, price, price_message
 
 
     @classmethod
     def transfer_costs(
-            cls, service_id, date_from, date_to, cost_groups, provider,
+            cls, service_id, date_from, date_to, cost_groups, provider, booked, contract_code,
             location_from_id, location_to_id, addon_id=None, quantity=None):
         if location_from_id is None or location_from_id == '':
             return None, 'Location From Missing'
@@ -861,7 +861,7 @@ class ConfigServices(object):
                         continue
                     queryset = cls._get_provider_queryset(
                         ProviderTransferDetail.objects,
-                        provider.id, service_id, date_from, date_to)
+                        provider.id, service_id, date_from, date_to, booked, contract_code)
                     # pax range filtering
                     queryset = queryset.filter(
                         (Q(pax_range_min=0) & Q(pax_range_max__gte=paxes)) |
@@ -907,7 +907,7 @@ class ConfigServices(object):
             else:
                 queryset = cls._get_provider_queryset(
                     ProviderTransferDetail.objects,
-                    provider.id, service_id, date_from, date_to)
+                    provider.id, service_id, date_from, date_to, booked, contract_code)
                 # addon filtering
                 if addon_id:
                     queryset = queryset.filter(addon_id=addon_id)
@@ -939,7 +939,7 @@ class ConfigServices(object):
 
     @classmethod
     def transfer_prices(
-            cls, service_id, date_from, date_to, price_groups, agency,
+            cls, service_id, date_from, date_to, price_groups, agency, booked, contract_code,
             location_from_id, location_to_id, addon_id=None, quantity=None):
         if location_from_id is None or location_from_id == '':
             return None, 'Location From Missing'
@@ -973,7 +973,7 @@ class ConfigServices(object):
                         continue
                     queryset = cls._get_agency_queryset(
                         AgencyTransferDetail.objects,
-                        agency.id, service_id, date_from, date_to)
+                        agency.id, service_id, date_from, date_to, booked, contract_code)
                     # pax range filtering
                     queryset = queryset.filter(
                         (Q(pax_range_min=0) & Q(pax_range_max__gte=paxes)) |
@@ -1019,7 +1019,7 @@ class ConfigServices(object):
             else:
                 queryset = cls._get_agency_queryset(
                     AgencyTransferDetail.objects,
-                    agency.id, service_id, date_from, date_to)
+                    agency.id, service_id, date_from, date_to, booked, contract_code)
                 # addon filtering
                 if addon_id:
                     queryset = queryset.filter(addon_id=addon_id)
@@ -1071,18 +1071,18 @@ class ConfigServices(object):
 
         # provider cost
         cost, cost_message = cls.extra_costs(service_id, date_from, date_to, cost_groups,
-            provider, addon_id, quantity, parameter)
+            provider, booked, contract_code, addon_id, quantity, parameter)
 
         # agency price
         price, price_message = cls.extra_prices(service_id, date_from, date_to, price_groups,
-            agency, addon_id, quantity, parameter)
+            agency, booked, contract_code, addon_id, quantity, parameter)
 
         return cost, cost_message, price, price_message
 
 
     @classmethod
     def extra_costs(
-            cls, service_id, date_from, date_to, cost_groups, provider,
+            cls, service_id, date_from, date_to, cost_groups, provider, booked, contract_code,
             addon_id, quantity, parameter):
         service = Extra.objects.get(pk=service_id)
 
@@ -1118,7 +1118,7 @@ class ConfigServices(object):
                         continue
                     queryset = cls._get_provider_queryset(
                         ProviderExtraDetail.objects,
-                        provider.id, service_id, date_from, date_to)
+                        provider.id, service_id, date_from, date_to, booked, contract_code)
                     # pax range filtering
                     queryset = queryset.filter(
                         (Q(pax_range_min=0) & Q(pax_range_max__gte=paxes)) |
@@ -1149,7 +1149,7 @@ class ConfigServices(object):
             else:
                 queryset = cls._get_provider_queryset(
                     ProviderExtraDetail.objects,
-                    provider.id, service_id, date_from, date_to)
+                    provider.id, service_id, date_from, date_to, booked, contract_code)
                 # addon filtering
                 if addon_id:
                     queryset = queryset.filter(addon_id=addon_id)
@@ -1168,7 +1168,7 @@ class ConfigServices(object):
 
     @classmethod
     def extra_prices(
-            cls, service_id, date_from, date_to, price_groups, agency,
+            cls, service_id, date_from, date_to, price_groups, agency, booked, contract_code,
             addon_id, quantity, parameter):
         service = Extra.objects.get(pk=service_id)
 
@@ -1202,7 +1202,7 @@ class ConfigServices(object):
                     paxes = group[0] + group[1]
                     queryset = cls._get_agency_queryset(
                         AgencyExtraDetail.objects,
-                        agency.id, service_id, date_from, date_to)
+                        agency.id, service_id, date_from, date_to, booked, contract_code)
                     # pax range filtering
                     queryset = queryset.filter(
                         (Q(pax_range_min=0) & Q(pax_range_max__gte=paxes)) |
@@ -1233,7 +1233,7 @@ class ConfigServices(object):
             else:
                 queryset = cls._get_agency_queryset(
                     AgencyExtraDetail.objects,
-                    agency.id, service_id, date_from, date_to)
+                    agency.id, service_id, date_from, date_to, booked, contract_code)
                 # addon filtering
                 if addon_id:
                     queryset = queryset.filter(addon_id=addon_id)
@@ -1645,40 +1645,54 @@ class ConfigServices(object):
 
     @classmethod
     def _get_provider_queryset(
-            cls, manager, provider_id, service_id, date_from, date_to):
-        return manager.select_related(
-            'provider_service__service'
-            ).filter(
-                provider_service__provider_id=provider_id
-            ).filter(
-                provider_service__service_id=service_id
-            ).filter(
+            cls, manager, provider_id, service_id, date_from, date_to, booked, contract_code):
+        if date_from is None or date_to is None:
+            return manager.none()
+        qs = manager.select_related('provider_service__service').filter(
+                provider_service__provider_id=provider_id,
+                provider_service__service_id=service_id,
                 provider_service__date_to__gte=date_from,
                 provider_service__date_from__lte=date_to
             ).order_by(
                 'provider_service__date_from', '-provider_service__date_to'
             )
+        if booked:
+            qs = qs.filter(
+                Q(provider_service__booked_from__isnull=True)
+                | Q(provider_service__booked_from__lte=booked),
+                Q(provider_service__booked_to__isnull=True)
+                | Q(provider_service__booked_to__gte=booked))
+        if contract_code:
+            qs = qs.filter(provider_service__contract_code=contract_code)
+        else:
+            qs = qs.filter(provider_service__contract_code__isnull=True)
+        return qs
 
 
     @classmethod
     def _get_agency_queryset(
-            cls, manager, agency_id, service_id, date_from, date_to):
-        if date_from is None:
+            cls, manager, agency_id, service_id, date_from, date_to, booked, contract_code):
+        if date_from is None or date_to is None:
             return manager.none()
-        if date_to is None:
-            return manager.none()
-        return manager.select_related(
+        qs = manager.select_related(
             'agency_service__service'
             ).filter(
-                agency_service__agency_id=agency_id
-            ).filter(
-                agency_service__service_id=service_id
-            ).filter(
+                agency_service__agency_id=agency_id,
+                agency_service__service_id=service_id,
                 agency_service__date_to__gte=date_from,
-                agency_service__date_from__lte=date_to
+                agency_service__date_from__lte=date_to,
             ).order_by(
                 'agency_service__date_from', '-agency_service__date_to'
             )
+        if booked:
+            qs = qs.filter(
+                Q(agency_service__booked_from__isnull=True)
+                | Q(agency_service__booked_from__lte=booked),
+                Q(agency_service__booked_to__isnull=True)
+                | Q(agency_service__booked_to__gte=booked))
+        # prices dont use contract_code
+        qs = qs.filter(agency_service__contract_code__isnull=True)
+        return qs
 
 
     @classmethod
