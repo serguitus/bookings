@@ -73,12 +73,17 @@ from config.constants import (
     SERVICE_CATEGORY_ALLOTMENT, SERVICE_CATEGORY_TRANSFER,
     SERVICE_CATEGORY_EXTRA
 )
-from config.models import Service, Allotment, Place, Schedule, Transfer, Extra
+from config.models import (
+    Service, Allotment, Place, Schedule, Transfer, Extra,
+    ProviderAllotmentService, ProviderTransferService, ProviderExtraService,
+)
+
 from config.services import ConfigServices
 
 from finance.models import Provider, Office
 
 from reservas.admin import bookings_site
+from reservas.custom_settings import ADDON_FOR_NO_ADDON
 
 
 class BookingPaxAutocompleteView(autocomplete.Select2QuerySetView):
@@ -997,21 +1002,19 @@ class BookingInvoiceCancelView(View):
 class ServiceProvidersCostsView(ModelChangeFormProcessorView):
     common_site = bookings_site
 
-    def verify(self, service):
-        if not hasattr(service, 'service') or not service.service:
+    def process_data(self, booking_service, inlines):
+
+        if hasattr(booking_service, 'service') and booking_service.service:
+            service = booking_service.service
+        elif hasattr(booking_service, 'book_service') and booking_service.book_service:
+            service = booking_service.book_service
+        else:
             return JsonResponse({
                 'cost': None,
                 'cost_message': 'Service Id Missing',
             })
-        return None
 
-    def process_data(self, service, inlines):
-    
-        response = self.verify(service)
-        if response:
-            return response
-
-        costs = BookingServices.find_service_providers_costs(service)
+        costs = BookingServices.find_service_providers_costs(booking_service, service)
         return JsonResponse({
             'costs': costs,
         })
@@ -1030,6 +1033,21 @@ class BookingProvidedTransferProvidersCostsView(ServiceProvidersCostsView):
 class BookingProvidedExtraProvidersCostsView(ServiceProvidersCostsView):
     model = BookingProvidedExtra
     common_sitemodel = BookingProvidedExtraSiteModel
+
+
+class BookingDetailAllotmentProvidersCostsView(ServiceProvidersCostsView):
+    model = BookingBookDetailAllotment
+    common_sitemodel = BookingBookDetailAllotmentSiteModel
+
+
+class BookingDetailTransferProvidersCostsView(ServiceProvidersCostsView):
+    model = BookingBookDetailTransfer
+    common_sitemodel = BookingProvidedTransferSiteModel
+
+
+class BookingDetailExtraProvidersCostsView(ServiceProvidersCostsView):
+    model = BookingBookDetailExtra
+    common_sitemodel = BookingBookDetailExtraSiteModel
 
 
 class NewQuoteAllotmentProvidersCostsView(ServiceProvidersCostsView):
@@ -1267,3 +1285,249 @@ class BookingAddPackageServiceView(BookingAddServiceView):
 
     def get_parent_obj(self, parent_id):
         return BookingExtraPackage.objects.get(id=parent_id)
+
+
+def findBooked(form):
+    booking_id = form.forwarded.get('booking', None)
+    if booking_id:
+        booking = Booking.objects.get(pk=booking_id)
+        return booking.booked
+
+    booking_service_id = form.forwarded.get('booking_service', None)
+    if booking_service_id:
+        booking_service = BaseBookingService.objects.get(pk=booking_service_id)
+        if booking_service:
+            return booking_service.booking.booked
+    return None
+
+
+def findService(form):
+    service = form.forwarded.get('service', None)
+    if service:
+        return service
+    return form.forwarded.get('book_service', None)
+
+
+def contract_list(catalogs):
+    contracts = set()
+    for catalog in catalogs:
+        contracts.add(catalog.contract_code)
+    return contracts
+
+
+def allotment_contract_list(
+        booked, service, provider, date_from, date_to, contract_code, addon,
+        room_type, board_type):
+
+    qs = ProviderAllotmentService.objects.all().distinct().filter(
+        service=service,
+        provider__enabled=True)
+    if provider:
+        qs = qs.filter(provider=provider)
+    if booked:
+        qs = qs.filter(
+            Q(booked_from__isnull=True)
+            | Q(booked_from__lte=booked),
+            Q(booked_to__isnull=True)
+            | Q(booked_to__gte=booked))
+    if contract_code:
+        qs = qs.filter(contract_code__icontains=contract_code)
+    if date_from:
+        qs = qs.filter(
+            date_to__gte=date_from)
+    if date_to:
+        qs = qs.filter(date_from__lte=date_to)
+    # filters on details
+    if addon:
+        if room_type:
+            if board_type:
+                qs = qs.filter(
+                    providerallotmentdetail__addon=addon,
+                    providerallotmentdetail__room_type=room_type,
+                    providerallotmentdetail__board_type=board_type)
+            else:
+                qs = qs.filter(
+                    providerallotmentdetail__addon=addon,
+                    providerallotmentdetail__room_type=room_type)
+        else:
+            if board_type:
+                qs = qs.filter(
+                    providerallotmentdetail__addon=addon,
+                    providerallotmentdetail__board_type=board_type)
+            else:
+                qs = qs.filter(
+                    providerallotmentdetail__addon=addon)
+    else:
+        if room_type:
+            if board_type:
+                qs = qs.filter(
+                    providerallotmentdetail__addon=ADDON_FOR_NO_ADDON,
+                    providerallotmentdetail__room_type=room_type,
+                    providerallotmentdetail__board_type=board_type)
+            else:
+                qs = qs.filter(
+                    providerallotmentdetail__addon=ADDON_FOR_NO_ADDON,
+                    providerallotmentdetail__room_type=room_type)
+        else:
+            if board_type:
+                qs = qs.filter(
+                    providerallotmentdetail__addon=ADDON_FOR_NO_ADDON,
+                    providerallotmentdetail__board_type=board_type)
+            else:
+                qs = qs.filter(
+                    providerallotmentdetail__addon=ADDON_FOR_NO_ADDON)
+
+    return contract_list(list(qs))
+
+
+class AllotmentContractAutocompleteView(autocomplete.Select2ListView):
+    def get_list(self):
+        if not self.request.user.is_authenticated:
+            return []
+
+        booked = findBooked(self)
+        service = findService(self)
+        provider = self.forwarded.get('provider', None)
+        date_from = self.forwarded.get('date_from', None)
+        date_to = self.forwarded.get('date_to', None)
+        addon = self.forwarded.get('service_addon', None)
+        room_type = self.forwarded.get('room_type', None)
+        board_type = self.forwarded.get('board_type', None)
+
+        return allotment_contract_list(
+            booked, service, provider, date_from, date_to, self.q, addon,
+            room_type, board_type)
+
+
+def transfer_contract_list(
+        booked, service, provider, date_from, date_to, contract_code, addon,
+        location_from, location_to):
+
+    qs = ProviderTransferService.objects.all().distinct().filter(
+        service=service,
+        provider__enabled=True)
+
+    if provider:
+        qs = qs.filter(provider=provider)
+    if booked:
+        qs = qs.filter(
+            Q(booked_from__isnull=True)
+            | Q(booked_from__lte=booked))
+        qs = qs.filter(
+            Q(booked_to__isnull=True)
+            | Q(booked_to__gte=booked))
+    if contract_code:
+        qs = qs.filter(contract_code__icontains=contract_code)
+    if date_from:
+        qs = qs.filter(
+            date_to__gte=date_from)
+    if date_to:
+        qs = qs.filter(date_from__lte=date_to)
+    # filters on details
+    if addon:
+        if location_from:
+            if location_to:
+                qs = qs.filter(
+                    providertransferdetail__addon=addon,
+                    providertransferdetail__location_from=location_from,
+                    providertransferdetail__location_to=location_to)
+            else:
+                qs = qs.filter(
+                    providertransferdetail__addon=addon,
+                    providertransferdetail__location_from=location_from)
+        else:
+            if location_to:
+                qs = qs.filter(
+                    providertransferdetail__addon=addon,
+                    providertransferdetail__location_to=location_to)
+            else:
+                qs = qs.filter(
+                    providertransferdetail__addon=addon)
+    else:
+        if location_from:
+            if location_to:
+                qs = qs.filter(
+                    providertransferdetail__addon=ADDON_FOR_NO_ADDON,
+                    providertransferdetail__location_from=location_from,
+                    providertransferdetail__location_to=location_to)
+            else:
+                qs = qs.filter(
+                    providertransferdetail__addon=ADDON_FOR_NO_ADDON,
+                    providertransferdetail__location_from=location_from)
+        else:
+            if location_to:
+                qs = qs.filter(
+                    providertransferdetail__addon=ADDON_FOR_NO_ADDON,
+                    providertransferdetail__location_to=location_to)
+            else:
+                qs = qs.filter(
+                    providertransferdetail__addon=ADDON_FOR_NO_ADDON)
+
+    return contract_list(list(qs))
+
+
+class TransferContractAutocompleteView(autocomplete.Select2ListView):
+    def get_list(self):
+        if not self.request.user.is_authenticated:
+            return []
+
+        booked = findBooked(self)
+        service = findService(self)
+        provider = self.forwarded.get('provider', None)
+        date_from = self.forwarded.get('date_from', None)
+        date_to = self.forwarded.get('date_to', None)
+        addon = self.forwarded.get('service_addon', None)
+        location_from = self.forwarded.get('location_from', None)
+        location_to = self.forwarded.get('location_to', None)
+
+        return transfer_contract_list(
+            booked, service, provider, date_from, date_to, self.q, addon,
+            location_from, location_to)
+
+
+def extra_contract_list(
+        booked, service, provider, date_from, date_to, contract_code, addon):
+
+    qs = ProviderExtraService.objects.all().distinct().filter(
+        service=service,
+        provider__enabled=True)
+
+    if provider:
+        qs = qs.filter(provider=provider)
+    if booked:
+        qs = qs.filter(
+            Q(booked_from__isnull=True)
+            | Q(booked_from__lte=booked))
+        qs = qs.filter(
+            Q(booked_to__isnull=True)
+            | Q(booked_to__gte=booked))
+    if contract_code:
+        qs = qs.filter(contract_code__icontains=contract_code)
+    if date_from:
+        qs = qs.filter(
+            date_to__gte=date_from)
+    if date_to:
+        qs = qs.filter(date_from__lte=date_to)
+    # filters on details
+    if addon:
+        qs = qs.filter(providerextradetail__addon=addon)
+    else:
+        qs = qs.filter(providerextradetail__addon=ADDON_FOR_NO_ADDON)
+
+    return contract_list(list(qs))
+
+
+class ExtraContractAutocompleteView(autocomplete.Select2ListView):
+    def get_list(self):
+        if not self.request.user.is_authenticated:
+            return []
+
+        booked = findBooked(self)
+        service = findService(self)
+        provider = self.forwarded.get('provider', None)
+        date_from = self.forwarded.get('date_from', None)
+        date_to = self.forwarded.get('date_to', None)
+        addon = self.forwarded.get('service_addon', None)
+
+        return extra_contract_list(
+            booked, service, provider, date_from, date_to, self.q, addon)

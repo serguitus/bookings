@@ -31,7 +31,7 @@ from config.forms import (
 )
 from config.models import (
     ServiceCategory, Location, Place, TransferInterval, Schedule,
-    TransferZone, TransferPickupTime, AllotmentTransferZone, RoomType, Addon,
+    TransferZone, TransferPickupTime, AllotmentTransferZone, Chain, RoomType, Addon,
     Service,
     ServiceBookDetailAllotment, ServiceBookDetailTransfer, ServiceBookDetailExtra,
     Allotment, AllotmentRoomType, AllotmentBoardType,
@@ -47,7 +47,7 @@ from config.models import (
 )
 from config.services import ConfigServices
 from config.top_filters import (
-    RoomTypeTopFilter, LocationTopFilter, ServiceCategoryTopFilter,
+    RoomTypeTopFilter, ChainTopFilter, LocationTopFilter, ServiceCategoryTopFilter,
     AddonTopFilter,
     AllotmentTopFilter, TransferTopFilter, ExtraTopFilter,
     ProviderTransferLocationTopFilter, ProviderTransferLocationAdditionalTopFilter,
@@ -410,6 +410,15 @@ class ServiceSiteModel(BaseServiceSiteModel):
         return ServiceChangeList
 
 
+class ChainSiteModel(SiteModel):
+    model_order = 6005
+    menu_label = MENU_LABEL_CONFIG_BASIC
+    fields = ('name',)
+    list_display = ('name',)
+    top_filters = ('name',)
+    save_as = True
+
+
 class RoomTypeSiteModel(SiteModel):
     model_order = 6020
     menu_label = MENU_LABEL_CONFIG_BASIC
@@ -470,16 +479,16 @@ class AllotmentSiteModel(BaseServiceSiteModel):
     model_order = 6110
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = MENU_LABEL_CONFIG_GROUP
-    fields = (('name', 'location'),
+    fields = (('name', 'chain', 'location'),
               ('service_category', 'cost_type', 'is_shared_point'),
               ('phone', 'address'),
               ('time_from', 'time_to'),
               ('pax_range', 'enabled'),
               ('child_discount_percent', 'child_age', 'infant_age'))
-    list_display = ('name', 'service_category', 'phone',
+    list_display = ('name', 'chain', 'service_category', 'phone',
                     'location', 'is_shared_point', 'enabled',)
     top_filters = ('name', ('service_category', ServiceCategoryTopFilter),
-                   ('location', LocationTopFilter),
+                   ('chain', ChainTopFilter), ('location', LocationTopFilter),
                    'is_shared_point', 'enabled')
     ordering = ['enabled', 'name']
     inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline,
@@ -666,12 +675,15 @@ class ProviderAllotmentServiceSiteModel(CatalogService):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Costs Catalogue'
     #recent_allowed = True
-    fields = ('provider', 'service', 'date_from', 'date_to', 'id',)
-    list_display = ('service', 'provider', 'date_from', 'date_to',)
+    fields = (
+        ('provider', 'service'),
+        ('date_from', 'date_to'),
+        ('booked_from', 'booked_to', 'contract_code'), 'id',)
+    list_display = ('service', 'provider', 'date_from', 'date_to', 'booked_from', 'booked_to', 'contract_code',)
     top_filters = (
-        ('service', AllotmentTopFilter), ('provider', ProviderTopFilter),
+        ('service__chain', ChainTopFilter), ('service', AllotmentTopFilter), ('provider', ProviderTopFilter),
         'service__service_category',
-        ('date_to', DateTopFilter))
+        ('date_to', DateTopFilter), 'contract_code')
     inlines = [ProviderAllotmentDetailInline]
     ordering = ['service', 'provider', '-date_from']
     list_select_related = ('service', 'provider')
@@ -790,13 +802,17 @@ class ProviderTransferServiceSiteModel(CatalogService):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Costs Catalogue'
     #recent_allowed = True
-    fields = ('provider', 'service', 'date_from', 'date_to', 'id',)
-    list_display = ('service', 'provider', 'date_from', 'date_to',)
+    fields = (
+        ('provider', 'service'),
+        ('date_from', 'date_to'),
+        ('booked_from', 'booked_to', 'contract_code'), 'id',)
+    list_display = ('service', 'provider', 'date_from', 'date_to', 'booked_from', 'booked_to', 'contract_code',)
     top_filters = (
         ('service', TransferTopFilter), ('provider', ProviderTopFilter),
         'service__service_category',
         ('date_to', DateTopFilter),
-        ProviderTransferLocationTopFilter, ProviderTransferLocationAdditionalTopFilter)
+        ProviderTransferLocationTopFilter, ProviderTransferLocationAdditionalTopFilter,
+        'contract_code')
     inlines = [ProviderTransferDetailInline]
     ordering = ['service', 'provider', '-date_from']
     list_select_related = ('service', 'provider')
@@ -901,12 +917,15 @@ class ProviderExtraServiceSiteModel(CatalogService):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Costs Catalogue'
     #recent_allowed = True
-    fields = ('provider', 'service', 'date_from', 'date_to', 'id',)
-    list_display = ('service', 'provider', 'date_from', 'date_to',)
+    fields = (
+        ('provider', 'service'),
+        ('date_from', 'date_to'),
+        ('booked_from', 'booked_to', 'contract_code'), 'id',)
+    list_display = ('service', 'provider', 'date_from', 'date_to', 'booked_from', 'booked_to', 'contract_code',)
     top_filters = (
         ('service', ExtraTopFilter), ('provider', ProviderTopFilter),
         'service__service_category',
-        ('date_to', DateTopFilter))
+        ('date_to', DateTopFilter), 'contract_code')
     inlines = [ProviderExtraDetailInline]
     ordering = ['service', 'provider', '-date_from']
     list_select_related = ('service', 'provider')
@@ -1011,12 +1030,16 @@ class AgencyAllotmentServiceSiteModel(CatalogService):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Selling Prices Catalogue'
     #recent_allowed = True
-    fields = ('agency', 'service', 'date_from', 'date_to', 'id',)
-    list_display = ('agency', 'service', 'date_from', 'date_to',)
+    fields = (
+        ('agency', 'service'),
+        ('date_from', 'date_to'),
+        ('booked_from', 'booked_to', 'contract_code'), 'id',)
+    list_display = ('agency', 'service', 'date_from', 'date_to', 'booked_from', 'booked_to', 'contract_code',)
     top_filters = (
-        ('service', AllotmentTopFilter), ('agency', AgencyTopFilter),
+        ('service__chain', ChainTopFilter), ('service', AllotmentTopFilter),
+        ('agency', AgencyTopFilter),
         'service__service_category',
-        ('date_to', DateTopFilter))
+        ('date_to', DateTopFilter), 'contract_code')
     inlines = [AgencyAllotmentDetailInline]
     ordering = ['service', 'agency', '-date_from']
     list_select_related = ('agency', 'service')
@@ -1118,13 +1141,17 @@ class AgencyTransferServiceSiteModel(CatalogService):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Selling Prices Catalogue'
     #recent_allowed = True
-    fields = ('agency', 'service', 'date_from', 'date_to', 'id',)
-    list_display = ('agency', 'service', 'date_from', 'date_to',)
+    fields = (
+        ('agency', 'service'),
+        ('date_from', 'date_to'),
+        ('booked_from', 'booked_to', 'contract_code'), 'id',)
+    list_display = ('agency', 'service', 'date_from', 'date_to', 'booked_from', 'booked_to', 'contract_code',)
     top_filters = (
         ('service', TransferTopFilter), ('agency', AgencyTopFilter),
         'service__service_category',
         ('date_to', DateTopFilter),
-        AgencyTransferLocationTopFilter, AgencyTransferLocationAdditionalTopFilter)
+        AgencyTransferLocationTopFilter, AgencyTransferLocationAdditionalTopFilter,
+        'contract_code')
     inlines = [AgencyTransferDetailInline]
     ordering = ['service', 'agency', '-date_from']
     list_select_related = ('service', 'agency')
@@ -1215,12 +1242,15 @@ class AgencyExtraServiceSiteModel(CatalogService):
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Selling Prices Catalogue'
     #recent_allowed = True
-    fields = ('agency', 'service', 'date_from', 'date_to', 'id',)
-    list_display = ('agency', 'service', 'date_from', 'date_to',)
+    fields = (
+        ('agency', 'service'),
+        ('date_from', 'date_to'),
+        ('booked_from', 'booked_to', 'contract_code'), 'id',)
+    list_display = ('agency', 'service', 'date_from', 'date_to', 'booked_from', 'booked_to', 'contract_code',)
     top_filters = (
         ('service', ExtraTopFilter), ('agency', AgencyTopFilter),
         'service__service_category',
-        ('date_to', DateTopFilter))
+        ('date_to', DateTopFilter), 'contract_code')
     inlines = [AgencyExtraDetailInline]
     ordering = ['service', 'agency', '-date_from']
     list_select_related = ('service', 'agency')
@@ -1309,6 +1339,7 @@ class CarRentalSiteModel(SiteModel):
 bookings_site.register(ServiceCategory, ServiceCategorySiteModel)
 bookings_site.register(Location, LocationSiteModel)
 bookings_site.register(TransferZone, TransferZoneSiteModel)
+bookings_site.register(Chain, ChainSiteModel)
 bookings_site.register(RoomType, RoomTypeSiteModel)
 bookings_site.register(Addon, AddonSiteModel)
 bookings_site.register(CarRental, CarRentalSiteModel)

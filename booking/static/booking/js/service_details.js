@@ -21,14 +21,14 @@ function update_service_details(data){
     $('div.form-row.field-pickup_office.field-dropoff_office').hide();
   }
   if (data && data.has_place_from) {
-    $('div.field-box.field-place_from').show();
+    $('div.fieldBox.field-place_from').show();
   } else {
-    $('div.field-box.field-place_from').hide();
+    $('div.fieldBox.field-place_from').hide();
   }
   if (data && data.has_place_to) {
-    $('div.field-box.field-place_to').show();
+    $('div.fieldBox.field-place_to').show();
   } else {
-    $('div.field-box.field-place_to').hide();
+    $('div.fieldBox.field-place_to').hide();
   }
 }
 

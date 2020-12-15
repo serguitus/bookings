@@ -243,13 +243,26 @@ class Service(models.Model):
         return _get_child_objects([self])[0].get_absolute_url()
 
 
+class Chain(models.Model):
+    """
+    Chain
+    """
+    class Meta:
+        verbose_name = 'Chain'
+        verbose_name_plural = 'Chains'
+    name = models.CharField(max_length=150)
+
+    def __str__(self):
+        return self.name
+
+
 class Allotment(Service):
     """
     Accomodation
     """
     class Meta:
         verbose_name = 'Accomodation'
-        verbose_name_plural = 'Accomodation'
+        verbose_name_plural = 'Accomodations'
     cost_type = models.CharField(
         max_length=5, choices=ALLOTMENT_AMOUNTS_TYPES, default=AMOUNTS_BY_PAX)
     time_from = models.TimeField(default='16:00')
@@ -257,6 +270,8 @@ class Allotment(Service):
     address = models.CharField(max_length=75, blank=True, null=True)
     phone = models.CharField(max_length=30, blank=True, null=True)
     is_shared_point = models.BooleanField(default=False)
+    chain = models.ForeignKey(
+        Chain, on_delete=models.CASCADE, blank=True, null=True)
 
     def fill_data(self):
         super(Allotment, self).fill_data()
@@ -435,29 +450,35 @@ class ServiceAddon(models.Model):
         return '%s for %s' % (self.addon, self.service)
 
 
-class ProviderCatalogue(models.Model):
+class Catalog(models.Model):
+    class Meta:
+        abstract = True
+    contract_code = models.CharField(max_length=40, blank=True, null=True)
+    booked_from = models.DateField(blank=True, null=True)
+    booked_to = models.DateField(blank=True, null=True)
+    date_from = models.DateField()
+    date_to = models.DateField()
+
+
+class ProviderCatalogue(Catalog):
     """
     ProviderCatalogue
     """
     class Meta:
         abstract = True
     provider = models.ForeignKey(Provider, on_delete=models.CASCADE)
-    date_from = models.DateField()
-    date_to = models.DateField()
 
     def get_detail_objects(self):
         return None
 
 
-class AgencyCatalogue(models.Model):
+class AgencyCatalogue(Catalog):
     """
     AgencyCatalogue
     """
     class Meta:
         abstract = True
     agency = models.ForeignKey(Agency, on_delete=models.CASCADE)
-    date_from = models.DateField()
-    date_to = models.DateField()
 
     def get_detail_objects(self):
         return None

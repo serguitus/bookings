@@ -397,6 +397,7 @@ class QuoteServiceSiteModel(SiteModel):
 class QuotePackagePaxVariantInline(CommonStackedInline):
     model = QuoteServicePaxVariant
     extra = 0
+    max_num = 0
     fields = [
         ('quote_pax_variant'),
         ('free_cost_single', 'free_price_single'),
@@ -416,9 +417,6 @@ class QuotePackagePaxVariantInline(CommonStackedInline):
     ]
     verbose_name_plural = 'Paxes Variants'
     can_delete = False
-
-    def has_add_permission(self,request, obj):
-        return False
 
 
 class QuoteExtraPackageSiteModel(QuoteServiceSiteModel):
@@ -501,6 +499,7 @@ class QuotePackageServiceSiteModel(SiteModel):
 class QuoteServicePaxVariantInline(CommonStackedInline):
     model = QuoteServicePaxVariant
     extra = 0
+    max_num = 0
     fields = [
         ('quote_pax_variant'),
         ('free_cost_single', 'free_price_single'),
@@ -520,9 +519,6 @@ class QuoteServicePaxVariantInline(CommonStackedInline):
         'utility_percent_single', 'utility_percent_double',
         'utility_percent_triple', 'utility_percent_qdrple',
         'utility_single', 'utility_double', 'utility_triple', 'utility_qdrple']
-
-    def has_add_permission(self,request, obj):
-        return False
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super(QuoteServicePaxVariantInline, self).get_readonly_fields(request, obj) or []
@@ -788,7 +784,7 @@ class BookingSiteModel(SiteModel):
                 ('seller', 'internal_reference', 'details'),
                 ('name', 'reference', 'status'),
                 ('agency', 'agency_contact'),
-                ('date_from', 'date_to'),
+                ('booked', 'date_from', 'date_to',),
                 ('is_package_price',),
                 ('package_sgl_price_amount', 'package_dbl_price_amount'),
                 ('package_tpl_price_amount', 'package_qpl_price_amount'),
@@ -1235,7 +1231,7 @@ class BookingBaseServiceSiteModel(SiteModel):
         (None, {
             'fields': (
                 ('name', 'status', 'conf_number'),
-                ('service_addon'),
+                ('service_addon', 'contract_code'),
                 ('manual_cost', 'provider'),
                 'cost_amount', 'manual_price', 'price_amount',
                 'utility_percent', 'utility')
@@ -1294,7 +1290,7 @@ class BookingProvidedServiceSiteModel(SiteModel):
             'fields': (
                 'booking', ('name', 'status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'service_addon'),
-                'provider',
+                ('provider', 'contract_code'),
                 ('manual_cost', 'cost_by_catalog'),
                 'cost_amount',
                 ('manual_price', 'price_by_catalog'),
@@ -1626,7 +1622,7 @@ class BookingProvidedAllotmentSiteModel(BookingProvidedServiceSiteModel):
                 ('status', 'conf_number'),
                 ('datetime_from', 'nights', 'datetime_to'),
                 ('room_type', 'board_type'),
-                'provider',
+                ('provider', 'contract_code'),
                 ('manual_cost', 'cost_by_catalog'),
                 'cost_amount',
                 ('manual_price', 'price_by_catalog'),
@@ -1671,7 +1667,7 @@ class BookingProvidedTransferSiteModel(BookingProvidedServiceSiteModel):
                 ('location_to', 'place_to'),
                 ('dropoff', 'schedule_to', 'schedule_time_to'),
                 'service_addon',
-                'provider',
+                ('provider', 'contract_code'),
                 ('manual_cost', 'cost_by_catalog'),
                 'cost_amount',
                 ('manual_price', 'price_by_catalog'),
@@ -1717,7 +1713,7 @@ class BookingProvidedExtraSiteModel(BookingProvidedServiceSiteModel):
                 'service_addon',
                 ('quantity', 'parameter'),
                 ('pickup_office', 'dropoff_office'),
-                'provider',
+                ('provider', 'contract_code'),
                 ('manual_cost', 'cost_by_catalog'),
                 'cost_amount',
                 ('manual_price', 'price_by_catalog'),
@@ -1742,10 +1738,10 @@ class BookingProvidedExtraSiteModel(BookingProvidedServiceSiteModel):
         ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'booking_package', 'service__name',)
     form = BookingProvidedExtraForm
-    add_form_template = 'booking/bookingextra_change_form.html'
-    change_form_template = 'booking/bookingextra_change_form.html'
-    list_details_template = 'booking/bookingextra_details.html'
-    change_details_template = 'booking/bookingextra_details.html'
+    add_form_template = 'booking/bookingprovidedextra_change_form.html'
+    change_form_template = 'booking/bookingprovidedextra_change_form.html'
+    list_details_template = 'booking/bookingprovidedextra_details.html'
+    change_details_template = 'booking/bookingprovidedextra_details.html'
 
 
 class BookingExtraPackageSiteModel(BaseBookingServiceSiteModel):
@@ -2303,7 +2299,7 @@ class ExportBookingSiteModel(SiteModel):
                 ('seller'),
                 ('name', 'reference', 'status'),
                 ('agency', 'agency_contact'),
-                ('date_from', 'date_to'),
+                ('booked', 'date_from', 'date_to'),
                 ('is_package_price',),
                 ('package_sgl_price_amount', 'package_dbl_price_amount'),
                 ('package_tpl_price_amount', 'package_qpl_price_amount'),
@@ -2439,7 +2435,7 @@ class BookingBookDetailAllotmentSiteModel(BaseBookingBookDetailSiteModel):
         ('room_type', 'board_type'),
         'time',
         'service_addon',
-        'provider',
+        ('provider', 'contract_code'),
         'manual_cost',
         'cost_amount',
         'manual_price',
@@ -2466,7 +2462,7 @@ class BookingBookDetailTransferSiteModel(BaseBookingBookDetailSiteModel):
         ('schedule_time_from', 'schedule_time_to'),
         ('time', 'quantity'),
         'service_addon',
-        'provider',
+        ('provider', 'contract_code'),
         'manual_cost',
         'cost_amount',
         'manual_price',
@@ -2489,7 +2485,7 @@ class BookingBookDetailExtraSiteModel(BaseBookingBookDetailSiteModel):
         ('pickup_office', 'dropoff_office'),
         ('time', 'parameter', 'quantity'),
         'service_addon',
-        'provider',
+        ('provider', 'contract_code'),
         'manual_cost',
         'cost_amount',
         'manual_price',

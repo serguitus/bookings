@@ -634,6 +634,7 @@ class Booking(models.Model):
     name = models.CharField(max_length=100)
     agency = models.ForeignKey(Agency, on_delete=models.CASCADE)
     reference = models.CharField(max_length=25, blank=True, null=True, verbose_name='TTOO Ref')
+    booked = models.DateField(blank=True, null=True)
     date_from = models.DateField(blank=True, null=True)
     date_to = models.DateField(blank=True, null=True)
     status = models.CharField(
@@ -827,6 +828,7 @@ class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
     booking = models.ForeignKey(Booking,
                                 on_delete=models.CASCADE,
                                 related_name='base_booking_services')
+    contract_code = models.CharField(max_length=40, blank=True, null=True)
     status = models.CharField(
         max_length=5, choices=SERVICE_STATUS_LIST, default=SERVICE_STATUS_PENDING)
     # This holds the confirmation number when it exists
@@ -1183,7 +1185,7 @@ class BookingProvidedAllotment(BookingProvidedService, BookAllotmentData):
         return 0
 
     def get_absolute_url(self):
-        return reverse('common:booking_bookingallotment_change', args=[self.id])
+        return reverse('common:booking_bookingprovidedallotment_change', args=[self.id])
 
 
 class BookingProvidedTransfer(BookingProvidedService, BookTransferData):
@@ -1225,7 +1227,7 @@ class BookingProvidedTransfer(BookingProvidedService, BookTransferData):
         return self.__unicode__()
 
     def get_absolute_url(self):
-        return reverse('common:booking_bookingtransfer_change', args=[self.id])
+        return reverse('common:booking_bookingprovidedtransfer_change', args=[self.id])
 
 
 class BookingProvidedExtra(BookingProvidedService, BookExtraData):
@@ -1266,7 +1268,7 @@ class BookingProvidedExtra(BookingProvidedService, BookExtraData):
         return self.__unicode__()
 
     def get_absolute_url(self):
-        return reverse('common:booking_bookingextra_change', args=[self.id])
+        return reverse('common:booking_bookingprovidedextra_change', args=[self.id])
 
 
 class BookingBookDetail(BaseBookingService):

@@ -1169,24 +1169,12 @@ class SiteModel(TotalsumAdmin):
             add=None, opts=None, object_id=None, to_field=None):
         return {}
 
-    def do_deleting(self, request, obj, obj_display, obj_id):
-        """
-        Hook for custom deleting actions.
-        """
-        try:
-            with transaction.atomic(savepoint=False):
-                self.log_deletion(request, obj, obj_display)
-                self.delete_model(request, obj)
-                self.delete_recent(request, obj_id)
-
-                return self.response_delete(request, obj, obj_display, obj_id)
-        except ValidationError as ex:
-            for message in ex.messages:
-                self.message_user(request, message, messages.ERROR)
-            return False
-
     @csrf_protect_m
     def delete_view(self, request, object_id, extra_context=None):
+        with transaction.atomic(using=router.db_for_write(self.model)):
+            return self._delete_view(request, object_id, extra_context)
+
+    def _delete_view(self, request, object_id, extra_context):
         """
         Recoding for allowing custom deleting.
         """
@@ -1206,51 +1194,56 @@ class SiteModel(TotalsumAdmin):
         if obj is None:
             return self.get_obj_does_not_exist_redirect(request, opts, object_id)
 
-        using = router.db_for_write(self.model)
-
         # Populate deleted_objects, a data structure of all related objects that
         # will also be deleted.
-        (deleted_objects, model_count, perms_needed, protected) = get_deleted_objects(
-            [obj], opts, request.user, self.admin_site, using)
+        deleted_objects, model_count, perms_needed, protected = self.get_deleted_objects(
+            [obj], request)
 
         if request.POST and not protected:  # The user has confirmed the deletion.
             if perms_needed:
                 raise PermissionDenied
-            obj_display = force_text(obj)
+            obj_display = str(obj)
             attr = str(to_field) if to_field else opts.pk.attname
             obj_id = obj.serializable_value(attr)
 
-            response = self.do_deleting(request, obj, obj_display, obj_id)
-            if response:
-                return response
+            try:
+                with transaction.atomic(savepoint=False):
+                    self.log_deletion(request, obj, obj_display)
+                    self.delete_model(request, obj)
+                    self.delete_recent(request, obj_id)
 
-            return HttpResponseRedirect(reverse(
-                'common:%s_%s_change' % (self.model._meta.app_label, self.model._meta.model_name),
-                args=[obj.id]))
+                    return self.response_delete(request, obj, obj_display, obj_id)
 
-        object_name = force_text(opts.verbose_name)
+            except ValidationError as ex:
+                for message in ex.messages:
+                    self.message_user(request, message, messages.ERROR)
+                return HttpResponseRedirect(reverse(
+                    'common:%s_%s_change' % (self.model._meta.app_label, self.model._meta.model_name),
+                    args=[obj.id]))
+
+        object_name = str(opts.verbose_name)
 
         if perms_needed or protected:
             title = _("Cannot delete %(name)s") % {"name": object_name}
         else:
             title = _("Are you sure?")
 
-        context = dict(
-            self.admin_site.each_context(request),
-            title=title,
-            object_name=object_name,
-            object=obj,
-            deleted_objects=deleted_objects,
-            model_count=dict(model_count).items(),
-            perms_lacking=perms_needed,
-            protected=protected,
-            opts=opts,
-            app_label=app_label,
-            preserved_filters=self.get_preserved_filters(request),
-            is_popup=(IS_POPUP_VAR in request.POST or IS_POPUP_VAR in request.GET),
-            to_field=to_field,
-        )
-        context.update(extra_context or {})
+        context = {
+            **self.admin_site.each_context(request),
+            'title': title,
+            'object_name': object_name,
+            'object': obj,
+            'deleted_objects': deleted_objects,
+            'model_count': dict(model_count).items(),
+            'perms_lacking': perms_needed,
+            'protected': protected,
+            'opts': opts,
+            'app_label': app_label,
+            'preserved_filters': self.get_preserved_filters(request),
+            'is_popup': IS_POPUP_VAR in request.POST or IS_POPUP_VAR in request.GET,
+            'to_field': to_field,
+            **(extra_context or {}),
+        }
 
         return self.render_delete_form(request, context)
 
@@ -1262,7 +1255,7 @@ class SiteModel(TotalsumAdmin):
 
     def details_button(self, obj):
         """
-        A list_display column containing a button widget.
+        A list_display column containing a b utton widget.
         """
         return mark_safe('<a type="button" class="collapsed" data-toggle="collapse" data-target="#div_' + str(obj.pk) +  '" aria-expanded="false"><span class="fa fa-plus"></span></a>')
 

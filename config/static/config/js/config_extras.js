@@ -33,8 +33,8 @@ $(document).ready(function(){
   // var costInput = $('#id_cost_amount')[0];
   // var priceInput = $('#id_price_amount')[0];
 
-  // var calcCost = $('div.field-box.field-calculated_cost').children()[1];
-  // var calcPrice = $('div.field-box.field-calculated_price').children()[1];
+  // var calcCost = $('div.fieldBox.field-calculated_cost').children()[1];
+  // var calcPrice = $('div.fieldBox.field-calculated_price').children()[1];
 
   // function compare_numbers() {
   //   // a function to check if computed prices differ from set prices

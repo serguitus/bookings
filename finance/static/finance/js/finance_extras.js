@@ -1,7 +1,7 @@
 $(document).ready(function(){
   /* the place to set the computed total of selected rows*/
-  let total_count = $('.field-box.field-selected_amount .readonly')
-  let max_amount = $('.field-box.field-amount .readonly')
+  let total_count = $('.fieldBox.field-selected_amount .readonly')
+  let max_amount = $('.fieldBox.field-amount .readonly')
   let submit_btn = $('input[name="_save"]')
 
   function check_total(){

@@ -31,7 +31,7 @@ from finance.views import (
 from config import urls as config_urls
 from config.views import (
     LocationAutocompleteView, ZoneTransferAutocompleteView, ServiceCategoryAutocompleteView,
-    RoomTypeAutocompleteView, BoardTypeAutocompleteView,
+    ChainAutocompleteView, RoomTypeAutocompleteView, BoardTypeAutocompleteView,
     AllotmentAutocompleteView, ProviderAllotmentAutocompleteView,
     TransferAutocompleteView, ProviderTransferAutocompleteView,
     AddonAutocompleteView,
@@ -47,6 +47,9 @@ from booking.views import (
     PickUpAutocompleteView, DropOffAutocompleteView, PlaceAutocompleteView,
     ScheduleArrivalAutocompleteView, ScheduleDepartureAutocompleteView,
     QuotePaxVariantAutocompleteView, SellerAutocompleteView,
+    AllotmentContractAutocompleteView,
+    TransferContractAutocompleteView,
+    ExtraContractAutocompleteView,
 )
 
 from reservas.views import DisabledAutocompleteView
@@ -114,6 +117,10 @@ urlpatterns = [
         LoanAccountAutocompleteView.as_view(),
         name='loanaccount-autocomplete',
     ),
+    url(r'^chain-autocomplete/$',
+        ChainAutocompleteView.as_view(),
+        name='chain-autocomplete',
+    ),
     url(r'^location-autocomplete/$',
         LocationAutocompleteView.as_view(),
         name='location-autocomplete',
@@ -141,6 +148,18 @@ urlpatterns = [
     url(r'^providerextra-autocomplete/$',
         ProviderExtraAutocompleteView.as_view(),
         name='providerextra-autocomplete',
+    ),
+    url(r'^allotmentcontract-autocomplete/$',
+        AllotmentContractAutocompleteView.as_view(),
+        name='allotmentcontract-autocomplete',
+    ),
+    url(r'^transfercontract-autocomplete/$',
+        TransferContractAutocompleteView.as_view(),
+        name='transfercontract-autocomplete',
+    ),
+    url(r'^extracontract-autocomplete/$',
+        ExtraContractAutocompleteView.as_view(),
+        name='extracontract-autocomplete',
     ),
     url(r'^roomtype-autocomplete/$',
         RoomTypeAutocompleteView.as_view(),
