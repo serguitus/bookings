@@ -200,8 +200,7 @@ $(document).ready(function(){
     changed_manual_price(e.target);
   })
 
-  // for service changed
-  $('#id_service').change(function (e) {
+  function service_changed(e) {
     e.preventDefault();
     // clear data
     $('#id_room_type').val(null).trigger('change');
@@ -211,6 +210,24 @@ $(document).ready(function(){
     $('#id_addon').val(null).trigger('change');
     $('#id_pickup_office').val(null).trigger('change');
     $('#id_dropoff_office').val(null).trigger('change');
+    $('#id_contract_code').val('').trigger('change');
+  }
+
+  // for service changed
+  $('#id_service').change(function (e) {
+    service_changed(e);
+  });
+
+  // for book service changed
+  $('#id_book_service').change(function (e) {
+    service_changed(e);
+  });
+
+  // for provider changed
+  $('#id_provider').change(function (e) {
+    e.preventDefault();
+    // clear data
+    $('#id_contract_code').val('').trigger('change');
   });
 
   // for location from changed
