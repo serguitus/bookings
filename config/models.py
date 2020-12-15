@@ -453,7 +453,7 @@ class ServiceAddon(models.Model):
 class Catalog(models.Model):
     class Meta:
         abstract = True
-    contract_code = models.CharField(max_length=40, blank=True, null=True)
+    contract_code = models.CharField(max_length=40, blank=True, null=False, default='')
     booked_from = models.DateField(blank=True, null=True)
     booked_to = models.DateField(blank=True, null=True)
     date_from = models.DateField()
@@ -587,7 +587,7 @@ class ProviderAllotmentService(ProviderCatalogue):
     class Meta:
         verbose_name = 'Accomodation Cost'
         verbose_name_plural = 'Accomodation Costs'
-        unique_together = (('provider', 'service', 'date_from', 'date_to'),)
+        unique_together = (('provider', 'service', 'date_from', 'date_to', 'contract_code'),)
     service = models.ForeignKey(Allotment, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -635,7 +635,7 @@ class AgencyAllotmentService(AgencyCatalogue):
     class Meta:
         verbose_name = 'Accomodation Price'
         verbose_name_plural = 'Accomodation Prices'
-        unique_together = (('agency', 'service', 'date_from', 'date_to'),)
+        unique_together = (('agency', 'service', 'date_from', 'date_to', 'contract_code'),)
     service = models.ForeignKey(Allotment, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -723,7 +723,7 @@ class ProviderTransferService(ProviderCatalogue):
     class Meta:
         verbose_name = 'Transfer Cost'
         verbose_name_plural = 'Transfer Cost'
-        unique_together = (('provider', 'service', 'date_from', 'date_to'),)
+        unique_together = (('provider', 'service', 'date_from', 'date_to', 'contract_code'),)
     service = models.ForeignKey(Transfer, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -772,7 +772,7 @@ class AgencyTransferService(AgencyCatalogue):
     class Meta:
         verbose_name = 'Transfer Price'
         verbose_name_plural = 'Transfer Prices'
-        unique_together = (('agency', 'service', 'date_from', 'date_to'),)
+        unique_together = (('agency', 'service', 'date_from', 'date_to', 'contract_code'),)
     service = models.ForeignKey(Transfer, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -823,7 +823,7 @@ class ProviderExtraService(ProviderCatalogue):
     class Meta:
         verbose_name = 'Extra Cost'
         verbose_name_plural = 'Extra Costs'
-        unique_together = (('provider', 'service', 'date_from', 'date_to'),)
+        unique_together = (('provider', 'service', 'date_from', 'date_to', 'contract_code'),)
     service = models.ForeignKey(Extra, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -860,7 +860,7 @@ class AgencyExtraService(AgencyCatalogue):
     class Meta:
         verbose_name = 'Extra Price'
         verbose_name_plural = 'Extras Prices'
-        unique_together = (('agency', 'service', 'date_from', 'date_to'),)
+        unique_together = (('agency', 'service', 'date_from', 'date_to', 'contract_code'),)
     service = models.ForeignKey(Extra, on_delete=models.CASCADE)
 
     def __str__(self):
