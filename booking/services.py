@@ -3202,7 +3202,7 @@ class BookingServices(object):
             return cls._find_bookingservice_catalog_price(
                 bookingservice,
                 bookingservice.datetime_from, bookingservice.datetime_to,
-                pax_list, agency, booked, bookingservice.contrct_code)
+                pax_list, agency, booked, bookingservice.contract_code)
         else:
             cost, cost_msg, price, price_msg = cls._find_bookingservice_amounts_by_details(
                 bookingservice, pax_list, agency, booked)
