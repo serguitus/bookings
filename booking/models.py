@@ -1284,6 +1284,7 @@ class BookingBookDetail(BaseBookingService):
         related_name='%(class)s_booking_service')
 
     def fill_data(self):
+        super(BookingBookDetail, self).fill_data()
         self.booking = self.booking_service.booking
         self.location = self.base_service.location
 

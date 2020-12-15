@@ -1665,7 +1665,7 @@ class ConfigServices(object):
         if contract_code:
             qs = qs.filter(provider_service__contract_code=contract_code)
         else:
-            qs = qs.filter(provider_service__contract_code__isnull=True)
+            qs = qs.filter(provider_service__contract_code='')
         return qs
 
 

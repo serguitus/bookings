@@ -1321,7 +1321,7 @@ def allotment_contract_list(
 
     qs = ProviderAllotmentService.objects.all().distinct().filter(
         service=service,
-        provider__enabled=True)
+        provider__enabled=True).exclude(contract_code='')
     if provider:
         qs = qs.filter(provider=provider)
     if booked:
@@ -1405,7 +1405,7 @@ def transfer_contract_list(
 
     qs = ProviderTransferService.objects.all().distinct().filter(
         service=service,
-        provider__enabled=True)
+        provider__enabled=True).exclude(contract_code='')
 
     if provider:
         qs = qs.filter(provider=provider)
@@ -1490,7 +1490,7 @@ def extra_contract_list(
 
     qs = ProviderExtraService.objects.all().distinct().filter(
         service=service,
-        provider__enabled=True)
+        provider__enabled=True).exclude(contract_code='')
 
     if provider:
         qs = qs.filter(provider=provider)
