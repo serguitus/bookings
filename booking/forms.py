@@ -305,17 +305,15 @@ class BookingProvidedAllotmentForm(forms.ModelForm, MailForm, ServiceForm):
             'p_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
             'new_v_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
             'provider_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
+            'contract_code': autocomplete.ListSelect2(
+                url='allotmentcontract-autocomplete',
+                forward=[
+                    'booking', 'provider', 'service', 'date_from', 'date_to',
+                    'service_addon', 'room_type', 'board_type'],
+                ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
     nights = forms.IntegerField(initial=0)
-    contract_code: autocomplete.Select2ListChoiceField(
-        widget=autocomplete.ListSelect2(
-            url='allotmentcontract-autocomplete',
-            forward=[
-                'booking', 'provider', 'service', 'date_from', 'date_to',
-                'service_addon', 'room_type', 'board_type'],
-        )
-    )
 
 
 class BookingProvidedTransferForm(forms.ModelForm, MailForm, ServiceForm):
@@ -368,16 +366,14 @@ class BookingProvidedTransferForm(forms.ModelForm, MailForm, ServiceForm):
             'p_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
             'new_v_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
             'provider_notes': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
+            'contract_code': autocomplete.ListSelect2(
+                url='transfercontract-autocomplete',
+                forward=[
+                    'booking', 'provider', 'service', 'date_from', 'date_to',
+                    'service_addon', 'location_from', 'location_to'],
+                ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
-    contract_code: autocomplete.Select2ListChoiceField(
-        widget=autocomplete.ListSelect2(
-            url='transfercontract-autocomplete',
-            forward=[
-                'booking', 'provider', 'service', 'date_from', 'date_to',
-                'service_addon', 'location_from', 'location_to'],
-        )
-    )
 
 
 class BookingProvidedExtraForm(forms.ModelForm, MailForm, ServiceForm):
@@ -412,17 +408,15 @@ class BookingProvidedExtraForm(forms.ModelForm, MailForm, ServiceForm):
                 url='carrentaloffice-autocomplete',
                 forward=['service',],
                 ),
+            'contract_code': autocomplete.ListSelect2(
+                url='extracontract-autocomplete',
+                forward=[
+                    'booking', 'provider', 'service', 'date_from', 'date_to',
+                    'service_addon'],
+                ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
     nights = forms.IntegerField(initial=0)
-    contract_code: autocomplete.Select2ListChoiceField(
-        widget=autocomplete.ListSelect2(
-            url='extracontract-autocomplete',
-            forward=[
-                'booking', 'provider', 'service', 'date_from', 'date_to',
-                'service_addon'],
-        )
-    )
 
 
 class BookingExtraPackageForm(forms.ModelForm, MailForm, ServiceForm):
@@ -725,15 +719,13 @@ class BookingBookDetailAllotmentForm(forms.ModelForm, BaseBookDataForm):
                 url='providerallotment-autocomplete',
                 forward=['book_service'],
                 ),
+            'contract_code': autocomplete.ListSelect2(
+                url='allotmentcontract-autocomplete',
+                forward=[
+                    'booking_service', 'provider', 'book_service', 'date_from', 'date_to',
+                    'service_addon', 'room_type', 'board_type'],
+                ),
         }
-    contract_code: autocomplete.Select2ListChoiceField(
-        widget=autocomplete.ListSelect2(
-            url='allotmentcontract-autocomplete',
-            forward=[
-                'booking_service', 'provider', 'book_service', 'date_from', 'date_to',
-                'service_addon', 'room_type', 'board_type'],
-        )
-    )
 
 
 class BookingBookDetailTransferForm(forms.ModelForm, BaseBookDataForm):
@@ -765,14 +757,6 @@ class BookingBookDetailTransferForm(forms.ModelForm, BaseBookDataForm):
                     'service_addon', 'location_from', 'location_to'],
                 ),
         }
-    contract_code: autocomplete.Select2ListChoiceField(
-        widget=autocomplete.ListSelect2(
-            url='transfercontract-autocomplete',
-            forward=[
-                'booking_service', 'provider', 'book_service', 'date_from', 'date_to',
-                'service_addon', 'location_from', 'location_to'],
-        )
-    )
 
 
 class BookingBookDetailExtraForm(forms.ModelForm, BaseBookDataForm):
@@ -803,10 +787,10 @@ class BookingBookDetailExtraForm(forms.ModelForm, BaseBookDataForm):
                 url='providerextra-autocomplete',
                 forward=['book_service'],
                 ),
+            'contract_code': autocomplete.ListSelect2(
+                url='extracontract-autocomplete',
+                forward=[
+                    'booking_service', 'provider', 'book_service', 'date_from', 'date_to',
+                    'service_addon'],
+                ),
         }
-    contract_code: autocomplete.Select2ListChoiceField(
-        widget=autocomplete.ListSelect2(
-            url='extracontract-autocomplete',
-            forward=['booking_service', 'provider', 'book_service', 'date_from', 'date_to', 'service_addon'],
-        )
-    )
