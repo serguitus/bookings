@@ -317,7 +317,9 @@ class BookingProvidedAllotmentForm(forms.ModelForm, MailForm, ServiceForm):
 
     def __init__(self, *args, **kwargs):
         super(BookingProvidedAllotmentForm, self).__init__(*args, **kwargs)
-        self.fields['contract_code'].widget.choices=[[self.instance.contract_code, self.instance.contract_code]]
+        self.fields['contract_code'].widget.choices = [
+            [self.instance.contract_code, self.instance.contract_code]]
+
 
 class BookingProvidedTransferForm(forms.ModelForm, MailForm, ServiceForm):
     class Meta:
@@ -378,6 +380,11 @@ class BookingProvidedTransferForm(forms.ModelForm, MailForm, ServiceForm):
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
+    def __init__(self, *args, **kwargs):
+        super(BookingProvidedTransferForm, self).__init__(*args, **kwargs)
+        self.fields['contract_code'].widget.choices = [
+            [self.instance.contract_code, self.instance.contract_code]]
+
 
 class BookingProvidedExtraForm(forms.ModelForm, MailForm, ServiceForm):
     class Meta:
@@ -420,6 +427,11 @@ class BookingProvidedExtraForm(forms.ModelForm, MailForm, ServiceForm):
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
     nights = forms.IntegerField(initial=0)
+
+    def __init__(self, *args, **kwargs):
+        super(BookingProvidedExtraForm, self).__init__(*args, **kwargs)
+        self.fields['contract_code'].widget.choices = [
+            [self.instance.contract_code, self.instance.contract_code]]
 
 
 class BookingExtraPackageForm(forms.ModelForm, MailForm, ServiceForm):
@@ -730,6 +742,11 @@ class BookingBookDetailAllotmentForm(forms.ModelForm, BaseBookDataForm):
                 ),
         }
 
+    def __init__(self, *args, **kwargs):
+        super(BookingBookDetailAllotmentForm, self).__init__(*args, **kwargs)
+        self.fields['contract_code'].widget.choices = [
+            [self.instance.contract_code, self.instance.contract_code]]
+
 
 class BookingBookDetailTransferForm(forms.ModelForm, BaseBookDataForm):
     class Meta:
@@ -760,6 +777,11 @@ class BookingBookDetailTransferForm(forms.ModelForm, BaseBookDataForm):
                     'service_addon', 'location_from', 'location_to'],
                 ),
         }
+
+    def __init__(self, *args, **kwargs):
+        super(BookingBookDetailTransferForm, self).__init__(*args, **kwargs)
+        self.fields['contract_code'].widget.choices = [
+            [self.instance.contract_code, self.instance.contract_code]]
 
 
 class BookingBookDetailExtraForm(forms.ModelForm, BaseBookDataForm):
@@ -797,3 +819,8 @@ class BookingBookDetailExtraForm(forms.ModelForm, BaseBookDataForm):
                     'service_addon'],
                 ),
         }
+
+    def __init__(self, *args, **kwargs):
+        super(BookingBookDetailExtraForm, self).__init__(*args, **kwargs)
+        self.fields['contract_code'].widget.choices = [
+            [self.instance.contract_code, self.instance.contract_code]]

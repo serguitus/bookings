@@ -1691,7 +1691,7 @@ class ConfigServices(object):
                 Q(agency_service__booked_to__isnull=True)
                 | Q(agency_service__booked_to__gte=booked))
         # prices dont use contract_code
-        qs = qs.filter(agency_service__contract_code__isnull=True)
+        # qs = qs.filter(agency_service__contract_code='')
         return qs
 
 
