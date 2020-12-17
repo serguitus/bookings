@@ -315,6 +315,9 @@ class BookingProvidedAllotmentForm(forms.ModelForm, MailForm, ServiceForm):
     id = forms.CharField(required=False, widget=forms.HiddenInput())
     nights = forms.IntegerField(initial=0)
 
+    def __init__(self, *args, **kwargs):
+        super(BookingProvidedAllotmentForm, self).__init__(*args, **kwargs)
+        self.fields['contract_code'].widget.choices=[[self.instance.contract_code, self.instance.contract_code]]
 
 class BookingProvidedTransferForm(forms.ModelForm, MailForm, ServiceForm):
     class Meta:
