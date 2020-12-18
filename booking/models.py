@@ -1052,6 +1052,9 @@ class BookingExtraPackage(BaseBookingService, BookExtraData):
         self.description = self.build_description()
         # TODO define a location for packages to show
 
+    def pax_quantity(self):
+        return self.rooming_list.count()
+
     def __str__(self):
         return self.__unicode__()
 
@@ -1079,6 +1082,11 @@ class BookingProvidedService(BaseBookingService):
         on_delete=models.CASCADE,
         related_name='booking_package_services',
         blank=True, null=True)
+
+    def pax_quantity(self):
+        if self.booking_package and not self.rooming_list:
+            return self.booking_package.rooming_list.count()
+        return self.rooming_list.count()
 
     def validate(self):
         if self.booking_id and self.booking_package:
@@ -1294,6 +1302,11 @@ class BookingBookDetail(BaseBookingService):
         super(BookingBookDetail, self).save(
             force_insert, force_update, using, update_fields)
 
+    def pax_quantity(self):
+        if self.rooming_list:
+            return self.rooming_list.count()
+        return self.booking_service.rooming_list.count()
+
     def __str__(self):
         return self.__unicode__()
 
@@ -1316,6 +1329,28 @@ class BookingBookDetailAllotment(BookingBookDetail, BookAllotmentData):
         self.base_category = BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_ALLOTMENT
         self.name = '%s - %s' % (self.booking_service, self.book_service)
         self.time = time(23, 59, 59)
+
+    def adult_quantity(self):
+        if self.book_service.child_age:
+            if self.rooming_list:
+                return self.rooming_list.filter(
+                    Q(booking_pax__pax_age__isnull=True) |
+                    Q(booking_pax__pax_age__gte=self.book_service.child_age)).count()
+            else:
+                return self.booking_service.rooming_list.filter(
+                    Q(booking_pax__pax_age__isnull=True) |
+                    Q(booking_pax__pax_age__gte=self.book_service.child_age)).count()
+        elif self.rooming_list:
+            return self.rooming_list.count()
+        else:
+            return self.booking_service.rooming_list.count()
+
+    def child_quantity(self):
+        if self.service.child_age:
+            return self.rooming_list.filter(
+                booking_pax__pax_age__lt=self.service.child_age).count()
+        return 0
+
 
 
 class BookingBookDetailTransfer(BookingBookDetail, BookTransferData):
