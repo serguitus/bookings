@@ -1343,7 +1343,7 @@ class ConfigServices(object):
                 quantity, parameter, detail_list)
             if amount is None:
                 return None, message
-            groups_amount += amount
+            groups_amount += float(amount)
             groups_message = message
 
         return groups_amount, groups_message
