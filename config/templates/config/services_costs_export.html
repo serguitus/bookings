@@ -1,0 +1,38 @@
+{% extends "common/change_form.html" %}
+{% load export_costs %}
+{% load static %}
+
+{% block head_extra %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'admin/js/calendar.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/core.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/jquery.init.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/admin/DateTimeShortcuts.js' %}"></script>
+ {% endblock %}
+
+{% block content %}
+    <form action="" method="post" class="form-inline">
+        {{ form.non_field_errors }}
+        {% csrf_token %}
+        {{ form.start_date.errors }}
+        {{ form.start_date.label_tag }}
+        {{ form.start_date|addclass:'vDateField form-control' }}
+        {{ form.end_date.errors }}
+        {{ form.end_date.label_tag }}
+        {{ form.end_date|addclass:'vDateField form-control' }}
+        <div>
+        <p><h1>
+            You are going to export costs for the following services. Are you sure?
+        </h1></p>
+        {% for service in services %}
+            <div>
+            <p>{{ service }}</p>
+            <input type="hidden" name="_selected_action" value="{{ service.pk }}" />
+            </div>
+        {% endfor %}
+        </div>
+        <input type="hidden" name="action" value="export_costs" />
+        <input type="submit" name="apply" value="Export Costs"/>
+        <a class="btn btn-back" href="">Back</a>
+    </form>
+{% endblock %}

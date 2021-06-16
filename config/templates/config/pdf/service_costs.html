@@ -1,0 +1,303 @@
+{% load common_utils %}
+<table width="100%">
+{% if service.category == 'A' %}
+    <tr>
+        <td colspan="10" class="bold-top-line">
+            <b>Service:</b> {{ service.name }}
+        </td>
+    </tr>
+    <tr>
+        <td class="top-line boardtype-content center"><b>Board</b></td>
+        <td class="top-line roomtype-content left"><b>Room</b></td>
+        <td class="top-line provider-content left"><b>Provider</b></td>
+        {% if service.pax_range %}
+            <td class="top-line pax-range-content center"><b>Px.Rng.</b></td>
+        {% else %}
+            <td class="top-line pax-range-content center"><b>No PR</b></td>
+        {% endif %}
+        <td class="top-line date-content center"><b>From</b></td>
+        <td class="top-line date-content center"><b>To</b></td>
+        <td class="top-line amount-content right"><b>SGL</b></td>
+        <td class="top-line amount-content right"><b>DBL</b></td>
+        <td class="top-line amount-content right"><b>TPL</b></td>
+        <td class="top-line amount-content right"><b>QPL</b></td>
+    </tr>
+    {% setvar '' as prev_board %}
+    {% setvar '' as prev_room %}
+    {% setvar '' as prev_addon %}
+    {% setvar '' as prev_provider %}
+    {% for detail in details %}
+        {% setvar False as print_top_line %}
+        <tr>
+            {% if detail.board_type != prev_board %}
+                {% setvar True as print_top_line %}
+            {% endif %}
+            {% if print_top_line %}
+                <td class="top-line boardtype-content center">
+                    {{ detail.board_type }}
+                </td>
+            {% else %}
+                <td class="boardtype-content"></td>
+            {% endif %}
+            {% if not print_top_line and detail.room_type.name != prev_room %}
+                {% setvar True as print_top_line %}
+            {% endif %}
+            {% if print_top_line %}
+                <td class="top-line roomtype-content left">
+                    {{ detail.room_type.name }}
+                </td>
+            {% else %}
+                <td class="roomtype-content"></td>
+            {% endif %}
+            {% if not print_top_line and detail.provider_service.provider.id != prev_provider %}
+                {% setvar True as print_top_line %}
+            {% endif %}
+            {% if print_top_line %}
+                <td class="top-line provider-content left">
+                    {{ detail.provider_service.provider.name }}
+                </td>
+            {% else %}
+                <td class="provider-content"></td>
+            {% endif %}
+            <td class="top-line paxrange-content center">
+                {{ detail.pax_range_min }} - {{ detail.pax_range_max }}
+            </td>
+            <td class="top-line date-content center">
+                {{ detail.provider_service.date_from | date:"d-b-Y" }}
+            </td>
+            <td class="top-line date-content center">
+                {{ detail.provider_service.date_to | date:"d-b-Y" }}
+            </td>
+            {% if detail.ad_1_amount %}
+                <td class="top-line amount-content right">
+                    {{ detail.ad_1_amount }}
+                </td>
+            {% else %}
+                <td class="top-line amount-content"></td>
+            {% endif %}
+            {% if detail.ad_2_amount %}
+                <td class="top-line amount-content right">
+                    {{ detail.ad_2_amount }}
+                </td>
+            {% else %}
+                <td class="top-line amount-content"></td>
+            {% endif %}
+            {% if detail.ad_3_amount %}
+                <td class="top-line amount-content right">
+                    {{ detail.ad_3_amount }}
+                </td>
+            {% else %}
+                <td class="top-line amount-content"></td>
+            {% endif %}
+            {% if detail.ad_4_amount %}
+                <td class="top-line amount-content right">
+                    {{ detail.ad_4_amount }}
+                </td>
+            {% else %}
+                <td class="top-line amount-content"></td>
+            {% endif %}
+        </tr>
+        {% setvar detail.board_type as prev_board %}
+        {% setvar detail.room_type.name as prev_room %}
+        {% setvar detail.addon.name as prev_addon %}
+        {% setvar detail.provider_service.provider.id as prev_provider %}
+    {% endfor %}
+
+{% elif service.category == 'T' %}
+    <tr>
+        <td colspan="8" class="bold-top-line">
+            <b>Service:</b> {{ service.name }}
+        </td>
+    </tr>
+    <tr>
+        <td class="top-line location-content left"><b>Origin</b></td>
+        <td class="top-line location-content left""><b>Destination</b></td>
+        <td class="top-line addon-content left"><b>Addon</b></td>
+        <td class="top-line provider content left"><b>Provider</b></td>
+        {% if service.pax_range %}
+            <td class="top-line paxrange-content center"><b>Px.Rng.</b></td>
+        {% else %}
+            <td class="top-line paxrange-content center"><b>No PR</b></td>
+        {% endif %}
+        <td class="top-line date-content center"><b>From</b></td>
+        <td class="top-line date-content center"><b>To</b></td>
+        <td class="top-line amount-content right"><b>Price</b></td>
+    </tr>
+    {% setvar '' as prev_from %}
+    {% setvar '' as prev_to %}
+    {% setvar '' as prev_addon %}
+    {% setvar '' as prev_provider %}
+    {% for detail in details %}
+        {% setvar False as print_top_line %}
+        <tr>
+            {% if detail.location_from.name != prev_from %}
+                {% setvar True as print_top_line %}
+            {% endif %}
+            {% if print_top_line %}
+                <td class="top-line location-content left">
+                    {{ detail.location_from.name }}
+                </td>
+            {% else %}
+                <td class="location-content"></td>
+            {% endif %}
+            {% if not print_top_line and detail.location_to.name != prev_to %}
+                {% setvar True as print_top_line %}
+            {% endif %}
+            {% if print_top_line %}
+                <td class="top-line location_content left">
+                    {{ detail.location_to.name }}
+                </td>
+            {% else %}
+                <td class="location-content"></td>
+            {% endif %}
+            {% if not print_top_line and detail.addon.name != prev_addon %}
+                {% setvar True as print_top_line %}
+            {% endif %}
+            {% if print_top_line %}
+                <td class="top-line">
+                    {{ detail.addon.name }}
+                </td>
+            {% else %}
+                <td></td>
+            {% endif %}
+            {% if not print_top_line and detail.provider_id != prev_provider %}
+                {% setvar True as print_top_line %}
+            {% endif %}
+            {% if print_top_line %}
+                <td class="top-line provider-content left">
+                    {{ detail.provider_name }}
+                </td>
+            {% else %}
+                <td class="provider-content"></td>
+            {% endif %}
+            <td class="top-line paxrange-content center">
+                {{ detail.pax_range_min }} - {{ detail.pax_range_max }}
+            </td>
+            <td class="top-line date-content center">
+                {{ detail.provider_service.date_from | date:"d-b-Y" }}
+            </td>
+            <td class="top-line date-content center">
+                {{ detail.provider_service.date_to | date:"d-b-Y" }}
+            </td>
+            <td class="top-line amount-content right">
+                {{ detail.ad_1_amount }}
+            </td>
+        </tr>
+        {% setvar detail.location_from.name as prev_from %}
+        {% setvar detail.location_to.name as prev_to %}
+        {% setvar detail.addon.name as prev_addon %}
+        {% setvar detail.provider_id as prev_provider %}
+    {% endfor %}
+
+{% elif service.category == 'E' %}
+    <tr>
+        <td colspan="6" class="bold-top-line">
+            <b>Service:</b> {{ service.name }}
+            {% if service.description %}
+                <br>{{ service.description }}
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <td class="top-line addon-content left"><b>Addon</b></td>
+        <td class="top-line provider-content left"><b>Provider</b></td>
+        {% if service.pax_range %}
+            <td class="top-line paxrange-content center"><b>Px.Rng.</b></td>
+        {% else %}
+            <td class="top-line paxrange-content center"><b>No PR</b></td>
+        {% endif %}
+        <td class="top-line date-content center"><b>From</b></td>
+        <td class="top-line date-content center"><b>To</b></td>
+        <td class="top-line amount-content right"><b>Cost</b></td>
+    </tr>
+    {% setvar '' as prev_addon %}
+    {% setvar '' as prev_provider %}
+    {% for detail in details %}
+        {% setvar False as print_top_line %}
+        <tr>
+            {% if detail.addon.name != prev_addon %}
+                {% setvar True as print_top_line %}
+            {% endif %}
+            {% if print_top_line %}
+                <td class="top-line addon-content left">
+                    {{ detail.addon.name }}
+                </td>
+            {% else %}
+                <td class="addon-content"></td>
+            {% endif %}
+            {% if detail.provider_service.provider.id != prev_provider %}
+                {% setvar True as print_top_line %}
+            {% endif %}
+            {% if print_top_line %}
+                <td class="top-line provider-content left">
+                    {{ detail.provider_service.provider.name }}
+                </td>
+            {% else %}
+                <td class="provider-content"></td>
+            {% endif %}
+            <td class="top-line paxrange-content center">
+                {{ detail.pax_range_min }} - {{ detail.pax_range_max }}
+            </td>
+            <td class="top-line date-content center">
+                {{ detail.provider_service.date_from | date:"d-b-Y" }}
+            </td>
+            <td class="top-line date-content center">
+                {{ detail.provider_service.date_to | date:"d-b-Y" }}
+            </td>
+            <td class="top-line amount-content right">
+                {{ detail.ad_1_amount }}
+            </td>
+        </tr>
+        {% setvar detail.addon.name as prev_addon %}
+        {% setvar detail.provider_service.provider.id as prev_provider %}
+    {% endfor %}
+
+{% elif service.category == 'P' %}
+    <tr>
+        {% if service.pax_range %}
+            <td colspan="5" class="bold-top-line">
+                <b>Service:</b> {{ service.name }}
+                {% if service.description %}
+                    <br>{{ service.description }}
+                {% endif %}
+            </td>
+        {% else %}
+            <td colspan="4" class="bold-top-line">
+                <b>Service:</b> {{ service.name }}
+                {% if service.description %}
+                    <br>{{ service.description }}
+                {% endif %}
+            </td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td class="top-line"></td>
+        {% if service.pax_range %}
+            <td class="top-line pax-range-content"><b>Pax Range</b></td>
+        {% endif %}
+        <td class="top-line date-content"><b>From</b></td>
+        <td class="top-line date-content"><b>To</b></td>
+        <td class="top-line amount-content"><b>SGL</b></td>
+    </tr>
+    {% for detail in details %}
+        {% setvar False as print_top_line %}
+        <tr>
+            <td class="top-line"></td>
+            {% if service.pax_range %}
+                <td class="top-line pax-range">
+                    {{ detail.pax_range_min }} - {{ detail.pax_range_max }}
+                </td>
+            {% endif %}
+            <td class="top-line date">
+                {{ detail.provider_service.date_from | date:"d-b-Y" }}
+            </td>
+            <td class="top-line date">
+                {{ detail.provider_service.date_to | date:"d-b-Y" }}
+            </td>
+            <td class="top-line amount">
+                {{ detail.ad_1_amount }}
+            </td>
+        </tr>
+    {% endfor %}
+{% endif %}
+</table>

@@ -2105,6 +2105,20 @@ class ConfigServices(object):
         return list(qs)
 
     @classmethod
+    def list_allotment_costs_details(cls, allotment, date_from, date_to):
+        qs = ProviderAllotmentDetail.objects.all()
+        qs = qs.filter(
+            provider_service__service=allotment.id)
+        if date_from:
+            qs = qs.filter(provider_service__date_to__gte=date_from)
+        if date_to:
+            qs = qs.filter(provider_service__date_from__lte=date_to)
+        qs = qs.order_by(
+            'board_type', 'room_type', 'addon', 'provider_service__provider', 'pax_range_min', '-pax_range_max',
+            'provider_service__date_from', '-provider_service__date_to')
+        return list(qs)
+
+    @classmethod
     def list_transfer_details(cls, transfer, agency, date_from='', date_to=''):
         # raw_sql collect transfer routes with their reverses excluding
         # not_reversible routes and explicitly specified ones
@@ -2183,6 +2197,65 @@ class ConfigServices(object):
         return list(qs)
 
     @classmethod
+    def list_transfer_costs_details(cls, transfer, date_from='', date_to=''):
+        # raw_sql collect transfer routes with their reverses excluding
+        # not_reversible routes and explicitly specified ones
+        raw_sql = """
+        SELECT sq_pd.*
+        FROM
+        (
+        SELECT
+            p.id as provider_id, p.name as provider_name, ptd.id, ptd.location_from_id, ptd.location_to_id,
+            pts.date_from, ptd.ad_1_amount
+          FROM `config_providertransferdetail` ptd
+          JOIN `config_providertransferservice` pts
+            ON pts.id = ptd.`provider_service_id`
+          JOIN `finance_provider` p
+            ON p.id = pts.`provider_id`
+          JOIN `config_location` l1
+            ON l1.id = ptd.location_from_id
+          JOIN `config_location` l2
+            ON l2.id = ptd.location_to_id
+          WHERE
+            pts.service_id = %s AND pts.date_to >= %s AND pts.date_from <= %s
+        UNION
+        SELECT
+            p.id as provider_id, p.name as provider_name, ptd1.id, l2.id AS location_from_id, l1.id AS location_to_id,
+            pts.date_from, ptd1.ad_1_amount
+          FROM
+            `config_providertransferdetail` ptd1
+          JOIN `config_providertransferservice` pts
+            ON pts.id = ptd1.`provider_service_id`
+          JOIN `finance_provider` p
+            ON p.id = pts.`provider_id`
+          JOIN `config_location` l1
+            ON l1.id = ptd1.location_from_id
+          JOIN `config_location` l2
+            ON l2.id = ptd1.location_to_id
+          LEFT JOIN `config_providertransferdetail` ptd2
+            ON ptd2.`provider_service_id` = ptd1.`provider_service_id`
+            AND ptd2.`location_from_id` = ptd1.`location_to_id`
+            AND ptd2.`location_to_id` = ptd1.`location_from_id`
+          WHERE
+            ptd2.id IS NULL
+            AND pts.service_id = %s AND pts.date_to >= %s AND pts.date_from <= %s
+        ) sq_pd
+        ORDER BY
+          sq_pd.location_from_id,
+          sq_pd.location_to_id,
+          sq_pd.provider_name,
+          sq_pd.provider_id,
+          sq_pd.date_from """
+        qs = ProviderTransferDetail.objects.raw(raw_sql,
+                                              [transfer.id,
+                                               date_from,
+                                               date_to,
+                                               transfer.id,
+                                               date_from,
+                                               date_to])
+        return list(qs)
+
+    @classmethod
     def list_extra_details(cls, extra, agency, date_from, date_to):
         qs = AgencyExtraDetail.objects.all()
         qs = qs.filter(
@@ -2198,19 +2271,33 @@ class ConfigServices(object):
         return list(qs)
 
     @classmethod
-    def list_package_details(cls, package, agency, date_from, date_to):
-        qs = AgencyPackageDetail.objects.all()
+    def list_extra_costs_details(cls, extra, date_from, date_to):
+        qs = ProviderExtraDetail.objects.all()
         qs = qs.filter(
-            agency_service__agency=agency,
-            agency_service__service=package.id)
+            provider_service__service=extra.id)
         if date_from:
-            qs = qs.filter(agency_service__date_to__gte=date_from)
+            qs = qs.filter(provider_service__date_to__gte=date_from)
         if date_to:
-            qs = qs.filter(agency_service__date_from__lte=date_to)
+            qs = qs.filter(provider_service__date_from__lte=date_to)
         qs = qs.order_by(
-            'pax_range_min', '-pax_range_max',
-            'agency_service__date_from', '-agency_service__date_to')
+            'addon', 'provider_service__provider', 'pax_range_min', '-pax_range_max',
+            'provider_service__date_from', '-provider_service__date_to')
         return list(qs)
+
+    # @classmethod
+    # def list_package_details(cls, package, agency, date_from, date_to):
+    #     qs = AgencyPackageDetail.objects.all()
+    #     qs = qs.filter(
+    #         agency_service__agency=agency,
+    #         agency_service__service=package.id)
+    #     if date_from:
+    #         qs = qs.filter(agency_service__date_to__gte=date_from)
+    #     if date_to:
+    #         qs = qs.filter(agency_service__date_from__lte=date_to)
+    #     qs = qs.order_by(
+    #         'pax_range_min', '-pax_range_max',
+    #         'agency_service__date_from', '-agency_service__date_to')
+    #     return list(qs)
 
 
     @classmethod
@@ -2221,8 +2308,18 @@ class ConfigServices(object):
             return cls.list_transfer_details(service, agency, date_from, date_to)
         if service.category == 'E':
             return cls.list_extra_details(service, agency, date_from, date_to)
-        if service.category == 'P':
-            return cls.list_package_details(service, agency, date_from, date_to)
+        # if service.category == 'P':
+        #     return cls.list_package_details(service, agency, date_from, date_to)
+
+
+    @classmethod
+    def list_service_costs(cls, service, date_from, date_to):
+        if service.category == 'A':
+            return cls.list_allotment_costs_details(service, date_from, date_to)
+        if service.category == 'T':
+            return cls.list_transfer_costs_details(service, date_from, date_to)
+        if service.category == 'E':
+            return cls.list_extra_costs_details(service, date_from, date_to)
 
 
     @classmethod
