@@ -154,11 +154,11 @@
                 {% setvar True as print_top_line %}
             {% endif %}
             {% if print_top_line %}
-                <td class="top-line">
+                <td class="top-line addon-content left">
                     {{ detail.addon.name }}
                 </td>
             {% else %}
-                <td></td>
+                <td class="addon-content"></td>
             {% endif %}
             {% if not print_top_line and detail.provider_id != prev_provider %}
                 {% setvar True as print_top_line %}
