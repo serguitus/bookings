@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import copy
 import datetime
 import json
+import logging
 import string
 import sys
 
@@ -51,6 +52,7 @@ from common.filters import PARAM_PREFIX, TopFilter
 from common.models import RecentLink
 from common.templatetags.common_utils import common_add_preserved_filters, result_hidden_fields
 
+logger = logging.getLogger(__name__)
 
 class CommonSite(AdminSite):
 
@@ -548,7 +550,7 @@ class SiteModel(TotalsumAdmin):
             self.build_url(r'^(.+)/$', RedirectView.as_view(
                 pattern_name='%s:%s_%s_change' % ((self.admin_site.name,) + info))),
         ]
-        
+
         return urlpatterns
 
     def index_url_format(self):
@@ -1050,7 +1052,7 @@ class SiteModel(TotalsumAdmin):
             redirect_url = common_add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
             return HttpResponseRedirect(redirect_url)
         except Exception as ex:
-            print('EXCEPTION common sites - changeform_do_saving : ' + ex.__str__())
+            logger.error('EXCEPTION common sites - changeform_do_saving : ' + ex.__str__())
             self.message_user(request, ex, messages.ERROR)
             return False
 
@@ -1767,7 +1769,7 @@ class ResultList(list):
 
 
 class CommonModelSiteTemplateResponse(TemplateResponse):
-    
+
     def __init__(self, request, site_model, template, context=None, content_type=None,
                  status=None, charset=None, using=None):
         new_context = {}
@@ -1848,7 +1850,7 @@ class CommonInlineModelAdmin(InlineModelAdmin):
             for related_field in self.list_select_related:
                 qs.select_related(related_field)
             self.queryset = qs
-            
+
         return self.queryset
 
     def get_formset(self, request, obj=None, **kwargs):
