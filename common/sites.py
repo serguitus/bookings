@@ -1053,7 +1053,6 @@ class SiteModel(TotalsumAdmin):
             return HttpResponseRedirect(redirect_url)
         except Exception as ex:
             logger.exception('EXCEPTION common sites - changeform_do_saving : ' + ex.__str__())
-            logger.error('traceback:' + ex.__traceback__)
             self.message_user(request, ex, messages.ERROR)
             return False
 
