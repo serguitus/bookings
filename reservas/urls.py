@@ -234,5 +234,5 @@ urlpatterns = [
         name='disabled-autocomplete',
     ),
     # this has to be the last one to redirect / to /bookings
-     url(r'^.*$', RedirectView.as_view(url='/bookings', permanent=False), name='index')
+     url(r'^.*$', RedirectView.as_view(url='/bookings/', permanent=False), name='index')
 ]
