@@ -365,6 +365,13 @@ class PricesExportForm(forms.Form):
                                widget=AdminDateWidget())
 
 
+class CostsExportForm(forms.Form):
+    start_date = forms.DateField(label='Starting Date', required=False,
+                                 widget=AdminDateWidget())
+    end_date = forms.DateField(label='End Date', required=False,
+                               widget=AdminDateWidget())
+
+
 class ExtraForm(forms.ModelForm):
     class Meta:
         fields = ('__all__')

@@ -588,6 +588,41 @@ def render_prices_pdf(request, extra_context=None):
     return HttpResponse(result.getvalue(), content_type='application/pdf')
 
 
+def render_costs_pdf(request, extra_context=None):
+    """
+    helper method
+    given some extra context with services renders a pdf of costs
+    requires a context with:
+    - services: a list of services to include in list
+    - date_from: the starting date to fetch prices
+    - date_to: the ending date to fetch prices for
+    """
+    context = {}
+    context.update(extra_context)
+    if 'services' not in context:
+        # Missing data. no pdf can be rendered
+        return redirect(reverse('common:config_service'))
+    template = get_template("config/pdf/costs.html")
+    context.update({
+        'pagesize': 'Letter',
+        # 'services': services,
+        # 'date_from': None,
+        # 'date_to': None,
+    })
+    html = template.render(context).encode('UTF-8')
+    result = StringIO()
+    pdf = pisa.pisaDocument(StringIO(html),
+                            dest=result,
+                            link_callback=_fetch_resources)
+    if pdf.err:
+        messages.add_message(request,
+                             messages.ERROR,
+                             "Failed Costs PDF Generation")
+        return HttpResponseRedirect(reverse('common:config_service'))
+
+    return HttpResponse(result.getvalue(), content_type='application/pdf')
+
+
 class ServiceAutocompleteView(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !

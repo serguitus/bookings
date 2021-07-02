@@ -24,7 +24,7 @@ from config.forms import (
     AgencyExtraServiceForm, AgencyExtraDetailForm, AgencyExtraDetailInlineForm,
     AllotmentRoomTypeInlineForm, TransferZoneForm,
     LocationTransferIntervalInlineForm, ServiceAddonInlineForm,
-    TransferPickupTimeInlineForm, PricesExportForm, ExtraForm,
+    TransferPickupTimeInlineForm, PricesExportForm, CostsExportForm, ExtraForm,
     ServiceForm, ServiceBookDetailForm,
     ServiceBookDetailAllotmentForm, ServiceBookDetailTransferForm,
     ServiceBookDetailExtraForm, SearchServiceForm, ExtendCatalogForm
@@ -57,7 +57,7 @@ from config.top_filters import (
     ProviderTransferDetailLocationTopFilter, TransferDetailProviderTopFilter,
     PackageTopFilter,
 )
-from config.views import render_prices_pdf
+from config.views import render_prices_pdf, render_costs_pdf
 
 from finance.top_filters import ProviderTopFilter, AgencyTopFilter
 from finance.models import Agency
@@ -102,6 +102,36 @@ def export_prices(request, queryset, extra_context=None):
     context.update(extra_context or {})
     # context.update({'quote_id': id})
     return render(request, 'config/agency_prices_export.html', context=context)
+
+
+def export_costs(request, queryset, extra_context=None):
+    """
+    This allows exporting service costs for certain dates
+    """
+    context = {}
+    if 'apply' in request.POST:
+        # The user clicked submit on the intermediate form.
+        # render the pdf
+        from common.filters import parse_date
+
+        date_from = parse_date(request.POST.get('start_date', None))
+        date_to = parse_date(request.POST.get('end_date', None))
+
+        services = request.POST.getlist('_selected_action', [])
+        if services:
+            return render_costs_pdf(
+                request,
+                {
+                    'date_from': date_from,
+                    'date_to': date_to,
+                    'services': Service.objects.filter(id__in=services).order_by('location__name')
+                })
+    context.update({'services': queryset})
+    context.update({'form': CostsExportForm()})
+    context.update({'site_title': 'Export Services'})
+    context.update(extra_context or {})
+    # context.update({'quote_id': id})
+    return render(request, 'config/services_costs_export.html', context=context)
 
 
 def response_post_agency_service(request, obj, url):
@@ -388,6 +418,15 @@ class BaseServiceSiteModel(SiteModel):
         context.update(extra_context or {})
         return export_prices(request, queryset, context)
 
+    def export_costs(self, request, queryset, extra_context=None):
+        """
+        This allows exporting service costs for certain dates
+        """
+        context = {}
+        context.update(self.get_model_extra_context(request))
+        context.update(extra_context or {})
+        return export_costs(request, queryset, context)
+
 
 class ServiceSiteModel(BaseServiceSiteModel):
     model_order = 6100
@@ -400,7 +439,7 @@ class ServiceSiteModel(BaseServiceSiteModel):
     top_filters = ('name', ('service_category', ServiceCategoryTopFilter),
                    'location', 'category', 'enabled')
     ordering = ['enabled', 'category', 'name']
-    actions = ['export_prices']
+    actions = ['export_prices', 'export_costs']
     form = ServiceForm
 
     def get_changelist(self, request, **kwargs):
@@ -493,7 +532,7 @@ class AllotmentSiteModel(BaseServiceSiteModel):
     ordering = ['enabled', 'name']
     inlines = [AllotmentRoomTypeInline, AllotmentBoardTypeInline,
                ServiceAddonInline, AllotmentTransferZoneInline,]
-    actions = ['export_prices']
+    actions = ['export_prices', 'export_costs']
     form = ServiceForm
 
 
@@ -512,7 +551,7 @@ class TransferSiteModel(BaseServiceSiteModel):
         AgencyTransferLocationTopFilter, 'is_shared', 'enabled')
     ordering = ['enabled', 'name']
     inlines = [ServiceAddonInline]
-    actions = ['export_prices']
+    actions = ['export_prices', 'export_costs']
     form = ServiceForm
 
 
@@ -535,7 +574,7 @@ class ExtraSiteModel(BaseServiceSiteModel):
                    ('location', LocationTopFilter))
     ordering = ['enabled', 'name']
     inlines = [ServiceAddonInline]
-    actions = ['export_prices']
+    actions = ['export_prices', 'export_costs']
     form = ExtraForm
 
 
