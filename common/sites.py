@@ -1027,6 +1027,7 @@ class SiteModel(TotalsumAdmin):
         """
         try:
             with transaction.atomic(savepoint=False):
+                logger.info('iniciando proceso de salvado de todo.....')
                 self.save_model(request, new_object, form, not add)
                 self.save_related(request, form, formsets, not add)
                 self.recent_link(request, model_object=new_object)
