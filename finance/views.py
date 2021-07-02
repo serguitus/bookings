@@ -119,7 +119,8 @@ class MatchList(CommonChangeList):
     def __init__(self, request, list_display, list_display_links,
                  list_filter, top_filters, date_hierarchy, search_fields,
                  list_select_related, list_per_page, list_max_show_all,
-                 list_editable, match_sitemodel, object_id, match_child_sitemodel):
+                 list_editable, match_sitemodel, object_id, match_child_sitemodel,
+                 sortable_by):
         self.obj_id = object_id
         self.match_sitemodel = match_sitemodel
         self.match_child_sitemodel = match_child_sitemodel
@@ -127,7 +128,8 @@ class MatchList(CommonChangeList):
             request, self.match_child_sitemodel.model, list_display,
             list_display_links, list_filter, top_filters, date_hierarchy,
             search_fields, list_select_related, list_per_page,
-            list_max_show_all, list_editable, self.match_child_sitemodel)
+            list_max_show_all, list_editable, self.match_child_sitemodel,
+            sortable_by)
         self.title = ugettext(
             'Select %s to match') % force_text(self.opts.verbose_name)
 

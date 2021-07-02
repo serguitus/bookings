@@ -1630,7 +1630,7 @@ class BookingProvidedAllotmentSiteModel(BookingProvidedServiceSiteModel):
                 'utility_percent', 'utility', 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
-        ('Notes', {'fields': ('p_notes', 'provider_notes'),
+        ('Notes', {'fields': ('p_notes', 'new_v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide', 'show')})
     )
     list_display = ('name', 'booking', 'booking_package', 'datetime_from',
@@ -1675,7 +1675,7 @@ class BookingProvidedTransferSiteModel(BookingProvidedServiceSiteModel):
                 'utility_percent', 'utility', 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
-        ('Notes', {'fields': ('p_notes', 'provider_notes'),
+        ('Notes', {'fields': ('p_notes', 'new_v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide', 'show')})
     )
     list_display = ('name', 'booking', 'booking_package', 'service_addon',
@@ -1721,7 +1721,7 @@ class BookingProvidedExtraSiteModel(BookingProvidedServiceSiteModel):
                 'utility_percent', 'utility', 'id', 'version',
                 'submit_action', 'mail_from', 'mail_to', 'mail_cc', 'mail_bcc', 'mail_subject', 'mail_body')
         }),
-        ('Notes', {'fields': ('p_notes', 'provider_notes'),
+        ('Notes', {'fields': ('p_notes', 'new_v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide', 'show')})
     )
     list_display = ('name', 'booking', 'booking_package', 'service_addon',

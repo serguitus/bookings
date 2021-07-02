@@ -261,7 +261,8 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
                 request, match_list_display,
                 match_list_display_links, match_list_filter, match_top_filters, match_date_hierarchy,
                 match_list_search_fields, match_list_select_related, match_list_per_page,
-                match_list_max_show_all, match_list_editable, match_parent_sitemodel, object_id, match_child_sitemodel
+                match_list_max_show_all, match_list_editable, match_parent_sitemodel, object_id,
+                match_child_sitemodel, self.get_sortable_by(request)
             )
         except IncorrectLookupParameters:
             # Wacky lookup parameters were given, so redirect to the main
