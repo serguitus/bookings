@@ -3425,6 +3425,15 @@ class BookingServices(object):
             bookingservice = cls._find_bookingservice(bookingservice, BookingProvidedExtra.objects)
         elif bookingservice.base_category == constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE:
             bookingservice = cls._find_bookingservice(bookingservice, BookingExtraPackage.objects)
+        elif bookingservice.base_category in [
+                constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_ALLOTMENT]:
+            bookingservice = cls._find_bookingservice(bookingservice, BookingBookDetailAllotment.objects)
+        elif bookingservice.base_category in [
+                constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_TRANSFER]:
+            bookingservice = cls._find_bookingservice(bookingservice, BookingBookDetailTransfer.objects)
+        elif bookingservice.base_category in [
+                constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_EXTRA]:
+            bookingservice = cls._find_bookingservice(bookingservice, BookingBookDetailExtra.objects)
 
         return bookingservice
 
