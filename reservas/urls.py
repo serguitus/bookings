@@ -16,6 +16,8 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
+from django.views.generic.base import RedirectView
+
 from reservas.admin import reservas_admin
 from reservas.admin import bookings_site
 
@@ -231,4 +233,6 @@ urlpatterns = [
         DisabledAutocompleteView.as_view(),
         name='disabled-autocomplete',
     ),
+    # this has to be the last one to redirect / to /bookings
+     url(r'^.*$', RedirectView.as_view(url='/bookings', permanent=False), name='index')
 ]
