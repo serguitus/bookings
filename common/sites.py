@@ -1027,7 +1027,6 @@ class SiteModel(TotalsumAdmin):
         """
         try:
             with transaction.atomic(savepoint=False):
-                logger.info('iniciando proceso de salvado de todo.....')
                 self.save_model(request, new_object, form, not add)
                 self.save_related(request, form, formsets, not add)
                 self.recent_link(request, model_object=new_object)
@@ -1053,7 +1052,8 @@ class SiteModel(TotalsumAdmin):
             redirect_url = common_add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
             return HttpResponseRedirect(redirect_url)
         except Exception as ex:
-            logger.error('EXCEPTION common sites - changeform_do_saving : ' + ex.__str__())
+            logger.exception('EXCEPTION common sites - changeform_do_saving : ' + ex.__str__())
+            logger.error('traceback:' + ex.__traceback__)
             self.message_user(request, ex, messages.ERROR)
             return False
 
