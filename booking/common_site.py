@@ -164,7 +164,8 @@ class QuoteSiteModel(SiteModel):
     fields = (
         ('reference', 'agency', 'seller'),
         ('status', 'currency'),
-        ('date_from', 'date_to'), 'id',
+        ('booked', 'date_from', 'date_to',),
+        'id',
         'mail_from', 'mail_to', 'mail_cc',
         'mail_bcc', 'mail_subject', 'mail_body', 'submit_action'
     )
@@ -541,8 +542,12 @@ class NewQuoteAllotmentSiteModel(QuoteServiceSiteModel):
     menu_group = MENU_GROUP_LABEL_SERVICES
 
     fields = (
-        ('quote', 'quote_package'), ('service', 'search_location', 'status'), ('datetime_from', 'nights', 'datetime_to'),
-        ('room_type', 'board_type'), ('provider','cost_by_catalog','price_by_catalog'), 'id')
+        ('quote', 'quote_package'),
+        ('service', 'search_location', 'status'),
+        ('datetime_from', 'nights', 'datetime_to'),
+        ('room_type', 'board_type'),
+        ('provider', 'contract_code'),
+        ('cost_by_catalog', 'price_by_catalog'), 'id')
     list_display = ('quote', 'quote_package', 'service', 'datetime_from', 'datetime_to', 'status',)
     top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote__reference', 'service__name',)
@@ -559,9 +564,12 @@ class NewQuoteTransferSiteModel(QuoteServiceSiteModel):
     menu_group = MENU_GROUP_LABEL_SERVICES
 
     fields = (
-        ('quote', 'quote_package'), ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to'),
+        ('quote', 'quote_package'),
+        ('service', 'search_location', 'status'),
+        ('datetime_from', 'datetime_to'),
         ('location_from', 'location_to'), 'service_addon',
-        ('provider','cost_by_catalog','price_by_catalog'), 'id')
+        ('provider', 'contract_code'),
+        ('cost_by_catalog', 'price_by_catalog'), 'id')
     list_display = ('quote', 'quote_package', 'name', 'service_addon', 'datetime_from', 'status',)
     top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote__reference', 'service__name',)
@@ -579,10 +587,12 @@ class NewQuoteExtraSiteModel(QuoteServiceSiteModel):
 
     fields = (
         ('quote', 'quote_package'),
-        ('service', 'search_location', 'status'), ('datetime_from', 'datetime_to', 'time'),
+        ('service', 'search_location', 'status'),
+        ('datetime_from', 'datetime_to', 'time'),
         ('service_addon'), ('quantity', 'parameter'),
         ('pickup_office', 'dropoff_office',),
-        ('provider','cost_by_catalog','price_by_catalog'), 'description', 'id')
+        ('provider', 'contract_code'),
+        ('cost_by_catalog', 'price_by_catalog'), 'description', 'id')
     list_display = (
         'quote', 'quote_package', 'service', 'service_addon', 'quantity', 'parameter',
         'datetime_from', 'datetime_to', 'time', 'status',)
@@ -676,10 +686,11 @@ class NewQuoteServiceBookDetailAllotmentSiteModel(BaseQuoteServiceBookDetailSite
     fields = [
         'quote_service',
         ('book_service', 'search_location'),
-        ('datetime_from', 'datetime_to'),
+        ('datetime_from', 'datetime_to', 'time'),
         ('room_type', 'board_type'),
-        'time',
-        'service_addon',]
+        'service_addon',
+        ('provider', 'contract_code'),
+    ]
     list_display = (
         'quote_service', 'book_service', 'datetime_from', 'datetime_to',
         'room_type', 'board_type', 'service_addon',)
@@ -699,7 +710,9 @@ class NewQuoteServiceBookDetailTransferSiteModel(BaseQuoteServiceBookDetailSiteM
         ('schedule_from', 'schedule_to'),
         ('schedule_time_from', 'schedule_time_to'),
         ('time', 'quantity'),
-        'service_addon',]
+        'service_addon',
+        ('provider', 'contract_code'),
+    ]
     list_display = (
         'quote_service', 'book_service', 'datetime_from', 'datetime_to',
         'location_from', 'location_to', 'quantity', 'service_addon')
@@ -715,7 +728,9 @@ class NewQuoteServiceBookDetailExtraSiteModel(BaseQuoteServiceBookDetailSiteMode
         ('datetime_from', 'datetime_to'),
         ('pickup_office', 'dropoff_office'),
         ('time', 'parameter', 'quantity'),
-        'service_addon',]
+        'service_addon',
+        ('provider', 'contract_code'),
+    ]
     list_display = (
         'quote_service', 'book_service', 'datetime_from', 'datetime_to',
         'parameter', 'quantity', 'pickup_office', 'dropoff_office', 'service_addon')

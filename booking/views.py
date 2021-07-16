@@ -1288,6 +1288,18 @@ class BookingAddPackageServiceView(BookingAddServiceView):
 
 
 def findBooked(form):
+    # quote
+    quote_id = form.forwarded.get('quote', None)
+    if quote_id:
+        quote = Quote.objects.get(pk=quote_id)
+        return quote.booked
+
+    quote_service_id = form.forwarded.get('quote_service', None)
+    if quote_service_id:
+        quote_service = QuoteService.objects.get(pk=quote_service_id)
+        if quote_service:
+            return quote_service.quote.booked
+    # booking
     booking_id = form.forwarded.get('booking', None)
     if booking_id:
         booking = Booking.objects.get(pk=booking_id)

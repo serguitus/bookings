@@ -649,8 +649,10 @@ class BookingServices(object):
 
     @classmethod
     def find_quote_amounts(
-            cls, quote, variant_list, inline_allotment_list=None, inline_transfer_list=None, inline_extra_list=None, inline_package_list=None):
+            cls, quote, variant_list, inline_allotment_list=None, inline_transfer_list=None,
+            inline_extra_list=None, inline_package_list=None):
         agency = quote.agency
+        booked = quote.booked
         result = list()
 
         if not variant_list:
@@ -697,7 +699,7 @@ class BookingServices(object):
             cost_3, cost_3_msg, price_3, price_3_msg, \
             cost_4, cost_4_msg, price_4, price_4_msg = cls._find_quote_pax_variant_amounts(
                 pax_variant, allotment_list, transfer_list, extra_list, package_list,
-                agency, variant_dict)
+                agency, booked, variant_dict)
 
             variant_dict.update({'total': cls._quote_amounts_dict(
                 cost_1, cost_1_msg, price_1, price_1_msg,
@@ -713,7 +715,7 @@ class BookingServices(object):
     @classmethod
     def _find_quote_pax_variant_amounts(
             cls, pax_variant, allotment_list, transfer_list, extra_list, package_list,
-            agency, variant_dict=None):
+            agency, booked, variant_dict=None):
         cost_1, cost_1_msg, price_1, price_1_msg = 0, '', 0, ''
         cost_2, cost_2_msg, price_2, price_2_msg = 0, '', 0, ''
         cost_3, cost_3_msg, price_3, price_3_msg = 0, '', 0, ''
@@ -844,7 +846,7 @@ class BookingServices(object):
                     c3, c3_msg, p3, p3_msg, \
                     c4, c4_msg, p4, p4_msg = cls._find_quotepackage_amounts(
                         quote_pax_variant=pax_variant, package=package, agency=agency,
-                        manuals=True)
+                        booked=booked, manuals=True)
 
                     # service amounts
                     if variant_dict:
@@ -918,6 +920,7 @@ class BookingServices(object):
                         quote_pax_variant=pax_variant.quote_pax_variant,
                         package=quoteservice,
                         agency=quoteservice.quote.agency,
+                        booked=quoteservice.quote.booked,
                         service_pax_variant=pax_variant,
                         manuals=True)
                 else:
@@ -1262,7 +1265,8 @@ class BookingServices(object):
 
     @classmethod
     def _find_quotepackage_amounts(
-            cls, quote_pax_variant, package, agency, service_pax_variant=None, manuals=False):
+            cls, quote_pax_variant, package, agency, booked, service_pax_variant=None,
+            manuals=False):
         cost_1 = 0
         cost_2 = 0
         cost_3 = 0
@@ -1558,6 +1562,7 @@ class BookingServices(object):
             addon_id = package.service_addon_id
             quantity = package.quantity
             parameter = package.parameter
+            contract_code = package.contract_code
 
             price_1, price_1_msg, \
             price_2, price_2_msg, \
@@ -1568,6 +1573,8 @@ class BookingServices(object):
                 date_from=date_from,
                 date_to=date_to,
                 agency=agency,
+                booked=booked,
+                contract_code=contract_code,
                 addon_id=addon_id,
                 parameter=parameter,
                 quantity=quantity,
@@ -1758,6 +1765,8 @@ class BookingServices(object):
                 bookingpackage_service.service,
                 bookingpackage_service.datetime_from, bookingpackage_service.datetime_to,
                 cost_groups, price_groups, service_provider,
+                bookingpackage_service.booking_package.booking.booked,
+                bookingpackage_service.contract_code,
                 bookingpackage_service.booking_package.booking.agency,
                 bookingpackage_service.board_type, bookingpackage_service.room_type_id,
                 bookingpackage_service.service_addon_id)
@@ -1766,6 +1775,8 @@ class BookingServices(object):
                 bookingpackage_service.service,
                 bookingpackage_service.datetime_from, bookingpackage_service.datetime_to,
                 cost_groups, price_groups, service_provider,
+                bookingpackage_service.booking_package.booking.booked,
+                bookingpackage_service.contract_code,
                 bookingpackage_service.booking_package.booking.agency,
                 bookingpackage_service.location_from_id, bookingpackage_service.location_to_id,
                 bookingpackage_service.service_addon_id,
@@ -1775,6 +1786,8 @@ class BookingServices(object):
                 bookingpackage_service.service,
                 bookingpackage_service.datetime_from, bookingpackage_service.datetime_to,
                 cost_groups, price_groups, service_provider,
+                bookingpackage_service.booking_package.booking.booked,
+                bookingpackage_service.contract_code,
                 bookingpackage_service.booking_package.booking.agency,
                 bookingpackage_service.service_addon_id,
                 bookingpackage_service.quantity, bookingpackage_service.parameter)
@@ -2050,28 +2063,34 @@ class BookingServices(object):
     def _any_quoteservice_catalog_costs(
             cls, any_service, date_from, date_to, cost_groups, provider):
         c, c_msg = None, "Unknown Service"
+        quote = None
         service = None
         if isinstance(any_service, (QuoteProvidedService)):
+            quote = any_service.quote
             service = any_service.service
         elif isinstance(any_service, (NewQuoteServiceBookDetail)):
+            quote = any_service.quote_service.quote
             service = any_service.book_service
 
         if isinstance(any_service, (
                 NewQuoteAllotment, NewQuoteServiceBookDetailAllotment)):
             c, c_msg = ConfigServices.allotment_costs(
-                service, date_from, date_to, cost_groups, provider, None, None,
+                service, date_from, date_to, cost_groups,
+                provider, quote.booked, any_service.contract_code,
                 any_service.board_type, any_service.room_type_id,
                 any_service.service_addon_id)
         if isinstance(any_service, (
                 NewQuoteTransfer, NewQuoteServiceBookDetailTransfer)):
             c, c_msg = ConfigServices.transfer_costs(
-                service, date_from, date_to, cost_groups, provider, None, None,
+                service, date_from, date_to, cost_groups,
+                provider, quote.booked, any_service.contract_code,
                 any_service.location_from_id, any_service.location_to_id,
                 any_service.service_addon_id, any_service.quantity)
         if isinstance(any_service, (
                 NewQuoteExtra, NewQuoteServiceBookDetailExtra)):
             c, c_msg = ConfigServices.extra_costs(
-                service, date_from, date_to, cost_groups, provider, None, None,
+                service, date_from, date_to, cost_groups,
+                provider, quote.booked, any_service.contract_code,
                 any_service.service_addon_id, any_service.quantity, any_service.parameter)
 
         return cls._round_cost(c), c_msg
@@ -2084,17 +2103,19 @@ class BookingServices(object):
         if isinstance(quoteservice, (NewQuoteAllotment)):
             p, p_msg = ConfigServices.allotment_prices(
                 quoteservice.service, date_from, date_to, price_groups, agency,
-                None, None,
+                quoteservice.quote.booked, quoteservice.contract_code,
                 quoteservice.board_type, quoteservice.room_type_id,
                 quoteservice.service_addon_id)
         if isinstance(quoteservice, (NewQuoteTransfer)):
             p, p_msg = ConfigServices.transfer_prices(
-                quoteservice.service, date_from, date_to, price_groups, agency, None, None,
+                quoteservice.service, date_from, date_to, price_groups, agency,
+                quoteservice.quote.booked, quoteservice.contract_code,
                 quoteservice.location_from_id, quoteservice.location_to_id,
                 quoteservice.service_addon_id, quoteservice.quantity)
         if isinstance(quoteservice, (NewQuoteExtra)):
             p, p_msg = ConfigServices.extra_prices(
-                quoteservice.service, date_from, date_to, price_groups, agency, None, None,
+                quoteservice.service, date_from, date_to, price_groups, agency,
+                quoteservice.quote.booked, quoteservice.contract_code,
                 quoteservice.service_addon_id, quoteservice.quantity, quoteservice.parameter)
         return cls._round_price(p), p_msg
 
@@ -2355,10 +2376,11 @@ class BookingServices(object):
 
     @classmethod
     def _find_quotepackage_catalog_prices(
-            cls, pax_quantity, service, date_from, date_to, agency, addon_id, parameter, quantity, service_pax_variant):
+            cls, pax_quantity, service, date_from, date_to, agency,
+            booked, contract_code, addon_id, parameter, quantity, service_pax_variant):
         total_free_cost, total_free_price = cls._find_free_paxes(service_pax_variant)
         p1, p1_msg = ConfigServices.extra_prices(
-            service, date_from, date_to, ({0:pax_quantity, 1:0},), agency, None, None,
+            service, date_from, date_to, ({0:pax_quantity, 1:0},), agency, booked, contract_code,
             addon_id, quantity, parameter
         )
         if p1 is not None:
@@ -2612,6 +2634,7 @@ class BookingServices(object):
                 quote_pax_variant=quote_pax_variant,
                 package=service,
                 agency=service.quote.agency,
+                booked=service.quote.booked,
                 service_pax_variant=service_pax_variant,
                 manuals=for_update)
         elif isinstance(service, QuoteService):
@@ -2627,6 +2650,7 @@ class BookingServices(object):
                     quote_pax_variant=quote_pax_variant,
                     package=service,
                     agency=service.quote.agency,
+                    booked=service.quote.booked,
                     service_pax_variant=service_pax_variant,
                     manuals=for_update)
             else:
@@ -2820,6 +2844,7 @@ class BookingServices(object):
             quote_pax_variant=pax_variant.quote_pax_variant,
             package=package,
             agency=pax_variant.quote_pax_variant.quote.agency,
+            booked=pax_variant.quote_pax_variant.quote.booked,
             service_pax_variant=quotepackage_pax_variant,
             manuals=True)
 
@@ -3801,7 +3826,8 @@ class BookingServices(object):
                 bookingpackage.service.id,
                 bookingpackage.datetime_from, bookingpackage.datetime_to,
                 price_groups,
-                bookingpackage.booking.agency, None, None,
+                bookingpackage.booking.agency,
+                bookingpackage.booking.booked, bookingpackage.contract_code,
                 bookingpackage.service_addon_id,
                 bookingpackage.quantity, bookingpackage.parameter)
 
@@ -3872,7 +3898,7 @@ class BookingServices(object):
                     bookingpackage.service,
                     bookingpackage.datetime_from, bookingpackage.datetime_to,
                     cls.find_groups(bookingpackage, bookingpackage.service, False),
-                    agency, None, None,
+                    agency, booked, bookingpackage.contract_code,
                     bookingpackage.service_addon_id,
                     bookingpackage.quantity,
                     bookingpackage.parameter

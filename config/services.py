@@ -588,7 +588,8 @@ class ConfigServices(object):
 
     @classmethod
     def allotment_amounts(
-            cls, service_id, date_from, date_to, cost_groups, price_groups, provider, agency,
+            cls, service_id, date_from, date_to, cost_groups, price_groups,
+            provider, booked, contract_code, agency,
             board_type, room_type_id, addon_id=None, quantity=None):
         if room_type_id is None or room_type_id == '':
             return None, 'Room Missing', None, 'Room Missing'
@@ -799,7 +800,8 @@ class ConfigServices(object):
 
     @classmethod
     def transfer_amounts(
-            cls, service_id, date_from, date_to, cost_groups, price_groups, provider, agency,
+            cls, service_id, date_from, date_to, cost_groups, price_groups,
+            provider, booked, contract_code, agency,
             location_from_id, location_to_id, addon_id=None, quantity=None):
         if location_from_id is None or location_from_id == '':
             return None, 'Location From Missing', None, 'Location From Missing'
@@ -1052,7 +1054,8 @@ class ConfigServices(object):
 
     @classmethod
     def extra_amounts(
-            cls, service_id, date_from, date_to, cost_groups, price_groups, provider, agency,
+            cls, service_id, date_from, date_to, cost_groups, price_groups,
+            provider, booked, contract_code, agency,
             addon_id, quantity, parameter):
         service = Extra.objects.get(pk=service_id)
 

@@ -226,6 +226,7 @@ class Quote(models.Model):
     reference = models.CharField(max_length=250)
     date_from = models.DateField(blank=True, null=True)
     date_to = models.DateField(blank=True, null=True)
+    booked = models.DateField(blank=True, null=True)
     status = models.CharField(
         max_length=5, choices=QUOTE_STATUS_LIST, default=QUOTE_STATUS_DRAFT)
     currency = models.CharField(
@@ -297,6 +298,7 @@ class QuoteService(BookServiceData, DateInterval):
         max_length=5, choices=QUOTE_STATUS_LIST, default=QUOTE_STATUS_DRAFT)
     base_category = models.CharField(
         max_length=5, choices=QUOTE_SERVICE_CATEGORIES)
+    contract_code = models.CharField(max_length=40, blank=True, null=True)
 
     # Managers
     objects = models.Manager()
