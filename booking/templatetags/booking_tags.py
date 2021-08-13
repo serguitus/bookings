@@ -266,6 +266,10 @@ def render_service(booking_service, provider=None):
     c.update({'bs': bs})
     if provider:
         c.update({'provider': provider})
+    rooming = bs.rooming_list.all()
+    if not rooming:
+        rooming = bs.booking_package.rooming_list.all()
+    c.update({'rooming_list': rooming})
     return c
 
 
