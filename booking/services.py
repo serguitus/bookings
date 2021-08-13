@@ -1193,6 +1193,24 @@ class BookingServices(object):
         else:
             status = constants.BOOKING_STATUS_PENDING
 
+        if bookingpackage.price_by_catalog:
+            if bookingpackage.manual_price:
+                if bookingpackage.price_amount is None:
+                    price, price_msg = None, "Missing Manual Price"
+                else:
+                    price, price_msg = bookingpackage.price_amount, None
+            else:
+                price, price_msg = ConfigServices.extra_prices(
+                    bookingpackage.service,
+                    bookingpackage.datetime_from, bookingpackage.datetime_to,
+                    cls.find_groups(bookingpackage, bookingpackage.service, False),
+                    bookingpackage.booking.agency,
+                    bookingpackage.booking.booked, bookingpackage.contract_code,
+                    bookingpackage.service_addon_id,
+                    bookingpackage.quantity,
+                    bookingpackage.parameter
+                )
+
         fields = []
         if bookingpackage.datetime_from != date_from:
             fields.append('datetime_from')
