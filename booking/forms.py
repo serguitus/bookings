@@ -160,9 +160,20 @@ class NewQuoteAllotmentForm(forms.ModelForm, ServiceForm):
                 url='providerallotment-autocomplete',
                 forward=['service', 'room_type', 'board_type', 'service_addon'],
                 ),
+            'contract_code': autocomplete.ListSelect2(
+                url='allotmentcontract-autocomplete',
+                forward=[
+                    'quote', 'provider', 'service', 'date_from', 'date_to',
+                    'service_addon', 'room_type', 'board_type'],
+                ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
     nights = forms.IntegerField(initial=0)
+
+    def __init__(self, *args, **kwargs):
+        super(NewQuoteAllotmentForm, self).__init__(*args, **kwargs)
+        self.fields['contract_code'].widget.choices = [
+            [self.instance.contract_code, self.instance.contract_code]]
 
 
 class NewQuoteTransferForm(forms.ModelForm, ServiceForm):
@@ -188,8 +199,19 @@ class NewQuoteTransferForm(forms.ModelForm, ServiceForm):
                 url='providertransfer-autocomplete',
                 forward=['service', 'location_from', 'location_to', 'service_addon'],
                 ),
+            'contract_code': autocomplete.ListSelect2(
+                url='transfercontract-autocomplete',
+                forward=[
+                    'quote', 'provider', 'service', 'date_from', 'date_to',
+                    'service_addon', 'location_from', 'location_to'],
+                ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        super(NewQuoteTransferForm, self).__init__(*args, **kwargs)
+        self.fields['contract_code'].widget.choices = [
+            [self.instance.contract_code, self.instance.contract_code]]
 
 
 class NewQuoteExtraForm(forms.ModelForm, ServiceForm):
@@ -226,8 +248,19 @@ class NewQuoteExtraForm(forms.ModelForm, ServiceForm):
                 url='carrentaloffice-autocomplete',
                 forward=['service'],
                 ),
+            'contract_code': autocomplete.ListSelect2(
+                url='extracontract-autocomplete',
+                forward=[
+                    'quote', 'provider', 'service', 'date_from', 'date_to',
+                    'service_addon'],
+                ),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        super(NewQuoteExtraForm, self).__init__(*args, **kwargs)
+        self.fields['contract_code'].widget.choices = [
+            [self.instance.contract_code, self.instance.contract_code]]
 
 
 class QuoteExtraPackageForm(forms.ModelForm, ServiceForm):
@@ -658,6 +691,12 @@ class NewQuoteServiceBookDetailAllotmentForm(forms.ModelForm, BaseBookDataForm):
                 url='addon-autocomplete',
                 forward=['book_service'],
                 ),
+            'contract_code': autocomplete.ListSelect2(
+                url='allotmentcontract-autocomplete',
+                forward=[
+                    'quote_service', 'provider', 'book_service', 'date_from', 'date_to',
+                    'service_addon', 'room_type', 'board_type'],
+                ),
         }
 
 
@@ -677,6 +716,12 @@ class NewQuoteServiceBookDetailTransferForm(forms.ModelForm, BaseBookDataForm):
             'service_addon': autocomplete.ModelSelect2(
                 url='addon-autocomplete',
                 forward=['book_service'],
+                ),
+            'contract_code': autocomplete.ListSelect2(
+                url='transfercontract-autocomplete',
+                forward=[
+                    'quote_service', 'provider', 'book_service', 'date_from', 'date_to',
+                    'service_addon', 'location_from', 'location_to'],
                 ),
         }
 
@@ -703,6 +748,12 @@ class NewQuoteServiceBookDetailExtraForm(forms.ModelForm, BaseBookDataForm):
             'dropoff_office': autocomplete.ModelSelect2(
                 url='carrentaloffice-autocomplete',
                 forward=['book_service',],
+                ),
+            'contract_code': autocomplete.ListSelect2(
+                url='extracontract-autocomplete',
+                forward=[
+                    'quote_service', 'provider', 'book_service', 'date_from', 'date_to',
+                    'service_addon'],
                 ),
         }
 
