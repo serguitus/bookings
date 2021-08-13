@@ -1377,10 +1377,10 @@ class BookingProvidedServiceSiteModel(SiteModel):
     def response_post_save_or_delete(self, request, obj):
         # verify if has parent package
         if hasattr(obj, 'booking_package') and obj.booking_package:
-            return redirect(reverse('common:booking_bookingpackageextra_change', args=[obj.booking_package.pk]))
+            return redirect(reverse('common:booking_bookingextrapackage_change', args=[obj.booking_package.pk]))
         bookingpackage_obj = request.POST.get('booking_package')
         if bookingpackage_obj:
-            return redirect(reverse('common:booking_bookingpackageextra_change', args=[bookingpackage_obj]))
+            return redirect(reverse('common:booking_bookingextrapackage_change', args=[bookingpackage_obj]))
         # no parent package return go for parent booking
         if hasattr(obj, 'booking') and obj.booking:
             return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
@@ -1773,7 +1773,7 @@ class BookingExtraPackageSiteModel(BaseBookingServiceSiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_SERVICES
 
-    readonly_fields = ['status', 'utility_percent', 'utility'] 
+    readonly_fields = ['status', 'utility_percent', 'utility']
 
     fieldsets = (
         (None, {
