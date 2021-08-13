@@ -1357,28 +1357,37 @@ class BookingProvidedServiceSiteModel(SiteModel):
     confirmed_services.short_description = "Confirm Services"
 
     def response_post_delete(self, request, obj):
-        if hasattr(obj, 'booking') and obj.booking:
-            return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
-        booking_obj = request.POST.get('booking')
-        if booking_obj:
-            return redirect(reverse('common:booking_booking_change', args=[booking_obj]))
+        response = self.response_post_save_or_delete(request, obj)
+        if response:
+            return response
         return super(BookingProvidedServiceSiteModel, self).response_post_delete(request, obj)
 
     def response_post_save_add(self, request, obj):
-        if hasattr(obj, 'booking') and obj.booking:
-            return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
-        booking_obj = request.POST.get('booking')
-        if booking_obj:
-            return redirect(reverse('common:booking_booking_change', args=[booking_obj]))
+        response = self.response_post_save_or_delete(request, obj)
+        if response:
+            return response
         return super(BookingProvidedServiceSiteModel, self).response_post_save_add(request, obj)
 
     def response_post_save_change(self, request, obj):
+        response = self.response_post_save_or_delete(request, obj)
+        if response:
+            return response
+        return super(BookingProvidedServiceSiteModel, self).response_post_save_change(request, obj)
+
+    def response_post_save_or_delete(self, request, obj):
+        # verify if has parent package
+        if hasattr(obj, 'booking_package') and obj.booking_package:
+            return redirect(reverse('common:booking_bookingpackageextra_change', args=[obj.booking_package.pk]))
+        bookingpackage_obj = request.POST.get('booking_package')
+        if bookingpackage_obj:
+            return redirect(reverse('common:booking_bookingpackageextra_change', args=[bookingpackage_obj]))
+        # no parent package return go for parent booking
         if hasattr(obj, 'booking') and obj.booking:
             return redirect(reverse('common:booking_booking_change', args=[obj.booking.pk]))
         booking_obj = request.POST.get('booking')
         if booking_obj:
             return redirect(reverse('common:booking_booking_change', args=[booking_obj]))
-        return super(BookingProvidedServiceSiteModel, self).response_post_save_change(request, obj)
+        return None
 
     def changeform_context(
             self, request, form, obj, formsets, inline_instances,
