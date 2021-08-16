@@ -1,6 +1,12 @@
 var add_service_url = base_url + 'booking/booking_add_service/';
 $(document).ready(function(){
 
+  var clickEvent = new MouseEvent("click", {
+    "view": window,
+    "bubbles": true,
+    "cancelable": false
+  });
+
   function get_computed_amounts(){
     // sending a request to get computed numbers
     $.ajax({
@@ -71,7 +77,8 @@ $(document).ready(function(){
 
   // check if there are general notes on the booking to Expand collapsed notes
   if($('#id_p_notes').val()){
-    $('#fieldsetcollapser0.collapse-toggle').click()
+    document.getElementById('fieldsetcollapser0').dispatchEvent(clickEvent);
+    //$('#fieldsetcollapser0.collapse-toggle').click()
   }
 
   // for agency changed

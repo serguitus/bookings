@@ -2,6 +2,7 @@
 {% load booking_tags static %}
 {% load render_table from django_tables2 %}
 {% block head_extra %}
+    <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
     <script src="{% static 'admin/js/jquery.init.js' %}"></script>
     <script type="text/javascript" src="/admin/jsi18n/"></script>
     <script src="{% static 'admin/js/actions.js' %}"></script>
@@ -10,7 +11,7 @@
 {% block content %}
     <h1>Vouchers Configuration</h1>
     <h2>Please choose services to build vouchers to</h2>
-  <form method="post" novalidate>{% csrf_token %}
+  <form method="post" novalidate id='booking_vouchers_form'>{% csrf_token %}
     {% vouchers_table current as table %}
     <div class="bookingvouchers-container">
       {% render_table table %}
@@ -19,7 +20,7 @@
 
     {% include 'booking/emails/popup_modal_form.html' with form=email_form %}
 
-    <div class="submitbtn vouchers-submit">  
+    <div class="submitbtn vouchers-submit">
       <button class="btn btn-primary" id="btn-build" type="submit">Generate</button>
       {% include "booking/emails/popup_button.html" with btn_label='Send Mail' only %}
       <a class="btn btn-back" href="{% url 'common:booking_booking_change' current.id %}">Back</a>
