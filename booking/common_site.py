@@ -1791,8 +1791,9 @@ class BookingExtraPackageSiteModel(BaseBookingServiceSiteModel):
         ('Notes', {'fields': ('p_notes', 'new_v_notes', 'provider_notes'),
                    'classes': ('collapse', 'wide', 'show')})
     )
-    list_display = ['name', 'booking', 'datetime_from', 'datetime_to',
-            'cost_amount', 'price_amount', 'utility_percent', 'utility', 'status']
+    list_display = [
+        'name', 'booking', 'datetime_from', 'datetime_to',
+        'cost_amount', 'price_amount', 'utility_percent', 'utility', 'status']
     top_filters = ['booking__name', 'service', 'booking__reference',
                    ('datetime_from', DateTopFilter), 'status']
     ordering = ['datetime_from', 'booking__reference', 'service__name']
