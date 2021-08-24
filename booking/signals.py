@@ -146,8 +146,12 @@ def pre_delete_bookingextra(sender, instance, **kwargs):
 
 @receiver(pre_delete, sender=BookingExtraPackage)
 def pre_delete_bookingpackage(sender, instance, **kwargs):
-    if instance.has_payment or instance.status != SERVICE_STATUS_PENDING:
+    if instance.has_payment:
+        raise ValidationError('Can not delete Booking Services that have payments')
+    if instance.status != SERVICE_STATUS_PENDING:
         raise ValidationError('Can not delete Booking Services that are Not Pending')
+    if instance.booking_package_services.all():
+        raise ValidationError('Can not delete Booking Package Services with inner services')
 
 
 @receiver((post_save, post_delete), sender=BookingProvidedAllotment)

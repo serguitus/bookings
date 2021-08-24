@@ -1814,6 +1814,34 @@ class BookingExtraPackageSiteModel(BaseBookingServiceSiteModel):
             obj = self.save_form(request, form, change)
             BookingServices.update_bookingpackageservices_amounts(obj)
 
+    @csrf_protect_m
+    def delete_view(self, request, object_id, extra_context=None):
+        package = BookingExtraPackage.objects.get(pk=object_id)
+        stop = False
+        if package.status != SERVICE_STATUS_PENDING:
+            messages.add_message(
+                request=request, level=messages.ERROR,
+                message='Only Pending Service can be deleted. You can set Status to Cancelled.',
+                extra_tags='', fail_silently=False)
+            stop = True
+        if package.has_payment:
+            messages.add_message(
+                request=request, level=messages.ERROR,
+                message='Only Service without payments can be deleted.',
+                extra_tags='', fail_silently=False)
+            stop = True
+        if package.booking_package_services.all():
+            messages.add_message(
+                request=request, level=messages.ERROR,
+                message='Only Package without inner services can be deleted. You can try to delete inner services first.',
+                extra_tags='', fail_silently=False)
+            stop = True
+        if stop:
+            return redirect(reverse(
+                'common:%s_%s_change' % (self.model._meta.app_label, self.model._meta.model_name),
+                args=[object_id]))
+        return super(BookingExtraPackage, self).delete_view(request, object_id, extra_context)
+
     def delete_model(self, request, obj):
         with transaction.atomic(savepoint=False):
             if obj.has_payment or obj.status != SERVICE_STATUS_PENDING:
