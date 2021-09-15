@@ -1,6 +1,12 @@
 (function($){
 $(document).ready(function(){
 
+  var clickEvent = new MouseEvent("click", {
+    "view": window,
+    "bubbles": true,
+    "cancelable": false
+  });
+
   $('div.fieldBox.field-provider>div.related-widget-wrapper').after('<a id="btn-costs" title="Costs" data-toggle="modal" data-target="#popup-costs" class="btn btn-costs fa fa-dollar" href="#"></a>');
 
   $('#btn-costs').on('click', function (e) {
@@ -14,6 +20,7 @@ $(document).ready(function(){
 
   // check if there are notes on bookingServices to Expand collapsed notes
   if($('#id_new_v_notes').val() || $('#id_p_notes').val() || $('#id_provider_notes').val()){
+    document.getElementById('fieldsetcollapser0').dispatchEvent(clickEvent);
     $('#fieldsetcollapser0.collapse-toggle').click();
   }
 
