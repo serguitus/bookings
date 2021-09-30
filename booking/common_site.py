@@ -1841,7 +1841,7 @@ class BookingExtraPackageSiteModel(BaseBookingServiceSiteModel):
             return redirect(reverse(
                 'common:%s_%s_change' % (self.model._meta.app_label, self.model._meta.model_name),
                 args=[object_id]))
-        return super(BookingExtraPackage, self).delete_view(request, object_id, extra_context)
+        return super(BookingExtraPackageSiteModel, self).delete_view(request, object_id, extra_context)
 
     def delete_model(self, request, obj):
         with transaction.atomic(savepoint=False):
