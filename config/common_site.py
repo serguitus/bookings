@@ -710,7 +710,7 @@ class ProviderAllotmentDetailInline(CommonTabularInline):
 
 
 class ProviderAllotmentServiceSiteModel(CatalogService):
-    model_order = 7220
+    model_order = 7120
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Costs Catalogue'
     #recent_allowed = True
@@ -837,7 +837,7 @@ class ProviderTransferDetailInline(CommonTabularInline):
 
 
 class ProviderTransferServiceSiteModel(CatalogService):
-    model_order = 7230
+    model_order = 7130
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Costs Catalogue'
     #recent_allowed = True
@@ -952,7 +952,7 @@ class ProviderExtraDetailInline(CommonTabularInline):
 
 
 class ProviderExtraServiceSiteModel(CatalogService):
-    model_order = 7240
+    model_order = 7140
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Costs Catalogue'
     #recent_allowed = True
@@ -1065,7 +1065,7 @@ class AgencyAllotmentDetailInline(CommonTabularInline):
 
 
 class AgencyAllotmentServiceSiteModel(CatalogService):
-    model_order = 7120
+    model_order = 7220
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Selling Prices Catalogue'
     #recent_allowed = True
@@ -1176,7 +1176,7 @@ class AgencyTransferDetailInline(CommonTabularInline):
 
 
 class AgencyTransferServiceSiteModel(CatalogService):
-    model_order = 7130
+    model_order = 7230
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Selling Prices Catalogue'
     #recent_allowed = True
@@ -1277,7 +1277,7 @@ class AgencyExtraDetailInline(CommonTabularInline):
 
 
 class AgencyExtraServiceSiteModel(CatalogService):
-    model_order = 7140
+    model_order = 7240
     menu_label = MENU_LABEL_CONFIG_BASIC
     menu_group = 'Selling Prices Catalogue'
     #recent_allowed = True
