@@ -98,6 +98,7 @@ class ConfigServices(object):
                 agency__in=[src_agency, dst_agency]).values(
                     'date_from',
                     'date_to',
+                    'contract_code',
                     'service')
             # now find those that are not present for both agencies
             src_not_dup_services = src_services.annotate(
@@ -106,7 +107,7 @@ class ConfigServices(object):
                 # no service to update here. inform and exit
                 return
             src_services_unique_fields = src_not_dup_services.values(
-                'service', 'date_from', 'date_to')
+                'service', 'date_from', 'date_to', 'contract_code')
             # build the list of items to filter by
             filter_list = None
             for s in src_services_unique_fields:
@@ -122,6 +123,9 @@ class ConfigServices(object):
                     agency_id=dst_agency.id,
                     date_from=src_service.date_from,
                     date_to=src_service.date_to,
+                    contract_code=src_service.contract_code,
+                    booked_from=src_service.booked_from,
+                    booked_to=src_service.booked_to,
                     service_id=src_service.service_id
                 )
                 for detail in getattr(src_service, detail_set_name).all():
@@ -148,6 +152,7 @@ class ConfigServices(object):
                     'agency_service__service',
                     'agency_service__date_from',
                     'agency_service__date_to',
+                    'agency_service__contract_code',
                     'room_type',
                     'board_type',
                     'addon',
@@ -163,6 +168,7 @@ class ConfigServices(object):
                 'agency_service__service',
                 'agency_service__date_from',
                 'agency_service__date_to',
+                'agency_service__contract_code',
                 'addon',
                 'room_type',
                 'board_type',
@@ -185,7 +191,8 @@ class ConfigServices(object):
                     agency=dst_agency,
                     service=src_detail.agency_service.service,
                     date_from=src_detail.agency_service.date_from,
-                    date_to=src_detail.agency_service.date_to)
+                    date_to=src_detail.agency_service.date_to,
+                    contract_code=src_detail.agency_service.contract_code)
                 # now drop ids to create a new detail refering dst_service
                 src_detail.pk = None
                 src_detail.id = None
@@ -203,8 +210,13 @@ class ConfigServices(object):
                 agency_id=dst_agency.id,
                 date_from=src_agency_service.date_from,
                 date_to=src_agency_service.date_to,
+                contract_code=src_agency_service.contract_code,
                 service_id=src_agency_service.service_id
             )
+            if created:
+                dst_agency_service.booked_from = src_agency_service.booked_from
+                dst_agency_service.booked_to = src_agency_service.booked_to
+
             # find details
             details = list(
                 AgencyAllotmentDetail.objects.filter(agency_service=src_agency_service))
@@ -238,6 +250,7 @@ class ConfigServices(object):
                     'agency_service__service',
                     'agency_service__date_from',
                     'agency_service__date_to',
+                    'agency_service__contract_code',
                     'location_from',
                     'location_to',
                     'addon',
@@ -253,6 +266,7 @@ class ConfigServices(object):
                 'agency_service__service',
                 'agency_service__date_from',
                 'agency_service__date_to',
+                'agency_service__contract_code',
                 'addon',
                 'location_from',
                 'location_to',
@@ -275,7 +289,8 @@ class ConfigServices(object):
                     agency=dst_agency,
                     service=src_detail.agency_service.service,
                     date_from=src_detail.agency_service.date_from,
-                    date_to=src_detail.agency_service.date_to)
+                    date_to=src_detail.agency_service.date_to,
+                    contract_code=src_detail.agency_service.contract_code)
                 # now drop ids to create a new detail refering dst_service
                 src_detail.pk = None
                 src_detail.id = None
@@ -294,8 +309,13 @@ class ConfigServices(object):
                 agency_id=dst_agency.id,
                 date_from=src_agency_service.date_from,
                 date_to=src_agency_service.date_to,
+                contract_code=src_agency_service.contract_code,
                 service_id=src_agency_service.service_id
             )
+            if created:
+                dst_agency_service.booked_from = src_agency_service.booked_from
+                dst_agency_service.booked_to = src_agency_service.booked_to
+
             # find details
             details = list(
                 AgencyTransferDetail.objects.filter(agency_service=src_agency_service))
@@ -330,6 +350,7 @@ class ConfigServices(object):
                     'agency_service__service',
                     'agency_service__date_from',
                     'agency_service__date_to',
+                    'agency_service__contract_code',
                     'addon',
                     'pax_range_min',
                     'pax_range_max'
@@ -340,6 +361,7 @@ class ConfigServices(object):
                 'agency_service__service',
                 'agency_service__date_from',
                 'agency_service__date_to',
+                'agency_service__contract_code',
                 'addon',
                 'pax_range_min',
                 'pax_range_max'
@@ -360,7 +382,8 @@ class ConfigServices(object):
                     agency=dst_agency,
                     service=src_detail.agency_service.service,
                     date_from=src_detail.agency_service.date_from,
-                    date_to=src_detail.agency_service.date_to)
+                    date_to=src_detail.agency_service.date_to,
+                    contract_code=src_detail.agency_service.contract_code)
                 # now drop ids to create a new detail refering dst_service
                 src_detail.pk = None
                 src_detail.id = None
@@ -379,8 +402,13 @@ class ConfigServices(object):
                 agency_id=dst_agency.id,
                 date_from=src_agency_service.date_from,
                 date_to=src_agency_service.date_to,
+                contract_code=src_agency_service.contract_code,
                 service_id=src_agency_service.service_id
             )
+            if created:
+                dst_agency_service.booked_from = src_agency_service.booked_from
+                dst_agency_service.booked_to = src_agency_service.booked_to
+
             # find details
             details = list(
                 AgencyExtraDetail.objects.filter(agency_service=src_agency_service))
@@ -1828,11 +1856,13 @@ class ConfigServices(object):
             agency_id=dst_agency.id,
             date_from=src_provider_service.date_from,
             date_to=src_provider_service.date_to,
-            booked_from=src_provider_service.booked_from,
-            booked_to=src_provider_service.booked_to,
             contract_code=src_provider_service.contract_code,
             service_id=src_provider_service.service_id
         )
+        if created:
+            dst_agency_service.booked_from = src_provider_service.booked_from
+            dst_agency_service.booked_to = src_provider_service.booked_to
+
         # find details
         details = list(
             ProviderAllotmentDetail.objects.filter(provider_service=src_provider_service))
@@ -1870,11 +1900,13 @@ class ConfigServices(object):
             agency_id=dst_agency.id,
             date_from=src_provider_service.date_from,
             date_to=src_provider_service.date_to,
-            booked_from=src_provider_service.booked_from,
-            booked_to=src_provider_service.booked_to,
             contract_code=src_provider_service.contract_code,
             service_id=src_provider_service.service_id
         )
+        if created:
+            dst_agency_service.booked_from = src_provider_service.booked_from
+            dst_agency_service.booked_to = src_provider_service.booked_to
+
         # find details
         details = list(
             ProviderTransferDetail.objects.filter(provider_service=src_provider_service))
@@ -1914,11 +1946,13 @@ class ConfigServices(object):
             agency_id=dst_agency.id,
             date_from=src_provider_service.date_from,
             date_to=src_provider_service.date_to,
-            booked_from=src_provider_service.booked_from,
-            booked_to=src_provider_service.booked_to,
             contract_code=src_provider_service.contract_code,
             service_id=src_provider_service.service_id
         )
+        if created:
+            dst_agency_service.booked_from = src_provider_service.booked_from
+            dst_agency_service.booked_to = src_provider_service.booked_to
+
         # find details
         details = list(
             ProviderExtraDetail.objects.filter(provider_service=src_provider_service))
