@@ -1034,6 +1034,11 @@ class BookingExtraPackage(BaseBookingService, BookExtraData):
     class Meta:
         verbose_name = 'Booking Package'
         verbose_name_plural = 'Bookings Packages'
+
+    # Managers
+    objects = models.Manager()
+    vouched_objects = VouchedManager()
+
     version = AutoIncVersionField()
     service = models.ForeignKey(Extra,
                                 on_delete=models.CASCADE,

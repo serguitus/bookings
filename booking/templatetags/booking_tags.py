@@ -159,7 +159,7 @@ def vouchers_table(booking):
         booking=booking).filter(
             booking_package__isnull=True).values_list(
                 'id', flat=True))
-    packages = list(BookingExtraPackage.objects.filter(
+    packages = list(BookingExtraPackage.vouched_objects.filter(
         booking=booking).exclude(
             voucher_detail=True).values_list(
                 'id', flat=True))
