@@ -273,6 +273,8 @@ class BookingServices(object):
         dst_service.status = constants.SERVICE_STATUS_PENDING
         dst_service.provider = src_service.provider
         dst_service.service = src_service.service
+        dst_service.base_category = src_service.base_category
+        dst_service.contract_code = src_service.contract_code
 
 
     @classmethod
@@ -281,6 +283,8 @@ class BookingServices(object):
         dst_service.datetime_from = src_service.datetime_from
         dst_service.datetime_to = src_service.datetime_to
         dst_service.book_service = src_service.book_service
+        dst_service.base_category = src_service.base_category
+        dst_service.contract_code = src_service.contract_code
         dst_service.save()
 
 
@@ -347,7 +351,7 @@ class BookingServices(object):
         bookingpackage_service.booking_package = bookingpackage
         cls._copy_service_info(
             dst_service=bookingpackage_service, src_service=quotepackage_service)
-        bookingpackage_service.p_notes = quotepackage_allotment.description
+        bookingpackage_service.p_notes = quotepackage_service.description
 
         if service_pax_variant:
             cls.setup_bookingservice_amounts_from_quote(
