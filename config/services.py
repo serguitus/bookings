@@ -89,7 +89,7 @@ class ConfigServices(object):
         [Param] is_update: boolean. True if existing prices remain untouched
         [Param] service_model: the child model to get services from (ex. AgencyExtraService)
         [Param] detail_set_name: the queryset of related details. (ex. AgencyExtraService.agencyextradetail_set)
-        [Param] detail_model: the child model to get price details from (ex. AgencyExtraDetail) 
+        [Param] detail_model: the child model to get price details from (ex. AgencyExtraDetail)
         """
         # find agencyservice list
         if is_update:
@@ -724,7 +724,7 @@ class ConfigServices(object):
 
         if (price_groups is None or not price_groups) and service.cost_type == AMOUNTS_BY_PAX:
             price = None
-            price_message = 'Paxes Missing'
+            price_message = 'Rooming Missing'
         elif agency is None:
             price = None
             price_message = 'Agency Not Found'
