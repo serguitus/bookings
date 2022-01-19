@@ -311,12 +311,18 @@ class QuoteConfirmationTable(tables.Table):
     def __init__(self, *args, **kwargs):
         # self.base_columns['utility_percent'].verbose_name='Util.%'
         # self.base_columns['utility'].verbose_name='Util.'
-        # self.base_columns['nights'].verbose_name='N'
+        self.base_columns['name'].verbose_name='Service'
         self.base_columns['datetime_from'].verbose_name = 'FROM'
         self.base_columns['datetime_to'].verbose_name = 'TO'
         #self.base_columns['description'].verbose_name='Pax'
         #self.base_columns['conf_number'].verbose_name='Conf.'
         super(QuoteConfirmationTable, self).__init__(*args, **kwargs)
+
+    def render_name(self, value, record):
+        details = ''
+        if record.description:
+            details = ': {}'.format(record.description)
+        return '{}{}'.format(value, details)
 
 
 class BookingServiceSummaryTable(tables.Table):
