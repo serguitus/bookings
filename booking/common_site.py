@@ -1466,7 +1466,7 @@ class BookingProvidedServiceSiteModel(SiteModel):
                     service.save(update_fields=['status'])
             messages.add_message(
                 request=request, level=messages.SUCCESS,
-                message='Requests mail  sent successfully.',
+                message='Request mail sent successfully.',
                 extra_tags='', fail_silently=False)
             return redirect(reverse('common:booking_%s_change' % self.model._meta.model_name, args=[object_id]))
         else:
@@ -1480,7 +1480,7 @@ class BookingProvidedServiceSiteModel(SiteModel):
                     'default_mail_to': default_requests_mail_to(request, bs.provider, bs.booking),
                     'default_mail_cc': '',
                     'default_mail_bcc': default_requests_mail_bcc(request, bs.provider, bs.booking),
-                    'default_mail_subject': default_requests_mail_subject(request, bs.provider, bs.booking),
+                    'default_mail_subject': default_requests_mail_subject(request, bs.provider, bs.booking, bs.contract_code),
                     'default_mail_body': default_requests_mail_body(request, bs.provider, bs.booking),
                 })
 
@@ -1621,7 +1621,7 @@ class BaseBookingServiceSiteModel(SiteModel):
                     'default_mail_to': default_requests_mail_to(request, bs.provider, bs.booking),
                     'default_mail_cc': '',
                     'default_mail_bcc': default_requests_mail_bcc(request, bs.provider, bs.booking),
-                    'default_mail_subject': default_requests_mail_subject(request, bs.provider, bs.booking),
+                    'default_mail_subject': default_requests_mail_subject(request, bs.provider, bs.booking, bs.contract_code),
                     'default_mail_body': default_requests_mail_body(request, bs.provider, bs.booking),
                 })
 
@@ -2209,12 +2209,14 @@ def default_requests_mail_bcc(request, provider=None, booking=None):
     return request.user.email or None
 
 
-def default_requests_mail_subject(request, provider=None, booking=None):
+def default_requests_mail_subject(request, provider=None, booking=None, contract_code=None):
     subject_ref = ''
     if booking:
         subject_ref = booking.name or ''
         if booking.reference:
             subject_ref += ' (%s)' % booking.reference
+    if contract_code:
+        subject_ref += ' *** PROMOTION %s ***' % contract_code
     return 'Solicitud de Reserva %s' % subject_ref
 
 
