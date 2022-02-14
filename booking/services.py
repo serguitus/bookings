@@ -2384,7 +2384,7 @@ class BookingServices(object):
         else:
             # no grouping means passing total pax quantity
             total_free_cost, total_free_price = cls._find_free_paxes(service_pax_variant)
-                
+
             p1, p1_msg = cls._quoteservice_prices(
                 quoteservice, date_from, date_to,
                 ({0:pax_quantity, 1:0},),
@@ -2438,7 +2438,7 @@ class BookingServices(object):
     @classmethod
     def sync_quote_paxvariants(cls, quote, user=None):
         if hasattr(quote, "avoid_sync_paxvariants"):
-            return 
+            return
         # verify on all services if pax variant exists
         quote_services = list(QuoteService.objects.all().filter(
             quote=quote.id))
@@ -2506,7 +2506,7 @@ class BookingServices(object):
             cls._sync_quotepackage_children_paxvariants(
                 quotepackage_paxvariant, quotepackage_services)
             cls.update_quotepackage_paxvariant_amounts(quotepackage_paxvariant)
-        
+
 
     @classmethod
     def sync_quotepackage_children_paxvariants(cls, quotepackage_pax_variant):
@@ -3385,7 +3385,7 @@ class BookingServices(object):
             for bookingservicedetail in service_list:
 
                 c, c_msg = None, None
-                if cost_msg is None:
+                if not cost_msg: # is None: here, cost_msg can be null or empty string
                     if bookingservicedetail.manual_cost is None:
                         bookingservicedetail.manual_cost = False
 
@@ -3399,7 +3399,7 @@ class BookingServices(object):
                     cost, cost_msg = cls._merge_costs(cost, cost_msg, c, c_msg)
 
                 p, p_msg = None, None
-                if price_msg is None:
+                if not price_msg:  # is None:  here, price_msg can be null or empty string
                     if bookingservicedetail.manual_price is None:
                         bookingservicedetail.manual_price = False
 
@@ -3435,7 +3435,7 @@ class BookingServices(object):
                     if days_duration is None:
                         days_duration = 0
                     date_to = date_from + timedelta(days=days_duration)
-    
+
                 contract_code = service_detail.contract_code
 
                 if cost_msg is None:
@@ -4332,7 +4332,7 @@ class BookingServices(object):
                 return Provider.objects.none()
             return list(qs)
         return Provider.objects.none()
-    
+
 
     @classmethod
     def _clone_quoteservice_paxvariant(cls, pax_variant, quote_service):
@@ -4883,7 +4883,7 @@ class BookingServices(object):
                 # load and lock account
                 account = load_locked_model_object(
                     pk=payment.account_id, model_class=Account, allow_empty_pk=False)
-                
+
                 # manage saving
                 return FinanceServices.document_save(
                     user=user,
@@ -5012,7 +5012,7 @@ class BookingServices(object):
         booking_dict = dict()
         for service in services:
             service.status = status
-            cls.validate_basebookingservice(service)            
+            cls.validate_basebookingservice(service)
             service.save(update_fields=['status', 'cost_amount_to_pay'])
             booking_dict.update({service.booking_id: service.booking})
         for booking in booking_dict.values():
