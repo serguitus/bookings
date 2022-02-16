@@ -1980,7 +1980,7 @@ class ConfigServices(object):
                 )
 
     @classmethod
-    def update_detail_amount(cls, detail_amount, diff_percent, diff_amount, min_diff, max_diff):
+    def update_detail_amount(cls, detail_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round=True):
         if (diff_percent is None or diff_percent == 0) and (
             diff_amount is None or diff_amount == 0):
             return detail_amount
@@ -1998,7 +1998,9 @@ class ConfigServices(object):
         if max_diff is not None:
             if abs(diff) > abs(max_diff):
                 diff = math.copysign(max_diff, diff)
-        return round(0.499999 + result + diff)
+        if apply_round:
+            return round(0.499999 + result + diff)
+        return round(result + diff, 2)
 
     @classmethod
     def next_year_catalog_service_amounts(
@@ -2032,44 +2034,50 @@ class ConfigServices(object):
                 new_detail.pk = None
                 new_detail.id = None
 
+                apply_round = True
+                if not isinstance(
+                        new_detail,
+                        (AgencyAllotmentDetail, AgencyTransferDetail, AgencyExtraDetail)):
+                    apply_round = False
+
                 new_detail.ad_1_amount = cls.update_detail_amount(
-                    detail.ad_1_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ad_1_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ad_2_amount = cls.update_detail_amount(
-                    detail.ad_2_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ad_2_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ad_3_amount = cls.update_detail_amount(
-                    detail.ad_3_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ad_3_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ad_4_amount = cls.update_detail_amount(
-                    detail.ad_4_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ad_4_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_1_ad_0_amount = cls.update_detail_amount(
-                    detail.ch_1_ad_0_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_1_ad_0_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_1_ad_1_amount = cls.update_detail_amount(
-                    detail.ch_1_ad_1_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_1_ad_1_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_1_ad_2_amount = cls.update_detail_amount(
-                    detail.ch_1_ad_2_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_1_ad_2_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_1_ad_3_amount = cls.update_detail_amount(
-                    detail.ch_1_ad_3_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_1_ad_3_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_1_ad_4_amount = cls.update_detail_amount(
-                    detail.ch_1_ad_4_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_1_ad_4_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_2_ad_0_amount = cls.update_detail_amount(
-                    detail.ch_2_ad_0_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_2_ad_0_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_2_ad_1_amount = cls.update_detail_amount(
-                    detail.ch_2_ad_1_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_2_ad_1_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_2_ad_2_amount = cls.update_detail_amount(
-                    detail.ch_2_ad_2_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_2_ad_2_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_2_ad_3_amount = cls.update_detail_amount(
-                    detail.ch_2_ad_3_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_2_ad_3_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_2_ad_4_amount = cls.update_detail_amount(
-                    detail.ch_2_ad_4_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_2_ad_4_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_3_ad_0_amount = cls.update_detail_amount(
-                    detail.ch_3_ad_0_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_3_ad_0_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_3_ad_1_amount = cls.update_detail_amount(
-                    detail.ch_3_ad_1_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_3_ad_1_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_3_ad_2_amount = cls.update_detail_amount(
-                    detail.ch_3_ad_2_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_3_ad_2_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_3_ad_3_amount = cls.update_detail_amount(
-                    detail.ch_3_ad_3_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_3_ad_3_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_3_ad_4_amount = cls.update_detail_amount(
-                    detail.ch_3_ad_4_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_3_ad_4_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
 
                 if isinstance(
                         new_detail,
