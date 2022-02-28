@@ -12,7 +12,7 @@ $(document).ready(function(){
     $('#id_mail_bcc').val($('#m_bcc').val());
     $('#id_mail_subject').val($('#m_subject').val());
     $('#id_mail_body').val($('#m_body').val());
-    $('form[id^=booking], form[id^=quote]').submit();
+    $('form[id^=booking], form[id^=quote, form[id^=providerbookingpayment]').submit();
   }
 
 });
