@@ -3854,7 +3854,7 @@ class BookingServices(object):
                 bookingpackage.quantity, bookingpackage.parameter)
 
         if bookingpackage.manual_price:
-            price = bookingpackage.bookingpackage.price_amount
+            price = bookingpackage.price_amount
             price_msg = None
             if price is None:
                 price_msg = "Manual Price Missing"
