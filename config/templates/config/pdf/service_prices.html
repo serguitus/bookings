@@ -3,21 +3,24 @@
 {% if service.category == 'A' %}
     <tr>
         {% if service.pax_range %}
-            <td colspan="9" class="bold-top-line">
+            <td colspan="12" class="bold-top-line">
                 <b>Service:</b> {{ service.name }}
             </td>
         {% else %}
-            <td colspan="8" class="bold-top-line">
+            <td colspan="11" class="bold-top-line">
                 <b>Service:</b> {{ service.name }}
             </td>
         {% endif %}
     </tr>
     <tr>
-        <td class="top-line"><b>Board</b></td>
-        <td class="top-line"><b>Room</b></td>
+        <td class="top-line board-content"><b>Board</b></td>
+        <td class="top-line room-type-content"><b>Room</b></td>
         {% if service.pax_range %}
             <td class="top-line pax-range-content"><b>Pax Range</b></td>
         {% endif %}
+        <td class="top-line date-content"><b>Book From</b></td>
+        <td class="top-line date-content"><b>Book To</b></td>
+        <td class="top-line code-content"><b>Code</b></td>
         <td class="top-line date-content"><b>From</b></td>
         <td class="top-line date-content"><b>To</b></td>
         <td class="top-line amount-content"><b>SGL</b></td>
@@ -57,22 +60,31 @@
                 </td>
             {% endif %}
             <td class="top-line date">
+                {{ detail.agency_service.booked_from | date:"d-b-Y" }}
+            </td>
+            <td class="top-line date">
+                {{ detail.agency_service.booked_to | date:"d-b-Y" }}
+            </td>
+            <td class="top-line date">
+                {{ detail.agency_service.contract_code }}
+            </td>
+            <td class="top-line date">
                 {{ detail.agency_service.date_from | date:"d-b-Y" }}
             </td>
             <td class="top-line date">
                 {{ detail.agency_service.date_to | date:"d-b-Y" }}
             </td>
             <td class="top-line amount">
-                {{ detail.ad_1_amount }}
+                {{ detail.ad_1_amount | default:"" }}
             </td>
             <td class="top-line amount">
-                {{ detail.ad_2_amount }}
+                {{ detail.ad_2_amount  | default:""}}
             </td>
             <td class="top-line amount">
-                {{ detail.ad_3_amount }}
+                {{ detail.ad_3_amount | default:"" }}
             </td>
             <td class="top-line amount">
-                {{ detail.ad_4_amount }}
+                {{ detail.ad_4_amount | default:"" }}
             </td>
         </tr>
         {% setvar detail.board_type as prev_board %}
