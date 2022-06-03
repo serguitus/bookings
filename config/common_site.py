@@ -1078,7 +1078,8 @@ class AgencyAllotmentServiceSiteModel(CatalogService):
         ('service__chain', ChainTopFilter), ('service', AllotmentTopFilter),
         ('agency', AgencyTopFilter),
         'service__service_category',
-        ('date_to', DateTopFilter), 'contract_code')
+        ('date_to', DateTopFilter), 'contract_code',
+        ('service__location', LocationTopFilter))
     inlines = [AgencyAllotmentDetailInline]
     ordering = ['service', 'agency', '-date_from']
     list_select_related = ('agency', 'service')
