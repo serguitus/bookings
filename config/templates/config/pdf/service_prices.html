@@ -1,6 +1,7 @@
 {% load common_utils %}
+{% if details %}
 <table width="100%">
-{% if service.category == 'A' %}
+{% if service.category == 'A'%}
     <tr>
         {% if service.pax_range %}
             <td colspan="12" class="bold-top-line">
@@ -11,6 +12,9 @@
                 <b>Service:</b> {{ service.name }}
             </td>
         {% endif %}
+    </tr>
+    <tr>
+        <td colspan="{% if service.pax_range %}12{% else %}11{% endif %}" class="top-line">Price format: Adlt (1Chld / 2Chld)</td>
     </tr>
     <tr>
         <td class="top-line board-content"><b>Board</b></td>
@@ -37,18 +41,16 @@
             {% if detail.board_type != prev_board %}
                 {% setvar True as print_top_line %}
             {% endif %}
-            {% if print_top_line %}
-                <td class="top-line">
+            <td class="top-line board-content">
+                {% if print_top_line %}
                     {{ detail.board_type }}
-                </td>
-            {% else %}
-                <td></td>
-            {% endif %}
+                {% endif %}
+            </td>
             {% if not print_top_line and detail.room_type.name != prev_room %}
                 {% setvar True as print_top_line %}
             {% endif %}
             {% if print_top_line %}
-                <td class="top-line">
+                <td class="top-line room-type-content">
                     {{ detail.room_type.name }}
                 </td>
             {% else %}
@@ -78,7 +80,7 @@
                 {{ detail.ad_1_amount | default:"" }}
             </td>
             <td class="top-line amount">
-                {{ detail.ad_2_amount  | default:""}}
+                {{ detail.ad_2_amount  | default:""}}{% if detail.ch_1_ad_2_amount %} ({{detail.ch_1_ad_2_amount|floatformat:"0"}}/{{detail.ch_1_ad_2_amount | floatformat:"0" | default:"-"}}){% endif %}
             </td>
             <td class="top-line amount">
                 {{ detail.ad_3_amount | default:"" }}
@@ -279,3 +281,4 @@
     {% endfor %}
 {% endif %}
 </table>
+{% endif %}
