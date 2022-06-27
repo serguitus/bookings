@@ -66,7 +66,8 @@ class ConfigServices(object):
             # 'Source Agency not Found'
             return
         for dst_agency in agencies:
-            cls._copy_agency_amounts(src_agency, dst_agency, is_update)
+            if dst_agency.enabled:
+                cls._copy_agency_amounts(src_agency, dst_agency, is_update)
 
 
     @classmethod
