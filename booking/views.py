@@ -285,18 +285,18 @@ class BookingServiceAmountsView(ModelChangeFormProcessorView):
             if not pax_list:
                 return JsonResponse({
                     'cost': None,
-                    'cost_message': 'Paxes Missing',
+                    'cost_message': 'Empty rooming',
                     'price': None,
-                    'price_message': 'Paxes Missing',
+                    'price_message': 'Empty rooming',
                 }), pax_list
         else:
             pax_list = inlines[0]
             if not pax_list:
                 return JsonResponse({
                     'cost': None,
-                    'cost_message': 'Paxes Missing',
+                    'cost_message': 'Empty rooming',
                     'price': None,
-                    'price_message': 'Paxes Missing',
+                    'price_message': 'Empty rooming',
                 }), pax_list
 
         return None, pax_list
@@ -811,7 +811,7 @@ class ScheduleArrivalAutocompleteView(autocomplete.Select2QuerySetView):
             qs = qs.filter(is_arrival=False)
         else:
             qs = qs.filter(is_arrival=True)
- 
+
         location = self.forwarded.get('location_from', None)
 
         if location:
