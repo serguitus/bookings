@@ -1135,7 +1135,7 @@ class ConfigServices(object):
         # obtain details order by date_from asc, date_to desc
         if (cost_groups is None or not cost_groups) and service.cost_type == AMOUNTS_BY_PAX:
             cost = None
-            cost_message = 'Paxes Missing'
+            cost_message = 'Empty Rooming List'
         elif provider is None:
             cost = None
             cost_message = 'Provider Not Found'
@@ -1221,7 +1221,7 @@ class ConfigServices(object):
         # obtain details order by date_from asc, date_to desc
         if (price_groups is None or not price_groups) and service.cost_type == AMOUNTS_BY_PAX:
             price = None
-            price_message = 'Paxes Missing'
+            price_message = 'Empty Rooming List'
         elif agency is None:
             price = None
             price_message = 'Agency Not Found'
@@ -1709,7 +1709,10 @@ class ConfigServices(object):
 
     @classmethod
     def _get_agency_queryset(
-            cls, manager, agency_id, service_id, date_from, date_to, booked, contract_code):
+            cls, manager, agency_id, service_id, date_from, date_to, booked, contract_code=''):
+        valid_contract_code = contract_code
+        if contract_code is None:
+            valid_contract_code = ''
         if date_from is None or date_to is None:
             return manager.none()
         qs = manager.select_related(
@@ -1729,7 +1732,7 @@ class ConfigServices(object):
                 Q(agency_service__booked_to__isnull=True)
                 | Q(agency_service__booked_to__gte=booked))
         # prices dont use contract_code
-        # qs = qs.filter(agency_service__contract_code='')
+        qs = qs.filter(agency_service__contract_code=valid_contract_code)
         return qs
 
 
