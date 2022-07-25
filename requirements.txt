@@ -65,7 +65,7 @@ traitlets==4.3.2
 twentytab-totalsum-admin==0.9
 tzdata==2022.1
 tzlocal==4.2
-uritools==4.0.0
+# uritools==4.0.0
 urllib3==1.26.10
 wcwidth==0.1.7
 webencodings==0.5.1
