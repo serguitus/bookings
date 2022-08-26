@@ -1440,18 +1440,41 @@ def transfer_contract_list(
         if location_from:
             if location_to:
                 qs = qs.filter(
-                    providertransferdetail__addon=addon,
-                    providertransferdetail__location_from=location_from,
-                    providertransferdetail__location_to=location_to)
+                    Q(providertransferdetail__addon=addon)
+                    &
+                    (
+                        (
+                            Q(providertransferdetail__location_from=location_from)
+                            & Q(providertransferdetail__location_to=location_to)
+                        )
+                        |
+                        (
+                            Q(providertransferdetail__location_from=location_to)
+                            & Q(providertransferdetail__location_to=location_from)
+                        )
+                    )
+                )
             else:
                 qs = qs.filter(
-                    providertransferdetail__addon=addon,
-                    providertransferdetail__location_from=location_from)
+                    Q(providertransferdetail__addon=addon)
+                    &
+                    (
+                        Q(providertransferdetail__location_from=location_from)
+                        |
+                        Q(providertransferdetail__location_to=location_from)
+                    )
+                )
         else:
             if location_to:
                 qs = qs.filter(
-                    providertransferdetail__addon=addon,
-                    providertransferdetail__location_to=location_to)
+                    Q(providertransferdetail__addon=addon)
+                    &
+                    (
+                        Q(providertransferdetail__location_from=location_to)
+                        |
+                        Q(providertransferdetail__location_to=location_to)
+                    )
+                )
             else:
                 qs = qs.filter(
                     providertransferdetail__addon=addon)
@@ -1459,18 +1482,41 @@ def transfer_contract_list(
         if location_from:
             if location_to:
                 qs = qs.filter(
-                    providertransferdetail__addon=ADDON_FOR_NO_ADDON,
-                    providertransferdetail__location_from=location_from,
-                    providertransferdetail__location_to=location_to)
+                    Q(providertransferdetail__addon=ADDON_FOR_NO_ADDON)
+                    &
+                    (
+                        (
+                            Q(providertransferdetail__location_from=location_from)
+                            & Q(providertransferdetail__location_to=location_to)
+                        )
+                        |
+                        (
+                            Q(providertransferdetail__location_from=location_to)
+                            & Q(providertransferdetail__location_to=location_from)
+                        )
+                    )
+                )
             else:
                 qs = qs.filter(
-                    providertransferdetail__addon=ADDON_FOR_NO_ADDON,
-                    providertransferdetail__location_from=location_from)
+                    Q(providertransferdetail__addon=ADDON_FOR_NO_ADDON)
+                    &
+                    (
+                        Q(providertransferdetail__location_from=location_from)
+                        |
+                        Q(providertransferdetail__location_to=location_from)
+                    )
+                )
         else:
             if location_to:
                 qs = qs.filter(
-                    providertransferdetail__addon=ADDON_FOR_NO_ADDON,
-                    providertransferdetail__location_to=location_to)
+                    Q(providertransferdetail__addon=ADDON_FOR_NO_ADDON)
+                    &
+                    (
+                        Q(providertransferdetail__location_from=location_to)
+                        |
+                        Q(providertransferdetail__location_to=location_to)
+                    )
+                )
             else:
                 qs = qs.filter(
                     providertransferdetail__addon=ADDON_FOR_NO_ADDON)
