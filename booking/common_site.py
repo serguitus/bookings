@@ -1687,12 +1687,13 @@ class BookingProvidedAllotmentSiteModel(BookingProvidedServiceSiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
 
-    readonly_fields = ['utility_percent', 'utility']
+    readonly_fields = ['utility_percent', 'utility', 'description']
 
     fieldsets = (
         (None, {
             'fields': (
-                'booking', 'booking_package', ('service', 'search_location'),
+                ('booking', 'description'), 'booking_package', ('service',
+                                                                'search_location'),
                 ('status', 'conf_number'),
                 ('datetime_from', 'nights', 'datetime_to'),
                 ('room_type', 'board_type'),
@@ -1729,12 +1730,12 @@ class BookingProvidedTransferSiteModel(BookingProvidedServiceSiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
 
-    readonly_fields = ['utility_percent', 'utility']
+    readonly_fields = ['utility_percent', 'utility', 'description']
 
     fieldsets = (
         (None, {
             'fields': (
-                'booking', 'booking_package', ('service',
+                ('booking', 'description'), 'booking_package', ('service',
                                                'search_location'), ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
                 ('location_from', 'place_from'),
@@ -1776,12 +1777,12 @@ class BookingProvidedExtraSiteModel(BookingProvidedServiceSiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
 
-    readonly_fields = ['utility_percent', 'utility']
+    readonly_fields = ['utility_percent', 'utility', 'description']
 
     fieldsets = (
         (None, {
             'fields': (
-                'booking', 'booking_package',
+                ('booking', 'description'), 'booking_package',
                 ('service', 'search_location'),
                 ('status', 'conf_number'),
                 ('datetime_from', 'nights', 'datetime_to', 'time'),

@@ -833,9 +833,9 @@ class ConfigServices(object):
             provider, booked, contract_code, agency,
             location_from_id, location_to_id, addon_id=None, quantity=None):
         if location_from_id is None or location_from_id == '':
-            return None, 'Location From Missing', None, 'Location From Missing'
+            return None, 'Origin Location Missing', None, 'Origin Location Missing'
         if location_to_id is None or location_to_id == '':
-            return None, 'Location To Missing', None, 'Location To Missing'
+            return None, 'Destination Location Missing', None, 'Destination Location Missing'
         if date_from is None and date_to is None:
             return None, 'Both Dates are Missing', None, 'Both Dates are Missing'
         if date_from is None:
@@ -861,9 +861,9 @@ class ConfigServices(object):
             cls, service_id, date_from, date_to, cost_groups, provider, booked, contract_code,
             location_from_id, location_to_id, addon_id=None, quantity=None):
         if location_from_id is None or location_from_id == '':
-            return None, 'Location From Missing'
+            return None, 'Origin Location Missing'
         if location_to_id is None or location_to_id == '':
-            return None, 'Location To Missing'
+            return None, 'Destination Location Missing'
         if date_from is None and date_to is None:
             return None, 'Both Dates are Missing'
         if date_from is None:
@@ -877,7 +877,7 @@ class ConfigServices(object):
 
         if (cost_groups is None or not cost_groups) and service.cost_type == AMOUNTS_BY_PAX:
             cost = None
-            cost_message = 'Paxes Missing'
+            cost_message = 'Rooming Missing'
         elif provider is None:
             cost = None
             cost_message = 'Provider Not Found'

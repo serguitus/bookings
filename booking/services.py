@@ -1251,7 +1251,7 @@ class BookingServices(object):
         }
         service = CLASSES[booking_service.base_category].objects.get(id=booking_service.id)
         service.description = service.build_description()
-        service.save()
+        service.save(update_fields=['description'])
 
     @classmethod
     def _find_service_pax_variant(cls, service, quote_pax_variant, service_pax_variant):
@@ -4515,6 +4515,7 @@ class BookingServices(object):
         bookingservice_pax.booking_pax = booking_pax
         bookingservice_pax.group = booking_pax.pax_group
         bookingservice_pax.save()
+        BookingServices.update_bookingservice_description(bookingservice)
 
 
     @classmethod
