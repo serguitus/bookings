@@ -1362,6 +1362,7 @@ class BookingProvidedServiceSiteModel(SiteModel):
                     'price_amount', 'utility_percent', 'status',
                     'cost_amount_paid')
     top_filters = (('booking__name', 'Booking'),
+                   ('booking__agency', AgencyTopFilter),
                    ('name', 'Service'),
                    'booking__reference', 'conf_number',
                    ('booking__id', InternalReferenceTopFilter),
