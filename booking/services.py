@@ -4368,6 +4368,8 @@ class BookingServices(object):
 
         quote_service.pk = None
         quote_service.id = None
+        quote_service.quoteprovidedservice_ptr_id = None
+        quote_service.quoteservice_ptr_id = None
         quote_service.quote = quote
         quote_service.quote_id = quote.pk
         quote_service.avoid_all = True
@@ -4425,6 +4427,7 @@ class BookingServices(object):
                 quote_package=package_pk))
             for package_service in extras:
                 cls._clone_quotepackage_service(package_service, service)
+            cls.update_quotepackage(service)
 
         cls.update_quote(new_quote)
         cls.update_quote_paxvariants_amounts(new_quote)
