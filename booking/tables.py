@@ -373,7 +373,7 @@ class BookingExtraPackageServiceSummaryTable(tables.Table):
         model = BookingProvidedService
         template_name = 'booking/include/base_table.html'
         fields = [
-            'name', 'datetime_from', 'datetime_to', 'provider', 'status']
+            'name', 'datetime_from', 'datetime_to', 'provider', 'cost_amount', 'price_amount', 'status']
         attrs = {'class': 'table table-hover table-sm'}
         row_attrs = {
             'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING[record.status]),
