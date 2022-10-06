@@ -1835,6 +1835,7 @@ class BookingExtraPackageSiteModel(BaseBookingServiceSiteModel):
                 ('service', 'search_location'),
                 ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
+                'service_addon',
                 'cost_amount',
                 ('manual_price', 'price_by_catalog'),
                 'price_amount', 'utility_percent', 'utility', 'id', 'version',
