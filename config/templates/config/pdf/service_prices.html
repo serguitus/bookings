@@ -77,10 +77,10 @@
                 {{ detail.agency_service.date_to | date:"d-b-Y" }}
             </td>
             <td class="top-line amount">
-                {{ detail.ad_1_amount | default:"" }}{% if detail.ch_1_ad_1_amount or detail.ch_2_ad_1_amount %} ({{detail.ch_1_ad_1_amount|floatformat:"0"}}/{{detail.ch_2_ad_1_amount | floatformat:"0" | default:"-"}}){% endif %}
+                {{ detail.ad_1_amount | default:"" }}{% if detail.ch_1_ad_1_amount != None %} ({{detail.ch_1_ad_1_amount|floatformat:"0"}}/{{detail.ch_2_ad_1_amount | floatformat:"0" | default:"-"}}){% endif %}
             </td>
             <td class="top-line amount">
-                {{ detail.ad_2_amount  | default:""}}{% if detail.ch_1_ad_2_amount or detail.ch_2_ad_2_amount %} ({{detail.ch_1_ad_2_amount|floatformat:"0"}}/{{detail.ch_2_ad_2_amount | floatformat:"0" | default:"-"}}){% endif %}
+                {{ detail.ad_2_amount  | default:""}}{% if detail.ch_1_ad_2_amount != None %} ({{detail.ch_1_ad_2_amount|floatformat:"0"}}/{{detail.ch_2_ad_2_amount | floatformat:"0" | default:"-"}}){% endif %}
             </td>
             <td class="top-line amount">
                 {{ detail.ad_3_amount | default:"" }}
