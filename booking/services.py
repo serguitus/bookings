@@ -438,10 +438,10 @@ class BookingServices(object):
                     booking_transfer = BookingProvidedTransfer()
                     ConfigServices.copy_book_transfer_data(
                         dst_service=booking_transfer, src_service=quote_transfer)
-                    booking_transfer.quantity = ConfigServices.get_service_quantity(
-                        booking_transfer.service, len(pax_list), quote_transfer.quantity)
                     cls.build_bookingservice_from_quoteservice(
                         booking_transfer, quote_transfer, booking, pax_list, pax_variant, user)
+                    booking_transfer.quantity = ConfigServices.get_service_quantity(
+                        booking_transfer.service, len(pax_list), quote_transfer.quantity)
 
                 # create bookingextra list
                 for quote_extra in NewQuoteExtra.objects.filter(quote_id=quote.id).all():
@@ -449,10 +449,10 @@ class BookingServices(object):
                     booking_extra.booking = booking
                     ConfigServices.copy_book_extra_data(
                         dst_service=booking_extra, src_service=quote_extra)
+                    cls.build_bookingservice_from_quoteservice(
+                        booking_extra, quote_extra, booking, pax_list, pax_variant, user)
                     booking_extra.quantity = ConfigServices.get_service_quantity(
                         booking_extra.service, len(pax_list), quote_extra.quantity)
-                    cls.build_bookingservice_from_quoteservice(
-                        booking_transfer, quote_transfer, booking, pax_list, pax_variant, user)
 
                 # create bookingpackage list
                 for quote_package in QuoteExtraPackage.objects.filter(quote_id=quote.id).all():
