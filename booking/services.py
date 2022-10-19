@@ -4576,7 +4576,7 @@ class BookingServices(object):
 
 
     @classmethod
-    def _clone_booking_service(cls, booking_service, booking):
+    def _clone_booking_service(cls, booking_service, booking_package, booking):
         allotment_details = list(BookingBookDetailAllotment.objects.filter(
             booking_service=booking_service))
         transfer_details = list(BookingBookDetailTransfer.objects.filter(
@@ -4590,6 +4590,9 @@ class BookingServices(object):
         booking_service.basebookingservice_ptr_id = None
         booking_service.bookingservice_ptr = None
         booking_service.bookingservice_ptr_id = None
+        if booking_package:
+            booking_service.booking_package = booking_package
+            booking_service.booking_package_id = booking_package.pk
         booking_service.booking = booking
         booking_service.booking_id = booking.pk
         booking_service.status = constants.SERVICE_STATUS_PENDING
@@ -4612,74 +4615,73 @@ class BookingServices(object):
 
 
     @classmethod
-    def _clone_bookingpackage_service(cls, bookingpackage_service, booking_package):
-        bookingpackage_service.pk = None
-        bookingpackage_service.id = None
-        bookingpackage_service.basebookingservice_ptr = None
-        bookingpackage_service.basebookingservice_ptr_id = None
-        bookingpackage_service.bookingpackageservice_ptr = None
-        bookingpackage_service.bookingpackageservice_ptr_id = None
-        bookingpackage_service.booking_package = booking_package
-        bookingpackage_service.booking_package_id = booking_package.pk
-        bookingpackage_service.status = constants.SERVICE_STATUS_PENDING
-        bookingpackage_service.conf_number = ''
-        if not hasattr(bookingpackage_service, 'manual_cost') or not bookingpackage_service.manual_cost:
-            bookingpackage_service.cost_amount = None
-        if not hasattr(bookingpackage_service, 'manual_price') or not bookingpackage_service.manual_price:
-            bookingpackage_service.price_amount = None
-        booking_service.cost_amount_to_pay = 0.00
-        booking_service.cost_amount_paid = 0.00
-        bookingpackage_service.avoid_all = True
-        bookingpackage_service.save()
-
-
-    @classmethod
     def clone_booking_services(cls, old_booking_id, new_booking):
         new_booking.avoid_all = True
 
         old_booking = Booking.objects.get(pk=old_booking_id)
 
         allotments = list(BookingProvidedAllotment.objects.filter(
-            booking=old_booking))
+            booking=old_booking, booking_package__isnull=True))
         for service in allotments:
-            cls._clone_booking_service(service, new_booking)
+            cls._clone_booking_service(service, None, new_booking)
 
         transfers = list(BookingProvidedTransfer.objects.filter(
-            booking=old_booking))
+            booking=old_booking, booking_package__isnull=True))
         for service in transfers:
-            cls._clone_booking_service(service, new_booking)
+            cls._clone_booking_service(service, None, new_booking)
 
         extras = list(BookingProvidedExtra.objects.filter(
-            booking=old_booking))
+            booking=old_booking, booking_package__isnull=True))
         for service in extras:
-            cls._clone_booking_service(service, new_booking)
+            cls._clone_booking_service(service, None, new_booking)
 
         packages = list(BookingExtraPackage.objects.filter(
             booking=old_booking))
-        for service in packages:
-            package_pk = service.pk
-            service.avoid_sync_services = True
-            cls._clone_booking_service(service, new_booking)
+        for package in packages:
+            package.avoid_sync_services = True
+            cls._clone_booking_package(package, new_booking)
 
-            # package services
-            allotments = list(BookingProvidedAllotment.objects.filter(
-                booking_package=package_pk))
-            for package_service in allotments:
-                cls._clone_bookingpackage_service(package_service, service)
-
-            transfers = list(BookingProvidedTransfer.objects.filter(
-                booking_package=package_pk))
-            for package_service in transfers:
-                cls._clone_bookingpackage_service(package_service, service)
-
-            extras = list(BookingProvidedTransfer.objects.filter(
-                booking_package=package_pk))
-            for package_service in extras:
-                cls._clone_bookingpackage_service(package_service, service)
-
-            cls.update_bookingpackage(service)
 
         cls.update_booking(new_booking)
+
+
+    @classmethod
+    def _clone_booking_package(cls, booking_package_service, booking):
+        allotments = list(BookingProvidedAllotment.objects.filter(
+            booking_package=booking_package_service))
+        transfers = list(BookingProvidedTransfer.objects.filter(
+            booking_package=booking_package_service))
+        extras = list(BookingProvidedExtra.objects.filter(
+            booking_package=booking_package_service))
+
+        booking_package_service.pk = None
+        booking_package_service.id = None
+        booking_package_service.basebookingservice_ptr = None
+        booking_package_service.basebookingservice_ptr_id = None
+        booking_package_service.bookingservice_ptr = None
+        booking_package_service.bookingservice_ptr_id = None
+        booking_package_service.booking = booking
+        booking_package_service.booking_id = booking.pk
+        booking_package_service.status = constants.SERVICE_STATUS_PENDING
+        booking_package_service.conf_number = ''
+        if not hasattr(booking_package_service, 'manual_cost') or not booking_package_service.manual_cost:
+            booking_package_service.cost_amount = None
+        if not hasattr(booking_package_service, 'manual_price') or not booking_package_service.manual_price:
+            booking_package_service.price_amount = None
+        booking_package_service.cost_amount_to_pay = 0.00
+        booking_package_service.cost_amount_paid = 0.00
+        booking_package_service.avoid_all = True
+        booking_package_service.save()
+
+        # package services
+        for service in allotments:
+            cls._clone_booking_service(service, booking_package_service, booking)
+        for service in transfers:
+            cls._clone_booking_service(service, booking_package_service, booking)
+        for service in extras:
+            cls._clone_booking_service(service, booking_package_service, booking)
+
+        cls.update_bookingpackage(service)
 
 
     @classmethod
