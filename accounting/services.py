@@ -101,7 +101,8 @@ class AccountingService():
             operation=operation,
             movement_type=movement_type,
             account=account,
-            amount=amount)
+            amount=amount,
+            final_account_balance=account.balance)
         movement.save()
         return movement
 

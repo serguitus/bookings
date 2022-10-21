@@ -121,6 +121,7 @@ class OperationMovement(models.Model):
     movement_type = models.CharField(max_length=5, choices=MOVEMENT_TYPES)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     amount = models.DecimalField(default=0.0, max_digits=9, decimal_places=2)
+    final_account_balance = models.DecimalField(default=0.0, max_digits=12, decimal_places=2)
 
     def __str__(self):
         return  '%s on %s of %s' % (
