@@ -49,13 +49,15 @@ class AccountingServiceTestCase(TestCase):
             operation=test_operation,
             account=test_account1,
             movement_type=MOVEMENT_TYPE_INPUT,
-            amount=test_amount1
+            amount=test_amount1,
+            final_account_balance=test_account1.balance
         )
         OperationMovement.objects.create(
             operation=test_operation,
             account=test_account2,
             movement_type=MOVEMENT_TYPE_INPUT,
-            amount=test_amount2
+            amount=test_amount2,
+            final_account_balance=test_account2.balance
         )
 
         test_operation = Operation.objects.create(
@@ -71,13 +73,15 @@ class AccountingServiceTestCase(TestCase):
             operation=test_operation,
             account=test_account1,
             movement_type=MOVEMENT_TYPE_OUTPUT,
-            amount=test_amount3
+            amount=test_amount3,
+            final_account_balance=test_account1.balance
         )
         OperationMovement.objects.create(
             operation=test_operation,
             account=test_account2,
             movement_type=MOVEMENT_TYPE_OUTPUT,
-            amount=test_amount4
+            amount=test_amount4,
+            final_account_balance=test_account2.balance
         )
 
         test_account1.recalculate_balance()

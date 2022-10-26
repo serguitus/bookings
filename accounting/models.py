@@ -1,3 +1,4 @@
+from decimal import ROUND_HALF_EVEN, Decimal
 from django.db import connection, models
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -121,6 +122,7 @@ class OperationMovement(models.Model):
     movement_type = models.CharField(max_length=5, choices=MOVEMENT_TYPES)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     amount = models.DecimalField(default=0.0, max_digits=9, decimal_places=2)
+    final_account_balance = models.DecimalField(default=0.0, max_digits=12, decimal_places=2)
 
     def __str__(self):
         return  '%s on %s of %s' % (
@@ -129,3 +131,28 @@ class OperationMovement(models.Model):
     def delete(self, using=None, keep_parents=False):
         raise ValidationError(
             'Can not delete Movements')
+
+    @classmethod
+    def recalculate_movements_final_account_balance(cls):
+        """
+        Recalculates movements final_account_balance
+        """
+        all_accounts = Account.objects.all()
+        for account in all_accounts:
+            all_movs = OperationMovement.objects.filter(account=account).order_by('id')
+            initial_balance = Decimal()
+            for movement in all_movs:
+                if movement.movement_type == MOVEMENT_TYPE_INPUT:
+                    initial_balance = initial_balance + movement.amount
+                else:
+                    initial_balance = initial_balance - movement.amount
+                balance = initial_balance.quantize(Decimal('.01'), rounding=ROUND_HALF_EVEN)
+                if movement.final_account_balance:
+                    saved_balance = movement.final_account_balance.quantize(Decimal('.01'), rounding=ROUND_HALF_EVEN)
+                    if balance != saved_balance:
+                        movement.final_account_balance = initial_balance
+                        movement.save(update_fields=['final_account_balance'])
+                else:
+                    movement.final_account_balance = initial_balance
+                    movement.save(update_fields=['final_account_balance'])
+
