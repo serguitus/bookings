@@ -4991,15 +4991,15 @@ class BookingServices(object):
 
     @classmethod
     def delete_quoteservice_details(cls, service):
-        details = NewQuoteBookDetailAllotment.objects.filter(quote_service=service);
+        details = NewQuoteServiceBookDetailAllotment.objects.filter(quote_service=service);
         for detail in details:
             detail.delete()
 
-        details = NewQuoteBookDetailTransfer.objects.filter(quote_service=service);
+        details = NewQuoteServiceBookDetailTransfer.objects.filter(quote_service=service);
         for detail in details:
             detail.delete()
 
-        services = NewQuoteBookDetailExtra.objects.filter(quote_service=service);
+        services = NewQuoteServiceBookDetailExtra.objects.filter(quote_service=service);
         for detail in details:
             detail.delete()
 
