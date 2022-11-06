@@ -137,7 +137,7 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
     def get_changelist_form(self, request, **kwargs):
         return MatchableChangeListForm
 
-    #@csrf_protect_m
+    # @csrf_protect_m
     def match_view(self, request, object_id, extra_context=None):
         return self._match_view(request, object_id, extra_context)
 
@@ -235,7 +235,8 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
             raise PermissionDenied
 
         match_list_display = self.match_list_display
-        match_list_display_links = match_child_sitemodel.get_list_display_links(request, match_list_display)
+        match_list_display_links = match_child_sitemodel.get_list_display_links(
+            request, match_list_display)
         match_list_filter = match_child_sitemodel.get_list_filter(request)
         match_top_filters = match_child_sitemodel.get_top_filters(request)
         match_date_hierarchy = self.match_date_hierarchy
@@ -245,7 +246,8 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
         match_list_max_show_all = self.match_list_max_show_all
         match_list_editable = self.match_list_editable
 
-        to_field = request.POST.get(TO_FIELD_VAR, request.GET.get(TO_FIELD_VAR))
+        to_field = request.POST.get(
+            TO_FIELD_VAR, request.GET.get(TO_FIELD_VAR))
 
         obj = self.get_object(request, unquote(object_id), to_field)
 
@@ -286,10 +288,11 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
         if request.method == 'POST' and '_cancel' in request.POST:
             info = self.model._meta.app_label, self.model._meta.model_name
             return HttpResponseRedirect(reverse('common:%s_%s_change' % info, args=[obj.id]))
-            
+
         if request.method == 'POST' and '_save' in request.POST:
             FormSet = self.get_matchlist_formset(request)
-            formset = cl.formset = FormSet(request.POST, request.FILES, queryset=self.get_queryset(request))
+            formset = cl.formset = FormSet(
+                request.POST, request.FILES, queryset=self.get_queryset(request))
             if formset.is_valid():
                 matches = self.build_matches(formset.forms)
                 try:
@@ -363,8 +366,10 @@ class MatchableSiteModel(BaseFinantialDocumentSiteModel):
             preserved_filters=self.get_preserved_filters(request),
 
             module_name=force_text(opts.verbose_name_plural),
-            selection_note=_('0 of %(cnt)s selected') % {'cnt': len(cl.result_list)},
-            selection_note_all=selection_note_all % {'total_count': cl.result_count},
+            selection_note=_('0 of %(cnt)s selected') % {
+                'cnt': len(cl.result_list)},
+            selection_note_all=selection_note_all % {
+                'total_count': cl.result_count},
             cl=cl,
             opts=cl.opts,
             action_form=action_form,
@@ -459,8 +464,10 @@ class LoanEntityDocumentSiteModel(MatchableSiteModel):
     """
     base class for loan entities deposits and withdraws
     """
-    fields = ('name', ('loan_entity', 'account'), ('amount', 'matched_amount'), ('date', 'status'))
-    list_display = ['name', 'loan_entity', 'account', 'amount', 'matched_amount', 'date', 'status']
+    fields = ('name', ('loan_entity', 'account'),
+              ('amount', 'matched_amount'), ('date', 'status'))
+    list_display = ['name', 'loan_entity', 'account',
+                    'amount', 'matched_amount', 'date', 'status']
     top_filters = (
         'currency', ('account', AccountTopFilter), 'status', 'date',
         ('loan_entity', LoanEntityTopFilter),)
@@ -470,7 +477,8 @@ class LoanEntityDocumentSiteModel(MatchableSiteModel):
 
     match_child_model_keyfield = 'loanentitydocument_ptr'
     match_model = LoanEntityMatch
-    match_fields = ('name', ('loan_entity', 'account'), ('amount', 'matched_amount'), ('date', 'status'))
+    match_fields = ('name', ('loan_entity', 'account'),
+                    ('amount', 'matched_amount'), ('date', 'status'))
     match_related_fields = ['account', 'loan_entity']
     match_list_display = [
         'name', 'included', 'match_amount'
@@ -523,7 +531,8 @@ class LoanAccountSiteModel(SiteModel):
     menu_group = 'Account Loan'
 
     fields = ('account', 'credit_amount', 'debit_amount', 'matched_amount')
-    list_display = ('account', 'credit_amount', 'debit_amount', 'matched_amount')
+    list_display = ('account', 'credit_amount',
+                    'debit_amount', 'matched_amount')
     top_filters = ('account__name', 'account__currency',)
     ordering = ['account__name']
     readonly_fields = ('credit_amount', 'debit_amount', 'matched_amount')
@@ -535,16 +544,20 @@ class LoanAccountDocumentSiteModel(MatchableSiteModel):
     """
     base class for loan accounts deposits and withdraws
     """
-    fields = ('name', ('loan_account', 'account'), ('amount', 'matched_amount'), ('date', 'status'))
-    list_display = ['name', 'loan_account', 'account', 'amount', 'matched_amount', 'date', 'status']
-    top_filters = ('currency', ('account', AccountTopFilter), 'status', 'date', ('loan_account', LoanAccountTopFilter))
+    fields = ('name', ('loan_account', 'account'),
+              ('amount', 'matched_amount'), ('date', 'status'))
+    list_display = ['name', 'loan_account', 'account',
+                    'amount', 'matched_amount', 'date', 'status']
+    top_filters = ('currency', ('account', AccountTopFilter),
+                   'status', 'date', ('loan_account', LoanAccountTopFilter))
 
     readonly_fields = ('name', 'matched_amount',)
     form = LoanAccountDocumentForm
 
     match_child_model_keyfield = 'loanaccountdocument_ptr'
     match_model = LoanAccountMatch
-    match_fields = ('name', ('loan_account', 'account'), ('amount', 'matched_amount'), ('date', 'status'))
+    match_fields = ('name', ('loan_account', 'account'),
+                    ('amount', 'matched_amount'), ('date', 'status'))
     match_related_fields = ['account', 'loan_account']
     match_list_display = [
         'name', 'included', 'match_amount'
@@ -624,7 +637,8 @@ class ProviderDocumentSiteModel(MatchableSiteModel):
     form = ProviderDocumentForm
 
     match_model = ProviderDocumentMatch
-    match_fields = ('name', ('provider', 'currency'), ('amount', 'matched_amount'), ('date', 'status'))
+    match_fields = ('name', ('provider', 'currency'),
+                    ('amount', 'matched_amount'), ('date', 'status'))
     match_related_fields = ['provider', 'currency']
     match_list_display = [
         'name', 'included', 'match_amount'
@@ -716,7 +730,7 @@ class AgencySiteModel(SiteModel):
     list_display = ('name', 'currency', 'gain_percent', 'country', 'enabled')
     list_editable = ('gain_percent', 'enabled',)
     top_filters = ('name', 'currency', 'enabled')
-    ordering = ['enabled', 'currency', 'name']
+    ordering = ['-enabled', 'currency', 'name']
 
     actions = ['rewrite_agency_amounts', 'update_agency_amounts']
 
@@ -820,10 +834,12 @@ class AgencyInvoiceSiteModel(AgencyDebitDocumentSiteModel):
     model_order = 4220
     menu_label = MENU_LABEL_FINANCE_ADVANCED
 
-    fields = ('name', 'agency', 'document_number', 'currency', 'amount', 'matched_amount', 'date', 'status')
-    list_display = ['name', 'invoice_number', 'content_date', 'currency', 'amount', 'matched_amount', 'date', 'status']
+    fields = ('name', 'agency', 'document_number', 'currency',
+              'amount', 'matched_amount', 'date', 'status')
+    list_display = ['name', 'invoice_number', 'content_date',
+                    'currency', 'amount', 'matched_amount', 'date', 'status']
     top_filters = ('currency', 'agency', 'status', 'date', 'document_number')
-    readonly_fields = ['name', 'matched_amount', 'document_number',]
+    readonly_fields = ['name', 'matched_amount', 'document_number', ]
     list_details_template = 'finance/agencyinvoice_details.html'
     change_details_template = 'finance/agencyinvoice_details.html'
     ordering = ['content_date']
