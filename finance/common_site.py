@@ -41,7 +41,7 @@ from finance.models import (
     Provider, ProviderDocumentMatch, ProviderCreditDocument, ProviderDebitDocument,
     ProviderInvoice, ProviderPayment)
 from finance.services import FinanceServices
-from finance.top_filters import LoanEntityTopFilter, LoanAccountTopFilter
+from finance.top_filters import EnabledTopFilter, LoanEntityTopFilter, LoanAccountTopFilter
 
 from accounting.top_filters import AccountTopFilter, AmountTopFilter
 from accounting.common_site import MENU_LABEL_ACCOUNTING
@@ -729,7 +729,7 @@ class AgencySiteModel(SiteModel):
     menu_group = 'Tour Operators'
     list_display = ('name', 'currency', 'gain_percent', 'country', 'enabled')
     list_editable = ('gain_percent', 'enabled',)
-    top_filters = ('name', 'currency', 'enabled')
+    top_filters = ('name', 'currency', ('enabled', EnabledTopFilter))
     ordering = ['-enabled', 'currency', 'name']
 
     actions = ['rewrite_agency_amounts', 'update_agency_amounts']
