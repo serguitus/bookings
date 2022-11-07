@@ -4091,27 +4091,35 @@ class BookingServices(object):
                         constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_EXTRA]:
                     # set not all cancelled
                     cancelled = False
+                    # TODO: refactor this to use SERVICE_STATUS_ORDER and BOOKING_STATUS_ORDER
                     # pending sets always pending
                     if service.status == constants.SERVICE_STATUS_PENDING:
                         status = constants.BOOKING_STATUS_PENDING
+                    # on-hold sets always on-hold
+                    elif service.status == constants.SERVICE_STATUS_ON_HOLD:
+                        status = constants.BOOKING_STATUS_ON_HOLD
                     # requested sets requested when not pending
                     elif (service.status == constants.SERVICE_STATUS_REQUEST) and (
-                            status != constants.BOOKING_STATUS_PENDING):
+                            status != constants.BOOKING_STATUS_PENDING) and (
+                            status != constants.BOOKING_STATUS_ON_HOLD):
                         status = constants.BOOKING_STATUS_REQUEST
                     # phone confirmed sets requested when not pending
                     elif (service.status == constants.SERVICE_STATUS_PHONE_CONFIRMED) and (
-                            status != constants.BOOKING_STATUS_PENDING):
+                            status != constants.BOOKING_STATUS_PENDING) and (
+                            status != constants.BOOKING_STATUS_ON_HOLD):
                         status = constants.BOOKING_STATUS_REQUEST
                     # confirmed sets confirmed when not requested and not pending
                     elif (service.status == constants.SERVICE_STATUS_CONFIRMED) and (
                             status != constants.BOOKING_STATUS_PENDING) and (
-                                status != constants.BOOKING_STATUS_REQUEST):
+                            status != constants.BOOKING_STATUS_ON_HOLD) and (
+                            status != constants.BOOKING_STATUS_REQUEST):
                         status = constants.BOOKING_STATUS_CONFIRMED
                     # coordinated sets when not pending or requested or confirmed
                     elif (service.status == constants.SERVICE_STATUS_COORDINATED) and (
                             status != constants.BOOKING_STATUS_PENDING) and (
-                                status != constants.BOOKING_STATUS_REQUEST) and (
-                                    status != constants.BOOKING_STATUS_CONFIRMED):
+                            status != constants.BOOKING_STATUS_ON_HOLD) and (
+                            status != constants.BOOKING_STATUS_REQUEST) and (
+                            status != constants.BOOKING_STATUS_CONFIRMED):
                         status = constants.BOOKING_STATUS_COORDINATED
 
         # verify that have services and all cancelled
