@@ -1358,7 +1358,7 @@ class BookingProvidedServiceSiteModel(SiteModel):
 
     list_display = ('name', 'datetime_from', 'datetime_to',
                     'service_provider', 'conf_number', 'booking_name',
-                    'service_addon', 'cost_amount',
+                    'description', 'service_addon', 'cost_amount',
                     'price_amount', 'utility_percent', 'status',
                     'cost_amount_paid')
     top_filters = (('booking__name', 'Booking'),
