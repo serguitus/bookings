@@ -45,7 +45,8 @@ class OperationMovementSiteModel(SiteModel):
     menu_group = MENU_GROUP_LABEL_ACCOUNTING
     readonly_model = True
     actions_on_top = False
-    list_display = ('operation', 'account', 'movement_type', 'amount',)
+    list_display = ('operation', 'account', 'movement_type',
+                    'balance_before', 'amount', 'final_account_balance')
     top_filters = (('account', AccountTopFilter), 'movement_type', 'amount',)
     ordering = ['-operation__datetime']
 
