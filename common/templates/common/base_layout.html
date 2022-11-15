@@ -81,7 +81,7 @@
 {% endblock navbar %}
 
 {% block leftbar %}
-    <div id="leftbar_container" class="left-bg-color col-sm-2 col-md-3 col-lg-2 collapse d-lg-block sidebar">
+    <div id="leftbar_container" class="left-bg-color col-sm-2 col-md-3 col-lg-2 collapse sidebar" aria-expanded="false">
         <div class="left-bg-color">
         {% if module_name and current_model_actions %}
             {% block model_actions %}
