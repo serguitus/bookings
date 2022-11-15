@@ -1688,12 +1688,13 @@ class BookingProvidedAllotmentSiteModel(BookingProvidedServiceSiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
 
-    readonly_fields = ['utility_percent', 'utility', 'description']
+    readonly_fields = ['utility_percent', 'utility',
+                       'description', 'internal_reference']
 
     fieldsets = (
         (None, {
             'fields': (
-                ('booking', 'description'), 'booking_package', ('service',
+                ('booking', 'description', 'internal_reference'), 'booking_package', ('service',
                                                                 'search_location'),
                 ('status', 'conf_number'),
                 ('datetime_from', 'nights', 'datetime_to'),

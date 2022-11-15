@@ -46,7 +46,7 @@ from booking.constants import (
     INVOICE_FORMATS, INVOICE_FORMAT_COMPACT)
 
 from config.constants import (
-    BOARD_TYPES, AMOUNTS_BY_PAX, 
+    BOARD_TYPES, AMOUNTS_BY_PAX,
     SERVICE_CATEGORY_TRANSFER,
     SERVICE_CATEGORY_ALLOTMENT,
     SERVICE_CATEGORY_EXTRA)
@@ -864,6 +864,10 @@ class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
     def utility_percent(self):
         return utility_percent(self.cost_amount, self.price_amount)
     utility_percent.fget.short_description = 'Util.%'
+
+    @property
+    def internal_reference(self):
+        return self.booking.internal_reference
 
     def booking_name(self):
         # gets booking.name for this bookingservice

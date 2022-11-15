@@ -418,13 +418,19 @@ class CurrencyExchangeSiteModel(BaseFinantialDocumentSiteModel):
     model_order = 2030
     menu_label = MENU_LABEL_ACCOUNTING
     menu_group = MENU_GROUP_LABEL_FINANCE_BASIC
-    fields = ('name', 'account', 'amount', 'date', 'status',
-              'exchange_account', 'exchange_amount', 'details')
+    fields = ('name', 'exchange_account', 'exchange_amount',
+              'account', 'amount', 'date', 'status', 'details')
     list_display = (
         'details', 'exchange_account', 'exchange_amount',
         'account', 'amount', 'date', 'status')
     top_filters = ('currency', ('account', AccountTopFilter), 'status', 'date')
     form = CurrencyExchangeForm
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change, **kwargs)
+        form.base_fields['account'].label = 'Destination Account'
+        form.base_fields['amount'].label = 'Destination Amount'
+        return form
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
@@ -435,7 +441,7 @@ class TransferSiteModel(BaseFinantialDocumentSiteModel):
     model_order = 2040
     menu_label = MENU_LABEL_ACCOUNTING
     menu_group = MENU_GROUP_LABEL_FINANCE_BASIC
-    fields = ('name', 'account', 'transfer_account',
+    fields = ('name', 'transfer_account', 'account',
               'amount', 'operation_cost', 'date', 'status',
               'details')
     list_display = (
@@ -443,6 +449,11 @@ class TransferSiteModel(BaseFinantialDocumentSiteModel):
         'operation_cost', 'date', 'status')
     top_filters = ('currency', ('account', AccountTopFilter), 'status', 'date')
     form = TransferForm
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change, **kwargs)
+        form.base_fields['account'].label = 'Destination Account'
+        return form
 
     def save_model(self, request, obj, form, change):
         # overrides base class method
