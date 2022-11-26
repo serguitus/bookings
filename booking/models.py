@@ -42,6 +42,7 @@ from booking.constants import (
     QUOTE_SERVICE_CATEGORY_QUOTE_DETAIL_EXTRA,
     QUOTE_STATUS_LIST, QUOTE_STATUS_DRAFT,
     BOOKING_STATUS_LIST, BOOKING_STATUS_PENDING,
+    SERVICE_STATUS_CANCELLING,
     SERVICE_STATUS_LIST, SERVICE_STATUS_PENDING, SERVICE_STATUS_REQUEST, SERVICE_STATUS_CANCELLED,
     INVOICE_FORMATS, INVOICE_FORMAT_COMPACT)
 
@@ -815,7 +816,8 @@ class InvoicedManager(models.Manager):
 class VouchedManager(models.Manager):
     def get_queryset(self):
         return super(VouchedManager, self).get_queryset().filter(
-            service__is_internal=False).exclude(status=SERVICE_STATUS_CANCELLED)
+            service__is_internal=False).exclude(
+                status__in=[SERVICE_STATUS_CANCELLED, SERVICE_STATUS_CANCELLING])
 
 
 class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
@@ -933,7 +935,7 @@ class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
         self.validate_date_interval()
         if self.status in [
                 SERVICE_STATUS_PENDING, SERVICE_STATUS_REQUEST,
-                SERVICE_STATUS_CANCELLED]:
+                SERVICE_STATUS_CANCELLED, SERVICE_STATUS_CANCELLING]:
             self.cost_amount_to_pay = 0.00
         elif self.cost_amount is None:
             raise ValidationError(

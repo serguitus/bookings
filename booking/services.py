@@ -212,7 +212,7 @@ class BookingServices(object):
             # obtain lines
             booking_service_list = BaseBookingService.objects.filter(
                 booking=booking.id).exclude(
-                    status=constants.SERVICE_STATUS_CANCELLED).filter(
+                    status__in=[constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]).filter(
                         base_category__in=[
                             constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT,
                             constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_TRANSFER,
@@ -666,25 +666,29 @@ class BookingServices(object):
         if not allotment_list:
             allotment_list = list(NewQuoteAllotment.objects.filter(
                 quote=quote.id).exclude(
-                    status=constants.SERVICE_STATUS_CANCELLED
+                    status__in=[constants.SERVICE_STATUS_CANCELLED,
+                                constants.SERVICE_STATUS_CANCELLING]
                 ).all())
         transfer_list = inline_transfer_list
         if not transfer_list:
             transfer_list = list(NewQuoteTransfer.objects.filter(
                 quote=quote.id).exclude(
-                    status=constants.SERVICE_STATUS_CANCELLED
+                    status__in=[constants.SERVICE_STATUS_CANCELLED,
+                                constants.SERVICE_STATUS_CANCELLING]
                 ).all())
         extra_list = inline_extra_list
         if not extra_list:
             extra_list = list(NewQuoteExtra.objects.filter(
                 quote=quote.id).exclude(
-                    status=constants.SERVICE_STATUS_CANCELLED
+                    status__in=[constants.SERVICE_STATUS_CANCELLED,
+                                constants.SERVICE_STATUS_CANCELLING]
                 ).all())
         package_list = inline_package_list
         if not package_list:
             package_list = list(QuoteExtraPackage.objects.filter(
                 quote=quote.id).exclude(
-                    status=constants.SERVICE_STATUS_CANCELLED
+                    status__in=[constants.SERVICE_STATUS_CANCELLED,
+                                constants.SERVICE_STATUS_CANCELLING]
                 ).all())
 
         if (
@@ -728,7 +732,7 @@ class BookingServices(object):
         if allotment_list:
             counter = 0
             for allotment in allotment_list:
-                if allotment.status == constants.SERVICE_STATUS_CANCELLED:
+                if allotment.status in [constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]:
                     continue
                 key = '%s' % counter
                 if not hasattr(allotment, 'service'):
@@ -766,7 +770,7 @@ class BookingServices(object):
         if transfer_list:
             counter = 0
             for transfer in transfer_list:
-                if transfer.status == constants.SERVICE_STATUS_CANCELLED:
+                if transfer.status in [constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]:
                     continue
                 key = '2-%s' % counter
                 if not hasattr(transfer, 'service'):
@@ -802,7 +806,7 @@ class BookingServices(object):
         if extra_list:
             counter = 0
             for extra in extra_list:
-                if extra.status == constants.SERVICE_STATUS_CANCELLED:
+                if extra.status in [constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]:
                     continue
                 key = '3-%s' % counter
                 if not hasattr(extra, 'service'):
@@ -838,7 +842,7 @@ class BookingServices(object):
         if package_list:
             counter = 0
             for package in package_list:
-                if package.status == constants.SERVICE_STATUS_CANCELLED:
+                if package.status in [constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]:
                     continue
                 key = '4-%s' % counter
                 if not hasattr(package, 'service'):
@@ -1135,7 +1139,7 @@ class BookingServices(object):
                     and (date_to_max is None or date_to_max < service.datetime_to)):
                 date_to_max = service.datetime_to
             # process only non cancelled services
-            if service.status != constants.SERVICE_STATUS_CANCELLED:
+            if service.status not in [constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]:
                 # set not all cancelled
                 cancelled = False
                 # date_from
@@ -1321,15 +1325,15 @@ class BookingServices(object):
             allotment_list = list(
                 NewQuoteAllotment.objects.filter(
                     quote_package=package.id).exclude(
-                        status=constants.SERVICE_STATUS_CANCELLED).all())
+                        status__in=[constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]).all())
             transfer_list = list(
                 NewQuoteTransfer.objects.filter(
                     quote_package=package.id).exclude(
-                        status=constants.SERVICE_STATUS_CANCELLED).all())
+                        status__in=[constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]).all())
             extra_list = list(
                 NewQuoteExtra.objects.filter(
                     quote_package=package.id).exclude(
-                        status=constants.SERVICE_STATUS_CANCELLED).all())
+                        status__in=[constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]).all())
         else:
             allotment_list = list(
                 ServiceBookDetailAllotment.objects.filter(service=package.service_id).all())
@@ -2816,14 +2820,14 @@ class BookingServices(object):
         provided_pax_variants = list(
             QuoteServicePaxVariant.provided_objects.filter(
                 quote_pax_variant=quote_pax_variant.id).exclude(
-                    quote_service__status=constants.SERVICE_STATUS_CANCELLED))
+                    quote_service__status__in=[constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]))
 
         c1, c2, c3, c4 = cls._totalize_pax_variants_costs(provided_pax_variants)
 
         invoiced_pax_variants = list(
             QuoteServicePaxVariant.invoiced_objects.filter(
                 quote_pax_variant=quote_pax_variant.id).exclude(
-                    quote_service__status=constants.SERVICE_STATUS_CANCELLED))
+                    quote_service__status__in=[constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]))
 
         p1, p2, p3, p4 = cls._totalize_pax_variants_prices(invoiced_pax_variants)
 
@@ -2986,7 +2990,7 @@ class BookingServices(object):
         date_from = None
         date_to = None
         for service in quote_package.quoteprovidedservice_set.all():
-            if not service.status is constants.SERVICE_STATUS_CANCELLED:
+            if not service.status in [constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]:
                 # date_from
                 if service.datetime_from is not None:
                     if date_from is None or (date_from > service.datetime_from):
@@ -3077,19 +3081,23 @@ class BookingServices(object):
 
         allotment_list = list(BookingProvidedAllotment.objects.filter(
             booking=booking.id).exclude(
-                status=constants.SERVICE_STATUS_CANCELLED
+                status__in=[constants.SERVICE_STATUS_CANCELLED,
+                           constants.SERVICE_STATUS_CANCELLING]
             ).all())
         transfer_list = list(BookingProvidedTransfer.objects.filter(
             booking=booking.id).exclude(
-                status=constants.SERVICE_STATUS_CANCELLED
+                status__in=[constants.SERVICE_STATUS_CANCELLED,
+                           constants.SERVICE_STATUS_CANCELLING]
             ).all())
         extra_list = list(BookingProvidedExtra.objects.filter(
             booking=booking.id).exclude(
-                status=constants.SERVICE_STATUS_CANCELLED
+                status__in=[constants.SERVICE_STATUS_CANCELLED,
+                           constants.SERVICE_STATUS_CANCELLING]
             ).all())
         package_list = list(BookingExtraPackage.objects.filter(
             booking=booking.id).exclude(
-                status=constants.SERVICE_STATUS_CANCELLED
+                status__in=[constants.SERVICE_STATUS_CANCELLED,
+                           constants.SERVICE_STATUS_CANCELLING]
             ).all())
 
         service_list = list()
@@ -3107,7 +3115,7 @@ class BookingServices(object):
 
         if service_list:
             for service in service_list:
-                if service.status == constants.SERVICE_STATUS_CANCELLED:
+                if service.status in [constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]:
                     continue
                 if not hasattr(service, 'service'):
                     error_msg = "%s - Missing Service" % service
@@ -3129,7 +3137,7 @@ class BookingServices(object):
 
         if package_list:
             for package in package_list:
-                if package.status == constants.SERVICE_STATUS_CANCELLED:
+                if package.status in [constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]:
                     continue
                 if not hasattr(package, 'service'):
                     error_msg = "%s - Missing Package Service" % package
@@ -3838,7 +3846,7 @@ class BookingServices(object):
         bookingpackage_services = list(
             BookingProvidedService.objects.filter(
                 booking_package=bookingpackage.id).exclude(
-                    status=constants.SERVICE_STATUS_CANCELLED))
+                    status__in=[constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]))
 
         cost, price = cls._totalize_services(bookingpackage_services, update_services)
 
@@ -3890,13 +3898,13 @@ class BookingServices(object):
 
         allotment_list = list(BookingProvidedAllotment.objects.filter(
             booking_package=bookingpackage.id).exclude(
-                status=constants.SERVICE_STATUS_CANCELLED).all())
+                status__in=[constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]).all())
         transfer_list = list(BookingProvidedTransfer.objects.filter(
             booking_package=bookingpackage.id).exclude(
-                status=constants.SERVICE_STATUS_CANCELLED).all())
+                status__in=[constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]).all())
         extra_list = list(BookingProvidedExtra.objects.filter(
             booking_package=bookingpackage.id).exclude(
-                status=constants.SERVICE_STATUS_CANCELLED).all())
+                status__in=[constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]).all())
 
         service_list = list()
         if allotment_list:
@@ -4022,13 +4030,13 @@ class BookingServices(object):
         if not cls.sync_bookingpackage_services(bookingpackage):
             allotment_list = list(BookingProvidedAllotment.objects.filter(
                 booking_package=bookingpackage.id).exclude(
-                    status=constants.SERVICE_STATUS_CANCELLED).all())
+                    status__in=[constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]).all())
             transfer_list = list(BookingProvidedTransfer.objects.filter(
                 booking_package=bookingpackage.id).exclude(
-                    status=constants.SERVICE_STATUS_CANCELLED).all())
+                    status__in=[constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]).all())
             extra_list = list(BookingProvidedTransfer.objects.filter(
                 booking_package=bookingpackage.id).exclude(
-                    status=constants.SERVICE_STATUS_CANCELLED).all())
+                    status__in=[constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]).all())
             if allotment_list:
                 for allotment in allotment_list:
                     cls.update_bookingservice_amounts(allotment)
@@ -4072,7 +4080,7 @@ class BookingServices(object):
                     and (date_to_max is None or date_to_max < service.datetime_to)):
                 date_to_max = service.datetime_to
             # process only non cancelled services
-            if service.status != constants.SERVICE_STATUS_CANCELLED:
+            if not (service.status in [constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]):
                 # date_from
                 if (service.datetime_from is not None
                         and (date_from is None or date_from > service.datetime_from)):
@@ -4155,12 +4163,12 @@ class BookingServices(object):
         booking_provided_services = list(
             BookingProvidedService.objects.all().filter(
                 booking=booking.id).exclude(
-                    status=constants.SERVICE_STATUS_CANCELLED))
+                    status__in=[constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]))
 
         booking_invoiced_services = list(
             BaseBookingService.invoiced_objects.all().filter(
                 booking=booking.id).exclude(
-                    status=constants.SERVICE_STATUS_CANCELLED))
+                    status__in=[constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]))
 
         cost = cls._totalize_services_cost(booking_provided_services)
         price = cls._totalize_services_price(booking_invoiced_services)
@@ -4275,7 +4283,7 @@ class BookingServices(object):
         agency = booking.agency
         bookingservices = list(BaseBookingService.objects.all().filter(
             booking=booking.id).exclude(
-                status=constants.SERVICE_STATUS_CANCELLED).order_by(
+                status__in=[constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]).order_by(
                     'datetime_from', 'time', 'datetime_to'))
         services = list()
         for bookingservice in bookingservices:
@@ -4699,7 +4707,7 @@ class BookingServices(object):
                         'Payments to previous Provider were done. Cancel this Service and Create another for the new Provider')
         if basebookingservice.status in [
                 constants.SERVICE_STATUS_PENDING, constants.SERVICE_STATUS_REQUEST,
-                constants.SERVICE_STATUS_CANCELLED]:
+                constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]:
             basebookingservice.cost_amount_to_pay = 0.00
         elif basebookingservice.pk and basebookingservice.cost_amount is None:
             raise ValidationError('%s with Status %s requires a Cost' % (basebookingservice.name, basebookingservice.get_status_display()))

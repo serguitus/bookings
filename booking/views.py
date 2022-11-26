@@ -51,7 +51,7 @@ from booking.constants import (
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_TRANSFER,
-    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA, SERVICE_STATUS_CANCELLING,
 
 )
 from booking.models import (
@@ -633,7 +633,7 @@ class EmailConfirmationView(View):
         bk = Booking.objects.get(id=id)
         # pick all non-cancelled services
         services = BookingProvidedService.objects.filter(
-            booking=bk.pk).exclude(status=SERVICE_STATUS_CANCELLED)
+            booking=bk.pk).exclude(status__in=[SERVICE_STATUS_CANCELLED, SERVICE_STATUS_CANCELLING])
         # this is for the agency seller name (add also variable for email)
         client_name = ''
         if bk.agency_contact:

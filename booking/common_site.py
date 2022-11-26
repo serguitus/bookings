@@ -33,7 +33,7 @@ from finance.models import Office
 from finance.top_filters import ProviderTopFilter, AgencyTopFilter
 
 from booking.constants import (
-    SERVICE_STATUS_PENDING, SERVICE_STATUS_REQUEST, SERVICE_STATUS_COORDINATED,
+    SERVICE_STATUS_CANCELLING, SERVICE_STATUS_PENDING, SERVICE_STATUS_REQUEST, SERVICE_STATUS_COORDINATED,
     SERVICE_STATUS_CONFIRMED, SERVICE_STATUS_CANCELLED, SERVICE_STATUS_ON_HOLD,
     BOOTSTRAP_STYLE_BOOKING_STATUS_MAPPING,
     BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING,
@@ -119,7 +119,8 @@ def _get_voucher_services(services):
                 BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT: BookingProvidedAllotment,
             }
             package_services = list(BookingProvidedService.objects.filter(
-                booking_package=booking_service).exclude(status=SERVICE_STATUS_CANCELLED))
+                booking_package=booking_service).exclude(
+                    status__in=[SERVICE_STATUS_CANCELLED, SERVICE_STATUS_CANCELLING]))
             for package_service in package_services:
                 service = PACKAGE_MODELS[package_service.base_category].objects.get(
                     id=package_service.id)
