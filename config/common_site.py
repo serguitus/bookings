@@ -731,8 +731,7 @@ class ProviderAllotmentServiceSiteModel(CatalogService):
     change_form_template = 'config/catalog_service_change_form.html'
     save_as = True
 
-    actions = ['rewrite_agency_amounts',
-               'update_agency_amounts',
+    actions = ['update_agency_amounts',
                'extend_catalog_prices']
 
     def rewrite_agency_amounts(self, request, queryset):
@@ -860,8 +859,7 @@ class ProviderTransferServiceSiteModel(CatalogService):
     change_form_template = 'config/catalog_service_change_form.html'
     save_as = True
 
-    actions = ['rewrite_agency_amounts',
-                'update_agency_amounts',
+    actions = ['update_agency_amounts',
                 'extend_catalog_prices']
 
     def rewrite_agency_amounts(self, request, queryset):
@@ -973,8 +971,7 @@ class ProviderExtraServiceSiteModel(CatalogService):
     change_form_template = 'config/catalog_service_change_form.html'
     save_as = True
 
-    actions = ['rewrite_agency_amounts',
-               'update_agency_amounts',
+    actions = ['update_agency_amounts',
                'extend_catalog_prices']
 
     def rewrite_agency_amounts(self, request, queryset):
