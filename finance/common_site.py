@@ -743,7 +743,7 @@ class AgencySiteModel(SiteModel):
     top_filters = ('name', 'currency', ('enabled', EnabledTopFilter))
     ordering = ['-enabled', 'currency', 'name']
 
-    actions = ['rewrite_agency_amounts', 'update_agency_amounts']
+    actions = ['update_agency_amounts']
 
     inlines = [AgencyContactInline, AgencyCopyContactInline,
                AgencyBillingContactInline]
