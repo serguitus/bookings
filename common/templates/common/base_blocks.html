@@ -1,7 +1,7 @@
 <!doctype html>
 {% load i18n static %}
 {% get_current_language as LANGUAGE_CODE %}
-<html lang="{{ LANGUAGE_CODE|default:"en-us" }}">
+<html lang='{{ LANGUAGE_CODE|default:"en-us" }}'>
     <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -19,18 +19,18 @@
         {% endblock head_title %}
     </title>
     <script src="{% static 'common/js/jquery.min.js' %}"></script>
-    {% block head_extra %}
-    {% endblock head_extra %}
     <script src="{% static 'autocomplete_light/jquery.init.js' %}"></script>
     <script src="{% static 'autocomplete_light/autocomplete.init.js' %}"></script>
     <script src="{% static 'vendor/select2/dist/js/select2.full.js' %}"></script>
     <script src="{% static 'autocomplete_light/select2.js' %}"></script>
     <script src="{% static 'autocomplete_light/forward.js' %}"></script>
+    {% block head_extra %}
+    {% endblock head_extra %}
     <script src="{% static 'autocomplete_light/jquery.post-setup.js' %}"></script>
 
     <script src="{% static 'common/js/bootstrap.min.js' %}"></script>
-    <script src="{% static 'common/js/vue.js' %}"></script>
-    <script src="{% static 'common/js/cleave.js' %}"></script>
+    {% comment %} <script src="{% static 'common/js/vue.js' %}"></script>
+    <script src="{% static 'common/js/cleave.js' %}"></script> {% endcomment %}
     <link rel="stylesheet" type="text/css" href="{% static 'common/css/base.css' %}" />
 </head>
 <body data-common-utc-offset="{% now "Z" %}">

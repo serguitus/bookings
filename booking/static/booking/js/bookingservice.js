@@ -1,6 +1,6 @@
 (function($) {
-    //$(document).ready(function () {
-    window.addEventListener("load", function() {
+    $(document).ready(function() {
+        //window.addEventListener("load", function() { // this breaks autocomplete
         var clickEvent = new MouseEvent("click", {
             view: window,
             bubbles: true,

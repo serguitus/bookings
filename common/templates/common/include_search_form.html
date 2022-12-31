@@ -5,7 +5,7 @@
         <form class="search-form" method="get">
             <div><!-- DIV needed for valid HTML -->
                 <label for="searchbar">
-                    <img src="{% static "admin/img/search.svg" %}" alt="Search" />
+                    <img src='{% static "admin/img/search.svg" %}" alt="Search' />
                 </label>
                 <input type="text" size="40" name="{{ search_var }}" value="{{ cl.query }}" class="searchbar" autofocus />
                 <input type="submit" value="{% trans 'Search' %}" />
