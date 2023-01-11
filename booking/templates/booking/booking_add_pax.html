@@ -4,6 +4,7 @@
 {% load render_table from django_tables2 %}
 {% block head_extra %}
     {{ block.super }}
+
     <script src="{% static 'admin/js/jquery.init.js' %}"></script>
     <script type="text/javascript" src="/admin/jsi18n/"></script>
     <script type="text/javascript" src="{% static 'admin/js/actions.js' %}"></script>
@@ -36,7 +37,7 @@
       <td>{{ pax.pax_age }}</td>
       <td>{{ pax.is_price_free }}</td>
       <td></td>
-      
+
     </tr>
       {% endfor %}
     {% endif %}

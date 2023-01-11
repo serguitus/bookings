@@ -59,4 +59,4 @@
             return deleteForm(this, "form");
         });
     });
-})(jQuery);
+})(django.jQuery);
