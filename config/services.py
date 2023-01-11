@@ -1866,6 +1866,8 @@ class ConfigServices(object):
             agency_id=dst_agency.id,
             date_from=src_provider_service.date_from,
             date_to=src_provider_service.date_to,
+            booked_from=src_provider_service.booked_from,
+            booked_to=src_provider_service.booked_to,
             contract_code=src_provider_service.contract_code,
             service_id=src_provider_service.service_id
         )
