@@ -4394,7 +4394,7 @@ class BookingServices(object):
         quote_service.quote = quote
         quote_service.quote_id = quote.pk
         quote_service.avoid_all = True
-        if quote_service.datetime_from > quote_service.datetime_to:
+        if quote_service.datetime_to and quote_service.datetime_from > quote_service.datetime_to:
             quote_service.datetime_to = quote_service.datetime_from
         quote_service.save()
 
