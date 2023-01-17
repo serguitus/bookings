@@ -1,11 +1,29 @@
 (function($) {
-    $(document).ready(function() {
-        //window.addEventListener("load", function() { // this breaks autocomplete
+    window.addEventListener("load", function() {
         var clickEvent = new MouseEvent("click", {
             view: window,
             bubbles: true,
             cancelable: false,
         });
+        if (
+            document.querySelectorAll("#id_new_v_notes")[0].textContent ||
+            document.querySelectorAll("#id_p_notes")[0].textContent ||
+            document.querySelectorAll("#id_provider_notes")[0].textContent
+        ) {
+            document
+                .getElementById("fieldsetcollapser0")
+                .dispatchEvent(clickEvent);
+            //$("#fieldsetcollapser0.collapse-toggle").click();
+        }
+    });
+
+    $(document).ready(function() {
+        //window.addEventListener("load", function() { // this breaks autocomplete
+        // var clickEvent = new MouseEvent("click", {
+        //     view: window,
+        //     bubbles: true,
+        //     cancelable: false,
+        // });
 
         $("div.fieldBox.field-provider>div.related-widget-wrapper").after(
             '<a id="btn-costs" title="Costs" data-toggle="modal" data-target="#popup-costs" class="btn btn-costs fa fa-dollar" href="#"></a>'
@@ -27,16 +45,16 @@
         );
 
         // check if there are notes on bookingServices to Expand collapsed notes
-        if (
-            $("#id_new_v_notes").val() ||
-            $("#id_p_notes").val() ||
-            $("#id_provider_notes").val()
-        ) {
-            document
-                .getElementById("fieldsetcollapser0")
-                .dispatchEvent(clickEvent);
-            //$("#fieldsetcollapser0.collapse-toggle").click();
-        }
+        // if (
+        //     $("#id_new_v_notes").val() ||
+        //     $("#id_p_notes").val() ||
+        //     $("#id_provider_notes").val()
+        // ) {
+        //     document
+        //         .getElementById("fieldsetcollapser0")
+        //         .dispatchEvent(clickEvent);
+        //     //$("#fieldsetcollapser0.collapse-toggle").click();
+        // }
 
         function get_computed_amounts() {
             // sending a request to get computed numbers
@@ -277,7 +295,7 @@
         });
 
         // for provider changed
-        $("#id_provider").change(function(e) {
+        $("#id_provider").on("select2:select", function(e) {
             e.preventDefault();
             // clear data
             $("#id_contract_code").val("").trigger("change");
@@ -387,4 +405,4 @@
         );
     }
     /* END OF HELPER METHODS FOR NIGHTS HANDLING LOGIC */
-})(django.jQuery);
+})(jQuery);

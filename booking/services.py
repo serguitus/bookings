@@ -364,6 +364,19 @@ class BookingServices(object):
         bookingpackage_service.avoid_bookingpackageservice_update = True
         bookingpackage_service.save()
 
+    # TODO: finish this functionality to convert packages into extras with details
+    @classmethod
+    def build_extra_service_from_package(service_id):
+        """ creates a BookingProvidedExtra to replace a package in a booking """
+        try:
+            booking_package = BookingExtraPackage.objects.get(id=service_id)
+            with transaction.atomic(savepoint=False):
+                booking_extra = BookingProvidedExtra()
+                booking_extra.booking = booking_package.booking
+                ConfigServices.copy_book_extra_data(
+                    dst_service=booking_extra, src_service=booking_package)
+        except Exception:
+            return None, "Error converting package into extra with details"
 
     @classmethod
     def build_booking_from_quote(cls, quote_id, rooming, user=None):
