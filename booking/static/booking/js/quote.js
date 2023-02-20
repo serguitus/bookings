@@ -100,4 +100,9 @@ $(document).ready(function(){
     get_computed_amounts();
   });
 
+  // check if there is description on the quote to Expand collapsed description
+  if ($('#id_description').val()) {
+    document.getElementById('fieldsetcollapser0').dispatchEvent(clickEvent);
+    $('#fieldsetcollapser0.collapse-toggle').click()
+  }
 });

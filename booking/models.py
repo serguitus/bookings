@@ -254,6 +254,17 @@ class Quote(models.Model):
     def get_absolute_url(self):
         return reverse('common:booking_quote_change', args=[self.id])
 
+    def has_description(self):
+        # this shows a waring sign with mouse-over message
+        # for quotes with description
+        if self.description:
+            return format_html(
+                '<a href="#" data-toggle="tooltip" title="{}"> \
+                    <span class="fa fa-exclamation-circle" aria-hidden="true"> \
+                    </span></a>', self.description)
+
+    has_description.short_description = 'Description'
+
 
 class QuotePaxVariant(PaxVariantAmounts):
     """

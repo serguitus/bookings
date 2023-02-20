@@ -161,16 +161,25 @@ class QuoteSiteModel(SiteModel):
     menu_label = MENU_LABEL_QUOTE
 
     recent_allowed = True
-    fields = (
-        ('reference', 'agency', 'seller'),
-        ('status', 'currency'),
-        ('booked', 'date_from', 'date_to',),
-        'id',
-        'mail_from', 'mail_to', 'mail_cc',
-        'mail_bcc', 'mail_subject', 'mail_body', 'submit_action'
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                ('reference', 'agency', 'seller'),
+                ('status', 'currency'),
+                ('booked', 'date_from', 'date_to',),
+                'id',
+                'mail_from', 'mail_to', 'mail_cc',
+                'mail_bcc', 'mail_subject', 'mail_body', 'submit_action')
+        }),
+        ('Description', {
+            'fields': (
+                'description',),
+                'classes': ('collapse', 'wide', 'show')
+        })
     )
     list_display = ('reference', 'agency', 'date_from',
-                    'date_to', 'status', 'currency', 'seller')
+                    'date_to', 'status', 'currency', 'seller', 'has_description')
     top_filters = ('reference', ('date_from', DateTopFilter),
                    'status', ('seller', SellerTopFilter),
                    'agency')

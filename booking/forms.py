@@ -50,6 +50,7 @@ class QuoteForm(forms.ModelForm, MailForm):
         fields = ('__all__')
         widgets = {
             'agency': autocomplete.ModelSelect2(url='agency-autocomplete'),
+            'description': widgets.Textarea(attrs={'cols': 120, 'rows': 4}),
         }
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 

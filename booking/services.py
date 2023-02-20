@@ -375,6 +375,7 @@ class BookingServices(object):
             with transaction.atomic(savepoint=False):
                 # create booking
                 booking = Booking()
+                booking.p_notes = quote.description
                 booking.name = quote.reference
                 booking.agency = quote.agency
                 # booking.reference = '< reference> '
