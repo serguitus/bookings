@@ -113,7 +113,7 @@ def providerbookingpaymentreport_table(payment):
 @register.simple_tag
 def bookingconfirmation_table(booking):
     table = BookingConfirmationTable(
-        BaseBookingService.objects.filter(booking=booking).exclude(
+        BaseBookingService.objects.filter(booking=booking, base_service__is_internal=False).exclude(
             status__in=[SERVICE_STATUS_CANCELLED, SERVICE_STATUS_CANCELLING]),
         order_by=('datetime_from', 'time', 'datetime_to'))
     return table

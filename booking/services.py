@@ -375,6 +375,17 @@ class BookingServices(object):
                 booking_extra.booking = booking_package.booking
                 ConfigServices.copy_book_extra_data(
                     dst_service=booking_extra, src_service=booking_package)
+
+                # create bookingprovidedallotment list
+                # for quotepackage_allotment in BookingProvidedAllotment.objects.filter(
+                #         booking_package_id=booking_package.id).all():
+                #     bookingpackage_allotment = BookingProvidedAllotment()
+                #     ConfigServices.copy_book_allotment_data(
+                #         dst_service=bookingpackage_allotment,
+                #         src_service=quotepackage_allotment)
+                #     cls.build_bookingpackageservice_from_quotepackageservice(
+                #         bookingpackage_allotment, quotepackage_allotment,
+                #         pax_list, service_pax_variant)
         except Exception:
             return None, "Error converting package into extra with details"
 

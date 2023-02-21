@@ -632,8 +632,8 @@ class EmailConfirmationView(View):
         """
         bk = Booking.objects.get(id=id)
         # pick all non-cancelled services
-        services = BookingProvidedService.objects.filter(
-            booking=bk.pk).exclude(status__in=[SERVICE_STATUS_CANCELLED, SERVICE_STATUS_CANCELLING])
+        # services = BookingProvidedService.objects.filter(
+        #     booking=bk.pk).exclude(status__in=[SERVICE_STATUS_CANCELLED, SERVICE_STATUS_CANCELLING])
         # this is for the agency seller name (add also variable for email)
         client_name = ''
         if bk.agency_contact:
@@ -644,13 +644,13 @@ class EmailConfirmationView(View):
         if bk.agency_contact:
             client_email = bk.agency_contact.email or ''
         rooming = bk.rooming_list.all()
-        objs = get_bookingservice_objects(services)
+        # objs = get_bookingservice_objects(services)
         subj = 'Service Confirmation %s' % bk.name
         if bk.reference:
             subj += ' (%s)' % bk.reference
         initial = {
             'booking': bk,
-            'services': objs,
+            # 'services': objs,
             'client': client_name,
             'rooming': rooming,
             'user': request.user,

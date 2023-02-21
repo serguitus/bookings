@@ -274,7 +274,7 @@ class BookingConfirmationTable(tables.Table):
         template_name = 'booking/bookingservice_list.html'
         fields = ['name', 'service_location', 'datetime_from',
                   'datetime_to', 'nights', 'description',
-                  'conf_number', 'status']
+                  'conf_number', 'price_amount']
         attrs = {'class': 'table',
                  'style': 'width:100%',
                  'border': '1',}
