@@ -274,7 +274,7 @@ class BookingConfirmationTable(tables.Table):
         template_name = 'booking/bookingservice_list.html'
         fields = ['name', 'service_location', 'datetime_from',
                   'datetime_to', 'nights', 'description',
-                  'conf_number', 'price_amount']
+                  'price_amount']
         attrs = {'class': 'table',
                  'style': 'width:100%',
                  'border': '1',}
@@ -289,7 +289,7 @@ class BookingConfirmationTable(tables.Table):
         self.base_columns['datetime_from'].verbose_name = 'FROM'
         self.base_columns['datetime_to'].verbose_name = 'TO'
         self.base_columns['description'].verbose_name = 'Pax'
-        self.base_columns['conf_number'].verbose_name = 'Conf.'
+        # self.base_columns['conf_number'].verbose_name = 'Conf.'
         super(BookingConfirmationTable, self).__init__(*args, **kwargs)
 
 
