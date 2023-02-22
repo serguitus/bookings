@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 from django import template
 
-from booking.constants import SERVICE_STATUS_CANCELLED
+from booking.constants import SERVICE_STATUS_CANCELLED, SERVICE_STATUS_CANCELLING
 from booking.models import (
     Booking,
     BaseBookingService, BookingProvidedService,
@@ -113,7 +113,8 @@ def providerbookingpaymentreport_table(payment):
 @register.simple_tag
 def bookingconfirmation_table(booking):
     table = BookingConfirmationTable(
-        BaseBookingService.objects.filter(booking=booking),
+        BaseBookingService.objects.filter(booking=booking, base_service__is_internal=False).exclude(
+            status__in=[SERVICE_STATUS_CANCELLED, SERVICE_STATUS_CANCELLING]),
         order_by=('datetime_from', 'time', 'datetime_to'))
     return table
 
@@ -159,7 +160,7 @@ def vouchers_table(booking):
         booking=booking).filter(
             booking_package__isnull=True).values_list(
                 'id', flat=True))
-    packages = list(BookingExtraPackage.objects.filter(
+    packages = list(BookingExtraPackage.vouched_objects.filter(
         booking=booking).exclude(
             voucher_detail=True).values_list(
                 'id', flat=True))
@@ -267,7 +268,7 @@ def render_service(booking_service, provider=None):
     if provider:
         c.update({'provider': provider})
     rooming = bs.rooming_list.all()
-    if not rooming:
+    if not rooming and bs.booking_package:
         rooming = bs.booking_package.rooming_list.all()
     c.update({'rooming_list': rooming})
     return c

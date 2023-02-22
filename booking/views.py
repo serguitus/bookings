@@ -51,7 +51,7 @@ from booking.constants import (
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_TRANSFER,
-    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA,
+    BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_EXTRA, SERVICE_STATUS_CANCELLING,
 
 )
 from booking.models import (
@@ -285,18 +285,18 @@ class BookingServiceAmountsView(ModelChangeFormProcessorView):
             if not pax_list:
                 return JsonResponse({
                     'cost': None,
-                    'cost_message': 'Paxes Missing',
+                    'cost_message': 'Empty rooming',
                     'price': None,
-                    'price_message': 'Paxes Missing',
+                    'price_message': 'Empty rooming',
                 }), pax_list
         else:
             pax_list = inlines[0]
             if not pax_list:
                 return JsonResponse({
                     'cost': None,
-                    'cost_message': 'Paxes Missing',
+                    'cost_message': 'Empty rooming',
                     'price': None,
-                    'price_message': 'Paxes Missing',
+                    'price_message': 'Empty rooming',
                 }), pax_list
 
         return None, pax_list
@@ -632,8 +632,8 @@ class EmailConfirmationView(View):
         """
         bk = Booking.objects.get(id=id)
         # pick all non-cancelled services
-        services = BookingProvidedService.objects.filter(
-            booking=bk.pk).exclude(status=SERVICE_STATUS_CANCELLED)
+        # services = BookingProvidedService.objects.filter(
+        #     booking=bk.pk).exclude(status__in=[SERVICE_STATUS_CANCELLED, SERVICE_STATUS_CANCELLING])
         # this is for the agency seller name (add also variable for email)
         client_name = ''
         if bk.agency_contact:
@@ -644,13 +644,13 @@ class EmailConfirmationView(View):
         if bk.agency_contact:
             client_email = bk.agency_contact.email or ''
         rooming = bk.rooming_list.all()
-        objs = get_bookingservice_objects(services)
+        # objs = get_bookingservice_objects(services)
         subj = 'Service Confirmation %s' % bk.name
         if bk.reference:
             subj += ' (%s)' % bk.reference
         initial = {
             'booking': bk,
-            'services': objs,
+            # 'services': objs,
             'client': client_name,
             'rooming': rooming,
             'user': request.user,
@@ -811,7 +811,7 @@ class ScheduleArrivalAutocompleteView(autocomplete.Select2QuerySetView):
             qs = qs.filter(is_arrival=False)
         else:
             qs = qs.filter(is_arrival=True)
- 
+
         location = self.forwarded.get('location_from', None)
 
         if location:
@@ -1440,18 +1440,41 @@ def transfer_contract_list(
         if location_from:
             if location_to:
                 qs = qs.filter(
-                    providertransferdetail__addon=addon,
-                    providertransferdetail__location_from=location_from,
-                    providertransferdetail__location_to=location_to)
+                    Q(providertransferdetail__addon=addon)
+                    &
+                    (
+                        (
+                            Q(providertransferdetail__location_from=location_from)
+                            & Q(providertransferdetail__location_to=location_to)
+                        )
+                        |
+                        (
+                            Q(providertransferdetail__location_from=location_to)
+                            & Q(providertransferdetail__location_to=location_from)
+                        )
+                    )
+                )
             else:
                 qs = qs.filter(
-                    providertransferdetail__addon=addon,
-                    providertransferdetail__location_from=location_from)
+                    Q(providertransferdetail__addon=addon)
+                    &
+                    (
+                        Q(providertransferdetail__location_from=location_from)
+                        |
+                        Q(providertransferdetail__location_to=location_from)
+                    )
+                )
         else:
             if location_to:
                 qs = qs.filter(
-                    providertransferdetail__addon=addon,
-                    providertransferdetail__location_to=location_to)
+                    Q(providertransferdetail__addon=addon)
+                    &
+                    (
+                        Q(providertransferdetail__location_from=location_to)
+                        |
+                        Q(providertransferdetail__location_to=location_to)
+                    )
+                )
             else:
                 qs = qs.filter(
                     providertransferdetail__addon=addon)
@@ -1459,18 +1482,41 @@ def transfer_contract_list(
         if location_from:
             if location_to:
                 qs = qs.filter(
-                    providertransferdetail__addon=ADDON_FOR_NO_ADDON,
-                    providertransferdetail__location_from=location_from,
-                    providertransferdetail__location_to=location_to)
+                    Q(providertransferdetail__addon=ADDON_FOR_NO_ADDON)
+                    &
+                    (
+                        (
+                            Q(providertransferdetail__location_from=location_from)
+                            & Q(providertransferdetail__location_to=location_to)
+                        )
+                        |
+                        (
+                            Q(providertransferdetail__location_from=location_to)
+                            & Q(providertransferdetail__location_to=location_from)
+                        )
+                    )
+                )
             else:
                 qs = qs.filter(
-                    providertransferdetail__addon=ADDON_FOR_NO_ADDON,
-                    providertransferdetail__location_from=location_from)
+                    Q(providertransferdetail__addon=ADDON_FOR_NO_ADDON)
+                    &
+                    (
+                        Q(providertransferdetail__location_from=location_from)
+                        |
+                        Q(providertransferdetail__location_to=location_from)
+                    )
+                )
         else:
             if location_to:
                 qs = qs.filter(
-                    providertransferdetail__addon=ADDON_FOR_NO_ADDON,
-                    providertransferdetail__location_to=location_to)
+                    Q(providertransferdetail__addon=ADDON_FOR_NO_ADDON)
+                    &
+                    (
+                        Q(providertransferdetail__location_from=location_to)
+                        |
+                        Q(providertransferdetail__location_to=location_to)
+                    )
+                )
             else:
                 qs = qs.filter(
                     providertransferdetail__addon=ADDON_FOR_NO_ADDON)

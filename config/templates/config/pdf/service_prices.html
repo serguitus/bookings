@@ -1,23 +1,30 @@
 {% load common_utils %}
+{% if details %}
 <table width="100%">
-{% if service.category == 'A' %}
+{% if service.category == 'A'%}
     <tr>
         {% if service.pax_range %}
-            <td colspan="9" class="bold-top-line">
+            <td colspan="12" class="bold-top-line">
                 <b>Service:</b> {{ service.name }}
             </td>
         {% else %}
-            <td colspan="8" class="bold-top-line">
+            <td colspan="11" class="bold-top-line">
                 <b>Service:</b> {{ service.name }}
             </td>
         {% endif %}
     </tr>
     <tr>
-        <td class="top-line"><b>Board</b></td>
-        <td class="top-line"><b>Room</b></td>
+        <td colspan="{% if service.pax_range %}12{% else %}11{% endif %}" class="top-line">Price format: Adlt (1Chld / 2Chld)</td>
+    </tr>
+    <tr>
+        <td class="top-line board-content"><b>Board</b></td>
+        <td class="top-line room-type-content"><b>Room</b></td>
         {% if service.pax_range %}
             <td class="top-line pax-range-content"><b>Pax Range</b></td>
         {% endif %}
+        <td class="top-line date-content"><b>Book From</b></td>
+        <td class="top-line date-content"><b>Book To</b></td>
+        <td class="top-line code-content"><b>Code</b></td>
         <td class="top-line date-content"><b>From</b></td>
         <td class="top-line date-content"><b>To</b></td>
         <td class="top-line amount-content"><b>SGL</b></td>
@@ -34,18 +41,16 @@
             {% if detail.board_type != prev_board %}
                 {% setvar True as print_top_line %}
             {% endif %}
-            {% if print_top_line %}
-                <td class="top-line">
+            <td class="top-line board-content">
+                {% if print_top_line %}
                     {{ detail.board_type }}
-                </td>
-            {% else %}
-                <td></td>
-            {% endif %}
+                {% endif %}
+            </td>
             {% if not print_top_line and detail.room_type.name != prev_room %}
                 {% setvar True as print_top_line %}
             {% endif %}
             {% if print_top_line %}
-                <td class="top-line">
+                <td class="top-line room-type-content">
                     {{ detail.room_type.name }}
                 </td>
             {% else %}
@@ -57,22 +62,31 @@
                 </td>
             {% endif %}
             <td class="top-line date">
+                {{ detail.agency_service.booked_from | date:"d-b-Y" }}
+            </td>
+            <td class="top-line date">
+                {{ detail.agency_service.booked_to | date:"d-b-Y" }}
+            </td>
+            <td class="top-line date">
+                {{ detail.agency_service.contract_code }}
+            </td>
+            <td class="top-line date">
                 {{ detail.agency_service.date_from | date:"d-b-Y" }}
             </td>
             <td class="top-line date">
                 {{ detail.agency_service.date_to | date:"d-b-Y" }}
             </td>
             <td class="top-line amount">
-                {{ detail.ad_1_amount }}
+                {{ detail.ad_1_amount | default:"" }}{% if detail.ch_1_ad_1_amount != None %} ({{detail.ch_1_ad_1_amount|floatformat:"0"}}/{{detail.ch_2_ad_1_amount | floatformat:"0" | default:"-"}}){% endif %}
             </td>
             <td class="top-line amount">
-                {{ detail.ad_2_amount }}
+                {{ detail.ad_2_amount  | default:""}}{% if detail.ch_1_ad_2_amount != None %} ({{detail.ch_1_ad_2_amount|floatformat:"0"}}/{{detail.ch_2_ad_2_amount | floatformat:"0" | default:"-"}}){% endif %}
             </td>
             <td class="top-line amount">
-                {{ detail.ad_3_amount }}
+                {{ detail.ad_3_amount | default:"" }}
             </td>
             <td class="top-line amount">
-                {{ detail.ad_4_amount }}
+                {{ detail.ad_4_amount | default:"" }}
             </td>
         </tr>
         {% setvar detail.board_type as prev_board %}
@@ -267,3 +281,4 @@
     {% endfor %}
 {% endif %}
 </table>
+{% endif %}

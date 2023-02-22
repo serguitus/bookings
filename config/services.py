@@ -66,7 +66,8 @@ class ConfigServices(object):
             # 'Source Agency not Found'
             return
         for dst_agency in agencies:
-            cls._copy_agency_amounts(src_agency, dst_agency, is_update)
+            if dst_agency.enabled:
+                cls._copy_agency_amounts(src_agency, dst_agency, is_update)
 
 
     @classmethod
@@ -89,7 +90,7 @@ class ConfigServices(object):
         [Param] is_update: boolean. True if existing prices remain untouched
         [Param] service_model: the child model to get services from (ex. AgencyExtraService)
         [Param] detail_set_name: the queryset of related details. (ex. AgencyExtraService.agencyextradetail_set)
-        [Param] detail_model: the child model to get price details from (ex. AgencyExtraDetail) 
+        [Param] detail_model: the child model to get price details from (ex. AgencyExtraDetail)
         """
         # find agencyservice list
         if is_update:
@@ -645,7 +646,7 @@ class ConfigServices(object):
             cls, service_id, date_from, date_to, cost_groups, provider, booked, contract_code,
             board_type, room_type_id, addon_id=None, quantity=None):
         if room_type_id is None or room_type_id == '':
-            return None, 'Room Missing'
+            return None, 'Room Type Missing'
         if board_type is None or board_type == '':
             return None, 'Board Missing'
         if date_from is None:
@@ -659,7 +660,7 @@ class ConfigServices(object):
 
         if (cost_groups is None or not cost_groups) and service.cost_type == AMOUNTS_BY_PAX:
             cost = None
-            cost_message = 'Paxes Missing'
+            cost_message = 'Empty rooming'
         elif provider is None:
             cost = None
             cost_message = 'Provider Not Found'
@@ -752,7 +753,7 @@ class ConfigServices(object):
 
         if (price_groups is None or not price_groups) and service.cost_type == AMOUNTS_BY_PAX:
             price = None
-            price_message = 'Paxes Missing'
+            price_message = 'Rooming Missing'
         elif agency is None:
             price = None
             price_message = 'Agency Not Found'
@@ -832,9 +833,9 @@ class ConfigServices(object):
             provider, booked, contract_code, agency,
             location_from_id, location_to_id, addon_id=None, quantity=None):
         if location_from_id is None or location_from_id == '':
-            return None, 'Location From Missing', None, 'Location From Missing'
+            return None, 'Origin Location Missing', None, 'Origin Location Missing'
         if location_to_id is None or location_to_id == '':
-            return None, 'Location To Missing', None, 'Location To Missing'
+            return None, 'Destination Location Missing', None, 'Destination Location Missing'
         if date_from is None and date_to is None:
             return None, 'Both Dates are Missing', None, 'Both Dates are Missing'
         if date_from is None:
@@ -860,9 +861,9 @@ class ConfigServices(object):
             cls, service_id, date_from, date_to, cost_groups, provider, booked, contract_code,
             location_from_id, location_to_id, addon_id=None, quantity=None):
         if location_from_id is None or location_from_id == '':
-            return None, 'Location From Missing'
+            return None, 'Origin Location Missing'
         if location_to_id is None or location_to_id == '':
-            return None, 'Location To Missing'
+            return None, 'Destination Location Missing'
         if date_from is None and date_to is None:
             return None, 'Both Dates are Missing'
         if date_from is None:
@@ -876,7 +877,7 @@ class ConfigServices(object):
 
         if (cost_groups is None or not cost_groups) and service.cost_type == AMOUNTS_BY_PAX:
             cost = None
-            cost_message = 'Paxes Missing'
+            cost_message = 'Rooming Missing'
         elif provider is None:
             cost = None
             cost_message = 'Provider Not Found'
@@ -1134,7 +1135,7 @@ class ConfigServices(object):
         # obtain details order by date_from asc, date_to desc
         if (cost_groups is None or not cost_groups) and service.cost_type == AMOUNTS_BY_PAX:
             cost = None
-            cost_message = 'Paxes Missing'
+            cost_message = 'Empty Rooming List'
         elif provider is None:
             cost = None
             cost_message = 'Provider Not Found'
@@ -1220,7 +1221,7 @@ class ConfigServices(object):
         # obtain details order by date_from asc, date_to desc
         if (price_groups is None or not price_groups) and service.cost_type == AMOUNTS_BY_PAX:
             price = None
-            price_message = 'Paxes Missing'
+            price_message = 'Empty Rooming List'
         elif agency is None:
             price = None
             price_message = 'Agency Not Found'
@@ -1593,80 +1594,86 @@ class ConfigServices(object):
     @classmethod
     def find_detail_amount(cls, service, detail, adults, children, free_adults=0, free_children=0):
         if adults == 0:
-            if children == 1 and detail.ch_1_ad_0_amount is not None:
+            if (children - free_children) == 1 and detail.ch_1_ad_0_amount is not None:
                 return (children - free_children) * detail.ch_1_ad_0_amount
-            if children == 2 and detail.ch_2_ad_0_amount is not None:
-                return (children - free_children) * detail.ch_2_ad_0_amount
-            if children == 3 and detail.ch_3_ad_0_amount is not None:
-                return (children - free_children) * detail.ch_3_ad_0_amount
-        if adults == 1 and detail.ad_1_amount is not None:
-            if children == 0:
+            if (children - free_children) == 2 and detail.ch_1_ad_0_amount is not None and detail.ch_2_ad_0_amount is not None:
+                return detail.ch_1_ad_0_amount + detail.ch_2_ad_0_amount
+            if (children == 3
+                and detail.ch_1_ad_0_amount is not None
+                and detail.ch_2_ad_0_amount is not None
+                and detail.ch_3_ad_0_amount is not None):
+                return detail.ch_1_ad_0_amount + detail.ch_2_ad_0_amount + detail.ch_3_ad_0_amount
+        elif adults == 1 and detail.ad_1_amount is not None:
+            if (children - free_children) == 0:
                 return (adults - free_adults) * detail.ad_1_amount
-            if children == 1:
+            elif (children - free_children) == 1:
                 if detail.ch_1_ad_1_amount is not None:
-                    return (adults - free_adults) * detail.ad_1_amount + (children - free_children) * detail.ch_1_ad_1_amount
+                    return (adults - free_adults) * detail.ad_1_amount + detail.ch_1_ad_1_amount
                 elif  service.child_discount_percent is not None:
                     return (adults - free_adults) * float(detail.ad_1_amount) + (children - free_children) * float(detail.ad_1_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
-            elif children == 2:
-                if detail.ch_2_ad_1_amount is not None:
-                    return (adults - free_adults) * float(detail.ad_1_amount) + (children - free_children) * detail.ch_2_ad_1_amount
+            elif (children - free_children) == 2:
+                if detail.ch_1_ad_1_amount is not None and detail.ch_2_ad_1_amount is not None:
+                    return (adults - free_adults) * detail.ad_1_amount + detail.ch_1_ad_1_amount + detail.ch_2_ad_1_amount
                 elif  service.child_discount_percent is not None:
                     return (adults - free_adults) * float(detail.ad_1_amount) + (children - free_children) * float(detail.ad_1_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
+            # TODO: fix this calculation as done above
             elif children == 3:
                 if detail.ch_3_ad_1_amount is not None:
-                    return (adults - free_adults) * float(detail.ad_1_amount) + (children - free_children) * detail.ch_3_ad_1_amount
+                    return (adults - free_adults) * detail.ad_1_amount + (children - free_children) * detail.ch_3_ad_1_amount
                 elif  service.child_discount_percent is not None:
                     return (adults - free_adults) * float(detail.ad_1_amount) + (children - free_children) * float(detail.ad_1_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
-        if adults == 2 and detail.ad_2_amount is not None:
-            if children == 0:
+        elif adults == 2 and detail.ad_2_amount is not None:
+            if (children - free_children) == 0:
                 return (adults - free_adults) * detail.ad_2_amount
-            if children == 1:
+            elif (children - free_children) == 1:
                 if detail.ch_1_ad_2_amount is not None:
-                    return (adults - free_adults) * detail.ad_2_amount + (children - free_children) * detail.ch_1_ad_2_amount
+                    return (adults - free_adults) * detail.ad_2_amount + detail.ch_1_ad_2_amount
                 elif  service.child_discount_percent is not None:
                     return (adults - free_adults) * float(detail.ad_2_amount) + (children - free_children) * float(detail.ad_2_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
-            if children == 2:
-                if detail.ch_2_ad_2_amount is not None:
-                    return (adults - free_adults) * detail.ad_2_amount + (children - free_children) * detail.ch_2_ad_2_amount
+            elif (children - free_children) == 2:
+                if detail.ch_1_ad_2_amount is not None and detail.ch_2_ad_2_amount is not None:
+                    return (adults - free_adults) * detail.ad_2_amount + detail.ch_1_ad_2_amount + detail.ch_2_ad_2_amount
                 elif  service.child_discount_percent is not None:
                     return (adults - free_adults) * float(detail.ad_2_amount) + (children - free_children) * float(detail.ad_2_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
-            if children == 3:
+            # TODO: fix this calculation as done above
+            elif children == 3:
                 if detail.ch_3_ad_2_amount is not None:
                     return (adults - free_adults) * detail.ad_2_amount + (children - free_children) * detail.ch_3_ad_2_amount
                 elif  service.child_discount_percent is not None:
                     return (adults - free_adults) * float(detail.ad_2_amount) + (children - free_children) * float(detail.ad_2_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
-        if adults == 3 and detail.ad_3_amount is not None:
-            if children == 0:
+        elif adults == 3 and detail.ad_3_amount is not None:
+            if (children - free_children) == 0:
                 return (adults - free_adults) * detail.ad_3_amount
-            if children == 1:
+            elif (children - free_children) == 1:
                 if detail.ch_1_ad_3_amount is not None:
-                    return (adults - free_adults) * detail.ad_3_amount + (children - free_children) * detail.ch_1_ad_3_amount
+                    return (adults - free_adults) * detail.ad_3_amount + detail.ch_1_ad_3_amount
                 elif  service.child_discount_percent is not None:
                     return (adults - free_adults) * float(detail.ad_3_amount) + (children - free_children) * float(detail.ad_3_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
-            if children == 2:
-                if detail.ch_2_ad_3_amount is not None:
-                    return (adults - free_adults) * detail.ad_3_amount + (children - free_children) * detail.ch_2_ad_3_amount
+            elif (children - free_children) == 2:
+                if detail.ch_1_ad_3_amount is not None and detail.ch_2_ad_3_amount is not None:
+                    return (adults - free_adults) * detail.ad_3_amount + detail.ch_1_ad_3_amount + detail.ch_2_ad_3_amount
                 elif  service.child_discount_percent is not None:
                     return (adults - free_adults) * float(detail.ad_3_amount) + (children - free_children) * float(detail.ad_3_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
-            if children == 3:
+            # TODO: fix this calculation as done above
+            if (children - free_children) == 3:
                 if detail.ch_3_ad_3_amount is not None:
                     return (adults - free_adults) * detail.ad_3_amount + (children - free_children) * detail.ch_3_ad_3_amount
                 elif  service.child_discount_percent is not None:
                     return (adults - free_adults) * float(detail.ad_3_amount) + (children - free_children) * float(detail.ad_3_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
-        if adults == 4 and detail.ad_4_amount is not None:
-            if children == 0:
+        elif adults == 4 and detail.ad_4_amount is not None:
+            if (children - free_children) == 0:
                 return (adults - free_adults) * detail.ad_4_amount
-            if children == 1:
+            elif (children - free_children) == 1:
                 if detail.ch_1_ad_4_amount is not None:
-                    return (adults - free_adults) * detail.ad_4_amount + (children - free_children) * detail.ch_1_ad_4_amount
+                    return (adults - free_adults) * detail.ad_4_amount + detail.ch_1_ad_4_amount
                 elif  service.child_discount_percent is not None:
                     return (adults - free_adults) * float(detail.ad_4_amount) + (children - free_children) * float(detail.ad_4_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
-            if children == 2:
+            elif (children - free_children) == 2:
                 if detail.ch_2_ad_4_amount is not None:
                     return (adults - free_adults) * detail.ad_4_amount + (children - free_children) * detail.ch_2_ad_4_amount
                 elif  service.child_discount_percent is not None:
                     return (adults - free_adults) * float(detail.ad_4_amount) + (children - free_children) * float(detail.ad_4_amount) * (1.0 - float(service.child_discount_percent) / 100.0)
-            if children == 3:
+            elif (children - free_children) == 3:
                 if detail.ch_3_ad_4_amount is not None:
                     return (adults - free_adults) * detail.ad_4_amount + (children - free_children) * detail.ch_3_ad_4_amount
                 elif  service.child_discount_percent is not None:
@@ -1702,7 +1709,10 @@ class ConfigServices(object):
 
     @classmethod
     def _get_agency_queryset(
-            cls, manager, agency_id, service_id, date_from, date_to, booked, contract_code):
+            cls, manager, agency_id, service_id, date_from, date_to, booked, contract_code=''):
+        valid_contract_code = contract_code
+        if contract_code is None:
+            valid_contract_code = ''
         if date_from is None or date_to is None:
             return manager.none()
         qs = manager.select_related(
@@ -1722,7 +1732,7 @@ class ConfigServices(object):
                 Q(agency_service__booked_to__isnull=True)
                 | Q(agency_service__booked_to__gte=booked))
         # prices dont use contract_code
-        # qs = qs.filter(agency_service__contract_code='')
+        qs = qs.filter(agency_service__contract_code=valid_contract_code)
         return qs
 
 
@@ -1856,6 +1866,8 @@ class ConfigServices(object):
             agency_id=dst_agency.id,
             date_from=src_provider_service.date_from,
             date_to=src_provider_service.date_to,
+            booked_from=src_provider_service.booked_from,
+            booked_to=src_provider_service.booked_to,
             contract_code=src_provider_service.contract_code,
             service_id=src_provider_service.service_id
         )
@@ -1980,7 +1992,7 @@ class ConfigServices(object):
                 )
 
     @classmethod
-    def update_detail_amount(cls, detail_amount, diff_percent, diff_amount, min_diff, max_diff):
+    def update_detail_amount(cls, detail_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round=True):
         if (diff_percent is None or diff_percent == 0) and (
             diff_amount is None or diff_amount == 0):
             return detail_amount
@@ -1998,7 +2010,9 @@ class ConfigServices(object):
         if max_diff is not None:
             if abs(diff) > abs(max_diff):
                 diff = math.copysign(max_diff, diff)
-        return round(0.499999 + result + diff)
+        if apply_round:
+            return round(0.499999 + result + diff)
+        return round(result + diff, 2)
 
     @classmethod
     def next_year_catalog_service_amounts(
@@ -2032,44 +2046,50 @@ class ConfigServices(object):
                 new_detail.pk = None
                 new_detail.id = None
 
+                apply_round = True
+                if not isinstance(
+                        new_detail,
+                        (AgencyAllotmentDetail, AgencyTransferDetail, AgencyExtraDetail)):
+                    apply_round = False
+
                 new_detail.ad_1_amount = cls.update_detail_amount(
-                    detail.ad_1_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ad_1_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ad_2_amount = cls.update_detail_amount(
-                    detail.ad_2_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ad_2_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ad_3_amount = cls.update_detail_amount(
-                    detail.ad_3_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ad_3_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ad_4_amount = cls.update_detail_amount(
-                    detail.ad_4_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ad_4_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_1_ad_0_amount = cls.update_detail_amount(
-                    detail.ch_1_ad_0_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_1_ad_0_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_1_ad_1_amount = cls.update_detail_amount(
-                    detail.ch_1_ad_1_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_1_ad_1_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_1_ad_2_amount = cls.update_detail_amount(
-                    detail.ch_1_ad_2_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_1_ad_2_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_1_ad_3_amount = cls.update_detail_amount(
-                    detail.ch_1_ad_3_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_1_ad_3_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_1_ad_4_amount = cls.update_detail_amount(
-                    detail.ch_1_ad_4_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_1_ad_4_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_2_ad_0_amount = cls.update_detail_amount(
-                    detail.ch_2_ad_0_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_2_ad_0_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_2_ad_1_amount = cls.update_detail_amount(
-                    detail.ch_2_ad_1_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_2_ad_1_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_2_ad_2_amount = cls.update_detail_amount(
-                    detail.ch_2_ad_2_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_2_ad_2_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_2_ad_3_amount = cls.update_detail_amount(
-                    detail.ch_2_ad_3_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_2_ad_3_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_2_ad_4_amount = cls.update_detail_amount(
-                    detail.ch_2_ad_4_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_2_ad_4_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_3_ad_0_amount = cls.update_detail_amount(
-                    detail.ch_3_ad_0_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_3_ad_0_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_3_ad_1_amount = cls.update_detail_amount(
-                    detail.ch_3_ad_1_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_3_ad_1_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_3_ad_2_amount = cls.update_detail_amount(
-                    detail.ch_3_ad_2_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_3_ad_2_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_3_ad_3_amount = cls.update_detail_amount(
-                    detail.ch_3_ad_3_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_3_ad_3_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
                 new_detail.ch_3_ad_4_amount = cls.update_detail_amount(
-                    detail.ch_3_ad_4_amount, diff_percent, diff_amount, min_diff, max_diff)
+                    detail.ch_3_ad_4_amount, diff_percent, diff_amount, min_diff, max_diff, apply_round)
 
                 if isinstance(
                         new_detail,

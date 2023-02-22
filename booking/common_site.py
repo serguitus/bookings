@@ -33,8 +33,8 @@ from finance.models import Office
 from finance.top_filters import ProviderTopFilter, AgencyTopFilter
 
 from booking.constants import (
-    SERVICE_STATUS_PENDING, SERVICE_STATUS_REQUEST, SERVICE_STATUS_COORDINATED,
-    SERVICE_STATUS_CONFIRMED, SERVICE_STATUS_CANCELLED,
+    SERVICE_STATUS_CANCELLING, SERVICE_STATUS_PENDING, SERVICE_STATUS_REQUEST, SERVICE_STATUS_COORDINATED,
+    SERVICE_STATUS_CONFIRMED, SERVICE_STATUS_CANCELLED, SERVICE_STATUS_ON_HOLD,
     BOOTSTRAP_STYLE_BOOKING_STATUS_MAPPING,
     BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING,
     BASE_BOOKING_SERVICE_CATEGORY_BOOKING_ALLOTMENT,
@@ -119,7 +119,8 @@ def _get_voucher_services(services):
                 BASE_BOOKING_SERVICE_CATEGORY_BOOKING_PACKAGE_ALLOTMENT: BookingProvidedAllotment,
             }
             package_services = list(BookingProvidedService.objects.filter(
-                booking_package=booking_service).exclude(status=SERVICE_STATUS_CANCELLED))
+                booking_package=booking_service).exclude(
+                    status__in=[SERVICE_STATUS_CANCELLED, SERVICE_STATUS_CANCELLING]))
             for package_service in package_services:
                 service = PACKAGE_MODELS[package_service.base_category].objects.get(
                     id=package_service.id)
@@ -140,10 +141,14 @@ class QuotePaxVariantInline(CommonStackedInline):
         ('free_cost_double', 'free_price_double'),
         ('free_cost_triple', 'free_price_triple'),
         ('free_cost_qdrple', 'free_price_qdrple'),
-        ('cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single', 'extra_single_amount'),
-        ('cost_double_amount', 'price_double_amount', 'utility_percent_double', 'utility_double', 'extra_double_amount'),
-        ('cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple', 'extra_triple_amount'),
-        ('cost_qdrple_amount', 'price_qdrple_amount', 'utility_percent_qdrple', 'utility_qdrple', 'extra_qdrple_amount'),
+        ('cost_single_amount', 'price_single_amount',
+         'utility_percent_single', 'utility_single', 'extra_single_amount'),
+        ('cost_double_amount', 'price_double_amount',
+         'utility_percent_double', 'utility_double', 'extra_double_amount'),
+        ('cost_triple_amount', 'price_triple_amount',
+         'utility_percent_triple', 'utility_triple', 'extra_triple_amount'),
+        ('cost_qdrple_amount', 'price_qdrple_amount',
+         'utility_percent_qdrple', 'utility_qdrple', 'extra_qdrple_amount'),
     ]
     readonly_fields = [
         'cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single',
@@ -223,8 +228,9 @@ class QuoteSiteModel(SiteModel):
                                                 args=[booking.id]))
                     else:
                         self.message_user(request, msg, messages.ERROR)
-                else: # Error de validacion del form. Repeat
-                    self.message_user(request, 'Pax info missing', messages.ERROR)
+                else:  # Error de validacion del form. Repeat
+                    self.message_user(
+                        request, 'Pax info missing', messages.ERROR)
             else:
                 self.message_user(request, 'Quote Missing', messages.ERROR)
 
@@ -241,7 +247,8 @@ class QuoteSiteModel(SiteModel):
 
     def save_related(self, request, form, formsets, change):
         with transaction.atomic(savepoint=False):
-            super(QuoteSiteModel, self).save_related(request, form, formsets, change)
+            super(QuoteSiteModel, self).save_related(
+                request, form, formsets, change)
             if not "_saveasnew" in request.POST:
                 obj = self.save_form(request, form, change)
                 BookingServices.sync_quote_paxvariants(obj)
@@ -271,7 +278,8 @@ class QuoteSiteModel(SiteModel):
                 mail_from = request.POST.get('mail_from')
                 to_list = _build_mail_address_list(request.POST.get('mail_to'))
                 cc_list = _build_mail_address_list(request.POST.get('mail_cc'))
-                bcc_list = _build_mail_address_list(request.POST.get('mail_bcc'))
+                bcc_list = _build_mail_address_list(
+                    request.POST.get('mail_bcc'))
                 if not to_list or not mail_from:
                     messages.add_message(request=request,
                                          level=messages.ERROR,
@@ -379,7 +387,8 @@ class QuoteServiceSiteModel(SiteModel):
 
     def save_related(self, request, form, formsets, change):
         with transaction.atomic(savepoint=False):
-            super(QuoteServiceSiteModel, self).save_related(request, form, formsets, change)
+            super(QuoteServiceSiteModel, self).save_related(
+                request, form, formsets, change)
             obj = self.save_form(request, form, change)
             BookingServices.update_quote_paxvariants_amounts(obj)
             if not change:
@@ -414,10 +423,14 @@ class QuotePackagePaxVariantInline(CommonStackedInline):
         ('free_cost_double', 'free_price_double'),
         ('free_cost_triple', 'free_price_triple'),
         ('free_cost_qdrple', 'free_price_qdrple'),
-        ('cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single'),
-        ('cost_double_amount', 'price_double_amount', 'utility_percent_double', 'utility_double'),
-        ('cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple'),
-        ('cost_qdrple_amount', 'price_qdrple_amount', 'utility_percent_qdrple', 'utility_qdrple')
+        ('cost_single_amount', 'price_single_amount',
+         'utility_percent_single', 'utility_single'),
+        ('cost_double_amount', 'price_double_amount',
+         'utility_percent_double', 'utility_double'),
+        ('cost_triple_amount', 'price_triple_amount',
+         'utility_percent_triple', 'utility_triple'),
+        ('cost_qdrple_amount', 'price_qdrple_amount',
+         'utility_percent_qdrple', 'utility_qdrple')
     ]
     readonly_fields = [
         'cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single',
@@ -457,7 +470,8 @@ class QuoteExtraPackageSiteModel(QuoteServiceSiteModel):
 
     def save_related(self, request, form, formsets, change):
         with transaction.atomic(savepoint=False):
-            super(QuoteExtraPackageSiteModel, self).save_related(request, form, formsets, change)
+            super(QuoteExtraPackageSiteModel, self).save_related(
+                request, form, formsets, change)
             obj = self.save_form(request, form, change)
             BookingServices.sync_quotepackage_paxvariants(obj)
 
@@ -495,13 +509,15 @@ class QuotePackageServiceSiteModel(SiteModel):
 
     def delete_model(self, request, obj):
         with transaction.atomic(savepoint=False):
-            super(QuotePackageServiceSiteModel, self).delete_model(request, obj)
+            super(QuotePackageServiceSiteModel,
+                  self).delete_model(request, obj)
             BookingServices.update_quotepackage_paxvariants_amounts(obj)
             BookingServices.update_quotepackage(obj)
 
     def save_related(self, request, form, formsets, change):
         with transaction.atomic(savepoint=False):
-            super(QuotePackageServiceSiteModel, self).save_related(request, form, formsets, change)
+            super(QuotePackageServiceSiteModel, self).save_related(
+                request, form, formsets, change)
             obj = self.save_form(request, form, change)
             BookingServices.update_quotepackage_paxvariants_amounts(obj)
 
@@ -517,10 +533,14 @@ class QuoteServicePaxVariantInline(CommonStackedInline):
         ('free_cost_triple', 'free_price_triple'),
         ('free_cost_qdrple', 'free_price_qdrple'),
         ('manual_costs', 'manual_prices'),
-        ('cost_single_amount', 'price_single_amount', 'utility_percent_single', 'utility_single'),
-        ('cost_double_amount', 'price_double_amount', 'utility_percent_double', 'utility_double'),
-        ('cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple'),
-        ('cost_qdrple_amount', 'price_qdrple_amount', 'utility_percent_qdrple', 'utility_qdrple'),
+        ('cost_single_amount', 'price_single_amount',
+         'utility_percent_single', 'utility_single'),
+        ('cost_double_amount', 'price_double_amount',
+         'utility_percent_double', 'utility_double'),
+        ('cost_triple_amount', 'price_triple_amount',
+         'utility_percent_triple', 'utility_triple'),
+        ('cost_qdrple_amount', 'price_qdrple_amount',
+         'utility_percent_qdrple', 'utility_qdrple'),
     ]
     verbose_name_plural = 'Paxes Variants'
     can_delete = False
@@ -531,7 +551,8 @@ class QuoteServicePaxVariantInline(CommonStackedInline):
         'utility_single', 'utility_double', 'utility_triple', 'utility_qdrple']
 
     def get_readonly_fields(self, request, obj=None):
-        readonly_fields = super(QuoteServicePaxVariantInline, self).get_readonly_fields(request, obj) or []
+        readonly_fields = super(
+            QuoteServicePaxVariantInline, self).get_readonly_fields(request, obj) or []
 
         if not request.user.has_perm("booking.change_amounts"):
             return readonly_fields + [
@@ -557,8 +578,10 @@ class NewQuoteAllotmentSiteModel(QuoteServiceSiteModel):
         ('room_type', 'board_type'),
         ('provider', 'contract_code'),
         ('cost_by_catalog', 'price_by_catalog'), 'id')
-    list_display = ('quote', 'quote_package', 'service', 'datetime_from', 'datetime_to', 'status',)
-    top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
+    list_display = ('quote', 'quote_package', 'service',
+                    'datetime_from', 'datetime_to', 'status',)
+    top_filters = ('service', 'quote__reference',
+                   ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote__reference', 'service__name',)
     form = NewQuoteAllotmentForm
     add_form_template = 'booking/quoteallotment_change_form.html'
@@ -579,8 +602,10 @@ class NewQuoteTransferSiteModel(QuoteServiceSiteModel):
         ('location_from', 'location_to'), 'service_addon',
         ('provider', 'contract_code'),
         ('cost_by_catalog', 'price_by_catalog'), 'id')
-    list_display = ('quote', 'quote_package', 'name', 'service_addon', 'datetime_from', 'status',)
-    top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
+    list_display = ('quote', 'quote_package', 'name',
+                    'service_addon', 'datetime_from', 'status',)
+    top_filters = ('service', 'quote__reference',
+                   ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote__reference', 'service__name',)
     form = NewQuoteTransferForm
     add_form_template = 'booking/quotetransfer_change_form.html'
@@ -605,7 +630,8 @@ class NewQuoteExtraSiteModel(QuoteServiceSiteModel):
     list_display = (
         'quote', 'quote_package', 'service', 'service_addon', 'quantity', 'parameter',
         'datetime_from', 'datetime_to', 'time', 'status',)
-    top_filters = ('service', 'quote__reference', ('datetime_from', DateTopFilter), 'status',)
+    top_filters = ('service', 'quote__reference',
+                   ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'quote__reference', 'service__name',)
     form = NewQuoteExtraForm
     add_form_template = 'booking/quoteextra_change_form.html'
@@ -767,7 +793,8 @@ class BookingPaxInline(CommonTabularInline):
 
 class BaseBookingServicePaxInline(CommonTabularInline):
     model = BaseBookingServicePax
-    fields = ['booking_pax', 'group', 'is_cost_free', 'is_price_free', 'force_adult', 'version']
+    fields = ['booking_pax', 'group', 'is_cost_free',
+              'is_price_free', 'force_adult', 'version']
     verbose_name_plural = 'Service Rooming List'
     extra = 0
     form = BaseBookingServicePaxInlineForm
@@ -778,16 +805,19 @@ class BaseBookingServicePaxInline(CommonTabularInline):
         if request.method == "GET":
             saved = None
             if obj:
-                saved = BaseBookingServicePax.objects.filter(booking_service=obj.id)
+                saved = BaseBookingServicePax.objects.filter(
+                    booking_service=obj.id)
             if not saved:
                 booking = request.GET.get('booking')
-                rooming = BookingPax.objects.filter(booking=booking).order_by('pax_group')
+                rooming = BookingPax.objects.filter(
+                    booking=booking).order_by('pax_group')
                 self.extra = len(rooming)
                 for bp in rooming:
                     new_pax = {'booking_pax': bp.id,
                                'group': bp.pax_group}
                     initial.append(new_pax)
-        formset = super(BaseBookingServicePaxInline, self).get_formset(request, obj, **kwargs)
+        formset = super(BaseBookingServicePaxInline,
+                        self).get_formset(request, obj, **kwargs)
         formset.__init__ = curry(formset.__init__, initial=initial)
         return formset
 
@@ -947,7 +977,8 @@ class BookingSiteModel(SiteModel):
                 mail_from = request.POST.get('mail_from')
                 to_list = _build_mail_address_list(request.POST.get('mail_to'))
                 cc_list = _build_mail_address_list(request.POST.get('mail_cc'))
-                bcc_list = _build_mail_address_list(request.POST.get('mail_bcc'))
+                bcc_list = _build_mail_address_list(
+                    request.POST.get('mail_bcc'))
                 email = EmailMessage(
                     from_email=mail_from,
                     to=to_list,
@@ -979,7 +1010,8 @@ class BookingSiteModel(SiteModel):
         )
         if request.method == 'POST':
             formset = PaxFormSet(request.POST, prefix='form')
-            bookingservices = BaseBookingService.invoiced_objects.filter(booking=id)
+            bookingservices = BaseBookingService.invoiced_objects.filter(
+                booking=id)
             current_rooming = BookingPax.objects.filter(booking=id)
             if formset.is_valid():
                 booking = Booking.objects.get(pk=id)
@@ -1004,7 +1036,8 @@ class BookingSiteModel(SiteModel):
             # GET request
             formset = PaxFormSet(prefix='form',
                                  queryset=BookingPax.objects.none())
-            bookingservices = BaseBookingService.invoiced_objects.filter(booking=id)
+            bookingservices = BaseBookingService.invoiced_objects.filter(
+                booking=id)
             current_rooming = BookingPax.objects.filter(booking=id)
 
         context = {}
@@ -1022,8 +1055,8 @@ class BookingSiteModel(SiteModel):
         template = get_template("booking/pdf/voucher.html")
         booking = Booking.objects.get(id=bk)
         services = BaseBookingService.objects.filter(id__in=service_ids). \
-                   order_by('datetime_from', 'time', 'datetime_to'). \
-                   prefetch_related('rooming_list')
+            order_by('datetime_from', 'time', 'datetime_to'). \
+            prefetch_related('rooming_list')
         objs = _get_voucher_services(services)
         context.update({'pagesize': 'Letter',
                         'booking': booking,
@@ -1036,12 +1069,14 @@ class BookingSiteModel(SiteModel):
         return result, pdf
 
     def response_change(self, request, obj):
-        bookingservices = BookingServices.find_bookingservices_with_different_amounts(obj)
+        bookingservices = BookingServices.find_bookingservices_with_different_amounts(
+            obj)
         if bookingservices:
             # make a new GET request to show list of services to update
             redirect_url = reverse('bookingservice_update', args=[obj.id])
             if "_continue" in request.POST or "_saveasnew" in request.POST or "_addanother" in request.POST:
-                redirect_url = '{}?{}'.format(redirect_url, 'stay_on_booking=1')
+                redirect_url = '{}?{}'.format(
+                    redirect_url, 'stay_on_booking=1')
             return redirect(redirect_url)
 
         return super(BookingSiteModel, self).response_change(request, obj)
@@ -1055,7 +1090,8 @@ class BookingSiteModel(SiteModel):
 
         if request.method == 'POST' and 'service_selection' in request.POST:
             selected_bookingservices = list()
-            BookingServices.update_bookingservices_amounts(selected_bookingservices)
+            BookingServices.update_bookingservices_amounts(
+                selected_bookingservices)
             booking = selected_bookingservices[0].booking
             super(BookingSiteModel, self).response_change(request, booking)
         # show selection view
@@ -1068,7 +1104,8 @@ class BookingSiteModel(SiteModel):
                 formset.deleted_objects = []
         else:
             with transaction.atomic(savepoint=False):
-                super(BookingSiteModel, self).save_related(request, form, formsets, change)
+                super(BookingSiteModel, self).save_related(
+                    request, form, formsets, change)
                 obj = self.save_form(request, form, change)
                 BookingServices.update_booking_amounts(obj)
 
@@ -1078,13 +1115,15 @@ class BookingSiteModel(SiteModel):
         if submit_action == '_send_mail':
             booking = Booking.objects.get(id=object_id)
             if not booking.invoice:
-                messages.add_message(request, messages.ERROR , "Error Booking without Invoice")
+                messages.add_message(
+                    request, messages.ERROR, "Error Booking without Invoice")
                 return redirect(reverse('common:booking_booking_change', args=[object_id]))
 
             invoice = booking.invoice
             result, pdf = self._build_invoice_pdf(invoice)
             if result.err:
-                messages.add_message(request, messages.ERROR, "Failed Invoice PDF Generation - %s" % result.err)
+                messages.add_message(
+                    request, messages.ERROR, "Failed Invoice PDF Generation - %s" % result.err)
                 return redirect(reverse('common:booking_booking_change', args=[object_id]))
             mail_from = request.POST.get('mail_from')
             to_list = _build_mail_address_list(request.POST.get('mail_to'))
@@ -1119,7 +1158,7 @@ class BookingSiteModel(SiteModel):
                              'mail_bcc': default_invoice_mail_bcc(request),
                              'mail_subject': default_invoice_mail_subject(request, booking),
                              'mail_body': default_invoice_mail_body(request, booking),
-                    })
+                             })
             else:
                 form = EmailPopupForm()
             extra_context.update({
@@ -1167,7 +1206,7 @@ class BookingSiteModel(SiteModel):
         html = html.encode('UTF-8')
         pdf = StringIO()
         result = pisa.pisaDocument(StringIO(html), dest=pdf,
-                                link_callback=_fetch_resources)
+                                   link_callback=_fetch_resources)
         return result, pdf
 
     def response_add_saveasnew(
@@ -1192,7 +1231,8 @@ class BookingSiteModel(SiteModel):
 
 def _build_mail_address_list(addresses):
     mail_address_list = addresses.replace(';', ' ').replace(',', ' ').split()
-    mail_address_list = [mail_address for mail_address in mail_address_list if mail_address]
+    mail_address_list = [
+        mail_address for mail_address in mail_address_list if mail_address]
     return mail_address_list
 
 
@@ -1291,7 +1331,8 @@ class BookingBaseServiceSiteModel(SiteModel):
 
     def coordinated_services(self, request, queryset):
         services = list(queryset.all())
-        BookingServices.set_services_status(services, SERVICE_STATUS_COORDINATED)
+        BookingServices.set_services_status(
+            services, SERVICE_STATUS_COORDINATED)
 
     coordinated_services.short_description = "Coordinated Services"
 
@@ -1327,10 +1368,11 @@ class BookingProvidedServiceSiteModel(SiteModel):
 
     list_display = ('name', 'datetime_from', 'datetime_to',
                     'service_provider', 'conf_number', 'booking_name',
-                    'service_addon', 'cost_amount',
+                    'description', 'service_addon', 'cost_amount',
                     'price_amount', 'utility_percent', 'status',
                     'cost_amount_paid')
     top_filters = (('booking__name', 'Booking'),
+                   ('booking__agency', AgencyTopFilter),
                    ('name', 'Service'),
                    'booking__reference', 'conf_number',
                    ('booking__id', InternalReferenceTopFilter),
@@ -1355,7 +1397,8 @@ class BookingProvidedServiceSiteModel(SiteModel):
 
     def coordinated_services(self, request, queryset):
         services = list(queryset.all())
-        BookingServices.set_services_status(services, SERVICE_STATUS_COORDINATED)
+        BookingServices.set_services_status(
+            services, SERVICE_STATUS_COORDINATED)
 
     coordinated_services.short_description = "Coordinate Services"
 
@@ -1426,14 +1469,15 @@ class BookingProvidedServiceSiteModel(SiteModel):
                 body=request.POST.get('mail_body'))
             email.send()
             bs = BookingProvidedService.objects.get(pk=object_id)
-            services = find_provider_requests_services(request, bs.provider, bs.booking)
+            services = find_provider_requests_services(
+                request, bs.provider, bs.booking)
             for service in services:
                 if service.status == SERVICE_STATUS_PENDING:
                     service.status = SERVICE_STATUS_REQUEST
                     service.save(update_fields=['status'])
             messages.add_message(
                 request=request, level=messages.SUCCESS,
-                message='Requests mail  sent successfully.',
+                message='Request mail sent successfully.',
                 extra_tags='', fail_silently=False)
             return redirect(reverse('common:booking_%s_change' % self.model._meta.model_name, args=[object_id]))
         else:
@@ -1447,7 +1491,7 @@ class BookingProvidedServiceSiteModel(SiteModel):
                     'default_mail_to': default_requests_mail_to(request, bs.provider, bs.booking),
                     'default_mail_cc': '',
                     'default_mail_bcc': default_requests_mail_bcc(request, bs.provider, bs.booking),
-                    'default_mail_subject': default_requests_mail_subject(request, bs.provider, bs.booking),
+                    'default_mail_subject': default_requests_mail_subject(request, bs.provider, bs.booking, bs.contract_code),
                     'default_mail_body': default_requests_mail_body(request, bs.provider, bs.booking),
                 })
 
@@ -1457,7 +1501,8 @@ class BookingProvidedServiceSiteModel(SiteModel):
         with transaction.atomic(savepoint=False):
             BookingServices.setup_bookingservice_amounts(obj)
             BookingServices.validate_basebookingservice(obj)
-            super(BookingProvidedServiceSiteModel, self).save_model(request, obj, form, change)
+            super(BookingProvidedServiceSiteModel, self).save_model(
+                request, obj, form, change)
             BookingServices.update_bookingpackage(obj)
             BookingServices.update_booking(obj)
 
@@ -1474,8 +1519,10 @@ class BookingProvidedServiceSiteModel(SiteModel):
     def delete_model(self, request, obj):
         with transaction.atomic(savepoint=False):
             if obj.has_payment or obj.status != SERVICE_STATUS_PENDING:
-                raise ValidationError('Can not delete Booking Services that are Not Pending')
-            super(BookingProvidedServiceSiteModel, self).delete_model(request, obj)
+                raise ValidationError(
+                    'Can not delete Booking Services that are Not Pending')
+            super(BookingProvidedServiceSiteModel,
+                  self).delete_model(request, obj)
             BookingServices.update_bookingpackage(obj)
             BookingServices.update_booking(obj)
 
@@ -1491,7 +1538,8 @@ class BaseBookingServiceSiteModel(SiteModel):
         return BookingServiceStatusChangeList
 
     def get_readonly_fields(self, request, obj=None):
-        readonly_fields = super(BaseBookingServiceSiteModel, self).get_readonly_fields(request, obj) or []
+        readonly_fields = super(
+            BaseBookingServiceSiteModel, self).get_readonly_fields(request, obj) or []
 
         if not request.user.has_perm("booking.change_amounts"):
             return readonly_fields + ['manual_cost', 'cost_amount', 'manual_price', 'price_amount']
@@ -1536,13 +1584,13 @@ class BaseBookingServiceSiteModel(SiteModel):
 
     def save_related(self, request, form, formsets, change):
         with transaction.atomic(savepoint=False):
-            super(BaseBookingServiceSiteModel, self).save_related(request, form, formsets, change)
+            super(BaseBookingServiceSiteModel, self).save_related(
+                request, form, formsets, change)
             obj = self.save_form(request, form, change)
             BookingServices.update_bookingservice_amounts(obj)
             BookingServices.update_bookingservice_description(obj)
             if not change:
                 BookingServices.sync_bookingservice_details(obj)
-
 
     @csrf_protect_m
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
@@ -1562,7 +1610,8 @@ class BaseBookingServiceSiteModel(SiteModel):
                 body=request.POST.get('mail_body'))
             email.send()
             bs = BaseBookingService.objects.get(pk=object_id)
-            services = find_provider_requests_services(request, bs.provider, bs.booking)
+            services = find_provider_requests_services(
+                request, bs.provider, bs.booking)
             for service in services:
                 if service.status == SERVICE_STATUS_PENDING:
                     service.status = SERVICE_STATUS_REQUEST
@@ -1583,7 +1632,7 @@ class BaseBookingServiceSiteModel(SiteModel):
                     'default_mail_to': default_requests_mail_to(request, bs.provider, bs.booking),
                     'default_mail_cc': '',
                     'default_mail_bcc': default_requests_mail_bcc(request, bs.provider, bs.booking),
-                    'default_mail_subject': default_requests_mail_subject(request, bs.provider, bs.booking),
+                    'default_mail_subject': default_requests_mail_subject(request, bs.provider, bs.booking, bs.contract_code),
                     'default_mail_body': default_requests_mail_body(request, bs.provider, bs.booking),
                 })
 
@@ -1599,14 +1648,16 @@ class BaseBookingServiceSiteModel(SiteModel):
             message='Only Pending Service can be Deleted. You can set Status to Cancelled.',
             extra_tags='', fail_silently=False)
         return redirect(reverse(
-            'common:%s_%s_change' % (self.model._meta.app_label, self.model._meta.model_name),
+            'common:%s_%s_change' % (
+                self.model._meta.app_label, self.model._meta.model_name),
             args=[object_id]))
 
     actions = ['coordinated_services', 'confirmed_services', ]
 
     def coordinated_services(self, request, queryset):
         services = list(queryset.all())
-        BookingServices.set_services_status(services, SERVICE_STATUS_COORDINATED)
+        BookingServices.set_services_status(
+            services, SERVICE_STATUS_COORDINATED)
 
     coordinated_services.short_description = "Coordinate selected Services"
 
@@ -1619,7 +1670,8 @@ class BaseBookingServiceSiteModel(SiteModel):
     def build_another_redirect_url(self, request, obj, obj_url, preserved_filters, opts):
         redirect_url = request.path
         redirect_url = '%s?booking=%i' % (redirect_url, obj.booking_id)
-        redirect_url = common_add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
+        redirect_url = common_add_preserved_filters(
+            {'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
         return redirect_url
 
     @csrf_protect_m
@@ -1646,12 +1698,14 @@ class BookingProvidedAllotmentSiteModel(BookingProvidedServiceSiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
 
-    readonly_fields = ['utility_percent', 'utility']
+    readonly_fields = ['utility_percent', 'utility',
+                       'description', 'internal_reference']
 
     fieldsets = (
         (None, {
             'fields': (
-                'booking', 'booking_package', ('service', 'search_location'),
+                ('booking', 'description', 'internal_reference'), 'booking_package', ('service',
+                                                                'search_location'),
                 ('status', 'conf_number'),
                 ('datetime_from', 'nights', 'datetime_to'),
                 ('room_type', 'board_type'),
@@ -1688,12 +1742,14 @@ class BookingProvidedTransferSiteModel(BookingProvidedServiceSiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
 
-    readonly_fields = ['utility_percent', 'utility']
+    readonly_fields = ['utility_percent', 'utility',
+                       'description', 'internal_reference']
 
     fieldsets = (
         (None, {
             'fields': (
-                'booking', 'booking_package', ('service', 'search_location'), ('status', 'conf_number'),
+                ('booking', 'description', 'internal_reference'), 'booking_package', ('service',
+                                               'search_location'), ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
                 ('location_from', 'place_from'),
                 ('pickup', 'schedule_from', 'schedule_time_from'),
@@ -1734,12 +1790,13 @@ class BookingProvidedExtraSiteModel(BookingProvidedServiceSiteModel):
     menu_label = MENU_LABEL_BOOKING
     menu_group = MENU_GROUP_LABEL_PACKAGE_SERVICES
 
-    readonly_fields = ['utility_percent', 'utility']
+    readonly_fields = ['utility_percent', 'utility',
+                       'description', 'internal_reference']
 
     fieldsets = (
         (None, {
             'fields': (
-                'booking', 'booking_package',
+                ('booking', 'description', 'internal_reference'), 'booking_package',
                 ('service', 'search_location'),
                 ('status', 'conf_number'),
                 ('datetime_from', 'nights', 'datetime_to', 'time'),
@@ -1791,6 +1848,7 @@ class BookingExtraPackageSiteModel(BaseBookingServiceSiteModel):
                 ('service', 'search_location'),
                 ('status', 'conf_number'),
                 ('datetime_from', 'datetime_to', 'time'),
+                'service_addon',
                 'cost_amount',
                 ('manual_price', 'price_by_catalog'),
                 'price_amount', 'utility_percent', 'utility', 'id', 'version',
@@ -1815,12 +1873,14 @@ class BookingExtraPackageSiteModel(BaseBookingServiceSiteModel):
 
     def save_model(self, request, obj, form, change):
         with transaction.atomic(savepoint=False):
-            super(BookingExtraPackageSiteModel, self).save_model(request, obj, form, change)
+            super(BookingExtraPackageSiteModel, self).save_model(
+                request, obj, form, change)
             BookingServices.update_booking(obj)
 
     def save_related(self, request, form, formsets, change):
         with transaction.atomic(savepoint=False):
-            super(BookingExtraPackageSiteModel, self).save_related(request, form, formsets, change)
+            super(BookingExtraPackageSiteModel, self).save_related(
+                request, form, formsets, change)
             obj = self.save_form(request, form, change)
             BookingServices.update_bookingpackageservices_amounts(obj)
 
@@ -1848,15 +1908,18 @@ class BookingExtraPackageSiteModel(BaseBookingServiceSiteModel):
             stop = True
         if stop:
             return redirect(reverse(
-                'common:%s_%s_change' % (self.model._meta.app_label, self.model._meta.model_name),
+                'common:%s_%s_change' % (
+                    self.model._meta.app_label, self.model._meta.model_name),
                 args=[object_id]))
         return super(BookingExtraPackageSiteModel, self).delete_view(request, object_id, extra_context)
 
     def delete_model(self, request, obj):
         with transaction.atomic(savepoint=False):
             if obj.has_payment or obj.status != SERVICE_STATUS_PENDING:
-                raise ValidationError('Can not delete Booking Services that are Not Pending')
-            super(BookingExtraPackageSiteModel, self).delete_model(request, obj)
+                raise ValidationError(
+                    'Can not delete Booking Services that are Not Pending')
+            super(BookingExtraPackageSiteModel,
+                  self).delete_model(request, obj)
             BookingServices.update_booking(obj)
 
 
@@ -1875,7 +1938,7 @@ class BookingInvoiceLineInline(CommonTabularInline):
 class BookingInvoicePartialInline(CommonTabularInline):
     model = BookingInvoicePartial
     extra = 0
-    fields = ['pax_name', 'is_free', 'partial_amount',]
+    fields = ['pax_name', 'is_free', 'partial_amount', ]
 
 
 class BookingInvoiceSiteModel(SiteModel):
@@ -1996,7 +2059,8 @@ class ProviderBookingPaymentSiteModel(SiteModel):
             self, request, form=None, obj=None, formsets=None, inline_instances=None,
             add=None, opts=None, object_id=None, to_field=None):
         if object_id:
-            formset_services = BookingServices.booking_provider_payment_services(request, form, object_id)
+            formset_services = BookingServices.booking_provider_payment_services(
+                request, form, object_id)
             return dict(formset_services=formset_services)
 
         return {}
@@ -2011,12 +2075,16 @@ class ProviderBookingPaymentSiteModel(SiteModel):
 
         if object_id:
             if 'formset_services' not in context:
-                context['formset_services'] = BookingServices.booking_provider_payment_services(request, form, object_id)
+                context['formset_services'] = BookingServices.booking_provider_payment_services(
+                    request, form, object_id)
             if obj.status == STATUS_DRAFT:
-                ServicesFormSet = formset_factory(ProviderPaymentBookingProvidedForm, extra=0)
+                ServicesFormSet = formset_factory(
+                    ProviderPaymentBookingProvidedForm, extra=0)
             else:
-                ServicesFormSet = formset_factory(ProviderPaymentBookingProvidedReadonlyForm, extra=0)
-            services_formset = ServicesFormSet(initial=list(context['formset_services']))
+                ServicesFormSet = formset_factory(
+                    ProviderPaymentBookingProvidedReadonlyForm, extra=0)
+            services_formset = ServicesFormSet(
+                initial=list(context['formset_services']))
 
             context.update(dict(services_formset=services_formset))
 
@@ -2025,7 +2093,8 @@ class ProviderBookingPaymentSiteModel(SiteModel):
     def save_model(self, request, obj, form, change):
         if obj. pk:
             # disable save of agencyinvoice object
-            ServicesFormSet = formset_factory(ProviderPaymentBookingProvidedForm)
+            ServicesFormSet = formset_factory(
+                ProviderPaymentBookingProvidedForm)
             services_formset = ServicesFormSet(request.POST)
             if services_formset.is_valid():
                 BookingServices.save_payment(
@@ -2033,7 +2102,8 @@ class ProviderBookingPaymentSiteModel(SiteModel):
             else:
                 raise ValidationError('Invalid Services Payments Data')
         else:
-            super(ProviderBookingPaymentSiteModel, self).save_model(request, obj, form, change)
+            super(ProviderBookingPaymentSiteModel, self).save_model(
+                request, obj, form, change)
 
     @csrf_protect_m
     def changeform_view(self, request, object_id=None,
@@ -2043,21 +2113,23 @@ class ProviderBookingPaymentSiteModel(SiteModel):
                 payment = ProviderBookingPayment.objects.get(id=object_id)
                 result, pdf = self._build_provider_payment_pdf(payment)
                 if result.err:
-                    messages.add_message(request, messages.ERROR, "Failed Provider Payment PDF Generation - %s" % result.err)
+                    messages.add_message(
+                        request, messages.ERROR, "Failed Provider Payment PDF Generation - %s" % result.err)
                     return redirect(reverse('common:booking_providerbookingpayment_change', args=[object_id]))
                 return HttpResponse(pdf.getvalue(), content_type='application/pdf')
             elif 'submit_action' in request.POST and request.POST['submit_action'] == '_send_mail':
                 payment = ProviderBookingPayment.objects.get(id=object_id)
 
-
                 result, pdf = self._build_provider_payment_pdf(payment)
                 if result.err:
-                    messages.add_message(request, messages.ERROR, "Failed Provider Payment PDF Generation - %s" % result.err)
+                    messages.add_message(
+                        request, messages.ERROR, "Failed Provider Payment PDF Generation - %s" % result.err)
                     return redirect(reverse('common:booking_providerbookingpayment_change', args=[object_id]))
                 mail_from = request.POST.get('mail_from')
                 to_list = _build_mail_address_list(request.POST.get('mail_to'))
                 cc_list = _build_mail_address_list(request.POST.get('mail_cc'))
-                bcc_list = _build_mail_address_list(request.POST.get('mail_bcc'))
+                bcc_list = _build_mail_address_list(
+                    request.POST.get('mail_bcc'))
 
                 if not to_list or not mail_from:
                     messages.add_message(request=request,
@@ -2075,7 +2147,8 @@ class ProviderBookingPaymentSiteModel(SiteModel):
                     subject=request.POST.get('mail_subject'),
                     body=request.POST.get('mail_body'))
 
-                email.attach('provider_payment.pdf', pdf.getvalue(), 'application/pdf')
+                email.attach('provider_payment.pdf',
+                             pdf.getvalue(), 'application/pdf')
                 email.content_subtype = "html"
                 email.send()
 
@@ -2152,12 +2225,14 @@ def default_requests_mail_bcc(request, provider=None, booking=None):
     return request.user.email or None
 
 
-def default_requests_mail_subject(request, provider=None, booking=None):
+def default_requests_mail_subject(request, provider=None, booking=None, contract_code=None):
     subject_ref = ''
     if booking:
         subject_ref = booking.name or ''
         if booking.reference:
             subject_ref += ' (%s)' % booking.reference
+    if contract_code:
+        subject_ref += ' *** PROMOTION %s ***' % contract_code
     return 'Solicitud de Reserva %s' % subject_ref
 
 
@@ -2264,8 +2339,8 @@ def default_vouchers_mail_body(request, booking=None):
     if booking and booking.agency_contact:
         dest = booking.agency_contact.name
     context = {
-            'user': request.user,
-            'client': dest,
+        'user': request.user,
+        'client': dest,
     }
     return get_template('booking/emails/vouchers_email.html').render(context)
 
@@ -2302,7 +2377,8 @@ def default_quote_mail_body(request, quote=None):
 def default_provider_payment_mail_subject(request, payment=None):
     subject_ref = ''
     if payment:
-        subject_ref = '%s - %s %s' % (payment.date, payment.amount, payment.currency)
+        subject_ref = '%s - %s %s' % (payment.date,
+                                      payment.amount, payment.currency)
 
     return 'Payment details %s' % (subject_ref)
 
@@ -2404,13 +2480,15 @@ class BaseBookingBookDetailSiteModel(SiteModel):
 
     def save_related(self, request, form, formsets, change):
         with transaction.atomic(savepoint=False):
-            super(BaseBookingBookDetailSiteModel, self).save_related(request, form, formsets, change)
+            super(BaseBookingBookDetailSiteModel, self).save_related(
+                request, form, formsets, change)
             obj = self.save_form(request, form, change)
             BookingServices.update_bookingservice_amounts(obj.booking_service)
 
     def delete_model(self, request, obj):
         with transaction.atomic(savepoint=False):
-            super(BaseBookingBookDetailSiteModel, self).delete_model(request, obj)
+            super(BaseBookingBookDetailSiteModel,
+                  self).delete_model(request, obj)
             BookingServices.update_bookingservice_amounts(obj.booking_service)
 
     def response_post_delete(self, request, obj):
@@ -2426,7 +2504,8 @@ class BaseBookingBookDetailSiteModel(SiteModel):
                     'common:booking_bookingprovidedextra_change', args=[obj.booking_service.pk]))
         booking_service = request.POST.get('booking_service')
         if booking_service:
-            booking_service = BaseBookingService.objects.get(id=booking_service)
+            booking_service = BaseBookingService.objects.get(
+                id=booking_service)
             if booking_service.base_service.category == 'A':
                 return redirect(reverse(
                     'common:booking_bookingprovidedallotment_change', args=[booking_service.pk]))
@@ -2451,7 +2530,8 @@ class BaseBookingBookDetailSiteModel(SiteModel):
                     'common:booking_bookingprovidedextra_change', args=[obj.booking_service.pk]))
         booking_service = request.POST.get('booking_service')
         if booking_service:
-            booking_service = BaseBookingService.objects.get(id=booking_service)
+            booking_service = BaseBookingService.objects.get(
+                id=booking_service)
             if booking_service.base_service.category == 'A':
                 return redirect(reverse(
                     'common:booking_bookingprovidedallotment_change', args=[booking_service.pk]))
@@ -2476,7 +2556,8 @@ class BaseBookingBookDetailSiteModel(SiteModel):
                     'common:booking_bookingprovidedextra_change', args=[obj.booking_service.pk]))
         booking_service = request.POST.get('booking_service')
         if booking_service:
-            booking_service = BaseBookingService.objects.get(id=booking_service)
+            booking_service = BaseBookingService.objects.get(
+                id=booking_service)
             if booking_service.base_service.category == 'A':
                 return redirect(reverse(
                     'common:booking_bookingprovidedallotment_change', args=[booking_service.pk]))
@@ -2497,7 +2578,7 @@ class BookingBookDetailAllotmentSiteModel(BaseBookingBookDetailSiteModel):
         ('room_type', 'board_type'),
         'time',
         'service_addon',
-        ('provider', 'contract_code'),
+        ('contract_code'),
         'manual_cost',
         'cost_amount',
         'manual_price',
@@ -2524,7 +2605,7 @@ class BookingBookDetailTransferSiteModel(BaseBookingBookDetailSiteModel):
         ('schedule_time_from', 'schedule_time_to'),
         ('time', 'quantity'),
         'service_addon',
-        ('provider', 'contract_code'),
+        ('contract_code'),
         'manual_cost',
         'cost_amount',
         'manual_price',
@@ -2547,7 +2628,7 @@ class BookingBookDetailExtraSiteModel(BaseBookingBookDetailSiteModel):
         ('pickup_office', 'dropoff_office'),
         ('time', 'parameter', 'quantity'),
         'service_addon',
-        ('provider', 'contract_code'),
+        ('contract_code'),
         'manual_cost',
         'cost_amount',
         'manual_price',
@@ -2586,8 +2667,10 @@ bookings_site.register(ExportBooking, ExportBookingSiteModel)
 
 bookings_site.register(BookingProvidedService, BookingProvidedServiceSiteModel)
 
-bookings_site.register(BookingProvidedAllotment, BookingProvidedAllotmentSiteModel)
-bookings_site.register(BookingProvidedTransfer, BookingProvidedTransferSiteModel)
+bookings_site.register(BookingProvidedAllotment,
+                       BookingProvidedAllotmentSiteModel)
+bookings_site.register(BookingProvidedTransfer,
+                       BookingProvidedTransferSiteModel)
 bookings_site.register(BookingProvidedExtra, BookingProvidedExtraSiteModel)
 bookings_site.register(BookingExtraPackage, BookingExtraPackageSiteModel)
 

@@ -3,9 +3,11 @@
     <head>
         <style>
             @page {
-                size: a4 portrait;
+                size: A4 landscape;
                 @frame content_frame { /* Content Frame */
                     left: 45pt; right: 45pt; top: 45pt; bottom: 45pt;
+                    width: 770pt;
+                    height: 500pt;
                 };
             }
             td.bold-top-line {
@@ -16,6 +18,18 @@
                 border-top: 1px solid black;
                 padding-top: 2px;
                 border-bottom: 1px solid black;
+            }
+            td.board-content {
+                width: 100px;
+                /*text-align: center;*/
+            }
+            td.room-type-content {
+                width: 200pt;
+                /*text-align: center;*/
+            }
+            td.code-content {
+                width: 110pt;
+                text-align: center;
             }
             td.addon-content {
                 width: 25%;
@@ -29,14 +43,18 @@
                 text-align: center;
             }
             td.date-content {
-                width: 18%;
+                width: 24%;
                 text-align: center;
             }
             td.date {
                 text-align: center;
             }
             td.amount-content {
-                width: 12%;
+                width: 22%;
+                text-align: right;
+            }
+            td.amount-content-wide {
+                width: 25%;
                 text-align: right;
             }
             td.amount {
@@ -56,6 +74,6 @@
             {% service_prices service agency date_from date_to %}
         {% endfor %}
     {% endfor %}
-    </table>
+
     </body>
 </html>
