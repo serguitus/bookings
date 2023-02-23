@@ -2302,16 +2302,16 @@ def default_invoice_mail_body(request, booking=None):
 
 def default_mail_cc(request, booking):
     if booking.agency:
-        cc_list = ''
+        addr_list = []
         for contact in booking.agency.agencycopycontact_set.all():
             name, domain = contact.email.split('@')
             if name in [f.name for f in Booking._meta.get_fields()]:
                 attr = getattr(booking, name)
                 if attr:
-                    cc_list += '%s@%s, ' % (attr, domain)
+                    addr_list.append('{}@{}'.format(attr, domain))
             else:
-                cc_list += '%s, ' % contact.email
-        return cc_list
+                addr_list.append(contact.email)
+        return ', '.join(addr_list)
 
 
 def default_vouchers_mail_bcc(request):
