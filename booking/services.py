@@ -4090,82 +4090,104 @@ class BookingServices(object):
 
         date_from = None
         date_to = None
+        # date to use when all services are cancelled
         date_from_min = None
+        # date to use when all services are cancelled
         date_to_max = None
         status = constants.BOOKING_STATUS_NOSHOW
-        services = False
-        cancelled = True
+        booking_with_services = False
+        all_services_cancelled = True
         for service in BaseBookingService.objects.filter(booking=booking):
-            services = True
+            booking_with_services = True
+            if all_services_cancelled:
+                # update date_from_min and date_to_max
+                if (service.datetime_from is not None
+                        and (date_from_min is None or date_from_min > service.datetime_from)):
+                    date_from_min = service.datetime_from
+                if service.datetime_to is None:
+                    service.datetime_to = service.datetime_from
+                if (service.datetime_to is not None
+                        and (date_to_max is None or date_to_max < service.datetime_to)):
+                    date_to_max = service.datetime_to
+            # verify service status
+            if service.status in [constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]:
+                # cancelled services not processed
+                continue
+            # verify service is detail
+            is_detail = False
+            if service.base_category in [
+                    constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_ALLOTMENT,
+                    constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_TRANSFER,
+                    constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_EXTRA]:
+                is_detail = True
+                # load detail
+                detail = BookingBookDetail.objects.get(pk=service.id)
+                # verify parent is cancelled
+                if detail.booking_service.status in [constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]:
+                    # detail service with parent cancelled not processed
+                    continue
+
             # date_from
             if (service.datetime_from is not None
-                    and (date_from_min is None or date_from_min > service.datetime_from)):
-                date_from_min = service.datetime_from
+                    and (date_from is None or date_from > service.datetime_from)):
+                date_from = service.datetime_from
             # date_to
             if service.datetime_to is None:
                 service.datetime_to = service.datetime_from
             if (service.datetime_to is not None
-                    and (date_to_max is None or date_to_max < service.datetime_to)):
-                date_to_max = service.datetime_to
-            # process only non cancelled services
-            if not (service.status in [constants.SERVICE_STATUS_CANCELLED, constants.SERVICE_STATUS_CANCELLING]):
-                # date_from
-                if (service.datetime_from is not None
-                        and (date_from is None or date_from > service.datetime_from)):
-                    date_from = service.datetime_from
-                # date_to
-                if service.datetime_to is None:
-                    service.datetime_to = service.datetime_from
-                if (service.datetime_to is not None
-                        and (date_to is None or date_to < service.datetime_to)):
-                    date_to = service.datetime_to
-                # status
-                # process only services that are not details
-                if service.base_category not in [
-                        constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_ALLOTMENT,
-                        constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_TRANSFER,
-                        constants.BASE_BOOKING_SERVICE_CATEGORY_BOOKING_DETAIL_EXTRA]:
-                    # set not all cancelled
-                    cancelled = False
-                    # TODO: refactor this to use SERVICE_STATUS_ORDER and BOOKING_STATUS_ORDER
-                    # pending sets always pending
-                    if service.status == constants.SERVICE_STATUS_PENDING:
-                        status = constants.BOOKING_STATUS_PENDING
-                    # on-hold sets always on-hold
-                    elif service.status == constants.SERVICE_STATUS_ON_HOLD:
-                        status = constants.BOOKING_STATUS_ON_HOLD
-                    # requested sets requested when not pending
-                    elif (service.status == constants.SERVICE_STATUS_REQUEST) and (
-                            status != constants.BOOKING_STATUS_PENDING) and (
-                            status != constants.BOOKING_STATUS_ON_HOLD):
-                        status = constants.BOOKING_STATUS_REQUEST
-                    # phone confirmed sets requested when not pending
-                    elif (service.status == constants.SERVICE_STATUS_PHONE_CONFIRMED) and (
-                            status != constants.BOOKING_STATUS_PENDING) and (
-                            status != constants.BOOKING_STATUS_ON_HOLD):
-                        status = constants.BOOKING_STATUS_REQUEST
-                    # confirmed sets confirmed when not requested and not pending
-                    elif (service.status == constants.SERVICE_STATUS_CONFIRMED) and (
-                            status != constants.BOOKING_STATUS_PENDING) and (
-                            status != constants.BOOKING_STATUS_ON_HOLD) and (
-                            status != constants.BOOKING_STATUS_REQUEST):
-                        status = constants.BOOKING_STATUS_CONFIRMED
-                    # coordinated sets when not pending or requested or confirmed
-                    elif (service.status == constants.SERVICE_STATUS_COORDINATED) and (
-                            status != constants.BOOKING_STATUS_PENDING) and (
-                            status != constants.BOOKING_STATUS_ON_HOLD) and (
-                            status != constants.BOOKING_STATUS_REQUEST) and (
-                            status != constants.BOOKING_STATUS_CONFIRMED):
-                        status = constants.BOOKING_STATUS_COORDINATED
+                    and (date_to is None or date_to < service.datetime_to)):
+                date_to = service.datetime_to
+
+            # status
+            # process only services that are not details
+            # verify service is detail
+            if is_detail:
+                # details are not used for status
+                continue
+
+            # set not all cancelled
+            all_services_cancelled = False
+            # TODO: refactor this to use SERVICE_STATUS_ORDER and BOOKING_STATUS_ORDER
+            # pending sets always pending
+            if service.status == constants.SERVICE_STATUS_PENDING:
+                status = constants.BOOKING_STATUS_PENDING
+            # on-hold sets always on-hold
+            elif service.status == constants.SERVICE_STATUS_ON_HOLD:
+                status = constants.BOOKING_STATUS_ON_HOLD
+            # requested sets requested when not pending
+            elif (service.status == constants.SERVICE_STATUS_REQUEST) and (
+                    status != constants.BOOKING_STATUS_PENDING) and (
+                    status != constants.BOOKING_STATUS_ON_HOLD):
+                status = constants.BOOKING_STATUS_REQUEST
+            # phone confirmed sets requested when not pending
+            elif (service.status == constants.SERVICE_STATUS_PHONE_CONFIRMED) and (
+                    status != constants.BOOKING_STATUS_PENDING) and (
+                    status != constants.BOOKING_STATUS_ON_HOLD):
+                status = constants.BOOKING_STATUS_REQUEST
+            # confirmed sets confirmed when not requested and not pending
+            elif (service.status == constants.SERVICE_STATUS_CONFIRMED) and (
+                    status != constants.BOOKING_STATUS_PENDING) and (
+                    status != constants.BOOKING_STATUS_ON_HOLD) and (
+                    status != constants.BOOKING_STATUS_REQUEST):
+                status = constants.BOOKING_STATUS_CONFIRMED
+            # coordinated sets when not pending or requested or confirmed
+            elif (service.status == constants.SERVICE_STATUS_COORDINATED) and (
+                    status != constants.BOOKING_STATUS_PENDING) and (
+                    status != constants.BOOKING_STATUS_ON_HOLD) and (
+                    status != constants.BOOKING_STATUS_REQUEST) and (
+                    status != constants.BOOKING_STATUS_CONFIRMED):
+                status = constants.BOOKING_STATUS_COORDINATED
 
         # verify that have services and all cancelled
-        if services:
-            if cancelled:
+        if booking_with_services:
+            if all_services_cancelled:
                 # status cancelled
                 status = constants.BOOKING_STATUS_CANCELLED
                 date_from = date_from_min
                 date_to = date_to_max
         else:
+            date_from = None
+            date_to = None
             status = constants.BOOKING_STATUS_PENDING
 
         fields = []
