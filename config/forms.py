@@ -17,7 +17,7 @@ from config.models import (
     AgencyAllotmentService, AgencyTransferService, AgencyExtraService,
     AgencyAllotmentDetail, AgencyTransferDetail, AgencyExtraDetail,
 )
- 
+
 from finance.models import Agency
 
 
@@ -565,12 +565,12 @@ class ExtendCatalogForm(forms.Form):
                                       attrs={'placeholder': 'Min. Increment'}))
     diff_percent = forms.IntegerField(required=False,
                                       label='',
-                                      help_text='Specify a percent value to alter generated values',
+                                      help_text='Specify a percent value to alter generated values. (negative to decrease)',
                                       widget=forms.NumberInput(
                                           attrs={'placeholder': 'Increment (%)'}))
     diff_value = forms.IntegerField(required=False,
                                     label='',
-                                    help_text='Specify an absolute value to alter generated numbers',
+                                    help_text='Specify an absolute value to alter generated numbers. (negative to decrease)',
                                     widget=forms.NumberInput(
                                         attrs={'placeholder': 'Increment (Abs.)'}))
 

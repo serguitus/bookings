@@ -243,9 +243,9 @@
         <div id="footer_content">
             <p style="font-weight:bold">BANK DETAILS</p>
             {{ invoice.office.bank_details | safe}}
-            <p style="color:red; font-weight:bold;">IMPORTANT: This is a safe way to pay our services, but due to the US embargo against Cuba you MUST NOT write down in the bank forms any word that could be associated to Cuba, such as hotel names, tour names or any service in Cuba, only the name of the client or invoice number; otherwise your money could be retained by US government.
+            {% comment %} <p style="color:red; font-weight:bold;">IMPORTANT: This is a safe way to pay our services, but due to the US embargo against Cuba you MUST NOT write down in the bank forms any word that could be associated to Cuba, such as hotel names, tour names or any service in Cuba, only the name of the client or invoice number; otherwise your money could be retained by US government.
             <br>
-            We are not responsible for retained payments for not following above indications.</p>
+            We are not responsible for retained payments for not following above indications.</p> {% endcomment %}
         </div>
     </body>
 </html>

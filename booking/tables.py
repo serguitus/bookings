@@ -274,7 +274,7 @@ class BookingConfirmationTable(tables.Table):
         template_name = 'booking/bookingservice_list.html'
         fields = ['name', 'service_location', 'datetime_from',
                   'datetime_to', 'nights', 'description',
-                  'conf_number', 'status']
+                  'price_amount']
         attrs = {'class': 'table',
                  'style': 'width:100%',
                  'border': '1',}
@@ -289,7 +289,7 @@ class BookingConfirmationTable(tables.Table):
         self.base_columns['datetime_from'].verbose_name = 'FROM'
         self.base_columns['datetime_to'].verbose_name = 'TO'
         self.base_columns['description'].verbose_name = 'Pax'
-        self.base_columns['conf_number'].verbose_name = 'Conf.'
+        # self.base_columns['conf_number'].verbose_name = 'Conf.'
         super(BookingConfirmationTable, self).__init__(*args, **kwargs)
 
 
@@ -311,12 +311,18 @@ class QuoteConfirmationTable(tables.Table):
     def __init__(self, *args, **kwargs):
         # self.base_columns['utility_percent'].verbose_name='Util.%'
         # self.base_columns['utility'].verbose_name='Util.'
-        # self.base_columns['nights'].verbose_name='N'
+        self.base_columns['name'].verbose_name='Service'
         self.base_columns['datetime_from'].verbose_name = 'FROM'
         self.base_columns['datetime_to'].verbose_name = 'TO'
         #self.base_columns['description'].verbose_name='Pax'
         #self.base_columns['conf_number'].verbose_name='Conf.'
         super(QuoteConfirmationTable, self).__init__(*args, **kwargs)
+
+    def render_name(self, value, record):
+        details = ''
+        if record.description:
+            details = ': {}'.format(record.description)
+        return '{}{}'.format(value, details)
 
 
 class BookingServiceSummaryTable(tables.Table):
@@ -367,7 +373,7 @@ class BookingExtraPackageServiceSummaryTable(tables.Table):
         model = BookingProvidedService
         template_name = 'booking/include/base_table.html'
         fields = [
-            'name', 'datetime_from', 'datetime_to', 'provider', 'status']
+            'name', 'datetime_from', 'datetime_to', 'provider', 'cost_amount', 'price_amount', 'status']
         attrs = {'class': 'table table-hover table-sm'}
         row_attrs = {
             'class': lambda record: '{}'.format(BOOTSTRAP_STYLE_BOOKING_SERVICE_STATUS_MAPPING[record.status]),

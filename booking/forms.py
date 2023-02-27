@@ -479,6 +479,10 @@ class BookingExtraPackageForm(forms.ModelForm, MailForm, ServiceForm):
                 url='serviceextra-autocomplete',
                 forward=['provider', 'search_location'],
                 ),
+            'service_addon': autocomplete.ModelSelect2(
+                url='addon-autocomplete',
+                forward=['service'],
+            ),
             'provider': autocomplete.ModelSelect2(
                 url='providerextra-autocomplete',
                 forward=['service'],

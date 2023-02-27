@@ -7,8 +7,6 @@ from dal import autocomplete
 
 from django import forms
 
-from finance.models import Deposit
-
 
 class AccountingForm(forms.ModelForm):
     class Meta:
@@ -35,6 +33,7 @@ class TransferForm(AccountingForm):
             'transfer_account': autocomplete.ModelSelect2(url='account-autocomplete'),
         }
 
+
 class LoanEntityDocumentForm(AccountingForm):
     class Meta:
         fields = ('__all__')
@@ -42,6 +41,7 @@ class LoanEntityDocumentForm(AccountingForm):
             'account': autocomplete.ModelSelect2(url='account-autocomplete'),
             'loan_entity': autocomplete.ModelSelect2(url='loanentity-autocomplete'),
         }
+
 
 class LoanAccountDocumentForm(AccountingForm):
     class Meta:

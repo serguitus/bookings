@@ -720,9 +720,9 @@ class ProviderAllotmentServiceSiteModel(CatalogService):
         ('booked_from', 'booked_to', 'contract_code'), 'id',)
     list_display = ('service', 'provider', 'date_from', 'date_to', 'booked_from', 'booked_to', 'contract_code',)
     top_filters = (
-        ('service__chain', ChainTopFilter), ('service', AllotmentTopFilter), ('provider', ProviderTopFilter),
+        ('service', AllotmentTopFilter), ('service__chain', ChainTopFilter), ('provider', ProviderTopFilter),
         'service__service_category',
-        ('date_to', DateTopFilter), 'contract_code')
+        ('date_to', DateTopFilter), 'contract_code', ('service__location', LocationTopFilter))
     inlines = [ProviderAllotmentDetailInline]
     ordering = ['service', 'provider', '-date_from']
     list_select_related = ('service', 'provider')
@@ -731,8 +731,7 @@ class ProviderAllotmentServiceSiteModel(CatalogService):
     change_form_template = 'config/catalog_service_change_form.html'
     save_as = True
 
-    actions = ['rewrite_agency_amounts',
-               'update_agency_amounts',
+    actions = ['update_agency_amounts',
                'extend_catalog_prices']
 
     def rewrite_agency_amounts(self, request, queryset):
@@ -860,8 +859,7 @@ class ProviderTransferServiceSiteModel(CatalogService):
     change_form_template = 'config/catalog_service_change_form.html'
     save_as = True
 
-    actions = ['rewrite_agency_amounts',
-                'update_agency_amounts',
+    actions = ['update_agency_amounts',
                 'extend_catalog_prices']
 
     def rewrite_agency_amounts(self, request, queryset):
@@ -964,7 +962,7 @@ class ProviderExtraServiceSiteModel(CatalogService):
     top_filters = (
         ('service', ExtraTopFilter), ('provider', ProviderTopFilter),
         'service__service_category',
-        ('date_to', DateTopFilter), 'contract_code')
+        ('date_to', DateTopFilter), 'contract_code', ('service__location', LocationTopFilter))
     inlines = [ProviderExtraDetailInline]
     ordering = ['service', 'provider', '-date_from']
     list_select_related = ('service', 'provider')
@@ -973,8 +971,7 @@ class ProviderExtraServiceSiteModel(CatalogService):
     change_form_template = 'config/catalog_service_change_form.html'
     save_as = True
 
-    actions = ['rewrite_agency_amounts',
-               'update_agency_amounts',
+    actions = ['update_agency_amounts',
                'extend_catalog_prices']
 
     def rewrite_agency_amounts(self, request, queryset):
@@ -1075,10 +1072,11 @@ class AgencyAllotmentServiceSiteModel(CatalogService):
         ('booked_from', 'booked_to', 'contract_code'), 'id',)
     list_display = ('agency', 'service', 'date_from', 'date_to', 'booked_from', 'booked_to', 'contract_code',)
     top_filters = (
-        ('service__chain', ChainTopFilter), ('service', AllotmentTopFilter),
+        ('service', AllotmentTopFilter), ('service__chain', ChainTopFilter),
         ('agency', AgencyTopFilter),
         'service__service_category',
-        ('date_to', DateTopFilter), 'contract_code')
+        ('date_to', DateTopFilter), 'contract_code',
+        ('service__location', LocationTopFilter))
     inlines = [AgencyAllotmentDetailInline]
     ordering = ['service', 'agency', '-date_from']
     list_select_related = ('agency', 'service')
@@ -1289,7 +1287,7 @@ class AgencyExtraServiceSiteModel(CatalogService):
     top_filters = (
         ('service', ExtraTopFilter), ('agency', AgencyTopFilter),
         'service__service_category',
-        ('date_to', DateTopFilter), 'contract_code')
+        ('date_to', DateTopFilter), 'contract_code', ('service__location', LocationTopFilter))
     inlines = [AgencyExtraDetailInline]
     ordering = ['service', 'agency', '-date_from']
     list_select_related = ('service', 'agency')
