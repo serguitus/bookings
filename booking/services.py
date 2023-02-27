@@ -588,6 +588,7 @@ class BookingServices(object):
         for package_allotment in ServiceBookDetailAllotment.objects.filter(service_id=package.id).all():
             quote_package_allotment = NewQuoteAllotment()
             quote_package_allotment.quote_package = quote_package
+            quote_package_allotment.quote_id = quote_package.quote_id
             # quote_package_allotment.conf_number = '< confirm number >'
             # cost_amount
             # cost_comment
@@ -608,6 +609,7 @@ class BookingServices(object):
         for package_transfer in ServiceBookDetailTransfer.objects.filter(service_id=package.id).all():
             quote_package_transfer = NewQuoteTransfer()
             quote_package_transfer.quote_package = quote_package
+            quote_package_transfer.quote_id = quote_package.quote_id
             # quote_package_transfer.conf_number = '< confirm number >'
             # cost_amount
             # cost_comment
@@ -635,6 +637,7 @@ class BookingServices(object):
         for package_extra in ServiceBookDetailExtra.objects.filter(service_id=package.id).all():
             quote_package_extra = NewQuoteExtra()
             quote_package_extra.quote_package = quote_package
+            quote_package_extra.quote_id = quote_package.quote_id
             # quote_package_extra.conf_number = '< confirm number >'
             # cost_amount
             # cost_comment
