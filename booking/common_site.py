@@ -1778,6 +1778,7 @@ class BookingProvidedTransferSiteModel(BookingProvidedServiceSiteModel):
         'booking_package__booking__reference', 'conf_number',
         ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'booking_package', 'service__name',)
+    save_as = True
     form = BookingProvidedTransferForm
     add_form_template = 'booking/bookingprovidedtransfer_change_form.html'
     change_form_template = 'booking/bookingprovidedtransfer_change_form.html'
@@ -1827,6 +1828,7 @@ class BookingProvidedExtraSiteModel(BookingProvidedServiceSiteModel):
         'booking_package__booking__reference',
         ('datetime_from', DateTopFilter), 'status',)
     ordering = ('datetime_from', 'booking_package', 'service__name',)
+    save_as = True
     form = BookingProvidedExtraForm
     add_form_template = 'booking/bookingprovidedextra_change_form.html'
     change_form_template = 'booking/bookingprovidedextra_change_form.html'
