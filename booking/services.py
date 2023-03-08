@@ -364,30 +364,6 @@ class BookingServices(object):
         bookingpackage_service.avoid_bookingpackageservice_update = True
         bookingpackage_service.save()
 
-    # TODO: finish this functionality to convert packages into extras with details
-    @classmethod
-    def build_extra_service_from_package(service_id):
-        """ creates a BookingProvidedExtra to replace a package in a booking """
-        try:
-            booking_package = BookingExtraPackage.objects.get(id=service_id)
-            with transaction.atomic(savepoint=False):
-                booking_extra = BookingProvidedExtra()
-                booking_extra.booking = booking_package.booking
-                ConfigServices.copy_book_extra_data(
-                    dst_service=booking_extra, src_service=booking_package)
-
-                # create bookingprovidedallotment list
-                # for quotepackage_allotment in BookingProvidedAllotment.objects.filter(
-                #         booking_package_id=booking_package.id).all():
-                #     bookingpackage_allotment = BookingProvidedAllotment()
-                #     ConfigServices.copy_book_allotment_data(
-                #         dst_service=bookingpackage_allotment,
-                #         src_service=quotepackage_allotment)
-                #     cls.build_bookingpackageservice_from_quotepackageservice(
-                #         bookingpackage_allotment, quotepackage_allotment,
-                #         pax_list, service_pax_variant)
-        except Exception:
-            return None, "Error converting package into extra with details"
 
     @classmethod
     def build_booking_from_quote(cls, quote_id, rooming, user=None):
@@ -4673,6 +4649,22 @@ class BookingServices(object):
             cls._clone_bookingservice_detail(transfer_detail, booking_service)
         for extra_detail in extra_details:
             cls._clone_bookingservice_detail(extra_detail, booking_service)
+
+
+    @classmethod
+    def clone_bookingservice_details(cls, cloned_bookingservice_id, new_booking_service):
+        allotment_details = list(BookingBookDetailAllotment.objects.filter(
+            booking_service=cloned_bookingservice_id))
+        for allotment_detail in allotment_details:
+            cls._clone_bookingservice_detail(allotment_detail, new_booking_service)
+        transfer_details = list(BookingBookDetailTransfer.objects.filter(
+            booking_service=cloned_bookingservice_id))
+        for transfer_detail in transfer_details:
+            cls._clone_bookingservice_detail(transfer_detail, new_booking_service)
+        extra_details = list(BookingBookDetailExtra.objects.filter(
+            booking_service=cloned_bookingservice_id))
+        for extra_detail in extra_details:
+            cls._clone_bookingservice_detail(extra_detail, new_booking_service)
 
 
     @classmethod
