@@ -438,7 +438,7 @@ class QuotePackagePaxVariantInline(CommonStackedInline):
         'cost_triple_amount', 'price_triple_amount', 'utility_percent_triple', 'utility_triple',
         'cost_qdrple_amount', 'price_qdrple_amount', 'utility_percent_qdrple', 'utility_qdrple',
     ]
-    verbose_name_plural = 'Paxes Variants'
+    verbose_name_plural = 'Pax Variants'
     can_delete = False
 
 
@@ -542,7 +542,7 @@ class QuoteServicePaxVariantInline(CommonStackedInline):
         ('cost_qdrple_amount', 'price_qdrple_amount',
          'utility_percent_qdrple', 'utility_qdrple'),
     ]
-    verbose_name_plural = 'Paxes Variants'
+    verbose_name_plural = 'Pax Variants'
     can_delete = False
 
     readonly_fields = [
