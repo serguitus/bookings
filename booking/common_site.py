@@ -1526,6 +1526,16 @@ class BookingProvidedServiceSiteModel(SiteModel):
             BookingServices.update_bookingpackage(obj)
             BookingServices.update_booking(obj)
 
+    def response_add_saveasnew(
+            self, request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue=None):
+        id = request.POST.get('id')
+        if id and obj:
+            BookingServices.clone_bookingservice_details(id, obj)
+
+        return super(BookingProvidedServiceSiteModel, self).response_add_saveasnew(
+            request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue)
+
+
 
 class BaseBookingServiceSiteModel(SiteModel):
 
@@ -1834,6 +1844,16 @@ class BookingProvidedExtraSiteModel(BookingProvidedServiceSiteModel):
     change_form_template = 'booking/bookingprovidedextra_change_form.html'
     list_details_template = 'booking/bookingprovidedextra_details.html'
     change_details_template = 'booking/bookingprovidedextra_details.html'
+
+    def response_add_saveasnew(
+            self, request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue=None):
+        id = request.POST.get('id')
+        if id and obj:
+            BookingServices.clone_booking_services(id, obj)
+
+        return super(BookingSiteModel, self).response_add_saveasnew(
+            request, obj, msg_dict, obj_url, preserved_filters, opts, post_url_continue)
+
 
 
 class BookingExtraPackageSiteModel(BaseBookingServiceSiteModel):

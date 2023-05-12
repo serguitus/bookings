@@ -1181,7 +1181,7 @@ class BookingAddServiceView(View):
         service_id = request.POST.get('search_service', None)
         if parent_id and service_id:
             service = Service.objects.get(id=service_id)
-            querystring = self.build_querystring(parent_id, service_id)
+            querystring = self.build_querystring(parent_id, service_id, service.description)
             if service.category == 'A':
                 return redirect('{}?{}'.format(
                     reverse(
@@ -1209,10 +1209,16 @@ class BookingAddServiceView(View):
         parent = self.get_parent_obj(parent_id)
         return redirect(parent)
 
-    def build_querystring(self, parent_id, service_id):
-        return urlencode(
-            {'booking': parent_id,
-             'service': service_id})
+    def build_querystring(self, parent_id, service_id, v_notes):
+        if v_notes:
+            return urlencode(
+                {'booking': parent_id,
+                 'service': service_id,
+                 'new_v_notes': v_notes})
+        else:
+            return urlencode(
+                {'booking': parent_id,
+                 'service': service_id})
 
     def get_parent_obj(self, parent_id):
         return Booking.objects.get(id=parent_id)
