@@ -565,7 +565,7 @@ class ExtraSiteModel(BaseServiceSiteModel):
               ('child_discount_percent', 'child_age', 'infant_age'),
               ('car_rental', 'enabled'),
               'included_services',
-              'description')
+              'description','voucher_notes')
     list_display = ('name', 'service_category', 'location', 'cost_type',
                     'parameter_type', 'max_capacity', 'enabled',
                     'pax_range',
