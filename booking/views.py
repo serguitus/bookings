@@ -1181,7 +1181,7 @@ class BookingAddServiceView(View):
         service_id = request.POST.get('search_service', None)
         if parent_id and service_id:
             service = Service.objects.get(id=service_id)
-            querystring = self.build_querystring(parent_id, service_id, service.description)
+            querystring = self.build_querystring(parent_id, service_id, service.voucher_notes)
             if service.category == 'A':
                 return redirect('{}?{}'.format(
                     reverse(
