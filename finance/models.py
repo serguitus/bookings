@@ -83,7 +83,7 @@ class FinantialDocument(models.Model):
 
     def delete(self, using=None, keep_parents=False):
         raise ValidationError(
-            'Can not delete Finantials Documents')
+            'Can not delete Finantial Documents')
 
 
 class FinantialDocumentHistory(models.Model):
