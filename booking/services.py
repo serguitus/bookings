@@ -4744,7 +4744,7 @@ class BookingServices(object):
             # validate provider
             if db_basebookingservice.provider != basebookingservice.provider:
                 if db_basebookingservice.has_payment:
-                    transaction.rollback()
+                    # transaction.rollback()
                     raise ValidationError(
                         'Payments to previous Provider were done. Cancel this Service and Create another for the new Provider')
         if basebookingservice.status in [
