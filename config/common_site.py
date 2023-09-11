@@ -85,6 +85,8 @@ def export_prices(request, queryset, extra_context=None):
 
         date_from = parse_date(request.POST.get('start_date', None))
         date_to = parse_date(request.POST.get('end_date', None))
+        bw_date_from = parse_date(request.POST.get('booking_window_start_date', None))
+        bw_date_to = parse_date(request.POST.get('booking_window_end_date', None))
 
         services = request.POST.getlist('_selected_action', [])
         if agency and services:
@@ -94,6 +96,8 @@ def export_prices(request, queryset, extra_context=None):
                     'agency': Agency.objects.get(id=agency),
                     'date_from': date_from,
                     'date_to': date_to,
+                    'bw_date_from': bw_date_from,
+                    'bw_date_to': bw_date_to,
                     'services': Service.objects.filter(id__in=services).order_by('location__name')
                 })
     context.update({'services': queryset})
@@ -116,6 +120,8 @@ def export_costs(request, queryset, extra_context=None):
 
         date_from = parse_date(request.POST.get('start_date', None))
         date_to = parse_date(request.POST.get('end_date', None))
+        bw_date_from = parse_date(request.POST.get('booking_window_start_date', None))
+        bw_date_to = parse_date(request.POST.get('booking_window_end_date', None))
 
         services = request.POST.getlist('_selected_action', [])
         if services:
@@ -124,6 +130,8 @@ def export_costs(request, queryset, extra_context=None):
                 {
                     'date_from': date_from,
                     'date_to': date_to,
+                    'bw_date_from': bw_date_from,
+                    'bw_date_to': bw_date_to,
                     'services': Service.objects.filter(id__in=services).order_by('location__name')
                 })
     context.update({'services': queryset})

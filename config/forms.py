@@ -358,10 +358,15 @@ class ServiceAddonInlineForm(forms.ModelForm):
 
 class PricesExportForm(forms.Form):
     agency = forms.ModelChoiceField(queryset=Agency.objects.all(),
-                                    label='Pick Agency to export prices for')
+                                    label='Pick Agency to export prices for',
+                                    widget=autocomplete.ModelSelect2(url='agency-autocomplete'))
     start_date = forms.DateField(label='Starting Date', required=False,
                                  widget=AdminDateWidget())
     end_date = forms.DateField(label='End Date', required=False,
+                               widget=AdminDateWidget())
+    booking_window_start_date = forms.DateField(label='Booking Window Start Date', required=False,
+                                 widget=AdminDateWidget())
+    booking_window_end_date = forms.DateField(label='Booking Window End Date', required=False,
                                widget=AdminDateWidget())
 
 
@@ -369,6 +374,10 @@ class CostsExportForm(forms.Form):
     start_date = forms.DateField(label='Starting Date', required=False,
                                  widget=AdminDateWidget())
     end_date = forms.DateField(label='End Date', required=False,
+                               widget=AdminDateWidget())
+    booking_window_start_date = forms.DateField(label='Booking Window Start Date', required=False,
+                                 widget=AdminDateWidget())
+    booking_window_end_date = forms.DateField(label='Booking Window End Date', required=False,
                                widget=AdminDateWidget())
 
 

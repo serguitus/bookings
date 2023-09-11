@@ -560,6 +560,8 @@ def render_prices_pdf(request, extra_context=None):
     - services: a list of services to include in list
     - date_from: the starting date to fetch prices
     - date_to: the ending date to fetch prices for
+    - bw_date_from: the booking_window starting date to fetch prices for
+    - bw_date_to: the booking_window ending date to fetch prices for
     """
     context = {}
     context.update(extra_context)
@@ -729,7 +731,7 @@ class ServiceTransferAutocompleteView(autocomplete.Select2QuerySetView):
                     |
                     Q(providertransferservice__providertransferdetail__location_to=location_to)
                 )
-    
+
         if self.q:
             qs = qs.filter(name__icontains=self.q)
         return qs[:20]

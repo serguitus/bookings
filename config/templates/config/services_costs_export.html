@@ -14,13 +14,24 @@
     <form action="" method="post" class="form-inline">
         {{ form.non_field_errors }}
         {% csrf_token %}
+        <div class="form-row"><div class="fieldbox mr-3">
         {{ form.start_date.errors }}
         {{ form.start_date.label_tag }}
         {{ form.start_date|addclass:'vDateField form-control' }}
+        </div><div class="fieldbox">
         {{ form.end_date.errors }}
         {{ form.end_date.label_tag }}
         {{ form.end_date|addclass:'vDateField form-control' }}
-        <div>
+        </div></div>
+        <div class="form-row"><div class="fieldbox mr-3">
+        {{ form.booking_window_start_date.label_tag }}
+        {{ form.booking_window_start_date|addclass:'vDateField form-control' }}
+        {{ form.booking_window_start_date.errors }}
+        </div><div class="fieldbox">
+        {{ form.booking_window_end_date.label_tag }}
+        {{ form.booking_window_end_date|addclass:'vDateField form-control' }}
+        {{ form.booking_window_end_date.errors }}
+        </div></div>
         <p><h1>
             You are going to export costs for the following services. Are you sure?
         </h1></p>
