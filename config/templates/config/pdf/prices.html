@@ -71,7 +71,7 @@
     {% for location in location_list %}
         <div class="location"><b>Location:</b> {{ location.grouper }}</div>
         {% for service in location.list %}
-            {% service_prices service agency date_from date_to %}
+            {% service_prices service agency date_from date_to bw_date_from bw_date_to %}
         {% endfor %}
     {% endfor %}
 

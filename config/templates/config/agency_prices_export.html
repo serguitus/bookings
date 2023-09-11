@@ -11,21 +11,36 @@
  {% endblock %}
 
 {% block content %}
-    <form action="" method="post" class="form-inline">
+<div class="row"><div class="col"><h1>
+    You are going to export prices for the following services. Are you sure?
+</h1></div></div>
+    <form action="" method="post" class="form">
         {{ form.non_field_errors }}
         {% csrf_token %}
-        <p><h1>
-            You are going to export prices for the following services. Are you sure?
-        </h1></p>
+        <div class="form-row"><div class="fieldbox">
         {{ form.agency.errors }}
         {{ form.agency.label_tag }}
-        {{ form.agency|addclass:'form-control' }}
+        {{ form.agency|addclass:'fieldbox' }}
+        </div></div>
+        <div class="form-row"><div class="fieldbox mr-3">
         {{ form.start_date.errors }}
         {{ form.start_date.label_tag }}
         {{ form.start_date|addclass:'vDateField form-control' }}
+        </div><div class="fieldbox">
         {{ form.end_date.errors }}
         {{ form.end_date.label_tag }}
         {{ form.end_date|addclass:'vDateField form-control' }}
+        </div></div>
+        <div class="form-row"><div class="fieldbox mr-3">
+        {{ form.booking_window_start_date.label_tag }}
+        {{ form.booking_window_start_date|addclass:'vDateField form-control' }}
+        {{ form.booking_window_start_date.errors }}
+        </div><div class="fieldbox">
+        {{ form.booking_window_end_date.label_tag }}
+        {{ form.booking_window_end_date|addclass:'vDateField form-control' }}
+        {{ form.booking_window_end_date.errors }}
+        </div></div>
+        <div class="form-row"><div class="fieldbox mr-3">
         {% for service in services %}
             <p>{{ service }}</p>
             <input type="hidden" name="_selected_action" value="{{ service.pk }}" />
@@ -34,5 +49,6 @@
         <input type="hidden" name="action" value="export_prices" />
         <input type="submit" name="apply" value="Export Prices"/>
         <a class="btn btn-back" href="">Back</a>
+        </div></div>
     </form>
 {% endblock %}

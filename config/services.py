@@ -2147,7 +2147,7 @@ class ConfigServices(object):
         }
 
     @classmethod
-    def list_allotment_details(cls, allotment, agency, date_from, date_to):
+    def list_allotment_details(cls, allotment, agency, date_from, date_to, booked_from, booked_to):
         qs = AgencyAllotmentDetail.objects.all()
         qs = qs.filter(
             agency_service__agency=agency,
@@ -2156,13 +2156,19 @@ class ConfigServices(object):
             qs = qs.filter(agency_service__date_to__gte=date_from)
         if date_to:
             qs = qs.filter(agency_service__date_from__lte=date_to)
+        if booked_from:
+            qs = qs.filter(Q(agency_service__booked_to__gte=booked_from) |
+                           Q(agency_service__booked_to__isnull=True))
+        if booked_to:
+            qs = qs.filter(Q(agency_service__booked_from__lte=booked_to) |
+                           Q(agency_service__booked_from__isnull=True))
         qs = qs.order_by(
             'board_type', 'room_type', 'addon', 'pax_range_min', '-pax_range_max',
             'agency_service__date_from', '-agency_service__date_to')
         return list(qs)
 
     @classmethod
-    def list_allotment_costs_details(cls, allotment, date_from, date_to):
+    def list_allotment_costs_details(cls, allotment, date_from, date_to, booked_from, booked_to):
         qs = ProviderAllotmentDetail.objects.all()
         qs = qs.filter(
             provider_service__service=allotment.id)
@@ -2170,13 +2176,19 @@ class ConfigServices(object):
             qs = qs.filter(provider_service__date_to__gte=date_from)
         if date_to:
             qs = qs.filter(provider_service__date_from__lte=date_to)
+        if booked_from:
+            qs = qs.filter(Q(agency_service__booked_to__gte=booked_from) |
+                           Q(agency_service__booked_to__isnull=True))
+        if booked_to:
+            qs = qs.filter(Q(agency_service__booked_from__lte=booked_to) |
+                           Q(agency_service__booked_from__isnull=True))
         qs = qs.order_by(
             'board_type', 'room_type', 'addon', 'provider_service__provider', 'pax_range_min', '-pax_range_max',
             'provider_service__date_from', '-provider_service__date_to')
         return list(qs)
 
     @classmethod
-    def list_transfer_details(cls, transfer, agency, date_from='', date_to=''):
+    def list_transfer_details(cls, transfer, agency, date_from='', date_to='', booked_from='', booked_to=''):
         # raw_sql collect transfer routes with their reverses excluding
         # not_reversible routes and explicitly specified ones
         raw_sql = """
@@ -2254,7 +2266,7 @@ class ConfigServices(object):
         return list(qs)
 
     @classmethod
-    def list_transfer_costs_details(cls, transfer, date_from='', date_to=''):
+    def list_transfer_costs_details(cls, transfer, date_from='', date_to='', booked_from='', booked_to=''):
         # raw_sql collect transfer routes with their reverses excluding
         # not_reversible routes and explicitly specified ones
         raw_sql = """
@@ -2313,7 +2325,7 @@ class ConfigServices(object):
         return list(qs)
 
     @classmethod
-    def list_extra_details(cls, extra, agency, date_from, date_to):
+    def list_extra_details(cls, extra, agency, date_from, date_to, booked_from, booked_to):
         qs = AgencyExtraDetail.objects.all()
         qs = qs.filter(
             agency_service__agency=agency,
@@ -2322,13 +2334,19 @@ class ConfigServices(object):
             qs = qs.filter(agency_service__date_to__gte=date_from)
         if date_to:
             qs = qs.filter(agency_service__date_from__lte=date_to)
+        if booked_from:
+            qs = qs.filter(Q(agency_service__booked_to__gte=booked_from) |
+                           Q(agency_service__booked_to__isnull=True))
+        if booked_to:
+            qs = qs.filter(Q(agency_service__booked_from__lte=booked_to) |
+                           Q(agency_service__booked_from__isnull=True))
         qs = qs.order_by(
             'addon', 'pax_range_min', '-pax_range_max',
             'agency_service__date_from', '-agency_service__date_to')
         return list(qs)
 
     @classmethod
-    def list_extra_costs_details(cls, extra, date_from, date_to):
+    def list_extra_costs_details(cls, extra, date_from, date_to, booked_from, booked_to):
         qs = ProviderExtraDetail.objects.all()
         qs = qs.filter(
             provider_service__service=extra.id)
@@ -2336,6 +2354,12 @@ class ConfigServices(object):
             qs = qs.filter(provider_service__date_to__gte=date_from)
         if date_to:
             qs = qs.filter(provider_service__date_from__lte=date_to)
+        if booked_from:
+            qs = qs.filter(Q(agency_service__booked_to__gte=booked_from) |
+                           Q(agency_service__booked_to__isnull=True))
+        if booked_to:
+            qs = qs.filter(Q(agency_service__booked_from__lte=booked_to) |
+                           Q(agency_service__booked_from__isnull=True))
         qs = qs.order_by(
             'addon', 'provider_service__provider', 'pax_range_min', '-pax_range_max',
             'provider_service__date_from', '-provider_service__date_to')
@@ -2358,25 +2382,25 @@ class ConfigServices(object):
 
 
     @classmethod
-    def list_service_prices(cls, service, agency, date_from, date_to):
+    def list_service_prices(cls, service, agency, date_from, date_to, booked_from, booked_to):
         if service.category == 'A':
-            return cls.list_allotment_details(service, agency, date_from, date_to)
+            return cls.list_allotment_details(service, agency, date_from, date_to, booked_from, booked_to)
         if service.category == 'T':
-            return cls.list_transfer_details(service, agency, date_from, date_to)
+            return cls.list_transfer_details(service, agency, date_from, date_to, booked_from, booked_to)
         if service.category == 'E':
-            return cls.list_extra_details(service, agency, date_from, date_to)
+            return cls.list_extra_details(service, agency, date_from, date_to, booked_from, booked_to)
         # if service.category == 'P':
         #     return cls.list_package_details(service, agency, date_from, date_to)
 
 
     @classmethod
-    def list_service_costs(cls, service, date_from, date_to):
+    def list_service_costs(cls, service, date_from, date_to, booked_from, booked_to):
         if service.category == 'A':
-            return cls.list_allotment_costs_details(service, date_from, date_to)
+            return cls.list_allotment_costs_details(service, date_from, date_to, booked_from, booked_to)
         if service.category == 'T':
-            return cls.list_transfer_costs_details(service, date_from, date_to)
+            return cls.list_transfer_costs_details(service, date_from, date_to, booked_from, booked_to)
         if service.category == 'E':
-            return cls.list_extra_costs_details(service, date_from, date_to)
+            return cls.list_extra_costs_details(service, date_from, date_to, booked_from, booked_to)
 
 
     @classmethod
