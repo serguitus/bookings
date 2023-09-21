@@ -2197,7 +2197,7 @@ class ConfigServices(object):
         (
         SELECT
             atd.id, atd.location_from_id, atd.location_to_id,
-            ats.date_from, atd.ad_1_amount
+            ats.date_from, atd.ad_1_amount, atd.pax_range_min, atd.pax_range_max
           FROM `config_agencytransferdetail` atd
           JOIN `config_agencytransferservice` ats
             ON ats.id = atd.`agency_service_id`
@@ -2211,7 +2211,7 @@ class ConfigServices(object):
         UNION
         SELECT
             atd1.id, l2.id AS location_from_id, l1.id AS location_to_id,
-            ats.date_from, atd1.ad_1_amount
+            ats.date_from, atd1.ad_1_amount, atd1.pax_range_min, atd1.pax_range_max
           FROM
             `config_agencytransferdetail` atd1
           JOIN `config_agencytransferservice` ats
@@ -2275,7 +2275,7 @@ class ConfigServices(object):
         (
         SELECT
             p.id as provider_id, p.name as provider_name, ptd.id, ptd.location_from_id, ptd.location_to_id,
-            pts.date_from, ptd.ad_1_amount
+            pts.date_from, ptd.ad_1_amount, ptd.pax_range_min, ptd.pax_range_max
           FROM `config_providertransferdetail` ptd
           JOIN `config_providertransferservice` pts
             ON pts.id = ptd.`provider_service_id`
@@ -2290,7 +2290,7 @@ class ConfigServices(object):
         UNION
         SELECT
             p.id as provider_id, p.name as provider_name, ptd1.id, l2.id AS location_from_id, l1.id AS location_to_id,
-            pts.date_from, ptd1.ad_1_amount
+            pts.date_from, ptd1.ad_1_amount, ptd1.pax_range_min, ptd1.pax_range_max
           FROM
             `config_providertransferdetail` ptd1
           JOIN `config_providertransferservice` pts
