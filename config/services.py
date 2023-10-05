@@ -2177,11 +2177,11 @@ class ConfigServices(object):
         if date_to:
             qs = qs.filter(provider_service__date_from__lte=date_to)
         if booked_from:
-            qs = qs.filter(Q(agency_service__booked_to__gte=booked_from) |
-                           Q(agency_service__booked_to__isnull=True))
+            qs = qs.filter(Q(provider_service__booked_to__gte=booked_from) |
+                           Q(provider_service__booked_to__isnull=True))
         if booked_to:
-            qs = qs.filter(Q(agency_service__booked_from__lte=booked_to) |
-                           Q(agency_service__booked_from__isnull=True))
+            qs = qs.filter(Q(provider_service__booked_from__lte=booked_to) |
+                           Q(provider_service__booked_from__isnull=True))
         qs = qs.order_by(
             'board_type', 'room_type', 'addon', 'provider_service__provider', 'pax_range_min', '-pax_range_max',
             'provider_service__date_from', '-provider_service__date_to')
