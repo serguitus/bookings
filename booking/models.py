@@ -305,8 +305,7 @@ class QuoteService(BookServiceData, DateInterval, ValidateSaveModelMixin, FillDa
         max_length=5, choices=QUOTE_SERVICE_CATEGORIES)
     contract_code = models.CharField(max_length=40, blank=True, null=True)
 
-    # Managers
-    objects = models.Manager()
+    # Other Managers
     invoiced_objects = QuoteInvoicedServiceManager()
 
     def validate(self):
@@ -344,8 +343,7 @@ class QuoteServicePaxVariant(PaxVariantAmounts):
     manual_costs = models.BooleanField(default=False, verbose_name='Manual Costs')
     manual_prices = models.BooleanField(default=False, verbose_name='Manual Prices')
 
-    # Managers
-    objects = models.Manager()
+    # Other Managers
     invoiced_objects = QuoteInvoicedServicePaxVariantManager()
     provided_objects = QuoteProvidedServicePaxVariantManager()
 
@@ -843,8 +841,7 @@ class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData, Ato
         max_digits=10, decimal_places=2, default=0.00, verbose_name='Paid')
     has_payment = models.BooleanField(default=False)
 
-    # Managers
-    objects = models.Manager()
+    # Other Managers
     invoiced_objects = InvoicedManager()
 
     @property
@@ -1007,8 +1004,7 @@ class BookingExtraPackage(BaseBookingService, BookExtraData):
         verbose_name = 'Booking Package'
         verbose_name_plural = 'Bookings Packages'
 
-    # Managers
-    objects = models.Manager()
+    # Other Managers
     vouched_objects = VouchedManager()
 
     version = AutoIncVersionField()
@@ -1090,8 +1086,7 @@ class BookingProvidedAllotment(BookingProvidedService, BookAllotmentData):
     service = models.ForeignKey(Allotment, on_delete=models.CASCADE)
     version = AutoIncVersionField()
 
-    # Managers
-    objects = models.Manager()
+    # Other Managers
     vouched_objects = VouchedManager()
 
     def __unicode__(self):
@@ -1187,8 +1182,7 @@ class BookingProvidedTransfer(BookingProvidedService, BookTransferData):
     service = models.ForeignKey(Transfer, on_delete=models.CASCADE)
     version = AutoIncVersionField()
 
-    # Managers
-    objects = models.Manager()
+    # Other Managers
     vouched_objects = VouchedManager()
 
     def build_description(self):
@@ -1231,8 +1225,7 @@ class BookingProvidedExtra(BookingProvidedService, BookExtraData):
                                 related_name='%(class)s_service')
     version = AutoIncVersionField()
 
-    # Managers
-    objects = models.Manager()
+    # Other Managers
     vouched_objects = VouchedManager()
 
     def build_description(self):

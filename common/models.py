@@ -47,11 +47,18 @@ class OrganizationAwareModelMixin(models.Model):
     objects = OrganizationAwareManager()
     objects_all = models.Manager()
 
+    def __save_allowed__(self, user_organization):
+        empty_organization = user_organization is None or self.organization is None
+        return empty_organization or not user_organization.restricted or user_organization.id == self.organization.id
+
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         # set organization data
         organization = get_current_organization
-        if organization is not None and (organization.restricted or self.organization is None):
-            self.organization = organization
+        if self.__save_allowed__(organization):
+            if self.organization is None:
+                self.organization = organization
+        else:
+            raise ValidationError("Invalid Save operation for User Org. %s and Model Org. %s" %(organization.short_name, self.organization.short_name) )
 
         # Call the super save() method.
         super(OrganizationAwareModelMixin, self).save(force_insert, force_update, using, update_fields)
