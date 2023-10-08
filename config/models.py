@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from datetime import time
 from django.db import models
 from django.urls import reverse
+from common.models import FillDataSaveModelMixin
 
 from config.constants import (
     ROOM_CAPACITIES, BOARD_TYPES, AMOUNTS_BY_PAX,
@@ -193,7 +194,7 @@ class RouteData(models.Model):
         related_name='%(class)s_location_to', verbose_name='Location to')
 
 
-class Service(models.Model):
+class Service(FillDataSaveModelMixin):
     """
     Service
     """
@@ -228,14 +229,6 @@ class Service(models.Model):
         # Call the "real" __init__ method.
         super(Service, self).__init__(*args, **kwargs)
         self.fill_data()
-
-    def fill_data(self):
-        pass
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.fill_data()
-        # Call the "real" save method.
-        super(Service, self).save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return self.name
@@ -895,7 +888,7 @@ class AgencyExtraDetail(AmountDetail):
 # BOOK DETAILS
 # ===============================================================================
 
-class ServiceBookDetail(BookServiceData, RelativeInterval):
+class ServiceBookDetail(BookServiceData, RelativeInterval, FillDataSaveModelMixin):
     """
     Service Detail
     """
@@ -905,14 +898,6 @@ class ServiceBookDetail(BookServiceData, RelativeInterval):
     service = models.ForeignKey(Service,
                                 on_delete=models.CASCADE,
                                 related_name='%(class)s_service')
-
-    def fill_data(self):
-        pass
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.fill_data()
-        # Call the "real" save() method.
-        super(ServiceBookDetail, self).save(force_insert, force_update, using, update_fields)
 
 
 class ServiceBookDetailAllotment(ServiceBookDetail, BookAllotmentData):

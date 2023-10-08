@@ -71,6 +71,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # 'django_pdb.middleware.PdbMiddleware',
+    'common.middleware.SetOrganizationMiddleware',
 ]
 
 ROOT_URLCONF = 'reservas.urls'
