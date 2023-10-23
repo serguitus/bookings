@@ -65,6 +65,7 @@ class AgencyDocumentForm(forms.ModelForm):
         fields = ('__all__')
         widgets = {
             'agency': autocomplete.ModelSelect2(url='agency-autocomplete'),
+            'account': autocomplete.ModelSelect2(url='account-autocomplete'),
         }
 
 
