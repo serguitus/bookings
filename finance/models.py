@@ -8,6 +8,7 @@ from django.utils.timezone import now
 from accounting.constants import (
     CURRENCIES, CURRENCY_CUC, CURRENCY_USD)
 from accounting.models import Account, Operation
+from common.models import FillDataSaveModelMixin
 
 from finance.constants import (
     STATUSES, STATUS_DRAFT, STATUS_READY,
@@ -52,7 +53,7 @@ class SummaryModel(models.Model):
     matched_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 
-class FinantialDocument(models.Model):
+class FinantialDocument(FillDataSaveModelMixin):
     class Meta:
         verbose_name = 'Finantial Document'
         verbose_name_plural = 'Finantials Documents'
@@ -75,11 +76,6 @@ class FinantialDocument(models.Model):
 
     def fill_data(self):
         raise ValidationError('Finantial Document can not be saved')
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.fill_data()
-        # Call the "real" save() method.
-        super(FinantialDocument, self).save(force_insert, force_update, using, update_fields)
 
     def delete(self, using=None, keep_parents=False):
         raise ValidationError(
@@ -161,11 +157,6 @@ class Withdraw(FinantialDocument, AccountingDocument):
         account = Account.objects.get(pk=self.account_id)
         self.name = '%s - Withdraw from %s of %s %s ' % (
             self.date, account, self.amount, account.get_currency_display())
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.fill_data()
-        # Call the "real" save() method.
-        super(Withdraw, self).save(force_insert, force_update, using, update_fields)
 
 
 class CurrencyExchange(FinantialDocument, AccountingDocument):
@@ -1162,11 +1153,6 @@ class ProviderInvoice(ProviderDebitDocument):
         provider = Provider.objects.get(pk=self.provider_id)
         self.name = '%s - Provider Invoice from %s for %s %s' % (
             self.date, provider, self.amount, self.get_currency_display())
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.fill_data()
-        # Call the real save() method
-        super(ProviderInvoice, self).save(force_insert, force_update, using, update_fields)
 
 
 class ProviderPayment(ProviderCreditDocument, AccountingDocument):

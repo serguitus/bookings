@@ -45,6 +45,7 @@ from booking.constants import (
     SERVICE_STATUS_CANCELLING,
     SERVICE_STATUS_LIST, SERVICE_STATUS_PENDING, SERVICE_STATUS_REQUEST, SERVICE_STATUS_CANCELLED,
     INVOICE_FORMATS, INVOICE_FORMAT_COMPACT)
+from common.models import AtomicSaveModelMixin, FillDataSaveModelMixin, ValidateSaveModelMixin
 
 from config.constants import (
     BOARD_TYPES, AMOUNTS_BY_PAX,
@@ -214,7 +215,7 @@ class PaxVariantAmounts(models.Model):
     utility_percent_qdrple.fget.short_description = 'Util.QPL %'
 
 
-class Quote(models.Model):
+class Quote(FillDataSaveModelMixin):
     """
     Quote
     """
@@ -238,14 +239,6 @@ class Quote(models.Model):
     history = models.CharField(
         max_length=2000, blank=True, null=True, verbose_name='History')
     seller = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-
-    def fill_data(self):
-        pass
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.fill_data()
-        # Call the "real" save() method.
-        super(Quote, self).save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return '%s - %s %s - %s (%s)' % (
@@ -297,7 +290,7 @@ class QuoteInvoicedServiceManager(models.Manager):
             base_category__in=['QA', 'QT', 'QE', 'QP'])
 
 
-class QuoteService(BookServiceData, DateInterval):
+class QuoteService(BookServiceData, DateInterval, ValidateSaveModelMixin, FillDataSaveModelMixin):
     """
     Quote Service
     """
@@ -312,18 +305,11 @@ class QuoteService(BookServiceData, DateInterval):
         max_length=5, choices=QUOTE_SERVICE_CATEGORIES)
     contract_code = models.CharField(max_length=40, blank=True, null=True)
 
-    # Managers
-    objects = models.Manager()
+    # Other Managers
     invoiced_objects = QuoteInvoicedServiceManager()
 
-    def fill_data(self):
-        pass
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    def validate(self):
         self.validate_date_interval()
-        self.fill_data()
-        # Call the "real" save() method.
-        super(QuoteService, self).save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return '%s' % (self.base_service)
@@ -357,8 +343,7 @@ class QuoteServicePaxVariant(PaxVariantAmounts):
     manual_costs = models.BooleanField(default=False, verbose_name='Manual Costs')
     manual_prices = models.BooleanField(default=False, verbose_name='Manual Prices')
 
-    # Managers
-    objects = models.Manager()
+    # Other Managers
     invoiced_objects = QuoteInvoicedServicePaxVariantManager()
     provided_objects = QuoteProvidedServicePaxVariantManager()
 
@@ -629,7 +614,7 @@ class BookingInvoicePartial(models.Model):
     partial_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
 
-class Booking(models.Model):
+class Booking(FillDataSaveModelMixin):
     """
     Booking
     """
@@ -719,14 +704,6 @@ class Booking(models.Model):
             return self.invoice.document_number
         return ''
     invoice_number.short_description = 'Inv.'
-
-    def fill_data(self):
-        pass
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.fill_data()
-        # Call the "real" save() method.
-        super(Booking, self).save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return self.__unicode__()
@@ -831,7 +808,7 @@ class VouchedManager(models.Manager):
                 status__in=[SERVICE_STATUS_CANCELLED, SERVICE_STATUS_CANCELLING])
 
 
-class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
+class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData, AtomicSaveModelMixin, FillDataSaveModelMixin, ValidateSaveModelMixin):
     """
     Base Booking Service
     """
@@ -864,8 +841,7 @@ class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
         max_digits=10, decimal_places=2, default=0.00, verbose_name='Paid')
     has_payment = models.BooleanField(default=False)
 
-    # Managers
-    objects = models.Manager()
+    # Other Managers
     invoiced_objects = InvoicedManager()
 
     @property
@@ -954,20 +930,11 @@ class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData):
         elif self.cost_amount is not None:
             self.cost_amount_to_pay = self.cost_amount
 
-    def fill_data(self):
-        pass
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        with transaction.atomic(savepoint=False):
-            self.fill_data()
-            self.validate()
-            super(BaseBookingService, self).save(force_insert, force_update, using, update_fields)
-
     def get_absolute_url(self):
         return self.get_bookingservice_object().get_absolute_url()
 
 
-class ProviderBookingPayment(Withdraw):
+class ProviderBookingPayment(Withdraw, AtomicSaveModelMixin, FillDataSaveModelMixin):
     """
     ProviderBookingPayment
     """
@@ -986,12 +953,6 @@ class ProviderBookingPayment(Withdraw):
         self.name = '%s-(%s) Payment - %s  (%s %s)' % (
             self.date, self.provider, account, self.amount, account.get_currency_display())
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        with transaction.atomic(savepoint=False):
-            self.fill_data()
-            # Call the "real" save() method.
-            super(ProviderBookingPayment, self).save(force_insert, force_update, using, update_fields)
-
     def delete(self, using=None, keep_parents=False):
         if self.status != STATUS_DRAFT:
             raise ValidationError('Can not delete Payments')
@@ -1000,7 +961,7 @@ class ProviderBookingPayment(Withdraw):
         return STATUS_LABELS[self.status]
 
 
-class BaseBookingServicePax(models.Model):
+class BaseBookingServicePax(AtomicSaveModelMixin, FillDataSaveModelMixin):
     """
     Booking Service Pax
     """
@@ -1023,15 +984,6 @@ class BaseBookingServicePax(models.Model):
     price_comments = models.CharField(max_length=1000, blank=True, null=True)
     is_price_free = models.BooleanField(default=False)
 
-    def fill_data(self):
-        pass
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        with transaction.atomic(savepoint=False):
-            self.fill_data()
-            # Call the "real" save() method.
-            super(BaseBookingServicePax, self).save(force_insert, force_update, using, update_fields)
-
     def __str__(self):
         return self.__unicode__()
 
@@ -1052,8 +1004,7 @@ class BookingExtraPackage(BaseBookingService, BookExtraData):
         verbose_name = 'Booking Package'
         verbose_name_plural = 'Bookings Packages'
 
-    # Managers
-    objects = models.Manager()
+    # Other Managers
     vouched_objects = VouchedManager()
 
     version = AutoIncVersionField()
@@ -1135,8 +1086,7 @@ class BookingProvidedAllotment(BookingProvidedService, BookAllotmentData):
     service = models.ForeignKey(Allotment, on_delete=models.CASCADE)
     version = AutoIncVersionField()
 
-    # Managers
-    objects = models.Manager()
+    # Other Managers
     vouched_objects = VouchedManager()
 
     def __unicode__(self):
@@ -1232,8 +1182,7 @@ class BookingProvidedTransfer(BookingProvidedService, BookTransferData):
     service = models.ForeignKey(Transfer, on_delete=models.CASCADE)
     version = AutoIncVersionField()
 
-    # Managers
-    objects = models.Manager()
+    # Other Managers
     vouched_objects = VouchedManager()
 
     def build_description(self):
@@ -1276,8 +1225,7 @@ class BookingProvidedExtra(BookingProvidedService, BookExtraData):
                                 related_name='%(class)s_service')
     version = AutoIncVersionField()
 
-    # Managers
-    objects = models.Manager()
+    # Other Managers
     vouched_objects = VouchedManager()
 
     def build_description(self):
@@ -1305,7 +1253,7 @@ class BookingProvidedExtra(BookingProvidedService, BookExtraData):
         return reverse('common:booking_bookingprovidedextra_change', args=[self.id])
 
 
-class BookingBookDetail(BaseBookingService):
+class BookingBookDetail(BaseBookingService, FillDataSaveModelMixin):
     """
     Booking Service Book Detail
     """
@@ -1321,12 +1269,6 @@ class BookingBookDetail(BaseBookingService):
         super(BookingBookDetail, self).fill_data()
         self.booking = self.booking_service.booking
         self.location = self.base_service.location
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.fill_data()
-        # Call the "real" save() method.
-        super(BookingBookDetail, self).save(
-            force_insert, force_update, using, update_fields)
 
     def pax_quantity(self):
         if self.rooming_list:
