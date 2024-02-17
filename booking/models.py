@@ -306,6 +306,7 @@ class QuoteService(BookServiceData, DateInterval, ValidateSaveModelMixin, FillDa
     contract_code = models.CharField(max_length=40, blank=True, null=True)
 
     # Other Managers
+    objects = models.Manager()
     invoiced_objects = QuoteInvoicedServiceManager()
 
     def validate(self):
@@ -344,6 +345,7 @@ class QuoteServicePaxVariant(PaxVariantAmounts):
     manual_prices = models.BooleanField(default=False, verbose_name='Manual Prices')
 
     # Other Managers
+    objects = models.Manager()
     invoiced_objects = QuoteInvoicedServicePaxVariantManager()
     provided_objects = QuoteProvidedServicePaxVariantManager()
 
@@ -842,6 +844,7 @@ class BaseBookingService(BookServiceData, DateInterval, CostData, PriceData, Ato
     has_payment = models.BooleanField(default=False)
 
     # Other Managers
+    objects = models.Manager()
     invoiced_objects = InvoicedManager()
 
     @property
@@ -1005,6 +1008,7 @@ class BookingExtraPackage(BaseBookingService, BookExtraData):
         verbose_name_plural = 'Bookings Packages'
 
     # Other Managers
+    objects = models.Manager()
     vouched_objects = VouchedManager()
 
     version = AutoIncVersionField()
@@ -1087,6 +1091,7 @@ class BookingProvidedAllotment(BookingProvidedService, BookAllotmentData):
     version = AutoIncVersionField()
 
     # Other Managers
+    objects = models.Manager()
     vouched_objects = VouchedManager()
 
     def __unicode__(self):
@@ -1183,6 +1188,7 @@ class BookingProvidedTransfer(BookingProvidedService, BookTransferData):
     version = AutoIncVersionField()
 
     # Other Managers
+    objects = models.Manager()
     vouched_objects = VouchedManager()
 
     def build_description(self):
@@ -1226,6 +1232,7 @@ class BookingProvidedExtra(BookingProvidedService, BookExtraData):
     version = AutoIncVersionField()
 
     # Other Managers
+    objects = models.Manager()
     vouched_objects = VouchedManager()
 
     def build_description(self):
@@ -1318,7 +1325,6 @@ class BookingBookDetailAllotment(BookingBookDetail, BookAllotmentData):
             return self.rooming_list.filter(
                 booking_pax__pax_age__lt=self.service.child_age).count()
         return 0
-
 
 
 class BookingBookDetailTransfer(BookingBookDetail, BookTransferData):

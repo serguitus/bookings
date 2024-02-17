@@ -1230,7 +1230,9 @@ class QuoteAddServiceView(View):
         service_id = request.POST.get('search_service', None)
         if parent_id and service_id:
             service = Service.objects.get(id=service_id)
-            querystring = self.build_querystring(parent_id, service_id)
+            querystring = self.build_querystring(
+                parent_id, service_id, service.voucher_notes
+            )
             if service.category == 'A':
                 return redirect('{}?{}'.format(
                     reverse(
@@ -1258,36 +1260,62 @@ class QuoteAddServiceView(View):
         parent = self.get_parent_obj(parent_id)
         return redirect(parent)
 
-    def build_querystring(self, parent_id, service_id):
-        return urlencode(
-            {'quote': parent_id,
-             'service': service_id})
+    def build_querystring(self, parent_id, service_id, v_notes):
+        if v_notes:
+            return urlencode(
+                {
+                    "quote": parent_id,
+                    "service": service_id,
+                    "new_v_notes": v_notes,
+                }
+            )
+        else:
+            return urlencode({"quote": parent_id, "service": service_id})
 
     def get_parent_obj(self, parent_id):
         return Quote.objects.get(id=parent_id)
 
 
 class QuoteAddPackageServiceView(QuoteAddServiceView):
-    def build_querystring(self, parent_id, service_id):
+
+    def build_querystring(self, parent_id, service_id, v_notes):
         qp = QuoteExtraPackage.objects.get(id=parent_id)
         quote = qp.quote_id
         return urlencode(
-            {'quote': quote,
-             'service': service_id,
-             'quote_package': parent_id})
+            {
+                "quote": quote,
+                "service": service_id,
+                "quote_package": parent_id,
+                "new_v_notes": v_notes or "",
+            }
+        )
 
     def get_parent_obj(self, parent_id):
         return QuoteExtraPackage.objects.get(id=parent_id)
 
 
 class BookingAddPackageServiceView(BookingAddServiceView):
-    def build_querystring(self, parent_id, service_id):
+
+    def build_querystring(self, parent_id, service_id, v_notes):
         bp = BookingExtraPackage.objects.get(id=parent_id)
         booking = bp.booking_id
-        return urlencode(
-            {'booking': booking,
-             'service': service_id,
-             'booking_package': parent_id})
+        if v_notes:
+            return urlencode(
+                {
+                    "booking": booking,
+                    "service": service_id,
+                    "booking_package": parent_id,
+                    "new_v_notes": v_notes,
+                }
+            )
+        else:
+            return urlencode(
+                {
+                    "booking": booking,
+                    "service": service_id,
+                    "booking_package": parent_id,
+                }
+            )
 
     def get_parent_obj(self, parent_id):
         return BookingExtraPackage.objects.get(id=parent_id)
