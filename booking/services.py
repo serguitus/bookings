@@ -86,7 +86,6 @@ class BookingServices(object):
                     change_message="Booking Invoice Cancelled",
                 )
 
-
     @classmethod
     def _find_booking_package_paxes(cls, booking):
         pax_list = list(BookingPax.objects.filter(booking=booking.id))
@@ -132,7 +131,6 @@ class BookingServices(object):
                 if group['free'] > 0:
                     result['4']['free'] += group['free']
         return result
-
 
     @classmethod
     def create_bookinginvoice(cls, user, booking):
@@ -252,7 +250,6 @@ class BookingServices(object):
             )
             return True
 
-
     @classmethod
     def build_bookingservice_paxes(cls, bookingservice, pax_list, user=None):
         for service_pax in pax_list:
@@ -265,7 +262,6 @@ class BookingServices(object):
             bookingservice_pax.avoid_booking_update = True
             bookingservice_pax.save()
 
-
     @classmethod
     def _copy_service_info(cls, dst_service, src_service):
         dst_service.datetime_from = src_service.datetime_from
@@ -276,7 +272,6 @@ class BookingServices(object):
         dst_service.base_category = src_service.base_category
         dst_service.contract_code = src_service.contract_code
 
-
     @classmethod
     def build_book_detail_from_quote_detail(cls, dst_service, src_service, booking_service):
         dst_service.booking_service = booking_service
@@ -286,7 +281,6 @@ class BookingServices(object):
         dst_service.base_category = src_service.base_category
         dst_service.contract_code = src_service.contract_code
         dst_service.save()
-
 
     @classmethod
     def build_bookingservice_details_from_quoteservice(
@@ -318,7 +312,6 @@ class BookingServices(object):
             cls.build_book_detail_from_quote_detail(
                 bookingdetail_extra, quotedetail_extra, booking_service)
 
-
     @classmethod
     def build_bookingservice_from_quoteservice(
             cls, booking_service, quote_service, booking, pax_list, pax_variant, user):
@@ -343,7 +336,6 @@ class BookingServices(object):
         cls.build_bookingservice_details_from_quoteservice(
             booking_service, quote_service)
 
-
     @classmethod
     def build_bookingpackageservice_from_quotepackageservice(
             cls, bookingpackage_service, quotepackage_service,
@@ -363,7 +355,6 @@ class BookingServices(object):
         bookingpackage_service.avoid_bookingpackage_update = True
         bookingpackage_service.avoid_bookingpackageservice_update = True
         bookingpackage_service.save()
-
 
     @classmethod
     def build_booking_from_quote(cls, quote_id, rooming, user=None):
@@ -563,7 +554,6 @@ class BookingServices(object):
         if fields:
             quote.save(update_fields=fields)
 
-
     @classmethod
     def _copy_package_info(cls, dst_package, src_package):
 
@@ -571,7 +561,6 @@ class BookingServices(object):
             dst_service=dst_package, src_service=src_package)
         dst_package.service = src_package.book_service
         dst_package.service_addon = src_package.service_addon
-
 
     @classmethod
     def sync_quotepackage_services(cls, quote_package):
@@ -654,7 +643,6 @@ class BookingServices(object):
             quote_package_extra.parameter = package_extra.parameter
             quote_package_extra.save()
 
-
     @classmethod
     def find_quote_amounts(
             cls, quote, variant_list, inline_allotment_list=None, inline_transfer_list=None,
@@ -722,7 +710,6 @@ class BookingServices(object):
             result.append(variant_dict)
 
         return 0, '', result
-
 
     @classmethod
     def _find_quote_pax_variant_amounts(
@@ -884,7 +871,6 @@ class BookingServices(object):
             cost_3, cost_3_msg, price_3, price_3_msg, \
             cost_4, cost_4_msg, price_4, price_4_msg
 
-
     @classmethod
     def find_quoteservice_amounts(
             cls, quoteservice, variant_list):
@@ -976,7 +962,6 @@ class BookingServices(object):
 
         return 0, '', result
 
-
     @classmethod
     def find_groups(cls, booking_service, service, for_cost):
         if booking_service is None:
@@ -984,7 +969,6 @@ class BookingServices(object):
         pax_list = list(
             BaseBookingServicePax.objects.filter(booking_service=booking_service.id))
         return cls.find_bookingservice_paxes_groups(pax_list, service, for_cost)
-
 
     @classmethod
     def find_bookingservice_paxes_groups(cls, pax_list, service, for_cost):
@@ -1104,7 +1088,6 @@ class BookingServices(object):
                                         elif pax.is_price_free:
                                             free_children += 1
             return ({0: adults, 1: children, 2: free_adults, 3: free_children},)
-
 
     @classmethod
     def update_bookingpackage(cls, bookingpackage_or_bookingpackageservice):
@@ -1245,7 +1228,6 @@ class BookingServices(object):
             bookingpackage.save(update_fields=fields)
             cls.update_booking(bookingpackage)
 
-
     @classmethod
     def update_bookingservice_description(cls, booking_service):
         CLASSES = {
@@ -1291,7 +1273,6 @@ class BookingServices(object):
                     return result
         else:
             return service_pax_variant
-
 
     @classmethod
     def _find_quotepackage_amounts(
@@ -1615,7 +1596,6 @@ class BookingServices(object):
             cost_3, cost_3_msg, price_3, price_3_msg, \
             cost_4, cost_4_msg, price_4, price_4_msg
 
-
     @classmethod
     def _quote_amounts_dict(
             cls,
@@ -1642,14 +1622,12 @@ class BookingServices(object):
             'price_4_msg': price_4_msg,
         }
 
-
     @classmethod
     def _no_service_dict(cls):
         return cls._quote_amounts_dict(
             None, 'No Service', None, 'No Service', None, 'No Service', None, 'No Service',
             None, 'No Service', None, 'No Service', None, 'No Service', None, 'No Service'
         )
-
 
     @classmethod
     def _variant_cost_totals(
@@ -1665,7 +1643,6 @@ class BookingServices(object):
 
         return rc1, rc1_msg, rc2, rc2_msg, rc3, rc3_msg, rc4, rc4_msg
 
-
     @classmethod
     def _variant_price_totals(
             cls,
@@ -1679,7 +1656,6 @@ class BookingServices(object):
         rp4, rp4_msg = cls._merge_prices(price_4, price_4_msg, p4, p4_msg)
 
         return rp1, rp1_msg, rp2, rp2_msg, rp3, rp3_msg, rp4, rp4_msg
-
 
     @classmethod
     def _variant_totals(
@@ -1699,7 +1675,6 @@ class BookingServices(object):
 
         return rc1, rc1_msg, rp1, rp1_msg, rc2, rc2_msg, rp2, rp2_msg, rc3, rc3_msg, rp3, rp3_msg, rc4, rc4_msg, rp4, rp4_msg
 
-
     @classmethod
     def _merge_costs(
             cls, prev_cost, prev_msg, cost, msg):
@@ -1709,7 +1684,6 @@ class BookingServices(object):
             return None, msg
         else:
             return cls._round_cost(float(prev_cost) + float(cost)), msg
-
 
     @classmethod
     def _merge_prices(
@@ -1721,14 +1695,12 @@ class BookingServices(object):
         else:
             return cls._round_cost(float(prev_price) + float(price)), msg
 
-
     @classmethod
     def _find_bookingservice(cls, booking_service, manager):
         bookingservice = list(manager.filter(pk=booking_service.pk))
         if not bookingservice:
             return None
         return bookingservice[0]
-
 
     @classmethod
     def _save_booking_service_amounts(cls, booking_service, cost, price):
@@ -1744,11 +1716,10 @@ class BookingServices(object):
             fields.append('description')
             booking_service.save(update_fields=fields)
             # done on signals
-            #if isinstance(booking_service, (BookingAllotment, BookingTransfer, BookingExtra)):
+            # if isinstance(booking_service, (BookingAllotment, BookingTransfer, BookingExtra)):
             #    cls.update_booking_amounts(booking_service)
-            #else:
+            # else:
             #    cls.update_bookingpackage_amounts(booking_service)
-
 
     @classmethod
     def _find_bookingservice_pax_list(cls, bookingservice):
@@ -1765,7 +1736,6 @@ class BookingServices(object):
                         booking_service=bookingservice.booking_package_id).all())
         return list(BaseBookingServicePax.objects.filter(booking_service=bookingservice.id).all())
 
-
     @classmethod
     def _verify_booking_service_manuals(cls, booking_service):
         if booking_service.manual_cost is None:
@@ -1773,7 +1743,6 @@ class BookingServices(object):
         if booking_service.manual_price is None:
             booking_service.manual_price = False
         return booking_service.manual_cost and booking_service.manual_price
-
 
     @classmethod
     def _bookingpackageservice_amounts(cls, bookingpackage_service, pax_list=None):
@@ -1824,7 +1793,6 @@ class BookingServices(object):
 
         return cls._round_cost(cost), cls._round_price(price)
 
-
     @classmethod
     def _find_pax_quantity_for_booking_rooming(cls, rooming):
         pax_qtty = 0
@@ -1832,7 +1800,6 @@ class BookingServices(object):
             if pax['pax_name'] and pax['pax_group']:
                 pax_qtty += 1
         return pax_qtty
-
 
     @classmethod
     def _find_quote_paxvariant_for_booking_rooming(cls, quote, rooming):
@@ -1848,7 +1815,6 @@ class BookingServices(object):
             return result
         return None
 
-
     @classmethod
     def _find_quoteservice_paxvariant_for_bookingservice(cls, quoteservice, quote_pax_variant):
         service_pax_variants = list(
@@ -1858,7 +1824,6 @@ class BookingServices(object):
         if service_pax_variants:
             return service_pax_variants[0]
         return None
-
 
     @classmethod
     def build_date_interval_data(cls, dst_service, src_service):
@@ -1883,7 +1848,6 @@ class BookingServices(object):
             days_duration = 0
         if dst_service.datetime_from:
             dst_service.datetime_to = dst_service.datetime_from + timedelta(days=days_duration)
-
 
     @classmethod
     def _find_free_paxes(cls, quoteservice_pax_variant):
@@ -1912,7 +1876,6 @@ class BookingServices(object):
         total_free_cost = free_cost_single + free_cost_double + free_cost_triple + free_cost_qdrple
         total_free_price = free_price_single + free_price_double + free_price_triple + free_price_qdrple
         return total_free_cost, total_free_price
-
 
     @classmethod
     def _adjust_group_free_amounts(
@@ -2029,7 +1992,6 @@ class BookingServices(object):
 
         return a1, a1_msg, a2, a2_msg, a3, a3_msg, a4, a4_msg
 
-
     @classmethod
     def _calculate_group_free_amount(
             cls, amount1, amount2, amount3, amount4, service_pax_variant, for_cost):
@@ -2057,7 +2019,6 @@ class BookingServices(object):
 
         return amount
 
-
     @classmethod
     def _find_quoteservice_amounts(
             cls, quote_pax_variant, quoteservice, agency, service_pax_variant=None, manuals=False):
@@ -2079,7 +2040,6 @@ class BookingServices(object):
 
         return cls._round_cost(c1), c1_msg, cls._round_price(p1), p1_msg, cls._round_cost(c2), c2_msg, cls._round_price(p2), p2_msg, cls._round_cost(c3), c3_msg, cls._round_price(p3), p3_msg, cls._round_cost(c4), c4_msg, cls._round_price(p4), p4_msg
 
-
     @classmethod
     def _quoteservice_amounts(
             cls, quoteservice, date_from, date_to, cost_groups, price_groups, provider, agency):
@@ -2087,7 +2047,6 @@ class BookingServices(object):
         c, c_msg = cls._any_quoteservice_catalog_costs(quoteservice, date_from, date_to, cost_groups, provider)
         p, p_msg = cls._quoteservice_prices(quoteservice, date_from, date_to, price_groups, agency)
         return cls._round_cost(c), c_msg, cls._round_price(p), p_msg
-
 
     @classmethod
     def _any_quoteservice_catalog_costs(
@@ -2125,7 +2084,6 @@ class BookingServices(object):
 
         return cls._round_cost(c), c_msg
 
-
     @classmethod
     def _quoteservice_prices(
             cls, quoteservice, date_from, date_to, price_groups, agency):
@@ -2148,7 +2106,6 @@ class BookingServices(object):
                 quoteservice.quote.booked, quoteservice.contract_code,
                 quoteservice.service_addon_id, quoteservice.quantity, quoteservice.parameter)
         return cls._round_price(p), p_msg
-
 
     @classmethod
     def _find_quoteservice_catalog_costs(
@@ -2186,7 +2143,6 @@ class BookingServices(object):
             c2, c2_msg, c3, c3_msg, c4, c4_msg = c1, c1_msg, c1, c1_msg, c1, c1_msg
 
         return c1, c1_msg, c2, c2_msg, c3, c3_msg, c4, c4_msg
-
 
     @classmethod
     def _find_quoteservice_details_costs(
@@ -2261,7 +2217,6 @@ class BookingServices(object):
 
         return cost_1, cost_1_msg, cost_2, cost_2_msg, cost_3, cost_3_msg, cost_4, cost_4_msg
 
-
     @classmethod
     def _find_quoteservice_costs(
             cls, pax_quantity, quoteservice, date_from, date_to,
@@ -2299,7 +2254,6 @@ class BookingServices(object):
                 pax_quantity, quoteservice, date_from, date_to, provider, service_pax_variant)
 
         return cls._round_cost(c1), c1_msg, cls._round_cost(c2), c2_msg, cls._round_cost(c3), c3_msg, cls._round_cost(c4), c4_msg
-
 
     @classmethod
     def _find_quoteservice_prices(
@@ -2353,7 +2307,6 @@ class BookingServices(object):
             else:
                 p4, p4_msg = None, 'Cost QPL for % is empty'
 
-
             return cls._round_price(p1), p1_msg, cls._round_price(p2), p2_msg, cls._round_price(p3), p3_msg, cls._round_price(p4), p4_msg
 
         if manuals:
@@ -2403,7 +2356,6 @@ class BookingServices(object):
 
         return cls._round_price(p1), p1_msg, cls._round_price(p2), p2_msg, cls._round_price(p3), p3_msg, cls._round_price(p4), p4_msg
 
-
     @classmethod
     def _find_quotepackage_catalog_prices(
             cls, pax_quantity, service, date_from, date_to, agency,
@@ -2418,16 +2370,13 @@ class BookingServices(object):
         p2, p2_msg, p3, p3_msg, p4, p4_msg = p1, p1_msg, p1, p1_msg, p1, p1_msg
         return p1, p1_msg, p2, p2_msg, p3, p3_msg, p4, p4_msg
 
-
     @classmethod
     def _adjust_cost(cls, cost, total_paxes, free_paxes):
         return (1.0 - float(free_paxes) / total_paxes) * float(cost) / total_paxes
 
-
     @classmethod
     def _adjust_price(cls, price, total_paxes, free_paxes):
         return (1.0 + float(free_paxes) / total_paxes) * float(price) / total_paxes
-
 
     @classmethod
     def _round_cost(cls, cost):
@@ -2435,13 +2384,11 @@ class BookingServices(object):
             return None
         return round(float(cost), 2)
 
-
     @classmethod
     def _round_price(cls, price):
         if price is None:
             return None
         return round(0.499999 + float(price))
-
 
     @classmethod
     def sync_quote_paxvariants(cls, quote, user=None):
@@ -2463,7 +2410,6 @@ class BookingServices(object):
         quote_services = list(QuoteService.objects.all().filter(
             quote=quote.id))
         cls._sync_quote_children_paxvariants(quote_pax_variant, quote_services, user)
-
 
     @classmethod
     def _sync_quote_children_paxvariants(cls, quote_pax_variant, quote_services, user=None):
@@ -2500,7 +2446,6 @@ class BookingServices(object):
             except Exception as ex:
                 print('EXCEPTION booking services - _sync_quote_children_paxvariants : ' + ex.__str__())
 
-
     @classmethod
     def sync_quotepackage_paxvariants(cls, quotepackage):
         cls.sync_quote_paxvariants(quotepackage.quote)
@@ -2515,7 +2460,6 @@ class BookingServices(object):
                 quotepackage_paxvariant, quotepackage_services)
             cls.update_quotepackage_paxvariant_amounts(quotepackage_paxvariant)
 
-
     @classmethod
     def sync_quotepackage_children_paxvariants(cls, quotepackage_pax_variant):
         quotepackage = quotepackage_pax_variant.quote_service
@@ -2524,7 +2468,6 @@ class BookingServices(object):
             quote_package=quotepackage.id))
         if quotepackage_services:
             cls._sync_quotepackage_children_paxvariants(quotepackage_pax_variant, quotepackage_services)
-
 
     @classmethod
     def _sync_quotepackage_children_paxvariants(
@@ -2545,7 +2488,6 @@ class BookingServices(object):
             except Exception as ex:
                 print('EXCEPTION booking services - _sync_quotepackage_children_paxvariants : ' + ex.__str__())
 
-
     @classmethod
     def update_quotepackage_paxvariants_amounts(cls, quotepackage_service):
         quote_package = quotepackage_service.quote_package
@@ -2558,7 +2500,6 @@ class BookingServices(object):
             except Exception as ex:
                 print('EXCEPTION booking services - update_quotepackage_paxvariants_amounts : ' + ex.__str__())
 
-
     @classmethod
     def _equals_amounts(cls, amount1, amount2):
         if amount1 is None and amount2 is None:
@@ -2566,7 +2507,6 @@ class BookingServices(object):
         if amount1 is None or amount2 is None:
             return False
         return float(amount1) == float(amount2)
-
 
     @classmethod
     def update_quoteservice_paxvariants_amounts(cls, quote_service):
@@ -2634,7 +2574,6 @@ class BookingServices(object):
                 obj = QuoteServicePaxVariant(**new_values)
                 obj.save()
                 cls.update_quote_paxvariant_amounts(quote_pax_variant)
-
 
     @classmethod
     def _find_paxvariant_amounts(cls, service, pax_variant, for_update=False):
@@ -2736,7 +2675,6 @@ class BookingServices(object):
             'price_qdrple_amount': p4,
         }
 
-
     @classmethod
     def update_quotepackage_service_pax_variants_amounts(cls, quotepackage_service):
         quote_package = quotepackage_service.quote_package
@@ -2801,7 +2739,6 @@ class BookingServices(object):
                 obj.save()
                 cls.update_quotepackage_paxvariant_amounts(obj)
 
-
     @classmethod
     def update_quote_paxvariants_amounts(cls, quote_or_service):
         if isinstance(quote_or_service, Quote):
@@ -2840,7 +2777,6 @@ class BookingServices(object):
             quote_pax_variant.code_updated = True
             quote_pax_variant.save(update_fields=fields)
 
-
     @classmethod
     def _apply_percent(cls, amount, percent):
         return float(amount) * (1.0 + float(percent) / 100.0)
@@ -2853,7 +2789,6 @@ class BookingServices(object):
 
         for quotepackage_pax_variant in quotepackage_pax_variants:
             cls.update_quotepackage_paxvariant_amounts(quotepackage_pax_variant)
-
 
     @classmethod
     def update_quotepackage_paxvariant_amounts(cls, pax_variant):
@@ -2884,7 +2819,6 @@ class BookingServices(object):
             quotepackage_pax_variant.save(update_fields=fields)
             cls.update_quote_paxvariant_amounts(quotepackage_pax_variant)
 
-
     @classmethod
     def _totalize_pax_variants_costs(cls, pax_variants):
         if pax_variants:
@@ -2897,7 +2831,6 @@ class BookingServices(object):
             return  cls._round_cost(c1), cls._round_cost(c2), cls._round_cost(c3), cls._round_cost(c4)
         return None, None, None, None
 
-
     @classmethod
     def _totalize_pax_variants_prices(cls, pax_variants):
         if pax_variants:
@@ -2909,7 +2842,6 @@ class BookingServices(object):
                 p4 = cls.totalize(p4, pax_variant.price_qdrple_amount)
             return  cls._round_price(p1), cls._round_price(p2), cls._round_price(p3), cls._round_price(p4)
         return None, None, None, None
-
 
     @classmethod
     def _build_pax_variant_fields(cls, pax_variant, c1, c2, c3, c4, p1, p2, p3, p4):
@@ -2978,13 +2910,11 @@ class BookingServices(object):
                 pax_variant.price_qdrple_amount = p4 + extra
         return fields
 
-
     @classmethod
     def totalize(cls, total, increment):
         if total is None or increment is None:
             return None
         return float(total) + float(increment)
-
 
     @classmethod
     def update_quotepackage(cls, quotepackage_service):
@@ -3013,7 +2943,6 @@ class BookingServices(object):
         if fields:
             quote_package.code_updated = True
             quote_package.save(update_fields=fields)
-
 
     @classmethod
     def setup_paxvariant_amounts(cls, pax_variant):
@@ -3075,7 +3004,6 @@ class BookingServices(object):
                 pax_variant.price_qdrple_amount = p4
 
         return modified
-
 
     @classmethod
     def find_booking_amounts(cls, booking, pax_list):
@@ -3162,14 +3090,12 @@ class BookingServices(object):
 
         return cost, cost_msg, price, price_msg
 
-
     @classmethod
     def _find_bookingpackageservice_provider(cls, bookingpackageservice):
         service_provider = bookingpackageservice.booking_package.provider
         if service_provider is None:
             return bookingpackageservice.provider
         return service_provider
-
 
     @classmethod
     def find_bookingservice_amounts(
@@ -3185,7 +3111,6 @@ class BookingServices(object):
         price, price_msg = cls._find_bookingservice_price(bookingservice, pax_list)
 
         return cls._round_cost(cost), cost_msg, cls._round_price(price), price_msg
-
 
     @classmethod
     def _find_bookingservice_cost(cls, bookingservice, pax_list=None, booked=None):
@@ -3226,7 +3151,6 @@ class BookingServices(object):
                 bookingservice, pax_list, agency, booked)
             return cost, cost_msg
 
-
     @classmethod
     def _find_bookingservice_price(cls, bookingservice, pax_list=None, agency=None, booked=None):
         if isinstance(bookingservice, BookingExtraPackage):
@@ -3266,7 +3190,6 @@ class BookingServices(object):
             cost, cost_msg, price, price_msg = cls._find_bookingservice_amounts_by_details(
                 bookingservice, pax_list, agency, booked)
             return price, price_msg
-
 
     @classmethod
     def _find_bookingservice_catalog_cost(
@@ -3310,7 +3233,6 @@ class BookingServices(object):
             cost, cost_msg = cls._bookingpackage_costs(bookingservice, pax_list)
         return cost, cost_msg
 
-
     @classmethod
     def _find_bookingservice_catalog_price(
             cls, bookingservice, date_from, date_to, pax_list, agency, booked, contract_code):
@@ -3352,7 +3274,6 @@ class BookingServices(object):
         elif isinstance(bookingservice, BookingExtraPackage):
             price, price_msg = cls._bookingpackage_prices(bookingservice, pax_list, agency)
         return price, price_msg
-
 
     @classmethod
     def _find_bookingservice_amounts_by_details(
@@ -3467,7 +3388,6 @@ class BookingServices(object):
 
         return cost, cost_msg, price, price_msg
 
-
     @classmethod
     def _find_booking_service(cls, bookingservice):
         if bookingservice.base_category in [
@@ -3496,7 +3416,6 @@ class BookingServices(object):
 
         return bookingservice
 
-
     @classmethod
     def _find_bookingservice_update_amounts(
             cls, bookingservice, pax_list=None, agency=None, booked=None):
@@ -3515,7 +3434,6 @@ class BookingServices(object):
             bookingservice, pax_list, agency, booked)
 
         return cost, cost_msg, price, price_msg
-
 
     @classmethod
     def _find_bookingservice_update_cost(cls, bookingservice, pax_list=None, booked=None):
@@ -3546,7 +3464,6 @@ class BookingServices(object):
         cost, cost_msg = cls._find_bookingservice_cost(bookingservice, pax_list, booked)
         return cost, cost_msg
 
-
     @classmethod
     def _find_bookingservice_update_price(cls, bookingservice, pax_list=None, agency=None, booked=None):
 
@@ -3575,7 +3492,6 @@ class BookingServices(object):
 
         price, price_msg = cls._find_bookingservice_price(bookingservice, pax_list, agency, booked)
         return price, price_msg
-
 
     @classmethod
     def setup_bookingservice_amounts_from_quote(cls, bookingservice, service_paxvariant, pax_list):
@@ -3633,7 +3549,6 @@ class BookingServices(object):
         bookingservice.manual_cost = service_paxvariant.manual_costs
         bookingservice.manual_price = service_paxvariant.manual_prices
 
-
     @classmethod
     def setup_bookingservice_amounts(cls, bookingservice, pax_list=None, agency=None, booked=None):
         if hasattr(bookingservice, 'avoid_update'):
@@ -3676,7 +3591,6 @@ class BookingServices(object):
 
         return modified
 
-
     # removed automatic update from booking to services
     # @classmethod
     # def update_bookingservices_amounts(cls, obj):
@@ -3704,7 +3618,6 @@ class BookingServices(object):
     #     if package_list:
     #         for package in package_list:
     #             cls.update_bookingservice_amounts(package)
-
 
     @classmethod
     def update_bookingservice_amounts(cls, booking_service):
@@ -3786,7 +3699,6 @@ class BookingServices(object):
                 booking_service.cost_amount = bookingpackageextra.cost_amount
                 booking_service.price_amount = bookingpackageextra.price_amount
 
-
     @classmethod
     def _totalize_services_cost(cls, services, update_services=False):
         if services:
@@ -3798,7 +3710,6 @@ class BookingServices(object):
             return  cls._round_cost(cost)
         return None
 
-
     @classmethod
     def _totalize_services_price(cls, services, update_services=False):
         if services:
@@ -3809,7 +3720,6 @@ class BookingServices(object):
                 price = cls.totalize(price, service.price_amount)
             return  cls._round_price(price)
         return None
-
 
     @classmethod
     def update_booking_amounts(cls, obj):
@@ -3826,7 +3736,6 @@ class BookingServices(object):
             booking.code_updated = True
             booking.save(update_fields=fields)
 
-
     @classmethod
     def _totalize_services(cls, services, update_services=False):
         if services:
@@ -3838,7 +3747,6 @@ class BookingServices(object):
                 price = cls.totalize(price, service.price_amount)
             return  cls._round_cost(cost), cls._round_cost(price)
         return None, None
-
 
     @classmethod
     def update_bookingpackage_amounts(cls, obj, update_services=False):
@@ -3883,7 +3791,6 @@ class BookingServices(object):
             bookingpackage.code_updated = True
             bookingpackage.save(update_fields=fields)
             cls.update_booking_amounts(bookingpackage.booking)
-
 
     @classmethod
     def _find_bookingpackage_update_amounts(
@@ -3953,7 +3860,6 @@ class BookingServices(object):
 
         return cost, cost_msg, price, price_msg
 
-
     @classmethod
     def sync_bookingpackage_services(cls, bookingpackage):
         if not isinstance(bookingpackage, BookingExtraPackage):
@@ -3971,13 +3877,11 @@ class BookingServices(object):
 
         package = bookingpackage.service
 
-
         # TODO time for packages (extras)
-        #if bookingpackage.time is None and not package.time is None:
+        # if bookingpackage.time is None and not package.time is None:
         #    bookingpackage.refresh_from_db(fields=['version'])
         #    bookingpackage.time = package.time
         #    bookingpackage.save(update_fields=['time'])
-
 
         # create bookingallotment list
         for package_allotment in ServiceBookDetailAllotment.objects.filter(service_id=package.id).all():
@@ -4023,7 +3927,6 @@ class BookingServices(object):
             booking_package_extra.save()
         return True
 
-
     @classmethod
     def update_bookingpackageservices_amounts(cls, obj):
         if isinstance(obj, BaseBookingServicePax):
@@ -4050,7 +3953,6 @@ class BookingServices(object):
             if extra_list:
                 for extra in extra_list:
                     cls.update_bookingservice_amounts(extra)
-
 
     @classmethod
     def update_booking(cls, booking_or_bookingservice):
@@ -4182,7 +4084,6 @@ class BookingServices(object):
         if fields:
             booking.save(update_fields=fields)
 
-
     @classmethod
     def _set_update_booking_amounts(cls, booking, fields):
 
@@ -4210,7 +4111,6 @@ class BookingServices(object):
             fields.append('price_amount')
             booking.price_amount = price
 
-
     @classmethod
     def _find_groups(cls, pax_list):
         groups = dict()
@@ -4229,13 +4129,11 @@ class BookingServices(object):
                 groups[pax.group] += 1
         return groups.values()
 
-
     @classmethod
     def _find_booking_groups(cls, booking, pax_list=None):
         if not pax_list:
             pax_list = list(BookingPax.objects.filter(booking=booking.id))
         return cls._find_groups(pax_list)
-
 
     @classmethod
     def _find_booking_pricepackage_groups(cls, booking, pax_list=None):
@@ -4253,7 +4151,6 @@ class BookingServices(object):
             if pax.is_price_free:
                 groups[pax.pax_group]['free'] += 1
         return groups.values()
-
 
     @classmethod
     def _find_booking_package_price(cls, booking, pax_list=None):
@@ -4303,7 +4200,6 @@ class BookingServices(object):
                 return None, "Package Price Unsupported Pax Quantity (%s)" % group['qtty']
         return cls._round_price(price), price_msg
 
-
     @classmethod
     def find_bookingservices_with_different_amounts(cls, booking):
         agency = booking.agency
@@ -4322,12 +4218,10 @@ class BookingServices(object):
                 services.append(bookingservice)
         return services
 
-
     @classmethod
     def update_bookingservices_amounts(cls, services):
         for service in services:
             cls.update_bookingservice_amounts(service)
-
 
     @classmethod
     def find_providers(cls, bookingservice):
@@ -4375,7 +4269,6 @@ class BookingServices(object):
             return list(qs)
         return Provider.objects.none()
 
-
     @classmethod
     def _clone_quoteservice_paxvariant(cls, pax_variant, quote_service):
         pax_variant.pk = None
@@ -4388,7 +4281,6 @@ class BookingServices(object):
         pax_variant.avoid_all = True
         pax_variant.save()
 
-
     @classmethod
     def _clone_quoteservice_detail(cls, book_detail, quote_service):
         book_detail.pk = None
@@ -4397,7 +4289,6 @@ class BookingServices(object):
         book_detail.quote_service_id = quote_service.pk
         book_detail.avoid_all = True
         book_detail.save()
-
 
     @classmethod
     def _clone_quote_service(cls, quote_service, quote_package, quote):
@@ -4432,7 +4323,6 @@ class BookingServices(object):
             cls._clone_quoteservice_detail(transfer_detail, quote_service)
         for extra_detail in extra_details:
             cls._clone_quoteservice_detail(extra_detail, quote_service)
-
 
     @classmethod
     def _clone_quote_package(cls, quote_package_service, quote):
@@ -4492,17 +4382,14 @@ class BookingServices(object):
             package.avoid_sync_services = True
             cls._clone_quote_package(package, new_quote)
 
-
         cls.update_quote(new_quote)
         cls.update_quote_paxvariants_amounts(new_quote)
-
 
     @classmethod
     def _find_quote_paxvariant(cls, pax_variant, quote):
         pax_variants = list(QuotePaxVariant.objects.filter(
             quote=quote.id, pax_quantity=pax_variant.quote_pax_variant.pax_quantity))
         return pax_variants[0]
-
 
     @classmethod
     def add_paxes_to_booking(cls, booking, pax_list, bookingservice_ids):
@@ -4540,7 +4427,6 @@ class BookingServices(object):
             bookingservice = BaseBookingService.objects.get(pk=bookingservice_id)
             cls._add_bookingpax_to_bookingservice(booking_pax, bookingservice)
 
-
     @classmethod
     def _add_bookingpax_to_bookingservice(cls, booking_pax, bookingservice):
         if bookingservice.status != constants.SERVICE_STATUS_PENDING:
@@ -4552,7 +4438,6 @@ class BookingServices(object):
         bookingservice_pax.group = booking_pax.pax_group
         bookingservice_pax.save()
         BookingServices.update_bookingservice_description(bookingservice)
-
 
     @classmethod
     def find_service_providers_costs(cls, booking_service, service):
@@ -4601,7 +4486,6 @@ class BookingServices(object):
             })
         return result
 
-
     @classmethod
     def _clone_bookingservice_detail(cls, book_detail, booking_service):
         book_detail.pk = None
@@ -4610,7 +4494,6 @@ class BookingServices(object):
         book_detail.booking_service_id = booking_service.pk
         book_detail.avoid_all = True
         book_detail.save()
-
 
     @classmethod
     def _clone_booking_service(cls, booking_service, booking_package, booking):
@@ -4641,6 +4524,7 @@ class BookingServices(object):
         booking_service.cost_amount_to_pay = 0.00
         booking_service.cost_amount_paid = 0.00
         booking_service.avoid_all = True
+        booking_service.has_payment = False
         booking_service.save()
 
         for allotment_detail in allotment_details:
@@ -4649,7 +4533,6 @@ class BookingServices(object):
             cls._clone_bookingservice_detail(transfer_detail, booking_service)
         for extra_detail in extra_details:
             cls._clone_bookingservice_detail(extra_detail, booking_service)
-
 
     @classmethod
     def clone_bookingservice_details(cls, cloned_bookingservice_id, new_booking_service):
@@ -4665,7 +4548,6 @@ class BookingServices(object):
             booking_service=cloned_bookingservice_id))
         for extra_detail in extra_details:
             cls._clone_bookingservice_detail(extra_detail, new_booking_service)
-
 
     @classmethod
     def clone_booking_services(cls, old_booking_id, new_booking):
@@ -4694,9 +4576,7 @@ class BookingServices(object):
             package.avoid_sync_services = True
             cls._clone_booking_package(package, new_booking)
 
-
         cls.update_booking(new_booking)
-
 
     @classmethod
     def _clone_booking_package(cls, booking_package_service, booking):
@@ -4724,6 +4604,7 @@ class BookingServices(object):
         booking_package_service.cost_amount_to_pay = 0.00
         booking_package_service.cost_amount_paid = 0.00
         booking_package_service.avoid_all = True
+        booking_package_service.has_payment = False
         booking_package_service.save()
 
         # package services
@@ -4735,7 +4616,6 @@ class BookingServices(object):
             cls._clone_booking_service(service, booking_package_service, booking)
 
         cls.update_bookingpackage(service)
-
 
     @classmethod
     def validate_basebookingservice(cls, basebookingservice):
@@ -4755,7 +4635,6 @@ class BookingServices(object):
             raise ValidationError('%s with Status %s requires a Cost' % (basebookingservice.name, basebookingservice.get_status_display()))
         elif basebookingservice.cost_amount is not None:
             basebookingservice.cost_amount_to_pay = basebookingservice.cost_amount
-
 
     @classmethod
     def booking_provider_payment_services(cls, request, form, payment_id):
@@ -4842,7 +4721,6 @@ class BookingServices(object):
             services.append(service)
         return services
 
-
     @classmethod
     def save_payment(cls, user, payment, services_data):
         """
@@ -4885,7 +4763,6 @@ class BookingServices(object):
                                 booking_service.cost_amount_paid = float(booking_service.cost_amount_paid) + float(service_data['amount_paid'])
                                 booking_service.has_payment = True
                                 booking_service.save(update_fields=['cost_amount_paid', 'has_payment'])
-
 
                             if round(float(service_data['amount_paid']), 2) != round(float(db_payment_service.amount_paid), 2):
                                 db_payment_service.amount_paid = round(float(service_data['amount_paid']), 2)
@@ -4983,7 +4860,6 @@ class BookingServices(object):
         payment.status = db_payment.status
         raise ValidationError('Payment can not be modified')
 
-
     @classmethod
     def save_booking_invoice(cls, request, obj, form, change):
 
@@ -5019,12 +4895,10 @@ class BookingServices(object):
                     change_message="Booking Invoice Cancelled",
                 )
 
-
     @classmethod
     def delete_quotepackage(cls, package):
         cls.delete_quotepackage_services(package)
         package.delete()
-
 
     @classmethod
     def delete_quotepackage_services(cls, package):
@@ -5040,12 +4914,10 @@ class BookingServices(object):
         for service in services:
             cls.delete_quoteservice(service)
 
-
     @classmethod
     def delete_quoteservice(cls, service):
         cls.delete_quoteservice_details(service)
         service.delete()
-
 
     @classmethod
     def delete_quoteservice_details(cls, service):
@@ -5061,7 +4933,6 @@ class BookingServices(object):
         for detail in details:
             detail.delete()
 
-
     @classmethod
     def set_services_status(cls, services, status):
         booking_dict = dict()
@@ -5072,7 +4943,6 @@ class BookingServices(object):
             booking_dict.update({service.booking_id: service.booking})
         for booking in booking_dict.values():
             cls.update_booking(booking)
-
 
     @classmethod
     def sync_quoteservice_details(cls, quote_service):
@@ -5118,7 +4988,6 @@ class BookingServices(object):
             cls.build_date_interval_data(
                 dst_service=quote_service_detail_extra, src_service=detail_extra)
             quote_service_detail_extra.save()
-
 
     @classmethod
     def sync_bookingservice_details(cls, booking_service):
