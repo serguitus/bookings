@@ -1192,6 +1192,13 @@ class BookingProvidedTransfer(BookingProvidedService, BookTransferData):
     vouched_objects = VouchedManager()
 
     def build_description(self):
+        """
+        if this booking service has booking package then it will return
+        the rooming_list count of the parent booking_package,
+        else it will return self.rooming_list.count()
+        """
+        if self.booking_package:
+            return "%s pax" % self.booking_package.rooming_list.count()
         return '%s pax' % self.rooming_list.count()
 
     def fill_data(self):
@@ -1236,6 +1243,13 @@ class BookingProvidedExtra(BookingProvidedService, BookExtraData):
     vouched_objects = VouchedManager()
 
     def build_description(self):
+        """
+        if this booking service has booking package then it will return
+        the rooming_list count of the parent booking_package,
+        else it will return self.rooming_list.count()
+        """
+        if self.booking_package:
+            return "%s pax" % self.booking_package.rooming_list.count()
         return '%s pax' % self.rooming_list.count()
 
     def fill_data(self):
